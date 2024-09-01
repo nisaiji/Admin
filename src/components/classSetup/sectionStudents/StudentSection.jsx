@@ -59,8 +59,9 @@ export default function StudentSection() {
     const res = await axiosClient.get(
       `${EndPoints.ADMIN.SECTION_INFO}/${sectionId}`
     );
+    // console.log("res", res);
     if (res?.statusCode === 200) {
-      setClassTeacher(res.result.classTeacher);
+      setClassTeacher(res.result.teacher);
     }
   };
 
@@ -166,12 +167,15 @@ export default function StudentSection() {
     let url;
     if (isTeacher) url = EndPoints.TEACHER.REGISTER_SECTION_STUDENT;
     else url = EndPoints.ADMIN.REGISTER_SECTION_STUDENT;
+    delete newStudent.SNo;
     const transformedStudent = {
       ...newStudent,
       firstname: capitalizeFirstLetter(newStudent.firstname.trim()),
       lastname: capitalizeFirstLetter(newStudent.lastname.trim()),
       parentName: capitalizeFirstLetter(newStudent.parentName.trim()),
     };
+    // console.log(transformedStudent);
+
     try {
       setLoading(true);
       let res;
@@ -189,7 +193,7 @@ export default function StudentSection() {
           sectionId,
         });
       }
-      // console.log(res);
+      // console.log("res", res);
 
       if (res?.statusCode === 200 || res?.statusCode === 201) {
         toast.success(<b>{res.result}</b>);
@@ -245,6 +249,8 @@ export default function StudentSection() {
         phone: student.phone.trim(),
       };
       setLoading(true);
+      console.log(student._id);
+
       const response = await axiosClient.put(
         `${url}/${student._id}`,
         transformedStudent
@@ -253,7 +259,7 @@ export default function StudentSection() {
 
       if (response?.statusCode === 200 || response?.statusCode === 201) {
         fetchStudents();
-        toast.success(t("messages.student.success"));
+        toast.success(t("messages.student.update"));
         setEditSNo(null);
       }
     } catch (error) {
@@ -275,9 +281,11 @@ export default function StudentSection() {
     try {
       setLoading(true);
       const response = await axiosClient.delete(`${url}/${studentId}`);
+      console.log(response);
+
       if (response?.statusCode === 200) {
         setShowDeleteConfirmation(false);
-        toast.success(t("toasterMessages.deleteSuccess"));
+        toast.success(t("studentList.toasterMessages.deleteSuccess"));
         setLoading(false);
         fetchStudents();
       }
@@ -336,8 +344,13 @@ export default function StudentSection() {
                   isDarkMode ? "text-white" : ""
                 } text-xl px-5 py-1 font-semibold text-[#464590]`}
               >
-                {t("messages.student.class")} {className} |{" "}
-                {t("messages.student.section")} {sectionName}
+                {isTeacher
+                  ? `${localStorage.getItem("class")} ${localStorage.getItem(
+                      "section"
+                    )}`
+                  : `${t("messages.student.class")} ${className} | ${t(
+                      "messages.student.section"
+                    )} ${sectionName}`}
               </div>
             </div>
           </div>

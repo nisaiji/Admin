@@ -42,6 +42,7 @@
       "errorUpdating": "Error updating student:",
       "errorDeleting": "Error deleting student!",
       "success": "Student added successfully",
+      "update": "Student updated successfully",
       "class":"class:",
       "section":"section:"
     },

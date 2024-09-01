@@ -301,9 +301,19 @@ const Event = () => {
   const fetchEvents = async () => {
     try {
       setEventLoading(true);
+      const startDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+      ).getTime();
+      const endDate = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0
+      ).getTime();
       const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
-        month,
-        year,
+        startDate,
+        endDate,
       });
       // console.log(response.result);
       if (response?.statusCode === 200) {
@@ -362,6 +372,7 @@ const Event = () => {
         description: capitalizeFirstLetter(newEvent.description.trim()),
         date: moment(newEvent.date).format("yyyy-MM-DD"),
       };
+      delete formattedEvent.date;
       let res;
       if (eventId) {
         res = await axiosClient.put(

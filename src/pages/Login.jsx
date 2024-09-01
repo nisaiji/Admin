@@ -65,15 +65,20 @@ function Login() {
             user: values.username,
             password: values.password,
           });
+          // console.log(response);
+          
           if (response?.statusCode === 200) {
             setItem(response?.result?.accessToken);
             setFirstname(response?.result?.firstname);
           }
         }
-        toast.success(<b>{t("login.success")}</b>);
+        // toast.success(<b>{t("login.success")}</b>);
+        toast.success("login successful");
         resetForm();
-        navigate("/");
+        // navigate("/");
+        window.location.replace("/");
       } catch (e) {
+        console.log(e);
         toast.error(e);
       } finally {
         setLoading(false);

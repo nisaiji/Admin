@@ -137,7 +137,11 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
   const handleUpdateTeacherSection = async (section) => {
     try {
       setLoading(true);
-      const res = await axiosClient.post(EndPoints.ADMIN.REPLACE_TEACHER, {
+      if (!newSection?.teacherId) {
+        toast.error("please select teacher");
+        return;
+      }
+      const res = await axiosClient.put(EndPoints.ADMIN.REPLACE_TEACHER, {
         sectionId: section._id,
         teacherId: newSection.teacherId,
       });
@@ -152,6 +156,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
       }
     } catch (e) {
       toast.error(e);
+      console.log("e", e);
     } finally {
       setLoading(false);
     }
@@ -166,11 +171,15 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
   const getSections = async () => {
     try {
       setLoading(true);
-      const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_SECTION}/${clickedClassId}`
-      );
+      const res = await axiosClient.get(`${EndPoints.ADMIN.CLASS_SECTION}/${clickedClassId}`);
+      // console.log(res.result.class[0].section);
+
       if (res?.statusCode === 200) {
-        setSections(res.result);
+        // const filteredSections = res.result
+        //   .filter((item) => item._id === clickedClassId)
+        //   .map((item) => item.section)
+        // .flat();
+        setSections(res.result.class[0].section);
       }
     } catch (e) {
       toast.error(e);
@@ -284,8 +293,9 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                       isDarkMode ? "bg-gray-300" : "text-gray-500 bg-[#f2f2ff]"
                     } w-[250px] `}
                   >
-                    {section.classTeacher.firstname}{" "}
-                    {section.classTeacher.lastname}
+                    {section.teacher.firstname}{" "}
+                    {section.teacher.lastname}
+                    {/* first and last name */}
                   </div>
                 )}
                 <div className="flex items-center">

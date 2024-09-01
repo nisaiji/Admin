@@ -21,14 +21,14 @@ const capitalize = (str) => {
 const validationSchema = Yup.object({
   firstname: Yup.string().required("First name is required"),
   lastname: Yup.string().required("Last name is required"),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  address: Yup.string().required("Address is required"),
-  university: Yup.string().required("University is required"),
-  gender: Yup.string().required("Gender is required"),
-  bloodGroup: Yup.string().required("Blood group is required"),
-  dob: Yup.date().required("Date of birth is required"),
+  // email: Yup.string()
+  //   .email("Invalid email address")
+  //   .required("Email is required"),
+  // address: Yup.string().required("Address is required"),
+  // university: Yup.string().required("University is required"),
+  // gender: Yup.string().required("Gender is required"),
+  // bloodGroup: Yup.string().required("Blood group is required"),
+  // dob: Yup.date().required("Date of birth is required"),
   phone: Yup.string()
     .required("Phone number is required")
     .matches(/^\d{10}$/, "Phone number should be 10 digits")

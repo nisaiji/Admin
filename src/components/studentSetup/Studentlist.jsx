@@ -38,7 +38,7 @@ export default function Studentlist() {
   const [totalStudentCount, setTotalStudentCount] = useState(5);
   const [limit, setLimit] = useState(5);
   const [studentList, setStudentList] = useState([]);
-  const [searchInput, setSearchInput] = useState("");
+  const [name, setName] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState([]);
   const [openModal, setOpenModal] = useState(false);
@@ -88,6 +88,8 @@ export default function Studentlist() {
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}/${pageNo}`);
+      // console.log(response);
+      
       if (response?.statusCode === 200) {
         const { totalCount, studentList, limit } = response?.result;
         setTotalStudentCount(totalCount);
@@ -107,7 +109,7 @@ export default function Studentlist() {
     else url = EndPoints.ADMIN.STUDENT_LIST_SEARCH_WISE;
     try {
       setLoading(true);
-      const response = await axiosClient.get(`${url}/${searchInput}`);
+      const response = await axiosClient.get(`${url}/${name}`);
       if (response?.statusCode === 200) {
         const { totalCount, result, limit } = response;
         setTotalStudentCount(totalCount);
@@ -131,6 +133,8 @@ export default function Studentlist() {
         else url = EndPoints.ADMIN.STUDENT_LIST_SECTION_WISE;
         setLoading(true);
         const studentList = await axiosClient.get(`${url}/${sectionId}`);
+        console.log(studentList);
+        
         if (studentList?.statusCode === 200) {
           setTotalStudentCount(studentList?.result?.totalCount);
           setLimit(studentList?.result?.limit);
@@ -158,9 +162,9 @@ export default function Studentlist() {
   };
 
   const handleSearch = () => {
-    // const searchInputLower = searchInput.toLowerCase();
+    // const nameLower = name.toLowerCase();
     // const searchedStudent = studentList.filter(
-    //   (itm) => itm.firstname.toLowerCase() === searchInputLower
+    //   (itm) => itm.firstname.toLowerCase() === nameLower
     // );
     getStudentSearchWise();
   };
@@ -171,7 +175,7 @@ export default function Studentlist() {
   };
 
   const handleClear = () => {
-    setSearchInput("");
+    setName("");
     setSearchClass("");
     setSearchSection("");
     getStudent();
@@ -360,9 +364,9 @@ export default function Studentlist() {
                         isDarkMode ? " bg-[#0D192F] text-white" : ""
                       } px-3 rounded-lg focus:outline-none w-full shadow-sm border border-t-gray`}
                       onChange={(e) => {
-                        setSearchInput(e.target.value);
+                        setName(e.target.value);
                       }}
-                      value={searchInput}
+                      value={name}
                     />
                     <button
                       className="bg-[#e3e3ee] text-white hover:bg-white hover:border-2 hover:border-blue-950 ml-2 w-20 text-lg rounded-md flex items-center justify-center"

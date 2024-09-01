@@ -7,7 +7,7 @@ export default function DeletePopup({ isVisible, onClose, onDelete }) {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
       <div className="bg-white p-5 rounded shadow-lg">
         <div className="flex">
           <div className="bg-red-100 rounded-full p-2">

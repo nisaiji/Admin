@@ -88,7 +88,7 @@ export default function Teacher() {
         // newTeacherFirstNameRef.current.focus();
       }
     } catch (e) {
-      // console.error("register Error:", e);
+      console.error("register Error:", e);
       toast.error(e);
     } finally {
       setLoading(false);
@@ -157,13 +157,16 @@ export default function Teacher() {
         `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
         transformedTeacher
       );
+      // console.log(response);
+      
       if (response?.statusCode === 200) {
         getTeacher();
         toast.success(t("teacherSetup.updateTeacher"));
         setEditSNo(null);
       }
-    } catch (error) {
-      toast.error(<b>{error}</b>);
+    } catch (e) {
+      console.log("error in update", e);
+      // toast.error(<b>{e}</b>);
     } finally {
       setLoading(false);
     }

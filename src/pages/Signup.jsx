@@ -6,6 +6,7 @@ import hide from "../assets/images/hide.png";
 import show from "../assets/images/show.png";
 import { useState } from "react";
 import * as Yup from "yup";
+import EndPoints from "../services/EndPoints";
 
 function Signup() {
   const [ishide, setIsHide] = useState(true);
@@ -19,7 +20,7 @@ function Signup() {
       address: "",
       email: "",
       phone: "",
-      adminName: "",
+      username: "",
       password: "",
     },
     validationSchema: Yup.object({
@@ -39,7 +40,7 @@ function Signup() {
             return value && /^[1-5]/.test(value);
           }
         ),
-      adminName: Yup.string().required("Admin name is required"),
+      username: Yup.string().required("user name is required"),
       password: Yup.string()
         .min(8, "Password must be at least 8 characters")
         .required("Password is required"),
@@ -47,7 +48,7 @@ function Signup() {
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
         setLoading(true);
-        const response = await axiosClient.post("/admin/register", values);
+        const response = await axiosClient.post(EndPoints.ADMIN.ADMIN_REGISTER, values);
         // console.log(response);
 
         if (response?.statusCode === 200||response?.statusCode === 201) {
@@ -176,16 +177,16 @@ function Signup() {
               <div className="mt-5">
                 <input
                   type="text"
-                  name="adminName"
-                  placeholder="admin-Name"
+                  name="username"
+                  placeholder="user-Name"
                   className="border border-gray-400 py-1 px-2 w-full"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  value={formik.values.adminName}
+                  value={formik.values.username}
                 />
-                {formik.touched.adminName && formik.errors.adminName ? (
+                {formik.touched.username && formik.errors.username ? (
                   <div className="text-red-600 text-sm">
-                    {formik.errors.adminName}
+                    {formik.errors.username}
                   </div>
                 ) : null}
               </div>

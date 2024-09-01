@@ -128,6 +128,8 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}/${selectedSection}`);
+      // console.log(response);
+      
       if (response?.statusCode === 200) {
         const { weeklyAttendance, totalStudentCount } = response?.result;
         weeklyData(weeklyAttendance, totalStudentCount);
@@ -148,6 +150,8 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}/${selectedSection}`);
+      // console.log(response);
+      
       if (response?.statusCode === 200) {
         const { monthlyAttendance, totalStudentCount } = response?.result;
         monthlyData(monthlyAttendance, totalStudentCount);
@@ -290,7 +294,10 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
         return <Bar data={chartData} options={chartOptions} width={300} />;
       } else {
         return (
-          <Bar data={emptyWeeklyChartView} options={chartOptions} width={300} />
+          <Bar 
+          data={emptyWeeklyChartView} 
+          options={chartOptions} 
+          width={300} />
         );
       }
     } else {

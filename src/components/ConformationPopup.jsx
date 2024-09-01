@@ -24,7 +24,7 @@ export default function ConformationPopup({ isVisible, onClose, submit }) {
           </button>
           <button
             className="border border-[#d91111] bg-[#d91111] text-white shadow-sm rounded-lg px-4 py-2 text-base font-poppins-regular"
-            onClick={handleRegisterStudent}
+            onClick={submit}
           >
             submit
           </button>

@@ -6,7 +6,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
   // console.log(currTeacher);
   const personalDetails = [
     ["Full Name", `${currTeacher.firstname} ${currTeacher.lastname}`],
-    ["Class and Section", `${currTeacher.class} ${currTeacher.section}`],
+    ["Class and Section", `${currTeacher.class || ""} ${currTeacher.section||"NA"}`],
     ["Gender", currTeacher.gender || "NA"],
     ["Blood Group", currTeacher.bloodGroup || "NA"],
     ["Date of birth", currTeacher.dob || "NA"],

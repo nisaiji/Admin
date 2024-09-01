@@ -21,6 +21,7 @@ import { I18nextProvider } from "react-i18next";
 
 function App() {
   const role = useSelector((state) => state.appAuth.role);
+  // console.log('role',role);
 
   return (
     <>
@@ -30,7 +31,8 @@ function App() {
             <Route path="/" element={<Home />}>
               {role === "teacher" ? (
                 <>
-                  <Route path="" element={<DashBoard />} />
+                  {/* <Route path="" element={<DashBoard />} /> */}
+                  {/* <Route path="" element={<StudentSection />} /> */}
                   <Route path="student-section" element={<StudentSection />} />
                   <Route path="event" element={<Event />} />
                 </>
