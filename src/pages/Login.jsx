@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
@@ -66,7 +66,7 @@ function Login() {
             password: values.password,
           });
           // console.log(response);
-          
+
           if (response?.statusCode === 200) {
             setItem(response?.result?.accessToken);
             setFirstname(response?.result?.firstname);
@@ -165,7 +165,7 @@ function Login() {
           position: "absolute",
           right: "0%",
           top: "50%",
-          left: "55%",
+          left: "52%",
           transform: "translateY(-50%)",
           zIndex: "1",
           color: "white",
@@ -222,11 +222,11 @@ function Login() {
               style={{
                 fontWeight: "800",
                 fontSize: 48,
-                marginTop: "-0%",
-                margindown: "-80%",
+                // marginTop: "-0%",
+                // margindown: "-80%",
               }}
             >
-              {t("login.welcome")}
+              {t("login.login")}
             </h2>
             <p style={{ font: "poppins", color: "#FFFFFFB3" }}>
               {t("login.enterDetails")}
@@ -234,53 +234,67 @@ function Login() {
 
             {/* Conditional Input Fields */}
             {isAdmin ? (
-              <div className="mt-5" style={{ width: "100%" }}>
-                <input
-                  style={{
-                    color: "#FFFFFF80",
-                    background: "transparent",
-                    border: "none",
-                    borderBottom: "1px solid #FFFFFF66",
-                    width: "100%",
-                    marginBottom: "2px",
-                  }}
-                  type="text"
-                  name="email"
-                  placeholder="Admin email"
-                  className="py-1 px-2 w-full"
-                  onChange={formik.handleChange}
-                  value={formik.values.email}
-                />
+              <>
+                <div
+                  className="mt-5"
+                  style={{ width: "100%", borderBottom: "1px solid #FFFFFF66" }}
+                >
+                  <input
+                    style={{
+                      color: "#FFFFFF80",
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      // borderBottom: "1px solid #FFFFFF66",
+                      width: "100%",
+                      marginBottom: "2px",
+                    }}
+                    type="text"
+                    name="email"
+                    placeholder="Email"
+                    className="py-1 px-2 w-full"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values.email}
+                  />
+                </div>
                 {formik.touched.email && formik.errors.email ? (
                   <div style={{ color: "red", fontSize: "12px" }}>
                     {formik.errors.email}
                   </div>
                 ) : null}
-              </div>
+              </>
             ) : (
-              <div className="mt-5" style={{ width: "100%" }}>
-                <input
-                  style={{
-                    color: "#FFFFFF80",
-                    background: "transparent",
-                    border: "none",
-                    borderBottom: "1px solid #FFFFFF66",
-                    width: "100%",
-                    marginBottom: "2px",
-                  }}
-                  type="text"
-                  name="username"
-                  placeholder={t("login.placeholders.username")}
-                  className="py-1 px-2 w-full"
-                  onChange={formik.handleChange}
-                  value={formik.values.username}
-                />
+              <>
+                <div
+                  className="mt-5"
+                  style={{ width: "100%", borderBottom: "1px solid #FFFFFF66" }}
+                >
+                  <input
+                    style={{
+                      color: "#FFFFFF80",
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      // borderBottom: "1px solid #FFFFFF66",
+                      width: "100%",
+                      marginBottom: "2px",
+                    }}
+                    type="text"
+                    name="username"
+                    placeholder={t("login.placeholders.username")}
+                    className="py-1 px-2 w-full"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values.username}
+                  />
+                </div>
                 {formik.touched.username && formik.errors.username ? (
                   <div style={{ color: "red", fontSize: "12px" }}>
                     {formik.errors.username}
                   </div>
                 ) : null}
-              </div>
+              </>
             )}
 
             {/* Password Input */}
@@ -297,6 +311,7 @@ function Login() {
                   color: "#FFFFFF80",
                   background: "transparent",
                   border: "none",
+                  outline: "none",
                   paddingRight: "40px", // Adding right padding to accommodate the icon
                 }}
                 type={ishide ? "password" : "text"}
@@ -320,12 +335,12 @@ function Login() {
                   height: "24px",
                 }}
               />
-              {formik.touched.password && formik.errors.password ? (
-                <div style={{ color: "red", fontSize: "12px" }}>
-                  {formik.errors.password}
-                </div>
-              ) : null}
             </div>
+            {formik.touched.password && formik.errors.password ? (
+              <div style={{ color: "red", fontSize: "12px" }}>
+                {formik.errors.password}
+              </div>
+            ) : null}
 
             {/* Forgot Password Link */}
             <div
@@ -355,7 +370,7 @@ function Login() {
                   lineHeight: "normal",
                   borderRadius: "12px",
                   background: "#FFFF",
-                  width: "105%",
+                  width: "100%",
                   marginRight: "100%",
                 }}
                 type="submit"
@@ -380,7 +395,7 @@ function Login() {
                   fontWeight: "700",
                   lineHeight: "normal",
                   borderRadius: "12px",
-                  width: "105%",
+                  width: "100%",
                 }}
               >
                 {t("login.toggleButton")} {isAdmin ? "Teacher" : "Admin"}
@@ -390,14 +405,14 @@ function Login() {
               <div
                 style={{
                   color: "#FFFFFFB2",
-                  fontSize: "14px",
+                  fontSize: "12px",
                   alignSelf: "flex-start",
                   marginTop: "1rem",
                   display: "flex",
-                  justifyContent: "flex-end",
+                  justifyContent: "center",
                 }}
               >
-                <div className="text-[#FFFFFFB3] pr-2">
+                <div className="text-[#FFFFFFB3] pr-1">
                   {t("login.notHaveAccount")}
                 </div>
                 <Link to="/signup" style={{ color: "#FFFFFF" }}>

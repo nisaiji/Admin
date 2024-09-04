@@ -103,7 +103,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-10 flex justify-center items-end pb-5 bg-gray-900 bg-opacity-50">
+      <div className="fixed inset-0 z-50 flex justify-center items-end pb-5 bg-gray-900 bg-opacity-50">
         <div className="relative flex flex-col w-[80%] h-4/5 bg-white rounded-lg shadow-lg overflow-hidden">
           <div
             className="absolute top-3 right-5 cursor-pointer"
@@ -139,12 +139,12 @@ export default function StudentInfo({ currStudent, modelOpen }) {
                   <div className="flex pb-2" key={index}>
                     <p className="w-1/3">{label}</p>
                     <p className="w-1/5">-</p>
-                    <p className="w-1/2 font-poppins-bold">{value}</p>
+                    <p className="w-1/3 font-poppins-bold">{value}</p>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="flex justify-center items-center w-full">
+            <div className="flex justify-center items-center w-full mt-32">
               <img
                 id="StudentInfoImage"
                 className="h-[370px] w-[300px] object-center"

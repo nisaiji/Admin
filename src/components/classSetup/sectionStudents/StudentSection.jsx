@@ -81,15 +81,17 @@ export default function StudentSection() {
         const sectionId = teacherSectionId;
         res = await axiosClient.get(`${url}/${sectionId}`);
       } else res = await axiosClient.get(`${url}/${sectionId}`);
-      // console.log(res);
+      // console.log(res.result.studentList);
       if (res?.statusCode === 200) {
-        const fetchedStudents = res.result.studentList;
+        const fetchedStudents = res?.result?.studentList;
+        console.log("f", fetchedStudents);
         const studentsWithSNos = fetchedStudents.map((student, index) => ({
           ...student,
           SNo: index + 1,
-          parentName: student.parent.fullname,
-          phone: student.parent.phone,
+          parentName: student.parent?.fullname || "",
+          phone: student.parent?.phone || "",
         }));
+        // console.log("swsn", studentsWithSNos);
         setStudents(studentsWithSNos);
       }
     } catch (error) {

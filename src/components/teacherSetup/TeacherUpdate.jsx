@@ -145,7 +145,7 @@ export default function TeacherUpdate() {
                 {
                   name: "dob",
                   label: "Date of Birth",
-                  placeholder: "Enter Dob",
+                  placeholder: "DD/MM/YYYY",
                   type: "date",
                 },
                 {
@@ -200,7 +200,7 @@ export default function TeacherUpdate() {
                           )
                         }
                         dateFormat="MM/dd/yyyy"
-                        placeholderText="Enter Dob"
+                        placeholderText="DD/MM/YYYY"
                         className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
                         wrapperClassName="w-full"
                       />

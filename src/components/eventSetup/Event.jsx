@@ -220,7 +220,7 @@ const Event = () => {
     if (!isOpen) return null;
 
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="bg-white p-6 rounded-lg shadow-lg w-80">
           <h2 className="text-lg font-bold mb-4">
             {prevData?.editData?.eventId ? "Edit Event" : "Add New Event"}
@@ -372,9 +372,9 @@ const Event = () => {
         description: capitalizeFirstLetter(newEvent.description.trim()),
         date: moment(newEvent.date).format("yyyy-MM-DD"),
       };
-      delete formattedEvent.date;
       let res;
       if (eventId) {
+        delete formattedEvent.date;
         res = await axiosClient.put(
           `${EndPoints.ADMIN.UPDATE_EVENT}/${eventId}`,
           formattedEvent
