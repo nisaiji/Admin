@@ -213,7 +213,7 @@ export default function Teacher() {
         <div
           className={`${
             isDarkMode ? "bg-[#0D192F] text-white" : "bg-white "
-          } p-4`}
+          } p-4 min-h-screen`}
         >
           <Toaster position="top-center" reverseOrder={false} />
           <div className="px-4">

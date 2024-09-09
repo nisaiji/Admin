@@ -333,6 +333,8 @@ function Login() {
                   cursor: "pointer",
                   width: "24px",
                   height: "24px",
+                  filter:
+                    "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
                 }}
               />
             </div>

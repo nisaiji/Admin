@@ -151,17 +151,17 @@ const CalendarComponent = ({ events, updateDate }) => {
 
   const fetchEvents = async () => {
     try {
-      const startDate = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        1
-      ).getTime();
-      const endDate = new Date(
-        today.getFullYear(),
-        today.getMonth() + 1,
-        0
-      ).getTime();
-      const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS,{startDate,endDate});
+      // const startDate = new Date(
+      //   today.getFullYear(),
+      //   today.getMonth(),
+      //   1
+      // ).getTime();
+      // const endDate = new Date(
+      //   today.getFullYear(),
+      //   today.getMonth() + 1,
+      //   0
+      // ).getTime();
+      const response = await axiosClient.post(EndPoints.ADMIN.DASHBOARD_CALENDER_EVENTS,{month,year});
       // Sort events by date in ascending order
       // console.log(response);
       if (response?.statusCode === 200) {

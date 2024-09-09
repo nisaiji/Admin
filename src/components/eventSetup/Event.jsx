@@ -301,21 +301,20 @@ const Event = () => {
   const fetchEvents = async () => {
     try {
       setEventLoading(true);
-      const startDate = new Date(
+      const startTime = new Date(
         today.getFullYear(),
         today.getMonth(),
         1
       ).getTime();
-      const endDate = new Date(
+      const endTime = new Date(
         today.getFullYear(),
         today.getMonth() + 1,
         0
       ).getTime();
       const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
-        startDate,
-        endDate,
+        startTime,
+        endTime,
       });
-      // console.log(response.result);
       if (response?.statusCode === 200) {
         const sortedEvents = response.result.sort(
           (a, b) => new Date(a.date) - new Date(b.date)
@@ -559,7 +558,7 @@ const Event = () => {
         <div
           className={`${
             isDarkMode ? "bg-[#102945]" : "text-blue-900"
-          } goto-today flex items-center justify-between py-4 mx-10 rounded-xl`}
+          } goto-today flex items-center justify-between py-4 mx-5 rounded-xl`}
         >
           <div
             className={`${
@@ -579,7 +578,7 @@ const Event = () => {
                 isDarkMode ? "bg-blue-900" : "bg-[#e2e2ee]"
               } goto-btn px-3 py-1  text-white`}
             >
-              <img src={Search2} alt="" className="size-6" />
+              <img src={Search2} alt="" className="h-6 w-7" />
             </button>
           </div>
           <button
@@ -597,7 +596,7 @@ const Event = () => {
           </div>
         )}
         <div>
-          <div className="text-2xl font-bold my-4 dark:text-white">
+          <div className="text-2xl font-bold my-2 dark:text-white">
             {t("events.title")}
           </div>
 

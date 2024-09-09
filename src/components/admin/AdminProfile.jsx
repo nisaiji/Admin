@@ -504,13 +504,13 @@ export default function AdminProfile() {
           >
             {t("adminProfile.saveChanges")}
           </button>
-          <button
+          {/* <button
             type="button"
             onClick={formik.handleReset}
             className="px-6 py-1 text-indigo-800 border-2 border-indigo-800 rounded-lg"
           >
             {t("adminProfile.cancel")}
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -745,13 +745,13 @@ export default function AdminProfile() {
           >
             {t("adminProfile.saveChanges")}
           </button>
-          <button
+          {/* <button
             type="button"
             onClick={formik.handleReset}
             className="px-6 py-2 text-indigo-800 border-2 border-indigo-800 rounded-lg"
           >
             {t("cancel")}
-          </button>
+          </button> */}
         </div>
       </div>
     </form>

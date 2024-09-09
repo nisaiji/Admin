@@ -48,10 +48,13 @@ function Signup() {
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
         setLoading(true);
-        const response = await axiosClient.post(EndPoints.ADMIN.ADMIN_REGISTER, values);
+        const response = await axiosClient.post(
+          EndPoints.ADMIN.ADMIN_REGISTER,
+          values
+        );
         // console.log(response);
 
-        if (response?.statusCode === 200||response?.statusCode === 201) {
+        if (response?.statusCode === 200 || response?.statusCode === 201) {
           toast.success(<b>Register Successfully</b>);
           resetForm();
           navigate("/login");
@@ -206,6 +209,10 @@ function Signup() {
                     onClick={() => setIsHide(!ishide)}
                     alt=""
                     className="size-5 relative right-3"
+                    style={{
+                      filter:
+                        "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
+                    }}
                   />
                 ) : (
                   <img
@@ -213,6 +220,10 @@ function Signup() {
                     onClick={() => setIsHide(!ishide)}
                     alt=""
                     className="size-5 relative right-3"
+                    style={{
+                      filter:
+                        "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
+                    }}
                   />
                 )}
               </div>

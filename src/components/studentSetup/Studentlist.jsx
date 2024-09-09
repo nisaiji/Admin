@@ -226,7 +226,7 @@ export default function Studentlist() {
       <div
         className={`${
           isDarkMode ? "bg-[#112138]" : "bg-white"
-        } flex flex-col self-center w-full max-w-[95%] my-10 rounded  max-md:max-w-full`}
+        } flex flex-col self-center w-full max-w-[95%] my-10 rounded  max-md:max-w-full min-h-screen`}
       >
         <h1 className="text-4xl px-14 py-5 font-poppins-bold ">
           {t("dashboard.students")}

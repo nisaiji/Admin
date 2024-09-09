@@ -47,6 +47,7 @@ export default function TeacherUpdate() {
   const teacher = useLocation().state;
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+
   const formik = useFormik({
     initialValues: {
       firstname: teacher.firstname || "",
@@ -65,20 +66,26 @@ export default function TeacherUpdate() {
       // console.log(values);
       try {
         setLoading(true);
+        const teacherData = {
+          firstname: values.firstname ? capitalize(values.firstname) : "",
+          lastname: values.lastname ? capitalize(values.lastname) : "",
+          email: values.email ? values.email.toLowerCase() : "",
+          address: values.address ? capitalize(values.address) : "",
+          university: values.university ? capitalize(values.university) : "",
+          gender: values.gender || "",
+          bloodGroup: values.bloodGroup || "",
+          dob: values.dob || "",
+          phone: values.phone || "",
+          degree: values.degree ? capitalize(values.degree) : "",
+        };
+        const filteredTeacherData = Object.fromEntries(
+          Object.entries(teacherData).filter(([_, value]) => value !== "")
+        );
+        console.log(filteredTeacherData);
+
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
-          {
-            firstname: capitalize(values.firstname) || "",
-            lastname: capitalize(values.lastname) || "",
-            email: values.email.toLowerCase() || "",
-            address: capitalize(values.address) || "",
-            university: capitalize(values.university) || "",
-            gender: values.gender || "",
-            bloodGroup: values.bloodGroup || "",
-            dob: values.dob || "",
-            phone: values.phone || "",
-            degree: capitalize(values.degree) || "",
-          }
+          filteredTeacherData
         );
         if (response?.statusCode === 200) {
           toast.success("Teacher updated successfully!");
