@@ -220,7 +220,7 @@ const Event = () => {
     if (!isOpen) return null;
 
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="bg-white p-6 rounded-lg shadow-lg w-80">
           <h2 className="text-lg font-bold mb-4">
             {prevData?.editData?.eventId ? "Edit Event" : "Add New Event"}
@@ -301,11 +301,20 @@ const Event = () => {
   const fetchEvents = async () => {
     try {
       setEventLoading(true);
+      const startTime = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+      ).getTime();
+      const endTime = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0
+      ).getTime();
       const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
-        month,
-        year,
+        startTime,
+        endTime,
       });
-      // console.log(response.result);
       if (response?.statusCode === 200) {
         const sortedEvents = response.result.sort(
           (a, b) => new Date(a.date) - new Date(b.date)
@@ -364,6 +373,7 @@ const Event = () => {
       };
       let res;
       if (eventId) {
+        delete formattedEvent.date;
         res = await axiosClient.put(
           `${EndPoints.ADMIN.UPDATE_EVENT}/${eventId}`,
           formattedEvent
@@ -548,7 +558,7 @@ const Event = () => {
         <div
           className={`${
             isDarkMode ? "bg-[#102945]" : "text-blue-900"
-          } goto-today flex items-center justify-between py-4 mx-10 rounded-xl`}
+          } goto-today flex items-center justify-between py-4 mx-5 rounded-xl`}
         >
           <div
             className={`${
@@ -568,7 +578,7 @@ const Event = () => {
                 isDarkMode ? "bg-blue-900" : "bg-[#e2e2ee]"
               } goto-btn px-3 py-1  text-white`}
             >
-              <img src={Search2} alt="" className="size-6" />
+              <img src={Search2} alt="" className="h-6 w-7" />
             </button>
           </div>
           <button
@@ -586,7 +596,7 @@ const Event = () => {
           </div>
         )}
         <div>
-          <div className="text-2xl font-bold my-4 dark:text-white">
+          <div className="text-2xl font-bold my-2 dark:text-white">
             {t("events.title")}
           </div>
 

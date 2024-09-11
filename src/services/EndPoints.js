@@ -1,8 +1,8 @@
 const EndPoints = {
   ADMIN: {
-    // STUDENT_DELETE: "student/admin-delete",
-    // STUDENT_UPDATE: "student/admin-update",
-    // UPDATE_STUDENT: "student/admin-update",
+    // ADMIN AUTH
+    ADMIN_REGISTER: "admin",
+    ADMIN_LOGIN: "admin/login",
 
     // ADMIN DASHBOARD
     STUDENT_COUNT: "admin-dashboard/present-students",
@@ -12,33 +12,34 @@ const EndPoints = {
     DASHBOARD_MONTHLY_ATTENDANCE: "admin-dashboard/monthly-attendance",
 
     // ADMIN TEACHER SETUP
-    REGISTER_TEACHER: "teacher/register",
+    REGISTER_TEACHER: "teacher",
     TEACHER_LIST: "teacher/all",
-    UPDATE_TEACHER: "teacher/admin-class-teacher",
+    UPDATE_TEACHER: "teacher/admin",
     DELETE_TEACHER: "teacher",
 
     // ADMIN STUDENT SETUP
-    ALL_STUDENT_LIST: "student/all-students",
-    STUDENT_LIST_SEARCH_WISE: "student/admin-search",
-    STUDENT_LIST_SECTION_WISE: "student/admin-section-students",
-    DELETE_STUDENT: "student/admin-delete",
+    ALL_STUDENT_LIST: "student",
+    STUDENT_LIST_SEARCH_WISE: "student/admin/search",
+    STUDENT_LIST_SECTION_WISE: "student/admin-section",
+    DELETE_STUDENT: "student/admin",
     STUDENT_UPDATE: "student/student-parent-update",
 
     // ADMIN CLASS AND SECTION SETUP
-    REGISTER_CLASS: "class/register",
+    REGISTER_CLASS: "class",
     DELETE_CLASS: "class",
-    REGISTER_SECTION: "section/register",
+    CLASS_SECTION: "class",
+    REGISTER_SECTION: "section",
     DELETE_SECTION: "section",
     GET_SECTION: "section",
-    UNASSIGNED_TEACHER: "teacher/unassigned-teachers",
+    UNASSIGNED_TEACHER: "teacher/unassigned",
     REPLACE_TEACHER: "section/replace-teacher",
-    SECTION_INFO: "section/section-info",
+    SECTION_INFO: "section",
 
     // ADMIN SECTION STUDENTS
-    GET_SECTION_STUDENTS: "student/admin-section-students",
-    REGISTER_SECTION_STUDENT: "student/admin-register",
-    UPDATE_SECTION_STUDENT: "student/admin-update",
-    DELETE_SECTION_STUDENT: "student/admin-delete",
+    GET_SECTION_STUDENTS: "student/admin-section",
+    REGISTER_SECTION_STUDENT: "student/admin",
+    UPDATE_SECTION_STUDENT: "student/admin",
+    DELETE_SECTION_STUDENT: "student/admin",
 
     // ADMIN EVENT SECTION
     REGISTER_EVENT: "holiday-event/register",
@@ -46,12 +47,9 @@ const EndPoints = {
     DELETE_EVENT: "holiday-event",
 
     // ADMIN PROFILE
-    GET_ADMIN:'admin/profile',
-    PROFILE_UPDATE:'admin/profile',
-    SOCIAL_PROFILE_UPDATE:'admin/social-profile',
-
-    // ADMIN PROFILE
-    ADMIN_LOGIN:'admin/login',
+    GET_ADMIN: "admin",
+    PROFILE_UPDATE: "admin",
+    SOCIAL_PROFILE_UPDATE: "admin/social",
   },
   TEACHER: {
     // STUDENT_DELETE: "student/delete",
@@ -70,17 +68,16 @@ const EndPoints = {
     DELETE_STUDENT: "dashboard/parent-count",
 
     // TEACHER SECTION STUDENTS
-    GET_SECTION_STUDENTS: "student/section-students",
-    REGISTER_SECTION_STUDENT: "student/register",
-    UPDATE_SECTION_STUDENT: "student/update",
-    DELETE_SECTION_STUDENT: "student/delete",
+    GET_SECTION_STUDENTS: "student/teacher-section",
+    REGISTER_SECTION_STUDENT: "student/teacher",
+    UPDATE_SECTION_STUDENT: "student/teacher",
+    DELETE_SECTION_STUDENT: "student/teacher",
 
     // ADMIN PROFILE
-    TEACHER_LOGIN:'teacher/login',
-
+    TEACHER_LOGIN: "teacher/login",
   },
   COMMON: {
-    CLASS_LIST: "class/class-list",
+    CLASS_LIST: "class/all",
     GET_EVENTS: "holiday-event",
   },
 };

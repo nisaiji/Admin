@@ -17,8 +17,8 @@ import { useTranslation } from "react-i18next";
 
 const validationSchema = Yup.object({
   schoolName: Yup.string().required("School Name is required"),
-  principalName: Yup.string().required("Principal Name is required"),
-  adminName: Yup.string().required("Admin Name is required"),
+  principal: Yup.string().required("Principal Name is required"),
+  username: Yup.string().required("Admin Name is required"),
   schoolBoard: Yup.string().required("School Board is required"),
   affiliationNo: Yup.string().required("Affiliation Number is required"),
   address: Yup.string().required("School Address is required"),
@@ -38,8 +38,8 @@ export default function AdminProfile() {
   const formik = useFormik({
     initialValues: {
       schoolName: "",
-      principalName: "",
-      adminName: "",
+      principal: "",
+      username: "",
       schoolBoard: "",
       affiliationNo: "",
       schoolNumber: "",
@@ -67,13 +67,13 @@ export default function AdminProfile() {
     try {
       setLoading(true);
       const res = await axiosClient.get(EndPoints.ADMIN.GET_ADMIN);
-      // console.log(res);
+      console.log(res);
       if (res?.statusCode === 200) {
         setAdmin(res.result);
         formik.setValues({
           schoolName: res.result.schoolName || "",
-          principalName: res.result.principalName || "",
-          adminName: res.result.adminName || "",
+          principal: res.result.principal || "",
+          username: res.result.username || "",
           schoolBoard: res.result.schoolBoard || "",
           affiliationNo: res.result.affiliationNo || "",
           schoolNumber: res.result.schoolNumber || "",
@@ -103,8 +103,8 @@ export default function AdminProfile() {
     try {
       const fieldsToValidate = [
         "schoolName",
-        "principalName",
-        "adminName",
+        "principal",
+        "username",
         "schoolBoard",
         "affiliationNo",
         "address",
@@ -127,24 +127,32 @@ export default function AdminProfile() {
       if (allValid) {
         const values = formik.values;
         setLoading(true);
-        const res = await axiosClient.put(EndPoints.ADMIN.PROFILE_UPDATE, {
+        const requestBody = {
           schoolName: values.schoolName,
-          principalName: values.principalName,
+          principal: values.principal,
           schoolBoard: values.schoolBoard,
-          schoolNumber: values.schoolNumber || "N/A",
           affiliationNo: values.affiliationNo,
           address: values.address,
           city: values.city,
           state: values.state,
           email: values.email,
-          adminName: values.adminName,
-        });
+          username: values.username,
+        };
+        if (values.schoolNumber) {
+          requestBody.schoolNumber = values.schoolNumber;
+        }
+        const res = await axiosClient.put(
+          EndPoints.ADMIN.PROFILE_UPDATE,
+          requestBody
+        );
+        // console.log(res);
+
         toast.success(t("adminProfile.updateMsg"));
         getadmin();
       }
     } catch (e) {
       toast.error(e);
-      // console.log("error in updating email", e);
+      console.log("error in updating ", e);
     } finally {
       setLoading(false);
     }
@@ -242,21 +250,21 @@ export default function AdminProfile() {
               </div>
               <div>
                 <input
-                  name="principalName"
+                  name="principal"
                   placeholder={t("adminProfile.principal")}
-                  value={formik.values.principalName}
+                  value={formik.values.principal}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.principalName && formik.touched.principalName
+                    formik.errors.principal && formik.touched.principal
                       ? "border-red-500"
                       : "border-gray-200"
                   } text-black bg-white border`}
                 />
-                {formik.errors.principalName &&
-                  formik.touched.principalName && (
+                {formik.errors.principal &&
+                  formik.touched.principal && (
                     <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.principalName}
+                      {formik.errors.principal}
                     </div>
                   )}
               </div>
@@ -269,20 +277,20 @@ export default function AdminProfile() {
               </div>
               <div>
                 <input
-                  name="adminName"
+                  name="username"
                   placeholder={t("adminProfile.adminName")}
-                  value={formik.values.adminName}
+                  value={formik.values.username}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.adminName && formik.touched.adminName
+                    formik.errors.username && formik.touched.username
                       ? "border-red-500"
                       : "border-gray-200"
                   } text-black bg-white border`}
                 />
-                {formik.errors.adminName && formik.touched.adminName && (
+                {formik.errors.username && formik.touched.username && (
                   <div className="text-red-500 text-sm mt-1">
-                    {formik.errors.adminName}
+                    {formik.errors.username}
                   </div>
                 )}
               </div>
@@ -496,13 +504,13 @@ export default function AdminProfile() {
           >
             {t("adminProfile.saveChanges")}
           </button>
-          <button
+          {/* <button
             type="button"
             onClick={formik.handleReset}
             className="px-6 py-1 text-indigo-800 border-2 border-indigo-800 rounded-lg"
           >
             {t("adminProfile.cancel")}
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -737,13 +745,13 @@ export default function AdminProfile() {
           >
             {t("adminProfile.saveChanges")}
           </button>
-          <button
+          {/* <button
             type="button"
             onClick={formik.handleReset}
             className="px-6 py-2 text-indigo-800 border-2 border-indigo-800 rounded-lg"
           >
             {t("cancel")}
-          </button>
+          </button> */}
         </div>
       </div>
     </form>

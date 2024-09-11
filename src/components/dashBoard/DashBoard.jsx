@@ -111,6 +111,8 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
     try {
       setEventLoading(true);
       const response = await axiosClient.post(url, reqData);
+      // console.log(response);
+
       if (response?.statusCode === 200) {
         setCalenderEvents(response?.result);
       }
@@ -128,6 +130,8 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}/${selectedSection}`);
+      // console.log(response);
+
       if (response?.statusCode === 200) {
         const { weeklyAttendance, totalStudentCount } = response?.result;
         weeklyData(weeklyAttendance, totalStudentCount);
@@ -148,6 +152,8 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}/${selectedSection}`);
+      // console.log(response);
+
       if (response?.statusCode === 200) {
         const { monthlyAttendance, totalStudentCount } = response?.result;
         monthlyData(monthlyAttendance, totalStudentCount);
@@ -254,6 +260,7 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
   };
 
   const chartOptions = {
+    maintainAspectRatio: false,
     scales: {
       x: {
         stacked: true,
@@ -274,6 +281,7 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
       },
     },
   };
+
   const renderStudentCount = () => {
     if (studentCountData?.totalCount > 0) {
       return `${studentCountData?.presentCount || 0}/${
@@ -286,27 +294,42 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
 
   const renderChart = () => {
     if (selectedOption === "Weekly") {
-      if (chartData) {
-        return <Bar data={chartData} options={chartOptions} width={300} />;
-      } else {
-        return (
-          <Bar data={emptyWeeklyChartView} options={chartOptions} width={300} />
-        );
-      }
+      return (
+        <Bar data={chartData || emptyWeeklyChartView} options={chartOptions} />
+      );
     } else {
-      if (chartData) {
-        return <Bar data={chartData} options={chartOptions} width={400} />;
-      } else {
-        return (
-          <Bar
-            data={emptyMonthlyChartView}
-            options={chartOptions}
-            width={400}
-          />
-        );
-      }
+      return (
+        <Bar data={chartData || emptyMonthlyChartView} options={chartOptions} />
+      );
     }
   };
+
+  // const renderChart = () => {
+  //   if (selectedOption === "Weekly") {
+  //     if (chartData) {
+  //       return <Bar data={chartData} options={chartOptions} width={300} />;
+  //     } else {
+  //       return (
+  //         <Bar
+  //         data={emptyWeeklyChartView}
+  //         options={chartOptions}
+  //         width={300} />
+  //       );
+  //     }
+  //   } else {
+  //     if (chartData) {
+  //       return <Bar data={chartData} options={chartOptions} width={400} />;
+  //     } else {
+  //       return (
+  //         <Bar
+  //           data={emptyMonthlyChartView}
+  //           options={chartOptions}
+  //           width={400}
+  //         />
+  //       );
+  //     }
+  //   }
+  // };
 
   return (
     <div className="relative w-full min-h-screen bg-white bg-gradient-to-t from-[rgba(138,137,250,0.1)] to-[rgba(138,137,250,0.1)]">
@@ -357,7 +380,7 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
         <div className="grid grid-rows-1 lg:grid-rows-1 gap-6 mb-10">
           <div className="bg-white p-6 rounded-lg shadow-lg relative">
             <div className="flex justify-between mb-10">
-              <h2 className="text-2xl font-semibold pl-10">
+              <h2 className="text-2xl font-semibold pl-5">
                 {t("dashboard.attendance")}
               </h2>
 
@@ -436,7 +459,11 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
               </div>
             )}
             <div className="flex justify-center mb-4">
-              <div className="w-full h-96 flex justify-center">
+              <div
+                className={`h-96 flex justify-center ${
+                  selectedOption === "Weekly" ? "w-8/12" : "w-11/12"
+                }`}
+              >
                 {renderChart()}
               </div>
             </div>
@@ -484,7 +511,7 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
                     {calenderEvents.map((itm, index) => (
                       <div
                         key={index}
-                        className="mb-5 shadow-md rounded-lg overflow-hidden border-l-8 border-red-600"
+                        className="mb-5 shadow-sm rounded-lg overflow-hidden border-l-8 border-red-600"
                       >
                         <div className="flex h-5 justify-between items-center bg-[#ffffff] text-red-500 font-poppins px-2 text-lg">
                           <div className="font-poppins-bold text-xl mt-4 mb-2 ml-4">
@@ -517,7 +544,7 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
                               )}
                               {itm.event && (
                                 <div className="px-3 py-1 mr-3 text-center text-sm font-medium rounded-3xl bg-[#464590] text-white">
-                                  {t("dashboard.occasion")}
+                                  {t("dashboard.Event")}
                                 </div>
                               )}
                             </div>

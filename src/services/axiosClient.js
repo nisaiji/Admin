@@ -43,5 +43,6 @@ axiosClient.interceptors.response.use(
       toast.error("Check your internet connectivity");
     }
     console.log("axios err", error);
+    return Promise.reject(error.response.data.message);
   }
 );

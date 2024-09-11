@@ -186,12 +186,14 @@ const Navbar = () => {
                 onClick={closeMenus}
               >
                 <div className="py-1">
-                  <Link
-                    to="/admin-profile"
-                    className="block px-4 py-2 hover:bg-white hover:text-[#05022B]"
-                  >
-                    {t("profile")}
-                  </Link>
+                  {role === "admin" && (
+                    <Link
+                      to="/admin-profile"
+                      className="block px-4 py-2 hover:bg-white hover:text-[#05022B]"
+                    >
+                      {t("profile")}
+                    </Link>
+                  )}
                   <Link
                     onClick={handleLogout}
                     to="/login"

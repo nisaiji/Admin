@@ -311,6 +311,10 @@ function ClassSetup() {
                     className={`cursor-pointer shadow appearance-none border rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline bg-[#464590] text-white text-center text-sm font-semibold  ${
                       isDarkMode ? "bg-[#152f54] text-white" : "text-gray-700"
                     }`}
+                    style={{
+                      overflowY: "auto",
+                      maxHeight: "150px",
+                    }}
                   >
                     <option value="">{t("classSetup.selectClass")}</option>
                     {availableClassOptions.map((item, i) => (

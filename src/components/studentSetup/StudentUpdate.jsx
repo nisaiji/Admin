@@ -28,10 +28,8 @@ const validationSchema = Yup.object({
   address: Yup.string().required("Address is required"),
   parentFullname: Yup.string().required("Parent's Full Name is required"),
   parentGender: Yup.string().required("Parent's Gender is required"),
-  parentAge: Yup.number()
-    .required("Parent's Age is required")
-    .positive()
-    .integer(),
+  parentAge: Yup.string()
+    .required("Parent's Age is required"),
   parentEmail: Yup.string()
     .email("Invalid email address")
     .required("Parent's Email is required"),
@@ -61,7 +59,7 @@ export default function StudentUpdate() {
 
   const formik = useFormik({
     initialValues: {
-      rollNumber: student.rollNumber || "",
+      // rollNumber: student.rollNumber || "",
       firstname: student.firstname || "",
       lastname: student.lastname || "",
       gender: student.gender || "",
@@ -85,7 +83,7 @@ export default function StudentUpdate() {
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.STUDENT_UPDATE}/${student._id}`,
           {
-            rollNumber: capitalize(values.rollNumber) || "",
+            // rollNumber: capitalize(values.rollNumber) || "",
             firstname: capitalize(values.firstname) || "",
             lastname: capitalize(values.lastname) || "",
             gender: values.gender || "",
@@ -94,7 +92,7 @@ export default function StudentUpdate() {
             address: capitalize(values.address) || "",
             parentFullname: capitalize(values.parentFullname) || "",
             parentGender: values.parentGender || "",
-            parentAge: values.parentAge || "",
+            parentAge: values.parentAge.toString() || "",
             parentEmail: values.parentEmail.toLowerCase() || "",
             parentPhone: values.parentPhone || "",
             parentQualification: capitalize(values.parentQualification) || "",
@@ -102,6 +100,8 @@ export default function StudentUpdate() {
             parentAddress: capitalize(values.parentAddress) || "",
           }
         );
+        console.log('response',response);
+        
         if (response?.statusCode === 200) {
           toast.success(t("studentList.studentUpdateMsg"));
           navigate(-1);
@@ -127,7 +127,7 @@ export default function StudentUpdate() {
           label: "Gender",
           name: "gender",
           type: "select",
-          options: ["male", "female", "other"],
+          options: ["Male", "Female", "Other"],
         },
         {
           label: "First Name",
@@ -232,13 +232,13 @@ export default function StudentUpdate() {
           label: "Gender",
           name: "parentGender",
           type: "select",
-          options: ["male", "female", "other"],
+          options: ["Male", "Female", "Other"],
         },
         {
           label: "Age",
           name: "parentAge",
           placeholder: t("studentDetails.placeholders.age"),
-          type: "Number",
+          type: "text",
         },
         {
           label: "Email Address",

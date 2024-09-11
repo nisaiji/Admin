@@ -3,10 +3,10 @@ import teacher from "../../assets/images/teacher.png";
 import cross from "../../assets/images/cross.png";
 
 export default function TeacherInfo({ currTeacher, modelOpen }) {
-  // console.log(currTeacher);
+  console.log(currTeacher);
   const personalDetails = [
     ["Full Name", `${currTeacher.firstname} ${currTeacher.lastname}`],
-    ["Class and Section", `${currTeacher.class} ${currTeacher.section}`],
+    ["Class and Section", `${currTeacher.section.classId.name || ""} ${currTeacher.section.name||"NA"}`],
     ["Gender", currTeacher.gender || "NA"],
     ["Blood Group", currTeacher.bloodGroup || "NA"],
     ["Date of birth", currTeacher.dob || "NA"],
@@ -21,7 +21,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-10 flex justify-center items-end pb-5 bg-gray-900 bg-opacity-50">
+      <div className="fixed inset-0 flex justify-center items-end pb-5 bg-gray-900 bg-opacity-50 z-50">
         <div className="relative flex flex-col w-[80%] max-h-[90vh] bg-white rounded-lg shadow-lg overflow-hidden">
           <div
             className="absolute top-3 right-3 cursor-pointer"
@@ -48,7 +48,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
                   <div className="flex pb-2" key={index}>
                     <p className="w-1/3">{label}</p>
                     <p className="w-1/5">-</p>
-                    <p className="w-1/2 font-poppins-bold">{value}</p>
+                    <p className="w-1/3 font-poppins-bold">{value}</p>
                   </div>
                 ))}
               </div>

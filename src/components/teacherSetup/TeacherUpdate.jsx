@@ -21,14 +21,14 @@ const capitalize = (str) => {
 const validationSchema = Yup.object({
   firstname: Yup.string().required("First name is required"),
   lastname: Yup.string().required("Last name is required"),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  address: Yup.string().required("Address is required"),
-  university: Yup.string().required("University is required"),
-  gender: Yup.string().required("Gender is required"),
-  bloodGroup: Yup.string().required("Blood group is required"),
-  dob: Yup.date().required("Date of birth is required"),
+  // email: Yup.string()
+  //   .email("Invalid email address")
+  //   .required("Email is required"),
+  // address: Yup.string().required("Address is required"),
+  // university: Yup.string().required("University is required"),
+  // gender: Yup.string().required("Gender is required"),
+  // bloodGroup: Yup.string().required("Blood group is required"),
+  // dob: Yup.date().required("Date of birth is required"),
   phone: Yup.string()
     .required("Phone number is required")
     .matches(/^\d{10}$/, "Phone number should be 10 digits")
@@ -47,6 +47,7 @@ export default function TeacherUpdate() {
   const teacher = useLocation().state;
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+
   const formik = useFormik({
     initialValues: {
       firstname: teacher.firstname || "",
@@ -65,20 +66,26 @@ export default function TeacherUpdate() {
       // console.log(values);
       try {
         setLoading(true);
+        const teacherData = {
+          firstname: values.firstname ? capitalize(values.firstname) : "",
+          lastname: values.lastname ? capitalize(values.lastname) : "",
+          email: values.email ? values.email.toLowerCase() : "",
+          address: values.address ? capitalize(values.address) : "",
+          university: values.university ? capitalize(values.university) : "",
+          gender: values.gender || "",
+          bloodGroup: values.bloodGroup || "",
+          dob: values.dob || "",
+          phone: values.phone || "",
+          degree: values.degree ? capitalize(values.degree) : "",
+        };
+        const filteredTeacherData = Object.fromEntries(
+          Object.entries(teacherData).filter(([_, value]) => value !== "")
+        );
+        console.log(filteredTeacherData);
+
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
-          {
-            firstname: capitalize(values.firstname) || "",
-            lastname: capitalize(values.lastname) || "",
-            email: values.email.toLowerCase() || "",
-            address: capitalize(values.address) || "",
-            university: capitalize(values.university) || "",
-            gender: values.gender || "",
-            bloodGroup: values.bloodGroup || "",
-            dob: values.dob || "",
-            phone: values.phone || "",
-            degree: capitalize(values.degree) || "",
-          }
+          filteredTeacherData
         );
         if (response?.statusCode === 200) {
           toast.success("Teacher updated successfully!");
@@ -145,7 +152,7 @@ export default function TeacherUpdate() {
                 {
                   name: "dob",
                   label: "Date of Birth",
-                  placeholder: "Enter Dob",
+                  placeholder: "DD/MM/YYYY",
                   type: "date",
                 },
                 {
@@ -200,7 +207,7 @@ export default function TeacherUpdate() {
                           )
                         }
                         dateFormat="MM/dd/yyyy"
-                        placeholderText="Enter Dob"
+                        placeholderText="DD/MM/YYYY"
                         className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
                         wrapperClassName="w-full"
                       />
