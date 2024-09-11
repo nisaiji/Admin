@@ -1,12 +1,20 @@
 {
+  "register": {
+    "welcome": "Welcome",
+    "registerNow": "Register Now",
+    "submitting": "Submitting...",
+    "description": "Hello! welcome to School App. one step solution for schools",
+    "adminRegister": "Admin Register",
+    "haveAccount": "Already have account? "
+  },
   "login": {
-    "A":"A",
+    "A": "A",
     "welcome": "Welcome to",
     "managementHub": "Management Hub",
     "simplify": "Simplify School Management with ease!",
     "login": "Login",
     "enterDetails": "Enter your account details",
-    "LOGO":"LOGO",
+    "LOGO": "LOGO",
     "placeholders": {
       "email": "Admin email",
       "username": "Username, email or phone",
@@ -21,10 +29,13 @@
   "roles": {
     "admin": "Admin",
     "teacher": "Teacher",
-    "student":"Student",
-    "classTeacher":"Class Teacher"
+    "student": "Student",
+    "classTeacher": "Class Teacher"
   },
   "messages": {
+    "admin": {
+      "registerSuccess": "Admin registered successfully"
+    },
     "login": {
       "success": "Login Successfully",
       "error": "Error logging in. Please try again."
@@ -43,8 +54,8 @@
       "errorDeleting": "Error deleting student!",
       "success": "Student added successfully",
       "update": "Student updated successfully",
-      "class":"class:",
-      "section":"section:"
+      "class": "class:",
+      "section": "section:"
     },
     "event": {
       "createSuccess": "Event created successfully",
@@ -56,72 +67,60 @@
   },
   "dashboard": {
     "title": "Admin Dashboard",
-    
-      "students": "Students",
-      "parents": "Parents",
-      "attendance": "Attendance",
-      "calendar": "Calendar",
-      "holidayAndEvents": "Holiday and Events",
-      "holiday":"Holiday",
-      "weekly": "Weekly",
-      "monthly": "Monthly",
-      "selectClass": "Select class",
-      "selectSection": "Select section",
-      "today":"Today",
-      "Event":"Event",
-      "class":"Class",
-      "section":"Section"
-    
+    "students": "Students",
+    "parents": "Parents",
+    "attendance": "Attendance",
+    "calendar": "Calendar",
+    "holidayAndEvents": "Holiday and Events",
+    "holiday": "Holiday",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "selectClass": "Select class",
+    "selectSection": "Select section",
+    "today": "Today",
+    "Event": "Event",
+    "class": "Class",
+    "section": "Section"
   },
   "calendar": {
-    
-      "title": "Calendar",
-      "today": "Today",
-      "gotoDatePlaceholder": "mm/yyyy",
-    
-    
-      "january": "January",
-      "february": "February",
-      "march": "March",
-      "april": "April",
-      "may": "May",
-      "june": "June",
-      "july": "July",
-      "august": "August",
-      "september": "September",
-      "october": "October",
-      "november": "November",
-      "december": "December",
-      "sunday": "Sunday",
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday"
-    
+    "title": "Calendar",
+    "today": "Today",
+    "gotoDatePlaceholder": "mm/yyyy",
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December",
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
   },
   "events": {
-    
-      "title": "Events & Holidays",
-    
-      "cancel":"Cancel",
-      "message": "No events available.",
-      "date": "{date}, {day}",
-      "title1": "{title}",
-      "description": "{description}",
-      
-        "holiday": "Holiday",
-        "event": "Event",
-        "titleRequired":"Title is required",
-        "descRequired":"Description is required",
-        "oneCheckbox":"Please select at least one checkbox (Holiday or Event) ",
-        "eventUpdated":"Event updated successfully",
-        "eventCreated":"Event created successfully",
-        "eventDeleted":"Event deleted successfully"
-
-      
-    
+    "title": "Events & Holidays",
+    "cancel": "Cancel",
+    "message": "No events available.",
+    "date": "{date}, {day}",
+    "title1": "{title}",
+    "description": "{description}",
+    "holiday": "Holiday",
+    "event": "Event",
+    "titleRequired": "Title is required",
+    "descRequired": "Description is required",
+    "oneCheckbox": "Please select at least one checkbox (Holiday or Event) ",
+    "eventUpdated": "Event updated successfully",
+    "eventCreated": "Event created successfully",
+    "eventDeleted": "Event deleted successfully"
   },
   "eventForm": {
     "title": {
@@ -188,15 +187,10 @@
     "delete": "Delete",
     "info": "Info"
   },
-  "validationError": {
-    "message": "All fields must be filled out before adding a new row."
-  },
   "studentDetails": {
     "title": "Student Details",
-    
-      "personalDetails": "Student Personal Details",
-      "guardianDetails": "Guardian Details",
-    
+    "personalDetails": "Student Personal Details",
+    "guardianDetails": "Guardian Details",
     "fields": {
       "rollNumber": "Roll Number",
       "gender": "Gender",
@@ -211,13 +205,13 @@
       "phoneNumber": "Phone Number",
       "qualification": "Qualification",
       "occupation": "Occupation",
-      "classAndSection":"Class & Section",
-      "guardianName":"Guardian Name",
-      "Phone":"Phone",
-      "Action":"Action",
-      "GenderSelect":"Select Gender",
+      "classAndSection": "Class & Section",
+      "guardianName": "Guardian Name",
+      "Phone": "Phone",
+      "Action": "Action",
+      "GenderSelect": "Select Gender",
       "addStudent": "Add Student",
-      "student":"Student"
+      "student": "Student"
     },
     "placeholders": {
       "rollNumber": "Enter Roll Number",
@@ -229,12 +223,12 @@
       "age": "Enter Age",
       "emailAddress": "Enter Email Address",
       "phoneNumber": "Enter Phone Number",
-      "qualification":"Enter Qualification",
-      "Occupation":"Enter Occupation"
+      "qualification": "Enter Qualification",
+      "Occupation": "Enter Occupation"
     },
-    "buttons":{
-        "print":"print",
-        "screenshot":"Take screenshot"
+    "buttons": {
+      "print": "print",
+      "screenshot": "Take screenshot"
     }
   },
   "studentList": {
@@ -249,7 +243,6 @@
       "buttons": {
         "search": "Search",
         "clear": "Clear"
-        
       }
     },
     "tableHeaders": {
@@ -266,63 +259,56 @@
       "info": "Info",
       "delete": "Delete"
     },
-   
-      "showing": "Showing",
-      "from": "from",
-      "data": "data",
-      "studentUpdateMsg":"Student updated successfully!",
-    
-   
-      "message": "No Student at this time",
-      "subMessage": "Students will appear here after they enroll in your School",
-    
+    "showing": "Showing",
+    "from": "from",
+    "data": "data",
+    "studentUpdateMsg": "Student updated successfully!",
+    "message": "No Student at this time",
+    "subMessage": "Students will appear here after they enroll in your School",
     "toasterMessages": {
       "deleteSuccess": "Student deleted successfully!",
       "deleteFailure": "Failed to delete student!"
     }
   },
-  
-    "classSetup": {
-      "title": "Classroom",
-      "update": "Update",
-      "selectClass": "Add class",
-      "noClassroom": "No Classroom at This time",
-      "noClassroomDesc": "Classroom will appear here after you create it using the icon above",
-      "success": {
-        "classCreated": "Class created successfully",
-        "classDeleted": "Class deleted successfully"
-      },
-      "errors": {
-        "classroomFull": "Classroom is full of classes.",
-        "classExists": "Class already exists."
-      }
+  "classSetup": {
+    "title": "Classroom",
+    "update": "Update",
+    "selectClass": "Add class",
+    "noClassroom": "No Classroom at This time",
+    "noClassroomDesc": "Classroom will appear here after you create it using the icon above",
+    "success": {
+      "classCreated": "Class created successfully",
+      "classDeleted": "Class deleted successfully"
     },
+    "errors": {
+      "classroomFull": "Classroom is full of classes.",
+      "classExists": "Class already exists."
+    }
+  },
+  "teacherSetup": {
+    "validationFirstNameLength": "First Name should be atleast 3 character long",
+    "validationLastNameLength": "Last Name should be atleast 3 character long",
+    "validationParentFullNameLength": "Parent Full Name should be atleast 3 character long",
+    "validationEnter": "Please Enter First Name",
+    "validationLastName": "Please Enter Last Name ",
+    "validationFirstNameNoNumbers": "First Name Can Not Contain Numbers",
+    "validationLastNameNoNumbers": "Last Name Can Not Contain Numbers",
+    "validationParentFullNameNoNumbers": "Parent Full Name Can Not Contain Numbers",
+    "validationPhone": "Please Enter Phone Number ",
+    "validationPhoneCount": "Phone number must be 10 digits and start with a number between 1 and 5",
+    "fetchFailedData": "Failed to fetch teacher data",
+    "updateTeacher": "Teacher updated successfully!",
+    "teacherDeleted": "Teacher Deleted",
+    "search": "Search here...",
+    "enterFirstName": "Enter First Name",
+    "enterLastName": "Enter Last Name",
+    "enterPhone": "Enter Phone Number",
+    "gender": "Please Select Gender",
+    "parentName": "Please Enter ParentName ",
+    "guardianName": "Enter Guardian Name",
+    "Phone": "Enter Phone"
+  },
 
-    "teacherSetup":{  
-     "validationFirstNameLength":"First Name should be atleast 3 character long",
-     "validationLastNameLength":"Last Name should be atleast 3 character long",
-     "validationParentFullNameLength":"Parent Full Name should be atleast 3 character long",
-     "validationEnter":"Please Enter First Name",
-     "validationLastName":"Please Enter Last Name ",
-     "validationFirstNameNoNumbers":"First Name Can Not Contain Numbers",
-     "validationLastNameNoNumbers":"Last Name Can Not Contain Numbers",
-     "validationParentFullNameNoNumbers":"Parent Full Name Can Not Contain Numbers",
-     "validationPhone":"Please Enter Phone Number ",
-     "validationPhoneCount":"Phone number must be 10 digits and start with a number between 1 and 5",
-     "fetchFailedData":"Failed to fetch teacher data" ,
-     "updateTeacher":"Teacher updated successfully!",
-     "teacherDeleted":"Teacher Deleted",
-     "search":"Search here...",
-     "enterFirstName":"Enter First Name",
-     "enterLastName":"Enter Last Name",
-     "enterPhone":"Enter Phone Number",
-     "gender":"Please Select Gender",
-     "parentName":"Please Enter ParentName ",
-     "guardianName":"Enter Guardian Name",
-     "Phone":"Enter Phone"
-    },
-  
-  
   "adminProfile": {
     "accountSettings": "Account Settings",
     "schoolName": "School Name",
@@ -354,37 +340,48 @@
     "phoneNumberPlaceholder": "Your Phone number...",
     "socialProfile": "Social Profile",
     "phoneNumberInfo": "Phone Number",
-    "yourPhoneNumber":" Your Phone Number",
-    "Email":"Email ",
-    "updateMsg":"Profile Updated",
-    "socialUpdate":"Social Profile Updated",
-    "personalWebsitePlaceholder":"Personal website or portfolio url...",
-    "userName":"Username",
-    "Phone":"Phone number"
-
-    
-    
+    "yourPhoneNumber": " Your Phone Number",
+    "Email": "Email ",
+    "updateMsg": "Profile Updated",
+    "socialUpdate": "Social Profile Updated",
+    "personalWebsitePlaceholder": "Personal website or portfolio url...",
+    "userName": "Username",
+    "Phone": "Phone number"
   },
-  "createSection":"Create Sections",
-  "sections":"Sections",
-  "ClassTeacher":"Class teacher",
-  "Actions":"Actions",
-  "Done":"Done",
-  "SelectTeacher":"Assign Teacher",
-  "Save":"Save",
-  "cancel":"Cancel",
-  "TeacherDetails":"Teacher Details",
-  "TeacherPersonalDetails":"Teacher Personal Details",
-  "confirmDelete":"Are you sure you want to delete this? This action cannot be undone.",
-  "EducationDetails":"Education Details",
-  "delete":"Delete",
-  "logo":"LOGO",
-  "A":"A",
-  "setup":"Setup",
-  "classroom":"Classroom",
-   "event":"Events",
-   "student":"Student",
-   "profile":"Profile",
-   "logout":"Log Out"
+  "createSection": "Create Sections",
+  "sections": "Sections",
+  "ClassTeacher": "Class teacher",
+  "Actions": "Actions",
+  "Done": "Done",
+  "SelectTeacher": "Assign Teacher",
+  "Save": "Save",
+  "cancel": "Cancel",
+  "TeacherDetails": "Teacher Details",
+  "TeacherPersonalDetails": "Teacher Personal Details",
+  "confirmDelete": "Are you sure you want to delete this? This action cannot be undone.",
+  "EducationDetails": "Education Details",
+  "delete": "Delete",
+  "logo": "LOGO",
+  "A": "A",
+  "setup": "Setup",
+  "classroom": "Classroom",
+  "event": "Events",
+  "student": "Student",
+  "profile": "Profile",
+  "logout": "Log Out",
 
+  "validationError": {
+    "message": "All fields must be filled out before adding a new row.",
+    "username": "username is required",
+    "email": "email is required",
+    "emailAddress": "Invalid email address",
+    "password": "password is required",
+    "passwordLength": "Password must be at least 8 characters",
+    "schoolName": "School name is required",
+    "affiliationNumber": "Affiliation number is required",
+    "address": "Address is required",
+    "phone": "Phone number is required",
+    "phoneNumber": "Phone number should be 10 digits",
+    "phoneStart": "Phone number must start with a digit between 1 to 5"
+  }
 }

@@ -5,28 +5,22 @@ import eventBack from "../../assets/images/eventBack.png";
 import Studenthat from "../../assets/images/Studenthat.png";
 import ParentIcon from "../../assets/images/ParentIcon.png";
 import CalendarComponent from "./CalendarComponent.jsx";
-import { borderRadius, padding } from "@mui/system";
 import { useSelector } from "react-redux";
 import EndPoints from "../../services/EndPoints.js";
 import moment from "moment";
-
 import { axiosClient } from "../../services/axiosClient";
 import Spinner from "../Spinner.jsx";
 import { useTranslation } from "react-i18next";
+import toast, { Toaster } from "react-hot-toast";
+import CONSTANT from "../../utils/constants.js";
 
-const Dashboard = ({ activities = [], role, deleteEvent }) => {
+const Dashboard = () => {
   const { t } = useTranslation();
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const [selectedOption, setSelectedOption] = useState("Monthly");
-  const [eventToDelete, setEventToDelete] = useState(null);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [studentCountData, setStudentCountData] = useState();
   const [parentCount, setParentCount] = useState(0);
   const [calenderEvents, setCalenderEvents] = useState([]);
-  const [date, setDate] = useState({
-    month: moment().month(),
-    year: moment().year(),
-  });
   const [chartData, setChartData] = useState();
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
@@ -36,38 +30,11 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
   const [loading, setLoading] = useState(false);
   const [totalStudentClassSectionWise, setTotalStudentClassSectionWise] =
     useState(1);
-
-  useEffect(() => {
-    getStudentCount();
-    getParentCount();
-    getClassList();
-  }, []);
-
-  const getClassList = async () => {
-    try {
-      const response = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
-      if (response?.statusCode === 200) {
-        const { result } = response;
-        setClassList(result);
-        setSectionList(result[0]?.section);
-        setSelectedClass(result[0]?._id);
-        setSelectedSection(result[0]?.section[0]?._id);
-      }
-    } catch (error) {
-      // console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedSection !== "") {
-      if (selectedOption === "Weekly") getWeeklyChart();
-      else getMonthlyChart();
-    }
-  }, [selectedSection, selectedOption]);
-
-  useEffect(() => {
-    getCalenderEvents();
-  }, [date]);
+  const [date, setDate] = useState({
+    month: moment().month(),
+    year: moment().year(),
+  });
+  const daysInMonth = new Date(date.year, date.month, 0).getDate();
 
   const getStudentCount = async () => {
     let url;
@@ -79,8 +46,8 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
         const { presentCount, totalCount } = response?.result;
         setStudentCountData({ presentCount, totalCount });
       }
-    } catch (error) {
-      // console.log(error);
+    } catch (e) {
+      toast.error(e);
     }
   };
 
@@ -94,14 +61,34 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
         const { parentCount } = response?.result;
         setParentCount(parentCount);
       }
-    } catch (error) {
-      // console.log(error);
+    } catch (e) {
+      toast.error(e);
     }
   };
 
+  const getClassList = async () => {
+    try {
+      const response = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
+      if (response?.statusCode === 200) {
+        const { result } = response;
+        setClassList(result);
+        setSectionList(result[0]?.section);
+        setSelectedClass(result[0]?._id);
+        setSelectedSection(result[0]?.section[0]?._id);
+      }
+    } catch (e) {
+      toast.error(e);
+    }
+  };
+
+  useEffect(() => {
+    getStudentCount();
+    getParentCount();
+    getClassList();
+  }, []);
+
   const getCalenderEvents = async () => {
     let url;
-
     let reqData = {
       month: date?.month,
       year: date?.year,
@@ -111,17 +98,19 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
     try {
       setEventLoading(true);
       const response = await axiosClient.post(url, reqData);
-      // console.log(response);
-
       if (response?.statusCode === 200) {
         setCalenderEvents(response?.result);
       }
-    } catch (error) {
-      // console.log(error);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setEventLoading(false);
     }
   };
+
+  useEffect(() => {
+    getCalenderEvents();
+  }, [date]);
 
   const getWeeklyChart = async () => {
     let url;
@@ -130,15 +119,13 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}/${selectedSection}`);
-      // console.log(response);
-
       if (response?.statusCode === 200) {
         const { weeklyAttendance, totalStudentCount } = response?.result;
         weeklyData(weeklyAttendance, totalStudentCount);
         setTotalStudentClassSectionWise(totalStudentCount);
       }
-    } catch (error) {
-      // console.log(error);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -146,25 +133,29 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
 
   const getMonthlyChart = async () => {
     let url;
-
     if (isTeacher) url = EndPoints.TEACHER.DASHBOARD_MONTHLY_ATTENDANCE;
     else url = EndPoints.ADMIN.DASHBOARD_MONTHLY_ATTENDANCE;
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}/${selectedSection}`);
-      // console.log(response);
-
       if (response?.statusCode === 200) {
         const { monthlyAttendance, totalStudentCount } = response?.result;
         monthlyData(monthlyAttendance, totalStudentCount);
         setTotalStudentClassSectionWise(totalStudentCount);
       }
-    } catch (error) {
-      // console.log(error);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (selectedSection !== "") {
+      if (selectedOption === "Weekly") getWeeklyChart();
+      else getMonthlyChart();
+    }
+  }, [selectedSection, selectedOption]);
 
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
@@ -176,7 +167,7 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
       return acc;
     }, []);
     const data = {
-      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      labels: CONSTANT.WEEKDAYS,
       datasets: [
         {
           label: "Absent",
@@ -196,8 +187,9 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
     };
     setChartData(data);
   };
+
   const emptyWeeklyChartView = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    labels: CONSTANT.WEEKDAYS,
     datasets: [
       {
         label: "Absent",
@@ -217,7 +209,7 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
   };
 
   const emptyMonthlyChartView = {
-    labels: Array.from({ length: 31 }, (_, i) => i + 1),
+    labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
     datasets: [
       {
         label: "Absent",
@@ -304,35 +296,9 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
     }
   };
 
-  // const renderChart = () => {
-  //   if (selectedOption === "Weekly") {
-  //     if (chartData) {
-  //       return <Bar data={chartData} options={chartOptions} width={300} />;
-  //     } else {
-  //       return (
-  //         <Bar
-  //         data={emptyWeeklyChartView}
-  //         options={chartOptions}
-  //         width={300} />
-  //       );
-  //     }
-  //   } else {
-  //     if (chartData) {
-  //       return <Bar data={chartData} options={chartOptions} width={400} />;
-  //     } else {
-  //       return (
-  //         <Bar
-  //           data={emptyMonthlyChartView}
-  //           options={chartOptions}
-  //           width={400}
-  //         />
-  //       );
-  //     }
-  //   }
-  // };
-
   return (
     <div className="relative w-full min-h-screen bg-white bg-gradient-to-t from-[rgba(138,137,250,0.1)] to-[rgba(138,137,250,0.1)]">
+      <Toaster position="top-center" reverseOrder={false} />
       <div className="container mx-auto p-8">
         <div className="bg-white rounded-2xl">
           <h1 className="text-3xl font-bold mb-0 p-3 pl-10 pt-8">
@@ -367,13 +333,6 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
                 className="w-10 h-10 mr-4"
               />
             </div>
-            {/* <div className="flex items-center p-4 rounded-2xl bg-[#FF99331A] mb-5">
-              <div>
-                <p className="text-lg font-poppins">Working Days</p>
-                <p className="text-2xl font-bold text-[#FF9933]">25/273</p>
-              </div>
-              <img src={EventCal} alt="User Graduate" className="w-10 h-10 ml-14" />
-            </div> */}
           </div>
         </div>
 
@@ -383,7 +342,6 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
               <h2 className="text-2xl font-semibold pl-5">
                 {t("dashboard.attendance")}
               </h2>
-
               <div className="flex justify-evenly bg-[#f2f2f4] w-56 p-2 rounded-full">
                 <button
                   className={`px-5 py-1 rounded-full font-poppins-regular ${
@@ -469,8 +427,8 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
             </div>
           </div>
 
+          {/* Calender */}
           <div className="flex">
-            {/* Calender */}
             <div className="bg-white p-6 w-8/12 rounded-lg shadow-lg mr-4">
               <h2 className="text-xl font-semibold">
                 {t("dashboard.calendar")}
@@ -498,7 +456,6 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
                     alt="Event Background"
                     className="absolute inset-0 w-auto h-auto object-cover"
                   />
-                  {/* Your other content here */}
                 </div>
               ) : (
                 <div>
@@ -522,7 +479,7 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
                           <div className="flex py-1 justify-between items-center">
                             <div
                               className={`${
-                                false ? "bg-[#102945] text-white" : "" // Simulate `isDarkMode` being false
+                                false ? "bg-[#102945] text-white" : ""
                               } py-0 px-2 ml-4 text-base font-semibold`}
                             >
                               {itm.title}
@@ -531,7 +488,7 @@ const Dashboard = ({ activities = [], role, deleteEvent }) => {
                           <div className="flex pb-3 justify-between items-center">
                             <div
                               className={`${
-                                false ? "bg-[#102945] text-white" : "" // Simulate `isDarkMode` being false
+                                false ? "bg-[#102945] text-white" : ""
                               } py-0 px-2 ml-4 text-xs font-poppins-regular`}
                             >
                               {itm.description}

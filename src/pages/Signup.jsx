@@ -7,11 +7,15 @@ import show from "../assets/images/show.png";
 import { useState } from "react";
 import * as Yup from "yup";
 import EndPoints from "../services/EndPoints";
+import { useTranslation } from "react-i18next";
+import REGEX from "../utils/regix";
+import Background from "../assets/images/Background.png";
 
 function Signup() {
   const [ishide, setIsHide] = useState(true);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [t] = useTranslation();
 
   const formik = useFormik({
     initialValues: {
@@ -24,44 +28,47 @@ function Signup() {
       password: "",
     },
     validationSchema: Yup.object({
-      schoolName: Yup.string().required("School name is required"),
-      affiliationNo: Yup.string().required("Affiliation number is required"),
-      address: Yup.string().required("Address is required"),
+      schoolName: Yup.string().required(t("validationError.schoolName")),
+      affiliationNo: Yup.string().required(
+        t("validationError.affiliationNumber")
+      ),
+      address: Yup.string().required(t("validationError.address")),
       email: Yup.string()
-        .email("Invalid email address")
-        .required("Email is required"),
+        .email(t("validationError.emailAddress"))
+        .required(t("validationError.email")),
       phone: Yup.string()
-        .required("Phone number is required")
-        .matches(/^\d{10}$/, "Phone number should be 10 digits")
+        .required(t("validationError.phone"))
+        .matches(REGEX.PHONE, t("validationError.phoneNumber"))
         .test(
           "starts-with-1-to-5",
-          "Phone number must start with a digit between 1 to 5",
+          t("validationError.phoneStart"),
           (value) => {
-            return value && /^[1-5]/.test(value);
+            return value && REGEX.PHONE_TEST.test(value);
           }
         ),
-      username: Yup.string().required("user name is required"),
+      username: Yup.string().required(t("validationError.username")),
       password: Yup.string()
-        .min(8, "Password must be at least 8 characters")
-        .required("Password is required"),
+        .min(8, t("validationError.passwordLength"))
+        .required(t("validationError.password")),
     }),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
+        if (!formik.isValid || !formik.dirty) {
+          setSubmitting(false);
+          return;
+        }
         setLoading(true);
         const response = await axiosClient.post(
           EndPoints.ADMIN.ADMIN_REGISTER,
           values
         );
-        // console.log(response);
-
         if (response?.statusCode === 200 || response?.statusCode === 201) {
-          toast.success(<b>Register Successfully</b>);
+          toast.success(t("message.admin.registerSuccess"));
           resetForm();
           navigate("/login");
         }
-      } catch (error) {
-        // console.error("Error:", error);
-        toast.error(<b>{error}</b>);
+      } catch (e) {
+        toast.error(e);
       } finally {
         setSubmitting(false);
         setLoading(false);
@@ -81,21 +88,24 @@ function Signup() {
       <div className="container mx-auto">
         <div className="flex flex-col lg:flex-row w-10/12 lg:w-9/12 bg-white rounded-xl mx-auto shadow-lg overflow-hidden">
           <div
-            className="w-full  lg:w-2/5 flex flex-col items-center  justify-center p-4 bg-no-repeat bg-cover bg-center"
+            className="w-full lg:w-2/5 flex flex-col items-center justify-center p-4 bg-no-repeat bg-cover bg-center"
             style={{
-              backgroundImage:
-                "url('./src/assets/images/Register-Background.png')",
+              backgroundImage: `url(${Background})`,
             }}
           >
-            <h1 className="text-white text-3xl mb-3 text-center">Welcome</h1>
+            <h1 className="text-white text-3xl mb-3 text-center">
+              {t("register.welcome")}
+            </h1>
             <div className=" w-full">
               <p className="text-white text-center">
-                Hello! welcome to School App. one step solution for schools.
+                {t("register.description")}
               </p>
             </div>
           </div>
           <div className="w-full lg:w-3/5 py-16 px-12">
-            <h2 className="text-3xl mb-4 text-center">Admin Register</h2>
+            <h2 className="text-3xl mb-4 text-center">
+              {t("register.adminRegister")}
+            </h2>
             <form onSubmit={formik.handleSubmit}>
               <div className="mt-5">
                 <input
@@ -238,14 +248,18 @@ function Signup() {
                   className="w-full bg-blue-900 py-3 text-center text-white"
                   disabled={formik.isSubmitting}
                 >
-                  {formik.isSubmitting ? "Submitting..." : "Register Now"}
+                  {formik.isSubmitting
+                    ? t("register.submitting")
+                    : t("register.registerNow")}
                 </button>
               </div>
             </form>
             <div className="text-right mt-2 text-sm">
-              Already have account?{" "}
+              {t("register.haveAccount")}
               <Link to="/login">
-                <span className="text-blue-950 font-semibold">login</span>
+                <span className="text-blue-950 font-semibold">
+                  {t("login.login")}
+                </span>
               </Link>
             </div>
           </div>

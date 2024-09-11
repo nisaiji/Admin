@@ -21,7 +21,7 @@ i18n
       order: ['cookie', 'localStorage', 'navigator', 'querystring', 'htmlTag', 'path', 'subdomain'],
       caches: ['cookie'],
     },
-    debug: true,
+    debug: false,
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
     },
