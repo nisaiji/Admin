@@ -13,40 +13,28 @@ import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
+import REGEX from "../../utils/regix";
 
 const capitalize = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
-
-const validationSchema = Yup.object({
-  firstname: Yup.string().required("First name is required"),
-  lastname: Yup.string().required("Last name is required"),
-  // email: Yup.string()
-  //   .email("Invalid email address")
-  //   .required("Email is required"),
-  // address: Yup.string().required("Address is required"),
-  // university: Yup.string().required("University is required"),
-  // gender: Yup.string().required("Gender is required"),
-  // bloodGroup: Yup.string().required("Blood group is required"),
-  // dob: Yup.date().required("Date of birth is required"),
-  phone: Yup.string()
-    .required("Phone number is required")
-    .matches(/^\d{10}$/, "Phone number should be 10 digits")
-    .test(
-      "starts-with-1-to-5",
-      "Phone number must start with a digit between 1 to 5",
-      (value) => {
-        return value && /^[1-5]/.test(value);
-      }
-    ),
-  // degree: Yup.string().required("Degree is required"),
-});
 
 export default function TeacherUpdate() {
   const navigate = useNavigate();
   const teacher = useLocation().state;
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+
+  const validationSchema = Yup.object({
+    firstname: Yup.string().required(t("validationError.firstName")),
+    lastname: Yup.string().required(t("validationError.lastName")),
+    phone: Yup.string()
+      .required(t("validationError.phone"))
+      .matches(REGEX.PHONE, t("validationError.phoneNumber"))
+      .test("starts-with-1-to-5", t("validationError.phoneStart"), (value) => {
+        return value && REGEX.PHONE_TEST.test(value);
+      }),
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -63,7 +51,6 @@ export default function TeacherUpdate() {
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      // console.log(values);
       try {
         setLoading(true);
         const teacherData = {
@@ -81,18 +68,17 @@ export default function TeacherUpdate() {
         const filteredTeacherData = Object.fromEntries(
           Object.entries(teacherData).filter(([_, value]) => value !== "")
         );
-        console.log(filteredTeacherData);
 
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
           filteredTeacherData
         );
         if (response?.statusCode === 200) {
-          toast.success("Teacher updated successfully!");
+          toast.success(t("messages.teacher.updateSuccess"));
           navigate(-1);
         }
-      } catch (error) {
-        toast.error(<b>{error}</b>);
+      } catch (e) {
+        toast.error(e);
       } finally {
         setLoading(false);
       }
@@ -109,10 +95,10 @@ export default function TeacherUpdate() {
       <Toaster position="top-center" reverseOrder={false} />
       <div className="bg-white rounded-2xl w-full mx-10 flex flex-col items-start py-3 px-10 box-border">
         <h1 className="text-4xl font-poppins-bold mt-6">
-          {t("TeacherDetails")}
+          {t("titles.teacherDetails")}
         </h1>
         <h2 className="text-2xl font-poppins-regular mt-6 text-left">
-          {t("TeacherPersonalDetails")}
+          {t("titles.teacherPersonalDetails")}
         </h2>
         <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
           <form onSubmit={formik.handleSubmit} className="w-full">
@@ -120,65 +106,69 @@ export default function TeacherUpdate() {
               {[
                 {
                   name: "firstname",
-                  label: "First Name",
-                  placeholder: "Enter First Name",
+                  label: t("labels.firstName"),
+                  placeholder: t("placeholders.firstName"),
                   type: "text",
                 },
                 {
                   name: "gender",
-                  label: "Gender",
+                  label: t("labels.gender"),
                   type: "select",
-                  options: ["Male", "Female", "Other"],
+                  options: [
+                    t("options.Male"),
+                    t("options.Female"),
+                    t("options.other"),
+                  ],
                 },
                 {
                   name: "lastname",
-                  label: "Last Name",
-                  placeholder: "Enter Last Name",
+                  label: t("labels.lastName"),
+                  placeholder: t("placeholders.lastName"),
                   type: "text",
                 },
                 {
                   name: "bloodGroup",
-                  label: "Blood Group",
+                  label: t("labels.bloodGroup"),
                   type: "select",
                   options: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"],
                 },
                 {
                   name: "email",
-                  label: "Email Address",
-                  placeholder: "Enter Email",
+                  label: t("labels.email"),
+                  placeholder: t("placeholders.emailAddress"),
                   type: "email",
                   icon: { src: mail, width: 40, height: 40, top: 0 },
                 },
                 {
                   name: "dob",
-                  label: "Date of Birth",
-                  placeholder: "DD/MM/YYYY",
+                  label: t("labels.dob"),
+                  placeholder: t("placeholders.date"),
                   type: "date",
                 },
                 {
                   name: "address",
-                  label: "Address",
-                  placeholder: "Enter Address",
+                  label: t("labels.address"),
+                  placeholder: t("placeholders.address"),
                   type: "text",
                   icon: { src: location, width: 30, height: 30, top: 5 },
                 },
                 {
                   name: "phone",
-                  label: "Phone Number",
-                  placeholder: "Enter Phone Number",
+                  label: t("labels.phoneNumber"),
+                  placeholder: t("placeholders.phoneNumber"),
                   type: "text",
                   icon: { src: India, width: 35, height: 25, top: 7 },
                 },
                 {
                   name: "university",
-                  label: "University",
-                  placeholder: "Enter University",
+                  label: t("labels.university"),
+                  placeholder: t("placeholders.university"),
                   type: "text",
                 },
                 {
                   name: "degree",
-                  label: "Degree",
-                  placeholder: "Enter Degree",
+                  label: t("labels.degree"),
+                  placeholder: t("placeholders.degree"),
                   type: "text",
                 },
               ].map((field) => (
@@ -207,7 +197,7 @@ export default function TeacherUpdate() {
                           )
                         }
                         dateFormat="MM/dd/yyyy"
-                        placeholderText="DD/MM/YYYY"
+                        placeholderText={t("placeholders.date")}
                         className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
                         wrapperClassName="w-full"
                       />
@@ -249,13 +239,13 @@ export default function TeacherUpdate() {
                 onClick={() => navigate(-1)}
                 className="border-2 border-[#a3a2c7] text-[#464590] py-2 px-4 rounded w-36"
               >
-                {t("cancel")}
+                {t("buttons.cancel")}
               </button>
               <button
                 type="submit"
                 className="bg-[#464590] text-white py-2 px-4 rounded w-36"
               >
-                {t("Save")}
+                {t("buttons.save")}
               </button>
             </div>
           </form>

@@ -1,54 +1,15 @@
-// CalendarComponent.js
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import "tailwindcss/tailwind.css";
 import toast, { Toaster } from "react-hot-toast";
-import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
+import moment from "moment";
+import CONSTANT from "../../utils/constants";
 
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-const Calendar = ({
-  month,
-  year,
-  handlePrevMonth,
-  handleNextMonth,
-  handleMonthYearChange,
-}) => {
-  // const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-  const isDarkMode = false
-
-  const [inputMonth, setInputMonth] = useState(month + 1);
-  const [inputYear, setInputYear] = useState(year);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "month") {
-      setInputMonth(value);
-    } else if (name === "year") {
-      setInputYear(value);
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleMonthYearChange(parseInt(inputMonth) - 1, parseInt(inputYear));
-  };
+const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
+  const isDarkMode = false;
 
   return (
     <div
@@ -65,7 +26,7 @@ const Calendar = ({
           onClick={handlePrevMonth}
         />
         <div className={`${isDarkMode ? "text-white" : ""} date`}>
-          {`${months[month]} ${year}`}
+          {moment({ year, month }).format("MMMM YYYY")}
         </div>
         <FontAwesomeIcon
           icon={faAngleRight}
@@ -80,7 +41,7 @@ const Calendar = ({
           isDarkMode ? "text-white" : "text-[#1F317D]"
         } weekdays grid grid-cols-7 text-md font-medium capitalize pt-4`}
       >
-        {["Sun", "Mon", "Tue", "Wed", "Thurs", "Fri", "Sat"].map((day) => (
+        {CONSTANT.WEEKDAYS.map((day) => (
           <div key={day} className="text-center">
             {day}
           </div>
@@ -90,20 +51,8 @@ const Calendar = ({
   );
 };
 
-const Day = ({
-  day,
-  isActive,
-  hasEvent,
-  isHoliday,
-  onClick,
-  isSunday,
-  isToday,
-}) => {
-  // const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-  const isDarkMode = false
-
+const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
   const renderCss = () => {
-    // console.log(isHoliday,hasEvent);
     if (isHoliday && hasEvent) {
       return `
         text-white
@@ -138,7 +87,7 @@ const DaysGrid = ({ days }) => {
   return <div className="days grid grid-cols-7 gap-2 p-2 pl-6 ">{days}</div>;
 };
 
-const CalendarComponent = ({ events, updateDate }) => {
+const CalendarComponent = ({ updateDate }) => {
   const [today, setToday] = useState(new Date());
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
@@ -151,27 +100,28 @@ const CalendarComponent = ({ events, updateDate }) => {
 
   const fetchEvents = async () => {
     try {
-      // const startDate = new Date(
-      //   today.getFullYear(),
-      //   today.getMonth(),
-      //   1
-      // ).getTime();
-      // const endDate = new Date(
-      //   today.getFullYear(),
-      //   today.getMonth() + 1,
-      //   0
-      // ).getTime();
-      const response = await axiosClient.post(EndPoints.ADMIN.DASHBOARD_CALENDER_EVENTS,{month,year});
-      // Sort events by date in ascending order
-      // console.log(response);
-      if (response?.statusCode === 200) {
-      const sortedEvents = response.result.sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
+      const startTime = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+      ).getTime();
+      const endTime = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0
+      ).getTime();
+      const response = await axiosClient.post(
+        EndPoints.COMMON.GET_EVENTS,
+        { startTime, endTime }
       );
-      setEventsArr(sortedEvents);
-    }
-    } catch (error) {
-      // console.error("Error fetching events:", error);
+      if (response?.statusCode === 200) {
+        const sortedEvents = response.result.sort(
+          (a, b) => new Date(a.date) - new Date(b.date)
+        );
+        setEventsArr(sortedEvents);
+      }
+    } catch (e) {
+      toast.error(e);
     }
   };
 

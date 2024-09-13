@@ -9,9 +9,6 @@ import ellipse from "../../assets/images/ellipse.png";
 import searchp from "../../assets/images/searchp.png";
 import clear from "../../assets/images/clear.png";
 import {
-  Modal,
-  Box,
-  Button,
   FormControl,
   InputLabel,
   Select,
@@ -27,21 +24,19 @@ import { useNavigate } from "react-router-dom";
 import DeletePopup from "../DeleteMessagePopup";
 import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
+import CONSTANT from "../../utils/constants";
 
 export default function Studentlist() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
-  const [selectedBloodGroup, setSelectedBloodGroup] = useState(null);
   const [pageNo, setPageNo] = useState(1);
   const [openInfoModal, setOpenInfoModal] = useState(false);
   const [totalStudentCount, setTotalStudentCount] = useState(5);
   const [limit, setLimit] = useState(5);
   const [studentList, setStudentList] = useState([]);
   const [name, setName] = useState("");
-  const [anchorEl, setAnchorEl] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState([]);
-  const [openModal, setOpenModal] = useState(false);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
   const [idForDelete, setIdForDelete] = useState();
@@ -53,7 +48,6 @@ export default function Studentlist() {
   const [searchSection, setSearchSection] = useState(
     () => localStorage.getItem("searchSection") || ""
   );
-  const [searchStudentName, setSearchStudentName] = useState("");
   const [loading, setLoading] = useState(false);
 
   const classRef = useRef(searchClass);
@@ -74,8 +68,6 @@ export default function Studentlist() {
   useEffect(() => {
     localStorage.setItem("searchClass", searchClass);
     localStorage.setItem("searchSection", searchSection);
-    // console.log("c", searchClass);
-    // console.log("s", searchSection);
     classRef.current = searchClass;
     sectionRef.current = searchSection;
     getStudentsListSectionWise();
@@ -88,16 +80,14 @@ export default function Studentlist() {
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}/${pageNo}`);
-      // console.log(response);
-      
       if (response?.statusCode === 200) {
         const { totalCount, studentList, limit } = response?.result;
         setTotalStudentCount(totalCount);
         setLimit(limit);
         setStudentList(studentList);
       }
-    } catch (error) {
-      // console.log(error);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -108,16 +98,18 @@ export default function Studentlist() {
     if (isTeacher) url = EndPoints.TEACHER.STUDENT_LIST_SEARCH_WISE;
     else url = EndPoints.ADMIN.STUDENT_LIST_SEARCH_WISE;
     try {
-      setLoading(true);
-      const response = await axiosClient.get(`${url}/${name}`);
-      if (response?.statusCode === 200) {
-        const { totalCount, result, limit } = response;
-        setTotalStudentCount(totalCount);
-        setLimit(limit);
-        setStudentList(result);
+      if (name) {
+        setLoading(true);
+        const response = await axiosClient.get(`${url}/${name}`);
+        if (response?.statusCode === 200) {
+          const { totalCount, result, limit } = response;
+          setTotalStudentCount(totalCount);
+          setLimit(limit);
+          setStudentList(result);
+        }
       }
-    } catch (error) {
-      // console.log(error);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -127,14 +119,11 @@ export default function Studentlist() {
     try {
       if (searchSection !== "") {
         const sectionId = searchSection;
-        // console.log('sectionid',sectionId);
         let url;
         if (isTeacher) url = EndPoints.TEACHER.STUDENT_LIST_SECTION_WISE;
         else url = EndPoints.ADMIN.STUDENT_LIST_SECTION_WISE;
         setLoading(true);
         const studentList = await axiosClient.get(`${url}/${sectionId}`);
-        console.log(studentList);
-        
         if (studentList?.statusCode === 200) {
           setTotalStudentCount(studentList?.result?.totalCount);
           setLimit(studentList?.result?.limit);
@@ -142,7 +131,7 @@ export default function Studentlist() {
         }
       }
     } catch (e) {
-      // console.error("error in fetching student", e);
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -152,8 +141,8 @@ export default function Studentlist() {
     try {
       const classes = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
       setClassList(classes.result);
-    } catch (error) {
-      // console.log(error);
+    } catch (e) {
+      toast.error(e);
     }
   };
 
@@ -162,10 +151,6 @@ export default function Studentlist() {
   };
 
   const handleSearch = () => {
-    // const nameLower = name.toLowerCase();
-    // const searchedStudent = studentList.filter(
-    //   (itm) => itm.firstname.toLowerCase() === nameLower
-    // );
     getStudentSearchWise();
   };
 
@@ -192,14 +177,12 @@ export default function Studentlist() {
       if (isTeacher) url = EndPoints.TEACHER.DELETE_STUDENT;
       else url = EndPoints.ADMIN.DELETE_STUDENT;
       let response = await axiosClient.delete(`${url}/${idForDelete}`);
-      // console.log("r", response);
       if (response?.statusCode === 200) {
         getStudent();
-        toast.success(t("studentList.toasterMessages.deleteSuccess"));
+        toast.success(t("messages.student.deleteSuccess"));
       }
     } catch (error) {
-      // console.log(error);
-      toast.error(t("studentList.toasterMessages.deleteFailure"));
+      toast.error(e);
     }
     setIdForDelete("");
     setDeleteConfirmModal(false);
@@ -229,7 +212,7 @@ export default function Studentlist() {
         } flex flex-col self-center w-full max-w-[95%] my-10 rounded  max-md:max-w-full min-h-screen`}
       >
         <h1 className="text-4xl px-14 py-5 font-poppins-bold ">
-          {t("dashboard.students")}
+          {t("titles.students")}
         </h1>
         <div className="flex flex-col self-center w-full font-medium max-w-full max-md:max-w-full">
           {/* Search Bar*/}
@@ -242,17 +225,15 @@ export default function Studentlist() {
                   <div className="flex justify-between w-full">
                     <FormControl
                       size="medium"
-                      className={`${isDarkMode ? "bg-blue-950" : ""}`}
-                      style={{ width: "200px", marginRight: "10px" }}
+                      className={`${
+                        isDarkMode ? "bg-blue-950" : ""
+                      } w-[200px] mr-[10px]`}
                     >
                       <InputLabel
                         id="demo-simple-select-label"
-                        style={{
-                          zIndex: 1,
-                          backgroundColor: isDarkMode ? "#1E3A8A" : "white",
-                        }}
+                        style={{ zIndex: 1, backgroundColor: "white" }}
                       >
-                        {t("dashboard.class")}
+                        {t("titles.class")}
                       </InputLabel>
                       <Select
                         labelId="demo-simple-select-label"
@@ -265,7 +246,6 @@ export default function Studentlist() {
                           );
                           setSectionList(classData[0]["section"]);
                         }}
-                        style={{ paddingTop: "0px" }}
                       >
                         {classList
                           .sort((a, b) => {
@@ -289,19 +269,15 @@ export default function Studentlist() {
 
                     <FormControl
                       size="medium"
-                      className={`${isDarkMode ? "bg-blue-950" : ""} mx-2`}
-                      style={{ width: "200px", marginRight: "10px" }}
+                      className={`${
+                        isDarkMode ? "bg-blue-950" : ""
+                      } mx-2 w-[200px] mr-[10px]`}
                     >
                       <InputLabel
                         id="demo-simple-select-label"
-                        style={{
-                          zIndex: 1,
-                          backgroundColor: isDarkMode ? "#1E3A8A" : "white",
-                          padding: "0 0px",
-                          marginRight: "10px",
-                        }}
+                        className="bg-white mr-[10px]"
                       >
-                        {t("dashboard.section")}
+                        {t("titles.section")}
                       </InputLabel>
                       <Select
                         labelId="demo-simple-select-label"
@@ -310,7 +286,6 @@ export default function Studentlist() {
                         onChange={(e) => {
                           setSearchSection(e.target.value);
                         }}
-                        style={{ paddingTop: "0px" }}
                       >
                         {sectionList.map((itm) => {
                           return (
@@ -321,45 +296,9 @@ export default function Studentlist() {
                         })}
                       </Select>
                     </FormControl>
-
-                    {/* <FormControl
-                      size="medium"
-                      className={`${
-                        isDarkMode ? "bg-blue-950" : ""
-                      } mx-2 shadow-sm`}
-                      style={{
-                        width: "200px",
-                        marginRight: "10px",
-                        border: "none",
-                      }}
-                    >
-                      <InputLabel
-                        id="demo-simple-select-label"
-                        style={{ marginRight: "100px" }}
-                      >
-                        B. group
-                      </InputLabel>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={searchSection}
-                        label="B. group"
-                        onChange={(e) => {
-                          setSearchSection(e.target.value);
-                        }}
-                        style={{ boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}
-                      >
-                        {bloodGroupList.map((group) => (
-                          <MenuItem key={group} value={group}>
-                            {group}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl> */}
-
                     <input
                       type="text"
-                      placeholder={t("studentList.search.placeholder")}
+                      placeholder={t("placeholders.search")}
                       className={`${
                         isDarkMode ? " bg-[#0D192F] text-white" : ""
                       } px-3 rounded-lg focus:outline-none w-full shadow-sm border border-t-gray`}
@@ -397,54 +336,47 @@ export default function Studentlist() {
                 >
                   <thead>
                     <tr className="text-base  text-[#686868BF]">
-                      {/* <th
-                        className={`${
-                          isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2`}
-                      >
-                        {t("studentDetails.fields.rollNumber")}
-                      </th> */}
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
                         } text-center px-4 py-2 max-sm:hidden`}
                       >
-                        {t("studentDetails.fields.firstName")}
+                        {t("labels.firstName")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
                         } text-center px-4 py-2 max-xl:hidden`}
                       >
-                        {t("studentDetails.fields.gender")}
+                        {t("labels.gender")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
                         } text-center px-4 py-2 max-md:hidden`}
                       >
-                        {t("studentDetails.fields.Phone")}
+                        {t("labels.phoneNumber")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
                         } text-center px-4 py-2 max-lg:hidden`}
                       >
-                        {t("studentDetails.fields.email")}
+                        {t("labels.email")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
                         } text-center px-4 py-2 max-lg:hidden`}
                       >
-                        {t("studentDetails.fields.bloodGroup")}
+                        {t("labels.bloodGroup")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
                         } text-center px-4 py-2`}
                       >
-                        {t("studentDetails.fields.Action")}
+                        {t("labels.action")}
                       </th>
                     </tr>
                   </thead>
@@ -460,13 +392,6 @@ export default function Studentlist() {
                         } border-t `}
                         key={i}
                       >
-                        {/* <td
-                          className={`${
-                            isDarkMode ? "text-white" : "text-[#303972]"
-                          } p-4 text-center`}
-                        >
-                          #{student?.rollNumber}
-                        </td> */}
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
@@ -493,14 +418,14 @@ export default function Studentlist() {
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
                           } p-4 text-center max-lg:hidden`}
                         >
-                          {student?.parent?.email || "N/A"}
+                          {student?.parent?.email || CONSTANT.NA}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
                           } p-4 text-center max-lg:hidden`}
                         >
-                          {student?.parent?.bloodGroup || "N/A"}
+                          {student?.parent?.bloodGroup || CONSTANT.NA}
                         </td>
                         {/* Action Icons */}
                         <td
@@ -557,7 +482,7 @@ export default function Studentlist() {
                     ))}
                   </tbody>
                 </table>
-                {searchSection === "" && (
+                {searchSection === "" && !name && (
                   <div className="flex gap-5 justify-between items-start my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
                     <div className="mt-4 text-blue-950">
                       <span
@@ -565,7 +490,7 @@ export default function Studentlist() {
                           isDarkMode ? "text-white" : "text-[#87A0C4]"
                         } leading-5 `}
                       >
-                        {t("studentList.showing")}
+                        {t("titles.showing")}
                       </span>{" "}
                       <span
                         className={`${
@@ -581,7 +506,7 @@ export default function Studentlist() {
                         } leading-5 `}
                       >
                         {" "}
-                        {t("studentList.from")}
+                        {t("titles.from")}
                       </span>{" "}
                       <span
                         className={`${
@@ -596,7 +521,7 @@ export default function Studentlist() {
                         } leading-5 `}
                       >
                         {" "}
-                        {t("studentList.data")}
+                        {t("titles.data")}
                       </span>
                     </div>
                     <Stack spacing={2}>
@@ -638,21 +563,20 @@ export default function Studentlist() {
                     isDarkMode ? "text-white" : "text-blue-950"
                   } text-2xl font-bold `}
                 >
-                  {t("studentList.message")}
+                  {t("titles.message")}
                 </p>
                 <p
                   className={`${
                     isDarkMode ? "text-white" : "text-blue-950"
                   }  text-sm`}
                 >
-                  {t("studentList.subMessage")}
+                  {t("titles.subMessage")}
                 </p>
               </div>
             </>
           )}
         </div>
 
-        {/* Info Popup */}
         {openInfoModal && (
           <StudentInfo
             modelOpen={setOpenInfoModal}

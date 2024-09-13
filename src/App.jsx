@@ -15,13 +15,11 @@ import { useSelector } from "react-redux";
 import TeacherUpdate from "./components/teacherSetup/TeacherUpdate";
 import StudentUpdate from "./components/studentSetup/StudentUpdate";
 import AdminProfile from "./components/admin/AdminProfile";
-import SchoolDetailSignup from "./pages/SchoolDetailSignup";
 import i18n from "./assets/locale/i18n";
 import { I18nextProvider } from "react-i18next";
 
 function App() {
   const role = useSelector((state) => state.appAuth.role);
-  // console.log('role',role);
 
   return (
     <>
@@ -31,8 +29,6 @@ function App() {
             <Route path="/" element={<Home />}>
               {role === "teacher" ? (
                 <>
-                  {/* <Route path="" element={<DashBoard />} /> */}
-                  {/* <Route path="" element={<StudentSection />} /> */}
                   <Route path="student-section" element={<StudentSection />} />
                   <Route path="event" element={<Event />} />
                 </>
@@ -55,7 +51,6 @@ function App() {
           </Route>
           <Route element={<NotRequireUser />}>
             <Route path="/login" element={<Login />} />
-            {/* <Route path="/signup" element={<SchoolDetailSignup />} /> */}
             <Route path="/signup" element={<Signup />} />
           </Route>
         </Routes>

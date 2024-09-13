@@ -1,22 +1,32 @@
 import React from "react";
 import teacher from "../../assets/images/teacher.png";
 import cross from "../../assets/images/cross.png";
+import CONSTANT from "../../utils/constants";
+import { useTranslation } from "react-i18next";
 
 export default function TeacherInfo({ currTeacher, modelOpen }) {
-  console.log(currTeacher);
+  const { t } = useTranslation();
   const personalDetails = [
-    ["Full Name", `${currTeacher.firstname} ${currTeacher.lastname}`],
-    ["Class and Section", `${currTeacher.section.classId.name || ""} ${currTeacher.section.name||"NA"}`],
-    ["Gender", currTeacher.gender || "NA"],
-    ["Blood Group", currTeacher.bloodGroup || "NA"],
-    ["Date of birth", currTeacher.dob || "NA"],
-    ["Email Address", currTeacher.email || "NA"],
-    ["Phone Number", currTeacher.phone || "NA"],
+    [
+      t("labels.fullName"),
+      `${currTeacher.firstname} ${currTeacher.lastname}`,
+    ],
+    [
+      t("labels.university"),
+      `${currTeacher.section.classId.name || ""} ${
+        currTeacher.section.name || CONSTANT.NA
+      }`,
+    ],
+    [t("labels.gender"), currTeacher.gender || CONSTANT.NA],
+    [t("labels.bloodGroup"), currTeacher.bloodGroup || CONSTANT.NA],
+    [t("labels.dob"), currTeacher.dob || CONSTANT.NA],
+    [t("labels.email"), currTeacher.email || CONSTANT.NA],
+    [t("labels.phoneNumber"), currTeacher.phone || CONSTANT.NA],
   ];
 
   const educationDetails = [
-    ["University", currTeacher.university || "NA"],
-    ["Degree", currTeacher.degree || "NA"],
+    [t("labels.university"), currTeacher.university || CONSTANT.NA],
+    [t("labels.degree"), currTeacher.degree || CONSTANT.NA],
   ];
 
   return (
@@ -31,8 +41,12 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
           </div>
           <div className="flex flex-col md:flex-row overflow-y-auto">
             <div className="w-full md:w-2/3 p-6">
-              <h2 className="text-2xl font-bold mb-4">Teacher Details</h2>
-              <h3 className="pb-2 font-bold">Teacher Personal Details</h3>
+              <h2 className="text-2xl font-bold mb-4">
+                {t("titles.teacherDetails")}
+              </h2>
+              <h3 className="pb-2 font-bold">
+                {t("titles.teacherPersonalDetails")}
+              </h3>
               <div className="pb-6 font-medium">
                 {personalDetails.map(([label, value], index) => (
                   <div className="flex pb-2" key={index}>
@@ -42,7 +56,9 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
                   </div>
                 ))}
               </div>
-              <h3 className="pb-2 font-bold">Education Details</h3>
+              <h3 className="pb-2 font-bold">
+                {t("titles.educationDetails")}
+              </h3>
               <div className="font-medium">
                 {educationDetails.map(([label, value], index) => (
                   <div className="flex pb-2" key={index}>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 export default function ConformationPopup({ isVisible, onClose, submit }) {
@@ -11,7 +11,7 @@ export default function ConformationPopup({ isVisible, onClose, submit }) {
         <div className="flex">
           <div className="ml-3">
             <div className="flex justify-between">
-              <p className="font-semibold text-black">same entry</p>
+              <p className="font-semibold text-black">{t("sameEntry")}</p>
             </div>
           </div>
         </div>
@@ -20,13 +20,13 @@ export default function ConformationPopup({ isVisible, onClose, submit }) {
             className="border border-[#d9d9d9] bg-white shadow-sm rounded-lg px-4 py-2 mr-2 text-base font-poppins-bold"
             onClick={onClose}
           >
-            {t("cancel")}
+            {t("buttons.cancel")}
           </button>
           <button
             className="border border-[#d91111] bg-[#d91111] text-white shadow-sm rounded-lg px-4 py-2 text-base font-poppins-regular"
             onClick={submit}
           >
-            submit
+            {t("buttons.submit")}
           </button>
         </div>
       </div>

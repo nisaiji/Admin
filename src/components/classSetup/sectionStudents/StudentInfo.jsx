@@ -3,18 +3,12 @@ import student from "../../../assets/images/student.png";
 import cross from "../../../assets/images/cross.png";
 import html2canvas from "html2canvas";
 import { useReactToPrint } from "react-to-print";
-import { useTranslation } from "react-i18next"; // Import useTranslation
+import { useTranslation } from "react-i18next";
+import CONSTANT from "../../../utils/constants";
 
 export default function StudentInfo({ currStudent, modelOpen }) {
-  const { t } = useTranslation(); // Initialize useTranslation hook
-
+  const { t } = useTranslation();
   const captureRef = useRef(null);
-  const componentRef = useRef();
-
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle: t("studentDetails.title"), // Use translation key
-  });
 
   const handleScreenshot = () => {
     const hiddenContainer = document.createElement("div");
@@ -25,7 +19,6 @@ export default function StudentInfo({ currStudent, modelOpen }) {
 
     const clonedNode = captureRef.current.cloneNode(true);
 
-    // Create a container for the image at the top right
     const imageContainer = document.createElement("div");
     imageContainer.style.position = "absolute";
     imageContainer.style.top = "100px";
@@ -43,7 +36,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     imageElement.style.objectFit = "cover";
 
     imageContainer.appendChild(imageElement);
-    clonedNode.style.position = "relative"; // Ensure clonedNode is relative for the absolute positioning of the image container
+    clonedNode.style.position = "relative";
     clonedNode.appendChild(imageContainer);
     hiddenContainer.appendChild(clonedNode);
     document.body.appendChild(hiddenContainer);
@@ -64,41 +57,36 @@ export default function StudentInfo({ currStudent, modelOpen }) {
       link.download = "student_info.png";
       link.click();
 
-      // Clean up the hidden container
       document.body.removeChild(hiddenContainer);
     });
   };
 
   const personalDetails = [
-    // [t("studentDetails.fields.rollNumber"), currStudent.rollNumber || "NA"],
     [
-      t("studentDetails.fields.fullName"),
-      `${currStudent.firstname} ${currStudent.lastname}` || "NA",
+      t("labels.fullName"),
+      `${currStudent.firstname} ${currStudent.lastname}` || CONSTANT.NA,
     ],
     [
-      t("studentDetails.fields.classAndSection"),
-      `${currStudent.classId.name} ${currStudent.section.name}` || "NA",
+      t("labels.classAndSection"),
+      `${currStudent.classId.name} ${currStudent.section.name}` || CONSTANT.NA,
     ],
-    [t("studentDetails.fields.gender"), currStudent.gender || "NA"],
-    [t("studentDetails.fields.bloodGroup"), currStudent.bloodGroup || "NA"],
-    [t("studentDetails.fields.dateOfBirth"), currStudent.dob || "NA"],
+    [t("labels.gender"), currStudent.gender || CONSTANT.NA],
+    [t("labels.bloodGroup"), currStudent.bloodGroup || CONSTANT.NA],
+    [t("labels.dob"), currStudent.dob || CONSTANT.NA],
   ];
 
   const guardianDetails = [
-    [t("studentDetails.fields.fullName"), currStudent.parent.fullname || "NA"],
-    [t("studentDetails.fields.gender"), currStudent.parent.gender || "NA"],
-    [t("studentDetails.fields.age"), currStudent.parent.age || "NA"],
-    [t("studentDetails.fields.email"), "NA"],
-    [t("studentDetails.fields.phoneNumber"), currStudent.parent.phone || "NA"],
+    [t("labels.fullName"), currStudent.parent.fullname || CONSTANT.NA],
+    [t("labels.gender"), currStudent.parent.gender || CONSTANT.NA],
+    [t("labels.age"), currStudent.parent.age || CONSTANT.NA],
+    [t("labels.email"), CONSTANT.NA],
+    [t("labels.phoneNumber"), currStudent.parent.phone || CONSTANT.NA],
     [
-      t("studentDetails.fields.qualification"),
-      currStudent.parent.qualification || "NA",
+      t("labels.qualification"),
+      currStudent.parent.qualification || CONSTANT.NA,
     ],
-    [
-      t("studentDetails.fields.occupation"),
-      currStudent.parent.occupation || "NA",
-    ],
-    [t("studentDetails.fields.address"), currStudent.parent.address || "NA"],
+    [t("labels.occupation"), currStudent.parent.occupation || CONSTANT.NA],
+    [t("labels.address"), currStudent.parent.address || CONSTANT.NA],
   ];
 
   return (
@@ -109,7 +97,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
             className="absolute top-3 right-5 cursor-pointer"
             onClick={() => modelOpen(false)}
           >
-            <img className="h-10 w-10" src={cross} alt={t("buttons.close")} />
+            <img className="h-10 w-10" src={cross} alt="close" />
           </div>
           <div
             ref={captureRef}
@@ -117,11 +105,9 @@ export default function StudentInfo({ currStudent, modelOpen }) {
           >
             <div className="w-full">
               <h2 className="text-2xl font-bold mb-4">
-                {t("studentDetails.title")}
+                {t("titles.studentDetails")}
               </h2>
-              <h3 className="pb-2 font-bold">
-                {t("studentDetails.personalDetails")}
-              </h3>
+              <h3 className="pb-2 font-bold">{t("titles.personalDetails")}</h3>
               <div className="pb-6 font-medium">
                 {personalDetails.map(([label, value], index) => (
                   <div className="flex pb-2" key={index}>
@@ -131,9 +117,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
                   </div>
                 ))}
               </div>
-              <h3 className="pb-2 font-bold">
-                {t("studentDetails.guardianDetails")}
-              </h3>
+              <h3 className="pb-2 font-bold">{t("titles.guardianDetails")}</h3>
               <div className="font-medium">
                 {guardianDetails.map(([label, value], index) => (
                   <div className="flex pb-2" key={index}>
@@ -149,22 +133,16 @@ export default function StudentInfo({ currStudent, modelOpen }) {
                 id="StudentInfoImage"
                 className="h-[370px] w-[300px] object-center"
                 src={student}
-                alt={t("studentDetails.fields.student")}
+                alt={t("titles.student")}
               />
             </div>
           </div>
           <div className="flex justify-center mt-5 space-x-5">
-            {/* <button
-              className="px-4 py-2 bg-blue-500 text-white rounded"
-              onClick={handlePrint}
-            >
-              {t('studentDetails.buttons.print')}
-            </button> */}
             <button
               className="px-4 py-2 bg-green-500 text-white rounded"
               onClick={handleScreenshot}
             >
-              {t("studentDetails.buttons.screenshot")}
+              {t("buttons.screenshot")}
             </button>
           </div>
         </div>
