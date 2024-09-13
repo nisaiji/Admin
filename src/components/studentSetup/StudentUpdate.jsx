@@ -13,53 +13,46 @@ import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
+import REGEX from "../../utils/regix";
 
 const capitalize = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
-
-const validationSchema = Yup.object({
-  // rollNumber: Yup.string().required("Roll Number is required"),
-  firstname: Yup.string().required("First Name is required"),
-  lastname: Yup.string().required("Last Name is required"),
-  gender: Yup.string().required("Gender is required"),
-  bloodGroup: Yup.string().required("Blood Group is required"),
-  dob: Yup.date().required("Date of Birth is required"),
-  address: Yup.string().required("Address is required"),
-  parentFullname: Yup.string().required("Parent's Full Name is required"),
-  parentGender: Yup.string().required("Parent's Gender is required"),
-  parentAge: Yup.string()
-    .required("Parent's Age is required"),
-  parentEmail: Yup.string()
-    .email("Invalid email address")
-    .required("Parent's Email is required"),
-  parentPhone: Yup.string()
-    .required("Parent's Phone Number is required")
-    .matches(/^\d{10}$/, "Phone number should be 10 digits")
-    .test(
-      "starts-with-1-to-5",
-      "Phone number must start with a digit between 1 to 5",
-      (value) => {
-        return value && /^[1-5]/.test(value);
-      }
-    ),
-  parentQualification: Yup.string().required(
-    "Parent's Qualification is required"
-  ),
-  parentOccupation: Yup.string().required("Parent's Occupation is required"),
-  parentAddress: Yup.string().required("Parent's Address is required"),
-});
 
 export default function StudentUpdate() {
   const navigate = useNavigate();
   const student = useLocation().state;
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  // console.log(student);
+
+  const validationSchema = Yup.object({
+    firstname: Yup.string().required(t("validationError.firstName")),
+    lastname: Yup.string().required(t("validationError.lastName")),
+    gender: Yup.string().required(t("validationError.gender")),
+    bloodGroup: Yup.string().required(t("validationError.bloodGroup")),
+    dob: Yup.date().required(t("validationError.dob")),
+    address: Yup.string().required(t("validationError.address")),
+    parentFullname: Yup.string().required(t("validationError.fullName")),
+    parentGender: Yup.string().required(t("validationError.gender")),
+    parentAge: Yup.string(t("validationError.age")).required(),
+    parentEmail: Yup.string()
+      .email(t("validationError.emailAddress"))
+      .required(t("validationError.email")),
+    parentPhone: Yup.string()
+      .required()
+      .matches(REGEX.PHONE, t("validationError.phoneNumber"))
+      .test("starts-with-1-to-5", t("validationError.phoneStart"), (value) => {
+        return value && REGEX.PHONE_TEST.test(value);
+      }),
+    parentQualification: Yup.string().required(
+      t("validationError.qualification")
+    ),
+    parentOccupation: Yup.string().required(t("validationError.occupation")),
+    parentAddress: Yup.string().required(t("validationError.address")),
+  });
 
   const formik = useFormik({
     initialValues: {
-      // rollNumber: student.rollNumber || "",
       firstname: student.firstname || "",
       lastname: student.lastname || "",
       gender: student.gender || "",
@@ -77,13 +70,11 @@ export default function StudentUpdate() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      // console.log("val", values);
       try {
         setLoading(true);
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.STUDENT_UPDATE}/${student._id}`,
           {
-            // rollNumber: capitalize(values.rollNumber) || "",
             firstname: capitalize(values.firstname) || "",
             lastname: capitalize(values.lastname) || "",
             gender: values.gender || "",
@@ -100,14 +91,12 @@ export default function StudentUpdate() {
             parentAddress: capitalize(values.parentAddress) || "",
           }
         );
-        console.log('response',response);
-        
         if (response?.statusCode === 200) {
-          toast.success(t("studentList.studentUpdateMsg"));
+          toast.success(t("messages.student.updateSuccess"));
           navigate(-1);
         }
-      } catch (error) {
-        toast.error(<b>{error}</b>);
+      } catch (e) {
+        toast.error(e);
       } finally {
         setLoading(false);
       }
@@ -117,46 +106,40 @@ export default function StudentUpdate() {
   const renderStudentFormFields = () => (
     <div className="grid grid-cols-2 gap-4">
       {[
-        // {
-        //   label: "Roll Number",
-        //   name: "rollNumber",
-        //   placeholder: t("studentDetails.placeholders.rollNumber"),
-        //   type: "text",
-        // },
         {
-          label: "Gender",
+          label: t("labels.gender"),
           name: "gender",
           type: "select",
-          options: ["Male", "Female", "Other"],
+          options: [t("options.male"), t("options.female"), t("options.other")],
         },
         {
-          label: "First Name",
+          label: t("labels.firstName"),
           name: "firstname",
-          placeholder: t("studentDetails.placeholders.firstName"),
+          placeholder: t("placeholders.firstName"),
           type: "text",
         },
         {
-          label: "Blood Group",
+          label: t("labels.bloodGroup"),
           name: "bloodGroup",
           type: "select",
           options: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"],
         },
         {
-          label: "Last Name",
+          label: t("labels.lastName"),
           name: "lastname",
-          placeholder: t("studentDetails.placeholders.lastName"),
+          placeholder: t("placeholders.lastName"),
           type: "text",
         },
         {
-          label: "Date of Birth",
+          label: t("labels.dob"),
           name: "dob",
-          placeholder: t("studentDetails.placeholders.dob"),
+          placeholder: t("placeholders.dob"),
           type: "date",
         },
         {
-          label: "Address",
+          label: t("labels.address"),
           name: "address",
-          placeholder: t("studentDetails.placeholders.address"),
+          placeholder: t("placeholders.address"),
           type: "text",
         },
       ].map((field) => (
@@ -182,7 +165,7 @@ export default function StudentUpdate() {
                   formik.setFieldValue("dob", format(date, "MM/dd/yyyy"))
                 }
                 dateFormat="MM/dd/yyyy"
-                placeholderText="MM/DD/YYYY"
+                placeholderText={t("placeholders.date")}
                 className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
                 wrapperClassName="w-full"
               />
@@ -196,14 +179,14 @@ export default function StudentUpdate() {
                 className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
               />
             )}
-            {field.icon && (
+            {field?.icon && (
               <img
                 src={field.icon.src}
                 className="absolute right-2"
                 style={{
-                  top: field.icon.top,
-                  width: field.icon.width,
-                  height: field.icon.height,
+                  top: field?.icon?.top,
+                  width: field?.icon?.width,
+                  height: field?.icon?.height,
                 }}
                 alt=""
               />
@@ -223,54 +206,54 @@ export default function StudentUpdate() {
     <div className="grid grid-cols-2 gap-4">
       {[
         {
-          label: "Full Name",
+          label: t("labels.fullName"),
           name: "parentFullname",
-          placeholder: t("studentDetails.placeholders.fullName"),
+          placeholder: t("placeholders.fullName"),
           type: "text",
         },
         {
-          label: "Gender",
+          label: t("labels.gender"),
           name: "parentGender",
           type: "select",
-          options: ["Male", "Female", "Other"],
+          options: [t("options.male"), t("options.female"), t("options.other")],
         },
         {
-          label: "Age",
+          label: t("labels.age"),
           name: "parentAge",
-          placeholder: t("studentDetails.placeholders.age"),
+          placeholder: t("placeholders.age"),
           type: "text",
         },
         {
-          label: "Email Address",
+          label: t("labels.emailAddress"),
           name: "parentEmail",
           icon: { src: mail, width: 40, height: 40, top: 0 },
-          placeholder: t("studentDetails.placeholders.emailAddress"),
+          placeholder: t("placeholders.emailAddress"),
           type: "email",
         },
         {
-          label: "Phone Number",
+          label: t("labels.phoneNumber"),
           name: "parentPhone",
           icon: { src: India, width: 35, height: 25, top: 7 },
-          placeholder: t("studentDetails.placeholders.phoneNumber"),
+          placeholder: t("placeholders.phoneNumber"),
           type: "Number",
         },
         {
-          label: "Qualification",
+          label: t("labels.qualification"),
           name: "parentQualification",
-          placeholder: t("studentDetails.placeholders.qualification"),
+          placeholder: t("placeholders.qualification"),
           type: "text",
         },
         {
-          label: "Occupation",
+          label: t("labels.occupation"),
           name: "parentOccupation",
-          placeholder: t("studentDetails.placeholders.Occupation"),
+          placeholder: t("placeholders.occupation"),
           type: "text",
         },
         {
-          label: "Address",
+          label: t("labels.address"),
           name: "parentAddress",
           icon: { src: location, width: 30, height: 30, top: 5 },
-          placeholder: t("studentDetails.placeholders.address"),
+          placeholder: t("placeholders.address"),
           type: "text",
         },
       ].map((field) => (
@@ -332,11 +315,11 @@ export default function StudentUpdate() {
       <Toaster position="top-center" reverseOrder={false} />
       <div className="bg-white rounded-2xl w-full mx-10 flex flex-col items-start py-3 px-10 box-border">
         <h1 className="text-4xl font-poppins-bold mt-6">
-          {t("studentDetails.title")}
+          {t("titles.studentDetails")}
         </h1>
         <div className="w-full">
           <h2 className="text-2xl font-poppins-regular mt-6 text-left">
-            {t("studentDetails.personalDetails")}
+            {t("titles.personalDetails")}
           </h2>
           <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
             <form onSubmit={formik.handleSubmit} className="w-full">
@@ -345,7 +328,7 @@ export default function StudentUpdate() {
           </div>
 
           <h2 className="text-2xl font-poppins-bold text-left ml-5">
-            {t("studentDetails.guardianDetails")}
+            {t("titles.guardianDetails")}
           </h2>
           <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
             <form onSubmit={formik.handleSubmit} className="w-full">
@@ -356,13 +339,13 @@ export default function StudentUpdate() {
                   onClick={() => navigate(-1)}
                   className="border-2 border-[#a3a2c7] text-[#464590] py-2 px-4 rounded w-36"
                 >
-                  {t("cancel")}
+                  {t("buttons.cancel")}
                 </button>
                 <button
                   type="submit"
                   className="bg-[#464590] text-white py-2 px-4 rounded w-36"
                 >
-                  {t("save")}
+                  {t("buttons.save")}
                 </button>
               </div>
             </form>

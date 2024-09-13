@@ -41,7 +41,22 @@ const Dashboard = () => {
     if (isTeacher) url = EndPoints.TEACHER.STUDENT_COUNT;
     else url = EndPoints.ADMIN.STUDENT_COUNT;
     try {
-      const response = await axiosClient.get(`${url}`);
+      const today = new Date();
+      const startTime = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      ).getTime();
+      const endTime = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        23,
+        59,
+        59,
+        999
+      ).getTime();
+      const response = await axiosClient.post(`${url}`, { startTime, endTime });
       if (response?.statusCode === 200) {
         const { presentCount, totalCount } = response?.result;
         setStudentCountData({ presentCount, totalCount });
@@ -89,15 +104,13 @@ const Dashboard = () => {
 
   const getCalenderEvents = async () => {
     let url;
-    let reqData = {
-      month: date?.month,
-      year: date?.year,
-    };
     if (isTeacher) url = EndPoints.TEACHER.DASHBOARD_CALENDER_EVENTS;
-    else url = EndPoints.ADMIN.DASHBOARD_CALENDER_EVENTS;
+    else url = EndPoints.COMMON.GET_EVENTS;
     try {
+      const startTime = new Date(date.year, date.month, 1).getTime();
+      const endTime = new Date(date.year, date.month + 1, 0).getTime();
       setEventLoading(true);
-      const response = await axiosClient.post(url, reqData);
+      const response = await axiosClient.post(url, { startTime, endTime });
       if (response?.statusCode === 200) {
         setCalenderEvents(response?.result);
       }
@@ -112,17 +125,40 @@ const Dashboard = () => {
     getCalenderEvents();
   }, [date]);
 
+  function getCurrentWeekDates() {
+    const currentDate = new Date();
+    const dayOfWeek = currentDate.getDay();
+    const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+    // Start date (Monday)
+    const startTime = new Date(currentDate);
+    startTime.setDate(currentDate.getDate() + diff);
+    startTime.setHours(0, 0, 0, 0);
+    // End date (Sunday)
+    const endTime = new Date(startTime);
+    endTime.setDate(startTime.getDate() + 6);
+    endTime.setHours(23, 59, 59, 999);
+    return {
+      startTime: startTime.getTime(),
+      endTime: endTime.getTime(),
+    };
+  }
+
   const getWeeklyChart = async () => {
     let url;
     if (isTeacher) url = EndPoints.TEACHER.DASHBOARD_WEEKLY_ATTENDANCE;
-    else url = EndPoints.ADMIN.DASHBOARD_WEEKLY_ATTENDANCE;
+    else url = EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS;
     try {
+      const { startTime, endTime } = getCurrentWeekDates();
       setLoading(true);
-      const response = await axiosClient.get(`${url}/${selectedSection}`);
+      const response = await axiosClient.post(`${url}/${selectedSection}`, {
+        startTime,
+        endTime,
+      });
+      // console.log("r", response);
       if (response?.statusCode === 200) {
-        const { weeklyAttendance, totalStudentCount } = response?.result;
-        weeklyData(weeklyAttendance, totalStudentCount);
-        setTotalStudentClassSectionWise(totalStudentCount);
+        const { sectionAttendance, totalStudent } = response?.result;
+        weeklyData(sectionAttendance, totalStudent);
+        setTotalStudentClassSectionWise(totalStudent);
       }
     } catch (e) {
       toast.error(e);
@@ -134,14 +170,30 @@ const Dashboard = () => {
   const getMonthlyChart = async () => {
     let url;
     if (isTeacher) url = EndPoints.TEACHER.DASHBOARD_MONTHLY_ATTENDANCE;
-    else url = EndPoints.ADMIN.DASHBOARD_MONTHLY_ATTENDANCE;
+    else url = EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS;
     try {
+      const currentDate = new Date();
+      const startTime = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+      ).getTime();
+      const endTime = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0
+      ).getTime();
       setLoading(true);
-      const response = await axiosClient.get(`${url}/${selectedSection}`);
+      const response = await axiosClient.post(`${url}/${selectedSection}`, {
+        startTime,
+        endTime,
+      });
+      // console.log("r", response);
+
       if (response?.statusCode === 200) {
-        const { monthlyAttendance, totalStudentCount } = response?.result;
-        monthlyData(monthlyAttendance, totalStudentCount);
-        setTotalStudentClassSectionWise(totalStudentCount);
+        const { sectionAttendance, totalStudent } = response?.result;
+        monthlyData(sectionAttendance, totalStudent);
+        setTotalStudentClassSectionWise(totalStudent);
       }
     } catch (e) {
       toast.error(e);

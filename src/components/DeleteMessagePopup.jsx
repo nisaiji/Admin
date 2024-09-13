@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import deleteIcon from "../assets/images/deleteIcon.png";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +19,7 @@ export default function DeletePopup({ isVisible, onClose, onDelete }) {
             <div className="flex justify-between">
               <p className="font-semibold text-black">{t("buttons.delete")}</p>
             </div>
-            <p className="text-gray-600 text-sm">{t("confirmDelete")}</p>
+            <p className="text-gray-600 text-sm">{t("titles.confirmDelete")}</p>
           </div>
         </div>
         <div className="mt-4 flex justify-end">
@@ -27,13 +27,13 @@ export default function DeletePopup({ isVisible, onClose, onDelete }) {
             className="border border-[#d9d9d9] bg-white shadow-sm rounded-lg px-4 py-2 mr-2 text-base font-poppins-bold"
             onClick={onClose}
           >
-            {t("cancel")}
+            {t("buttons.cancel")}
           </button>
           <button
             className="border border-[#d91111] bg-[#d91111] text-white shadow-sm rounded-lg px-4 py-2 text-base font-poppins-regular"
             onClick={onDelete}
           >
-            {t("delete")}
+            {t("buttons.delete")}
           </button>
         </div>
       </div>

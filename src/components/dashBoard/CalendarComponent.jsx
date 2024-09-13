@@ -100,9 +100,19 @@ const CalendarComponent = ({ updateDate }) => {
 
   const fetchEvents = async () => {
     try {
+      const startTime = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+      ).getTime();
+      const endTime = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0
+      ).getTime();
       const response = await axiosClient.post(
-        EndPoints.ADMIN.DASHBOARD_CALENDER_EVENTS,
-        { month, year }
+        EndPoints.COMMON.GET_EVENTS,
+        { startTime, endTime }
       );
       if (response?.statusCode === 200) {
         const sortedEvents = response.result.sort(

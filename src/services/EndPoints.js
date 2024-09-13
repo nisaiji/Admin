@@ -7,9 +7,7 @@ const EndPoints = {
     // ADMIN DASHBOARD
     STUDENT_COUNT: "admin-dashboard/present-students",
     PARENT_COUNT: "admin-dashboard/parent-count",
-    DASHBOARD_CALENDER_EVENTS: "admin-dashboard/holiday-events",
-    DASHBOARD_WEEKLY_ATTENDANCE: "admin-dashboard/weekly-attendance",
-    DASHBOARD_MONTHLY_ATTENDANCE: "admin-dashboard/monthly-attendance",
+    DASHBOARD_ATTENDANCE_STATUS: "admin-dashboard/attendance-status",
 
     // ADMIN TEACHER SETUP
     REGISTER_TEACHER: "teacher",

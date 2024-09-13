@@ -15,25 +15,27 @@ import toast, { Toaster } from "react-hot-toast";
 import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 
-const validationSchema = Yup.object({
-  schoolName: Yup.string().required("School Name is required"),
-  principal: Yup.string().required("Principal Name is required"),
-  username: Yup.string().required("Admin Name is required"),
-  schoolBoard: Yup.string().required("School Board is required"),
-  affiliationNo: Yup.string().required("Affiliation Number is required"),
-  address: Yup.string().required("School Address is required"),
-  city: Yup.string().required("City is required"),
-  state: Yup.string().required("State is required"),
-  phone: Yup.string().length(10).required("Phone Number is required"),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-});
-
 export default function AdminProfile() {
   const [admin, setAdmin] = useState([]);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+
+  const validationSchema = Yup.object({
+    schoolName: Yup.string().required(t("validationError.schoolName")),
+    principal: Yup.string().required(t("validationError.principalName")),
+    username: Yup.string().required(t("validationError.adminName")),
+    schoolBoard: Yup.string().required(t("validationError.schoolBoard")),
+    affiliationNo: Yup.string().required(
+      t("validationError.affiliationNumber")
+    ),
+    address: Yup.string().required(t("validationError.address")),
+    city: Yup.string().required(t("validationError.city")),
+    state: Yup.string().required(t("validationError.state")),
+    phone: Yup.string().length(10).required(t("validationError.phone")),
+    email: Yup.string()
+      .email(t("validationError.emailAddress"))
+      .required(t("validationError.email")),
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -57,17 +59,13 @@ export default function AdminProfile() {
       youtube: "",
     },
     validationSchema,
-    onSubmit: (values) => {
-      // console.log(values);
-      // handle form submission
-    },
+    onSubmit: (values) => {},
   });
 
   const getadmin = async () => {
     try {
       setLoading(true);
       const res = await axiosClient.get(EndPoints.ADMIN.GET_ADMIN);
-      console.log(res);
       if (res?.statusCode === 200) {
         setAdmin(res.result);
         formik.setValues({
@@ -92,7 +90,6 @@ export default function AdminProfile() {
         });
       }
     } catch (e) {
-      // console.log("error in fetching admin", e);
       toast.error(e);
     } finally {
       setLoading(false);
@@ -120,7 +117,7 @@ export default function AdminProfile() {
         } catch (validationError) {
           allValid = false;
           toast.error(validationError.message);
-          break; // Optional: stop validation on the first error
+          break;
         }
       }
 
@@ -145,14 +142,11 @@ export default function AdminProfile() {
           EndPoints.ADMIN.PROFILE_UPDATE,
           requestBody
         );
-        // console.log(res);
-
-        toast.success(t("adminProfile.updateMsg"));
+        toast.success(t("messages.admin.updateMsg"));
         getadmin();
       }
     } catch (e) {
       toast.error(e);
-      console.log("error in updating ", e);
     } finally {
       setLoading(false);
     }
@@ -184,12 +178,11 @@ export default function AdminProfile() {
             youtube: values.youtube,
           }
         );
-        toast.success(t("adminProfile.socialUpdate"));
+        toast.success(t("messages.admin.socialUpdate"));
         getadmin();
       }
     } catch (e) {
       toast.error(e);
-      // console.log("error in updating email", e);
     } finally {
       setLoading(false);
     }
@@ -225,7 +218,7 @@ export default function AdminProfile() {
               <div>
                 <input
                   name="schoolName"
-                  placeholder={t("adminProfile.socialUpdate")}
+                  placeholder={t("adminProfile.schoolName")}
                   value={formik.values.schoolName}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -261,12 +254,11 @@ export default function AdminProfile() {
                       : "border-gray-200"
                   } text-black bg-white border`}
                 />
-                {formik.errors.principal &&
-                  formik.touched.principal && (
-                    <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.principal}
-                    </div>
-                  )}
+                {formik.errors.principal && formik.touched.principal && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {formik.errors.principal}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -311,11 +303,11 @@ export default function AdminProfile() {
                     src="https://cdn.builder.io/api/v1/image/assets/TEMP/fb627a900256d2692843b0254a890d92734869efd3124ab979ce7d8dfb1f3930?"
                     className="w-6 aspect-square"
                   />
-                  <div>{t("uploadPhoto")}</div>
+                  <div>{t("adminProfile.uploadPhoto")}</div>
                 </div>
               </div>
               <div className="mt-6 text-xs text-center text-stone-500">
-                {t("imageSizeInfo")}
+                {t("adminProfile.imageSizeInfo")}
               </div>
             </div>
           </div>
@@ -378,8 +370,7 @@ export default function AdminProfile() {
           </div>
           <div>
             <input
-              name="affiliationNo
-"
+              name="affiliationNo"
               placeholder={t("adminProfile.affiliationNumber")}
               value={formik.values.affiliationNo}
               onChange={formik.handleChange}
@@ -463,7 +454,7 @@ export default function AdminProfile() {
               } text-black`}
             >
               <option value="">{t("adminProfile.city")}</option>
-              <option value="Indore">Indore </option>
+              <option value="Indore">Indore</option>
             </select>
             {formik.errors.city && formik.touched.city && (
               <div className="text-red-500 text-sm mt-1">
@@ -502,15 +493,8 @@ export default function AdminProfile() {
             type="button"
             className="px-6 py-2 text-white bg-indigo-800 rounded-lg"
           >
-            {t("adminProfile.saveChanges")}
+            {t("buttons.saveChanges")}
           </button>
-          {/* <button
-            type="button"
-            onClick={formik.handleReset}
-            className="px-6 py-1 text-indigo-800 border-2 border-indigo-800 rounded-lg"
-          >
-            {t("adminProfile.cancel")}
-          </button> */}
         </div>
       </div>
 
@@ -743,15 +727,8 @@ export default function AdminProfile() {
             type="button"
             className="px-6 py-2 text-white bg-indigo-800 rounded-lg"
           >
-            {t("adminProfile.saveChanges")}
+            {t("buttons.saveChanges")}
           </button>
-          {/* <button
-            type="button"
-            onClick={formik.handleReset}
-            className="px-6 py-2 text-indigo-800 border-2 border-indigo-800 rounded-lg"
-          >
-            {t("cancel")}
-          </button> */}
         </div>
       </div>
     </form>

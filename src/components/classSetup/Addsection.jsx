@@ -9,12 +9,6 @@ import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 
-const getNextSectionName = (sections) => {
-  const sectionLength = sections.length;
-  const letters = "ABCDEFGHI";
-  return sectionLength < letters.length ? letters[sectionLength] : "";
-};
-
 function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [newSection, setNewSection] = useState({
@@ -31,6 +25,12 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
   const [loading, setLoading] = useState(false);
   const selectRef = useRef(null);
 
+  const getNextSectionName = (sections) => {
+    const sectionLength = sections.length;
+    const letters = t("options.sections");
+    return sectionLength <= letters.length ? letters[sectionLength] : "";
+  };
+
   useEffect(() => {
     if (selectRef.current) {
       selectRef.current.focus();
@@ -39,10 +39,10 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
 
   const handleSaveSection = async () => {
     if (sections.length === 8) {
-      return toast.error("Reached maximum section limit");
+      return toast.error(t("toasts.sectionLimit"));
     }
     if (!newSection.teacherId) {
-      return toast.error("Please select a teacher");
+      return toast.error(t("toasts.selectTeacher"));
     }
     if (activeSection === null) {
       const sectionName = getNextSectionName(sections);
@@ -57,13 +57,11 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
           EndPoints.ADMIN.REGISTER_SECTION,
           newSectionObj
         );
-        // console.log('add',res);
-
-        // if (res?.statusCode === 200) {
-        getSections();
-        getUnassignedTeacher();
-        toast.success(res.result);
-        // }
+        if (res?.statusCode === 200) {
+          getSections();
+          getUnassignedTeacher();
+          toast.success(t("messages.section.createSuccess"));
+        }
       } catch (e) {
         toast.error(e);
       } finally {
@@ -71,21 +69,17 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
       }
     } else {
       try {
-        // await axiosClient.put(`/section/${activeSection}`, {
-        //   teacherId: newSection.teacherId,
-        // });
         setLoading(true);
         getSections();
         getUnassignedTeacher();
-        toast.success("Teacher updated successfully");
-      } catch (error) {
-        toast.error("Failed to update teacher");
+        toast.success(t("messages.teacher.updateSuccess"));
+      } catch (e) {
+        toast.error(e);
       } finally {
         setLoading(false);
       }
       setActiveSection(null);
     }
-
     setNewSection({ name: "", teacherId: "" });
     setShowForm(true);
   };
@@ -97,15 +91,12 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
       const response = await axiosClient.delete(
         `${EndPoints.ADMIN.DELETE_SECTION}/${sectionId}`
       );
-      // console.log("del", response);
-
       if (response?.statusCode === 200) {
         setShowDeleteConfirmation(false);
         getSections();
-        toast.success("Section deleted successfully");
+        toast.success(t("messages.section.deleteSuccess"));
       }
     } catch (e) {
-      toast.error("Failed to delete section");
       toast.error(e);
     } finally {
       setLoading(false);
@@ -122,7 +113,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
 
   const getUnassignedTeacher = async () => {
     try {
-      // setLoading(true);
+      setLoading(true);
       const res = await axiosClient.get(EndPoints.ADMIN.UNASSIGNED_TEACHER);
       if (res?.statusCode === 200) {
         setTeachers(res.result);
@@ -130,7 +121,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
     } catch (e) {
       toast.error(e);
     } finally {
-      // setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -138,17 +129,15 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
     try {
       setLoading(true);
       if (!newSection?.teacherId) {
-        toast.error("please select teacher");
+        toast.error(t("toasts.selectTeacher"));
         return;
       }
       const res = await axiosClient.put(EndPoints.ADMIN.REPLACE_TEACHER, {
         sectionId: section._id,
         teacherId: newSection.teacherId,
       });
-      // console.log("res", res);
-
       if (res?.statusCode === 200) {
-        toast.success("Teacher updated successfully");
+        toast.success(t("messages.teacher.updateSuccess"));
         getUnassignedTeacher();
         getSections();
         setNewSection({ name: section.name, teacherId: newSection.teacherId });
@@ -156,7 +145,6 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
       }
     } catch (e) {
       toast.error(e);
-      console.log("e", e);
     } finally {
       setLoading(false);
     }
@@ -171,14 +159,10 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
   const getSections = async () => {
     try {
       setLoading(true);
-      const res = await axiosClient.get(`${EndPoints.ADMIN.CLASS_SECTION}/${clickedClassId}`);
-      // console.log(res.result.class[0].section);
-
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.CLASS_SECTION}/${clickedClassId}`
+      );
       if (res?.statusCode === 200) {
-        // const filteredSections = res.result
-        //   .filter((item) => item._id === clickedClassId)
-        //   .map((item) => item.section)
-        // .flat();
         setSections(res.result.class[0].section);
       }
     } catch (e) {
@@ -219,29 +203,15 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                 setAddSectionModelOpen(false);
                 await getAllClass();
               }}
-              className="text-lg bg-[#464590] font-semibold text-white shadow-md hover:bg-blue-800"
-              style={{ height: 30, width: 100, borderRadius: 20 }}
+              className=" h-[30px] w-[100px] rounded-2xl text-lg bg-[#464590] font-semibold text-white shadow-md hover:bg-blue-800"
             >
-              {t("Done")}
+              {t("buttons.done")}
             </button>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-around",
-              marginTop: 30,
-              marginBottom: 10,
-            }}
-          >
-            <div style={{ fontSize: 20, fontWeight: "500" }}>
-              {t("sections")}
-            </div>
-            <div style={{ fontSize: 20, fontWeight: "500" }}>
-              {t("ClassTeacher")}
-            </div>
-            <div style={{ fontSize: 20, fontWeight: "500" }}>
-              {t("Actions")}
-            </div>
+          <div className="flex justify-around mt-[30px] mb-[10px] ">
+            <div className="font-medium text-xl">{t("sections")}</div>
+            <div className="font-medium text-xl">{t("ClassTeacher")}</div>
+            <div className="font-medium text-xl">{t("Actions")}</div>
           </div>
           <hr />
           <div className="my-6 max-h-56 overflow-y-auto">
@@ -273,7 +243,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                         isDarkMode ? "bg-blue-900 text-white" : ""
                       }`}
                     >
-                      {t("SelectTeacher")}
+                      {t("labels.assignTeacher")}
                     </option>
                     {teachers.map((teacher) => (
                       <option
@@ -293,24 +263,16 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                       isDarkMode ? "bg-gray-300" : "text-gray-500 bg-[#f2f2ff]"
                     } w-[250px] `}
                   >
-                    {section.teacher.firstname}{" "}
-                    {section.teacher.lastname}
-                    {/* first and last name */}
+                    {section.teacher.firstname} {section.teacher.lastname}
                   </div>
                 )}
                 <div className="flex items-center">
                   {activeSection === section._id ? (
                     <button
                       onClick={() => handleUpdateTeacherSection(section)}
-                      className={`mr-2 bg-[#464590]`}
-                      style={{
-                        height: 30,
-                        width: 60,
-                        borderRadius: 20,
-                        color: "white",
-                      }}
+                      className={`mr-2 bg-[#464590] h-[30px] w-[60px] rounded-2xl `}
                     >
-                      {t("Save")}
+                      {t("buttons.save")}
                     </button>
                   ) : (
                     <>
@@ -349,7 +311,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
             ))}
             {showForm && (
               <div
-                className={`flex items-center justify-around mb-2 p-4  rounded-lg shadow-md ${
+                className={`flex items-center justify-around mb-2 p-4 rounded-lg shadow-md ${
                   isDarkMode ? "bg-blue-800" : ""
                 }`}
               >
@@ -374,7 +336,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                     value=""
                     className={`${isDarkMode ? "bg-blue-900 text-white" : ""}`}
                   >
-                    {t("SelectTeacher")}
+                    {t("labels.assignTeacher")}
                   </option>
                   {teachers.map((teacher) => (
                     <option key={teacher._id} value={teacher._id}>
@@ -393,7 +355,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                   }}
                   disabled={activeSection !== null}
                 >
-                  {t("Save")}
+                  {t("buttons.save")}
                 </button>
               </div>
             )}

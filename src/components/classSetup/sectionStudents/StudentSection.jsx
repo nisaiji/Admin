@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { axiosClient } from "../../../services/axiosClient";
 import toast, { Toaster } from "react-hot-toast";
-import searchp from "../../../assets/images/searchp.png";
 import Search from "../../../assets/images/Search.png";
 import info from "../../../assets/images/info.png";
 import edit2 from "../../../assets/images/edit2.png";
@@ -15,14 +14,13 @@ import Spinner from "../../Spinner";
 import EndPoints from "../../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import ConformationPopup from "../../ConformationPopup";
+import REGEX from "../../../utils/regix";
 
 export default function StudentSection() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const location = useLocation();
   const { classId, sectionId, className, sectionName } = location.state;
   const searchInputRef = useRef(null);
-  const newStudentRollNoRef = useRef(null);
   const [students, setStudents] = useState([]);
   const [currStudent, setCurrStudent] = useState([]);
   const [classTeacher, setClassTeacher] = useState([]);
@@ -36,7 +34,6 @@ export default function StudentSection() {
   const [popupVisible, setPopupVisible] = useState(false);
   const [newStudent, setNewStudent] = useState({
     SNo: null,
-    // rollNumber: "",
     firstname: "",
     lastname: "",
     gender: "",
@@ -45,9 +42,10 @@ export default function StudentSection() {
     classId: classId,
     sectionId: sectionId,
   });
-  const genders = ["Male", "Female", "Other"];
+  const genders = [t("options.male"), t("options.female"), t("options.other")];
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const teacherSectionId = useSelector((state) => state.appAuth.section);
+
   useEffect(() => {
     fetchStudents();
     if (!isTeacher) {
@@ -56,12 +54,15 @@ export default function StudentSection() {
   }, []);
 
   const getSectionInfo = async () => {
-    const res = await axiosClient.get(
-      `${EndPoints.ADMIN.SECTION_INFO}/${sectionId}`
-    );
-    // console.log("res", res);
-    if (res?.statusCode === 200) {
-      setClassTeacher(res.result.teacher);
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.SECTION_INFO}/${sectionId}`
+      );
+      if (res?.statusCode === 200) {
+        setClassTeacher(res.result.teacher);
+      }
+    } catch (e) {
+      toast.error(e);
     }
   };
 
@@ -81,21 +82,18 @@ export default function StudentSection() {
         const sectionId = teacherSectionId;
         res = await axiosClient.get(`${url}/${sectionId}`);
       } else res = await axiosClient.get(`${url}/${sectionId}`);
-      // console.log(res.result.studentList);
       if (res?.statusCode === 200) {
         const fetchedStudents = res?.result?.studentList;
-        console.log("f", fetchedStudents);
         const studentsWithSNos = fetchedStudents.map((student, index) => ({
           ...student,
           SNo: index + 1,
           parentName: student.parent?.fullname || "",
           phone: student.parent?.phone || "",
         }));
-        // console.log("swsn", studentsWithSNos);
         setStudents(studentsWithSNos);
       }
-    } catch (error) {
-      // console.error(t("student.errorFetching"), error);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -113,7 +111,7 @@ export default function StudentSection() {
         existFullName.toLowerCase() === newFullName.toLowerCase() &&
         userExist?.gender === newStudent?.gender
       ) {
-        toast.error("Duplicate child adding for same parent");
+        toast.error(t("duplicate"));
         return false;
       } else {
         setPopupVisible(true);
@@ -129,28 +127,28 @@ export default function StudentSection() {
   };
 
   const validateData = (student) => {
-    if (!student.firstname.trim()) return t("teacherSetup.enterFirstName");
+    if (!student.firstname.trim()) return t("validationError.enterFirstName");
     if (student.firstname.length < 3)
-      return t("teacherSetup.validationFirstNameLength");
-    if (/\d/.test(student.firstname))
-      return t("teacherSetup.validationFirstNameNoNumbers");
+      return t("validationError.validationFirstNameLength");
+    if (REGEX.NUMBER.test(student.firstname))
+      return t("validationError.validationFirstNameNoNumbers");
 
-    if (!student.lastname.trim()) return t("teacherSetup.enterLastName");
+    if (!student.lastname.trim()) return t("validationError.enterLastName");
     if (student.lastname.length < 3)
-      return t("teacherSetup.validationLastNameLength");
-    if (/\d/.test(student.lastname))
-      return t("teacherSetup.validationLastNameNoNumbers");
+      return t("validationError.validationLastNameLength");
+    if (REGEX.NUMBER.test(student.lastname))
+      return t("validationError.validationLastNameNoNumbers");
 
-    if (!student.gender) return t("teacherSetup.gender");
+    if (!student.gender) return t("validationError.gender");
 
-    if (!student.parentName.trim()) return t("teacherSetup.parentName");
+    if (!student.parentName.trim()) return t("validationError.parentName");
     if (student.parentName.length < 3)
-      return t("teacherSetup.validationParentFullNameLength");
-    if (/\d/.test(student.parentName))
-      return t("teacherSetup.validationParentFullNameNoNumbers");
-    if (!student.phone.trim()) return t("teacherSetup.validationPhone");
-    if (!/^[1-5]\d{9}$/.test(student.phone))
-      return t("teacherSetup.validationPhoneCount");
+      return t("validationError.validationParentFullNameLength");
+    if (REGEX.NUMBER.test(student.parentName))
+      return t("validationError.validationParentFullNameNoNumbers");
+    if (!student.phone.trim()) return t("validationError.validationPhone");
+    if (!REGEX.PHONE_LENGTH.test(student.phone))
+      return t("validationError.validationPhoneCount");
     return "";
   };
 
@@ -176,8 +174,6 @@ export default function StudentSection() {
       lastname: capitalizeFirstLetter(newStudent.lastname.trim()),
       parentName: capitalizeFirstLetter(newStudent.parentName.trim()),
     };
-    // console.log(transformedStudent);
-
     try {
       setLoading(true);
       let res;
@@ -195,14 +191,11 @@ export default function StudentSection() {
           sectionId,
         });
       }
-      // console.log("res", res);
-
       if (res?.statusCode === 200 || res?.statusCode === 201) {
         toast.success(<b>{res.result}</b>);
         fetchStudents();
         setNewStudent({
           SNo: null,
-          // rollNumber: "",
           firstname: "",
           lastname: "",
           gender: "",
@@ -211,10 +204,9 @@ export default function StudentSection() {
           classId: classId,
           sectionId: sectionId,
         });
-        // newStudentRollNoRef.current.focus();
       }
     } catch (e) {
-      // console.error(t("messages.student.errorFetching"), e);
+      toast.error(e);
     } finally {
       setLoading(false);
       setPopupVisible(false);
@@ -234,9 +226,9 @@ export default function StudentSection() {
   };
 
   const updateStudent = async (student) => {
-    const error = validateData(student);
-    if (error) {
-      toast.error(error);
+    const e = validateData(student);
+    if (e) {
+      toast.error(e);
       return;
     }
     let url;
@@ -251,21 +243,17 @@ export default function StudentSection() {
         phone: student.phone.trim(),
       };
       setLoading(true);
-      console.log(student._id);
-
       const response = await axiosClient.put(
         `${url}/${student._id}`,
         transformedStudent
       );
-      // console.log(response, "update");
-
       if (response?.statusCode === 200 || response?.statusCode === 201) {
         fetchStudents();
         toast.success(t("messages.student.update"));
         setEditSNo(null);
       }
-    } catch (error) {
-      toast.error(<b>{error}</b>);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -283,27 +271,19 @@ export default function StudentSection() {
     try {
       setLoading(true);
       const response = await axiosClient.delete(`${url}/${studentId}`);
-      console.log(response);
-
       if (response?.statusCode === 200) {
         setShowDeleteConfirmation(false);
-        toast.success(t("studentList.toasterMessages.deleteSuccess"));
+        toast.success(t("messages.student.deleteSuccess"));
         setLoading(false);
         fetchStudents();
       }
     } catch (e) {
       toast.error(e);
-      // console.error(t("toasterMessages.deleteFailure"), e);
     }
   };
 
   const handleSearchInputChange = (e) => {
     setSearchQuery(e.target.value);
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery("");
-    searchInputRef.current.focus();
   };
 
   const filteredStudents = students.filter(
@@ -328,7 +308,7 @@ export default function StudentSection() {
         <div className="px-4">
           <div className="flex justify-between">
             <div className="text-4xl font-semibold px-5 py-3">
-              {t("studentList.students")}
+              {t("titles.students")}
             </div>
             <div className="text-right">
               <div
@@ -350,8 +330,8 @@ export default function StudentSection() {
                   ? `${localStorage.getItem("class")} ${localStorage.getItem(
                       "section"
                     )}`
-                  : `${t("messages.student.class")} ${className} | ${t(
-                      "messages.student.section"
+                  : `${t("titles.class")} ${className} | ${t(
+                      "titles.section"
                     )} ${sectionName}`}
               </div>
             </div>
@@ -364,7 +344,7 @@ export default function StudentSection() {
                 </div>
                 <input
                   type="text"
-                  placeholder={t("teacherSetup.search")}
+                  placeholder={t("placeholders.search")}
                   value={searchQuery}
                   onChange={handleSearchInputChange}
                   ref={searchInputRef}
@@ -393,33 +373,30 @@ export default function StudentSection() {
               >
                 <tr>
                   <th className="px-2 py-2 border border-gray-400">
-                    {t("table.columns.sNo")}
-                  </th>
-                  {/* <th className=" py-2 border border-gray-400">
-                      {t("studentDetails.fields.rollNumber")}
-                    </th> */}
-                  <th className=" py-2 border border-gray-400">
-                    {t("studentDetails.fields.firstName")}
+                    {t("labels.sNo")}
                   </th>
                   <th className=" py-2 border border-gray-400">
-                    {t("studentDetails.fields.lastName")}
+                    {t("labels.firstName")}
+                  </th>
+                  <th className=" py-2 border border-gray-400">
+                    {t("labels.lastName")}
                   </th>
                   <th className=" w-36 py-2 border border-gray-400">
-                    {t("studentDetails.fields.gender")}
+                    {t("labels.gender")}
                   </th>
                   <th className=" py-2 border border-gray-400">
-                    {t("studentDetails.fields.guardianName")}
+                    {t("labels.guardianName")}
                   </th>
                   <th className=" py-2 border border-gray-400">
-                    {t("studentDetails.fields.Phone")}
+                    {t("labels.Phone")}
                   </th>
                   <th className="w-32 py-2 border border-gray-400">
-                    {t("studentDetails.fields.Action")}
+                    {t("labels.Action")}
                   </th>
                 </tr>
               </thead>
               <tbody className="text-sm font-normal text-gray-900">
-                {filteredStudents.map((student, index) => (
+                {filteredStudents.map((student) => (
                   <tr key={student.SNo}>
                     <td
                       className={`${
@@ -428,27 +405,6 @@ export default function StudentSection() {
                     >
                       {student.SNo}
                     </td>
-                    {/* <td className=" py-2 border text-sm border-[#c1c0ca]">
-                        <input
-                          type="text"
-                          value={student.rollNumber}
-                          onChange={(e) =>
-                            handleInputChange(
-                              student.SNo,
-                              "rollNumber",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Enter rollNumber"
-                          className={`w-full h-full px-2 py-1  font-poppins-bold text-center border-none focus:outline-none ${
-                            isDarkMode
-                              ? "bg-gray-800 text-white"
-                              : "bg-white text-gray-900"
-                          }`}
-                          disabled={editSNo !== student.SNo}
-                          autoFocus={editSNo === student.SNo}
-                        />
-                      </td> */}
                     <td className=" py-2 border text-sm border-[#c1c0ca]">
                       <input
                         type="text"
@@ -460,7 +416,7 @@ export default function StudentSection() {
                             e.target.value
                           )
                         }
-                        placeholder={t("teacherSetup.enterFirstName")}
+                        placeholder={t("placeholders.firstName")}
                         className={`w-full h-full px-2 py-1  font-poppins-bold text-center border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
@@ -480,7 +436,7 @@ export default function StudentSection() {
                             e.target.value
                           )
                         }
-                        placeholder={t("teacherSetup.enterLastName")}
+                        placeholder={t("placeholders.lastName")}
                         className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
@@ -506,9 +462,6 @@ export default function StudentSection() {
                         }`}
                         disabled={editSNo !== student.SNo}
                       >
-                        {/* <option value="">
-                          {t("studentDetails.fields.GenderSelect")}
-                        </option> */}
                         {genders.map((gender, index) => (
                           <option key={index} value={gender}>
                             {gender}
@@ -527,7 +480,7 @@ export default function StudentSection() {
                             e.target.value
                           )
                         }
-                        placeholder={t("teacherSetup.parentName")}
+                        placeholder={t("placeholders.parentName")}
                         className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
@@ -547,7 +500,7 @@ export default function StudentSection() {
                             e.target.value
                           )
                         }
-                        placeholder={t("teacherSetup.Phone")}
+                        placeholder={t("placeholders.phoneNumber")}
                         className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
@@ -570,12 +523,7 @@ export default function StudentSection() {
                         </button>
                       ) : (
                         <div className="flex justify-around">
-                          <button
-                            // onClick={() =>
-                            //   navigate("/student-update", { state: student })
-                            // }
-                            onClick={() => handleEdit(student.SNo)}
-                          >
+                          <button onClick={() => handleEdit(student.SNo)}>
                             <img
                               src={ellipse}
                               alt=""
@@ -625,26 +573,6 @@ export default function StudentSection() {
                   <td className="px-2 py-2 text-center text-[#6d6ca7] font-bold border border-[#c1c0ca]">
                     {students.length + 1}
                   </td>
-                  {/* <td className=" py-2 border border-[#c1c0ca]">
-                      <input
-                        type="text"
-                        value={newStudent.rollNumber}
-                        onChange={(e) =>
-                          handleInputChange(
-                            null,
-                            "rollNumber",
-                            e.target.value
-                          )
-                        }
-                        placeholder="Enter Roll Number"
-                        className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
-                          isDarkMode
-                            ? "bg-gray-800 text-white"
-                            : "bg-white text-gray-900"
-                        }`}
-                        ref={newStudentRollNoRef}
-                      />
-                    </td> */}
                   <td className=" py-2 border border-[#c1c0ca]">
                     <input
                       type="text"
@@ -652,7 +580,7 @@ export default function StudentSection() {
                       onChange={(e) =>
                         handleInputChange(null, "firstname", e.target.value)
                       }
-                      placeholder={t("teacherSetup.enterFirstName")}
+                      placeholder={t("placeholders.firstName")}
                       className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
@@ -667,7 +595,7 @@ export default function StudentSection() {
                       onChange={(e) =>
                         handleInputChange(null, "lastname", e.target.value)
                       }
-                      placeholder={t("teacherSetup.enterLastName")}
+                      placeholder={t("placeholders.lastName")}
                       className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
@@ -694,7 +622,7 @@ export default function StudentSection() {
                       `}
                     >
                       <option value="" disabled>
-                        {t("studentDetails.fields.GenderSelect")}
+                        {t("placeholders.selectGender")}
                       </option>
                       {genders.map((gender, index) => (
                         <option key={index} value={gender}>
@@ -710,7 +638,7 @@ export default function StudentSection() {
                       onChange={(e) =>
                         handleInputChange(null, "parentName", e.target.value)
                       }
-                      placeholder={t("teacherSetup.guardianName")}
+                      placeholder={t("placeholders.parentName")}
                       className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
@@ -725,7 +653,7 @@ export default function StudentSection() {
                       onChange={(e) =>
                         handleInputChange(null, "phone", e.target.value)
                       }
-                      placeholder={t("teacherSetup.Phone")}
+                      placeholder={t("placeholders.phoneNumber")}
                       className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
@@ -738,7 +666,7 @@ export default function StudentSection() {
                       onClick={registerStudent}
                       className="bg-[#464590] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full"
                     >
-                      {t("studentDetails.fields.addStudent")}
+                      {t("buttons.addStudent")}
                     </button>
                   </td>
                 </tr>

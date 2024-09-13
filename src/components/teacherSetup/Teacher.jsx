@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
 import toast, { Toaster } from "react-hot-toast";
-import searchp from "../../assets/images/searchp.png";
 import Search from "../../assets/images/Search.png";
 import info from "../../assets/images/info.png";
 import edit2 from "../../assets/images/edit2.png";
@@ -14,6 +13,7 @@ import DeletePopup from "../DeleteMessagePopup";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
+import REGEX from "../../utils/regix";
 
 export default function Teacher() {
   const navigate = useNavigate();
@@ -42,19 +42,20 @@ export default function Teacher() {
   };
 
   const validateData = (teacher) => {
-    if (!teacher.firstname.trim()) return t("teacherSetup.validationEnter");
+    if (!teacher.firstname.trim()) return t("validationError.firstName");
     if (teacher.firstname.length < 3)
-      return t("teacherSetup.validationFirstNameLength");
-    if (/\d/.test(teacher.firstname))
-      return t("teacherSetup.validationFirstNameNoNumbers");
-    if (!teacher.lastname.trim()) return t("teacherSetup.validationLastName");
+      return t("validationError.validationFirstNameLength");
+    if (REGEX.NUMBER.test(teacher.firstname))
+      return t("validationError.validationFirstNameNoNumbers");
+    if (!teacher.lastname.trim())
+      return t("validationError.lastName");
     if (teacher.lastname.length < 3)
-      return t("teacherSetup.validationLastNameLength");
-    if (/\d/.test(teacher.lastname))
-      return t("teacherSetup.validationLastNameNoNumbers");
-    if (!teacher.phone.trim()) return t("teacherSetup.validationPhone");
-    if (!/^[1-5]\d{9}$/.test(teacher.phone))
-      return t("teacherSetup.validationPhoneCount");
+      return t("validationError.validationLastNameLength");
+    if (REGEX.NUMBER.test(teacher.lastname))
+      return t("validationError.validationLastNameNoNumbers");
+    if (!teacher.phone.trim()) return t("validationError.phone");
+    if (!REGEX.PHONE_LENGTH.test(teacher.phone))
+      return t("validationError.validationPhoneCount");
     return "";
   };
 
@@ -75,9 +76,8 @@ export default function Teacher() {
           phone: newTeacher.phone.trim(),
         }
       );
-      // console.log(response);
       if (response.statusCode === 200 || response.statusCode === 201) {
-        toast.success(<b>{t("messages.teacher.registerSuccess")}</b>);
+        toast.success(t("messages.teacher.registerSuccess"));
         getTeacher();
         setNewTeacher({
           SNo: null,
@@ -85,10 +85,8 @@ export default function Teacher() {
           lastname: "",
           phone: "",
         });
-        // newTeacherFirstNameRef.current.focus();
       }
     } catch (e) {
-      console.error("register Error:", e);
       toast.error(e);
     } finally {
       setLoading(false);
@@ -99,8 +97,6 @@ export default function Teacher() {
     try {
       setLoading(true);
       const response = await axiosClient.get(EndPoints.ADMIN.TEACHER_LIST);
-      // console.log(response);
-
       if (response?.statusCode === 200) {
         const fetchedTeachers = response.result;
         const teachersWithSNos = fetchedTeachers.map((teacher, index) => ({
@@ -109,8 +105,8 @@ export default function Teacher() {
         }));
         setTeachers(teachersWithSNos);
       }
-    } catch (error) {
-      toast.error(t("teacherSetup.fetchFailedData"));
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -136,14 +132,10 @@ export default function Teacher() {
     }
   };
 
-  const handleEdit = (SNo) => {
-    setEditSNo(SNo);
-  };
-
   const updateTeacher = async (teacher) => {
-    const error = validateData(teacher);
-    if (error) {
-      toast.error(error);
+    const e = validateData(teacher);
+    if (e) {
+      toast.error(e);
       return;
     }
     try {
@@ -157,16 +149,13 @@ export default function Teacher() {
         `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
         transformedTeacher
       );
-      // console.log(response);
-      
       if (response?.statusCode === 200) {
         getTeacher();
-        toast.success(t("teacherSetup.updateTeacher"));
+        toast.success(t("message.teacher.updateSuccess"));
         setEditSNo(null);
       }
     } catch (e) {
-      console.log("error in update", e);
-      // toast.error(<b>{e}</b>);
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -181,7 +170,7 @@ export default function Teacher() {
       );
       if (response?.statusCode === 200) {
         getTeacher();
-        toast.success(t("teacherSetup.teacherDeleted"));
+        toast.success(t("message.teacher.deleteSuccess"));
       }
     } catch (e) {
       toast.error(e);
@@ -218,7 +207,7 @@ export default function Teacher() {
           <Toaster position="top-center" reverseOrder={false} />
           <div className="px-4">
             <div className="text-4xl font-semibold px-5 py-3">
-              {t("header.title")}
+              {t("titles.teacherSetup")}
             </div>
             <div className="p-3">
               <div className="flex justify-between w-full relative z-10">
@@ -228,7 +217,7 @@ export default function Teacher() {
                   </div>
                   <input
                     type="text"
-                    placeholder={t("teacherSetup.search")}
+                    placeholder={t("placeholders.search")}
                     value={searchQuery}
                     onChange={handleSearchInputChange}
                     ref={searchInputRef}
@@ -257,19 +246,19 @@ export default function Teacher() {
                 >
                   <tr>
                     <th className="px-4 py-2 border border-gray-400">
-                      {t("table.columns.sNo")}
+                      {t("labels.sNo")}
                     </th>
                     <th className="px-4 py-2 border border-gray-400 ">
-                      {t("table.columns.firstName")}
+                      {t("labels.firstName")}
                     </th>
                     <th className="px-4 py-2 border border-gray-400">
-                      {t("table.columns.lastName")}
+                      {t("labels.lastName")}
                     </th>
                     <th className="px-4 py-2 border border-gray-400">
-                      {t("table.columns.phone")}
+                      {t("labels.phoneNumber")}
                     </th>
                     <th className="px-4 py-2 border border-gray-400">
-                      {t("table.columns.action")}
+                      {t("labels.action")}
                     </th>
                   </tr>
                 </thead>
@@ -294,7 +283,7 @@ export default function Teacher() {
                               e.target.value
                             )
                           }
-                          placeholder={t("teacherSetup.enterFirstName")}
+                          placeholder={t("placeholders.firstName")}
                           className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
                             isDarkMode
                               ? "bg-gray-800 text-white"
@@ -315,7 +304,7 @@ export default function Teacher() {
                               e.target.value
                             )
                           }
-                          placeholder={t("teacherSetup.enterLastName")}
+                          placeholder={t("placeholders.lastName")}
                           className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
                             isDarkMode
                               ? "bg-gray-800 text-white"
@@ -335,7 +324,7 @@ export default function Teacher() {
                               e.target.value
                             )
                           }
-                          placeholder={t("teacherSetup.enterPhone")}
+                          placeholder={t("placeholders.phoneNumber")}
                           className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
                             isDarkMode
                               ? "bg-gray-800 text-white"
@@ -360,7 +349,6 @@ export default function Teacher() {
                                   state: teacher,
                                 })
                               }
-                              // onClick={() => handleEdit(teacher.SNo)}
                             >
                               <img
                                 src={ellipse}
@@ -422,7 +410,7 @@ export default function Teacher() {
                         onChange={(e) =>
                           handleInputChange(null, "firstname", e.target.value)
                         }
-                        placeholder={t("teacherSetup.enterFirstName")}
+                        placeholder={t("placeholders.firstName")}
                         className={`w-full h-full px-2 py-1 border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
@@ -439,7 +427,7 @@ export default function Teacher() {
                         onChange={(e) =>
                           handleInputChange(null, "lastname", e.target.value)
                         }
-                        placeholder={t("teacherSetup.enterLastName")}
+                        placeholder={t("placeholders.lastName")}
                         className={`w-full h-full px-2 py-1 border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
@@ -455,7 +443,7 @@ export default function Teacher() {
                         onChange={(e) =>
                           handleInputChange(null, "phone", e.target.value)
                         }
-                        placeholder={t("teacherSetup.enterPhone")}
+                        placeholder={t("placeholders.phoneNumber")}
                         className={`w-full h-full px-2 py-1 border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
@@ -470,7 +458,7 @@ export default function Teacher() {
                         onClick={registerTeacher}
                         disabled={editSNo !== null}
                       >
-                        {t("table.newTeacher.addButton")}
+                        {t("buttons.addTeacher")}
                       </button>
                     </td>
                   </tr>

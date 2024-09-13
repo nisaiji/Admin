@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import add from "../../assets/images/add.png";
 import addclass from "../../assets/images/addclass.png";
 import students from "../../assets/images/students.png";
 import trash from "../../assets/images/trash.png";
@@ -17,81 +16,40 @@ import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
 
-const classOptions = [
-  "Pre-Nursery",
-  "Nursery",
-  "LKG",
-  "UKG",
-  "1st",
-  "2nd",
-  "3rd",
-  "4th",
-  "5th",
-  "6th",
-  "7th",
-  "8th",
-  "9th",
-  "10th",
-  "11th",
-  "12th",
-];
-
-const compareClasses = (a, b) => {
-  return classOptions.indexOf(a.name) - classOptions.indexOf(b.name);
-};
-
-const getNextClassName = (classes) => {
-  if (classes.length === 0) return classOptions[0];
-  const lastClass = classes[classes.length - 1].name;
-  switch (lastClass) {
-    case "Pre-Nursery":
-      return classOptions[1];
-    case "Nursery":
-      return classOptions[2];
-    case "LKG":
-      return classOptions[3];
-    case "UKG":
-      return classOptions[4];
-    case "1st":
-      return classOptions[5];
-    case "2nd":
-      return classOptions[6];
-    case "3rd":
-      return classOptions[7];
-    case "4th":
-      return classOptions[8];
-    case "5th":
-      return classOptions[9];
-    case "6th":
-      return classOptions[10];
-    case "7th":
-      return classOptions[11];
-    case "8th":
-      return classOptions[12];
-    case "9th":
-      return classOptions[13];
-    case "10th":
-      return classOptions[14];
-    case "11th":
-      return classOptions[15];
-    default:
-      return classOptions[0];
-  }
-};
-
 function ClassSetup() {
   const navigate = useNavigate();
-  const [count, setCount] = useState(0);
   const { t } = useTranslation();
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [classes, setClasses] = useState([]);
   const [isFlipped, setIsFlipped] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [newClassName, setNewClassName] = useState("");
   const [clickedClassId, setClickedClassId] = useState("");
   const [addSectionModelOpen, setAddSectionModelOpen] = useState(false);
   const [showDropdowns, setShowDropdowns] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const classOptions = [
+    t("options.preNursery"),
+    t("options.nursery"),
+    t("options.LKG"),
+    t("options.UKG"),
+    t("options.one"),
+    t("options.two"),
+    t("options.three"),
+    t("options.four"),
+    t("options.five"),
+    t("options.six"),
+    t("options.seven"),
+    t("options.eight"),
+    t("options.nine"),
+    t("options.ten"),
+    t("options.eleven"),
+    t("options.twelve"),
+  ];
+
+  const compareClasses = (a, b) => {
+    return classOptions.indexOf(a.name) - classOptions.indexOf(b.name);
+  };
 
   const handleCardClick = (index) => {
     setIsFlipped((prevIsFlipped) => {
@@ -110,7 +68,7 @@ function ClassSetup() {
         setClasses(sortedClasses);
       }
     } catch (e) {
-      // console.error("error in getching class ", e);
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -120,10 +78,10 @@ function ClassSetup() {
     try {
       const existingClassNames = classes.map((cls) => cls.name);
       if (existingClassNames.length >= classOptions.length) {
-        return toast.error(t("classSetup.errors.classroomFull"));
+        return toast.error(t("toasts.classroomFull"));
       }
       if (existingClassNames.includes(name)) {
-        return toast.error(t("classSetup.errors.classExists"));
+        return toast.error(t("toasts.classExists"));
       }
       setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.REGISTER_CLASS, {
@@ -131,10 +89,10 @@ function ClassSetup() {
       });
       if (res?.statusCode === 200) {
         getAllClass();
-        toast.success(t("classSetup.success.classCreated"));
+        toast.success(t("messages.class.createSuccess"));
       }
-    } catch (error) {
-      toast.error(error.message);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -148,12 +106,12 @@ function ClassSetup() {
         `${EndPoints.ADMIN.DELETE_CLASS}/${classId}`
       );
       if (response?.statusCode === 200) {
-        toast.success(t("classSetup.success.classDeleted"));
+        toast.success(t("messages.class.deleteSuccess"));
         setModalIsOpen(false);
         getAllClass();
       }
-    } catch (error) {
-      toast.error(error);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -184,15 +142,14 @@ function ClassSetup() {
           <div
             className={`${
               isDarkMode ? "bg-[#0d192f]" : "bg-white"
-            } w-full my-3 px-12 py-4`}
-            style={{ minHeight: "600px", borderRadius: 10 }}
+            } w-full my-3 px-12 py-4 min-h-[600px] rounded-[10px]`}
           >
             <h3
               className={`${
                 isDarkMode ? "text-white" : "text-black"
               } font-poppins-bold text-2xl md:text-4xl`}
             >
-              {t("classSetup.title")}
+              {t("titles.classRoom")}
             </h3>
             <div className="py-3 flex flex-wrap justify-start">
               {classes.map((data, index) => (
@@ -214,8 +171,7 @@ function ClassSetup() {
                           setModalIsOpen(true);
                         }}
                         alt="^"
-                        className="absolute rounded-full top-3 right-2 md:top-3 md:right-3 bg-white p-1"
-                        style={{ height: 26, width: 26 }}
+                        className="absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 bg-white p-1"
                       />
                     </div>
                     <div
@@ -280,7 +236,7 @@ function ClassSetup() {
                       }}
                     >
                       <div className="bg-[#464590] text-white text-center text-xs md:text-sm py-1 px-3 rounded-full">
-                        {t("classSetup.update")}
+                        {t("buttons.update")}
                       </div>
                     </Link>
                   </div>
@@ -308,15 +264,11 @@ function ClassSetup() {
                   <select
                     value=""
                     onChange={(e) => handleNewClassSubmit(e.target.value)}
-                    className={`cursor-pointer shadow appearance-none border rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline bg-[#464590] text-white text-center text-sm font-semibold  ${
+                    className={`cursor-pointer shadow appearance-none border rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline bg-[#464590] text-white text-center text-sm font-semibold max-h-[150px] overflow-y-auto ${
                       isDarkMode ? "bg-[#152f54] text-white" : "text-gray-700"
                     }`}
-                    style={{
-                      overflowY: "auto",
-                      maxHeight: "150px",
-                    }}
                   >
-                    <option value="">{t("classSetup.selectClass")}</option>
+                    <option value="">{t("buttons.addClass")}</option>
                     {availableClassOptions.map((item, i) => (
                       <option key={i} value={item}>
                         {item}
@@ -334,14 +286,14 @@ function ClassSetup() {
                     isDarkMode ? "text-white" : "text-[#01345B]"
                   } text-xl md:text-3xl font-bold`}
                 >
-                  {t("classSetup.noClassroom")}
+                  {t("titles.noClassroom")}
                 </p>
                 <p
                   className={`${
                     isDarkMode ? "text-white" : "text-[#01345b]"
                   } text-sm md:text-lg`}
                 >
-                  {t("classSetup.noClassroomDesc")}
+                  {t("titles.noClassroomDesc")}
                 </p>
               </div>
             )}

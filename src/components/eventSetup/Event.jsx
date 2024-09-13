@@ -13,49 +13,10 @@ import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import moment from "moment";
 import { useTranslation } from "react-i18next";
-import { t } from "i18next";
+import CONSTANT from "../../utils/constants";
 
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-const Calendar = ({
-  month,
-  year,
-  handlePrevMonth,
-  handleNextMonth,
-  handleMonthYearChange,
-}) => {
-  // const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
   const isDarkMode = false;
-  const { t } = useTranslation();
-  const [inputMonth, setInputMonth] = useState(month + 1);
-  const [inputYear, setInputYear] = useState(year);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "month") {
-      setInputMonth(value);
-    } else if (name === "year") {
-      setInputYear(value);
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleMonthYearChange(parseInt(inputMonth) - 1, parseInt(inputYear));
-  };
 
   return (
     <div
@@ -72,7 +33,7 @@ const Calendar = ({
           onClick={handlePrevMonth}
         />
         <div className={`${isDarkMode ? "text-white" : ""} date`}>
-          {`${months[month]} ${year}`}
+          {moment({ year, month }).format("MMMM YYYY")}
         </div>
         <FontAwesomeIcon
           icon={faAngleRight}
@@ -87,15 +48,7 @@ const Calendar = ({
           isDarkMode ? "text-white" : "text-[#1F317D]"
         } weekdays grid grid-cols-7 text-md font-medium capitalize pt-4`}
       >
-        {[
-          t("calendar.sunday"),
-          t("calendar.monday"),
-          t("calendar.tuesday"),
-          t("calendar.wednesday"),
-          t("calendar.thursday"),
-          t("calendar.friday"),
-          t("calendar.saturday"),
-        ].map((day) => (
+        {CONSTANT.WEEKDAYS.map((day) => (
           <div key={day} className="text-center">
             {day}
           </div>
@@ -105,18 +58,7 @@ const Calendar = ({
   );
 };
 
-const Day = ({
-  day,
-  isActive,
-  hasEvent,
-  isHoliday,
-  onClick,
-  isSunday,
-  isToday,
-}) => {
-  // const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-  const isDarkMode = false;
-
+const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
   const renderCss = () => {
     if (isHoliday && hasEvent) {
       return `
@@ -152,32 +94,7 @@ const DaysGrid = ({ days }) => {
 };
 
 const Event = () => {
-  const dayNames = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
   const isAdmin = useSelector((state) => state.appAuth.role) === "admin";
-  // const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const isDarkMode = false;
   const [today, setToday] = useState(new Date());
   const [month, setMonth] = useState(today.getMonth());
@@ -190,8 +107,6 @@ const Event = () => {
   const [eventLoading, setEventLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [newEvent, setNewEvent] = useState();
-  const dayName = dayNames[today.getDay()];
-  const monthName = monthNames[today.getMonth()];
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -206,7 +121,6 @@ const Event = () => {
       event: prevData?.editData?.event || false,
       date: prevData?.date ? moment(prevData.date).format("YYYY-MM-DD") : "",
     });
-    // console.log('prevdata',prevData);
     const handleChange = (e) => {
       const { name, value, type, checked } = e.target;
       setNewEventForm({
@@ -214,16 +128,15 @@ const Event = () => {
         [name]: type === "checkbox" ? checked : value,
       });
     };
-
-    // console.log("newEventForm", newEventForm);
-
     if (!isOpen) return null;
 
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="bg-white p-6 rounded-lg shadow-lg w-80">
           <h2 className="text-lg font-bold mb-4">
-            {prevData?.editData?.eventId ? "Edit Event" : "Add New Event"}
+            {prevData?.editData?.eventId
+              ? t("eventForm.title.edit")
+              : t("eventForm.title.add")}
           </h2>
           <div className="mb-4">
             <input
@@ -238,7 +151,7 @@ const Event = () => {
             <input
               type="text"
               name="title"
-              placeholder="Title"
+              placeholder={t("eventForm.form.title")}
               value={newEventForm.title}
               onChange={handleChange}
               className="w-full p-2 mb-2 border border-gray-300 rounded-lg"
@@ -247,7 +160,7 @@ const Event = () => {
           <div className="mb-4">
             <textarea
               name="description"
-              placeholder="Description"
+              placeholder={t("eventForm.form.description")}
               value={newEventForm.description}
               onChange={handleChange}
               className="w-full p-2 mb-2 border border-gray-300 rounded-lg"
@@ -282,7 +195,7 @@ const Event = () => {
               className="px-4 py-2 bg-gray-300 rounded-lg"
               onClick={() => isClose(false)}
             >
-              {t("events.cancel")}
+              {t("buttons.cancel")}
             </button>
             <button
               className="px-4 py-2 bg-blue-900 text-white rounded-lg"
@@ -290,7 +203,9 @@ const Event = () => {
                 isSubmit(newEventForm, prevData?.editData?.eventId)
               }
             >
-              {prevData?.editData?.eventId ? "Update" : "Submit"}
+              {prevData?.editData?.eventId
+                ? t("buttons.update")
+                : t("buttons.submit")}
             </button>
           </div>
         </div>
@@ -321,8 +236,8 @@ const Event = () => {
         );
         setEventsArr(sortedEvents);
       }
-    } catch (error) {
-      console.error("Error fetching events:", error);
+    } catch (e) {
+      toast.error(e);
     } finally {
       setEventLoading(false);
     }
@@ -334,7 +249,6 @@ const Event = () => {
     setMonth(todayDate.getMonth());
     setYear(todayDate.getFullYear());
     setActiveDay(todayDate.getDate());
-    // setNewEvent({ ...newEvent, date: todayDate }); // need to discuss
   };
 
   const handleGotoDate = (e) => {
@@ -351,17 +265,16 @@ const Event = () => {
 
   const handleAddEvent = async (newEvent, eventId) => {
     try {
-      // console.log(eventId, "eventid");
       if (!newEvent.title.trim()) {
-        toast.error(t("events.titleRequired"));
+        toast.error(t("toasts.titleRequired"));
         return;
       }
       if (!newEvent.description.trim()) {
-        toast.error(t("events.descRequired"));
+        toast.error(t("toasts.descRequired"));
         return;
       }
       if (!newEvent.holiday && !newEvent.event) {
-        toast.error(t("events.oneCheckbox"));
+        toast.error(t("toasts.oneCheckbox"));
         return;
       }
       setLoading(true);
@@ -387,8 +300,8 @@ const Event = () => {
       if (res?.statusCode === 200) {
         setShowAddEvent(false);
         fetchEvents();
-        if (eventId) toast.success(t("events.eventUpdated"));
-        else toast.success(t("events.eventCreated"));
+        if (eventId) toast.success(t("messages.event.updateSuccess"));
+        else toast.success(t("messages.event.createSuccess"));
       }
     } catch (e) {
       toast.error(e);
@@ -507,11 +420,6 @@ const Event = () => {
     return days;
   };
 
-  const handleDeleteEvent = (eventId) => {
-    setEventToDelete(eventId);
-    setShowDeleteConfirmation(true);
-  };
-
   const confirmDeleteEvent = async () => {
     try {
       setLoading(true);
@@ -519,13 +427,13 @@ const Event = () => {
         `${EndPoints.ADMIN.DELETE_EVENT}/${eventToDelete}`
       );
       if (response?.statusCode === 200) {
-        toast.success(t("events.eventDeleted"));
+        toast.success(t("messages.event.deleteSuccess"));
         setShowDeleteConfirmation(false);
         setLoading(false);
         setEventsArr(eventsArr.filter((event) => event._id !== eventToDelete));
       }
-    } catch (error) {
-      console.error("Error deleting event:", error);
+    } catch (e) {
+      toast.error(e);
     }
   };
 
@@ -542,7 +450,6 @@ const Event = () => {
             {t("dashboard.calendar")}
           </p>
           <p className="text-xl text-[#7B79FF] font-poppins-bold">
-            {/* {activeDay} {monthName} {year},{dayName} */}
             {moment(new Date()).format("D MMMM YYYY, dddd")}
           </p>
         </div>
@@ -567,7 +474,7 @@ const Event = () => {
           >
             <input
               type="text"
-              placeholder="mm/yyyy"
+              placeholder={t("calendar.gotoDatePlaceholder")}
               className={`${
                 isDarkMode ? "bg-gray-800 text-white" : ""
               } date-input w-full h-8 outline-none text-[#8A89FA] px-2`}
@@ -585,7 +492,7 @@ const Event = () => {
             className="today-btn px-3 py-1 border-2 border-[#8A89FA] bg-[#f2f2ff] text-[#8A89FA] rounded-md"
             onClick={handleToday}
           >
-            {t("dashboard.today")}
+            {t("buttons.today")}
           </button>
         </div>
       </div>

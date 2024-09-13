@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import Switch from "react-switch";
 import { appConfigAction } from "../store/AppConfigSlice";
+import Tools from "../assets/images/Tools.png";
+import Down from "../assets/images/Down.png";
+import { useTranslation } from "react-i18next";
 import {
   getItem,
   KEY_ACCESS_TOKEN,
   removeItem,
 } from "../services/LocalStorageManager";
-import Tools from "../assets/images/Tools.png";
-import Down from "../assets/images/Down.png";
-import { useTranslation } from "react-i18next";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -24,11 +23,6 @@ const Navbar = () => {
   const menuRef = useRef(null);
   const profileMenuRef = useRef(null);
   const { t } = useTranslation();
-  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-
-  const handleChange = () => {
-    dispatch(appConfigAction.toggleDarkMode());
-  };
 
   const handleToggleMenu = () => {
     setMenuOpen((prevState) => !prevState);
@@ -84,6 +78,7 @@ const Navbar = () => {
               {t("logo")}
             </span>
           </Link>
+
           {/* setup menu */}
           <div
             className="relative pl-6 z-10 ml-5"
@@ -115,7 +110,7 @@ const Navbar = () => {
                       }
                       className="block px-4 py-2 hover:text-[#05022B] hover:bg-white"
                     >
-                      {t("classroom")}
+                      {t("titles.classRoom")}
                     </div>
                     <Link
                       to="/event"
@@ -142,7 +137,7 @@ const Navbar = () => {
                       to="/class-setup"
                       className="block px-4 py-2 hover:text-[#05022B] hover:bg-white"
                     >
-                      {t("classroom")}
+                      {t("titles.classRoom")}
                     </Link>
                     <Link
                       to="/event"
@@ -174,7 +169,7 @@ const Navbar = () => {
                     : getItem("username")}
                 </div>
                 <div className="text-white text-xs">
-                  {role === "teacher" ? "Teacher" : "Admin"}
+                  {role === "teacher" ? t("roles.teacher") : t("roles.admin")}
                 </div>
               </div>
               <img src={Down} alt="Dropdown" className="w-4 h-2" />
