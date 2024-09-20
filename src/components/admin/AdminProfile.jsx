@@ -14,25 +14,28 @@ import EndPoints from "../../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
 import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
+import statesAndCity from "../../assets/locale/statesAndCity/en";
 
 export default function AdminProfile() {
   const [admin, setAdmin] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [filteredCities, setFilteredCities] = useState([]);
   const { t } = useTranslation();
 
   const validationSchema = Yup.object({
-    schoolName: Yup.string().required(t("validationError.schoolName")),
-    principal: Yup.string().required(t("validationError.principalName")),
-    username: Yup.string().required(t("validationError.adminName")),
-    schoolBoard: Yup.string().required(t("validationError.schoolBoard")),
-    affiliationNo: Yup.string().required(
-      t("validationError.affiliationNumber")
-    ),
-    address: Yup.string().required(t("validationError.address")),
-    city: Yup.string().required(t("validationError.city")),
-    state: Yup.string().required(t("validationError.state")),
-    phone: Yup.string().length(10).required(t("validationError.phone")),
+    schoolName: Yup.string().trim().required(t("validationError.schoolName")),
+    principal: Yup.string().trim().required(t("validationError.principalName")),
+    username: Yup.string().trim().required(t("validationError.adminName")),
+    schoolBoard: Yup.string().trim().required(t("validationError.schoolBoard")),
+    affiliationNo: Yup.string()
+      .trim()
+      .required(t("validationError.affiliationNumber")),
+    address: Yup.string().trim().required(t("validationError.address")),
+    city: Yup.string().trim().required(t("validationError.city")),
+    state: Yup.string().trim().required(t("validationError.state")),
+    phone: Yup.string().trim().length(10).required(t("validationError.phone")),
     email: Yup.string()
+      .trim()
       .email(t("validationError.emailAddress"))
       .required(t("validationError.email")),
   });
@@ -62,11 +65,21 @@ export default function AdminProfile() {
     onSubmit: (values) => {},
   });
 
+  const handleStateChange = (event) => {
+    formik.handleChange(event);
+    const selectedState = event.target.value;
+    const state = statesAndCity.states.find((s) => s.name === selectedState);
+    setFilteredCities(state ? state.cities : []);
+  };
+
   const getadmin = async () => {
     try {
       setLoading(true);
       const res = await axiosClient.get(EndPoints.ADMIN.GET_ADMIN);
       if (res?.statusCode === 200) {
+        const initialState = res.result.state || "";
+        const state = statesAndCity.states.find((s) => s.name === initialState);
+        setFilteredCities(state ? state.cities : []);
         setAdmin(res.result);
         formik.setValues({
           schoolName: res.result.schoolName || "",
@@ -78,7 +91,7 @@ export default function AdminProfile() {
           address: res.result.address || "",
           email: res.result.email || "",
           city: res.result.city || "",
-          state: res.result.state || "",
+          state: initialState || "",
           phone: res.result.phone || "",
           website: res.result.website || "",
           facebook: res.result.facebook || "",
@@ -105,11 +118,10 @@ export default function AdminProfile() {
         "schoolBoard",
         "affiliationNo",
         "address",
-        "city",
         "state",
+        "city",
         "email",
       ];
-
       let allValid = true;
       for (const field of fieldsToValidate) {
         try {
@@ -440,6 +452,36 @@ export default function AdminProfile() {
           </div>
           <div className="flex flex-col w-full md:w-1/4">
             <label className="text-sm font-semibold leading-5 text-neutral-800">
+              {t("adminProfile.state")} <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="state"
+              value={formik.values.state}
+              onChange={handleStateChange}
+              onBlur={formik.handleBlur}
+              className={`flex-auto px-2 py-1 mt-1 bg-white border ${
+                formik.errors.state && formik.touched.state
+                  ? "border-red-500"
+                  : "border-gray-200"
+              } text-black`}
+            >
+              {!formik.values.state && (
+                <option value=""> {t("adminProfile.state")}</option>
+              )}
+              {statesAndCity.states.map((state) => (
+                <option key={state.id} value={state.name}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+            {formik.errors.state && formik.touched.state && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.state}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col w-full md:w-1/4">
+            <label className="text-sm font-semibold leading-5 text-neutral-800">
               {t("adminProfile.city")} <span className="text-red-500">*</span>
             </label>
             <select
@@ -453,36 +495,15 @@ export default function AdminProfile() {
                   : "border-gray-200"
               } text-black`}
             >
-              <option value="">{t("adminProfile.city")}</option>
-              <option value="Indore">Indore</option>
+              {filteredCities.map((city) => (
+                <option key={city.id} value={city.name}>
+                  {city.name}
+                </option>
+              ))}
             </select>
             {formik.errors.city && formik.touched.city && (
               <div className="text-red-500 text-sm mt-1">
                 {formik.errors.city}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col w-full md:w-1/4">
-            <label className="text-sm font-semibold leading-5 text-neutral-800">
-              {t("adminProfile.state")} <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="state"
-              value={formik.values.state}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className={`flex-auto px-2 py-1 mt-1 bg-white border ${
-                formik.errors.state && formik.touched.state
-                  ? "border-red-500"
-                  : "border-gray-200"
-              } text-black`}
-            >
-              <option value=""> {t("adminProfile.state")}</option>
-              <option value="Madhya Pradesh">Madhya Pradesh</option>
-            </select>
-            {formik.errors.state && formik.touched.state && (
-              <div className="text-red-500 text-sm mt-1">
-                {formik.errors.state}
               </div>
             )}
           </div>
