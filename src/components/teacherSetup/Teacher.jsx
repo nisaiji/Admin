@@ -20,6 +20,8 @@ export default function Teacher() {
   const { t } = useTranslation();
   const searchInputRef = useRef(null);
   const newTeacherFirstNameRef = useRef(null);
+
+  // State variables
   const [teacherInfoModelOpen, setTeacherInfoModelOpen] = useState(false);
   const [currTeacher, setCurrTeacher] = useState([]);
   const [teachers, setTeachers] = useState([]);
@@ -36,19 +38,20 @@ export default function Teacher() {
     phone: "",
   });
 
+  // Capitalizes the first letter of a string
   const capitalizeFirstLetter = (string) => {
     if (!string) return string;
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
+  // Validates teacher data
   const validateData = (teacher) => {
     if (!teacher.firstname.trim()) return t("validationError.firstName");
     if (teacher.firstname.length < 3)
       return t("validationError.validationFirstNameLength");
     if (REGEX.NUMBER.test(teacher.firstname))
       return t("validationError.validationFirstNameNoNumbers");
-    if (!teacher.lastname.trim())
-      return t("validationError.lastName");
+    if (!teacher.lastname.trim()) return t("validationError.lastName");
     if (teacher.lastname.length < 3)
       return t("validationError.validationLastNameLength");
     if (REGEX.NUMBER.test(teacher.lastname))
@@ -59,6 +62,7 @@ export default function Teacher() {
     return "";
   };
 
+  // Registers a new teacher
   const registerTeacher = async () => {
     try {
       const error = validateData(newTeacher);
@@ -68,6 +72,7 @@ export default function Teacher() {
       }
       setValidationError("");
       setLoading(true);
+
       const response = await axiosClient.post(
         EndPoints.ADMIN.REGISTER_TEACHER,
         {
@@ -76,15 +81,11 @@ export default function Teacher() {
           phone: newTeacher.phone.trim(),
         }
       );
-      if (response.statusCode === 200 || response.statusCode === 201) {
+
+      if ([200, 201].includes(response?.statusCode)) {
         toast.success(t("messages.teacher.registerSuccess"));
         getTeacher();
-        setNewTeacher({
-          SNo: null,
-          firstname: "",
-          lastname: "",
-          phone: "",
-        });
+        setNewTeacher({ SNo: null, firstname: "", lastname: "", phone: "" });
       }
     } catch (e) {
       toast.error(e);
@@ -93,13 +94,13 @@ export default function Teacher() {
     }
   };
 
+  // Fetches the teacher list from the server
   const getTeacher = async () => {
     try {
       setLoading(true);
       const response = await axiosClient.get(EndPoints.ADMIN.TEACHER_LIST);
       if (response?.statusCode === 200) {
-        const fetchedTeachers = response.result;
-        const teachersWithSNos = fetchedTeachers.map((teacher, index) => ({
+        const teachersWithSNos = response?.result?.map((teacher, index) => ({
           ...teacher,
           SNo: index + 1,
         }));
@@ -112,43 +113,51 @@ export default function Teacher() {
     }
   };
 
+  // Load teacher data when component mounts
   useEffect(() => {
     getTeacher();
   }, []);
 
+  // Shows teacher info modal
   const handleShowInfo = (teacher) => {
     setCurrTeacher(teacher);
     setTeacherInfoModelOpen(true);
   };
 
+  // Handles input change for both new and existing teachers
   const handleInputChange = (SNo, field, value) => {
     if (SNo === null) {
       setNewTeacher({ ...newTeacher, [field]: value });
     } else {
-      const newTeachers = teachers.map((teacher) =>
-        teacher.SNo === SNo ? { ...teacher, [field]: value } : teacher
+      setTeachers((prevTeachers) =>
+        prevTeachers.map((teacher) =>
+          teacher.SNo === SNo ? { ...teacher, [field]: value } : teacher
+        )
       );
-      setTeachers(newTeachers);
     }
   };
 
+  // Updates an existing teacher
   const updateTeacher = async (teacher) => {
     const e = validateData(teacher);
     if (e) {
       toast.error(e);
       return;
     }
+
     try {
       setLoading(true);
-      const transformedTeacher = {
+      const updatedTeacher = {
         firstname: capitalizeFirstLetter(teacher.firstname.trim()),
         lastname: capitalizeFirstLetter(teacher.lastname.trim()),
         phone: teacher.phone.trim(),
       };
+
       const response = await axiosClient.put(
         `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
-        transformedTeacher
+        updatedTeacher
       );
+
       if (response?.statusCode === 200) {
         getTeacher();
         toast.success(t("message.teacher.updateSuccess"));
@@ -161,13 +170,14 @@ export default function Teacher() {
     }
   };
 
+  // Deletes a teacher
   const handleDelete = async () => {
     try {
-      const teacherId = currTeacher._id;
       setLoading(true);
       const response = await axiosClient.delete(
-        `/${EndPoints.ADMIN.DELETE_TEACHER}/${teacherId}`
+        `${EndPoints.ADMIN.DELETE_TEACHER}/${currTeacher._id}`
       );
+
       if (response?.statusCode === 200) {
         getTeacher();
         toast.success(t("message.teacher.deleteSuccess"));
@@ -180,10 +190,12 @@ export default function Teacher() {
     }
   };
 
+  // Filters teachers based on search query
   const handleSearchInputChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
+  // Filters the teachers list based on search input
   const filteredTeachers = teachers.filter(
     (teacher) =>
       teacher.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -193,6 +205,7 @@ export default function Teacher() {
 
   return (
     <>
+      {/* Loading spinner */}
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
           <Spinner />
@@ -204,11 +217,13 @@ export default function Teacher() {
             isDarkMode ? "bg-[#0D192F] text-white" : "bg-white "
           } p-4 min-h-screen`}
         >
+          {/* Toast notifications */}
           <Toaster position="top-center" reverseOrder={false} />
           <div className="px-4">
             <div className="text-4xl font-semibold px-5 py-3">
               {t("titles.teacherSetup")}
             </div>
+            {/* Search bar */}
             <div className="p-3">
               <div className="flex justify-between w-full relative z-10">
                 <div className="relative w-full">
@@ -231,6 +246,8 @@ export default function Teacher() {
                 </div>
               </div>
             </div>
+
+            {/* Teacher list table */}
             <div className="overflow-x-auto mt-6">
               <table
                 className={`${
@@ -244,6 +261,7 @@ export default function Teacher() {
                       : "bg-[#e3e3ee] text-[#6d6ca7]"
                   } text-base font-medium`}
                 >
+                  {/* Table headings */}
                   <tr>
                     <th className="px-4 py-2 border border-gray-400">
                       {t("labels.sNo")}
@@ -265,6 +283,7 @@ export default function Teacher() {
                 <tbody className="text-sm font-normal text-gray-900">
                   {filteredTeachers.map((teacher) => (
                     <tr key={teacher.SNo}>
+                      {/* SNo */}
                       <td
                         className={`${
                           isDarkMode ? "text-white" : ""
@@ -272,6 +291,7 @@ export default function Teacher() {
                       >
                         {teacher.SNo}
                       </td>
+                      {/* First Name */}
                       <td className="px-4 py-2 border text-sm border-[#c1c0ca]">
                         <input
                           type="text"
@@ -293,6 +313,7 @@ export default function Teacher() {
                           autoFocus={editSNo === newTeacher.SNo}
                         />
                       </td>
+                      {/* Last Name */}
                       <td className="px-4 py-2 text-sm  border border-[#c1c0ca]">
                         <input
                           type="text"
@@ -313,6 +334,7 @@ export default function Teacher() {
                           disabled={editSNo !== teacher.SNo}
                         />
                       </td>
+                      {/* Phone */}
                       <td className="px-4 py-2 text-sm border border-[#c1c0ca]">
                         <input
                           type="text"
@@ -333,6 +355,7 @@ export default function Teacher() {
                           disabled={editSNo !== teacher.SNo}
                         />
                       </td>
+                      {/* Actions */}
                       <td className="pl-3 pr-5 py-2 text-sm font-poppins-bold border border-[#c1c0ca]">
                         {editSNo === teacher.SNo ? (
                           <button
@@ -396,6 +419,7 @@ export default function Teacher() {
                     </tr>
                   ))}
                   <tr>
+                    {/* SNo */}
                     <td
                       className={`${
                         isDarkMode ? "text-white" : ""
@@ -403,6 +427,7 @@ export default function Teacher() {
                     >
                       {teachers.length + 1}
                     </td>
+                    {/* First Name */}
                     <td className="px-4 py-2 border border-[#c1c0ca]">
                       <input
                         type="text"
@@ -420,6 +445,7 @@ export default function Teacher() {
                         disabled={editSNo !== null}
                       />
                     </td>
+                    {/* Last Name */}
                     <td className="px-4 py-2 border border-[#c1c0ca]">
                       <input
                         type="text"
@@ -436,6 +462,7 @@ export default function Teacher() {
                         disabled={editSNo !== null}
                       />
                     </td>
+                    {/* Phone */}
                     <td className="px-4 py-2 border border-[#c1c0ca]">
                       <input
                         type="text"
@@ -452,6 +479,7 @@ export default function Teacher() {
                         disabled={editSNo !== null}
                       />
                     </td>
+                    {/* Actions */}
                     <td className="px-4 py-2 border border-[#c1c0ca]">
                       <button
                         className="bg-[#464590] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full"
@@ -465,6 +493,7 @@ export default function Teacher() {
                 </tbody>
               </table>
             </div>
+            {/* Validation error for Inputfields */}
             {validationError !== "" && (
               <div className="text-red-500 text-center mt-2">
                 {validationError}
@@ -473,12 +502,16 @@ export default function Teacher() {
           </div>
         </div>
       </div>
+
+      {/* Teacher info modal */}
       {teacherInfoModelOpen && (
         <TeacherInfo
           modelOpen={setTeacherInfoModelOpen}
           currTeacher={currTeacher}
         />
       )}
+
+      {/* Delete confirmation modal */}
       {showDeleteConfirmation && (
         <DeletePopup
           isVisible={showDeleteConfirmation}
