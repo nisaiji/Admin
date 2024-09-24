@@ -13,7 +13,7 @@ import Background from "../assets/images/Background.png";
 
 function Signup() {
   const [ishide, setIsHide] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [t] = useTranslation();
 
@@ -59,7 +59,7 @@ function Signup() {
     validationSchema, // Validation schema to validate form inputs
     validateOnChange: false,
     validateOnBlur: true,
-    onSubmit: async (values, { setSubmitting, resetForm }) => {
+    onSubmit: async (values, { resetForm }) => {
       if (!formik.isValid || !formik.dirty) return;
 
       setLoading(true);
@@ -79,7 +79,6 @@ function Signup() {
         toast.error(e);
       } finally {
         setLoading(false);
-        setSubmitting(false);
       }
     },
   });
@@ -176,14 +175,12 @@ function Signup() {
               <button
                 type="submit"
                 className="w-full bg-blue-900 py-3 text-white mt-5"
-                disabled={formik.isSubmitting || loading}
+                disabled={loading}
               >
-                {formik.isSubmitting || loading
-                  ? t("register.submitting")
-                  : t("register.registerNow")}
+                {loading ? t("register.submitting") : t("register.registerNow")}
               </button>
             </form>
-            
+
             {/* Link to login page for existing users */}
             <div className="text-right mt-2 text-sm">
               {t("register.haveAccount")}
