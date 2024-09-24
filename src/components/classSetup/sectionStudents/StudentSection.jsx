@@ -31,7 +31,6 @@ export default function StudentSection() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [popupVisible, setPopupVisible] = useState(false);
   const [newStudent, setNewStudent] = useState({
     SNo: null,
     firstname: "",
