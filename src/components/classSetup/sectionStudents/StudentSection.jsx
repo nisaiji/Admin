@@ -94,27 +94,31 @@ export default function StudentSection() {
     }
   };
 
-  // const checkIsStudentExistForSameParent = () => {
-  //   const userExist = students.find(
-  //     (item) => item?.phone === newStudent?.phone
-  //   );
-  //   if (userExist) {
-  //     const existFullName = `${userExist?.firstname.trim()} ${userExist?.lastname.trim()}`;
-  //     const newFullName = `${newStudent?.firstname.trim()} ${newStudent?.lastname.trim()}`;
+  // check same entry in registration
+  const checkIsStudentExistForSameParent = () => {
+    const userExist = students.find(
+      (item) => item?.phone === newStudent?.phone
+    );
+    if (userExist) {
+      const existFullName = `${userExist?.firstname.trim()} ${userExist?.lastname.trim()}`;
+      const newFullName = `${newStudent?.firstname.trim()} ${newStudent?.lastname.trim()}`;
 
-  //     if (
-  //       existFullName.toLowerCase() === newFullName.toLowerCase() &&
-  //       userExist?.gender === newStudent?.gender
-  //     ) {
-  //       toast.error(t("duplicate"));
-  //       return false;
-  //     } else {
-  //       setPopupVisible(true);
-  //       return false;
-  //     }
-  //   }
-  //   return true;
-  // };
+      if (
+        existFullName.toLowerCase() === newFullName.toLowerCase() &&
+        userExist?.gender === newStudent?.gender
+      ) {
+        toast.error(t("duplicate"));
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const registerStudent = async () => {
+    if (checkIsStudentExistForSameParent()) {
+      handleStudentAction(newStudent, false);
+    }
+  };
 
   // validation schema
   const validateData = (student) => {
@@ -631,7 +635,7 @@ export default function StudentSection() {
                   </td>
                   <td className="px-2 py-2 border border-[#c1c0ca]">
                     <button
-                      onClick={() => handleStudentAction(newStudent, false)}
+                      onClick={() => registerStudent()}
                       className="bg-[#464590] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full"
                     >
                       {t("buttons.addStudent")}
@@ -660,13 +664,6 @@ export default function StudentSection() {
           onDelete={handleDelete}
         />
       )}
-      {/* {popupVisible && (
-        <ConformationPopup
-          isVisible={popupVisible}
-          onClose={() => setPopupVisible(false)}
-          submit={handleRegisterStudent}
-        />
-      )} */}
     </div>
   );
 }
