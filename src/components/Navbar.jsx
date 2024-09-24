@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { appConfigAction } from "../store/AppConfigSlice";
 import Tools from "../assets/images/Tools.png";
 import Down from "../assets/images/Down.png";
 import { useTranslation } from "react-i18next";
@@ -37,6 +36,7 @@ const Navbar = () => {
     setProfileMenuOpen(false);
   };
 
+  // close menu when click outside
   const handleOutsideClick = (event) => {
     if (
       menuRef.current &&
@@ -78,8 +78,6 @@ const Navbar = () => {
               {t("logo")}
             </span>
           </Link>
-
-          {/* setup menu */}
           <div
             className="relative pl-6 z-10 ml-5"
             onMouseEnter={() => setMenuOpen(true)}
@@ -95,6 +93,7 @@ const Navbar = () => {
               </button>
               <img src={Down} alt="Dropdown" className="w-4 h-2" />
             </div>
+            {/* setup menu */}
             {menuOpen && (
               <div
                 ref={menuRef}
@@ -174,6 +173,7 @@ const Navbar = () => {
               </div>
               <img src={Down} alt="Dropdown" className="w-4 h-2" />
             </div>
+            {/* profile menu */}
             {profileMenuOpen && (
               <div
                 ref={profileMenuRef}

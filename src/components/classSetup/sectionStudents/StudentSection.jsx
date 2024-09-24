@@ -17,7 +17,7 @@ import ConformationPopup from "../../ConformationPopup";
 import REGEX from "../../../utils/regix";
 
 export default function StudentSection() {
-  const { t } = useTranslation();
+  const [t] = useTranslation();
   const location = useLocation();
   const { classId, sectionId, className, sectionName } = location.state;
   const searchInputRef = useRef(null);
@@ -39,8 +39,8 @@ export default function StudentSection() {
     gender: "",
     parentName: "",
     phone: "",
-    classId: classId,
-    sectionId: sectionId,
+    classId,
+    sectionId,
   });
   const genders = [t("options.male"), t("options.female"), t("options.other")];
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
@@ -48,19 +48,16 @@ export default function StudentSection() {
 
   useEffect(() => {
     fetchStudents();
-    if (!isTeacher) {
-      getSectionInfo();
-    }
+    if (!isTeacher) getSectionInfo();
   }, []);
 
+  // get class teacher info api
   const getSectionInfo = async () => {
     try {
       const res = await axiosClient.get(
         `${EndPoints.ADMIN.SECTION_INFO}/${sectionId}`
       );
-      if (res?.statusCode === 200) {
-        setClassTeacher(res.result.teacher);
-      }
+      if (res?.statusCode === 200) setClassTeacher(res.result.teacher);
     } catch (e) {
       toast.error(e);
     }
@@ -71,26 +68,24 @@ export default function StudentSection() {
     setStudentInfoModelOpen(true);
   };
 
+  // get student api
   const fetchStudents = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.GET_SECTION_STUDENTS;
-    else url = EndPoints.ADMIN.GET_SECTION_STUDENTS;
+    const url = isTeacher
+      ? EndPoints.TEACHER.GET_SECTION_STUDENTS
+      : EndPoints.ADMIN.GET_SECTION_STUDENTS;
     try {
       setLoading(true);
-      let res;
-      if (isTeacher) {
-        const sectionId = teacherSectionId;
-        res = await axiosClient.get(`${url}/${sectionId}`);
-      } else res = await axiosClient.get(`${url}/${sectionId}`);
+      const res = await axiosClient.get(
+        `${url}/${isTeacher ? teacherSectionId : sectionId}`
+      );
       if (res?.statusCode === 200) {
-        const fetchedStudents = res?.result?.studentList;
-        const studentsWithSNos = fetchedStudents.map((student, index) => ({
+        const studentList = res?.result?.studentList.map((student, index) => ({
           ...student,
           SNo: index + 1,
           parentName: student.parent?.fullname || "",
           phone: student.parent?.phone || "",
         }));
-        setStudents(studentsWithSNos);
+        setStudents(studentList);
       }
     } catch (e) {
       toast.error(e);
@@ -99,158 +94,124 @@ export default function StudentSection() {
     }
   };
 
-  const checkIsStudentExistForSameParent = () => {
-    const userExist = students.find(
-      (item) => item?.phone === newStudent?.phone
-    );
-    if (userExist) {
-      const existFullName = `${userExist?.firstname.trim()} ${userExist?.lastname.trim()}`;
-      const newFullName = `${newStudent?.firstname.trim()} ${newStudent?.lastname.trim()}`;
+  // const checkIsStudentExistForSameParent = () => {
+  //   const userExist = students.find(
+  //     (item) => item?.phone === newStudent?.phone
+  //   );
+  //   if (userExist) {
+  //     const existFullName = `${userExist?.firstname.trim()} ${userExist?.lastname.trim()}`;
+  //     const newFullName = `${newStudent?.firstname.trim()} ${newStudent?.lastname.trim()}`;
 
-      if (
-        existFullName.toLowerCase() === newFullName.toLowerCase() &&
-        userExist?.gender === newStudent?.gender
-      ) {
-        toast.error(t("duplicate"));
-        return false;
-      } else {
-        setPopupVisible(true);
-        return false;
-      }
-    }
-    return true;
-  };
+  //     if (
+  //       existFullName.toLowerCase() === newFullName.toLowerCase() &&
+  //       userExist?.gender === newStudent?.gender
+  //     ) {
+  //       toast.error(t("duplicate"));
+  //       return false;
+  //     } else {
+  //       setPopupVisible(true);
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // };
 
-  const capitalizeFirstLetter = (string) => {
-    if (!string) return string;
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-  };
-
+  // validation schema
   const validateData = (student) => {
-    if (!student.firstname.trim()) return t("validationError.enterFirstName");
-    if (student.firstname.length < 3)
-      return t("validationError.validationFirstNameLength");
-    if (REGEX.NUMBER.test(student.firstname))
-      return t("validationError.validationFirstNameNoNumbers");
-
-    if (!student.lastname.trim()) return t("validationError.enterLastName");
-    if (student.lastname.length < 3)
-      return t("validationError.validationLastNameLength");
-    if (REGEX.NUMBER.test(student.lastname))
-      return t("validationError.validationLastNameNoNumbers");
-
+    if (
+      !student.firstname.trim() ||
+      student.firstname.length < 3 ||
+      REGEX.NUMBER.test(student.firstname)
+    ) {
+      return t("validationError.enterFirstName");
+    }
+    if (
+      !student.lastname.trim() ||
+      student.lastname.length < 3 ||
+      REGEX.NUMBER.test(student.lastname)
+    ) {
+      return t("validationError.enterLastName");
+    }
     if (!student.gender) return t("validationError.gender");
-
-    if (!student.parentName.trim()) return t("validationError.parentName");
-    if (student.parentName.length < 3)
-      return t("validationError.validationParentFullNameLength");
-    if (REGEX.NUMBER.test(student.parentName))
-      return t("validationError.validationParentFullNameNoNumbers");
-    if (!student.phone.trim()) return t("validationError.validationPhone");
-    if (!REGEX.PHONE_LENGTH.test(student.phone))
-      return t("validationError.validationPhoneCount");
+    if (
+      !student.parentName.trim() ||
+      student.parentName.length < 3 ||
+      REGEX.NUMBER.test(student.parentName)
+    ) {
+      return t("validationError.parentName");
+    }
+    if (!REGEX.PHONE_LENGTH.test(student.phone.trim())) {
+      return t("validationError.validationPhone");
+    }
     return "";
   };
 
-  const registerStudent = async () => {
-    const error = validateData(newStudent);
-    if (error) {
-      setValidationError(error);
-      return;
-    }
-    setValidationError("");
-    if (checkIsStudentExistForSameParent()) {
-      handleRegisterStudent();
-    }
-  };
-  const handleRegisterStudent = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.REGISTER_SECTION_STUDENT;
-    else url = EndPoints.ADMIN.REGISTER_SECTION_STUDENT;
-    delete newStudent.SNo;
-    const transformedStudent = {
-      ...newStudent,
-      firstname: capitalizeFirstLetter(newStudent.firstname.trim()),
-      lastname: capitalizeFirstLetter(newStudent.lastname.trim()),
-      parentName: capitalizeFirstLetter(newStudent.parentName.trim()),
-    };
-    try {
-      setLoading(true);
-      let res;
-      if (isTeacher) {
-        const sectionId = teacherSectionId;
-        res = await axiosClient.post(url, {
-          ...transformedStudent,
-          classId,
-          sectionId,
-        });
-      } else {
-        res = await axiosClient.post(url, {
-          ...transformedStudent,
-          classId,
-          sectionId,
-        });
-      }
-      if (res?.statusCode === 200 || res?.statusCode === 201) {
-        toast.success(<b>{res.result}</b>);
-        fetchStudents();
-        setNewStudent({
-          SNo: null,
-          firstname: "",
-          lastname: "",
-          gender: "",
-          parentName: "",
-          phone: "",
-          classId: classId,
-          sectionId: sectionId,
-        });
-      }
-    } catch (e) {
-      toast.error(e);
-    } finally {
-      setLoading(false);
-      setPopupVisible(false);
-    }
-  };
+  const capitalize = (str) =>
+    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
   const handleInputChange = (sNo, field, value) => {
     if (sNo === null) {
       setNewStudent({ ...newStudent, [field]: value });
     } else {
-      setStudents((prevStudents) => {
-        const newItems = [...prevStudents];
-        newItems[sNo - 1] = { ...newItems[sNo - 1], [field]: value };
-        return newItems;
-      });
+      setStudents((prev) =>
+        prev.map((student, idx) =>
+          idx === sNo - 1 ? { ...student, [field]: value } : student
+        )
+      );
     }
   };
 
-  const updateStudent = async (student) => {
+  // api for registering and updating student
+  const handleStudentAction = async (student, isUpdate = false) => {
     const e = validateData(student);
     if (e) {
       toast.error(e);
       return;
     }
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.UPDATE_SECTION_STUDENT;
-    else url = EndPoints.ADMIN.UPDATE_SECTION_STUDENT;
+
+    const url = isTeacher
+      ? isUpdate
+        ? EndPoints.TEACHER.UPDATE_SECTION_STUDENT
+        : EndPoints.TEACHER.REGISTER_SECTION_STUDENT
+      : isUpdate
+      ? EndPoints.ADMIN.UPDATE_SECTION_STUDENT
+      : EndPoints.ADMIN.REGISTER_SECTION_STUDENT;
+
+    if (!isTeacher && !isUpdate) {
+      delete student.SNo;
+    }
+
+    const transformedStudent = {
+      ...student,
+      firstname: capitalize(student.firstname.trim()),
+      lastname: capitalize(student.lastname.trim()),
+      parentName: capitalize(student.parentName.trim()),
+      classId,
+      sectionId,
+    };
+
     try {
-      const transformedStudent = {
-        firstname: capitalizeFirstLetter(student.firstname.trim()),
-        lastname: capitalizeFirstLetter(student.lastname.trim()),
-        gender: student.gender,
-        parentName: capitalizeFirstLetter(student.parentName.trim()),
-        phone: student.phone.trim(),
-      };
       setLoading(true);
-      const response = await axiosClient.put(
-        `${url}/${student._id}`,
+
+      const response = await axiosClient[isUpdate ? "put" : "post"](
+        `${url}${isUpdate ? `/${student._id}` : ""}`,
         transformedStudent
       );
-      if (response?.statusCode === 200 || response?.statusCode === 201) {
+      if ([200, 201].includes(response?.statusCode)) {
+        toast.success(t(`messages.student.${isUpdate ? "update" : "success"}`));
         fetchStudents();
-        toast.success(t("messages.student.update"));
-        setEditSNo(null);
+        if (!isUpdate) {
+          setNewStudent({
+            SNo: null,
+            firstname: "",
+            lastname: "",
+            gender: "",
+            parentName: "",
+            phone: "",
+            classId,
+            sectionId,
+          });
+        }
       }
     } catch (e) {
       toast.error(e);
@@ -263,22 +224,23 @@ export default function StudentSection() {
     setEditSNo(SNo);
   };
 
+  // delete student api
   const handleDelete = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.DELETE_SECTION_STUDENT;
-    else url = EndPoints.ADMIN.DELETE_SECTION_STUDENT;
-    const studentId = currStudent._id;
     try {
       setLoading(true);
-      const response = await axiosClient.delete(`${url}/${studentId}`);
-      if (response?.statusCode === 200) {
-        setShowDeleteConfirmation(false);
+      const url = isTeacher
+        ? EndPoints.TEACHER.DELETE_SECTION_STUDENT
+        : EndPoints.ADMIN.DELETE_SECTION_STUDENT;
+      const res = await axiosClient.delete(`${url}/${currStudent._id}`);
+      if (res?.statusCode === 200) {
         toast.success(t("messages.student.deleteSuccess"));
-        setLoading(false);
         fetchStudents();
       }
     } catch (e) {
       toast.error(e);
+    } finally {
+      setLoading(false);
+      setShowDeleteConfirmation(false);
     }
   };
 
@@ -286,6 +248,7 @@ export default function StudentSection() {
     setSearchQuery(e.target.value);
   };
 
+  // filter students
   const filteredStudents = students.filter(
     (student) =>
       student.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -336,6 +299,7 @@ export default function StudentSection() {
               </div>
             </div>
           </div>
+          {/* search bar */}
           <div className="p-3">
             <div className="flex justify-between w-full relative">
               <div className="relative w-full">
@@ -371,6 +335,7 @@ export default function StudentSection() {
                     : "bg-[#e3e3ee] text-[#6d6ca7]"
                 } text-base font-medium`}
               >
+                {/* table headings */}
                 <tr>
                   <th className="px-2 py-2 border border-gray-400">
                     {t("labels.sNo")}
@@ -388,14 +353,15 @@ export default function StudentSection() {
                     {t("labels.guardianName")}
                   </th>
                   <th className=" py-2 border border-gray-400">
-                    {t("labels.Phone")}
+                    {t("labels.phone")}
                   </th>
                   <th className="w-32 py-2 border border-gray-400">
-                    {t("labels.Action")}
+                    {t("labels.action")}
                   </th>
                 </tr>
               </thead>
               <tbody className="text-sm font-normal text-gray-900">
+                {/* student data */}
                 {filteredStudents.map((student) => (
                   <tr key={student.SNo}>
                     <td
@@ -509,6 +475,7 @@ export default function StudentSection() {
                         disabled={editSNo !== student.SNo}
                       />
                     </td>
+                    {/* actions */}
                     <td
                       className={`${
                         isDarkMode ? "text-white" : ""
@@ -516,7 +483,7 @@ export default function StudentSection() {
                     >
                       {editSNo === student.SNo ? (
                         <button
-                          onClick={() => updateStudent(student)}
+                          onClick={() => handleStudentAction(student, true)}
                           className="bg-[#464590] text-white font-poppins-regular py-1.5 px-3 rounded-xl w-full h-full"
                         >
                           {t("buttons.save")}
@@ -569,6 +536,7 @@ export default function StudentSection() {
                     </td>
                   </tr>
                 ))}
+                {/* input fields */}
                 <tr>
                   <td className="px-2 py-2 text-center text-[#6d6ca7] font-bold border border-[#c1c0ca]">
                     {students.length + 1}
@@ -663,7 +631,7 @@ export default function StudentSection() {
                   </td>
                   <td className="px-2 py-2 border border-[#c1c0ca]">
                     <button
-                      onClick={registerStudent}
+                      onClick={() => handleStudentAction(newStudent, false)}
                       className="bg-[#464590] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full"
                     >
                       {t("buttons.addStudent")}
@@ -672,20 +640,19 @@ export default function StudentSection() {
                 </tr>
               </tbody>
             </table>
-            {validationError !== "" && (
-              <div className="text-red-500 text-center mt-2">
-                {validationError}
-              </div>
-            )}
           </div>
         </div>
       </div>
+
+      {/* student info model */}
       {studentInfoModelOpen && (
         <StudentInfo
           modelOpen={setStudentInfoModelOpen}
           currStudent={currStudent}
         />
       )}
+
+      {/* delete confirmation popup */}
       {showDeleteConfirmation && (
         <DeletePopup
           isVisible={showDeleteConfirmation}
@@ -693,13 +660,13 @@ export default function StudentSection() {
           onDelete={handleDelete}
         />
       )}
-      {popupVisible && (
+      {/* {popupVisible && (
         <ConformationPopup
           isVisible={popupVisible}
           onClose={() => setPopupVisible(false)}
           submit={handleRegisterStudent}
         />
-      )}
+      )} */}
     </div>
   );
 }

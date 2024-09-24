@@ -29,42 +29,42 @@ function ClassSetup() {
   const [loading, setLoading] = useState(false);
 
   const classOptions = [
-    t("options.preNursery"),
-    t("options.nursery"),
-    t("options.LKG"),
-    t("options.UKG"),
-    t("options.one"),
-    t("options.two"),
-    t("options.three"),
-    t("options.four"),
-    t("options.five"),
-    t("options.six"),
-    t("options.seven"),
-    t("options.eight"),
-    t("options.nine"),
-    t("options.ten"),
-    t("options.eleven"),
-    t("options.twelve"),
-  ];
+    "preNursery",
+    "nursery",
+    "LKG",
+    "UKG",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+  ].map((key) => t(`options.${key}`));
 
-  const compareClasses = (a, b) => {
-    return classOptions.indexOf(a.name) - classOptions.indexOf(b.name);
-  };
+  const compareClasses = (a, b) =>
+    classOptions.indexOf(a.name) - classOptions.indexOf(b.name);
 
-  const handleCardClick = (index) => {
-    setIsFlipped((prevIsFlipped) => {
-      const newIsFlipped = [...prevIsFlipped];
-      newIsFlipped[index] = !newIsFlipped[index];
-      return newIsFlipped;
+  // card flip
+  const toggleFlip = (index) =>
+    setIsFlipped((prev) => {
+      const updated = [...prev];
+      updated[index] = !updated[index];
+      return updated;
     });
-  };
 
+  // get classlist api
   const getAllClass = async () => {
     try {
       setLoading(true);
       const res = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
       if (res?.statusCode === 200) {
-        const sortedClasses = res.result.sort(compareClasses);
+        const sortedClasses = res?.result?.sort(compareClasses);
         setClasses(sortedClasses);
       }
     } catch (e) {
@@ -74,20 +74,20 @@ function ClassSetup() {
     }
   };
 
+  // register class api
   const handleNewClassSubmit = async (name) => {
+    const existingClassNames = classes.map((cls) => cls.name);
+    if (existingClassNames.includes(name))
+      return toast.error(t("toasts.classExists"));
+    if (existingClassNames.length >= classOptions.length)
+      return toast.error(t("toasts.classroomFull"));
+
     try {
-      const existingClassNames = classes.map((cls) => cls.name);
-      if (existingClassNames.length >= classOptions.length) {
-        return toast.error(t("toasts.classroomFull"));
-      }
-      if (existingClassNames.includes(name)) {
-        return toast.error(t("toasts.classExists"));
-      }
       setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.REGISTER_CLASS, {
         name,
       });
-      if (res?.statusCode === 200) {
+      if ([200, 201].includes(res?.statusCode)) {
         getAllClass();
         toast.success(t("messages.class.createSuccess"));
       }
@@ -98,12 +98,12 @@ function ClassSetup() {
     }
   };
 
+  // delete class api
   const handleDeleteClass = async () => {
     try {
-      const classId = clickedClassId;
       setLoading(true);
       const response = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_CLASS}/${classId}`
+        `${EndPoints.ADMIN.DELETE_CLASS}/${clickedClassId}`
       );
       if (response?.statusCode === 200) {
         toast.success(t("messages.class.deleteSuccess"));
@@ -152,12 +152,14 @@ function ClassSetup() {
               {t("titles.classRoom")}
             </h3>
             <div className="py-3 flex flex-wrap justify-start">
+              {/* class cards */}
               {classes.map((data, index) => (
                 <ReactCardFlip
                   isFlipped={isFlipped[index]}
                   flipDirection="horizontal"
                   key={index}
                 >
+                  {/* frontside */}
                   <div
                     className={`${
                       isDarkMode ? "bg-[#152f54] bg-opacity-70" : ""
@@ -174,10 +176,7 @@ function ClassSetup() {
                         className="absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 bg-white p-1"
                       />
                     </div>
-                    <div
-                      onClick={() => handleCardClick(index)}
-                      className="relative"
-                    >
+                    <div onClick={() => toggleFlip(index)} className="relative">
                       <img
                         src={students}
                         className="h-full w-full"
@@ -190,6 +189,7 @@ function ClassSetup() {
                       </p>
                     </div>
                   </div>
+                  {/* backside */}
                   <div
                     className={`${
                       isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
@@ -197,9 +197,10 @@ function ClassSetup() {
                   >
                     <div
                       className="flex flex-col justify-between h-full"
-                      onClick={() => handleCardClick(index)}
+                      onClick={() => toggleFlip(index)}
                     >
                       <div className="px-4 py-3 flex flex-row flex-wrap ">
+                        {/* section data */}
                         {data.section.map((section, j) => (
                           <div
                             onClick={() =>
@@ -248,6 +249,7 @@ function ClassSetup() {
                   isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
                 } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border-4 border-[#464590] rounded-3xl `}
               >
+                {/* available class dropdown */}
                 {!showDropdowns[classes.length] ? (
                   <img
                     src={addclass}
@@ -301,6 +303,7 @@ function ClassSetup() {
         </div>
       </div>
 
+      {/* add section model */}
       {addSectionModelOpen && (
         <Addsection
           setAddSectionModelOpen={setAddSectionModelOpen}
@@ -308,6 +311,8 @@ function ClassSetup() {
           getAllClass={getAllClass}
         />
       )}
+      
+      {/* delete confirmation popup */}
       {modalIsOpen && (
         <DeletePopup
           isVisible={modalIsOpen}

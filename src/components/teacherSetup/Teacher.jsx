@@ -46,17 +46,21 @@ export default function Teacher() {
 
   // Validates teacher data
   const validateData = (teacher) => {
-    if (!teacher.firstname.trim()) return t("validationError.firstName");
-    if (teacher.firstname.length < 3)
-      return t("validationError.validationFirstNameLength");
-    if (REGEX.NUMBER.test(teacher.firstname))
-      return t("validationError.validationFirstNameNoNumbers");
-    if (!teacher.lastname.trim()) return t("validationError.lastName");
-    if (teacher.lastname.length < 3)
-      return t("validationError.validationLastNameLength");
-    if (REGEX.NUMBER.test(teacher.lastname))
-      return t("validationError.validationLastNameNoNumbers");
-    if (!teacher.phone.trim()) return t("validationError.phone");
+    if (
+      !teacher.firstname.trim() ||
+      teacher.firstname.length < 3 ||
+      REGEX.NUMBER.test(teacher.firstname)
+    ) {
+      return t("validationError.enterFirstName");
+    }
+    if (
+      !teacher.lastname.trim() ||
+      teacher.lastname.length < 3 ||
+      REGEX.NUMBER.test(teacher.lastname)
+    ) {
+      return t("validationError.enterLastName");
+    }
+    if (!teacher?.phone.trim()) return t("validationError.phone");
     if (!REGEX.PHONE_LENGTH.test(teacher.phone))
       return t("validationError.validationPhoneCount");
     return "";
@@ -76,8 +80,8 @@ export default function Teacher() {
       const response = await axiosClient.post(
         EndPoints.ADMIN.REGISTER_TEACHER,
         {
-          firstname: capitalizeFirstLetter(newTeacher.firstname.trim()),
-          lastname: capitalizeFirstLetter(newTeacher.lastname.trim()),
+          firstname: capitalizeFirstLetter(newTeacher?.firstname.trim()),
+          lastname: capitalizeFirstLetter(newTeacher?.lastname.trim()),
           phone: newTeacher.phone.trim(),
         }
       );
@@ -148,8 +152,8 @@ export default function Teacher() {
     try {
       setLoading(true);
       const updatedTeacher = {
-        firstname: capitalizeFirstLetter(teacher.firstname.trim()),
-        lastname: capitalizeFirstLetter(teacher.lastname.trim()),
+        firstname: capitalizeFirstLetter(teacher?.firstname.trim()),
+        lastname: capitalizeFirstLetter(teacher?.lastname.trim()),
         phone: teacher.phone.trim(),
       };
 
@@ -198,9 +202,9 @@ export default function Teacher() {
   // Filters the teachers list based on search input
   const filteredTeachers = teachers.filter(
     (teacher) =>
-      teacher.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      teacher.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      teacher.phone.includes(searchQuery)
+      teacher?.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      teacher?.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      teacher?.phone.includes(searchQuery)
   );
 
   return (

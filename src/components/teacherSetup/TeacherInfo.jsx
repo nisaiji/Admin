@@ -5,12 +5,11 @@ import CONSTANT from "../../utils/constants";
 import { useTranslation } from "react-i18next";
 
 export default function TeacherInfo({ currTeacher, modelOpen }) {
-  const { t } = useTranslation();
+  const [t] = useTranslation();
+
+  // teacher details
   const personalDetails = [
-    [
-      t("labels.fullName"),
-      `${currTeacher.firstname} ${currTeacher.lastname}`,
-    ],
+    [t("labels.fullName"), `${currTeacher.firstname} ${currTeacher.lastname}`],
     [
       t("labels.university"),
       `${currTeacher.section.classId.name || ""} ${
@@ -56,9 +55,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
                   </div>
                 ))}
               </div>
-              <h3 className="pb-2 font-bold">
-                {t("titles.educationDetails")}
-              </h3>
+              <h3 className="pb-2 font-bold">{t("titles.educationDetails")}</h3>
               <div className="font-medium">
                 {educationDetails.map(([label, value], index) => (
                   <div className="flex pb-2" key={index}>
