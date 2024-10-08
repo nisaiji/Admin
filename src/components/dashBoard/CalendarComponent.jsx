@@ -8,7 +8,7 @@ import EndPoints from "../../services/EndPoints";
 import moment from "moment";
 import CONSTANT from "../../utils/constants";
 
-const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
+const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
   const isDarkMode = false;
 
   return (
@@ -23,7 +23,7 @@ const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
           className={`${
             isDarkMode ? "text-white" : "text-red-600"
           } cursor-pointer size-6`}
-          onClick={handlePrevMonth}
+          onClick={onPrevMonth}
         />
         <div className={`${isDarkMode ? "text-white" : ""} date`}>
           {moment({ year, month }).format("MMMM YYYY")}
@@ -33,7 +33,7 @@ const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
           className={`${
             isDarkMode ? "text-white" : "text-red-600"
           } cursor-pointer size-6`}
-          onClick={handleNextMonth}
+          onClick={onNextMonth}
         />
       </div>
       <div
@@ -51,6 +51,7 @@ const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
   );
 };
 
+// return days of month with handling styles
 const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
   const renderCss = () => {
     if (isHoliday && hasEvent) {
@@ -87,6 +88,7 @@ const DaysGrid = ({ days }) => {
   return <div className="days grid grid-cols-7 gap-2 p-2 pl-6 ">{days}</div>;
 };
 
+// Calendar component
 const CalendarComponent = ({ updateDate }) => {
   const [today, setToday] = useState(new Date());
   const [month, setMonth] = useState(today.getMonth());
@@ -98,22 +100,13 @@ const CalendarComponent = ({ updateDate }) => {
     fetchEvents();
   }, [month]);
 
+  // get event api
   const fetchEvents = async () => {
     try {
-      const startTime = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        1
-      ).getTime();
-      const endTime = new Date(
-        today.getFullYear(),
-        today.getMonth() + 1,
-        0
-      ).getTime();
-      const response = await axiosClient.post(
-        EndPoints.COMMON.GET_EVENTS,
-        { startTime, endTime }
-      );
+      const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
+        startTime: new Date(year, month, 1).getTime(),
+        endTime: new Date(year, month + 1, 0).getTime(),
+      });
       if (response?.statusCode === 200) {
         const sortedEvents = response.result.sort(
           (a, b) => new Date(a.date) - new Date(b.date)
@@ -125,6 +118,7 @@ const CalendarComponent = ({ updateDate }) => {
     }
   };
 
+  // handle month change
   const updateCalendar = (newMonth, newYear) => {
     setMonth(newMonth);
     setYear(newYear);
@@ -144,18 +138,11 @@ const CalendarComponent = ({ updateDate }) => {
     updateCalendar(newMonth, newYear);
   };
 
-  const handleDayClick = (day) => {
-    setActiveDay(day);
-  };
-
-  const handleMonthYearChange = (newMonth, newYear) => {
-    updateCalendar(newMonth, newYear);
-  };
-
   const getDaysInMonth = (month, year) => {
     return new Date(year, month + 1, 0).getDate();
   };
 
+  // returns days grid
   const renderDays = () => {
     const daysInMonth = getDaysInMonth(month, year);
     const firstDayOfMonth = new Date(year, month, 1).getDay();
@@ -190,7 +177,6 @@ const CalendarComponent = ({ updateDate }) => {
           isActive={isActive}
           hasEvent={hasEvent}
           isHoliday={isHoliday}
-          onClick={() => handleDayClick(day)}
           isSunday={isSunday}
           isToday={isToday}
         />
@@ -204,9 +190,9 @@ const CalendarComponent = ({ updateDate }) => {
       <Calendar
         month={month}
         year={year}
-        handlePrevMonth={handlePrevMonth}
-        handleNextMonth={handleNextMonth}
-        handleMonthYearChange={handleMonthYearChange}
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
+        handleMonthYearChange={updateCalendar}
       />
       <DaysGrid days={renderDays()} />
       <Toaster />

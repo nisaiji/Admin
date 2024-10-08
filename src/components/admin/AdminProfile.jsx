@@ -22,6 +22,7 @@ export default function AdminProfile() {
   const [filteredCities, setFilteredCities] = useState([]);
   const { t } = useTranslation();
 
+  // vaidation schema
   const validationSchema = Yup.object({
     schoolName: Yup.string().trim().required(t("validationError.schoolName")),
     principal: Yup.string().trim().required(t("validationError.principalName")),
@@ -40,6 +41,7 @@ export default function AdminProfile() {
       .required(t("validationError.email")),
   });
 
+  // formik for handeling form
   const formik = useFormik({
     initialValues: {
       schoolName: "",
@@ -65,6 +67,7 @@ export default function AdminProfile() {
     onSubmit: (values) => {},
   });
 
+  // filter city based on state
   const handleStateChange = (event) => {
     formik.handleChange(event);
     const selectedState = event.target.value;
@@ -72,6 +75,7 @@ export default function AdminProfile() {
     setFilteredCities(state ? state.cities : []);
   };
 
+  // get admin api
   const getadmin = async () => {
     try {
       setLoading(true);
@@ -80,26 +84,11 @@ export default function AdminProfile() {
         const initialState = res.result.state || "";
         const state = statesAndCity.states.find((s) => s.name === initialState);
         setFilteredCities(state ? state.cities : []);
-        setAdmin(res.result);
+        setAdmin(res?.result);
         formik.setValues({
-          schoolName: res.result.schoolName || "",
-          principal: res.result.principal || "",
-          username: res.result.username || "",
-          schoolBoard: res.result.schoolBoard || "",
-          affiliationNo: res.result.affiliationNo || "",
-          schoolNumber: res.result.schoolNumber || "",
-          address: res.result.address || "",
-          email: res.result.email || "",
-          city: res.result.city || "",
-          state: initialState || "",
-          phone: res.result.phone || "",
-          website: res.result.website || "",
-          facebook: res.result.facebook || "",
-          instagram: res.result.instagram || "",
-          linkedin: res.result.linkedin || "",
-          twitter: res.result.twitter || "",
-          whatsapp: res.result.whatsapp || "",
-          youtube: res.result.youtube || "",
+          ...formik.initialValues,
+          ...res.result,
+          state: initialState,
         });
       }
     } catch (e) {
@@ -109,54 +98,44 @@ export default function AdminProfile() {
     }
   };
 
-  const handleUpdateProfile = async () => {
+  // profile update api
+  const handleProfileUpdate = async () => {
     try {
-      const fieldsToValidate = [
-        "schoolName",
-        "principal",
-        "username",
-        "schoolBoard",
-        "affiliationNo",
-        "address",
-        "state",
-        "city",
-        "email",
-      ];
-      let allValid = true;
-      for (const field of fieldsToValidate) {
-        try {
-          await validationSchema.validateAt(field, formik.values);
-        } catch (validationError) {
-          allValid = false;
-          toast.error(validationError.message);
-          break;
-        }
-      }
+      const { values } = formik;
+      await Promise.all(
+        [
+          "schoolName",
+          "principal",
+          "username",
+          "schoolBoard",
+          "affiliationNo",
+          "address",
+          "state",
+          "city",
+          "email",
+        ].map((field) =>
+          Yup.reach(validationSchema, field).validate(values[field])
+        )
+      );
 
-      if (allValid) {
-        const values = formik.values;
-        setLoading(true);
-        const requestBody = {
-          schoolName: values.schoolName,
-          principal: values.principal,
-          schoolBoard: values.schoolBoard,
-          affiliationNo: values.affiliationNo,
-          address: values.address,
-          city: values.city,
-          state: values.state,
-          email: values.email,
-          username: values.username,
-        };
-        if (values.schoolNumber) {
-          requestBody.schoolNumber = values.schoolNumber;
-        }
-        const res = await axiosClient.put(
-          EndPoints.ADMIN.PROFILE_UPDATE,
-          requestBody
-        );
-        toast.success(t("messages.admin.updateMsg"));
-        getadmin();
-      }
+      setLoading(true);
+
+      const requestBody = {
+        schoolName: values.schoolName,
+        principal: values.principal,
+        schoolBoard: values.schoolBoard,
+        affiliationNo: values.affiliationNo,
+        address: values.address,
+        city: values.city,
+        state: values.state,
+        email: values.email,
+        username: values.username,
+        schoolNumber: values.schoolNumber || undefined,
+      };
+
+      await axiosClient.put(EndPoints.ADMIN.PROFILE_UPDATE, requestBody);
+      toast.success(t("messages.admin.updateMsg"));
+      getadmin();
     } catch (e) {
       toast.error(e);
     } finally {
@@ -164,35 +143,26 @@ export default function AdminProfile() {
     }
   };
 
-  const handleUpdateSocialProfile = async () => {
+  // soial details update api
+  const handleSocialProfileUpdate = async () => {
     try {
-      let res;
-      try {
-        await validationSchema.validateAt("phone", formik.values);
-        res = true;
-      } catch (validationError) {
-        res = false;
-        toast.error(validationError.message);
-      }
-      if (res) {
-        const values = formik.values;
-        setLoading(true);
-        const res = await axiosClient.put(
-          EndPoints.ADMIN.SOCIAL_PROFILE_UPDATE,
-          {
-            phone: values.phone,
-            website: values.website,
-            facebook: values.facebook,
-            instagram: values.instagram,
-            linkedin: values.linkedin,
-            twitter: values.twitter,
-            whatsapp: values.whatsapp,
-            youtube: values.youtube,
-          }
-        );
-        toast.success(t("messages.admin.socialUpdate"));
-        getadmin();
-      }
+      await Yup.reach(validationSchema, "phone").validate(formik.values.phone);
+      setLoading(true);
+
+      const { values } = formik;
+      await axiosClient.put(EndPoints.ADMIN.SOCIAL_PROFILE_UPDATE, {
+        phone: values.phone,
+        website: values.website,
+        facebook: values.facebook,
+        instagram: values.instagram,
+        linkedin: values.linkedin,
+        twitter: values.twitter,
+        whatsapp: values.whatsapp,
+        youtube: values.youtube,
+      });
+
+      toast.success(t("messages.admin.socialUpdate"));
+      getadmin();
     } catch (e) {
       toast.error(e);
     } finally {
@@ -223,6 +193,7 @@ export default function AdminProfile() {
         <div className="flex flex-col md:flex-row gap-5 mt-5 w-full">
           <div className="flex flex-col w-full md:w-3/4">
             <div className="mt-7 w-full">
+              {/* schoolname */}
               <div className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.schoolName")}{" "}
                 <span className="text-red-500">*</span>
@@ -247,7 +218,7 @@ export default function AdminProfile() {
                 )}
               </div>
             </div>
-
+            {/* principal */}
             <div className="mt-7 w-full">
               <div className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.principal")}{" "}
@@ -273,7 +244,7 @@ export default function AdminProfile() {
                 )}
               </div>
             </div>
-
+            {/* admin name */}
             <div className="mt-7 w-full">
               <div className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.adminName")}{" "}
@@ -300,6 +271,7 @@ export default function AdminProfile() {
               </div>
             </div>
           </div>
+          {/* admin photo */}
           <div className="flex flex-col w-full md:w-64">
             <div className="flex flex-col justify-center p-8 bg-slate-100">
               <div className="relative flex flex-col items-center pt-20 aspect-square">
@@ -324,6 +296,7 @@ export default function AdminProfile() {
             </div>
           </div>
         </div>
+        {/* email */}
         <div className="mt-7 w-full">
           <div className="text-sm font-semibold leading-5 text-neutral-800">
             {t("adminProfile.Email")}
@@ -349,6 +322,7 @@ export default function AdminProfile() {
             )}
           </div>
         </div>
+        {/* school board */}
         <div className="mt-7 w-full">
           <div className="text-sm font-semibold leading-5 text-neutral-800">
             {t("adminProfile.schoolBoard")}
@@ -374,7 +348,7 @@ export default function AdminProfile() {
             )}
           </div>
         </div>
-
+        {/* affilation no */}
         <div className="mt-7 w-full">
           <div className="text-sm font-semibold leading-5 text-neutral-800">
             {t("adminProfile.affiliationNumber")}{" "}
@@ -400,7 +374,7 @@ export default function AdminProfile() {
             )}
           </div>
         </div>
-
+        {/* school no */}
         <div className="mt-7 w-full">
           <div className="text-sm font-semibold leading-5 text-neutral-800">
             {t("adminProfile.schoolNumber")}
@@ -425,7 +399,7 @@ export default function AdminProfile() {
             )}
           </div>
         </div>
-
+        {/* address */}
         <div className="flex flex-col md:flex-row gap-5 py-2 mt-5 bg-white ">
           <div className="flex flex-col w-full md:w-1/2">
             <label className="text-sm font-semibold leading-5 text-neutral-800">
@@ -450,6 +424,7 @@ export default function AdminProfile() {
               </div>
             )}
           </div>
+          {/* state */}
           <div className="flex flex-col w-full md:w-1/4">
             <label className="text-sm font-semibold leading-5 text-neutral-800">
               {t("adminProfile.state")} <span className="text-red-500">*</span>
@@ -480,6 +455,7 @@ export default function AdminProfile() {
               </div>
             )}
           </div>
+          {/* city */}
           <div className="flex flex-col w-full md:w-1/4">
             <label className="text-sm font-semibold leading-5 text-neutral-800">
               {t("adminProfile.city")} <span className="text-red-500">*</span>
@@ -508,10 +484,12 @@ export default function AdminProfile() {
             )}
           </div>
         </div>
+        {/* save button */}
         <div className="flex gap-5 mt-7">
           <button
-            onClick={handleUpdateProfile}
+            onClick={handleProfileUpdate}
             type="button"
+            disabled={formik.isSubmitting || !formik.isValid}
             className="px-6 py-2 text-white bg-indigo-800 rounded-lg"
           >
             {t("buttons.saveChanges")}
@@ -524,6 +502,7 @@ export default function AdminProfile() {
         <div className="text-4xl font-bold tracking-tight leading-8 text-neutral-800">
           {t("adminProfile.socialProfile")}
         </div>
+        {/* phone */}
         <div className="mt-7 w-full">
           <div className="text-sm font-semibold leading-5 text-neutral-800">
             {t("adminProfile.phoneNumber")}
@@ -559,7 +538,7 @@ export default function AdminProfile() {
             )}
           </div>
         </div>
-
+        {/* website */}
         <div className="mt-7 w-full">
           <div className="text-sm font-semibold leading-5 text-neutral-800">
             {t("adminProfile.personalWebsite")}
@@ -581,7 +560,7 @@ export default function AdminProfile() {
             )}
           </div>
         </div>
-
+        {/* facebook */}
         <div className="flex flex-col md:flex-row gap-5">
           <div className="mt-7 w-full">
             <div className="text-sm font-semibold leading-5 text-neutral-800">
@@ -608,7 +587,7 @@ export default function AdminProfile() {
               )}
             </div>
           </div>
-
+          {/* instagram */}
           <div className="mt-7 w-full">
             <div className="text-sm font-semibold leading-5 text-neutral-800">
               {t("adminProfile.instagram")}
@@ -634,7 +613,7 @@ export default function AdminProfile() {
               )}
             </div>
           </div>
-
+          {/* linkedin */}
           <div className="mt-7 w-full">
             <div className="text-sm font-semibold leading-5 text-neutral-800">
               {t("adminProfile.linkedin")}
@@ -661,7 +640,7 @@ export default function AdminProfile() {
             </div>
           </div>
         </div>
-
+        {/* twitter */}
         <div className="flex flex-col md:flex-row gap-5">
           <div className="mt-7 w-full">
             <div className="text-sm font-semibold leading-5 text-neutral-800">
@@ -688,7 +667,7 @@ export default function AdminProfile() {
               )}
             </div>
           </div>
-
+          {/* whatsapp */}
           <div className="mt-7 w-full">
             <div className="text-sm font-semibold leading-5 text-neutral-800">
               {t("adminProfile.whatsapp")}
@@ -714,7 +693,7 @@ export default function AdminProfile() {
               )}
             </div>
           </div>
-
+          {/* youtube */}
           <div className="mt-7 w-full">
             <div className="text-sm font-semibold leading-5 text-neutral-800">
               {t("adminProfile.youtube")}
@@ -741,11 +720,12 @@ export default function AdminProfile() {
             </div>
           </div>
         </div>
-
+        {/* save button */}
         <div className="flex gap-5 mt-10">
           <button
-            onClick={handleUpdateSocialProfile}
+            onClick={handleSocialProfileUpdate}
             type="button"
+            disabled={formik.isSubmitting || !formik.isValid}
             className="px-6 py-2 text-white bg-indigo-800 rounded-lg"
           >
             {t("buttons.saveChanges")}

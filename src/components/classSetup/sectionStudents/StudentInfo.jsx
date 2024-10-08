@@ -7,9 +7,10 @@ import { useTranslation } from "react-i18next";
 import CONSTANT from "../../../utils/constants";
 
 export default function StudentInfo({ currStudent, modelOpen }) {
-  const { t } = useTranslation();
+  const [t] = useTranslation();
   const captureRef = useRef(null);
 
+  // print schema
   const handleScreenshot = () => {
     const hiddenContainer = document.createElement("div");
     hiddenContainer.style.position = "fixed";
@@ -61,6 +62,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     });
   };
 
+  // student details
   const personalDetails = [
     [
       t("labels.fullName"),
@@ -75,6 +77,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     [t("labels.dob"), currStudent.dob || CONSTANT.NA],
   ];
 
+  // parent details
   const guardianDetails = [
     [t("labels.fullName"), currStudent.parent.fullname || CONSTANT.NA],
     [t("labels.gender"), currStudent.parent.gender || CONSTANT.NA],
@@ -109,6 +112,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
               </h2>
               <h3 className="pb-2 font-bold">{t("titles.personalDetails")}</h3>
               <div className="pb-6 font-medium">
+                {/* student details */}
                 {personalDetails.map(([label, value], index) => (
                   <div className="flex pb-2" key={index}>
                     <p className="w-1/3">{label}</p>
@@ -119,6 +123,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
               </div>
               <h3 className="pb-2 font-bold">{t("titles.guardianDetails")}</h3>
               <div className="font-medium">
+                {/* parent details */}
                 {guardianDetails.map(([label, value], index) => (
                   <div className="flex pb-2" key={index}>
                     <p className="w-1/3">{label}</p>
@@ -137,6 +142,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
               />
             </div>
           </div>
+          {/* screenshot button */}
           <div className="flex justify-center mt-5 space-x-5">
             <button
               className="px-4 py-2 bg-green-500 text-white rounded"

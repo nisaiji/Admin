@@ -15,7 +15,8 @@ import moment from "moment";
 import { useTranslation } from "react-i18next";
 import CONSTANT from "../../utils/constants";
 
-const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
+// Calendar Header Component
+const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
   const isDarkMode = false;
 
   return (
@@ -30,7 +31,7 @@ const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
           className={`${
             isDarkMode ? "text-white" : "text-red-600"
           } cursor-pointer size-6`}
-          onClick={handlePrevMonth}
+          onClick={onPrevMonth}
         />
         <div className={`${isDarkMode ? "text-white" : ""} date`}>
           {moment({ year, month }).format("MMMM YYYY")}
@@ -40,7 +41,7 @@ const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
           className={`${
             isDarkMode ? "text-white" : "text-red-600"
           } cursor-pointer size-6`}
-          onClick={handleNextMonth}
+          onClick={onNextMonth}
         />
       </div>
       <div
@@ -58,6 +59,7 @@ const Calendar = ({ month, year, handlePrevMonth, handleNextMonth }) => {
   );
 };
 
+// return days of month with handling styles
 const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
   const renderCss = () => {
     if (isHoliday && hasEvent) {
@@ -93,6 +95,7 @@ const DaysGrid = ({ days }) => {
   return <div className="days grid grid-cols-7 gap-6 px-4 py-3">{days}</div>;
 };
 
+// Event Component
 const Event = () => {
   const isAdmin = useSelector((state) => state.appAuth.role) === "admin";
   const isDarkMode = false;
@@ -100,19 +103,20 @@ const Event = () => {
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
   const [activeDay, setActiveDay] = useState(today.getDate());
-  const [eventsArr, setEventsArr] = useState([]);
+  const [events, setEvents] = useState([]);
   const [showAddEvent, setShowAddEvent] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
   const [eventLoading, setEventLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [newEvent, setNewEvent] = useState();
-  const { t } = useTranslation();
+  const [t] = useTranslation();
 
   useEffect(() => {
     fetchEvents();
   }, [month]);
 
+  // edit or update event form
   const EventForm = ({ isOpen, isClose, isSubmit, prevData }) => {
     const [newEventForm, setNewEventForm] = useState({
       title: prevData?.editData?.title || "",
@@ -213,28 +217,18 @@ const Event = () => {
     );
   };
 
+  // get events api
   const fetchEvents = async () => {
+    setEventLoading(true);
     try {
-      setEventLoading(true);
-      const startTime = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        1
-      ).getTime();
-      const endTime = new Date(
-        today.getFullYear(),
-        today.getMonth() + 1,
-        0
-      ).getTime();
       const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
-        startTime,
-        endTime,
+        startTime: new Date(year, month, 1).getTime(),
+        endTime: new Date(year, month + 1, 0).getTime(),
       });
       if (response?.statusCode === 200) {
-        const sortedEvents = response.result.sort(
-          (a, b) => new Date(a.date) - new Date(b.date)
+        setEvents(
+          response?.result?.sort((a, b) => new Date(a.date) - new Date(b.date))
         );
-        setEventsArr(sortedEvents);
       }
     } catch (e) {
       toast.error(e);
@@ -263,21 +257,28 @@ const Event = () => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
+  // check validations
+  const validateForm = (form) => {
+    if (!form.title.trim()) {
+      toast.error(t("toasts.titleRequired"));
+      return false;
+    }
+    if (!form.description.trim()) {
+      toast.error(t("toasts.descRequired"));
+      return false;
+    }
+    if (!form.holiday && !form.event) {
+      toast.error(t("toasts.oneCheckbox"));
+      return false;
+    }
+    return true;
+  };
+
+  // api for handeling register and update event
   const handleAddEvent = async (newEvent, eventId) => {
     try {
-      if (!newEvent.title.trim()) {
-        toast.error(t("toasts.titleRequired"));
-        return;
-      }
-      if (!newEvent.description.trim()) {
-        toast.error(t("toasts.descRequired"));
-        return;
-      }
-      if (!newEvent.holiday && !newEvent.event) {
-        toast.error(t("toasts.oneCheckbox"));
-        return;
-      }
       setLoading(true);
+      if (!validateForm(newEvent)) return;
       const formattedEvent = {
         ...newEvent,
         title: capitalizeFirstLetter(newEvent.title.trim()),
@@ -310,6 +311,7 @@ const Event = () => {
     }
   };
 
+  // handle month change
   const updateCalendar = (newMonth, newYear) => {
     setMonth(newMonth);
     setYear(newYear);
@@ -328,6 +330,7 @@ const Event = () => {
     updateCalendar(newMonth, newYear);
   };
 
+  // handle click on day
   const handleDayClick = (day, isEdit = false, editData) => {
     const todayDate = new Date();
     const currentYear = todayDate.getFullYear();
@@ -349,34 +352,28 @@ const Event = () => {
     }
   };
 
-  const handleMonthYearChange = (newMonth, newYear) => {
-    updateCalendar(newMonth, newYear);
-  };
-
-  const getDaysInMonth = (month, year) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
+  // returns days grid
   const renderDays = () => {
-    const daysInMonth = getDaysInMonth(month, year);
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOffset = new Date(year, month, 1).getDay();
     const days = [];
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} className="empty"></div>);
-    }
+
+    for (let i = 0; i < firstDayOffset; i++)
+      days.push(<div key={`empty-${i}`} className="empty" />);
+
     for (let day = 1; day <= daysInMonth; day++) {
       const isActive = day === activeDay;
-      const isSunday = new Date(year, month, day).getDay() === 0;
       const targetDate = moment(new Date(year, month, day)).format(
         "YYYY-MM-DD"
       );
 
+      const isSunday = new Date(year, month, day).getDay() === 0;
       const isToday =
         day === today.getDate() &&
         month === today.getMonth() &&
         year === today.getFullYear();
-      const checkEventProperty = (eventsArr, property, returnValue = false) => {
-        for (let event of eventsArr) {
+      const checkEventProperty = (events, property, returnValue = false) => {
+        for (let event of events) {
           if (moment(event.date).format("YYYY-MM-DD") === targetDate) {
             if (event[property]) {
               return returnValue ? event[property] : true;
@@ -386,11 +383,11 @@ const Event = () => {
         return returnValue ? null : false;
       };
 
-      const hasEvent = checkEventProperty(eventsArr, "event");
-      const isHoliday = checkEventProperty(eventsArr, "holiday");
-      const title = checkEventProperty(eventsArr, "title", true);
-      const description = checkEventProperty(eventsArr, "description", true);
-      const eventId = checkEventProperty(eventsArr, "_id", true);
+      const hasEvent = checkEventProperty(events, "event");
+      const isHoliday = checkEventProperty(events, "holiday");
+      const title = checkEventProperty(events, "title", true);
+      const description = checkEventProperty(events, "description", true);
+      const eventId = checkEventProperty(events, "_id", true);
 
       const handleClick = () => {
         if (eventId) {
@@ -420,6 +417,7 @@ const Event = () => {
     return days;
   };
 
+  // delete event api
   const confirmDeleteEvent = async () => {
     try {
       setLoading(true);
@@ -430,7 +428,7 @@ const Event = () => {
         toast.success(t("messages.event.deleteSuccess"));
         setShowDeleteConfirmation(false);
         setLoading(false);
-        setEventsArr(eventsArr.filter((event) => event._id !== eventToDelete));
+        setEvents(events.filter((event) => event._id !== eventToDelete));
       }
     } catch (e) {
       toast.error(e);
@@ -444,6 +442,7 @@ const Event = () => {
           <Spinner />
         </div>
       )}
+      {/* left view */}
       <div className="col-span-4 px-10 bg-white shadow-lg rounded-lg p-4 mt-5">
         <div className="flex justify-between items-center mb-10">
           <p className="text-4xl font-poppins-bold">
@@ -457,9 +456,9 @@ const Event = () => {
           className="px-10"
           month={month}
           year={year}
-          handlePrevMonth={handlePrevMonth}
-          handleNextMonth={handleNextMonth}
-          handleMonthYearChange={handleMonthYearChange}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+          handleMonthYearChange={updateCalendar}
         />
         <DaysGrid days={renderDays()} />
         <div
@@ -472,6 +471,7 @@ const Event = () => {
               isDarkMode ? "border-purple-900" : ""
             } goto flex items-center border-2 border-[#8A89FA] rounded-md overflow-hidden`}
           >
+            {/* search input */}
             <input
               type="text"
               placeholder={t("calendar.gotoDatePlaceholder")}
@@ -496,6 +496,7 @@ const Event = () => {
           </button>
         </div>
       </div>
+      {/* right view */}
       <div className="col-span-2 events-container relative bg-white shadow-lg rounded-lg p-4 mt-5 ">
         {eventLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
@@ -507,7 +508,7 @@ const Event = () => {
             {t("events.title")}
           </div>
 
-          {eventsArr.length === 0 ? (
+          {events.length === 0 ? (
             <div className="relative w-full h-full">
               <img
                 src={eventBack}
@@ -517,7 +518,8 @@ const Event = () => {
             </div>
           ) : (
             <ul className="overflow-y-auto max-h-[750px] mt-10">
-              {eventsArr.map((itm) => (
+              {/* list of events */}
+              {events.map((itm) => (
                 <div
                   key={itm["_id"]}
                   className=" mb-5 border border-gray-300 shadow-lg rounded-lg overflow-hidden "
@@ -526,6 +528,7 @@ const Event = () => {
                     <div className="font-poppins-bold">
                       {moment(itm.date).format("DD-MM-YYYY")}, {itm.day}
                     </div>
+                    {/* delete icon for admin */}
                     {isAdmin && (
                       <img
                         src={deleteEvent}
@@ -573,12 +576,15 @@ const Event = () => {
           )}
         </div>
       </div>
+
       <EventForm
         isOpen={showAddEvent}
         isClose={setShowAddEvent}
         isSubmit={handleAddEvent}
         prevData={newEvent}
       />
+
+      {/* delete popup */}
       {showDeleteConfirmation && (
         <DeletePopup
           isVisible={showDeleteConfirmation}

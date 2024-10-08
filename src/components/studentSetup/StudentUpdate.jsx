@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useLocation, useNavigate } from "react-router-dom";
-import mail from "../../assets/images/mail.png";
-import India from "../../assets/images/India.png";
-import location from "../../assets/images/location.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
@@ -14,17 +11,20 @@ import EndPoints from "../../services/EndPoints";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import REGEX from "../../utils/regix";
+import mail from "../../assets/images/mail.png";
+import India from "../../assets/images/India.png";
+import location from "../../assets/images/location.png";
 
-const capitalize = (str) => {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-};
+const capitalize = (str) =>
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
 export default function StudentUpdate() {
   const navigate = useNavigate();
   const student = useLocation().state;
-  const { t } = useTranslation();
+  const [t] = useTranslation();
   const [loading, setLoading] = useState(false);
 
+  // validation schema
   const validationSchema = Yup.object({
     firstname: Yup.string().required(t("validationError.firstName")),
     lastname: Yup.string().required(t("validationError.lastName")),
@@ -41,9 +41,11 @@ export default function StudentUpdate() {
     parentPhone: Yup.string()
       .required()
       .matches(REGEX.PHONE, t("validationError.phoneNumber"))
-      .test("starts-with-1-to-5", t("validationError.phoneStart"), (value) => {
-        return value && REGEX.PHONE_TEST.test(value);
-      }),
+      .test(
+        "starts-with-1-to-5",
+        t("validationError.phoneStart"),
+        (value) => value && REGEX.PHONE_TEST.test(value)
+      ),
     parentQualification: Yup.string().required(
       t("validationError.qualification")
     ),
@@ -69,26 +71,22 @@ export default function StudentUpdate() {
       parentAddress: student.parent.address || "",
     },
     validationSchema,
+    // update student api
     onSubmit: async (values) => {
       try {
         setLoading(true);
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.STUDENT_UPDATE}/${student._id}`,
           {
-            firstname: capitalize(values.firstname) || "",
-            lastname: capitalize(values.lastname) || "",
-            gender: values.gender || "",
-            bloodGroup: values.bloodGroup || "",
-            dob: values.dob || "",
-            address: capitalize(values.address) || "",
-            parentFullname: capitalize(values.parentFullname) || "",
-            parentGender: values.parentGender || "",
-            parentAge: values.parentAge.toString() || "",
-            parentEmail: values.parentEmail.toLowerCase() || "",
-            parentPhone: values.parentPhone || "",
-            parentQualification: capitalize(values.parentQualification) || "",
-            parentOccupation: capitalize(values.parentOccupation) || "",
-            parentAddress: capitalize(values.parentAddress) || "",
+            ...values,
+            firstname: capitalize(values.firstname),
+            lastname: capitalize(values.lastname),
+            address: capitalize(values.address),
+            parentFullname: capitalize(values.parentFullname),
+            parentEmail: values.parentEmail.toLowerCase(),
+            parentQualification: capitalize(values.parentQualification),
+            parentOccupation: capitalize(values.parentOccupation),
+            parentAddress: capitalize(values.parentAddress),
           }
         );
         if (response?.statusCode === 200) {
@@ -103,205 +101,160 @@ export default function StudentUpdate() {
     },
   });
 
-  const renderStudentFormFields = () => (
+  // student form fields
+  const studentFields = [
+    {
+      label: t("labels.firstName"),
+      name: "firstname",
+      type: "text",
+      placeholder: t("placeholders.firstName"),
+    },
+    {
+      label: t("labels.lastName"),
+      name: "lastname",
+      type: "text",
+      placeholder: t("placeholders.lastName"),
+    },
+    {
+      label: t("labels.gender"),
+      name: "gender",
+      type: "select",
+      options: [t("options.male"), t("options.female"), t("options.other")],
+    },
+    {
+      label: t("labels.bloodGroup"),
+      name: "bloodGroup",
+      type: "select",
+      options: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"],
+    },
+    {
+      label: t("labels.dob"),
+      name: "dob",
+      type: "date",
+      placeholder: t("placeholders.dob"),
+    },
+    {
+      label: t("labels.address"),
+      name: "address",
+      type: "text",
+      placeholder: t("placeholders.address"),
+    },
+  ];
+
+  // parent form fields
+  const guardianFields = [
+    {
+      label: t("labels.fullName"),
+      name: "parentFullname",
+      type: "text",
+      placeholder: t("placeholders.fullName"),
+    },
+    {
+      label: t("labels.gender"),
+      name: "parentGender",
+      type: "select",
+      options: [t("options.male"), t("options.female"), t("options.other")],
+    },
+    {
+      label: t("labels.age"),
+      name: "parentAge",
+      type: "text",
+      placeholder: t("placeholders.age"),
+    },
+    {
+      label: t("labels.emailAddress"),
+      name: "parentEmail",
+      type: "email",
+      placeholder: t("placeholders.emailAddress"),
+      icon: { src: mail, width: 40, height: 40, top: 0 },
+    },
+    {
+      label: t("labels.phoneNumber"),
+      name: "parentPhone",
+      type: "text",
+      placeholder: t("placeholders.phoneNumber"),
+      icon: { src: India, width: 35, height: 25, top: 7 },
+    },
+    {
+      label: t("labels.qualification"),
+      name: "parentQualification",
+      type: "text",
+      placeholder: t("placeholders.qualification"),
+    },
+    {
+      label: t("labels.occupation"),
+      name: "parentOccupation",
+      type: "text",
+      placeholder: t("placeholders.occupation"),
+    },
+    {
+      label: t("labels.address"),
+      name: "parentAddress",
+      type: "text",
+      placeholder: t("placeholders.address"),
+      icon: { src: location, width: 30, height: 30, top: 5 },
+    },
+  ];
+
+  // logic for input fields to reduce repetative code
+  const renderFields = (fields) => (
     <div className="grid grid-cols-2 gap-4">
-      {[
-        {
-          label: t("labels.gender"),
-          name: "gender",
-          type: "select",
-          options: [t("options.male"), t("options.female"), t("options.other")],
-        },
-        {
-          label: t("labels.firstName"),
-          name: "firstname",
-          placeholder: t("placeholders.firstName"),
-          type: "text",
-        },
-        {
-          label: t("labels.bloodGroup"),
-          name: "bloodGroup",
-          type: "select",
-          options: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"],
-        },
-        {
-          label: t("labels.lastName"),
-          name: "lastname",
-          placeholder: t("placeholders.lastName"),
-          type: "text",
-        },
-        {
-          label: t("labels.dob"),
-          name: "dob",
-          placeholder: t("placeholders.dob"),
-          type: "date",
-        },
-        {
-          label: t("labels.address"),
-          name: "address",
-          placeholder: t("placeholders.address"),
-          type: "text",
-        },
-      ].map((field) => (
-        <div key={field.name} className="flex flex-col mx-4 mt-3">
-          <div className="text-xl font-semibold">{field.label}</div>
+      {fields.map(({ label, name, type, placeholder, options, icon }) => (
+        <div key={name} className="flex flex-col mx-4 mt-3">
+          <label className="text-xl font-semibold">{label}</label>
           <div className="relative mt-2">
-            {field.type === "select" ? (
+            {type === "select" ? (
               <select
-                name={field.name}
+                name={name}
                 onChange={formik.handleChange}
-                value={formik.values[field.name]}
+                value={formik.values[name]}
                 className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
               >
-                <option value="" label={field.label} />
-                {field.options.map((option) => (
+                <option value="" label={label} />
+                {options.map((option) => (
                   <option key={option} value={option} label={option} />
                 ))}
               </select>
-            ) : field.name === "dob" ? (
+            ) : type === "date" ? (
               <DatePicker
-                selected={formik.values.dob}
+                selected={formik.values[name]}
                 onChange={(date) =>
-                  formik.setFieldValue("dob", format(date, "MM/dd/yyyy"))
+                  formik.setFieldValue(name, format(date, "MM/dd/yyyy"))
                 }
                 dateFormat="MM/dd/yyyy"
-                placeholderText={t("placeholders.date")}
+                placeholderText={placeholder}
                 className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
                 wrapperClassName="w-full"
               />
             ) : (
               <input
-                type={field.type}
-                name={field.name}
-                placeholder={field.placeholder}
+                type={type}
+                name={name}
+                placeholder={placeholder}
                 onChange={formik.handleChange}
-                value={formik.values[field.name]}
+                value={formik.values[name]}
                 className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
               />
             )}
-            {field?.icon && (
+            {icon && (
               <img
-                src={field.icon.src}
+                src={icon.src}
                 className="absolute right-2"
                 style={{
-                  top: field?.icon?.top,
-                  width: field?.icon?.width,
-                  height: field?.icon?.height,
+                  top: icon.top,
+                  width: icon.width,
+                  height: icon.height,
                 }}
                 alt=""
               />
             )}
-            {formik.touched[field.name] && formik.errors[field.name] && (
-              <div className="text-red-500 text-sm">
-                {formik.errors[field.name]}
-              </div>
+            {formik.touched[name] && formik.errors[name] && (
+              <div className="text-red-500 text-sm">{formik.errors[name]}</div>
             )}
           </div>
         </div>
       ))}
-    </div>
-  );
-
-  const renderGuardianFormFields = () => (
-    <div className="grid grid-cols-2 gap-4">
-      {[
-        {
-          label: t("labels.fullName"),
-          name: "parentFullname",
-          placeholder: t("placeholders.fullName"),
-          type: "text",
-        },
-        {
-          label: t("labels.gender"),
-          name: "parentGender",
-          type: "select",
-          options: [t("options.male"), t("options.female"), t("options.other")],
-        },
-        {
-          label: t("labels.age"),
-          name: "parentAge",
-          placeholder: t("placeholders.age"),
-          type: "text",
-        },
-        {
-          label: t("labels.emailAddress"),
-          name: "parentEmail",
-          icon: { src: mail, width: 40, height: 40, top: 0 },
-          placeholder: t("placeholders.emailAddress"),
-          type: "email",
-        },
-        {
-          label: t("labels.phoneNumber"),
-          name: "parentPhone",
-          icon: { src: India, width: 35, height: 25, top: 7 },
-          placeholder: t("placeholders.phoneNumber"),
-          type: "Number",
-        },
-        {
-          label: t("labels.qualification"),
-          name: "parentQualification",
-          placeholder: t("placeholders.qualification"),
-          type: "text",
-        },
-        {
-          label: t("labels.occupation"),
-          name: "parentOccupation",
-          placeholder: t("placeholders.occupation"),
-          type: "text",
-        },
-        {
-          label: t("labels.address"),
-          name: "parentAddress",
-          icon: { src: location, width: 30, height: 30, top: 5 },
-          placeholder: t("placeholders.address"),
-          type: "text",
-        },
-      ].map((field) => (
-        <div key={field.name} className="flex flex-col mx-4 mt-3">
-          <div className="text-xl font-semibold">{field.label}</div>
-          <div className="relative mt-2">
-            {field.type === "select" ? (
-              <select
-                name={field.name}
-                onChange={formik.handleChange}
-                value={formik.values[field.name]}
-                className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
-              >
-                <option value="" label={field.label} />
-                {field.options.map((option) => (
-                  <option key={option} value={option} label={option} />
-                ))}
-              </select>
-            ) : (
-              <input
-                type={field.type}
-                name={field.name}
-                placeholder={field.placeholder}
-                onChange={formik.handleChange}
-                value={formik.values[field.name]}
-                className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
-              />
-            )}
-            {field.icon && (
-              <img
-                src={field.icon.src}
-                className="absolute right-2"
-                style={{
-                  top: field.icon.top,
-                  width: field.icon.width,
-                  height: field.icon.height,
-                }}
-                alt=""
-              />
-            )}
-            {formik.touched[field.name] && formik.errors[field.name] && (
-              <div className="text-red-500 text-sm">
-                {formik.errors[field.name]}
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
+      ;
     </div>
   );
 
@@ -323,7 +276,7 @@ export default function StudentUpdate() {
           </h2>
           <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
             <form onSubmit={formik.handleSubmit} className="w-full">
-              {renderStudentFormFields()}
+              {renderFields(studentFields)}
             </form>
           </div>
 
@@ -332,7 +285,8 @@ export default function StudentUpdate() {
           </h2>
           <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
             <form onSubmit={formik.handleSubmit} className="w-full">
-              {renderGuardianFormFields()}
+              {renderFields(guardianFields)}
+              {/* save and cancel buttons */}
               <div className="flex justify-end gap-4 mt-10 w-full">
                 <button
                   type="button"

@@ -53,11 +53,15 @@ export default function Studentlist() {
   const classRef = useRef(searchClass);
   const sectionRef = useRef(searchSection);
 
+  // Utility function to get appropriate URL based on role
+  const getUrl = (teacherUrl, adminUrl) => (isTeacher ? teacherUrl : adminUrl);
+
   useEffect(() => {
     getClassList();
     getStudent();
   }, [pageNo]);
 
+  // Update section list when class changes
   useEffect(() => {
     if (searchClass && classList.length > 0) {
       const classData = classList.find((itm) => itm["_id"] === searchClass);
@@ -65,6 +69,7 @@ export default function Studentlist() {
     }
   }, [searchClass, classList]);
 
+  // Sync local storage and fetch section-wise students when searchSection changes
   useEffect(() => {
     localStorage.setItem("searchClass", searchClass);
     localStorage.setItem("searchSection", searchSection);
@@ -73,10 +78,12 @@ export default function Studentlist() {
     getStudentsListSectionWise();
   }, [searchSection]);
 
+  // Fetch students list
   const getStudent = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.ALL_STUDENT_LIST;
-    else url = EndPoints.ADMIN.ALL_STUDENT_LIST;
+    const url = getUrl(
+      EndPoints.TEACHER.ALL_STUDENT_LIST,
+      EndPoints.ADMIN.ALL_STUDENT_LIST
+    );
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}/${pageNo}`);
@@ -93,20 +100,22 @@ export default function Studentlist() {
     }
   };
 
+  // Fetch students based on search input
   const getStudentSearchWise = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.STUDENT_LIST_SEARCH_WISE;
-    else url = EndPoints.ADMIN.STUDENT_LIST_SEARCH_WISE;
+    if (!name) return;
+
+    const url = getUrl(
+      EndPoints.TEACHER.STUDENT_LIST_SEARCH_WISE,
+      EndPoints.ADMIN.STUDENT_LIST_SEARCH_WISE
+    );
     try {
-      if (name) {
-        setLoading(true);
-        const response = await axiosClient.get(`${url}/${name}`);
-        if (response?.statusCode === 200) {
-          const { totalCount, result, limit } = response;
-          setTotalStudentCount(totalCount);
-          setLimit(limit);
-          setStudentList(result);
-        }
+      setLoading(true);
+      const response = await axiosClient.get(`${url}/${name}`);
+      if (response?.statusCode === 200) {
+        const { totalCount, result, limit } = response;
+        setTotalStudentCount(totalCount);
+        setLimit(limit);
+        setStudentList(result);
       }
     } catch (e) {
       toast.error(e);
@@ -115,20 +124,22 @@ export default function Studentlist() {
     }
   };
 
+  // Fetch section-wise students
   const getStudentsListSectionWise = async () => {
+    if (!searchSection) return;
+
+    const url = getUrl(
+      EndPoints.TEACHER.STUDENT_LIST_SECTION_WISE,
+      EndPoints.ADMIN.STUDENT_LIST_SECTION_WISE
+    );
     try {
-      if (searchSection !== "") {
-        const sectionId = searchSection;
-        let url;
-        if (isTeacher) url = EndPoints.TEACHER.STUDENT_LIST_SECTION_WISE;
-        else url = EndPoints.ADMIN.STUDENT_LIST_SECTION_WISE;
-        setLoading(true);
-        const studentList = await axiosClient.get(`${url}/${sectionId}`);
-        if (studentList?.statusCode === 200) {
-          setTotalStudentCount(studentList?.result?.totalCount);
-          setLimit(studentList?.result?.limit);
-          setStudentList(studentList?.result?.studentList);
-        }
+      setLoading(true);
+      const res = await axiosClient.get(`${url}/${searchSection}`);
+      if (res?.statusCode === 200) {
+        const { totalCount, limit, studentList } = resporesnse?.result;
+        setTotalStudentCount(totalCount);
+        setLimit(limit);
+        setStudentList(studentList);
       }
     } catch (e) {
       toast.error(e);
@@ -137,28 +148,29 @@ export default function Studentlist() {
     }
   };
 
+  // Fetch class list
   const getClassList = async () => {
     try {
-      const classes = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
-      setClassList(classes.result);
+      const res = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
+      setClassList(res.result);
     } catch (e) {
       toast.error(e);
     }
   };
 
-  const handlePageChange = (event, value) => {
-    setPageNo(value);
-  };
+  // Handle page change
+  const handlePageChange = (event, value) => setPageNo(value);
 
-  const handleSearch = () => {
-    getStudentSearchWise();
-  };
+  // Handle search
+  const handleSearch = () => getStudentSearchWise();
 
+  // Show student info
   const handleShowInfo = (student) => {
     setSelectedStudent(student);
     setOpenInfoModal(true);
   };
 
+  // Clear search filters
   const handleClear = () => {
     setName("");
     setSearchClass("");
@@ -166,27 +178,31 @@ export default function Studentlist() {
     getStudent();
   };
 
+  // Handle student deletion
   const handleDelete = (studentId) => {
     setIdForDelete(studentId);
     setDeleteConfirmModal(true);
   };
 
+  // Confirm student deletion
   const handleConfirmDelete = async () => {
+    const url = getUrl(
+      EndPoints.TEACHER.DELETE_STUDENT,
+      EndPoints.ADMIN.DELETE_STUDENT
+    );
     try {
-      let url;
-      if (isTeacher) url = EndPoints.TEACHER.DELETE_STUDENT;
-      else url = EndPoints.ADMIN.DELETE_STUDENT;
-      let response = await axiosClient.delete(`${url}/${idForDelete}`);
-      if (response?.statusCode === 200) {
+      const res = await axiosClient.delete(`${url}/${idForDelete}`);
+      if (res?.statusCode === 200) {
         getStudent();
         toast.success(t("messages.student.deleteSuccess"));
       }
-    } catch (error) {
+    } catch (e) {
       toast.error(e);
+    } finally {
+      setIdForDelete("");
+      setDeleteConfirmModal(false);
+      setSelectedStudent([]);
     }
-    setIdForDelete("");
-    setDeleteConfirmModal(false);
-    setSelectedStudent([]);
   };
 
   return (
@@ -325,7 +341,6 @@ export default function Studentlist() {
               </div>
             </div>
           </div>
-
           {studentList?.length > 0 ? (
             <>
               <div className="w-full max-md:max-w-full">
@@ -334,6 +349,7 @@ export default function Studentlist() {
                     isDarkMode ? "bg-[#0D192F]" : "bg-white"
                   } w-full mt-6 px-10 max-md:max-w-full`}
                 >
+                  {/* table headings */}
                   <thead>
                     <tr className="text-base  text-[#686868BF]">
                       <th
@@ -380,6 +396,7 @@ export default function Studentlist() {
                       </th>
                     </tr>
                   </thead>
+                  {/* list of students */}
                   <tbody>
                     {studentList.map((student, i) => (
                       <tr
@@ -482,6 +499,7 @@ export default function Studentlist() {
                     ))}
                   </tbody>
                 </table>
+                {/* pagination logic */}
                 {searchSection === "" && !name && (
                   <div className="flex gap-5 justify-between items-start my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
                     <div className="mt-4 text-blue-950">
@@ -556,6 +574,7 @@ export default function Studentlist() {
             </>
           ) : (
             <>
+              {/* no student */}
               <div className="flex flex-col items-center justify-center text-center pb-6">
                 <img src={nostudent} className="mb-4 size-52" />
                 <p
@@ -577,6 +596,7 @@ export default function Studentlist() {
           )}
         </div>
 
+        {/* student info modal */}
         {openInfoModal && (
           <StudentInfo
             modelOpen={setOpenInfoModal}
@@ -584,6 +604,7 @@ export default function Studentlist() {
           />
         )}
 
+        {/* delete confirmation popup */}
         {deleteConfirmModal && (
           <DeletePopup
             isVisible={deleteConfirmModal}

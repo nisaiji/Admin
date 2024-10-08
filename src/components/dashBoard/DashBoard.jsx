@@ -15,13 +15,13 @@ import toast, { Toaster } from "react-hot-toast";
 import CONSTANT from "../../utils/constants.js";
 
 const Dashboard = () => {
-  const { t } = useTranslation();
+  const [t] = useTranslation();
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const [selectedOption, setSelectedOption] = useState("Monthly");
-  const [studentCountData, setStudentCountData] = useState();
+  const [studentCountData, setStudentCountData] = useState(null);
   const [parentCount, setParentCount] = useState(0);
   const [calenderEvents, setCalenderEvents] = useState([]);
-  const [chartData, setChartData] = useState();
+  const [chartData, setChartData] = useState(null);
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
@@ -34,65 +34,69 @@ const Dashboard = () => {
     month: moment().month(),
     year: moment().year(),
   });
-  const daysInMonth = new Date(date.year, date.month, 0).getDate();
 
+  const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
+
+  // Centralized the axios request logic to reduce repetitive code.
+  const fetchData = async (url, method = "get", data = null) => {
+    try {
+      const response = await axiosClient[method](
+        url,
+        data ? { ...data } : null
+      );
+
+      if (response?.statusCode === 200) {
+        return response.result;
+      }
+    } catch (e) {
+      toast.error(e);
+    }
+    return null;
+  };
+
+  // student count api
   const getStudentCount = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.STUDENT_COUNT;
-    else url = EndPoints.ADMIN.STUDENT_COUNT;
-    try {
-      const today = new Date();
-      const startTime = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      ).getTime();
-      const endTime = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        23,
-        59,
-        59,
-        999
-      ).getTime();
-      const response = await axiosClient.post(`${url}`, { startTime, endTime });
-      if (response?.statusCode === 200) {
-        const { presentCount, totalCount } = response?.result;
-        setStudentCountData({ presentCount, totalCount });
-      }
-    } catch (e) {
-      toast.error(e);
-    }
+    const url = isTeacher
+      ? EndPoints.TEACHER.STUDENT_COUNT
+      : EndPoints.ADMIN.STUDENT_COUNT;
+    const today = new Date();
+    const startTime = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    ).getTime();
+    const endTime = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      23,
+      59,
+      59,
+      999
+    ).getTime();
+    const result = await fetchData(`${url}`, "post", { startTime, endTime });
+
+    if (result) setStudentCountData(result.presentCount, result.totalCount);
   };
 
+  // parent count api
   const getParentCount = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.PARENT_COUNT;
-    else url = EndPoints.ADMIN.PARENT_COUNT;
-    try {
-      const response = await axiosClient.get(`${url}`);
-      if (response?.statusCode === 200) {
-        const { parentCount } = response?.result;
-        setParentCount(parentCount);
-      }
-    } catch (e) {
-      toast.error(e);
-    }
+    const url = isTeacher
+      ? EndPoints.TEACHER.PARENT_COUNT
+      : EndPoints.ADMIN.PARENT_COUNT;
+    const result = await fetchData(`${url}`);
+    if (result) setParentCount(result.parentCount);
   };
 
+  // returns class and section list
   const getClassList = async () => {
-    try {
-      const response = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
-      if (response?.statusCode === 200) {
-        const { result } = response;
-        setClassList(result);
-        setSectionList(result[0]?.section);
-        setSelectedClass(result[0]?._id);
-        setSelectedSection(result[0]?.section[0]?._id);
-      }
-    } catch (e) {
-      toast.error(e);
+    const result = await fetchData(EndPoints.COMMON.CLASS_LIST);
+    if (result) {
+      setClassList(result);
+      const [firstClass] = result;
+      setSectionList(firstClass?.section || []);
+      setSelectedClass(firstClass?._id || "");
+      setSelectedSection(firstClass?.section[0]?._id || "");
     }
   };
 
@@ -103,28 +107,23 @@ const Dashboard = () => {
   }, []);
 
   const getCalenderEvents = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.DASHBOARD_CALENDER_EVENTS;
-    else url = EndPoints.COMMON.GET_EVENTS;
-    try {
-      const startTime = new Date(date.year, date.month, 1).getTime();
-      const endTime = new Date(date.year, date.month + 1, 0).getTime();
-      setEventLoading(true);
-      const response = await axiosClient.post(url, { startTime, endTime });
-      if (response?.statusCode === 200) {
-        setCalenderEvents(response?.result);
-      }
-    } catch (e) {
-      toast.error(e);
-    } finally {
-      setEventLoading(false);
-    }
+    const startTime = new Date(date.year, date.month, 1).getTime();
+    const endTime = new Date(date.year, date.month + 1, 0).getTime();
+    setEventLoading(true);
+    const result = await fetchData(EndPoints.COMMON.GET_EVENTS, "post", {
+      startTime,
+      endTime,
+    });
+
+    if (result) setCalenderEvents(result);
+    setEventLoading(false);
   };
 
   useEffect(() => {
     getCalenderEvents();
   }, [date]);
 
+  // return startTime and endTime of current week
   function getCurrentWeekDates() {
     const currentDate = new Date();
     const dayOfWeek = currentDate.getDay();
@@ -143,87 +142,48 @@ const Dashboard = () => {
     };
   }
 
-  const getWeeklyChart = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.DASHBOARD_WEEKLY_ATTENDANCE;
-    else url = EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS;
-    try {
-      const { startTime, endTime } = getCurrentWeekDates();
-      setLoading(true);
-      const response = await axiosClient.post(`${url}/${selectedSection}`, {
-        startTime,
-        endTime,
-      });
-      // console.log("r", response);
-      if (response?.statusCode === 200) {
-        const { sectionAttendance, totalStudent } = response?.result;
-        weeklyData(sectionAttendance, totalStudent);
-        setTotalStudentClassSectionWise(totalStudent);
-      }
-    } catch (e) {
-      toast.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // api for monthly, weekly chart
+  const getAttendanceChart = async (type) => {
+    const currentDates =
+      type === "Weekly"
+        ? getCurrentWeekDates()
+        : {
+            startTime: new Date(date.year, date.month, 1).getTime(),
+            endTime: new Date(date.year, date.month + 1, 0).getTime(),
+          };
+    setLoading(true);
+    const result = await fetchData(
+      `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`,
+      "post",
+      currentDates
+    );
 
-  const getMonthlyChart = async () => {
-    let url;
-    if (isTeacher) url = EndPoints.TEACHER.DASHBOARD_MONTHLY_ATTENDANCE;
-    else url = EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS;
-    try {
-      const currentDate = new Date();
-      const startTime = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        1
-      ).getTime();
-      const endTime = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() + 1,
-        0
-      ).getTime();
-      setLoading(true);
-      const response = await axiosClient.post(`${url}/${selectedSection}`, {
-        startTime,
-        endTime,
-      });
-      // console.log("r", response);
-
-      if (response?.statusCode === 200) {
-        const { sectionAttendance, totalStudent } = response?.result;
-        monthlyData(sectionAttendance, totalStudent);
-        setTotalStudentClassSectionWise(totalStudent);
-      }
-    } catch (e) {
-      toast.error(e);
-    } finally {
-      setLoading(false);
+    if (result) {
+      if (type === "Weekly")
+        weeklyData(result?.sectionAttendance, result?.totalStudent);
+      else monthlyData(result?.sectionAttendance, result?.totalStudent);
+      setTotalStudentClassSectionWise(result?.totalStudent);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
-    if (selectedSection !== "") {
-      if (selectedOption === "Weekly") getWeeklyChart();
-      else getMonthlyChart();
+    if (selectedSection) {
+      getAttendanceChart(selectedOption);
     }
   }, [selectedSection, selectedOption]);
 
-  const handleOptionChange = (event) => {
-    setSelectedOption(event.target.value);
-  };
+  const handleOptionChange = (event) => setSelectedOption(event.target.value);
 
+  // Weekly data of chart
   const weeklyData = (attendanceData, total) => {
-    let result = attendanceData.reduce((acc, curr) => {
-      acc.push(total - curr);
-      return acc;
-    }, []);
+    const absentData = attendanceData.map((present) => total - present);
     const data = {
       labels: CONSTANT.WEEKDAYS,
       datasets: [
         {
           label: "Absent",
-          data: result,
+          data: absentData,
           backgroundColor: "#DD1B10",
           barThickness: 50,
           borderRadius: 10,
@@ -240,6 +200,7 @@ const Dashboard = () => {
     setChartData(data);
   };
 
+  // Empty weekly data
   const emptyWeeklyChartView = {
     labels: CONSTANT.WEEKDAYS,
     datasets: [
@@ -260,6 +221,7 @@ const Dashboard = () => {
     ],
   };
 
+  // Empty monthly data
   const emptyMonthlyChartView = {
     labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
     datasets: [
@@ -278,17 +240,15 @@ const Dashboard = () => {
     ],
   };
 
+  // Monthly data of chart
   const monthlyData = (attendanceData, total) => {
-    let result = attendanceData.reduce((acc, curr) => {
-      acc.push(total - curr);
-      return acc;
-    }, []);
+    const absentData = attendanceData.map((present) => total - present);
     const data = {
-      labels: Array.from({ length: attendanceData?.length }, (_, i) => i + 1),
+      labels: Array.from({ length: attendanceData.length }, (_, i) => i + 1),
       datasets: [
         {
           label: "Absent",
-          data: result,
+          data: absentData,
           backgroundColor: "#DD1B10",
           barThickness: 20,
         },
@@ -306,22 +266,13 @@ const Dashboard = () => {
   const chartOptions = {
     maintainAspectRatio: false,
     scales: {
-      x: {
-        stacked: true,
-        grid: {
-          display: false,
-        },
-      },
+      x: { stacked: true, grid: { display: false } },
       y: {
         min: 0,
         max: totalStudentClassSectionWise,
-        ticks: {
-          stepSize: Math.ceil(totalStudentClassSectionWise / 10),
-        },
+        ticks: { stepSize: Math.ceil(totalStudentClassSectionWise / 10) },
         stacked: true,
-        grid: {
-          display: false,
-        },
+        grid: { display: false },
       },
     },
   };
@@ -336,17 +287,18 @@ const Dashboard = () => {
     }
   };
 
-  const renderChart = () => {
-    if (selectedOption === "Weekly") {
-      return (
-        <Bar data={chartData || emptyWeeklyChartView} options={chartOptions} />
-      );
-    } else {
-      return (
-        <Bar data={chartData || emptyMonthlyChartView} options={chartOptions} />
-      );
-    }
-  };
+  // render charts of weekly and monthly
+  const renderChart = () => (
+    <Bar
+      data={
+        chartData ||
+        (selectedOption === "Weekly"
+          ? emptyWeeklyChartView
+          : emptyMonthlyChartView)
+      }
+      options={chartOptions}
+    />
+  );
 
   return (
     <div className="relative w-full min-h-screen bg-white bg-gradient-to-t from-[rgba(138,137,250,0.1)] to-[rgba(138,137,250,0.1)]">
@@ -394,6 +346,7 @@ const Dashboard = () => {
               <h2 className="text-2xl font-semibold pl-5">
                 {t("dashboard.attendance")}
               </h2>
+              {/* Graph toggle button */}
               <div className="flex justify-evenly bg-[#f2f2f4] w-56 p-2 rounded-full">
                 <button
                   className={`px-5 py-1 rounded-full font-poppins-regular ${
