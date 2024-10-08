@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Tools from "../assets/images/Tools.png";
 import Down from "../assets/images/Down.png";
 import { useTranslation } from "react-i18next";
@@ -12,10 +12,10 @@ import {
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const role = useSelector((state) => state.appAuth.role);
+  const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
+
   const sectionId = useSelector((state) => state.appAuth.section);
   const classId = useSelector((state) => state.appAuth.class);
-  const dispatch = useDispatch();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -49,7 +49,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    if (role === "teacher") {
+    if (isTeacher) {
       removeItem("class");
       removeItem("section");
       removeItem("firstname");
@@ -99,7 +99,7 @@ const Navbar = () => {
                 ref={menuRef}
                 className="absolute top-10 left-0 w-40 bg-[#05022B] rounded-xl shadow-lg"
               >
-                {role === "teacher" ? (
+                {isTeacher ? (
                   <div className="py-1" onClick={closeMenus}>
                     <div
                       onClick={() =>
@@ -163,12 +163,10 @@ const Navbar = () => {
             >
               <div>
                 <div className="text-white text-base mr-3">
-                  {role === "teacher"
-                    ? getItem("firstname")
-                    : getItem("username")}
+                  {isTeacher ? getItem("firstname") : getItem("username")}
                 </div>
                 <div className="text-white text-xs">
-                  {role === "teacher" ? t("roles.teacher") : t("roles.admin")}
+                  {isTeacher ? t("roles.teacher") : t("roles.admin")}
                 </div>
               </div>
               <img src={Down} alt="Dropdown" className="w-4 h-2" />
@@ -181,7 +179,7 @@ const Navbar = () => {
                 onClick={closeMenus}
               >
                 <div className="py-1">
-                  {role === "admin" && (
+                  {!isTeacher && (
                     <Link
                       to="/admin-profile"
                       className="block px-4 py-2 hover:bg-white hover:text-[#05022B]"

@@ -133,9 +133,14 @@ export default function AdminProfile() {
         schoolNumber: values.schoolNumber || undefined,
       };
 
-      await axiosClient.put(EndPoints.ADMIN.PROFILE_UPDATE, requestBody);
-      toast.success(t("messages.admin.updateMsg"));
-      getadmin();
+      const res = await axiosClient.put(
+        EndPoints.ADMIN.PROFILE_UPDATE,
+        requestBody
+      );
+      if (res?.statusCode === 200) {
+        toast.success(res.result);
+        getadmin();
+      }
     } catch (e) {
       toast.error(e);
     } finally {
@@ -150,19 +155,20 @@ export default function AdminProfile() {
       setLoading(true);
 
       const { values } = formik;
-      await axiosClient.put(EndPoints.ADMIN.SOCIAL_PROFILE_UPDATE, {
+      const res = await axiosClient.put(EndPoints.ADMIN.SOCIAL_PROFILE_UPDATE, {
         phone: values.phone,
-        website: values.website,
-        facebook: values.facebook,
-        instagram: values.instagram,
-        linkedin: values.linkedin,
-        twitter: values.twitter,
-        whatsapp: values.whatsapp,
-        youtube: values.youtube,
+        website: values.website || undefined,
+        facebook: values.facebook || undefined,
+        instagram: values.instagram || undefined,
+        linkedin: values.linkedin || undefined,
+        twitter: values.twitter || undefined,
+        whatsapp: values.whatsapp || undefined,
+        youtube: values.youtube || undefined,
       });
-
-      toast.success(t("messages.admin.socialUpdate"));
-      getadmin();
+      if (res?.statusCode === 200) {
+        toast.success(res.result);
+        getadmin();
+      }
     } catch (e) {
       toast.error(e);
     } finally {

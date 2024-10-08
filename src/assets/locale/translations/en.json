@@ -87,12 +87,14 @@
     "state": "State is required",
     "address": "Address is required",
     "phone": "Phone number is required",
+    "dob": "Date of Birth is required",
     "qualification": "Qualification is required",
     "occupation": "Occupation is required",
     "enterFirstName": "First Name should be atleast 3 character long and can not contain numbers",
     "enterLastName": "Last Name should be atleast 3 character long and can not contain numbers",
     "validationParentFullNameLength": "Parent Full Name should be atleast 3 character long and can not contain numbers",
     "gender": "Please Select Gender",
+    "bloodGroup": "Please Select BloodGroup",
     "parentName": "Please Enter ParentFullName",
     "validationPhone": "Please Enter Phone Number ",
     "message": "All fields must be filled out before adding a new row.",
@@ -217,9 +219,9 @@
     "eleven": "11th",
     "twelve": "12th",
     "sections": "ABCDEFGH",
-    "male":"Male",
-    "female":"Female",
-    "other":"Other"
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
   },
   "eventForm": {
     "title": {
@@ -328,5 +330,5 @@
   "profile": "Profile",
   "logout": "Log Out",
   "duplicate": "Duplicate child adding for same parent",
-  "sameEntry":"same entry"
+  "sameEntry": "same entry"
 }

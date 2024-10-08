@@ -223,8 +223,9 @@ const Event = () => {
     try {
       const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
         startTime: new Date(year, month, 1).getTime(),
-        endTime: new Date(year, month + 1, 0).getTime(),
+        endTime: new Date(year, month + 1, 0, 23, 59, 59, 999).getTime(),
       });
+
       if (response?.statusCode === 200) {
         setEvents(
           response?.result?.sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -301,8 +302,7 @@ const Event = () => {
       if (res?.statusCode === 200) {
         setShowAddEvent(false);
         fetchEvents();
-        if (eventId) toast.success(t("messages.event.updateSuccess"));
-        else toast.success(t("messages.event.createSuccess"));
+        toast.success(res.result);
       }
     } catch (e) {
       toast.error(e);
@@ -425,7 +425,7 @@ const Event = () => {
         `${EndPoints.ADMIN.DELETE_EVENT}/${eventToDelete}`
       );
       if (response?.statusCode === 200) {
-        toast.success(t("messages.event.deleteSuccess"));
+        toast.success(response.result);
         setShowDeleteConfirmation(false);
         setLoading(false);
         setEvents(events.filter((event) => event._id !== eventToDelete));

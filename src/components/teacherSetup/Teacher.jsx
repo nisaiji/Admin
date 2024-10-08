@@ -87,7 +87,7 @@ export default function Teacher() {
       );
 
       if ([200, 201].includes(response?.statusCode)) {
-        toast.success(t("messages.teacher.registerSuccess"));
+        toast.success(response.result);
         getTeacher();
         setNewTeacher({ SNo: null, firstname: "", lastname: "", phone: "" });
       }
@@ -141,39 +141,6 @@ export default function Teacher() {
     }
   };
 
-  // Updates an existing teacher
-  const updateTeacher = async (teacher) => {
-    const e = validateData(teacher);
-    if (e) {
-      toast.error(e);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const updatedTeacher = {
-        firstname: capitalizeFirstLetter(teacher?.firstname.trim()),
-        lastname: capitalizeFirstLetter(teacher?.lastname.trim()),
-        phone: teacher.phone.trim(),
-      };
-
-      const response = await axiosClient.put(
-        `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
-        updatedTeacher
-      );
-
-      if (response?.statusCode === 200) {
-        getTeacher();
-        toast.success(t("message.teacher.updateSuccess"));
-        setEditSNo(null);
-      }
-    } catch (e) {
-      toast.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Deletes a teacher
   const handleDelete = async () => {
     try {
@@ -184,7 +151,9 @@ export default function Teacher() {
 
       if (response?.statusCode === 200) {
         getTeacher();
-        toast.success(t("message.teacher.deleteSuccess"));
+        console.log(response);
+
+        toast.success(response.result);
       }
     } catch (e) {
       toast.error(e);
@@ -361,64 +330,55 @@ export default function Teacher() {
                       </td>
                       {/* Actions */}
                       <td className="pl-3 pr-5 py-2 text-sm font-poppins-bold border border-[#c1c0ca]">
-                        {editSNo === teacher.SNo ? (
+                        <div className="flex justify-around">
                           <button
-                            className="bg-[#464590] text-white font-poppins-regular py-1.5 px-3 rounded-xl w-full h-full"
-                            onClick={() => updateTeacher(teacher)}
+                            onClick={() =>
+                              navigate("/teacher-update", {
+                                state: teacher,
+                              })
+                            }
                           >
-                            {t("buttons.save")}
+                            <img
+                              src={ellipse}
+                              alt=""
+                              className="size-6 absolute"
+                            />
+                            <img
+                              src={edit2}
+                              alt=""
+                              className="size-4 relative top-1 left-1"
+                            />
                           </button>
-                        ) : (
-                          <div className="flex justify-around">
-                            <button
-                              onClick={() =>
-                                navigate("/teacher-update", {
-                                  state: teacher,
-                                })
-                              }
-                            >
-                              <img
-                                src={ellipse}
-                                alt=""
-                                className="size-6 absolute"
-                              />
-                              <img
-                                src={edit2}
-                                alt=""
-                                className="size-4 relative top-1 left-1"
-                              />
-                            </button>
-                            <button onClick={() => handleShowInfo(teacher)}>
-                              <img
-                                src={ellipse}
-                                alt=""
-                                className="size-6 absolute "
-                              />
-                              <img
-                                src={info}
-                                alt=""
-                                className="size-4 relative top-1 left-1"
-                              />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setCurrTeacher(teacher);
-                                setShowDeleteConfirmation(true);
-                              }}
-                            >
-                              <img
-                                src={ellipse}
-                                alt=""
-                                className="size-6 absolute "
-                              />
-                              <img
-                                src={delete2}
-                                alt=""
-                                className="size-4 relative top-1 left-1"
-                              />
-                            </button>
-                          </div>
-                        )}
+                          <button onClick={() => handleShowInfo(teacher)}>
+                            <img
+                              src={ellipse}
+                              alt=""
+                              className="size-6 absolute "
+                            />
+                            <img
+                              src={info}
+                              alt=""
+                              className="size-4 relative top-1 left-1"
+                            />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setCurrTeacher(teacher);
+                              setShowDeleteConfirmation(true);
+                            }}
+                          >
+                            <img
+                              src={ellipse}
+                              alt=""
+                              className="size-6 absolute "
+                            />
+                            <img
+                              src={delete2}
+                              alt=""
+                              className="size-4 relative top-1 left-1"
+                            />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

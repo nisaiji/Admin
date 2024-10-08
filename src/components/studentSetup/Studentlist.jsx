@@ -29,17 +29,24 @@ import CONSTANT from "../../utils/constants";
 export default function Studentlist() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
+  const id = useSelector((state) => state.appAuth.id);
+
   const [pageNo, setPageNo] = useState(1);
-  const [openInfoModal, setOpenInfoModal] = useState(false);
+  const [limit, setLimit] = useState(10);
   const [totalStudentCount, setTotalStudentCount] = useState(5);
-  const [limit, setLimit] = useState(5);
-  const [studentList, setStudentList] = useState([]);
-  const [name, setName] = useState("");
-  const [selectedStudent, setSelectedStudent] = useState([]);
-  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+
+  const [openInfoModal, setOpenInfoModal] = useState(false);
   const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
+
+  const [studentList, setStudentList] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState([]);
   const [idForDelete, setIdForDelete] = useState();
+  const [name, setName] = useState("");
+
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
   const [searchClass, setSearchClass] = useState(
@@ -48,18 +55,18 @@ export default function Studentlist() {
   const [searchSection, setSearchSection] = useState(
     () => localStorage.getItem("searchSection") || ""
   );
+
   const [loading, setLoading] = useState(false);
 
   const classRef = useRef(searchClass);
   const sectionRef = useRef(searchSection);
 
-  // Utility function to get appropriate URL based on role
-  const getUrl = (teacherUrl, adminUrl) => (isTeacher ? teacherUrl : adminUrl);
-
   useEffect(() => {
-    getClassList();
-    getStudent();
-  }, [pageNo]);
+    if (id) {
+      getClassList();
+      fetchStudents({});
+    }
+  }, [id, pageNo]);
 
   // Update section list when class changes
   useEffect(() => {
@@ -75,71 +82,37 @@ export default function Studentlist() {
     localStorage.setItem("searchSection", searchSection);
     classRef.current = searchClass;
     sectionRef.current = searchSection;
-    getStudentsListSectionWise();
+    fetchStudents({ searchSection });
   }, [searchSection]);
 
-  // Fetch students list
-  const getStudent = async () => {
-    const url = getUrl(
-      EndPoints.TEACHER.ALL_STUDENT_LIST,
-      EndPoints.ADMIN.ALL_STUDENT_LIST
-    );
-    try {
-      setLoading(true);
-      const response = await axiosClient.get(`${url}/${pageNo}`);
-      if (response?.statusCode === 200) {
-        const { totalCount, studentList, limit } = response?.result;
-        setTotalStudentCount(totalCount);
-        setLimit(limit);
-        setStudentList(studentList);
-      }
-    } catch (e) {
-      toast.error(e);
-    } finally {
-      setLoading(false);
+  // Generalized function to fetch students based on different conditions
+  const fetchStudents = async ({ searchName = "", searchSection = "" }) => {
+    if (!id) {
+      return;
     }
-  };
 
-  // Fetch students based on search input
-  const getStudentSearchWise = async () => {
-    if (!name) return;
+    const url = isTeacher
+      ? EndPoints.TEACHER.GET_STUDENT_LIST
+      : EndPoints.ADMIN.GET_STUDENT_LIST;
 
-    const url = getUrl(
-      EndPoints.TEACHER.STUDENT_LIST_SEARCH_WISE,
-      EndPoints.ADMIN.STUDENT_LIST_SEARCH_WISE
-    );
-    try {
-      setLoading(true);
-      const response = await axiosClient.get(`${url}/${name}`);
-      if (response?.statusCode === 200) {
-        const { totalCount, result, limit } = response;
-        setTotalStudentCount(totalCount);
-        setLimit(limit);
-        setStudentList(result);
-      }
-    } catch (e) {
-      toast.error(e);
-    } finally {
-      setLoading(false);
+    let query = `?admin=${id}&page=${pageNo}&limit=${limit}&include=parent,class,section`;
+
+    // Determine the query parameters based on the inputs
+    if (searchName) {
+      query += `&firstname=${searchName}`;
+    } else if (searchSection) {
+      query += `&section=${searchSection}`;
     }
-  };
 
-  // Fetch section-wise students
-  const getStudentsListSectionWise = async () => {
-    if (!searchSection) return;
-
-    const url = getUrl(
-      EndPoints.TEACHER.STUDENT_LIST_SECTION_WISE,
-      EndPoints.ADMIN.STUDENT_LIST_SECTION_WISE
-    );
     try {
       setLoading(true);
-      const res = await axiosClient.get(`${url}/${searchSection}`);
-      if (res?.statusCode === 200) {
-        const { totalCount, limit, studentList } = resporesnse?.result;
-        setTotalStudentCount(totalCount);
-        setLimit(limit);
-        setStudentList(studentList);
+      const response = await axiosClient.get(`${url}${query}`);
+
+      if (response?.statusCode === 200) {
+        const { totalStudents, students, pageSize } = response?.result;
+        setTotalStudentCount(totalStudents);
+        setLimit(pageSize);
+        setStudentList(students);
       }
     } catch (e) {
       toast.error(e);
@@ -162,7 +135,7 @@ export default function Studentlist() {
   const handlePageChange = (event, value) => setPageNo(value);
 
   // Handle search
-  const handleSearch = () => getStudentSearchWise();
+  const handleSearch = () => fetchStudents({ searchName: name });
 
   // Show student info
   const handleShowInfo = (student) => {
@@ -175,7 +148,7 @@ export default function Studentlist() {
     setName("");
     setSearchClass("");
     setSearchSection("");
-    getStudent();
+    fetchStudents({});
   };
 
   // Handle student deletion
@@ -186,15 +159,15 @@ export default function Studentlist() {
 
   // Confirm student deletion
   const handleConfirmDelete = async () => {
-    const url = getUrl(
-      EndPoints.TEACHER.DELETE_STUDENT,
-      EndPoints.ADMIN.DELETE_STUDENT
-    );
+    const url = isTeacher
+      ? EndPoints.TEACHER.DELETE_STUDENT
+      : EndPoints.ADMIN.DELETE_STUDENT;
+
     try {
       const res = await axiosClient.delete(`${url}/${idForDelete}`);
       if (res?.statusCode === 200) {
-        getStudent();
-        toast.success(t("messages.student.deleteSuccess"));
+        fetchStudents({});
+        toast.success(res.result);
       }
     } catch (e) {
       toast.error(e);
@@ -428,21 +401,21 @@ export default function Studentlist() {
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
                           } p-4 text-center max-md:hidden`}
                         >
-                          {student?.parent?.phone}
+                          {student?.parentDetails?.phone}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
                           } p-4 text-center max-lg:hidden`}
                         >
-                          {student?.parent?.email || CONSTANT.NA}
+                          {student?.parentDetails?.email || CONSTANT.NA}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
                           } p-4 text-center max-lg:hidden`}
                         >
-                          {student?.parent?.bloodGroup || CONSTANT.NA}
+                          {student?.parentDetails?.bloodGroup || CONSTANT.NA}
                         </td>
                         {/* Action Icons */}
                         <td
@@ -500,76 +473,74 @@ export default function Studentlist() {
                   </tbody>
                 </table>
                 {/* pagination logic */}
-                {searchSection === "" && !name && (
-                  <div className="flex gap-5 justify-between items-start my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
-                    <div className="mt-4 text-blue-950">
-                      <span
-                        className={`${
-                          isDarkMode ? "text-white" : "text-[#87A0C4]"
-                        } leading-5 `}
-                      >
-                        {t("titles.showing")}
-                      </span>{" "}
-                      <span
-                        className={`${
-                          isDarkMode ? "text-white" : "text-[#152259]"
-                        } leading-5 `}
-                      >
-                        {pageNo * limit - (limit - 1)} -{" "}
-                        {Math.min(totalStudentCount, pageNo * limit)}
-                      </span>
-                      <span
-                        className={`${
-                          isDarkMode ? "text-white" : "text-[#87A0C4]"
-                        } leading-5 `}
-                      >
-                        {" "}
-                        {t("titles.from")}
-                      </span>{" "}
-                      <span
-                        className={`${
-                          isDarkMode ? "text-white" : "text-[#152259]"
-                        } leading-5 `}
-                      >
-                        {totalStudentCount}
-                      </span>
-                      <span
-                        className={`${
-                          isDarkMode ? "text-white" : "text-[#87A0C4]"
-                        } leading-5 `}
-                      >
-                        {" "}
-                        {t("titles.data")}
-                      </span>
-                    </div>
-                    <Stack spacing={2}>
-                      <Pagination
-                        count={Math.ceil(totalStudentCount / limit)}
-                        shape="rounded"
-                        page={pageNo}
-                        onChange={handlePageChange}
-                        renderItem={(item) => (
-                          <PaginationItem
-                            {...item}
-                            sx={{
-                              color: isDarkMode ? "white" : "#464590",
-                              borderColor:
-                                item.type === "previous" || item.type === "next"
-                                  ? "transparent"
-                                  : "#464590",
-                              borderWidth: "2px",
-                              borderStyle: "solid",
-                              "&.Mui-selected": {
-                                color: "white",
-                                backgroundColor: "#464590",
-                              },
-                            }}
-                          />
-                        )}
-                      />
-                    </Stack>
+                <div className="flex gap-5 justify-between items-start my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
+                  <div className="mt-4 text-blue-950">
+                    <span
+                      className={`${
+                        isDarkMode ? "text-white" : "text-[#87A0C4]"
+                      } leading-5 `}
+                    >
+                      {t("titles.showing")}
+                    </span>{" "}
+                    <span
+                      className={`${
+                        isDarkMode ? "text-white" : "text-[#152259]"
+                      } leading-5 `}
+                    >
+                      {pageNo * limit - (limit - 1)} -{" "}
+                      {Math.min(totalStudentCount, pageNo * limit)}
+                    </span>
+                    <span
+                      className={`${
+                        isDarkMode ? "text-white" : "text-[#87A0C4]"
+                      } leading-5 `}
+                    >
+                      {" "}
+                      {t("titles.from")}
+                    </span>{" "}
+                    <span
+                      className={`${
+                        isDarkMode ? "text-white" : "text-[#152259]"
+                      } leading-5 `}
+                    >
+                      {totalStudentCount}
+                    </span>
+                    <span
+                      className={`${
+                        isDarkMode ? "text-white" : "text-[#87A0C4]"
+                      } leading-5 `}
+                    >
+                      {" "}
+                      {t("titles.data")}
+                    </span>
                   </div>
-                )}
+                  <Stack spacing={2}>
+                    <Pagination
+                      count={Math.ceil(totalStudentCount / limit)}
+                      shape="rounded"
+                      page={pageNo}
+                      onChange={handlePageChange}
+                      renderItem={(item) => (
+                        <PaginationItem
+                          {...item}
+                          sx={{
+                            color: isDarkMode ? "white" : "#464590",
+                            borderColor:
+                              item.type === "previous" || item.type === "next"
+                                ? "transparent"
+                                : "#464590",
+                            borderWidth: "2px",
+                            borderStyle: "solid",
+                            "&.Mui-selected": {
+                              color: "white",
+                              backgroundColor: "#464590",
+                            },
+                          }}
+                        />
+                      )}
+                    />
+                  </Stack>
+                </div>
               </div>
             </>
           ) : (

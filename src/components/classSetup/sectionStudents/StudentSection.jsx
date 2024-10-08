@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { axiosClient } from "../../../services/axiosClient";
 import toast, { Toaster } from "react-hot-toast";
 import Search from "../../../assets/images/Search.png";
@@ -13,19 +13,17 @@ import DeletePopup from "../../DeleteMessagePopup";
 import Spinner from "../../Spinner";
 import EndPoints from "../../../services/EndPoints";
 import { useTranslation } from "react-i18next";
-import ConformationPopup from "../../ConformationPopup";
 import REGEX from "../../../utils/regix";
 
 export default function StudentSection() {
   const [t] = useTranslation();
   const location = useLocation();
-  const { classId, sectionId, className, sectionName } = location.state;
+  const { sectionId, className, sectionName } = location.state;
   const searchInputRef = useRef(null);
   const [students, setStudents] = useState([]);
   const [currStudent, setCurrStudent] = useState([]);
   const [classTeacher, setClassTeacher] = useState([]);
   const [studentInfoModelOpen, setStudentInfoModelOpen] = useState(false);
-  const [validationError, setValidationError] = useState("");
   const [editSNo, setEditSNo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
@@ -38,17 +36,25 @@ export default function StudentSection() {
     gender: "",
     parentName: "",
     phone: "",
-    classId,
     sectionId,
   });
   const genders = [t("options.male"), t("options.female"), t("options.other")];
+
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
+  const id = useSelector((state) => state.appAuth.id);
   const teacherSectionId = useSelector((state) => state.appAuth.section);
+  const teacherClassName = useSelector((state) => state.appAuth.className);
+  const teacherSectionName = useSelector((state) => state.appAuth.sectionName);
 
   useEffect(() => {
-    fetchStudents();
-    if (!isTeacher) getSectionInfo();
-  }, []);
+    if (id) {
+      getSectionInfo();
+    }
+
+    if ((id && !isTeacher) || (!id && isTeacher)) {
+      fetchStudents();
+    }
+  }, [id, isTeacher]);
 
   // get class teacher info api
   const getSectionInfo = async () => {
@@ -72,17 +78,24 @@ export default function StudentSection() {
     const url = isTeacher
       ? EndPoints.TEACHER.GET_SECTION_STUDENTS
       : EndPoints.ADMIN.GET_SECTION_STUDENTS;
+
+    let query = `?include=parent`;
+    if (!isTeacher) {
+      query += `&admin=${id}&section=${sectionId}`;
+    } else {
+      query += `&section=${teacherSectionId}`;
+    }
     try {
       setLoading(true);
-      const res = await axiosClient.get(
-        `${url}/${isTeacher ? teacherSectionId : sectionId}`
-      );
+
+      const res = await axiosClient.get(`${url}${query}`);
+
       if (res?.statusCode === 200) {
-        const studentList = res?.result?.studentList.map((student, index) => ({
+        const studentList = res?.result?.students.map((student, index) => ({
           ...student,
           SNo: index + 1,
-          parentName: student.parent?.fullname || "",
-          phone: student.parent?.phone || "",
+          parentName: student.parentDetails?.fullname || "",
+          phone: student.parentDetails?.phone || "",
         }));
         setStudents(studentList);
       }
@@ -184,24 +197,24 @@ export default function StudentSection() {
       delete student.SNo;
     }
 
-    const transformedStudent = {
-      ...student,
+    let transformedStudent = {
       firstname: capitalize(student.firstname.trim()),
       lastname: capitalize(student.lastname.trim()),
       parentName: capitalize(student.parentName.trim()),
-      classId,
-      sectionId,
+      gender: student.gender,
+      phone: student.phone,
+      ...(!isUpdate && { sectionId }),
     };
 
     try {
       setLoading(true);
-
+      // respone based on registered or updated request
       const response = await axiosClient[isUpdate ? "put" : "post"](
         `${url}${isUpdate ? `/${student._id}` : ""}`,
         transformedStudent
       );
       if ([200, 201].includes(response?.statusCode)) {
-        toast.success(t(`messages.student.${isUpdate ? "update" : "success"}`));
+        toast.success(response.result);
         fetchStudents();
         if (!isUpdate) {
           setNewStudent({
@@ -211,7 +224,6 @@ export default function StudentSection() {
             gender: "",
             parentName: "",
             phone: "",
-            classId,
             sectionId,
           });
         }
@@ -220,6 +232,7 @@ export default function StudentSection() {
       toast.error(e);
     } finally {
       setLoading(false);
+      setEditSNo(null)
     }
   };
 
@@ -236,7 +249,7 @@ export default function StudentSection() {
         : EndPoints.ADMIN.DELETE_SECTION_STUDENT;
       const res = await axiosClient.delete(`${url}/${currStudent._id}`);
       if (res?.statusCode === 200) {
-        toast.success(t("messages.student.deleteSuccess"));
+        toast.success(res.result);
         fetchStudents();
       }
     } catch (e) {
@@ -293,9 +306,7 @@ export default function StudentSection() {
                 } text-xl px-5 py-1 font-semibold text-[#464590]`}
               >
                 {isTeacher
-                  ? `${localStorage.getItem("class")} ${localStorage.getItem(
-                      "section"
-                    )}`
+                  ? `${teacherClassName} ${teacherSectionName}`
                   : `${t("titles.class")} ${className} | ${t(
                       "titles.section"
                     )} ${sectionName}`}

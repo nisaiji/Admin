@@ -76,7 +76,7 @@ const TeacherUpdate = () => {
         );
 
         if (response?.statusCode === 200) {
-          toast.success(t("messages.teacher.updateSuccess"));
+          toast.success(response.result);
           navigate(-1);
         }
       } catch (e) {

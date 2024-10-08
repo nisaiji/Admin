@@ -32,13 +32,13 @@ export default function StudentUpdate() {
     bloodGroup: Yup.string().required(t("validationError.bloodGroup")),
     dob: Yup.date().required(t("validationError.dob")),
     address: Yup.string().required(t("validationError.address")),
-    parentFullname: Yup.string().required(t("validationError.fullName")),
+    parentName: Yup.string().required(t("validationError.parentName")),
     parentGender: Yup.string().required(t("validationError.gender")),
     parentAge: Yup.string(t("validationError.age")).required(),
     parentEmail: Yup.string()
       .email(t("validationError.emailAddress"))
       .required(t("validationError.email")),
-    parentPhone: Yup.string()
+    phone: Yup.string()
       .required()
       .matches(REGEX.PHONE, t("validationError.phoneNumber"))
       .test(
@@ -61,14 +61,14 @@ export default function StudentUpdate() {
       bloodGroup: student.bloodGroup || "",
       dob: student.dob || "",
       address: student.address || "",
-      parentFullname: student.parent.fullname || "",
-      parentGender: student.parent.gender || "",
-      parentAge: student.parent.age || "",
-      parentEmail: student.parent.email || "",
-      parentPhone: student.parent.phone || "",
-      parentQualification: student.parent.qualification || "",
-      parentOccupation: student.parent.occupation || "",
-      parentAddress: student.parent.address || "",
+      parentName: student.parentDetails.fullname || "",
+      parentGender: student.parentDetails.gender || "",
+      parentAge: student.parentDetails.age || "",
+      parentEmail: student.parentDetails.email || "",
+      phone: student.parentDetails.phone || "",
+      parentQualification: student.parentDetails.qualification || "",
+      parentOccupation: student.parentDetails.occupation || "",
+      parentAddress: student.parentDetails.address || "",
     },
     validationSchema,
     // update student api
@@ -82,15 +82,16 @@ export default function StudentUpdate() {
             firstname: capitalize(values.firstname),
             lastname: capitalize(values.lastname),
             address: capitalize(values.address),
-            parentFullname: capitalize(values.parentFullname),
+            parentName: capitalize(values.parentName),
             parentEmail: values.parentEmail.toLowerCase(),
             parentQualification: capitalize(values.parentQualification),
             parentOccupation: capitalize(values.parentOccupation),
             parentAddress: capitalize(values.parentAddress),
           }
         );
+
         if (response?.statusCode === 200) {
-          toast.success(t("messages.student.updateSuccess"));
+          toast.success(response.result);
           navigate(-1);
         }
       } catch (e) {
@@ -145,7 +146,7 @@ export default function StudentUpdate() {
   const guardianFields = [
     {
       label: t("labels.fullName"),
-      name: "parentFullname",
+      name: "parentName",
       type: "text",
       placeholder: t("placeholders.fullName"),
     },
@@ -170,7 +171,7 @@ export default function StudentUpdate() {
     },
     {
       label: t("labels.phoneNumber"),
-      name: "parentPhone",
+      name: "phone",
       type: "text",
       placeholder: t("placeholders.phoneNumber"),
       icon: { src: India, width: 35, height: 25, top: 7 },

@@ -71,7 +71,7 @@ function Signup() {
         );
         // If registration is successful
         if ([200, 201].includes(response?.statusCode)) {
-          toast.success(t("message.admin.registerSuccess"));
+          toast.success(response.result);
           resetForm();
           navigate("/login");
         }

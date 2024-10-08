@@ -15,8 +15,11 @@ import EndPoints from "../services/EndPoints";
 import Spinner from "../components/Spinner";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+import { setAuthData } from "../store/AppAuthSlice";
 
 function Login() {
+  const dispatch = useDispatch();
   const [isAdmin, setIsAdmin] = useState(true);
   const navigate = useNavigate();
   const [ishide, setIsHide] = useState(true);
@@ -63,13 +66,15 @@ function Login() {
 
         // Submit login request
         const response = await axiosClient.post(endpoint, payload);
-
+        const { result } = response;
         // If login is successful
+
         if (response?.statusCode === 200) {
           isAdmin
-            ? setUsername(response?.result?.username)
-            : setFirstname(response?.result?.firstname);
-          setItem(response?.result?.accessToken);
+            ? setUsername(result?.username)
+            : setFirstname(result?.firstname);
+          setItem(result?.accessToken);
+          dispatch(setAuthData(result?.accessToken));
           toast.success(t("messages.login.success"));
           resetForm();
           navigate("/");

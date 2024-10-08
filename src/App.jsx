@@ -11,15 +11,26 @@ import Event from "./components/eventSetup/Event";
 import Addsection from "./components/classSetup/Addsection";
 import Studentlist from "./components/studentSetup/Studentlist";
 import StudentSection from "./components/classSetup/sectionStudents/StudentSection";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import TeacherUpdate from "./components/teacherSetup/TeacherUpdate";
 import StudentUpdate from "./components/studentSetup/StudentUpdate";
 import AdminProfile from "./components/admin/AdminProfile";
 import i18n from "./assets/locale/i18n";
 import { I18nextProvider } from "react-i18next";
+import { getItem } from "./services/LocalStorageManager";
+import { useEffect } from "react";
+import { setAuthData } from "./store/AppAuthSlice";
 
 function App() {
+  const dispatch = useDispatch();
   const role = useSelector((state) => state.appAuth.role);
+
+  useEffect(() => {
+    const token = getItem("access_token");
+    if (token) {
+      dispatch(setAuthData(token));
+    }
+  }, [dispatch]);
 
   return (
     <>

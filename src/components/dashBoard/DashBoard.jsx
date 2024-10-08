@@ -91,6 +91,7 @@ const Dashboard = () => {
   // returns class and section list
   const getClassList = async () => {
     const result = await fetchData(EndPoints.COMMON.CLASS_LIST);
+
     if (result) {
       setClassList(result);
       const [firstClass] = result;
@@ -142,6 +143,39 @@ const Dashboard = () => {
     };
   }
 
+  // Transform attendance data into array of 7 for weekly data
+  const transformWeeklyData = (attendanceData) => {
+    const weekData = Array(7).fill({ present: 0, absent: 0 });
+
+    attendanceData.forEach((item) => {
+      const dayIndex = new Date(item.date).getDay(); // Get day of the week (0-6)
+      weekData[dayIndex] = {
+        present: item.presentCount,
+        absent: item.absentCount,
+      };
+    });
+
+    return weekData;
+  };
+
+  // Transform attendance data into array for the full month
+  const transformMonthlyData = (attendanceData, daysInMonth) => {
+    const monthData = Array.from({ length: daysInMonth }, () => ({
+      present: 0,
+      absent: 0,
+    }));
+
+    attendanceData.forEach((item) => {
+      const dayIndex = new Date(item.date).getDate() - 1; // Get day of the month (0-based index)
+      monthData[dayIndex] = {
+        present: item.presentCount,
+        absent: item.absentCount,
+      };
+    });
+
+    return monthData;
+  };
+
   // api for monthly, weekly chart
   const getAttendanceChart = async (type) => {
     const currentDates =
@@ -152,6 +186,7 @@ const Dashboard = () => {
             endTime: new Date(date.year, date.month + 1, 0).getTime(),
           };
     setLoading(true);
+
     const result = await fetchData(
       `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`,
       "post",
@@ -177,7 +212,10 @@ const Dashboard = () => {
 
   // Weekly data of chart
   const weeklyData = (attendanceData, total) => {
-    const absentData = attendanceData.map((present) => total - present);
+    const transformedData = transformWeeklyData(attendanceData);
+    const absentData = transformedData.map((day) => total - day.present);
+    const presentData = transformedData.map((day) => day.present);
+
     const data = {
       labels: CONSTANT.WEEKDAYS,
       datasets: [
@@ -190,7 +228,7 @@ const Dashboard = () => {
         },
         {
           label: "Present",
-          data: attendanceData,
+          data: presentData,
           backgroundColor: "#7B79FF33",
           barThickness: 50,
           borderRadius: 10,
@@ -242,9 +280,13 @@ const Dashboard = () => {
 
   // Monthly data of chart
   const monthlyData = (attendanceData, total) => {
-    const absentData = attendanceData.map((present) => total - present);
+    const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
+    const transformedData = transformMonthlyData(attendanceData, daysInMonth);
+    const absentData = transformedData.map((day) => total - day.present);
+    const presentData = transformedData.map((day) => day.present);
+
     const data = {
-      labels: Array.from({ length: attendanceData.length }, (_, i) => i + 1),
+      labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
       datasets: [
         {
           label: "Absent",
@@ -254,7 +296,7 @@ const Dashboard = () => {
         },
         {
           label: "Present",
-          data: attendanceData,
+          data: presentData,
           backgroundColor: "#7B79FF33",
           barThickness: 20,
         },

@@ -1,41 +1,40 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { jwtDecode } from "jwt-decode";
-import { getItem } from "../services/LocalStorageManager";
 
-let initialRole = null;
-let initialSection = null;
-let initialClass = null;
-const token = getItem("access_token");
-
-if (token) {
-  try {
-    const decodedToken = jwtDecode(token);
-    // console.log(decodedToken);
-    initialRole = decodedToken.role;
-    initialSection = decodedToken.sectionId;
-    initialClass = decodedToken.classId;
-    if (decodedToken.role === "teacher") {
-      localStorage.setItem("class", decodedToken.className);
-      localStorage.setItem("section", decodedToken.sectionName);
-    }
-  } catch (error) {
-    console.error("Failed to decode token:", error);
-  }
-}
+const initialState = {
+  role: null,
+  section: null,
+  sectionName: null,
+  class: null,
+  className: null,
+  id: null,
+};
 
 const appAuthSlice = createSlice({
   name: "auth",
-  initialState: {
-    role: initialRole,
-    section: initialSection,
-    class: initialClass,
-  },
+  initialState,
   reducers: {
     getRole(state) {
       return state.role;
     },
+    // Add this action to update the state after login
+    setAuthData(state, action) {
+      const token = action.payload;
+      const decodeToken = jwtDecode(token);
+
+      if (decodeToken.role === "teacher") {
+        state.role = decodeToken.role;
+        state.section = decodeToken.sectionId;
+        state.sectionName = decodeToken.sectionName;
+        state.class = decodeToken.classId;
+        state.className = decodeToken.className;
+      } else {
+        state.role = decodeToken.role;
+        state.id = decodeToken.adminId;
+      }
+    },
   },
 });
 
-export const appAuthAction = appAuthSlice.actions;
+export const { getRole, setAuthData } = appAuthSlice.actions;
 export default appAuthSlice;

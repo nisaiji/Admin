@@ -76,7 +76,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
       );
       if ([200, 201].includes(res?.statusCode)) {
         fetchData();
-        toast.success(t("messages.section.createSuccess"));
+        toast.success(res.result);
       }
     } catch (e) {
       toast.error(e);
@@ -102,7 +102,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
 
       if (res?.statusCode === 200) {
         fetchData();
-        toast.success(t("messages.teacher.updateSuccess"));
+        toast.success(res.result);
         setNewSection({ name: section.name, teacherId: newSection.teacherId });
         setActiveSection(null);
       }
@@ -136,7 +136,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
       if (res?.statusCode === 200) {
         setShowDeleteConfirmation(false);
         await fetchData();
-        toast.success(t("messages.section.deleteSuccess"));
+        toast.success(res.result);
       }
     } catch (e) {
       toast.error(e);

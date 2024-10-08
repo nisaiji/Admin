@@ -66,30 +66,34 @@ export default function StudentInfo({ currStudent, modelOpen }) {
   const personalDetails = [
     [
       t("labels.fullName"),
-      `${currStudent.firstname} ${currStudent.lastname}` || CONSTANT.NA,
+      `${currStudent?.firstname} ${currStudent?.lastname}` || CONSTANT.NA,
     ],
     [
       t("labels.classAndSection"),
-      `${currStudent.classId.name} ${currStudent.section.name}` || CONSTANT.NA,
+      `${currStudent?.classDetails?.name} ${currStudent?.sectionDetails?.name}` ||
+        CONSTANT.NA,
     ],
-    [t("labels.gender"), currStudent.gender || CONSTANT.NA],
-    [t("labels.bloodGroup"), currStudent.bloodGroup || CONSTANT.NA],
-    [t("labels.dob"), currStudent.dob || CONSTANT.NA],
+    [t("labels.gender"), currStudent?.gender || CONSTANT.NA],
+    [t("labels.bloodGroup"), currStudent?.bloodGroup || CONSTANT.NA],
+    [t("labels.dob"), currStudent?.dob || CONSTANT.NA],
   ];
 
   // parent details
   const guardianDetails = [
-    [t("labels.fullName"), currStudent.parent.fullname || CONSTANT.NA],
-    [t("labels.gender"), currStudent.parent.gender || CONSTANT.NA],
-    [t("labels.age"), currStudent.parent.age || CONSTANT.NA],
-    [t("labels.email"), CONSTANT.NA],
-    [t("labels.phoneNumber"), currStudent.parent.phone || CONSTANT.NA],
+    [t("labels.fullName"), currStudent?.parentDetails?.fullname || CONSTANT.NA],
+    [t("labels.gender"), currStudent?.parentDetails?.gender || CONSTANT.NA],
+    [t("labels.age"), currStudent?.parentDetails?.age || CONSTANT.NA],
+    [t("labels.email"), currStudent?.parentDetails?.email || CONSTANT.NA],
+    [t("labels.phoneNumber"), currStudent?.parentDetails?.phone || CONSTANT.NA],
     [
       t("labels.qualification"),
-      currStudent.parent.qualification || CONSTANT.NA,
+      currStudent?.parentDetails?.qualification || CONSTANT.NA,
     ],
-    [t("labels.occupation"), currStudent.parent.occupation || CONSTANT.NA],
-    [t("labels.address"), currStudent.parent.address || CONSTANT.NA],
+    [
+      t("labels.occupation"),
+      currStudent?.parentDetails?.occupation || CONSTANT.NA,
+    ],
+    [t("labels.address"), currStudent?.parentDetails?.address || CONSTANT.NA],
   ];
 
   return (

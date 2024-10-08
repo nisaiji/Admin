@@ -89,7 +89,7 @@ function ClassSetup() {
       });
       if ([200, 201].includes(res?.statusCode)) {
         getAllClass();
-        toast.success(t("messages.class.createSuccess"));
+        toast.success(res.result);
       }
     } catch (e) {
       toast.error(e);
@@ -106,7 +106,7 @@ function ClassSetup() {
         `${EndPoints.ADMIN.DELETE_CLASS}/${clickedClassId}`
       );
       if (response?.statusCode === 200) {
-        toast.success(t("messages.class.deleteSuccess"));
+        toast.success(response.result);
         setModalIsOpen(false);
         getAllClass();
       }
@@ -206,7 +206,6 @@ function ClassSetup() {
                             onClick={() =>
                               navigate("/student-section", {
                                 state: {
-                                  classId: data._id,
                                   sectionId: section._id,
                                   className: data.name,
                                   sectionName: section.name,
@@ -311,7 +310,7 @@ function ClassSetup() {
           getAllClass={getAllClass}
         />
       )}
-      
+
       {/* delete confirmation popup */}
       {modalIsOpen && (
         <DeletePopup

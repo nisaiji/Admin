@@ -16,11 +16,9 @@ const EndPoints = {
     DELETE_TEACHER: "teacher",
 
     // ADMIN STUDENT SETUP
-    ALL_STUDENT_LIST: "student",
-    STUDENT_LIST_SEARCH_WISE: "student/admin/search",
-    STUDENT_LIST_SECTION_WISE: "student/admin-section",
+    GET_STUDENT_LIST: "student/admin",
     DELETE_STUDENT: "student/admin",
-    STUDENT_UPDATE: "student/student-parent-update",
+    STUDENT_UPDATE: "student/admin",
 
     // ADMIN CLASS AND SECTION SETUP
     REGISTER_CLASS: "class",
@@ -34,7 +32,7 @@ const EndPoints = {
     SECTION_INFO: "section",
 
     // ADMIN SECTION STUDENTS
-    GET_SECTION_STUDENTS: "student/admin-section",
+    GET_SECTION_STUDENTS: "student/admin",
     REGISTER_SECTION_STUDENT: "student/admin",
     UPDATE_SECTION_STUDENT: "student/admin",
     DELETE_SECTION_STUDENT: "student/admin",
@@ -60,13 +58,11 @@ const EndPoints = {
     DASHBOARD_MONTHLY_ATTENDANCE: "dashboard/monthly-attendance",
 
     // TEACHER STUDENT SETUP
-    ALL_STUDENT_LIST: "student/all-students",
-    STUDENT_LIST_SEARCH_WISE: "student/search",
-    STUDENT_LIST_SECTION_WISE: "student/section-students",
+    GET_STUDENT_LIST: "student/teacher",
     DELETE_STUDENT: "dashboard/parent-count",
 
     // TEACHER SECTION STUDENTS
-    GET_SECTION_STUDENTS: "student/teacher-section",
+    GET_SECTION_STUDENTS: "student/teacher",
     REGISTER_SECTION_STUDENT: "student/teacher",
     UPDATE_SECTION_STUDENT: "student/teacher",
     DELETE_SECTION_STUDENT: "student/teacher",
