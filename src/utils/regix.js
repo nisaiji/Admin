@@ -4,7 +4,7 @@ const REGEX = {
   PHONE_TEST: /^[1-5]/,
   NUMBER: /\d/,
   PHONE_LENGTH: /^[1-5]\d{9}$/,
-  PINCODE: /^[0-9]+$/,
+  PINCODE: /^\d{6}$/,
 };
 
 export default REGEX;

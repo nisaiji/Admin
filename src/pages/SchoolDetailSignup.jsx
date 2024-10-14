@@ -134,7 +134,7 @@ function SchoolDetailSignup() {
         district: capitalizeFirstLetter(values.district).trim(),
         pincode: values.pincode.trim(),
         address: capitalizeFirstLetter(values.address).trim(),
-        password: capitalizeFirstLetter(values.password).trim(),
+        password: values.password.trim(),
       };
       setLoading(true);
       try {
