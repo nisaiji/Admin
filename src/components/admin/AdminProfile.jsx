@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
-import teacher from "../../assets/images/teacher.png";
+import profileEmpty from "../../assets/images/profileEmpty.png";
 import Globe from "../../assets/images/Globe.png";
 import facebook from "../../assets/images/facebook.png";
 import instagram from "../../assets/images/instagram.png";
@@ -283,7 +283,7 @@ export default function AdminProfile() {
               <div className="relative flex flex-col items-center pt-20 aspect-square">
                 <img
                   loading="lazy"
-                  src={teacher}
+                  src={profileEmpty}
                   alt={t("adminPhoto")}
                   className="absolute inset-0 object-cover w-full h-full"
                 />

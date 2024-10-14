@@ -1,110 +1,83 @@
 import React from "react";
-import { useFormik } from "formik";
 import ArrowRight from "../assets/images/ArrowRight.png";
+import { useTranslation } from "react-i18next";
 
-const Step1 = ({ nextStep }) => {
-  const formik = useFormik({
-    initialValues: {
-      username: "",
-      password: "",
-    },
-    validate: (values) => {
-      const errors = {};
-      return errors;
-    },
-  });
+// Reusable Input Component
+const InputField = ({ label, name, type, placeholder, formik, className }) => (
+  <div className={`mt-5 ${className}`}>
+    <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
+      {label}
+    </p>
+    <input
+      className="text-black rounded-xl border border-[#E9EAF0] py-2 px-5 mt-2 w-full"
+      type={type}
+      name={name}
+      placeholder={placeholder}
+      onChange={formik.handleChange}
+      value={formik.values[name]}
+    />
+    {formik.touched[name] && formik.errors[name] && (
+      <div className="text-red-500 text-sm text-left pl-3">
+        {formik.errors[name]}
+      </div>
+    )}
+  </div>
+);
+
+const Step1 = ({ formik, nextStep }) => {
+  const [t] = useTranslation();
 
   return (
     <div>
-      <form className="text-black" onSubmit={formik.handleSubmit}>
-        <div className="mt-5">
-          <p className="text-gray-900 text-sm text-left pl-3 font-semibold">School Name</p>
-          <input
-            className="text-black rounded-xl border border-[#E9EAF0] py-1 px-5 mt-2 w-full"
+      <form className="text-black">
+        <InputField
+          label={t("adminProfile.schoolName")}
+          name="schoolName"
+          type="text"
+          placeholder={t("placeholders.schoolName")}
+          formik={formik}
+        />
+        <div className="flex gap-5">
+          <InputField
+            label={t("adminProfile.affiliationNumber")}
+            name="affiliationNo"
             type="text"
+            placeholder={t("placeholders.affiliationNo")}
+            formik={formik}
+            className="w-1/2"
+          />
+          <InputField
+            label={t("adminProfile.adminName")}
             name="username"
-            placeholder="School"
-            onChange={formik.handleChange}
-            value={formik.values.username}
-          />
-        </div>
-        <div className="flex gap-2 mt-5">
-          <div className="w-1/2">
-            <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
-              Affiliation Number
-            </p>
-            <input
-              className="text-black rounded-xl border border-[#E9EAF0] py-1 px-5 mt-2 w-full"
-              type="text"
-              name="affiliation"
-              placeholder="Affiliation Number"
-              onChange={formik.handleChange}
-              value={formik.values.affiliation}
-            />
-          </div>
-          <div className="w-1/2">
-            <p className="text-gray-900 text-sm text-left pl-3 font-semibold">School Number</p>
-            <input
-              className="text-black rounded-xl border border-[#E9EAF0] py-1 px-5 mt-2 w-full"
-              type="text"
-              name="schoolnumber"
-              placeholder="School Number"
-              onChange={formik.handleChange}
-              value={formik.values.schoolnumber}
-            />
-          </div>
-        </div>
-        <div className="mt-5">
-          <p className="text-gray-900 text-sm text-left pl-3 font-semibold">Admin Name</p>
-          <div className="flex gap-2">
-            <input
-              className="text-black rounded-xl border border-[#E9EAF0] py-1 px-5 mt-2 w-full"
-              type="text"
-              name="firstname"
-              placeholder="First name"
-              onChange={formik.handleChange}
-              value={formik.values.firstname}
-            />
-            <input
-              className="text-black rounded-xl border border-[#E9EAF0] py-1 px-5 mt-2 w-full"
-              type="text"
-              name="lastname"
-              placeholder="Last name"
-              onChange={formik.handleChange}
-              value={formik.values.lastname}
-            />
-          </div>
-        </div>
-        <div className="mt-5">
-          <p className="text-gray-900 text-sm text-left pl-3 font-semibold">Email</p>
-          <input
-            className="text-black rounded-xl border border-[#E9EAF0] py-1 px-5 mt-2 w-full"
             type="text"
-            name="email"
-            placeholder="Email address"
-            onChange={formik.handleChange}
-            value={formik.values.email}
+            placeholder={t("placeholders.adminName")}
+            formik={formik}
+            className="w-1/2"
           />
         </div>
-        <div className="mt-5">
-          <p className="text-gray-900 text-sm text-left pl-3 font-semibold">Phone Number</p>
-          <input
-            className="text-black rounded-xl border border-[#E9EAF0] py-1 px-5 mt-2 w-full"
-            type="text"
-            name="phonenumber"
-            placeholder="Phone Number"
-            onChange={formik.handleChange}
-            value={formik.values.phonenumber}
-          />
-        </div>
+        <InputField
+          label={t("adminProfile.Email")}
+          name="email"
+          type="email"
+          placeholder={t("placeholders.emailAddress")}
+          formik={formik}
+        />
+        <InputField
+          label={t("adminProfile.Phone")}
+          name="phone"
+          type="text"
+          placeholder={t("placeholders.phone")}
+          formik={formik}
+        />
+
         <div className="mt-5">
           <button
-            className="rounded-lg px-7 h-10 bg-[#464590] font-semibold flex items-center justify-center ml-auto text-white"
-            type="submit"
             onClick={nextStep}
+            type="button"
+            className="rounded-lg px-7 h-10 bg-[#464590] font-semibold flex items-center justify-center ml-auto text-white"
           >
             <div className="flex items-center gap-2">
-              <p className="text-base">Next</p>
+              <p className="text-base">{t("adminProfile.next")}</p>
               <img className="w-6 h-6" src={ArrowRight} alt="Arrow Right" />
             </div>
           </button>

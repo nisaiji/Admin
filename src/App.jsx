@@ -20,6 +20,7 @@ import { I18nextProvider } from "react-i18next";
 import { getItem } from "./services/LocalStorageManager";
 import { useEffect } from "react";
 import { setAuthData } from "./store/AppAuthSlice";
+import SchoolDetailSignup from "./pages/SchoolDetailSignup";
 
 function App() {
   const dispatch = useDispatch();
@@ -62,7 +63,8 @@ function App() {
           </Route>
           <Route element={<NotRequireUser />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            {/* <Route path="/signup" element={<Signup />} /> */}
+            <Route path="/signup" element={<SchoolDetailSignup />} />
           </Route>
         </Routes>
       </I18nextProvider>

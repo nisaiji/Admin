@@ -1,8 +1,7 @@
 import React, { useRef } from "react";
-import student from "../../../assets/images/student.png";
+import profileEmpty from "../../../assets/images/profileEmpty.png";
 import cross from "../../../assets/images/cross.png";
 import html2canvas from "html2canvas";
-import { useReactToPrint } from "react-to-print";
 import { useTranslation } from "react-i18next";
 import CONSTANT from "../../../utils/constants";
 
@@ -140,8 +139,12 @@ export default function StudentInfo({ currStudent, modelOpen }) {
             <div className="flex justify-center items-center w-full mt-32">
               <img
                 id="StudentInfoImage"
-                className="h-[370px] w-[300px] object-center"
-                src={student}
+                className="h-[300px] w-[300px] object-center"
+                src={
+                  currStudent.photo
+                    ? `data:image/jpeg;base64,${currStudent?.photo}`
+                    : profileEmpty
+                }
                 alt={t("titles.student")}
               />
             </div>

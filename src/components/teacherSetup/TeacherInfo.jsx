@@ -1,5 +1,5 @@
 import React from "react";
-import teacher from "../../assets/images/teacher.png";
+import profileEmpty from "../../assets/images/profileEmpty.png";
 import cross from "../../assets/images/cross.png";
 import CONSTANT from "../../utils/constants";
 import { useTranslation } from "react-i18next";
@@ -68,8 +68,12 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
             </div>
             <div className="flex justify-center items-center w-full md:w-1/3 pr-10">
               <img
-                className="h-[370px] w-[300px] object-contain"
-                src={teacher}
+                className="h-[300px] w-[300px] object-contain"
+                src={
+                  currTeacher.photo
+                    ? `data:image/jpeg;base64,${currTeacher?.photo}`
+                    : profileEmpty
+                }
                 alt="Teacher"
               />
             </div>

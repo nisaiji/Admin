@@ -131,16 +131,16 @@ function Signup() {
               {t("register.adminRegister")}
             </h2>
             <form onSubmit={formik.handleSubmit}>
-              {renderInput("schoolName", "text", t("placeholders.schoolName"))}
+              {renderInput("schoolName", "text", )}
               {renderInput(
                 "affiliationNo",
                 "text",
-                t("placeholders.affiliationNo")
+               
               )}
               {renderInput("address", "text", t("placeholders.address"))}
-              {renderInput("email", "email", t("placeholders.emailAddress"))}
-              {renderInput("phone", "text", t("placeholders.phone"))}
-              {renderInput("username", "text", t("placeholders.adminName"))}
+              {renderInput("email", "email", )}
+              {renderInput("phone", "text", )}
+              {renderInput("username", "text", )}
 
               {/* Password input with visibility toggle */}
               <div className="mt-5 border border-gray-400 flex items-center">
