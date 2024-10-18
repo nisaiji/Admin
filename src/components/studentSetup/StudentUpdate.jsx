@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import { useLocation, useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import toast, { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
 import Spinner from "../Spinner";
@@ -218,14 +218,23 @@ export default function StudentUpdate() {
               </select>
             ) : type === "date" ? (
               <DatePicker
-                selected={formik.values[name]}
-                onChange={(date) =>
-                  formik.setFieldValue(name, format(date, "MM/dd/yyyy"))
+                selected={
+                  formik.values.dob
+                    ? parse(formik.values.dob, "dd/MM/yyyy", new Date())
+                    : null
                 }
-                dateFormat="MM/dd/yyyy"
+                onChange={(date) =>
+                  formik.setFieldValue("dob", format(date, "dd/MM/yyyy"))
+                }
+                dateFormat="dd/MM/yyyy"
                 placeholderText={placeholder}
                 className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
                 wrapperClassName="w-full"
+                maxDate={new Date()}
+                onKeyDown={(e) => e.preventDefault()}
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
               />
             ) : (
               <input

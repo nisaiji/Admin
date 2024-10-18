@@ -79,7 +79,7 @@ export default function StudentSection() {
       ? EndPoints.TEACHER.GET_SECTION_STUDENTS
       : EndPoints.ADMIN.GET_SECTION_STUDENTS;
 
-    let query = `?include=parent`;
+    let query = `?include=parent,class,section`;
     if (!isTeacher) {
       query += `&admin=${id}&section=${sectionId}`;
     } else {
@@ -232,7 +232,7 @@ export default function StudentSection() {
       toast.error(e);
     } finally {
       setLoading(false);
-      setEditSNo(null)
+      setEditSNo(null);
     }
   };
 

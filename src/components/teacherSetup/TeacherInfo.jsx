@@ -9,23 +9,26 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
 
   // teacher details
   const personalDetails = [
-    [t("labels.fullName"), `${currTeacher.firstname} ${currTeacher.lastname}`],
+    [
+      t("labels.fullName"),
+      `${currTeacher?.firstname} ${currTeacher?.lastname}`,
+    ],
     [
       t("labels.university"),
-      `${currTeacher.section.classId.name || ""} ${
-        currTeacher.section.name || CONSTANT.NA
+      `${currTeacher?.section?.classId?.name || ""} ${
+        currTeacher?.section?.name || CONSTANT.NA
       }`,
     ],
-    [t("labels.gender"), currTeacher.gender || CONSTANT.NA],
-    [t("labels.bloodGroup"), currTeacher.bloodGroup || CONSTANT.NA],
-    [t("labels.dob"), currTeacher.dob || CONSTANT.NA],
-    [t("labels.email"), currTeacher.email || CONSTANT.NA],
-    [t("labels.phoneNumber"), currTeacher.phone || CONSTANT.NA],
+    [t("labels.gender"), currTeacher?.gender || CONSTANT.NA],
+    [t("labels.bloodGroup"), currTeacher?.bloodGroup || CONSTANT.NA],
+    [t("labels.dob"), currTeacher?.dob || CONSTANT.NA],
+    [t("labels.email"), currTeacher?.email || CONSTANT.NA],
+    [t("labels.phoneNumber"), currTeacher?.phone || CONSTANT.NA],
   ];
 
   const educationDetails = [
-    [t("labels.university"), currTeacher.university || CONSTANT.NA],
-    [t("labels.degree"), currTeacher.degree || CONSTANT.NA],
+    [t("labels.university"), currTeacher?.university || CONSTANT.NA],
+    [t("labels.degree"), currTeacher?.degree || CONSTANT.NA],
   ];
 
   return (
@@ -68,9 +71,9 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
             </div>
             <div className="flex justify-center items-center w-full md:w-1/3 pr-10">
               <img
-                className="h-[300px] w-[300px] object-contain"
+                className="h-[370px] w-[300px] object-contain"
                 src={
-                  currTeacher.photo
+                  currTeacher?.photo
                     ? `data:image/jpeg;base64,${currTeacher?.photo}`
                     : profileEmpty
                 }

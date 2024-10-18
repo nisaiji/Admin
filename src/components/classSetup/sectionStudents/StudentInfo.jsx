@@ -139,9 +139,9 @@ export default function StudentInfo({ currStudent, modelOpen }) {
             <div className="flex justify-center items-center w-full mt-32">
               <img
                 id="StudentInfoImage"
-                className="h-[300px] w-[300px] object-center"
+                className="h-[370px] w-[300px] object-center"
                 src={
-                  currStudent.photo
+                  currStudent?.photo
                     ? `data:image/jpeg;base64,${currStudent?.photo}`
                     : profileEmpty
                 }
