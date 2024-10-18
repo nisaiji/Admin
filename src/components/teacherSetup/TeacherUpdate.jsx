@@ -14,6 +14,7 @@ import REGEX from "../../utils/regix";
 import mail from "../../assets/images/mail.png";
 import India from "../../assets/images/India.png";
 import location from "../../assets/images/location.png";
+import moment from "moment/moment";
 
 const capitalize = (str) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -40,20 +41,19 @@ const TeacherUpdate = () => {
         (value) => value && REGEX.PHONE_TEST.test(value)
       ),
   });
-
   // Setup formik for handling form submission, validation, and field management
   const formik = useFormik({
     initialValues: {
-      firstname: teacher.firstname || "",
-      lastname: teacher.lastname || "",
-      email: teacher.email || "",
-      address: teacher.address || "",
-      university: teacher.university || "",
-      gender: teacher.gender || "",
-      bloodGroup: teacher.bloodGroup || "",
-      dob: teacher.dob || "",
-      phone: teacher.phone || "",
-      degree: teacher.degree || "",
+      firstname: teacher?.firstname || "",
+      lastname: teacher?.lastname || "",
+      email: teacher?.email || "",
+      address: teacher?.address || "",
+      university: teacher?.university || "",
+      gender: teacher?.gender || "",
+      bloodGroup: teacher?.bloodGroup || "",
+      dob: teacher?.dob || "",
+      phone: teacher?.phone || "",
+      degree: teacher?.degree || "",
     },
     validationSchema,
     // update teacher api
@@ -99,7 +99,7 @@ const TeacherUpdate = () => {
       name: "gender",
       label: t("labels.gender"),
       type: "select",
-      options: [t("options.Male"), t("options.Female"), t("options.other")],
+      options: [t("options.male"), t("options.female"), t("options.other")],
     },
     {
       name: "lastname",
@@ -197,17 +197,13 @@ const TeacherUpdate = () => {
                         <DatePicker
                           selected={
                             formik.values.dob
-                              ? parse(
-                                  formik.values.dob,
-                                  "dd/MM/yyyy",
-                                  new Date()
-                                )
+                              ? moment(formik.values.dob, "DD/MM/YYYY").toDate()
                               : null
                           }
                           onChange={(date) =>
                             formik.setFieldValue(
                               "dob",
-                              format(date, "dd/MM/yyyy")
+                              moment(date).format("DD/MM/YYYY")
                             )
                           }
                           dateFormat="dd/MM/yyyy"

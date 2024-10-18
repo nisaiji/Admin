@@ -14,6 +14,7 @@ import REGEX from "../../utils/regix";
 import mail from "../../assets/images/mail.png";
 import India from "../../assets/images/India.png";
 import location from "../../assets/images/location.png";
+import moment from "moment";
 
 const capitalize = (str) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -31,6 +32,14 @@ export default function StudentUpdate() {
     gender: Yup.string().required(t("validationError.gender")),
     bloodGroup: Yup.string().required(t("validationError.bloodGroup")),
     dob: Yup.date().required(t("validationError.dob")),
+    dob: Yup.date()
+      .nullable()
+      .required(t("validationError.dob"))
+      .transform((value, originalValue) =>
+        moment(originalValue, "DD/MM/YYYY").isValid()
+          ? moment(originalValue, "DD/MM/YYYY").toDate()
+          : null
+      ),
     address: Yup.string().required(t("validationError.address")),
     parentName: Yup.string().required(t("validationError.parentName")),
     parentGender: Yup.string().required(t("validationError.gender")),
@@ -55,26 +64,27 @@ export default function StudentUpdate() {
 
   const formik = useFormik({
     initialValues: {
-      firstname: student.firstname || "",
-      lastname: student.lastname || "",
-      gender: student.gender || "",
-      bloodGroup: student.bloodGroup || "",
-      dob: student.dob || "",
-      address: student.address || "",
-      parentName: student.parentDetails.fullname || "",
-      parentGender: student.parentDetails.gender || "",
-      parentAge: student.parentDetails.age || "",
-      parentEmail: student.parentDetails.email || "",
-      phone: student.parentDetails.phone || "",
-      parentQualification: student.parentDetails.qualification || "",
-      parentOccupation: student.parentDetails.occupation || "",
-      parentAddress: student.parentDetails.address || "",
+      firstname: student?.firstname || "",
+      lastname: student?.lastname || "",
+      gender: student?.gender || "",
+      bloodGroup: student?.bloodGroup || "",
+      dob: student?.dob || "",
+      address: student?.address || "",
+      parentName: student?.parentDetails?.fullname || "",
+      parentGender: student.parentDetails?.gender || "",
+      parentAge: student?.parentDetails?.age || "",
+      parentEmail: student?.parentDetails?.email || "",
+      phone: student?.parentDetails?.phone || "",
+      parentQualification: student?.parentDetails?.qualification || "",
+      parentOccupation: student?.parentDetails?.occupation || "",
+      parentAddress: student?.parentDetails?.address || "",
     },
     validationSchema,
     // update student api
     onSubmit: async (values) => {
       try {
         setLoading(true);
+
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.STUDENT_UPDATE}/${student._id}`,
           {
@@ -220,11 +230,11 @@ export default function StudentUpdate() {
               <DatePicker
                 selected={
                   formik.values.dob
-                    ? parse(formik.values.dob, "dd/MM/yyyy", new Date())
-                    : null
+                    ? moment(formik.values.dob, "DD/MM/YYYY").toDate()
+                    : ""
                 }
                 onChange={(date) =>
-                  formik.setFieldValue("dob", format(date, "dd/MM/yyyy"))
+                  formik.setFieldValue("dob", moment(date).format("DD/MM/YYYY"))
                 }
                 dateFormat="dd/MM/yyyy"
                 placeholderText={placeholder}
