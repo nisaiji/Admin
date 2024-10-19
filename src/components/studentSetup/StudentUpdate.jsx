@@ -273,7 +273,6 @@ export default function StudentUpdate() {
           </div>
         </div>
       ))}
-      ;
     </div>
   );
 

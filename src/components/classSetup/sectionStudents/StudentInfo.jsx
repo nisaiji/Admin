@@ -30,7 +30,9 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     imageContainer.style.backgroundColor = "white";
 
     const imageElement = document.createElement("img");
-    imageElement.src = student;
+    imageElement.src = currStudent?.photo
+      ? `data:image/jpeg;base64,${currStudent?.photo}`
+      : profileEmpty;
     imageElement.style.width = "100px";
     imageElement.style.height = "130px";
     imageElement.style.objectFit = "cover";
@@ -75,6 +77,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     [t("labels.gender"), currStudent?.gender || CONSTANT.NA],
     [t("labels.bloodGroup"), currStudent?.bloodGroup || CONSTANT.NA],
     [t("labels.dob"), currStudent?.dob || CONSTANT.NA],
+    [t("labels.address"), currStudent?.address || CONSTANT.NA],
   ];
 
   // parent details

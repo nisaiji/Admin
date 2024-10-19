@@ -415,7 +415,7 @@ export default function Studentlist() {
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
                           } p-4 text-center max-lg:hidden`}
                         >
-                          {student?.parentDetails?.bloodGroup || CONSTANT.NA}
+                          {student?.bloodGroup || CONSTANT.NA}
                         </td>
                         {/* Action Icons */}
                         <td

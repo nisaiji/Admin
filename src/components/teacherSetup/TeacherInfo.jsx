@@ -24,6 +24,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
     [t("labels.dob"), currTeacher?.dob || CONSTANT.NA],
     [t("labels.email"), currTeacher?.email || CONSTANT.NA],
     [t("labels.phoneNumber"), currTeacher?.phone || CONSTANT.NA],
+    [t("labels.address"), currTeacher?.address || CONSTANT.NA],
   ];
 
   const educationDetails = [
