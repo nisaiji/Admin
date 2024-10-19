@@ -31,7 +31,6 @@ export default function StudentUpdate() {
     lastname: Yup.string().required(t("validationError.lastName")),
     gender: Yup.string().required(t("validationError.gender")),
     bloodGroup: Yup.string().required(t("validationError.bloodGroup")),
-    dob: Yup.date().required(t("validationError.dob")),
     dob: Yup.date()
       .nullable()
       .required(t("validationError.dob"))
