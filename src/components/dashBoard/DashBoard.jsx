@@ -4,6 +4,7 @@ import "chart.js/auto";
 import eventBack from "../../assets/images/eventBack.png";
 import Studenthat from "../../assets/images/Studenthat.png";
 import ParentIcon from "../../assets/images/ParentIcon.png";
+import DownIcon from "../../assets/images/Down.png";
 import CalendarComponent from "./CalendarComponent.jsx";
 import { useSelector } from "react-redux";
 import EndPoints from "../../services/EndPoints.js";
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const [t] = useTranslation();
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const [selectedOption, setSelectedOption] = useState("Monthly");
+  const [studentPresentCountData, setStudentPresentCountData] = useState(null);
   const [studentCountData, setStudentCountData] = useState(null);
   const [parentCount, setParentCount] = useState(0);
   const [calenderEvents, setCalenderEvents] = useState([]);
@@ -76,7 +78,10 @@ const Dashboard = () => {
     ).getTime();
     const result = await fetchData(`${url}`, "post", { startTime, endTime });
 
-    if (result) setStudentCountData(result.presentCount, result.totalCount);
+    if (result) {
+      setStudentCountData(result.presentCount);
+      setStudentPresentCountData(result.totalCount);
+    }
   };
 
   // parent count api
@@ -85,6 +90,7 @@ const Dashboard = () => {
       ? EndPoints.TEACHER.PARENT_COUNT
       : EndPoints.ADMIN.PARENT_COUNT;
     const result = await fetchData(`${url}`);
+
     if (result) setParentCount(result.parentCount);
   };
 
@@ -109,7 +115,15 @@ const Dashboard = () => {
 
   const getCalenderEvents = async () => {
     const startTime = new Date(date.year, date.month, 1).getTime();
-    const endTime = new Date(date.year, date.month + 1, 0).getTime();
+    const endTime = new Date(
+      date.year,
+      date.month + 1,
+      0,
+      23,
+      59,
+      59,
+      999
+    ).getTime();
     setEventLoading(true);
     const result = await fetchData(EndPoints.COMMON.GET_EVENTS, "post", {
       startTime,
@@ -213,7 +227,7 @@ const Dashboard = () => {
   // Weekly data of chart
   const weeklyData = (attendanceData, total) => {
     const transformedData = transformWeeklyData(attendanceData);
-    const absentData = transformedData.map((day) => total - day.present);
+    const absentData = transformedData.map((day) => day.absent);
     const presentData = transformedData.map((day) => day.present);
 
     const data = {
@@ -229,7 +243,7 @@ const Dashboard = () => {
         {
           label: "Present",
           data: presentData,
-          backgroundColor: "#7B79FF33",
+          backgroundColor: "rgba(123, 121, 255, 0.20)",
           barThickness: 50,
           borderRadius: 10,
         },
@@ -252,7 +266,7 @@ const Dashboard = () => {
       {
         label: "Present",
         data: [],
-        backgroundColor: "#7B79FF33",
+        backgroundColor: "rgba(123, 121, 255, 0.20)",
         barThickness: 50,
         borderRadius: 10,
       },
@@ -272,7 +286,7 @@ const Dashboard = () => {
       {
         label: "Present",
         data: [],
-        backgroundColor: "#7B79FF33",
+        backgroundColor: "rgba(123, 121, 255, 0.20)",
         barThickness: 20,
       },
     ],
@@ -282,8 +296,9 @@ const Dashboard = () => {
   const monthlyData = (attendanceData, total) => {
     const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
     const transformedData = transformMonthlyData(attendanceData, daysInMonth);
-    const absentData = transformedData.map((day) => total - day.present);
+    const absentData = transformedData.map((day) => day.absent);
     const presentData = transformedData.map((day) => day.present);
+    console.log(presentData, absentData);
 
     const data = {
       labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
@@ -297,7 +312,7 @@ const Dashboard = () => {
         {
           label: "Present",
           data: presentData,
-          backgroundColor: "#7B79FF33",
+          backgroundColor: "rgba(123, 121, 255, 0.20)",
           barThickness: 20,
         },
       ],
@@ -320,10 +335,8 @@ const Dashboard = () => {
   };
 
   const renderStudentCount = () => {
-    if (studentCountData?.totalCount > 0) {
-      return `${studentCountData?.presentCount || 0}/${
-        studentCountData?.totalCount || 0
-      }`;
+    if (studentCountData > 0) {
+      return `${studentPresentCountData || 0}/${studentCountData || 0}`;
     } else {
       return "0";
     }
@@ -345,14 +358,14 @@ const Dashboard = () => {
   return (
     <div className="relative w-full min-h-screen bg-white bg-gradient-to-t from-[rgba(138,137,250,0.1)] to-[rgba(138,137,250,0.1)]">
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="container mx-auto p-8">
-        <div className="bg-white rounded-2xl">
+      <div className="container mx-[45px] py-[25px]">
+        <div className="bg-white rounded-[20px]">
           <h1 className="text-3xl font-bold mb-0 p-3 pl-10 pt-8">
             {t("dashboard.title")}
           </h1>
-
+          <hr className="mx-5" />
           {/* Grids */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 p-4 pl-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-[25px] p-4 pl-10">
             <div className="flex items-center justify-between p-3 rounded-2xl bg-[#7B79FF1A] mb-4">
               <div className="px-3">
                 <p className="text-base font-poppins-regular text-[#686868]">
@@ -382,9 +395,9 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-rows-1 lg:grid-rows-1 gap-6 mb-10">
-          <div className="bg-white p-6 rounded-lg shadow-lg relative">
-            <div className="flex justify-between mb-10">
+        <div className="grid grid-rows-1 lg:grid-rows-1 gap-6 mb-4">
+          <div className="bg-white p-6 rounded-[20px] relative">
+            <div className="flex justify-between mb-[20px]">
               <h2 className="text-2xl font-semibold pl-5">
                 {t("dashboard.attendance")}
               </h2>
@@ -418,7 +431,7 @@ const Dashboard = () => {
 
               <div className="flex space-x-2 ">
                 <select
-                  className="px-2 border-2 border-[#05022B99] rounded-xl"
+                  className="px-2 border-2 border-[rgba(196, 196, 196, 0.40)] font-poppins-bold w-[150px] rounded-[14px] justify-center items-center"
                   value={selectedClass}
                   onChange={(e) => {
                     setSelectedClass(e.target.value);
@@ -440,7 +453,7 @@ const Dashboard = () => {
                 </select>
 
                 <select
-                  className="px-2 border-2 border-[#05022B99] rounded-xl"
+                  className="px-2 border-2 border-[rgba(196, 196, 196, 0.40)] font-poppins-bold w-[170px] rounded-[14px] justify-center items-center "
                   value={selectedSection}
                   onChange={(e) => setSelectedSection(e?.target?.value)}
                 >
@@ -456,7 +469,7 @@ const Dashboard = () => {
                 </select>
               </div>
             </div>
-
+            <hr />
             {/* Bar Graph */}
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
@@ -476,7 +489,7 @@ const Dashboard = () => {
 
           {/* Calender */}
           <div className="flex">
-            <div className="bg-white p-6 w-8/12 rounded-lg shadow-lg mr-4">
+            <div className="bg-white p-6 w-7/12 rounded-[20px] mr-[25px]">
               <h2 className="text-xl font-semibold">
                 {t("dashboard.calendar")}
               </h2>
@@ -492,10 +505,11 @@ const Dashboard = () => {
             </div>
 
             {/* event list */}
-            <div className="bg-white py-4 px-8 w-4/12 rounded-lg shadow-lg relative">
-              <h2 className="text-xl font-semibold mb-4 mt-4">
+            <div className="bg-white py-3 px-8 w-5/12 rounded-[20px] relative">
+              <h2 className="text-xl font-semibold my-4">
                 {t("dashboard.holidayAndEvents")}
               </h2>
+              <hr className="mb-4" />
               {calenderEvents.length === 0 ? (
                 <div className="relative w-full h-full">
                   <img
@@ -515,7 +529,7 @@ const Dashboard = () => {
                     {calenderEvents.map((itm, index) => (
                       <div
                         key={index}
-                        className="mb-5 shadow-sm rounded-lg overflow-hidden border-l-8 border-red-600"
+                        className="mb-5 rounded-lg overflow-hidden border-l-8 border-red-600"
                       >
                         <div className="flex h-5 justify-between items-center bg-[#ffffff] text-red-500 font-poppins px-2 text-lg">
                           <div className="font-poppins-bold text-xl mt-4 mb-2 ml-4">
@@ -542,12 +556,12 @@ const Dashboard = () => {
                             </div>
                             <div className="flex">
                               {itm.holiday && (
-                                <div className="px-3 py-1 mr-3 rounded-3xl bg-[#d91111] text-white text-sm">
+                                <div className="py-1 mr-3 rounded-3xl text-[#d91111] text-[14px] font-medium">
                                   {t("dashboard.holiday")}
                                 </div>
                               )}
                               {itm.event && (
-                                <div className="px-3 py-1 mr-3 text-center text-sm font-medium rounded-3xl bg-[#464590] text-white">
+                                <div className="py-1 mr-3 text-center text-[14px] font-medium rounded-3xl text-[#464590] ">
                                   {t("dashboard.Event")}
                                 </div>
                               )}

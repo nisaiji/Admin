@@ -6,7 +6,6 @@ import Search from "../../assets/images/Search.png";
 import info from "../../assets/images/info.png";
 import edit2 from "../../assets/images/edit2.png";
 import delete2 from "../../assets/images/delete2.png";
-import ellipse from "../../assets/images/ellipse.png";
 import TeacherInfo from "./TeacherInfo";
 import { useNavigate } from "react-router-dom";
 import DeletePopup from "../DeleteMessagePopup";
@@ -90,6 +89,7 @@ export default function Teacher() {
         toast.success(response.result);
         getTeacher();
         setNewTeacher({ SNo: null, firstname: "", lastname: "", phone: "" });
+        newTeacherFirstNameRef.current?.focus();
       }
     } catch (e) {
       toast.error(e);
@@ -201,7 +201,7 @@ export default function Teacher() {
               <div className="flex justify-between w-full relative z-10">
                 <div className="relative w-full">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <img src={Search} alt="" className="size-6" />
+                    <img src={Search} alt="" className="size-5" />
                   </div>
                   <input
                     type="text"
@@ -212,8 +212,8 @@ export default function Teacher() {
                     className={`${
                       isDarkMode
                         ? "bg-gray-800 text-white"
-                        : "bg-white text-black"
-                    } px-10 py-2 rounded-lg focus:outline-none shadow-sm border border-t-gray w-full`}
+                        : "bg-white text-[rgba(196, 196, 196, 0.40)]"
+                    } placeholder-[rgba(196, 196, 196, 0.40)] px-10 py-2 rounded-lg focus:outline-none shadow-sm border border-t-gray w-full`}
                     onFocus={() => searchInputRef.current.focus()}
                   />
                 </div>
@@ -330,7 +330,7 @@ export default function Teacher() {
                       </td>
                       {/* Actions */}
                       <td className="pl-3 pr-5 py-2 text-sm font-poppins-bold border border-[#c1c0ca]">
-                        <div className="flex justify-around">
+                        <div className="flex justify-evenly">
                           <button
                             onClick={() =>
                               navigate("/teacher-update", {
@@ -338,28 +338,10 @@ export default function Teacher() {
                               })
                             }
                           >
-                            <img
-                              src={ellipse}
-                              alt=""
-                              className="size-6 absolute"
-                            />
-                            <img
-                              src={edit2}
-                              alt=""
-                              className="size-4 relative top-1 left-1"
-                            />
+                            <img src={edit2} alt="" className="size-5" />
                           </button>
                           <button onClick={() => handleShowInfo(teacher)}>
-                            <img
-                              src={ellipse}
-                              alt=""
-                              className="size-6 absolute "
-                            />
-                            <img
-                              src={info}
-                              alt=""
-                              className="size-4 relative top-1 left-1"
-                            />
+                            <img src={info} alt="" className="size-5" />
                           </button>
                           <button
                             onClick={() => {
@@ -367,16 +349,7 @@ export default function Teacher() {
                               setShowDeleteConfirmation(true);
                             }}
                           >
-                            <img
-                              src={ellipse}
-                              alt=""
-                              className="size-6 absolute "
-                            />
-                            <img
-                              src={delete2}
-                              alt=""
-                              className="size-4 relative top-1 left-1"
-                            />
+                            <img src={delete2} alt="" className="size-5" />
                           </button>
                         </div>
                       </td>
@@ -404,7 +377,7 @@ export default function Teacher() {
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-900"
-                        } font-poppins-bold text-center`}
+                        } font-poppins font-bold text-center`}
                         ref={newTeacherFirstNameRef}
                         disabled={editSNo !== null}
                       />
@@ -422,7 +395,7 @@ export default function Teacher() {
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-900"
-                        } font-poppins-bold text-center`}
+                        } font-poppins font-bold text-center`}
                         disabled={editSNo !== null}
                       />
                     </td>
@@ -439,7 +412,7 @@ export default function Teacher() {
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-900"
-                        } font-poppins-bold text-center`}
+                        } font-poppins font-bold text-center`}
                         disabled={editSNo !== null}
                       />
                     </td>

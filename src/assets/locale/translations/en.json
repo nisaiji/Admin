@@ -14,7 +14,7 @@
     "Event": "Event"
   },
   "calendar": {
-    "gotoDatePlaceholder": "mm/yyyy",
+    "gotoDatePlaceholder": "MM/YYYY",
 
     "title": "Calendar",
     "today": "Today",
@@ -53,8 +53,8 @@
   },
   "login": {
     "A": "A",
-    "welcome": "Welcome to",
-    "managementHub": "Management Hub",
+    "welcome": "Empowering Schools, One Click at a Time",
+    "managementHub": "",
     "simplify": "Simplify School Management with ease!",
     "login": "Login",
     "enterDetails": "Enter your account details",
@@ -183,8 +183,8 @@
     "teacherPersonalDetails": "Teacher Personal Details",
     "educationDetails": "Education Details",
     "teacherSetup": "Teacher Setup",
-    "class": "class:",
-    "section": "section:",
+    "class": "class-",
+    "section": "section-",
     "classRoom": "Classroom",
     "noClassroom": "No Classroom at This time",
     "noClassroomDesc": "Classroom will appear here after you create it using the icon above",
@@ -210,7 +210,7 @@
     "clear": "Clear",
     "addTeacher": "Add Teacher",
     "addStudent": "Add Student",
-    "addClass": "Add class",
+    "addClass": "Add Class",
     "today": "Today",
     "saveChanges": "Save changes"
   },

@@ -7,7 +7,6 @@ import Search from "../../../assets/images/Search.png";
 import info from "../../../assets/images/info.png";
 import edit2 from "../../../assets/images/edit2.png";
 import delete2 from "../../../assets/images/delete2.png";
-import ellipse from "../../../assets/images/ellipse.png";
 import StudentInfo from "./StudentInfo";
 import DeletePopup from "../../DeleteMessagePopup";
 import Spinner from "../../Spinner";
@@ -29,6 +28,7 @@ export default function StudentSection() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
+  const newStudentFirstNameRef = useRef(null);
   const [newStudent, setNewStudent] = useState({
     SNo: null,
     firstname: "",
@@ -226,6 +226,7 @@ export default function StudentSection() {
             phone: "",
             sectionId,
           });
+          newStudentFirstNameRef.current?.focus();
         }
       }
     } catch (e) {
@@ -281,7 +282,7 @@ export default function StudentSection() {
       <div
         className={`${
           isDarkMode ? "bg-[#0D192F] text-white" : "bg-white "
-        } p-4 min-h-screen `}
+        } p-4 min-h-screen rounded-[16px]`}
       >
         <Toaster position="top-center" reverseOrder={false} />
         <div className="px-4">
@@ -289,11 +290,11 @@ export default function StudentSection() {
             <div className="text-4xl font-semibold px-5 py-3">
               {t("titles.students")}
             </div>
-            <div className="text-right">
+            <div className="text-right py-3">
               <div
                 className={` ${
                   isDarkMode ? "text-white" : ""
-                } text-2xl px-5 font-poppins-bold text-gray-800`}
+                } text-[20px] px-5 font-poppins-regular text-gray-800`}
               >
                 {t("roles.classTeacher")} -{" "}
                 {isTeacher
@@ -303,7 +304,7 @@ export default function StudentSection() {
               <div
                 className={` ${
                   isDarkMode ? "text-white" : ""
-                } text-xl px-5 py-1 font-semibold text-[#464590]`}
+                } text-[16px] px-5 py-1 font-poppins-regular text-gray-800`}
               >
                 {isTeacher
                   ? `${teacherClassName} ${teacherSectionName}`
@@ -314,11 +315,11 @@ export default function StudentSection() {
             </div>
           </div>
           {/* search bar */}
-          <div className="p-3">
+          <div className="py-3">
             <div className="flex justify-between w-full relative">
               <div className="relative w-full">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <img src={Search} alt="" className="size-6" />
+                  <img src={Search} alt="" className="size-5" />
                 </div>
                 <input
                   type="text"
@@ -397,7 +398,7 @@ export default function StudentSection() {
                           )
                         }
                         placeholder={t("placeholders.firstName")}
-                        className={`w-full h-full px-2 py-1  font-poppins-bold text-center border-none focus:outline-none ${
+                        className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-900"
@@ -417,7 +418,7 @@ export default function StudentSection() {
                           )
                         }
                         placeholder={t("placeholders.lastName")}
-                        className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
+                        className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center  border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-900"
@@ -435,7 +436,7 @@ export default function StudentSection() {
                             e.target.value
                           )
                         }
-                        className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
+                        className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center  border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-black"
@@ -461,7 +462,7 @@ export default function StudentSection() {
                           )
                         }
                         placeholder={t("placeholders.parentName")}
-                        className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
+                        className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center  border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-900"
@@ -481,7 +482,7 @@ export default function StudentSection() {
                           )
                         }
                         placeholder={t("placeholders.phoneNumber")}
-                        className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
+                        className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center  border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-900"
@@ -506,26 +507,16 @@ export default function StudentSection() {
                         <div className="flex justify-around">
                           <button onClick={() => handleEdit(student.SNo)}>
                             <img
-                              src={ellipse}
-                              alt=""
-                              className="size-6 absolute "
-                            />
-                            <img
                               src={edit2}
                               alt=""
-                              className="size-4 relative top-1 left-1"
+                              className="size-5"
                             />
                           </button>
                           <button onClick={() => handleShowInfo(student)}>
                             <img
-                              src={ellipse}
-                              alt=""
-                              className="size-6 absolute "
-                            />
-                            <img
                               src={info}
                               alt=""
-                              className="size-4 relative top-1 left-1"
+                              className="size-5"
                             />
                           </button>
                           <button
@@ -535,14 +526,9 @@ export default function StudentSection() {
                             }}
                           >
                             <img
-                              src={ellipse}
-                              alt=""
-                              className="size-6 absolute "
-                            />
-                            <img
                               src={delete2}
                               alt=""
-                              className="size-4 relative top-1 left-1"
+                              className="size-5"
                             />
                           </button>
                         </div>
@@ -552,7 +538,7 @@ export default function StudentSection() {
                 ))}
                 {/* input fields */}
                 <tr>
-                  <td className="px-2 py-2 text-center text-[#6d6ca7] font-bold border border-[#c1c0ca]">
+                  <td className="px-2 py-2 text-center text-[#6d6ca7] font-poppins font-semibold border border-[#c1c0ca]">
                     {students.length + 1}
                   </td>
                   <td className=" py-2 border border-[#c1c0ca]">
@@ -563,11 +549,12 @@ export default function StudentSection() {
                         handleInputChange(null, "firstname", e.target.value)
                       }
                       placeholder={t("placeholders.firstName")}
-                      className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center  border-none focus:outline-none ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
                       }`}
+                      ref={newStudentFirstNameRef}
                     />
                   </td>
                   <td className=" py-2 border border-[#c1c0ca]">
@@ -578,7 +565,7 @@ export default function StudentSection() {
                         handleInputChange(null, "lastname", e.target.value)
                       }
                       placeholder={t("placeholders.lastName")}
-                      className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center  border-none focus:outline-none ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
@@ -591,7 +578,7 @@ export default function StudentSection() {
                       onChange={(e) =>
                         handleInputChange(null, "gender", e.target.value)
                       }
-                      className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center border-none focus:outline-none ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-black"
@@ -621,7 +608,7 @@ export default function StudentSection() {
                         handleInputChange(null, "parentName", e.target.value)
                       }
                       placeholder={t("placeholders.parentName")}
-                      className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center  border-none focus:outline-none ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
@@ -636,7 +623,7 @@ export default function StudentSection() {
                         handleInputChange(null, "phone", e.target.value)
                       }
                       placeholder={t("placeholders.phoneNumber")}
-                      className={`w-full h-full px-2 py-1 font-poppins-bold text-center  border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-1 font-poppins font-semibold text-center  border-none focus:outline-none ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"

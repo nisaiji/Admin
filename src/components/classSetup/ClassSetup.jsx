@@ -142,7 +142,7 @@ function ClassSetup() {
           <div
             className={`${
               isDarkMode ? "bg-[#0d192f]" : "bg-white"
-            } w-full my-3 px-12 py-4 min-h-[600px] rounded-[10px]`}
+            } w-full my-3 px-12 py-4 min-h-[600px] rounded-[16px]`}
           >
             <h3
               className={`${
@@ -246,14 +246,14 @@ function ClassSetup() {
               <div
                 className={`${
                   isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
-                } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border-4 border-[#464590] rounded-3xl `}
+                } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border border-[#464590] rounded-3xl `}
               >
                 {/* available class dropdown */}
                 {!showDropdowns[classes.length] ? (
                   <img
                     src={addclass}
                     alt=""
-                    className="size-16 cursor-pointer"
+                    className="size-[48px] cursor-pointer"
                     onClick={() =>
                       setShowDropdowns({
                         ...showDropdowns,
@@ -265,8 +265,7 @@ function ClassSetup() {
                   <select
                     value=""
                     onChange={(e) => handleNewClassSubmit(e.target.value)}
-                    className={`cursor-pointer shadow appearance-none border rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline bg-[#464590] text-white text-center text-sm font-semibold max-h-[150px] overflow-y-auto ${
-                      isDarkMode ? "bg-[#152f54] text-white" : "text-gray-700"
+                    className={`cursor-pointer shadow appearance-none border border-[#464590] rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline text-[#464590] text-center text-sm font-poppins-bold max-h-[150px] overflow-y-auto
                     }`}
                   >
                     <option value="">{t("buttons.addClass")}</option>

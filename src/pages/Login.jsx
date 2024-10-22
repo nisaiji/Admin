@@ -101,13 +101,9 @@ function Login() {
       />
       {/* Welcome text and description */}
       <div className="absolute top-[100px] left-[92px] z-10">
-        <h1 className="text-white text-[50px] font-light leading-[75px]">
-          {t("login.welcome")} <br />
-          <span className="font-semibold">{t("login.managementHub")}</span>
+        <h1 className="text-white text-[48px] leading-[60px] font-poppins font-semibold w-[50%]">
+          {t("login.welcome")}
         </h1>
-        <p className="text-white text-[20px] font-medium leading-[36px]">
-          {t("login.simplify")}
-        </p>
       </div>
       {/* Form container */}
       <div className="flex flex-col lg:flex-row mx-auto shadow-lg overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[520px] bg-white bg-opacity-20 rounded-3xl backdrop-blur-lg">

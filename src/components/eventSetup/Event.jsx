@@ -4,7 +4,7 @@ import eventBack from "../../assets/images/eventBack.png";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import "tailwindcss/tailwind.css";
 import deleteEvent from "../../assets/images/deleteEvent.png";
-import Search2 from "../../assets/images/Search2.png";
+import Search from "../../assets/images/Search.png";
 import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
@@ -25,11 +25,11 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         isDarkMode ? "bg-[#102945] " : "bg-white  "
       } calendar rounded-lg w-full `}
     >
-      <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-xl font-semibold rounded-lg h-11 w-12/12 capitalize border-2 border-[#7B79FF80]">
+      <div className="month flex items-center justify-between py-2 px-14 text-xl font-semibold rounded-[14px] h-14 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
         <FontAwesomeIcon
           icon={faAngleLeft}
           className={`${
-            isDarkMode ? "text-white" : "text-red-600"
+            isDarkMode ? "text-white" : "text-[#686868]"
           } cursor-pointer size-6`}
           onClick={onPrevMonth}
         />
@@ -39,7 +39,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         <FontAwesomeIcon
           icon={faAngleRight}
           className={`${
-            isDarkMode ? "text-white" : "text-red-600"
+            isDarkMode ? "text-white" : "text-[#686868]"
           } cursor-pointer size-6`}
           onClick={onNextMonth}
         />
@@ -76,14 +76,14 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
       return `text-[#FF9933] bg-[#FFE5CC] border-[#ff9933]`;
     } else {
       return `text-[#7B79FF] bg-[#8b89fa1a] border-[#b7b5ff] ${
-        isToday ? `border-2 border-slate-600 border-[#7B79FF]` : ""
+        isToday ? `border-4 border-[#7B79FF]` : "border-[rgb(123, 121, 255)]"
       }`;
     }
   };
 
   return (
     <div
-      className={`day cursor-pointer rounded-lg flex font-bold pl-2 pt-2 w-20 h-24 border-2  ${renderCss()}`}
+      className={`day cursor-pointer rounded-[14px] flex font-bold p-2 w-[80px] h-[100px] border-2  ${renderCss()}`}
       onClick={onClick}
     >
       {day}
@@ -92,7 +92,9 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
 };
 
 const DaysGrid = ({ days }) => {
-  return <div className="days grid grid-cols-7 gap-6 px-4 py-3">{days}</div>;
+  return (
+    <div className="days grid grid-cols-7 gap-[25px] px-4 py-3">{days}</div>
+  );
 };
 
 // Event Component
@@ -136,7 +138,7 @@ const Event = () => {
 
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+        <div className="bg-white p-6 rounded-lg w-80">
           <h2 className="text-lg font-bold mb-4">
             {prevData?.editData?.eventId
               ? t("eventForm.title.edit")
@@ -238,16 +240,16 @@ const Event = () => {
     }
   };
 
-  const handleToday = () => {
-    const todayDate = new Date();
-    setToday(todayDate);
-    setMonth(todayDate.getMonth());
-    setYear(todayDate.getFullYear());
-    setActiveDay(todayDate.getDate());
-  };
+  // const handleToday = () => {
+  //   const todayDate = new Date();
+  //   setToday(todayDate);
+  //   setMonth(todayDate.getMonth());
+  //   setYear(todayDate.getFullYear());
+  //   setActiveDay(todayDate.getDate());
+  // };
 
   const handleGotoDate = (e) => {
-    const [mm, yyyy] = e.target.value;
+    const [mm, yyyy] = e.target.value.split("/");
     if (mm && yyyy && mm > 0 && mm < 13 && yyyy.length === 4) {
       updateCalendar(mm - 1, parseInt(yyyy));
     }
@@ -436,22 +438,39 @@ const Event = () => {
   };
 
   return (
-    <div className="grid grid-cols-6 gap-8 p-4  bg-[#f3f3ff]">
+    <div className="grid grid-cols-6 gap-6 p-6  bg-[#f3f3ff]">
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
       {/* left view */}
-      <div className="col-span-4 px-10 bg-white shadow-lg rounded-lg p-4 mt-5">
-        <div className="flex justify-between items-center mb-10">
+      <div className="col-span-4 px-10 bg-white rounded-[20px] p-4 mt-5">
+        <div className="flex justify-between items-center mb-4">
           <p className="text-4xl font-poppins-bold">
             {t("dashboard.calendar")}
           </p>
-          <p className="text-xl text-[#7B79FF] font-poppins-bold">
-            {moment(new Date()).format("D MMMM YYYY, dddd")}
-          </p>
+          <div
+            className={`goto flex justify-evenly items-center px-3 w-[220px] h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[14px] overflow-hidden`}
+          >
+            {/* search input */}
+            <button className={`goto-btn py-1  text-white`}>
+              <img src={Search} alt="" className="h-[18px] w-[18px]" />
+            </button>
+            <input
+              type="text"
+              placeholder={t("calendar.gotoDatePlaceholder")}
+              className={`date-input outline-none text-[14px] text-black w-28`}
+              onBlur={handleGotoDate}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleGotoDate(e);
+                }
+              }}
+            />
+          </div>
         </div>
+        <hr className="mb-8" />
         <Calendar
           className="px-10"
           month={month}
@@ -461,53 +480,19 @@ const Event = () => {
           handleMonthYearChange={updateCalendar}
         />
         <DaysGrid days={renderDays()} />
-        <div
-          className={`${
-            isDarkMode ? "bg-[#102945]" : "text-blue-900"
-          } goto-today flex items-center justify-between py-4 mx-5 rounded-xl`}
-        >
-          <div
-            className={`${
-              isDarkMode ? "border-purple-900" : ""
-            } goto flex items-center border-2 border-[#8A89FA] rounded-md overflow-hidden`}
-          >
-            {/* search input */}
-            <input
-              type="text"
-              placeholder={t("calendar.gotoDatePlaceholder")}
-              className={`${
-                isDarkMode ? "bg-gray-800 text-white" : ""
-              } date-input w-full h-8 outline-none text-[#8A89FA] px-2`}
-              onBlur={handleGotoDate}
-            />
-            <button
-              className={`${
-                isDarkMode ? "bg-blue-900" : "bg-[#e2e2ee]"
-              } goto-btn px-3 py-1  text-white`}
-            >
-              <img src={Search2} alt="" className="h-6 w-7" />
-            </button>
-          </div>
-          <button
-            className="today-btn px-3 py-1 border-2 border-[#8A89FA] bg-[#f2f2ff] text-[#8A89FA] rounded-md"
-            onClick={handleToday}
-          >
-            {t("buttons.today")}
-          </button>
-        </div>
       </div>
       {/* right view */}
-      <div className="col-span-2 events-container relative bg-white shadow-lg rounded-lg p-4 mt-5 ">
+      <div className="col-span-2 events-container relative bg-white rounded-[20px] py-4 px-10 mt-5 ">
         {eventLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
             <Spinner />
           </div>
         )}
         <div>
-          <div className="text-2xl font-bold my-2 dark:text-white">
+          <div className="text-4xl text-center font-bold my-2 dark:text-white">
             {t("events.title")}
           </div>
-
+          <hr />
           {events.length === 0 ? (
             <div className="relative w-full h-full">
               <img
@@ -519,14 +504,14 @@ const Event = () => {
           ) : (
             <ul className="overflow-y-auto max-h-[750px] mt-10">
               {/* list of events */}
-              {events.map((itm) => (
+              {events.map((itm, index) => (
                 <div
-                  key={itm["_id"]}
-                  className=" mb-5 border border-gray-300 shadow-lg rounded-lg overflow-hidden "
+                  key={index}
+                  className="mb-5 rounded-lg overflow-hidden border-l-8 border-red-600"
                 >
-                  <div className="flex h-9 justify-between items-center bg-[#464590] text-white py-0 px-4 text-lg">
-                    <div className="font-poppins-bold">
-                      {moment(itm.date).format("DD-MM-YYYY")}, {itm.day}
+                  <div className="flex h-5 justify-between items-center bg-[#ffffff] text-red-500 font-poppins px-2 text-lg">
+                    <div className="font-poppins-regular text-xl mt-4 mb-2 ml-4">
+                      {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                     </div>
                     {/* delete icon for admin */}
                     {isAdmin && (
@@ -536,38 +521,40 @@ const Event = () => {
                           setEventToDelete(itm._id);
                           setShowDeleteConfirmation(true);
                         }}
-                        className="size-5 cursor-pointer"
+                        className="size-[25px] cursor-pointer"
                       />
                     )}
                   </div>
-                  <div className="bg-[#f2f2ff]">
-                    <div className="flex py-2 justify-between items-center">
+                  <div className="bg-[#ffffff] mt-2">
+                    <div className="flex py-1 justify-between items-center">
                       <div
                         className={`${
-                          isDarkMode ? "bg-[#102945] text-white" : " "
-                        } py-0 px-4 ml-2 text-2xl font-poppins-bold text-ellipsis whitespace-nowrap overflow-hidden`}
+                          false ? "bg-[#102945] text-white" : ""
+                        } py-0 px-2 ml-4 text-base font-semibold`}
                       >
                         {itm.title}
                       </div>
-                      {itm.holiday && (
-                        <div className="px-3 mr-3 w-20 rounded-3xl bg-[#d91111] text-white ">
-                          {t("dashboard.holiday")}
-                        </div>
-                      )}
                     </div>
                     <div className="flex pb-3 justify-between items-center">
                       <div
                         className={`${
-                          isDarkMode ? "bg-[#102945] text-white" : " "
-                        } py-0 px-4 ml-2 text-lg font-poppins-regular text-ellipsis whitespace-nowrap overflow-hidden`}
+                          false ? "bg-[#102945] text-white" : ""
+                        } py-0 px-2 ml-4 text-xs font-poppins-regular`}
                       >
                         {itm.description}
                       </div>
-                      {itm.event && (
-                        <div className="px-3 mr-3 w-20 text-center rounded-3xl bg-[#464590] text-white">
-                          {t("dashboard.Event")}
-                        </div>
-                      )}
+                      <div className="flex">
+                        {itm.holiday && (
+                          <div className="py-1 mr-3 rounded-3xl text-[#d91111] text-[14px] font-medium">
+                            {t("dashboard.holiday")}
+                          </div>
+                        )}
+                        {itm.event && (
+                          <div className="py-1 mr-3 text-center text-[14px] font-medium rounded-3xl text-[#464590] ">
+                            {t("dashboard.Event")}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

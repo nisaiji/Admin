@@ -5,8 +5,7 @@ import PaginationItem from "@mui/material/PaginationItem";
 import info from "../../assets/images/info.png";
 import edit2 from "../../assets/images/edit2.png";
 import delete2 from "../../assets/images/delete2.png";
-import ellipse from "../../assets/images/ellipse.png";
-import searchp from "../../assets/images/searchp.png";
+import Search from "../../assets/images/Search.png";
 import clear from "../../assets/images/clear.png";
 import {
   FormControl,
@@ -198,7 +197,7 @@ export default function Studentlist() {
       <div
         className={`${
           isDarkMode ? "bg-[#112138]" : "bg-white"
-        } flex flex-col self-center w-full max-w-[95%] my-10 rounded  max-md:max-w-full min-h-screen`}
+        } flex flex-col self-center w-full max-w-[95%] my-10 rounded-[16px]  max-md:max-w-full min-h-screen`}
       >
         <h1 className="text-4xl px-14 py-5 font-poppins-bold ">
           {t("titles.students")}
@@ -208,7 +207,7 @@ export default function Studentlist() {
           <div className="flex pl-4 gap-5 h-10 mt-5 max-md:flex-wrap max-md:mt-10 mb-10">
             <div className="flex flex-auto justify-around gap-3 text-lg text-sky-950 max-md:flex-wrap max-md:max-w-full">
               <div
-                className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded basis-0 w-fit max-md:max-w-full max-md:hidden`}
+                className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px] basis-0 w-fit max-md:max-w-full max-md:hidden`}
               >
                 <div className="flex gap-2 px-10 py-3.5 rounded-3xl w-full">
                   <div className="flex justify-between w-full">
@@ -216,11 +215,15 @@ export default function Studentlist() {
                       size="medium"
                       className={`${
                         isDarkMode ? "bg-blue-950" : ""
-                      } w-[200px] mr-[10px]`}
+                      } w-[150px] mr-[10px] rounded-[14px]`}
                     >
                       <InputLabel
                         id="demo-simple-select-label"
-                        style={{ zIndex: 1, backgroundColor: "white" }}
+                        style={{
+                          zIndex: 1,
+                          backgroundColor: "white",
+                          fontSize: 14,
+                        }}
                       >
                         {t("titles.class")}
                       </InputLabel>
@@ -258,13 +261,14 @@ export default function Studentlist() {
 
                     <FormControl
                       size="medium"
+                      sx={{ marginX: 1 }}
                       className={`${
                         isDarkMode ? "bg-blue-950" : ""
-                      } mx-2 w-[200px] mr-[10px]`}
+                      } mx-2 w-[150px] mr-[10px] rounded-[14px]`}
                     >
                       <InputLabel
                         id="demo-simple-select-label"
-                        className="bg-white mr-[10px]"
+                        className="bg-white mr-[10px] text-[14px]"
                       >
                         {t("titles.section")}
                       </InputLabel>
@@ -285,24 +289,25 @@ export default function Studentlist() {
                         })}
                       </Select>
                     </FormControl>
-                    <input
-                      type="text"
-                      placeholder={t("placeholders.search")}
-                      className={`${
-                        isDarkMode ? " bg-[#0D192F] text-white" : ""
-                      } px-3 rounded-lg focus:outline-none w-full shadow-sm border border-t-gray`}
-                      onChange={(e) => {
-                        setName(e.target.value);
-                      }}
-                      value={name}
-                    />
-                    <button
-                      className="bg-[#e3e3ee] text-white hover:bg-white hover:border-2 hover:border-blue-950 ml-2 w-20 text-lg rounded-md flex items-center justify-center"
-                      onClick={handleSearch}
-                      loading="lazy"
-                    >
-                      <img src={searchp} alt="Search" className="w-6 h-6" />
-                    </button>
+                    <div className="flex px-3 rounded-[14px]  mx-2 w-full max-w-[800px] shadow-sm border border-t-gray">
+                      <div className=" flex items-center pl-3 pointer-events-none">
+                        <img src={Search} alt="" className="size-5" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder={t("placeholders.search")}
+                        className="focus:outline-none pl-3 w-full"
+                        onChange={(e) => {
+                          setName(e.target.value);
+                        }}
+                        value={name}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSearch();
+                          }
+                        }}
+                      />
+                    </div>
                     <button
                       className="bg-[#e3e3ee] text-white hover:bg-white hover:border-blue-950 hover:border-2 ml-2 w-20 text-lg rounded-md flex items-center justify-center"
                       onClick={handleClear}
@@ -431,40 +436,13 @@ export default function Studentlist() {
                                 })
                               }
                             >
-                              <img
-                                src={ellipse}
-                                alt=""
-                                className="size-6 absolute "
-                              />
-                              <img
-                                src={edit2}
-                                alt=""
-                                className="size-4 relative top-1 left-1"
-                              />
+                              <img src={edit2} alt="" className="size-5" />
                             </button>
                             <button onClick={() => handleShowInfo(student)}>
-                              <img
-                                src={ellipse}
-                                alt=""
-                                className="size-6 absolute "
-                              />
-                              <img
-                                src={info}
-                                alt=""
-                                className="size-4 relative top-1 left-1"
-                              />
+                              <img src={info} alt="" className="size-5" />
                             </button>
                             <button onClick={() => handleDelete(student._id)}>
-                              <img
-                                src={ellipse}
-                                alt=""
-                                className="size-6 absolute "
-                              />
-                              <img
-                                src={delete2}
-                                alt=""
-                                className="size-4 relative top-1 left-1"
-                              />
+                              <img src={delete2} alt="" className="size-5" />
                             </button>
                           </div>
                         </td>

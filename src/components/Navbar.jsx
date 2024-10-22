@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import Tools from "../assets/images/Tools.png";
 import Down from "../assets/images/Down.png";
 import { useTranslation } from "react-i18next";
 import {
@@ -87,7 +86,6 @@ const Navbar = () => {
               onClick={handleToggleMenu}
               className="flex justify-center items-center cursor-pointer"
             >
-              <img src={Tools} alt="Tools" className="size-8" />
               <button className="text-white px-4 py-2 text-base rounded-md ">
                 {t("setup")}
               </button>

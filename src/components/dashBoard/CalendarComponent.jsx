@@ -17,11 +17,11 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         isDarkMode ? "bg-[#102945] " : "bg-white  "
       } calendar rounded-lg w-full `}
     >
-      <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-xl font-semibold rounded-lg h-10 w-12/12 capitalize border-2 border-[#7B79FF80]">
+      <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-xl font-semibold rounded-lg h-10 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
         <FontAwesomeIcon
           icon={faAngleLeft}
           className={`${
-            isDarkMode ? "text-white" : "text-red-600"
+            isDarkMode ? "text-white" : "text-[#686868]"
           } cursor-pointer size-6`}
           onClick={onPrevMonth}
         />
@@ -31,7 +31,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         <FontAwesomeIcon
           icon={faAngleRight}
           className={`${
-            isDarkMode ? "text-white" : "text-red-600"
+            isDarkMode ? "text-white" : "text-[#686868]"
           } cursor-pointer size-6`}
           onClick={onNextMonth}
         />
@@ -68,7 +68,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
       return `text-[#FF9933] bg-[#FFE5CC] border-[#ff9933]`;
     } else {
       return `text-[#7B79FF] bg-[#8b89fa1a] border-[#b7b5ff] ${
-        isToday ? `border-2 border-slate-600 border-[#7B79FF]` : ""
+        isToday ? "border-4  border-[#7B79FF]" : ""
       }`;
     }
   };
@@ -76,7 +76,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
   return (
     <div
       className={`day ${renderCss()}
-       cursor-pointer rounded-lg flex font-bold pl-2 pt-2 w-20 h-[85px]`}
+       cursor-pointer rounded-[14px] flex font-bold p-2 w-[65px] h-[75px]`}
       onClick={onClick}
     >
       {day}
@@ -85,7 +85,11 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
 };
 
 const DaysGrid = ({ days }) => {
-  return <div className="days grid grid-cols-7 gap-2 p-2 pl-6 ">{days}</div>;
+  return (
+    <div className="days grid grid-cols-7 gap-2 p-2 justify-center items-center">
+      {days}
+    </div>
+  );
 };
 
 // Calendar component
@@ -105,7 +109,7 @@ const CalendarComponent = ({ updateDate }) => {
     try {
       const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
         startTime: new Date(year, month, 1).getTime(),
-        endTime: new Date(year, month + 1, 0).getTime(),
+        endTime: new Date(year, month + 1, 0, 23, 59, 59, 999).getTime(),
       });
       if (response?.statusCode === 200) {
         const sortedEvents = response.result.sort(
