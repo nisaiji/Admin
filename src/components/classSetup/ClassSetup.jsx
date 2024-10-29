@@ -163,7 +163,7 @@ function ClassSetup() {
                   <div
                     className={`${
                       isDarkMode ? "bg-[#152f54] bg-opacity-70" : ""
-                    } my-3 md:my-6 mx-3 md:mx-4 w-16 h-16 md:w-40 md:h-40 border-1 border-[#464590] rounded-3xl cursor-pointer`}
+                    } my-3 md:my-6 mx-3 md:mx-4 w-16 h-16 md:w-40 md:h-40 border-1 border-[#4834D4] rounded-3xl cursor-pointer`}
                   >
                     <div className="relative rounded-full h-[40] w-[40] z-10">
                       <img
@@ -193,7 +193,7 @@ function ClassSetup() {
                   <div
                     className={`${
                       isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
-                    } mt-3 mx-3 md:mt-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border border-[#464590] font-bold rounded-3xl cursor-pointer`}
+                    } mt-3 mx-3 md:mt-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border border-[#4834D4] font-bold rounded-3xl cursor-pointer`}
                   >
                     <div
                       className="flex flex-col justify-between h-full"
@@ -235,7 +235,7 @@ function ClassSetup() {
                         setAddSectionModelOpen(true);
                       }}
                     >
-                      <div className="bg-[#464590] text-white text-center text-xs md:text-sm py-1 px-3 rounded-full">
+                      <div className="bg-[#4834D4] text-white text-center text-xs md:text-sm py-1 px-3 rounded-full">
                         {t("buttons.update")}
                       </div>
                     </Link>
@@ -246,7 +246,7 @@ function ClassSetup() {
               <div
                 className={`${
                   isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
-                } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border border-[#464590] rounded-3xl `}
+                } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border border-[#4834D4] rounded-3xl `}
               >
                 {/* available class dropdown */}
                 {!showDropdowns[classes.length] ? (
@@ -265,7 +265,7 @@ function ClassSetup() {
                   <select
                     value=""
                     onChange={(e) => handleNewClassSubmit(e.target.value)}
-                    className={`cursor-pointer shadow appearance-none border border-[#464590] rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline text-[#464590] text-center text-sm font-poppins-bold max-h-[150px] overflow-y-auto
+                    className={`cursor-pointer shadow appearance-none border border-[#4834D4] rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline text-[#4834D4] text-center text-sm font-poppins-bold max-h-[150px] overflow-y-auto
                     }`}
                   >
                     <option value="">{t("buttons.addClass")}</option>

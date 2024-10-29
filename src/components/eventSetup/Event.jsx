@@ -65,19 +65,19 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
     if (isHoliday && hasEvent) {
       return `
         text-white
-        bg-gradient-to-br from-[#D91111] from-45% via-[#ffffff] to-[#464590] to-55%
+        bg-gradient-to-br from-[#D91111] from-45% via-[#ffffff] to-[#4834D4] to-55%
         border-[#D91111] border-t-0 border-r-0 border-b-0 border-l-0
         `;
     } else if (isHoliday) {
       return `text-white bg-[#D91111] border-[#D91111]`;
     } else if (hasEvent) {
-      return `text-white bg-[#464590] border-[#464590]`;
+      return `text-white bg-[#4834D4] border-[#4834D4]`;
     } else if (isSunday) {
       return `text-[#FF9933] bg-[#FFE5CC] border-[#ff9933]`;
+    } else if (isToday) {
+      return `text-[#4834D4] bg-[#f4f5f6] border-4 border-[#4834D4]`;
     } else {
-      return `text-[#7B79FF] bg-[#8b89fa1a] border-[#b7b5ff] ${
-        isToday ? `border-4 border-[#7B79FF]` : "border-[rgb(123, 121, 255)]"
-      }`;
+      return `text-black border-[#6E6F8126] bg-[#f4f5f6]`;
     }
   };
 

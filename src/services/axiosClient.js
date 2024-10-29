@@ -41,8 +41,8 @@ axiosClient.interceptors.response.use(
   async (error) => {
     if (error.message === "Network Error") {
       toast.error("Check your internet connectivity");
+      return;
     }
-    console.log("axios err", error);
     return Promise.reject(error.response.data.message);
   }
 );

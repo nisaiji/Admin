@@ -21,6 +21,7 @@ import { getItem } from "./services/LocalStorageManager";
 import { useEffect } from "react";
 import { setAuthData } from "./store/AppAuthSlice";
 import SchoolDetailSignup from "./pages/SchoolDetailSignup";
+import Requests from "./components/dashBoard/Request";
 
 function App() {
   const dispatch = useDispatch();
@@ -57,6 +58,7 @@ function App() {
                   <Route path="student-section" element={<StudentSection />} />
                   <Route path="student-update" element={<StudentUpdate />} />
                   <Route path="admin-profile" element={<AdminProfile />} />
+                  <Route path="requests" element={<Requests />} />
                 </>
               )}
             </Route>

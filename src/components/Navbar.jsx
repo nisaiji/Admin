@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Down from "../assets/images/Down.png";
+import profile from "../assets/images/profile.png";
 import { useTranslation } from "react-i18next";
 import {
   getItem,
@@ -66,19 +67,22 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className="bg-[#05022B] px-4 py-6 text-white sticky top-0 z-40">
+    <div className="bg-white border-b border-gray-100 px-4 py-6 text-white sticky top-0 z-40">
       <div className="flex items-center justify-between">
         <div className="flex items-center ml-3">
           <Link to="/" className="flex items-center">
             <div className="bg-[#7B79FF] size-10 rounded-2xl flex justify-center items-center">
               <span className="text-3xl font-bold">{t("A")}</span>
             </div>
-            <span className="font-bold text-3xl ml-2 text-white">
+            <span className="font-bold text-3xl ml-2 text-black">
               {t("logo")}
             </span>
           </Link>
+        </div>
+
+        <div className="flex space-x-8">
           <div
-            className="relative pl-6 z-10 ml-5"
+            className="relative items-end z-10"
             onMouseEnter={() => setMenuOpen(true)}
             onMouseLeave={() => setMenuOpen(false)}
           >
@@ -86,7 +90,7 @@ const Navbar = () => {
               onClick={handleToggleMenu}
               className="flex justify-center items-center cursor-pointer"
             >
-              <button className="text-white px-4 py-2 text-base rounded-md ">
+              <button className="text-black px-4 py-2 text-base rounded-md ">
                 {t("setup")}
               </button>
               <img src={Down} alt="Dropdown" className="w-4 h-2" />
@@ -95,7 +99,7 @@ const Navbar = () => {
             {menuOpen && (
               <div
                 ref={menuRef}
-                className="absolute top-10 left-0 w-40 bg-[#05022B] rounded-xl shadow-lg"
+                className="absolute top-10 left-0 w-40 bg-[#f6f5fd] rounded-xl shadow-lg"
               >
                 {isTeacher ? (
                   <div className="py-1" onClick={closeMenus}>
@@ -105,13 +109,13 @@ const Navbar = () => {
                           state: { classId, sectionId },
                         })
                       }
-                      className="block px-4 py-2 hover:text-[#05022B] hover:bg-white"
+                      className="block px-4 py-2 text-black hover:bg-white"
                     >
                       {t("titles.classRoom")}
                     </div>
                     <Link
                       to="/event"
-                      className="block px-4 py-2 hover:text-[#05022B] hover:bg-white"
+                      className="block px-4 py-2 text-black hover:bg-white"
                     >
                       {t("event")}
                     </Link>
@@ -120,25 +124,25 @@ const Navbar = () => {
                   <div className="py-1" onClick={closeMenus}>
                     <Link
                       to="/teacher"
-                      className="block px-4 py-2 hover:text-[#05022B] hover:bg-white"
+                      className="block px-4 py-2 text-black hover:bg-white"
                     >
                       {t("roles.teacher")}
                     </Link>
                     <Link
                       to="/student"
-                      className="block px-4 py-2 hover:text-[#05022B] hover:bg-white"
+                      className="block px-4 py-2 text-black hover:bg-white"
                     >
                       {t("roles.student")}
                     </Link>
                     <Link
                       to="/class-setup"
-                      className="block px-4 py-2 hover:text-[#05022B] hover:bg-white"
+                      className="block px-4 py-2 text-black  hover:bg-white"
                     >
                       {t("titles.classRoom")}
                     </Link>
                     <Link
                       to="/event"
-                      className="block px-4 py-2 hover:text-[#05022B] hover:bg-white"
+                      className="block px-4 py-2 text-black  hover:bg-white"
                     >
                       {t("event")}
                     </Link>
@@ -147,11 +151,15 @@ const Navbar = () => {
               </div>
             )}
           </div>
-        </div>
-
-        <div className="flex space-x-8">
+          {!isTeacher && (
+            <Link to="/requests" className="py-2">
+              <span className="text-black text-base font-medium">
+                {t("titles.requests")}
+              </span>
+            </Link>
+          )}
           <div
-            className="relative bg-[#1e1b40] rounded-xl mr-5"
+            className="relative rounded-xl mr-5"
             onMouseEnter={() => setProfileMenuOpen(true)}
             onMouseLeave={() => setProfileMenuOpen(false)}
           >
@@ -159,7 +167,7 @@ const Navbar = () => {
               onClick={handleToggleProfileMenu}
               className="flex items-center justify-center px-3 py-1 cursor-pointer"
             >
-              <div>
+              {/* <div>
                 <div className="text-white text-base mr-3">
                   {isTeacher ? getItem("firstname") : getItem("username")}
                 </div>
@@ -167,20 +175,21 @@ const Navbar = () => {
                   {isTeacher ? t("roles.teacher") : t("roles.admin")}
                 </div>
               </div>
-              <img src={Down} alt="Dropdown" className="w-4 h-2" />
+              <img src={Down} alt="Dropdown" className="w-4 h-2" /> */}
+              <img src={profile} alt="Dropdown" className="size-6" />
             </div>
             {/* profile menu */}
             {profileMenuOpen && (
               <div
                 ref={profileMenuRef}
-                className="absolute top-full right-0 w-[120px] bg-[#05022B] rounded-xl shadow-lg z-10"
+                className="absolute top-full right-0 w-[120px] bg-[#f6f5fd] rounded-xl shadow-lg z-10"
                 onClick={closeMenus}
               >
                 <div className="py-1">
                   {!isTeacher && (
                     <Link
                       to="/admin-profile"
-                      className="block px-4 py-2 hover:bg-white hover:text-[#05022B]"
+                      className="block px-4 py-2 text-black hover:bg-white "
                     >
                       {t("profile")}
                     </Link>
@@ -188,7 +197,7 @@ const Navbar = () => {
                   <Link
                     onClick={handleLogout}
                     to="/login"
-                    className="block px-4 py-2 hover:bg-white hover:text-[#05022B]"
+                    className="block px-4 py-2 text-black hover:bg-white "
                   >
                     {t("logout")}
                   </Link>

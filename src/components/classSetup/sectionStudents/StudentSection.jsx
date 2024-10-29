@@ -499,25 +499,17 @@ export default function StudentSection() {
                       {editSNo === student.SNo ? (
                         <button
                           onClick={() => handleStudentAction(student, true)}
-                          className="bg-[#464590] text-white font-poppins-regular py-1.5 px-3 rounded-xl w-full h-full"
+                          className="bg-[#4834D4] text-white font-poppins-regular py-1.5 px-3 rounded-xl w-full h-full"
                         >
                           {t("buttons.save")}
                         </button>
                       ) : (
                         <div className="flex justify-around">
                           <button onClick={() => handleEdit(student.SNo)}>
-                            <img
-                              src={edit2}
-                              alt=""
-                              className="size-5"
-                            />
+                            <img src={edit2} alt="" className="size-5" />
                           </button>
                           <button onClick={() => handleShowInfo(student)}>
-                            <img
-                              src={info}
-                              alt=""
-                              className="size-5"
-                            />
+                            <img src={info} alt="" className="size-5" />
                           </button>
                           <button
                             onClick={() => {
@@ -525,11 +517,7 @@ export default function StudentSection() {
                               setShowDeleteConfirmation(true);
                             }}
                           >
-                            <img
-                              src={delete2}
-                              alt=""
-                              className="size-5"
-                            />
+                            <img src={delete2} alt="" className="size-5" />
                           </button>
                         </div>
                       )}
@@ -633,7 +621,7 @@ export default function StudentSection() {
                   <td className="px-2 py-2 border border-[#c1c0ca]">
                     <button
                       onClick={() => registerStudent()}
-                      className="bg-[#464590] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full"
+                      className="bg-[#4834D4] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full"
                     >
                       {t("buttons.addStudent")}
                     </button>

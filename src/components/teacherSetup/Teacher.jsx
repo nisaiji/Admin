@@ -188,7 +188,7 @@ export default function Teacher() {
         <div
           className={`${
             isDarkMode ? "bg-[#0D192F] text-white" : "bg-white "
-          } p-4 min-h-screen`}
+          } p-4 min-h-screen  rounded-[16px]`}
         >
           {/* Toast notifications */}
           <Toaster position="top-center" reverseOrder={false} />
@@ -419,7 +419,7 @@ export default function Teacher() {
                     {/* Actions */}
                     <td className="px-4 py-2 border border-[#c1c0ca]">
                       <button
-                        className="bg-[#464590] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full"
+                        className="bg-[#4834D4] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full"
                         onClick={registerTeacher}
                         disabled={editSNo !== null}
                       >
