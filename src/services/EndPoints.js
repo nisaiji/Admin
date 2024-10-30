@@ -3,6 +3,8 @@ const EndPoints = {
     // ADMIN AUTH
     ADMIN_REGISTER: "admin",
     ADMIN_LOGIN: "admin/login",
+    REQUESTS: "event/admin",
+    MODIFY_REQUEST: "event/admin",
 
     // ADMIN DASHBOARD
     STUDENT_COUNT: "admin-dashboard/present-students",

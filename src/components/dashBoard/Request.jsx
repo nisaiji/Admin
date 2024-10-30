@@ -1,183 +1,178 @@
-import React, { useState } from "react";
-import { Toaster } from "react-hot-toast";
+import React, { useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
+import EndPoints from "../../services/EndPoints";
+import { axiosClient } from "../../services/axiosClient";
 
 export default function Requests() {
   const { t } = useTranslation();
-  const [requests, setRequests] = useState([
-    {
-      classTeacherName: "John Doe",
-      className: "5th Grade",
-      resetBefore: 2,
-      status: "pending",
-      otp: "",
-    },
-    {
-      classTeacherName: "Jane Smith",
-      className: "6th Grade",
-      resetBefore: 5,
-      status: "approved",
-      otp: "123456",
-    },
-    {
-      classTeacherName: "Michael Lee",
-      className: "7th Grade",
-      resetBefore: 1,
-      status: "rejected",
-      otp: "",
-    },
-  ]);
+  const currentDate = new Date();
+  const [requests, setRequests] = useState([]);
   const [selectedTab, setSelectedTab] = useState("all");
   const [loading, setLoading] = useState(false);
-  const isDarkMode = false; // Change this according to your theme logic
 
-  const handleApprove = (index) => {
-    const newRequests = [...requests];
-    newRequests[index].status = "approved";
-    newRequests[index].otp = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString(); // Generate a 6-digit OTP
-    setRequests(newRequests);
+  const getRequest = async () => {
+    try {
+      setLoading(true);
+      const startTime = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+      ).getTime();
+      const endTime = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0,
+        23,
+        59,
+        59,
+        999
+      ).getTime();
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.REQUESTS}?model=teacher&type=forgetPassword&status=accept,reject,complete,pending,notSet,expired&startTime=${startTime}&endTime=${endTime}`
+      );
+      if (res?.statusCode === 200) {
+        setRequests(res.result.events);
+      }
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleReject = (index) => {
-    const newRequests = [...requests];
-    newRequests[index].status = "rejected";
-    newRequests[index].otp = ""; // Clear the OTP on rejection
-    setRequests(newRequests);
+  useEffect(() => {
+    getRequest();
+  }, []);
+
+  const handleRequestAction = async (id, action) => {
+    try {
+      setLoading(true);
+      const res = await axiosClient.put(EndPoints.ADMIN.MODIFY_REQUEST, {
+        eventId: id,
+        status: action,
+      });
+      if (res?.statusCode === 200) {
+        toast.success(res.result);
+        getRequest();
+      }
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredRequests =
     selectedTab === "all"
       ? requests
-      : requests.filter((req) => req.status === selectedTab);
+      : selectedTab === "approved"
+      ? requests.filter(
+          (req) => req.status === "accept" || req.status === "complete"
+        )
+      : selectedTab === "rejected"
+      ? requests.filter((req) => req.status === "reject")
+      : requests;
 
   return (
     <>
-      {/* Loading spinner */}
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
       <div className="bg-[#f3f3ff] px-6 py-10">
-        <div
-          className={`${
-            isDarkMode ? "bg-[#0D192F] text-white" : "bg-white "
-          } min-h-screen  rounded-[16px]`}
-        >
-          {/* Toast notifications */}
+        <div className="bg-white min-h-screen rounded-[16px]">
           <Toaster position="top-center" reverseOrder={false} />
           <div>
             <div className="text-4xl font-poppins-bold pl-12 py-5">
               {t("titles.passwordReset")}
             </div>
-
-            {/* Tabs for All, Approved, Rejected */}
             <div className="flex space-x-4 mt-4 pl-12">
-              <div
-                className={`cursor-pointer text-xs text-[#040320] font-poppins font-semibold w-[75px] text-center ${
-                  selectedTab === "all"
-                    ? "pb-3 border-b-[3px] border-[#4834d4]"
-                    : ""
-                }`}
-                onClick={() => setSelectedTab("all")}
-              >
-                {t("labels.all")}
-              </div>
-              <div
-                className={`cursor-pointer text-xs text-[#040320] font-poppins font-semibold w-[75px] text-center ${
-                  selectedTab === "approved"
-                    ? "pb-3 border-b-[3px] border-[#4834d4]"
-                    : ""
-                }`}
-                onClick={() => setSelectedTab("approved")}
-              >
-                {t("labels.approved")}
-              </div>
-              <div
-                className={`cursor-pointer text-xs text-[#040320] font-poppins font-semibold w-[75px] text-center ${
-                  selectedTab === "rejected"
-                    ? "pb-3 border-b-[3px] border-[#4834d4]"
-                    : ""
-                }`}
-                onClick={() => setSelectedTab("rejected")}
-              >
-                {t("labels.rejected")}
-              </div>
+              {["all", "approved", "rejected"].map((tab) => (
+                <div
+                  key={tab}
+                  className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
+                    selectedTab === tab
+                      ? "pb-3 border-b-[3px] border-[#4834d4]"
+                      : ""
+                  }`}
+                  onClick={() => setSelectedTab(tab)}
+                >
+                  {t(`labels.${tab}`)}
+                </div>
+              ))}
             </div>
             <hr className="border-[#9391A5BF] mx-10 -translate-y-[1px]" />
 
-            {/* Request list table */}
             <div className="overflow-x-auto mt-6">
-              <table className={`w-full shadow-md overflow-hidden`}>
+              <table className="w-full shadow-md overflow-hidden">
                 <thead>
-                  {/* Table headings */}
                   <tr>
-                    <th className="p-4 text-base font-poppins-bold text-gray-600">
-                      {t("labels.classTeacher")}
-                    </th>
-                    <th className="p-4 text-base font-poppins-bold  text-gray-600">
-                      {t("labels.class")}
-                    </th>
-                    <th className="p-4 text-base font-poppins-bold text-gray-600">
-                      {t("labels.resetBefore")}
-                    </th>
-                    <th className="p-4 text-base font-poppins-bold text-gray-600">
-                      {t("labels.action")}
-                    </th>
-                    <th className="p-4 text-base font-poppins-bold text-gray-600">
-                      {t("labels.otp")}
-                    </th>
+                    {[
+                      "classTeacher",
+                      "reasonToReset",
+                      "class",
+                      "resetBefore",
+                      "action",
+                      "otp",
+                    ].map((label) => (
+                      <th
+                        key={label}
+                        className="p-4 text-base font-poppins-bold text-gray-600"
+                      >
+                        {t(`labels.${label}`)}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className="text-sm font-normal text-gray-900">
                   {filteredRequests.map((req, index) => (
                     <tr
-                      className={`${index % 2 === 0 ? "bg-[#4645900D]" : ""}`}
                       key={index}
+                      className={index % 2 === 0 ? "bg-[#4645900D]" : ""}
                     >
-                      {/* Class Teacher Name */}
                       <td className="p-4 text-sm font-poppins-bold text-center">
-                        <div>{req.classTeacherName}</div>
+                        {req?.teacher?.firstname} {req?.teacher?.lastname}
                       </td>
-                      {/* Class Name */}
                       <td className="p-4 text-sm font-poppins-bold text-center">
-                        <div>{req.className}</div>
+                        {req?.title}
                       </td>
-                      {/* Reset Before (in days) */}
                       <td className="p-4 text-sm font-poppins-bold text-center">
-                        <div>{req.resetBefore}</div>
+                        {req?.teacher?.className} {req?.teacher?.section}
                       </td>
-                      {/* Actions (Approve/Reject) */}
-                      <td className="pl-3 pr-5 py-2 text-sm font-poppins-bold ">
+                      <td className="p-4 text-sm font-poppins-bold text-center">
+                        {req?.teacher?.forgetPasswordCount}
+                      </td>
+                      <td className="py-2 px-4 text-sm font-poppins-bold text-center">
                         {req.status === "pending" ? (
-                          <div className="flex justify-center text-center gap-3">
+                          <div className="flex justify-center gap-3">
                             <button
-                              onClick={() => handleApprove(index)}
-                              className="text-green-500 font-poppins-bold text-center"
+                              onClick={() =>
+                                handleRequestAction(req?._id, "accept")
+                              }
+                              className="text-green-500 font-poppins-bold"
                             >
-                              approve
+                              Approve
                             </button>
                             <button
-                              onClick={() => handleReject(index)}
-                              className="text-red-500 font-poppins-bold text-center"
+                              onClick={() =>
+                                handleRequestAction(req?._id, "reject")
+                              }
+                              className="text-red-500 font-poppins-bold"
                             >
-                              reject
+                              Reject
                             </button>
                           </div>
                         ) : (
-                          <div className="font-poppins-bold text-center">
-                            {req.status}
-                          </div>
+                          req.status
                         )}
                       </td>
-                      {/* OTP */}
-                      <td className="px-5">
-                        <div className="h-[35px] border border-[rgba(104, 104, 104, 0.25)] rounded-[10px] flex justify-center items-center">
-                          <div className="text-sm font-poppins-bold">
-                            {req.otp}
+                      <td className="p-4 text-center">
+                        <div className="h-[35px] border border-[rgba(104, 104, 104, 0.25)] rounded-[10px] flex items-center justify-center">
+                          <div className=" w-20 text-sm font-poppins-bold text-center">
+                            {req?.otp || "-"}
                           </div>
                         </div>
                       </td>

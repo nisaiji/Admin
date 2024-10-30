@@ -5,8 +5,8 @@ import {
   removeItem,
 } from "./LocalStorageManager.js";
 import toast from "react-hot-toast";
-// const BASE_URL = "http://localhost:4000/";
-const BASE_URL = "https://nisaiji.com/";
+const BASE_URL = "http://localhost:4000/";
+// const BASE_URL = "https://nisaiji.com/";
 
 export const axiosClient = axios.create({
   baseURL: BASE_URL,

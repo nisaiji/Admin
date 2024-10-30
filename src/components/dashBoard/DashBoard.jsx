@@ -197,7 +197,15 @@ const Dashboard = () => {
         ? getCurrentWeekDates()
         : {
             startTime: new Date(date.year, date.month, 1).getTime(),
-            endTime: new Date(date.year, date.month + 1, 0).getTime(),
+            endTime: new Date(
+              date.year,
+              date.month + 1,
+              0,
+              23,
+              59,
+              59,
+              999
+            ).getTime(),
           };
     setLoading(true);
 
@@ -298,7 +306,6 @@ const Dashboard = () => {
     const transformedData = transformMonthlyData(attendanceData, daysInMonth);
     const absentData = transformedData.map((day) => day.absent);
     const presentData = transformedData.map((day) => day.present);
-    console.log(presentData, absentData);
 
     const data = {
       labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
