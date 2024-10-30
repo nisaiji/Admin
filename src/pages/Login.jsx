@@ -89,10 +89,10 @@ function Login() {
   });
 
   return (
-    <div className="min-h-screen py-20 bg-[#05022B] relative">
+    <div className="min-h-screen py-20 bg-[#FFFFFF] relative">
       {/* Background video for the login page */}
       <video
-        className="fixed top-0 left-0 h-[800px] w-[700px] object-cover opacity-25"
+        className="fixed top-0 left-0 h-[700px] w-[770px] bg-[#FFFFFF] bg-blend-multiply object-cover"
         autoPlay
         loop
         muted
@@ -100,41 +100,41 @@ function Login() {
         type="video/mp4"
       />
       {/* Welcome text and description */}
-      <div className="absolute top-[100px] left-[92px] z-10">
-        <h1 className="text-white text-[48px] leading-[60px] font-poppins font-semibold w-[50%]">
+      {/* <div className="absolute top-[100px] left-[92px] z-10">
+        <h1 className="text-[#] text-[48px] leading-[60px] font-poppins font-semibold w-[50%]">
           {t("login.welcome")}
         </h1>
-      </div>
+      </div> */}
       {/* Form container */}
-      <div className="flex flex-col lg:flex-row mx-auto shadow-lg overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[520px] bg-white bg-opacity-20 rounded-3xl backdrop-blur-lg">
+      <div className="flex flex-col lg:flex-row mx-auto overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[540px] bg-[#C4C4C4]/20 backdrop-filter: blur(25px) rounded-3xl">
         {/* Form starts here */}
         <form onSubmit={formik.handleSubmit} className="w-full h-full">
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-30">
+            <div className="absolute inset-0 flex items-center justify-center bg-[#040320] bg-opacity-50 z-30">
               <Spinner />
             </div>
           )}
           {/* Logo section */}
-          <div className="text-white w-full py-8 px-12">
-            <h2 className="flex text-3xl mb-4">
+          <div className="text-[#040320] w-full px-[42px] py-[45px] justify-center">
+            <h2 className="flex text-3xl mb-4 justify-center">
               <Link to="/">
-                <div className="bg-[#05022B] w-[30px] h-[30px] rounded-md flex justify-center items-center">
+                <div className="bg-[#040320] w-[30px] h-[30px] rounded-md flex justify-center items-center">
                   <span className="text-white font-bold text-xl">
                     {t("login.A")}
                   </span>
                 </div>
               </Link>
-              <span className="font-bold text-xl ml-2 text-white">
+              <span className="font-bold text-xl ml-2 text-[#040320]">
                 {t("login.LOGO")}
               </span>
             </h2>
-            <h2 className="font-bold text-[48px]">{t("login.login")}</h2>
-            <p className="text-white opacity-70">{t("login.enterDetails")}</p>
+            <h2 className="font-bold text-[32px]">{t("login.login")}</h2>
+            <p className="text-[#040320]/70 py-3">{t("login.enterDetails")}</p>
 
             {/* Input field for email/username */}
-            <div className="mt-5 border-b border-white/40 w-full">
+            <div className="mt-6 border-b border-[#686868]/60 w-full">
               <input
-                className="py-1 px-2 w-full bg-transparent text-white placeholder-white focus:outline-none"
+                className="py-1 px-2 w-full bg-transparent text-[#040320] placeholder-[#686868]/50 focus:outline-none"
                 type="text"
                 name="userInput"
                 placeholder={
@@ -155,9 +155,9 @@ function Login() {
             )}
 
             {/* Input field for password with toggle visibility feature */}
-            <div className="mt-5 relative border-b border-white w-full">
+            <div className="mt-6 relative border-b border-[#686868]/60 w-full">
               <input
-                className="py-1 px-2 w-full bg-transparent text-white placeholder-white focus:outline-none"
+                className="py-1 px-2 w-full bg-transparent text-[#040320] placeholder-[#686868]/50 focus:outline-none"
                 type={ishide ? "password" : "text"}
                 name="password"
                 placeholder={t("login.placeholders.password")}
@@ -184,16 +184,16 @@ function Login() {
             </div>
 
             {/* Forgot password link */}
-            <div className="text-white text-end text-sm mt-2 opacity-70">
-              <Link to="/forgot-password" className="text-white">
+            <div className="text-white text-end text-sm mt-6">
+              <Link to="/forgot-password" className="text-[#040320]/70">
                 {t("login.forgotPassword")}
               </Link>
             </div>
 
             {/* Submit button for login */}
-            <div className="mt-5">
+            <div className="mt-6">
               <button
-                className="w-full py-1.5 text-center bg-white text-[#05022B] font-semibold rounded-lg disabled:opacity-50"
+                className="w-full py-1.5 text-center bg-[#4834d4] text-white font-poppins-bold rounded-lg disabled:opacity-50"
                 type="submit"
                 disabled={formik.isSubmitting}
               >
@@ -202,22 +202,22 @@ function Login() {
             </div>
 
             {/* Toggle button to switch between Admin and Teacher login */}
-            <div className="mt-5">
+            <div className="mt-3">
               <button
                 type="button"
                 onClick={() => setIsAdmin(!isAdmin)}
-                className="w-full py-1 border-2 border-white text-white rounded-lg font-poppins-regular"
+                className="w-full py-1 border border-[#4834d4] text-[#4834d4] rounded-lg font-bold"
               >
                 {t("login.toggleButton")} {isAdmin ? "Teacher" : "Admin"}
               </button>
             </div>
 
             {isAdmin && (
-              <div className="flex justify-center text-white text-xs opacity-70 mt-3">
-                <div className="text-[#FFFFFFB3] pr-1">
+              <div className="flex justify-center text-white text-xs opacity-70 mt-6">
+                <div className="text-[#040320]/70 pr-1">
                   {t("login.notHaveAccount")}
                 </div>
-                <Link to="/signup" className="text-white">
+                <Link to="/signup" className="text-[#4834d4] font-bold">
                   {t("login.register")}
                 </Link>
               </div>

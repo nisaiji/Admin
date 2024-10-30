@@ -131,16 +131,12 @@ function Signup() {
               {t("register.adminRegister")}
             </h2>
             <form onSubmit={formik.handleSubmit}>
-              {renderInput("schoolName", "text", )}
-              {renderInput(
-                "affiliationNo",
-                "text",
-               
-              )}
+              {renderInput("schoolName", "text")}
+              {renderInput("affiliationNo", "text")}
               {renderInput("address", "text", t("placeholders.address"))}
-              {renderInput("email", "email", )}
-              {renderInput("phone", "text", )}
-              {renderInput("username", "text", )}
+              {renderInput("email", "email")}
+              {renderInput("phone", "text")}
+              {renderInput("username", "text")}
 
               {/* Password input with visibility toggle */}
               <div className="mt-5 border border-gray-400 flex items-center">
@@ -174,7 +170,7 @@ function Signup() {
               {/* Submit button for form */}
               <button
                 type="submit"
-                className="w-full bg-blue-900 py-3 text-white mt-5"
+                className="w-full bg-[#4834D4] py-3 text-white mt-5"
                 disabled={loading}
               >
                 {loading ? t("register.submitting") : t("register.registerNow")}

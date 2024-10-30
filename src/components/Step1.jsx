@@ -74,7 +74,7 @@ const Step1 = ({ formik, nextStep }) => {
           <button
             onClick={nextStep}
             type="button"
-            className="rounded-lg px-7 h-10 bg-[#464590] font-semibold flex items-center justify-center ml-auto text-white"
+            className="rounded-lg px-7 h-10 bg-[#4834D4] font-semibold flex items-center justify-center ml-auto text-white"
           >
             <div className="flex items-center gap-2">
               <p className="text-base">{t("adminProfile.next")}</p>

@@ -158,25 +158,25 @@ function SchoolDetailSignup() {
 
   const Progress = () => (
     <div>
-      <div className="bg-[#7b79ff] h-1 w-[500px] mx-auto mt-6 translate-y-6"></div>
+      <div className="bg-[#4834D4] h-1 w-[500px] mx-auto mt-6 translate-y-6"></div>
       <div className="flex justify-around mb-2">
         <div
           className={`size-12 rounded-full flex items-center justify-center z-10 ${
-            currentStep === 1 ? "bg-[#7B79FF]" : "bg-[#05022B]"
+            currentStep === 1 ? "bg-[#4834D4]" : "bg-[#05022B]"
           } text-white`}
         >
           {currentStep === 1 ? 1 : <img src={Tick} alt="Tick" />}
         </div>
         <div
           className={`size-12 rounded-full flex items-center justify-center z-10 ${
-            currentStep === 2 ? "bg-[#7B79FF]" : "bg-[#05022B]"
+            currentStep === 2 ? "bg-[#4834D4]" : "bg-[#05022B]"
           } text-white`}
         >
           {currentStep <= 2 ? 2 : <img src={Tick} alt="Tick" />}
         </div>
         <div
           className={`size-12 rounded-full flex items-center justify-center z-10 ${
-            currentStep === 3 ? "bg-[#7B79FF]" : "bg-[#05022B]"
+            currentStep === 3 ? "bg-[#4834D4]" : "bg-[#05022B]"
           } text-white`}
         >
           3
@@ -185,21 +185,21 @@ function SchoolDetailSignup() {
       <div className="flex justify-around">
         <div
           className={`text-sm text-center font-semibold ${
-            currentStep === 1 ? "text-[#7B79FF]" : "text-black"
+            currentStep === 1 ? "text-[#4834D4]" : "text-black"
           }`}
         >
           {t("register.basicInfo")}
         </div>
         <div
           className={`text-sm text-center -translate-x-5 ${
-            currentStep === 2 ? "text-[#7B79FF]" : "text-black"
+            currentStep === 2 ? "text-[#4834D4]" : "text-black"
           }`}
         >
           {t("register.addressInfo")}
         </div>
         <div
           className={`text-sm text-center  ${
-            currentStep === 3 ? "text-[#7B79FF]" : "text-black"
+            currentStep === 3 ? "text-[#4834D4]" : "text-black"
           }`}
         >
           {t("register.setPassword")}
@@ -217,7 +217,7 @@ function SchoolDetailSignup() {
             <div className="text-center text-black">
               <h2 className="flex items-center justify-center gap-2 mb-4 text-3xl">
                 <Link to="/">
-                  <div className="bg-blue-900 w-12 h-12 flex items-center justify-center rounded-lg">
+                  <div className="bg-[#4834D4] w-12 h-12 flex items-center justify-center rounded-lg">
                     <span className="text-white font-bold">A</span>
                   </div>
                 </Link>

@@ -84,7 +84,7 @@ const Step3 = ({ formik, prevStep, loading }) => {
         <div className="flex justify-between w-full mt-5">
           {/* Back Button */}
           <button
-            className="rounded-lg px-7 h-10 bg-[#464590] font-semibold flex items-center justify-center text-white"
+            className="rounded-lg px-7 h-10 bg-[#4834D4] font-semibold flex items-center justify-center text-white"
             type="button" // No validation check on back button
             onClick={prevStep}
           >
@@ -100,7 +100,7 @@ const Step3 = ({ formik, prevStep, loading }) => {
 
           {/* Submit Button */}
           <button
-            className="rounded-lg px-7 h-10 bg-[#464590] font-semibold flex items-center justify-center text-white"
+            className="rounded-lg px-7 h-10 bg-[#4834D4] font-semibold flex items-center justify-center text-white"
             type="submit"
           >
             <div className="flex items-center gap-2">
