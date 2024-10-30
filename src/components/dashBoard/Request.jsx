@@ -140,7 +140,7 @@ export default function Requests() {
                         {req?.title}
                       </td>
                       <td className="p-4 text-sm font-poppins-bold text-center">
-                        {req?.teacher?.className} {req?.teacher?.section}
+                        {req?.teacher?.class}-{req?.teacher?.section}
                       </td>
                       <td className="p-4 text-sm font-poppins-bold text-center">
                         {req?.teacher?.forgetPasswordCount}
