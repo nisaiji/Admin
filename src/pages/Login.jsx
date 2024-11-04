@@ -110,7 +110,7 @@ function Login() {
         {/* Form starts here */}
         <form onSubmit={formik.handleSubmit} className="w-full h-full">
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#040320] bg-opacity-50 z-30">
+            <div className="absolute inset-0 flex items-center justify-center bg-[#C4C4C4]/20 bg-opacity-50 z-30">
               <Spinner />
             </div>
           )}

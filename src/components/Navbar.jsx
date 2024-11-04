@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import Down from "../assets/images/Down.png";
+import teachericon from "../assets/images/teachericon.png";
+import classroomicon from "../assets/images/classroomicon.png";
+import calendaricon from "../assets/images/calendaricon.png";
+import studenticon from "../assets/images/studenticon.png";
+import dropdown from "../assets/images/dropdown.png";
 import profile from "../assets/images/profile.png";
 import { useTranslation } from "react-i18next";
 import {
@@ -67,20 +71,20 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className="bg-white border-b border-gray-100 px-4 py-6 text-white sticky top-0 z-40">
+    <div className="bg-white border-b border-gray-100 px-10 py-6 text-white sticky top-0 z-40">
       <div className="flex items-center justify-between">
         <div className="flex items-center ml-3">
           <Link to="/" className="flex items-center">
-            <div className="bg-[#7B79FF] size-10 rounded-2xl flex justify-center items-center">
-              <span className="text-3xl font-bold">{t("A")}</span>
+            <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
+              <span className="text-[24px] font-bold">{t("A")}</span>
             </div>
-            <span className="font-bold text-3xl ml-2 text-black">
+            <span className="font-bold text-[24px] ml-2 text-[#040320]">
               {t("logo")}
             </span>
           </Link>
         </div>
 
-        <div className="flex space-x-8">
+        <div className="flex space-x-12">
           <div
             className="relative items-end z-10"
             onMouseEnter={() => setMenuOpen(true)}
@@ -90,16 +94,16 @@ const Navbar = () => {
               onClick={handleToggleMenu}
               className="flex justify-center items-center cursor-pointer"
             >
-              <button className="text-black px-4 py-2 text-base rounded-md ">
+              <button className="text-[#040320] px-2 py-2 text-base font-bold rounded-md relative">
                 {t("setup")}
               </button>
-              <img src={Down} alt="Dropdown" className="w-4 h-2" />
+              <img src={dropdown} alt="dropdown" className="w-4 h-4" />
             </div>
             {/* setup menu */}
             {menuOpen && (
               <div
                 ref={menuRef}
-                className="absolute top-10 left-0 w-40 bg-[#f6f5fd] rounded-xl shadow-lg"
+                className="absolute top-10 w-40 bg-white rounded-[14px] shadow-lg z-10 justify-items-center "
               >
                 {isTeacher ? (
                   <div className="py-1" onClick={closeMenus}>
@@ -109,13 +113,13 @@ const Navbar = () => {
                           state: { classId, sectionId },
                         })
                       }
-                      className="block px-4 py-2 text-black hover:bg-white"
+                      className="block px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
                     >
                       {t("titles.classRoom")}
                     </div>
                     <Link
                       to="/event"
-                      className="block px-4 py-2 text-black hover:bg-white"
+                      className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
                     >
                       {t("event")}
                     </Link>
@@ -124,26 +128,46 @@ const Navbar = () => {
                   <div className="py-1" onClick={closeMenus}>
                     <Link
                       to="/teacher"
-                      className="block px-4 py-2 text-black hover:bg-white"
+                      className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
                     >
+                      <img
+                        src={teachericon}
+                        alt="teachericon"
+                        className="w-5 h-5 relative"
+                      />
                       {t("roles.teacher")}
                     </Link>
                     <Link
                       to="/student"
-                      className="block px-4 py-2 text-black hover:bg-white"
+                      className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
                     >
+                      <img
+                        src={studenticon}
+                        alt="studenticon"
+                        className="w-5 h-5 relative"
+                      />
                       {t("roles.student")}
                     </Link>
                     <Link
                       to="/class-setup"
-                      className="block px-4 py-2 text-black  hover:bg-white"
+                      className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] hover:text-[#4834D4]  hover:bg-white"
                     >
+                      <img
+                        src={classroomicon}
+                        alt="classroomicon"
+                        className="w-5 h-5 relative"
+                      />
                       {t("titles.classRoom")}
                     </Link>
                     <Link
                       to="/event"
-                      className="block px-4 py-2 text-black  hover:bg-white"
+                      className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
                     >
+                      <img
+                        src={calendaricon}
+                        alt="calendaricon"
+                        className="w-5 h-5 relative"
+                      />
                       {t("event")}
                     </Link>
                   </div>
@@ -153,7 +177,7 @@ const Navbar = () => {
           </div>
           {!isTeacher && (
             <Link to="/requests" className="py-2">
-              <span className="text-black text-base font-medium">
+              <span className="text-[#040320] hover:text-[#4834D4] text-base font-bold">
                 {t("titles.requests")}
               </span>
             </Link>
@@ -182,14 +206,14 @@ const Navbar = () => {
             {profileMenuOpen && (
               <div
                 ref={profileMenuRef}
-                className="absolute top-full right-0 w-[120px] bg-[#f6f5fd] rounded-xl shadow-lg z-10"
+                className="absolute top-full right-0 w-[120px] text-[#040320] hover:text-[#4834D4] hover:bg-white bg-white rounded-xl shadow-lg z-10 justify-items-center"
                 onClick={closeMenus}
               >
                 <div className="py-1">
                   {!isTeacher && (
                     <Link
                       to="/admin-profile"
-                      className="block px-4 py-2 text-black hover:bg-white "
+                      className="block px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
                     >
                       {t("profile")}
                     </Link>
@@ -197,7 +221,7 @@ const Navbar = () => {
                   <Link
                     onClick={handleLogout}
                     to="/login"
-                    className="block px-4 py-2 text-black hover:bg-white "
+                    className="block px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
                   >
                     {t("logout")}
                   </Link>

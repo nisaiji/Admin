@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
 import eventBack from "../../assets/images/eventBack.png";
-import Studenthat from "../../assets/images/Studenthat.png";
+import noevents from "../../assets/images/noevents.png";
 import ParentIcon from "../../assets/images/ParentIcon.png";
 import DownIcon from "../../assets/images/Down.png";
+import dashboardstudent from "../../assets/images/dashboardstudent.png";
 import CalendarComponent from "./CalendarComponent.jsx";
 import { useSelector } from "react-redux";
 import EndPoints from "../../services/EndPoints.js";
@@ -363,30 +364,30 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="relative w-full min-h-screen bg-white bg-gradient-to-t from-[rgba(138,137,250,0.1)] to-[rgba(138,137,250,0.1)]">
+    <div className="relative w-full min-h-screen bg-[#F4F5F6]">
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="container mx-[45px] py-[25px]">
-        <div className="bg-white rounded-[20px]">
-          <h1 className="text-3xl font-bold mb-0 p-3 pl-10 pt-8">
+      <div className="container mx-[20px] py-[25px]">
+        <div className="bg-white rounded-[16px] w-full mx-8">
+          <h1 className="text-2xl font-semibold mb-0 p-3 pl-10 pt-6">
             {t("dashboard.title")}
           </h1>
           <hr className="mx-5" />
           {/* Grids */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-[25px] p-4 pl-10">
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-[#7B79FF1A] mb-4">
+            <div className="flex items-center justify-between p-6 rounded-2xl bg-[#4834D4]/5 mb-2 mt-2">
               <div className="px-3">
-                <p className="text-base font-poppins-regular text-[#686868]">
+                <p className="text-base font-medium text-[#9391A5]">
                   {t("dashboard.students")}
                 </p>
-                <p className="text-3xl mt-3 font-bold text-[#7B79FF]">
+                <p className="text-3xl mt-3 font-bold text-[#4834D4]">
                   {renderStudentCount()}
                 </p>
               </div>
-              <img src={Studenthat} className="w-12 h-12 mr-4" />
+              <img src={dashboardstudent} className="w-12 h-12 mr-4" />
             </div>
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-[#4CBC9A1A] mb-4">
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-[#4cbc9a]/10 mb-2 mt-2">
               <div className="px-3">
-                <p className="text-base font-poppins-regular text-[#686868]">
+                <p className="text-base font-medium text-[#9391A5]">
                   {t("dashboard.parents")}
                 </p>
                 <p className="text-3xl mt-3 font-bold text-[#4CBC9A]">
@@ -403,18 +404,18 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-rows-1 lg:grid-rows-1 gap-6 mb-4">
-          <div className="bg-white p-6 rounded-[20px] relative">
+          <div className="bg-white p-6 w-full rounded-[16px] relative mx-8">
             <div className="flex justify-between mb-[20px]">
               <h2 className="text-2xl font-semibold pl-5">
                 {t("dashboard.attendance")}
               </h2>
               {/* Graph toggle button */}
-              <div className="flex justify-evenly bg-[#f2f2f4] w-56 p-2 rounded-full">
+              <div className="flex justify-evenly bg-[#f2f2f4] w-56 p-2 rounded-[20px]">
                 <button
-                  className={`px-5 py-1 rounded-full font-poppins-regular ${
+                  className={`px-6 py-1 rounded-[14px] font-medium ${
                     selectedOption === "Weekly"
-                      ? "bg-[#05022B] text-[#fafafa]"
-                      : " text-[#05022B]"
+                      ? "bg-[#040320] text-[#fafafa]"
+                      : " text-[#040320]"
                   }`}
                   onClick={() =>
                     handleOptionChange({ target: { value: "Weekly" } })
@@ -423,10 +424,10 @@ const Dashboard = () => {
                   {t("dashboard.weekly")}
                 </button>
                 <button
-                  className={`px-5 py-1 rounded-full font-poppins-regular ${
+                  className={`px-6 py-1 rounded-[14px] font-medium ${
                     selectedOption === "Monthly"
-                      ? "bg-[#05022B] text-[#fafafa]"
-                      : " text-[#05022B]"
+                      ? "bg-[#040320] text-[#fafafa]"
+                      : " text-[#040320]"
                   }`}
                   onClick={() =>
                     handleOptionChange({ target: { value: "Monthly" } })
@@ -436,9 +437,9 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              <div className="flex space-x-2 ">
+              <div className="flex space-x-2 p-2 ">
                 <select
-                  className="px-2 border-2 border-[rgba(196, 196, 196, 0.40)] font-poppins-bold w-[150px] rounded-[14px] justify-center items-center"
+                  className="px-4 w-[150px] h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] font-medium rounded-[14px] justify-center items-center"
                   value={selectedClass}
                   onChange={(e) => {
                     setSelectedClass(e.target.value);
@@ -460,7 +461,7 @@ const Dashboard = () => {
                 </select>
 
                 <select
-                  className="px-2 border-2 border-[rgba(196, 196, 196, 0.40)] font-poppins-bold w-[170px] rounded-[14px] justify-center items-center "
+                  className="px-2 w-[150px] h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] font-medium rounded-[14px] justify-center items-center"
                   value={selectedSection}
                   onChange={(e) => setSelectedSection(e?.target?.value)}
                 >
@@ -479,7 +480,7 @@ const Dashboard = () => {
             <hr />
             {/* Bar Graph */}
             {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30 mx-8 w-full">
                 <Spinner />
               </div>
             )}
@@ -496,12 +497,12 @@ const Dashboard = () => {
 
           {/* Calender */}
           <div className="flex">
-            <div className="bg-white p-6 w-7/12 rounded-[20px] mr-[25px]">
-              <h2 className="text-xl font-semibold">
+            <div className="bg-white p-6 w-7/12 rounded-[16px] mr-[25px] mx-8">
+              <h2 className="text-xl font-semibold pl-6">
                 {t("dashboard.calendar")}
               </h2>
-              <hr className="mt-5" />
-              <div className="flex justify-center">
+              <hr className="mt-2" />
+              <div className="flex justify-center mt-2">
                 <div className="w-full h-screen rounded-lg ">
                   <CalendarComponent
                     events={calenderEvents}
@@ -512,15 +513,15 @@ const Dashboard = () => {
             </div>
 
             {/* event list */}
-            <div className="bg-white py-3 px-8 w-5/12 rounded-[20px] relative">
-              <h2 className="text-xl font-semibold my-4">
+            <div className="bg-white py-2 px-8 w-5/12 rounded-[16px] relative">
+              <h2 className="text-xl font-semibold my-4 pl-5 mt-2">
                 {t("dashboard.holidayAndEvents")}
               </h2>
               <hr className="mb-4" />
               {calenderEvents.length === 0 ? (
                 <div className="relative w-full h-full">
                   <img
-                    src={eventBack}
+                    src={noevents}
                     alt="Event Background"
                     className="absolute inset-0 w-auto h-auto object-cover"
                   />
@@ -536,10 +537,10 @@ const Dashboard = () => {
                     {calenderEvents.map((itm, index) => (
                       <div
                         key={index}
-                        className="mb-5 rounded-lg overflow-hidden border-l-8 border-red-600"
+                        className="mb-5 rounded-lg overflow-hidden border-l-8 border-[#d91111]"
                       >
-                        <div className="flex h-5 justify-between items-center bg-[#ffffff] text-red-500 font-poppins px-2 text-lg">
-                          <div className="font-poppins-bold text-xl mt-4 mb-2 ml-4">
+                        <div className="flex h-5 justify-between items-center bg-[#fffff] text-[#d91111] font-poppins mt-2 px-2 text-lg">
+                          <div className="font-poppins-bold text-l mt-4 mb-2 ml-4">
                             {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                           </div>
                         </div>
@@ -568,7 +569,7 @@ const Dashboard = () => {
                                 </div>
                               )}
                               {itm.event && (
-                                <div className="py-1 mr-3 text-center text-[14px] font-medium rounded-3xl text-[#464590] ">
+                                <div className="py-1 mr-3 text-center text-[14px] font-medium rounded-3xl text-[#4834D4] ">
                                   {t("dashboard.Event")}
                                 </div>
                               )}

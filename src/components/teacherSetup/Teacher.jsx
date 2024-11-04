@@ -184,11 +184,11 @@ export default function Teacher() {
           <Spinner />
         </div>
       )}
-      <div className="bg-[#f3f3ff] px-6 py-10 ">
+      <div className=" bg-[#F4F5F6] px-6 py-[25px] ">
         <div
           className={`${
             isDarkMode ? "bg-[#0D192F] text-white" : "bg-white "
-          } p-4 min-h-screen  rounded-[16px]`}
+          } p-4 min-h-screen rounded-[16px]`}
         >
           {/* Toast notifications */}
           <Toaster position="top-center" reverseOrder={false} />
@@ -212,8 +212,8 @@ export default function Teacher() {
                     className={`${
                       isDarkMode
                         ? "bg-gray-800 text-white"
-                        : "bg-white text-[rgba(196, 196, 196, 0.40)]"
-                    } placeholder-[rgba(196, 196, 196, 0.40)] px-10 py-2 rounded-lg focus:outline-none shadow-sm border border-t-gray w-full`}
+                        : "bg-[white] text-[#686868]/75 "
+                    } placeholder-[rgba(196, 196, 196, 0.40)] px-10 py-2 rounded-2xl focus:outline-none border border-[#05022B]/10 w-full`}
                     onFocus={() => searchInputRef.current.focus()}
                   />
                 </div>
@@ -231,7 +231,7 @@ export default function Teacher() {
                   className={`${
                     isDarkMode
                       ? "bg-gray-700 text-white"
-                      : "bg-[#e3e3ee] text-[#6d6ca7]"
+                      : "bg-[#F4F5F6] text-[#6E6F81]/75"
                   } text-base font-medium`}
                 >
                   {/* Table headings */}
@@ -260,7 +260,7 @@ export default function Teacher() {
                       <td
                         className={`${
                           isDarkMode ? "text-white" : ""
-                        } px-4 py-2 font-bold text-center border text-sm border-[#c1c0ca] text-[#6d6ca7]`}
+                        } px-4 py-2 font-bold text-center border text-sm border-[#c1c0ca] text-[#040320]`}
                       >
                         {teacher.SNo}
                       </td>
@@ -280,7 +280,7 @@ export default function Teacher() {
                           className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
                             isDarkMode
                               ? "bg-gray-800 text-white"
-                              : "bg-white text-[#1e1e1e]"
+                              : "bg-white text-[#040320]"
                           }`}
                           disabled={editSNo !== teacher.SNo}
                           autoFocus={editSNo === newTeacher.SNo}
@@ -302,7 +302,7 @@ export default function Teacher() {
                           className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
                             isDarkMode
                               ? "bg-gray-800 text-white"
-                              : "bg-white text-gray-900"
+                              : "bg-white text-[#040320]"
                           }`}
                           disabled={editSNo !== teacher.SNo}
                         />
@@ -323,7 +323,7 @@ export default function Teacher() {
                           className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
                             isDarkMode
                               ? "bg-gray-800 text-white"
-                              : "bg-white text-gray-900"
+                              : "bg-white text[#040320]"
                           }`}
                           disabled={editSNo !== teacher.SNo}
                         />
@@ -360,7 +360,7 @@ export default function Teacher() {
                     <td
                       className={`${
                         isDarkMode ? "text-white" : ""
-                      } px-4 py-2 text-center text-[#6d6ca7] font-bold border border-[#c1c0ca]`}
+                      } px-4 py-2 text-center text-[#040320] font-semibold border border-[#c1c0ca]`}
                     >
                       {teachers.length + 1}
                     </td>
@@ -376,8 +376,8 @@ export default function Teacher() {
                         className={`w-full h-full px-2 py-1 border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
-                            : "bg-white text-gray-900"
-                        } font-poppins font-bold text-center`}
+                            : "bg-white text-[#040320]"
+                        } font-poppins font-semibold text-center`}
                         ref={newTeacherFirstNameRef}
                         disabled={editSNo !== null}
                       />
@@ -394,8 +394,8 @@ export default function Teacher() {
                         className={`w-full h-full px-2 py-1 border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
-                            : "bg-white text-gray-900"
-                        } font-poppins font-bold text-center`}
+                            : "bg-white text-[#040320]"
+                        } font-poppins font-semibold text-center`}
                         disabled={editSNo !== null}
                       />
                     </td>
@@ -411,8 +411,8 @@ export default function Teacher() {
                         className={`w-full h-full px-2 py-1 border-none focus:outline-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
-                            : "bg-white text-gray-900"
-                        } font-poppins font-bold text-center`}
+                            : "bg-white text-[#040320]"
+                        } font-poppins font-semibold text-center`}
                         disabled={editSNo !== null}
                       />
                     </td>

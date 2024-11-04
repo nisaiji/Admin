@@ -82,11 +82,11 @@ export default function Requests() {
           <Spinner />
         </div>
       )}
-      <div className="bg-[#f3f3ff] px-6 py-10">
+      <div className="bg-[#F4F5F6] px-6 py-[25px]">
         <div className="bg-white min-h-screen rounded-[16px]">
           <Toaster position="top-center" reverseOrder={false} />
           <div>
-            <div className="text-4xl font-poppins-bold pl-12 py-5">
+            <div className="text-4xl font-poppins-bold pl-12 py-6">
               {t("titles.passwordReset")}
             </div>
             <div className="flex space-x-4 mt-4 pl-12">
@@ -104,10 +104,10 @@ export default function Requests() {
                 </div>
               ))}
             </div>
-            <hr className="border-[#9391A5BF] mx-10 -translate-y-[1px]" />
+            <hr className="border-[#9391A5]/25 mx-10 -translate-y-[1px]" />
 
             <div className="overflow-x-auto mt-6">
-              <table className="w-full shadow-md overflow-hidden">
+              <table className="w-full shadow-sm overflow-hidden">
                 <thead>
                   <tr>
                     {[
@@ -120,7 +120,7 @@ export default function Requests() {
                     ].map((label) => (
                       <th
                         key={label}
-                        className="p-4 text-base font-poppins-bold text-gray-600"
+                        className="p-4 text-base font-poppins-bold text-[#686868]/75"
                       >
                         {t(`labels.${label}`)}
                       </th>

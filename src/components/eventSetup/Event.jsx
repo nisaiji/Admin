@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import eventBack from "../../assets/images/eventBack.png";
+import noevents from "../../assets/images/noevents.png";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import "tailwindcss/tailwind.css";
 import deleteEvent from "../../assets/images/deleteEvent.png";
@@ -46,7 +46,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
       </div>
       <div
         className={`${
-          isDarkMode ? "text-white" : "text-[#1F317D]"
+          isDarkMode ? "text-white" : "text-[#6E6F81]/75"
         } weekdays grid grid-cols-7 text-md font-medium capitalize pt-4`}
       >
         {CONSTANT.WEEKDAYS.map((day) => (
@@ -73,7 +73,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
     } else if (hasEvent) {
       return `text-white bg-[#4834D4] border-[#4834D4]`;
     } else if (isSunday) {
-      return `text-[#FF9933] bg-[#FFE5CC] border-[#ff9933]`;
+      return `text-[#FF9933] bg-[#FF9933]/10 border-[#ff9933]`;
     } else if (isToday) {
       return `text-[#4834D4] bg-[#f4f5f6] border-4 border-[#4834D4]`;
     } else {
@@ -83,7 +83,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
 
   return (
     <div
-      className={`day cursor-pointer rounded-[14px] flex font-bold p-2 w-[80px] h-[100px] border-2  ${renderCss()}`}
+      className={`day cursor-pointer rounded-[14px] flex font-bold p-3 w-[80px] h-[100px] border-2  ${renderCss()}`}
       onClick={onClick}
     >
       {day}
@@ -198,13 +198,13 @@ const Event = () => {
           </div>
           <div className="flex justify-between mt-4">
             <button
-              className="px-4 py-2 bg-gray-300 rounded-lg"
+              className="px-4 py-2 bg-[#6E6F81]/15 rounded-lg"
               onClick={() => isClose(false)}
             >
               {t("buttons.cancel")}
             </button>
             <button
-              className="px-4 py-2 bg-blue-900 text-white rounded-lg"
+              className="px-4 py-2 bg-[#4834D4] text-white rounded-lg"
               onClick={() =>
                 isSubmit(newEventForm, prevData?.editData?.eventId)
               }
@@ -438,23 +438,23 @@ const Event = () => {
   };
 
   return (
-    <div className="grid grid-cols-6 gap-6 p-6  bg-[#f3f3ff]">
+    <div className="grid grid-cols-6 gap-6 px-6 bg-[#F4F5F6]">
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#F4F5F6] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
       {/* left view */}
-      <div className="col-span-4 px-10 bg-white rounded-[20px] p-4 mt-5">
+      <div className="col-span-4 px-10 bg-white rounded-[16px] p-4 mt-5">
         <div className="flex justify-between items-center mb-4">
-          <p className="text-4xl font-poppins-bold">
+          <p className="text-2xl font-poppins-bold">
             {t("dashboard.calendar")}
           </p>
           <div
             className={`goto flex justify-evenly items-center px-3 w-[220px] h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[14px] overflow-hidden`}
           >
             {/* search input */}
-            <button className={`goto-btn py-1  text-white`}>
+            <button className={`goto-mobnbtn py-1  text-white`}>
               <img src={Search} alt="" className="h-[18px] w-[18px]" />
             </button>
             <input
@@ -482,22 +482,22 @@ const Event = () => {
         <DaysGrid days={renderDays()} />
       </div>
       {/* right view */}
-      <div className="col-span-2 events-container relative bg-white rounded-[20px] py-4 px-10 mt-5 ">
+      <div className="col-span-2 events-container relative bg-white rounded-[16px] py-4 px-10 mt-5 ">
         {eventLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
             <Spinner />
           </div>
         )}
         <div>
-          <div className="text-4xl text-center font-bold my-2 dark:text-white">
+          <div className="text-2xl text-center font-bold my-2 pb-1 text-[#040320]">
             {t("events.title")}
           </div>
           <hr />
           {events.length === 0 ? (
             <div className="relative w-full h-full">
               <img
-                src={eventBack}
-                alt="Event Background"
+                src={noevents}
+                alt="noevents"
                 className="absolute inset-0 w-auto h-auto object-cover"
               />
             </div>
@@ -507,9 +507,9 @@ const Event = () => {
               {events.map((itm, index) => (
                 <div
                   key={index}
-                  className="mb-5 rounded-lg overflow-hidden border-l-8 border-red-600"
+                  className="mb-4 rounded-lg overflow-hidden border-l-8 border-[#4834D4]"
                 >
-                  <div className="flex h-5 justify-between items-center bg-[#ffffff] text-red-500 font-poppins px-2 text-lg">
+                  <div className="flex h-5 justify-between items-center bg-[#ffffff] text-[#4834D4] font-poppins px-2 text-lg">
                     <div className="font-poppins-regular text-xl mt-4 mb-2 ml-4">
                       {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                     </div>
@@ -535,7 +535,7 @@ const Event = () => {
                         {itm.title}
                       </div>
                     </div>
-                    <div className="flex pb-3 justify-between items-center">
+                    <div className="flex pb-2 justify-between items-center">
                       <div
                         className={`${
                           false ? "bg-[#102945] text-white" : ""
@@ -545,12 +545,12 @@ const Event = () => {
                       </div>
                       <div className="flex">
                         {itm.holiday && (
-                          <div className="py-1 mr-3 rounded-3xl text-[#d91111] text-[14px] font-medium">
+                          <div className="py-1 mr-3 rounded-3xl text-[#d91111] text-[14px] font-bold">
                             {t("dashboard.holiday")}
                           </div>
                         )}
                         {itm.event && (
-                          <div className="py-1 mr-3 text-center text-[14px] font-medium rounded-3xl text-[#464590] ">
+                          <div className="py-1 mr-3 text-center text-[14px] font-bold rounded-3xl text-[#4834D4]">
                             {t("dashboard.Event")}
                           </div>
                         )}

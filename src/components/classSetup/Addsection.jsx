@@ -154,7 +154,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
 
   return (
     <>
-      <div className="fixed inset-0 flex justify-center items-end pb-10 bg-black bg-opacity-50">
+      <div className="fixed inset-0 flex justify-center items-end pb-10 bg-[#686868] bg-opacity-50">
         {loading && (
           <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
             <Spinner />
@@ -178,7 +178,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                 setAddSectionModelOpen(false);
                 await getAllClass();
               }}
-              className=" h-[30px] w-[100px] rounded-2xl text-[16px] bg-[#464590] font-medium text-white shadow-md hover:bg-blue-800"
+              className=" h-[30px] w-[100px] rounded-xl text-[16px] bg-[#4834D4] font-medium text-white"
             >
               {t("buttons.done")}
             </button>
@@ -196,10 +196,10 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                 key={section._id}
                 className={`flex items-center justify-around mb-2 p-4 ${
                   isDarkMode ? "bg-blue-800" : ""
-                } rounded-lg shadow-md`}
+                } rounded-lg shadow-sm`}
               >
                 <div className="flex justify-center items-center bg-[#DD1B10] ml-8 size-7 rounded-full ">
-                  <div className={`text-lg font-semibold text-white`}>
+                  <div className={`text-lg font-medium text-white`}>
                     {section.name}
                   </div>
                 </div>
@@ -209,8 +209,8 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                     name="teacherId"
                     value={newSection.teacherId}
                     onChange={handleChange}
-                    className={` bg-white border border-[#7170ac] rounded-full py-1 px-8 ${
-                      isDarkMode ? "bg-gray-300" : "text-black bg-[#f2f2ff]"
+                    className={` bg-white border border-[#686868] rounded-xl py-1 px-8 ${
+                      isDarkMode ? "bg-gray-300" : "text-black bg-[#686868]"
                     } w-[250px]`}
                     ref={selectRef}
                   >
@@ -223,8 +223,8 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                   </select>
                 ) : (
                   <div
-                    className={`border border-[#7170ac] rounded-full py-1 px-8 ${
-                      isDarkMode ? "bg-gray-300" : "text-gray-500 bg-[#f2f2ff]"
+                    className={`border border-[#686868]/25 rounded-xl py-1 px-8 ${
+                      isDarkMode ? "bg-gray-300" : "text-[#686868] bg-[#F4F5F6]"
                     } w-[250px]`}
                   >
                     {section.teacher.firstname} {section.teacher.lastname}
@@ -235,7 +235,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                   {activeSection === section._id ? (
                     <button
                       onClick={() => handleUpdateTeacherSection(section)}
-                      className={`mr-2 bg-[#464590] h-[30px] w-[60px] rounded-2xl `}
+                      className={`mr-2 bg-[#4834D4] text-white h-[30px] w-[60px] rounded-2xl `}
                     >
                       {t("buttons.save")}
                     </button>
@@ -243,7 +243,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                     <>
                       <div
                         onClick={() => handleUpdateClick(section)}
-                        style={{ marginRight: 5, cursor: "pointer" }}
+                        style={{ marginRight: 10, cursor: "pointer" }}
                         disabled={activeSection !== null}
                       >
                         <img src={edit2} alt="" className="size-7" />
@@ -259,7 +259,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                         }`}
                         disabled={index !== sections.length - 1}
                       >
-                        <img src={delete2} alt="" className="size-7 ml-2" />
+                        <img src={delete2} alt="" className="size-7 mr-3" />
                       </button>
                     </>
                   )}
@@ -269,13 +269,13 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
             {/* add section */}
             {showForm && (
               <div
-                className={`flex items-center justify-around mb-2 p-4 rounded-lg shadow-md ${
+                className={`flex items-center justify-around mb-2 p-4 rounded-lg shadow-sm ${
                   isDarkMode ? "bg-blue-800" : ""
                 }`}
               >
                 <div className="flex items-center">
                   <div className="flex justify-center items-center bg-[#DD1B10] size-7 ml-8 rounded-full ">
-                    <div className={`text-lg font-semibold text-white`}>
+                    <div className={`text-lg font-medium text-white`}>
                       {getNextSectionName(sections)}
                     </div>
                   </div>
@@ -284,8 +284,8 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                   name="teacherId"
                   value={newSection.teacherId}
                   onChange={handleChange}
-                  className={`border-2 border-[#7170ac] rounded-full py-1 px-8 ${
-                    isDarkMode ? "bg-gray-300" : "text-black bg-[#f2f2ff]"
+                  className={`border-2 border-[#686868]/25 rounded-xl py-1 px-8 ${
+                    isDarkMode ? "bg-gray-300" : "text-black bg-[#F4F5F6]"
                   } w-[250px]`}
                   ref={selectRef}
                   disabled={activeSection !== null}
@@ -299,11 +299,11 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                 </select>
                 <button
                   onClick={handleSaveSection}
-                  className={`mr-2 bg-[#464590] `}
+                  className={`mr-2 bg-[#4834D4] `}
                   style={{
-                    height: 30,
-                    width: 60,
-                    borderRadius: 20,
+                    height: 32,
+                    width: 75,
+                    borderRadius: 12,
                     color: "white",
                   }}
                   disabled={activeSection !== null}

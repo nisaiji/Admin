@@ -149,7 +149,7 @@
     "selectCountry": "Select Country",
     "selectState": "Select State",
     "selectDistrict": "Select District",
-    "search": "Search here..."
+    "search": "Search here"
   },
   "labels": {
     "sNo": "S.No.",
@@ -186,16 +186,16 @@
   },
   "titles": {
     "studentDetails": "Student Details",
-    "personalDetails": "Student Personal Details",
+    "personalDetails": "Personal Details",
     "guardianDetails": "Guardian Details",
     "student": "Student",
     "students": "Students",
     "teacherDetails": "Teacher Details",
-    "teacherPersonalDetails": "Teacher Personal Details",
+    "teacherPersonalDetails": "Personal Details",
     "educationDetails": "Education Details",
     "teacherSetup": "Teacher Setup",
-    "class": "class-",
-    "section": "section-",
+    "class": "Class-",
+    "section": "Section-",
     "classRoom": "Classroom",
     "noClassroom": "No Classroom at This time",
     "noClassroomDesc": "Classroom will appear here after you create it using the icon above",

@@ -17,7 +17,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         isDarkMode ? "bg-[#102945] " : "bg-white  "
       } calendar rounded-lg w-full `}
     >
-      <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-xl font-semibold rounded-lg h-10 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
+      <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-l font-semibold rounded-lg h-10 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.25)]">
         <FontAwesomeIcon
           icon={faAngleLeft}
           className={`${
@@ -38,7 +38,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
       </div>
       <div
         className={`${
-          isDarkMode ? "text-white" : "text-[#1F317D]"
+          isDarkMode ? "text-white" : "text-[#040320]"
         } weekdays grid grid-cols-7 text-md font-medium capitalize pt-4`}
       >
         {CONSTANT.WEEKDAYS.map((day) => (
@@ -65,7 +65,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
     } else if (hasEvent) {
       return `text-white bg-[#4834D4] border-[#4834D4]`;
     } else if (isSunday) {
-      return `text-[#FF9933] bg-[#FFE5CC] border-[#ff9933]`;
+      return `text-[#FF9933] bg-[#FF9933]/10 border-[#ff9933]`;
     } else if (isToday) {
       return `text-[#4834D4] bg-[#f4f5f6] border-4 border-[#4834D4]`;
     } else {
@@ -76,7 +76,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
   return (
     <div
       className={`day ${renderCss()}
-       cursor-pointer rounded-[14px] flex font-bold p-2 w-[65px] h-[75px]`}
+       cursor-pointer rounded-[14px] flex font-bold p-3 w-[65px] h-[75px]`}
       onClick={onClick}
     >
       {day}
@@ -86,7 +86,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
 
 const DaysGrid = ({ days }) => {
   return (
-    <div className="days grid grid-cols-7 gap-2 p-2 justify-center items-center">
+    <div className="days grid grid-cols-7 gap-6 p-2 mt-2 justify-center items-center">
       {days}
     </div>
   );
@@ -190,7 +190,7 @@ const CalendarComponent = ({ updateDate }) => {
   };
 
   return (
-    <div className=" p-6 rounded-lg  mr-4 mb-4">
+    <div className=" p-4 rounded-lg  mr-4 mb-4">
       <Calendar
         month={month}
         year={year}

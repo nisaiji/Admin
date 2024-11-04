@@ -176,14 +176,14 @@ export default function StudentUpdate() {
       name: "parentEmail",
       type: "email",
       placeholder: t("placeholders.emailAddress"),
-      icon: { src: mail, width: 40, height: 40, top: 0 },
+      icon: { src: mail, width: 24, height: 24, top: 7 },
     },
     {
       label: t("labels.phoneNumber"),
       name: "phone",
       type: "text",
       placeholder: t("placeholders.phoneNumber"),
-      icon: { src: India, width: 35, height: 25, top: 7 },
+      icon: { src: India, width: 24, height: 20, top: 9 },
     },
     {
       label: t("labels.qualification"),
@@ -202,7 +202,7 @@ export default function StudentUpdate() {
       name: "parentAddress",
       type: "text",
       placeholder: t("placeholders.address"),
-      icon: { src: location, width: 30, height: 30, top: 5 },
+      icon: { src: location, width: 20, height: 20, top: 9 },
     },
   ];
 
@@ -211,14 +211,14 @@ export default function StudentUpdate() {
     <div className="grid grid-cols-2 gap-4">
       {fields.map(({ label, name, type, placeholder, options, icon }) => (
         <div key={name} className="flex flex-col mx-4 mt-3">
-          <label className="text-xl font-semibold">{label}</label>
+          <label className="text-l font-semibold">{label}</label>
           <div className="relative mt-2">
             {type === "select" ? (
               <select
                 name={name}
                 onChange={formik.handleChange}
                 value={formik.values[name]}
-                className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
+                className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
               >
                 <option value="" label={label} />
                 {options.map((option) => (
@@ -237,7 +237,7 @@ export default function StudentUpdate() {
                 }
                 dateFormat="dd/MM/yyyy"
                 placeholderText={placeholder}
-                className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
+                className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
                 wrapperClassName="w-full"
                 maxDate={new Date()}
                 onKeyDown={(e) => e.preventDefault()}
@@ -252,7 +252,7 @@ export default function StudentUpdate() {
                 placeholder={placeholder}
                 onChange={formik.handleChange}
                 value={formik.values[name]}
-                className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
+                className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
               />
             )}
             {icon && (
@@ -277,19 +277,19 @@ export default function StudentUpdate() {
   );
 
   return (
-    <div className="flex justify-center items-center w-full h-full bg-[#8A89FA1A] pt-10">
+    <div className="flex justify-center items-center w-full h-full bg-[#F4F5F6] pt-[25px]">
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="bg-white rounded-2xl w-full mx-10 flex flex-col items-start py-3 px-10 box-border">
+      <div className="bg-white rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border">
         <h1 className="text-4xl font-poppins-bold mt-6">
           {t("titles.studentDetails")}
         </h1>
         <div className="w-full">
-          <h2 className="text-2xl font-poppins-regular mt-6 text-left">
+          <h2 className="text-xl font-poppins-regular mt-6 text-left">
             {t("titles.personalDetails")}
           </h2>
           <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
@@ -298,7 +298,7 @@ export default function StudentUpdate() {
             </form>
           </div>
 
-          <h2 className="text-2xl font-poppins-bold text-left ml-5">
+          <h2 className="text-xl font-poppins-regular mt-6 text-left">
             {t("titles.guardianDetails")}
           </h2>
           <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
@@ -309,13 +309,13 @@ export default function StudentUpdate() {
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="border-2 border-[#a3a2c7] text-[#464590] py-2 px-4 rounded w-36"
+                  className="border-2  border-[#686868]/75 text-[#040320] py-2 px-4 rounded-xl w-36"
                 >
                   {t("buttons.cancel")}
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#464590] text-white py-2 px-4 rounded w-36"
+                  className="bg-[#4834D4] text-white py-2 px-4 rounded-xl w-36"
                 >
                   {t("buttons.save")}
                 </button>

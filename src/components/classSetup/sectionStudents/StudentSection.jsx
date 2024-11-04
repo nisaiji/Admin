@@ -273,7 +273,7 @@ export default function StudentSection() {
   );
 
   return (
-    <div className="bg-[#f3f3ff] px-6 py-10 ">
+    <div className="bg-[#F4F5F6] px-6 py-6 ">
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
           <Spinner />
@@ -285,16 +285,16 @@ export default function StudentSection() {
         } p-4 min-h-screen rounded-[16px]`}
       >
         <Toaster position="top-center" reverseOrder={false} />
-        <div className="px-4">
+        <div className="px-6">
           <div className="flex justify-between">
-            <div className="text-4xl font-semibold px-5 py-3">
+            <div className="text-4xl font-semibold px-2 py-3">
               {t("titles.students")}
             </div>
             <div className="text-right py-3">
               <div
                 className={` ${
                   isDarkMode ? "text-white" : ""
-                } text-[20px] px-5 font-poppins-regular text-gray-800`}
+                } text-[20px] px-5 font-medium text-gray-800`}
               >
                 {t("roles.classTeacher")} -{" "}
                 {isTeacher
@@ -315,7 +315,7 @@ export default function StudentSection() {
             </div>
           </div>
           {/* search bar */}
-          <div className="py-3">
+          <div className="py-2">
             <div className="flex justify-between w-full relative">
               <div className="relative w-full">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -331,7 +331,7 @@ export default function StudentSection() {
                     isDarkMode
                       ? "bg-gray-800 text-white"
                       : "bg-white text-black"
-                  } px-10 py-2 rounded-lg focus:outline-none shadow-sm border border-t-gray w-full`}
+                  } px-10 py-2 rounded-lg focus:outline-none border border-t-gray w-full`}
                   onFocus={() => searchInputRef.current.focus()}
                 />
               </div>
@@ -347,7 +347,7 @@ export default function StudentSection() {
                 className={`${
                   isDarkMode
                     ? "bg-gray-700 text-white"
-                    : "bg-[#e3e3ee] text-[#6d6ca7]"
+                    : "bg-[#F4F5F6] text-[#6E6F81]/75"
                 } text-base font-medium`}
               >
                 {/* table headings */}
@@ -382,7 +382,7 @@ export default function StudentSection() {
                     <td
                       className={`${
                         isDarkMode ? "text-white" : ""
-                      } px-2 py-2 font-bold text-center border text-sm border-[#c1c0ca] text-[#6d6ca7]`}
+                      } px-2 py-2 font-bold text-center border text-sm border-[#c1c0ca] text-[#040320]`}
                     >
                       {student.SNo}
                     </td>
@@ -526,7 +526,7 @@ export default function StudentSection() {
                 ))}
                 {/* input fields */}
                 <tr>
-                  <td className="px-2 py-2 text-center text-[#6d6ca7] font-poppins font-semibold border border-[#c1c0ca]">
+                  <td className="px-2 py-2 text-center text-[#040320] font-poppins font-semibold border border-[#c1c0ca]">
                     {students.length + 1}
                   </td>
                   <td className=" py-2 border border-[#c1c0ca]">

@@ -183,7 +183,7 @@ export default function AdminProfile() {
   return (
     <form
       onSubmit={formik.handleSubmit}
-      className="flex flex-col items-center bg-[#f3f3ff] p-10"
+      className="flex flex-col items-center bg-[#F4F5F6] p-6"
     >
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
@@ -191,7 +191,7 @@ export default function AdminProfile() {
         </div>
       )}
       {/* Account Setting */}
-      <div className="flex flex-col p-10 w-full bg-white max-md:px-5 max-md:m-10 max-md:max-w-full">
+      <div className="flex flex-col p-10 w-full rounded-2xl bg-white max-md:px-5 max-md:m-10 max-md:max-w-full">
         <Toaster position="top-center" reverseOrder={false} />
         <div className="text-4xl font-bold tracking-tight leading-8 text-neutral-800">
           {t("adminProfile.accountSettings")}
@@ -279,7 +279,7 @@ export default function AdminProfile() {
           </div>
           {/* admin photo */}
           <div className="flex flex-col w-full md:w-64">
-            <div className="flex flex-col justify-center p-8 bg-slate-100">
+            <div className="flex flex-col justify-center p-8 bg-[#F4F5F6]">
               <div className="relative flex flex-col items-center pt-20 aspect-square">
                 <img
                   loading="lazy"
@@ -296,7 +296,7 @@ export default function AdminProfile() {
                   <div>{t("adminProfile.uploadPhoto")}</div>
                 </div>
               </div>
-              <div className="mt-6 text-xs text-center text-stone-500">
+              <div className="mt-6 text-xs text-center text-[#686868]/75">
                 {t("adminProfile.imageSizeInfo")}
               </div>
             </div>
@@ -496,7 +496,7 @@ export default function AdminProfile() {
             onClick={handleProfileUpdate}
             type="button"
             disabled={formik.isSubmitting || !formik.isValid}
-            className="px-6 py-2 text-white bg-indigo-800 rounded-lg"
+            className="px-6 py-2 text-white bg-[#4834D4] rounded-lg"
           >
             {t("buttons.saveChanges")}
           </button>
@@ -504,13 +504,13 @@ export default function AdminProfile() {
       </div>
 
       {/* Social Profile */}
-      <div className="flex flex-col p-10 mx-10 mt-10 w-full bg-white max-w-[1320px] max-md:px-5">
-        <div className="text-4xl font-bold tracking-tight leading-8 text-neutral-800">
+      <div className="flex flex-col p-10 mx-10 mt-6 rounded-2xl w-full bg-white max-w-[1320px] max-md:px-5">
+        <div className="text-4xl font-bold tracking-tight leading-6 text-neutral-800">
           {t("adminProfile.socialProfile")}
         </div>
         {/* phone */}
         <div className="mt-7 w-full">
-          <div className="text-sm font-semibold leading-5 text-neutral-800">
+          <div className="text-sm font-semibold leading-6 text-neutral-800">
             {t("adminProfile.phoneNumber")}
             <span className="text-red-500">*</span>
           </div>
@@ -521,7 +521,7 @@ export default function AdminProfile() {
                 : "border-gray-200"
             }`}
           >
-            <div className="flex items-center gap-1.5 font-medium text-indigo-400">
+            <div className="flex items-center gap-1.5 font-medium text-[#4834D4]">
               <div>+91</div>
               <img
                 loading="lazy"
@@ -732,7 +732,7 @@ export default function AdminProfile() {
             onClick={handleSocialProfileUpdate}
             type="button"
             disabled={formik.isSubmitting || !formik.isValid}
-            className="px-6 py-2 text-white bg-indigo-800 rounded-lg"
+            className="px-6 py-2 text-white bg-[#4834D4] rounded-lg"
           >
             {t("buttons.saveChanges")}
           </button>

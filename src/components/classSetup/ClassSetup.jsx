@@ -135,14 +135,14 @@ function ClassSetup() {
       )}
       <div
         className={`${
-          isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-[#f3f3ff]"
+          isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-[#F4F5F6]"
         } w-full max-w-[1600px]`}
       >
-        <div className="p-6">
+        <div className="px-6 py-3">
           <div
             className={`${
               isDarkMode ? "bg-[#0d192f]" : "bg-white"
-            } w-full my-3 px-12 py-4 min-h-[600px] rounded-[16px]`}
+            } w-full my-3 px-10 py-6 min-h-[600px] rounded-[16px]`}
           >
             <h3
               className={`${
