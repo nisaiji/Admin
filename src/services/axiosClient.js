@@ -1,38 +1,68 @@
 import axios from "axios";
-import {
-  getItem,
-  KEY_ACCESS_TOKEN,
-  removeItem,
-} from "./LocalStorageManager.js";
 import toast from "react-hot-toast";
-// const BASE_URL = "http://localhost:4000/";
-const BASE_URL = "https://nisaiji.com/";
 
-export const axiosClient = axios.create({
-  baseURL: BASE_URL,
-});
+// const baseURL = "http://localhost:4000/";
+const baseURL = "https://nisaiji.com/";
+
+export const axiosClient = axios.create({ baseURL });
+
+// Function to request a new access token using the refresh token
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("refresh_token");
+  if (!refreshToken) {
+    return null;
+  }
+  try {
+    const response = await axios.get(`${baseURL}admin/refresh`, {
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    });
+    return response?.data?.result?.accessToken;
+  } catch (error) {
+    return null;
+  }
+}
 
 axiosClient.interceptors.request.use(
   (request) => {
-    const accessToken = getItem(KEY_ACCESS_TOKEN);
+    const accessToken = localStorage.getItem("access_token");
     request.headers["Authorization"] = `Bearer ${accessToken}`;
     return request;
   },
-  (error) => {}
+  (error) => {
+    Promise.reject(error);
+  }
 );
 
 axiosClient.interceptors.response.use(
   async (response) => {
     const data = response.data;
-    // console.log('axios res',response);
     if (data.status === "ok") {
       return data;
     }
-    if (data.status === "error" && data.message === "jwt expired") {
-      removeItem(KEY_ACCESS_TOKEN);
-      removeItem("username");
-      window.location.replace("/login", "_self");
-      return Promise.reject(data.message);
+    if (data.statusCode === 500 && data.message === "jwt expired") {
+      const originalRequest = response.config;
+
+      // Try refreshing the token
+      const newAccessToken = await refreshAccessToken();
+
+      if (newAccessToken) {
+        localStorage.setItem("access_token", newAccessToken);
+        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+
+        // Retry the original request with the new access token
+        return axiosClient(originalRequest);
+      } else {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("username");
+        localStorage.removeItem("firstname");
+        localStorage.removeItem("searchClass");
+        localStorage.removeItem("searchSection");
+        window.location.replace("/login", "_self");
+        return Promise.reject(data.message);
+      }
     }
     if (data.status == "error") {
       return Promise.reject(data.message);

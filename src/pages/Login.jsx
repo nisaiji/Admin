@@ -3,11 +3,6 @@ import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { axiosClient } from "../services/axiosClient";
-import {
-  setItem,
-  setUsername,
-  setFirstname,
-} from "../services/LocalStorageManager";
 import LoginVideo from "../assets/videos/LoginVideo.mp4";
 import hide from "../assets/images/hide.png";
 import show from "../assets/images/show.png";
@@ -67,13 +62,14 @@ function Login() {
         // Submit login request
         const response = await axiosClient.post(endpoint, payload);
         const { result } = response;
+        
         // If login is successful
-
         if (response?.statusCode === 200) {
           isAdmin
-            ? setUsername(result?.username)
-            : setFirstname(result?.firstname);
-          setItem(result?.accessToken);
+            ? localStorage.setItem("username", result?.username)
+            : localStorage.setItem("firstname", result?.firstname);
+          localStorage.setItem("access_token", result?.accessToken);
+          localStorage.setItem("refresh_token", result?.refreshToken);
           dispatch(setAuthData(result?.accessToken));
           toast.success(t("messages.login.success"));
           resetForm();
