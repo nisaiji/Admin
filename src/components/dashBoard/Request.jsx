@@ -184,7 +184,7 @@ export default function Requests() {
                       <td className="p-4 text-sm font-medium text-center">
                         {req?.teacher?.forgetPasswordCount}
                       </td>
-                      <td className="py-2 px-4 text-sm font-poppins-bold text-center">
+                      <td className="py-2 px-4 w-[200px] text-sm font-poppins-bold text-center">
                         {req.status === "pending" ? (
                           <div className="flex justify-center gap-3">
                             <button

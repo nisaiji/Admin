@@ -78,11 +78,8 @@ const Dashboard = () => {
       999
     ).getTime();
     const result = await fetchData(`${url}`, "post", { startTime, endTime });
-
-    if (result) {
-      setStudentCountData(result.presentCount);
-      setStudentPresentCountData(result.totalCount);
-    }
+    setStudentCountData(result?.totalCount);
+    setStudentPresentCountData(result?.presentCount);
   };
 
   // parent count api
