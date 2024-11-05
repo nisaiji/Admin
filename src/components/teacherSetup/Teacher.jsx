@@ -260,7 +260,7 @@ export default function Teacher() {
                       <td
                         className={`${
                           isDarkMode ? "text-white" : ""
-                        } px-4 py-2 font-bold text-center border text-sm border-[#c1c0ca] text-[#040320]`}
+                        } px-4 py-2 font-medium text-center border text-sm border-[#c1c0ca] text-[#040320]`}
                       >
                         {teacher.SNo}
                       </td>
@@ -277,7 +277,7 @@ export default function Teacher() {
                             )
                           }
                           placeholder={t("placeholders.firstName")}
-                          className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
+                          className={`w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none ${
                             isDarkMode
                               ? "bg-gray-800 text-white"
                               : "bg-white text-[#040320]"
@@ -299,7 +299,7 @@ export default function Teacher() {
                             )
                           }
                           placeholder={t("placeholders.lastName")}
-                          className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
+                          className={`w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none ${
                             isDarkMode
                               ? "bg-gray-800 text-white"
                               : "bg-white text-[#040320]"
@@ -320,7 +320,7 @@ export default function Teacher() {
                             )
                           }
                           placeholder={t("placeholders.phoneNumber")}
-                          className={`w-full h-full px-2 py-1 font-poppins-bold text-center border-none focus:outline-none ${
+                          className={`w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none ${
                             isDarkMode
                               ? "bg-gray-800 text-white"
                               : "bg-white text[#040320]"
@@ -360,7 +360,7 @@ export default function Teacher() {
                     <td
                       className={`${
                         isDarkMode ? "text-white" : ""
-                      } px-4 py-2 text-center text-[#040320] font-semibold border border-[#c1c0ca]`}
+                      } px-4 py-2 text-center text-[#040320] font-medium border border-[#c1c0ca]`}
                     >
                       {teachers.length + 1}
                     </td>
@@ -377,7 +377,7 @@ export default function Teacher() {
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-[#040320]"
-                        } font-poppins font-semibold text-center`}
+                        } font-poppins font-medium text-center`}
                         ref={newTeacherFirstNameRef}
                         disabled={editSNo !== null}
                       />
@@ -395,7 +395,7 @@ export default function Teacher() {
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-[#040320]"
-                        } font-poppins font-semibold text-center`}
+                        } font-poppins font-medium text-center`}
                         disabled={editSNo !== null}
                       />
                     </td>
@@ -412,7 +412,7 @@ export default function Teacher() {
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-[#040320]"
-                        } font-poppins font-semibold text-center`}
+                        } font-poppins font-medium text-center`}
                         disabled={editSNo !== null}
                       />
                     </td>

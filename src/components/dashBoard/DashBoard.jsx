@@ -379,25 +379,25 @@ const Dashboard = () => {
                 <p className="text-base font-medium text-[#9391A5]">
                   {t("dashboard.students")}
                 </p>
-                <p className="text-3xl mt-3 font-bold text-[#4834D4]">
+                <p className="text-3xl mt-2 font-bold text-[#4834D4]">
                   {renderStudentCount()}
                 </p>
               </div>
               <img src={dashboardstudent} className="w-12 h-12 mr-4" />
             </div>
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-[#4cbc9a]/10 mb-2 mt-2">
+            <div className="flex items-center justify-between p-6 rounded-2xl bg-[#4cbc9a]/10 mb-2 mt-2">
               <div className="px-3">
                 <p className="text-base font-medium text-[#9391A5]">
                   {t("dashboard.parents")}
                 </p>
-                <p className="text-3xl mt-3 font-bold text-[#4CBC9A]">
+                <p className="text-3xl mt-2 font-bold text-[#4CBC9A]">
                   {parentCount}
                 </p>
               </div>
               <img
                 src={ParentIcon}
                 alt="User Graduate"
-                className="w-10 h-10 mr-4"
+                className="w-12 h-12 mr-4"
               />
             </div>
           </div>
@@ -514,10 +514,10 @@ const Dashboard = () => {
 
             {/* event list */}
             <div className="bg-white py-2 px-8 w-5/12 rounded-[16px] relative">
-              <h2 className="text-xl font-semibold my-4 pl-5 mt-2">
+              <h2 className="text-xl font-semibold my-2 pl-6 mt-4">
                 {t("dashboard.holidayAndEvents")}
               </h2>
-              <hr className="mb-4" />
+              <hr className="mb-6" />
               {calenderEvents.length === 0 ? (
                 <div className="relative w-full h-full">
                   <img
@@ -537,10 +537,10 @@ const Dashboard = () => {
                     {calenderEvents.map((itm, index) => (
                       <div
                         key={index}
-                        className="mb-5 rounded-lg overflow-hidden border-l-8 border-[#d91111]"
+                        className="mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-[#4834D4]"
                       >
-                        <div className="flex h-5 justify-between items-center bg-[#fffff] text-[#d91111] font-poppins mt-2 px-2 text-lg">
-                          <div className="font-poppins-bold text-l mt-4 mb-2 ml-4">
+                        <div className="flex h-5 justify-between items-center bg-[#fffff] text-[#4834D4] font-poppins mt-2 px-2 text-lg">
+                          <div className="font-medium text-lg mt-4 mb-2 ml-4">
                             {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                           </div>
                         </div>
@@ -554,7 +554,7 @@ const Dashboard = () => {
                               {itm.title}
                             </div>
                           </div>
-                          <div className="flex pb-3 justify-between items-center">
+                          <div className="flex pb-2 justify-between items-center">
                             <div
                               className={`${
                                 false ? "bg-[#102945] text-white" : ""
@@ -564,12 +564,12 @@ const Dashboard = () => {
                             </div>
                             <div className="flex">
                               {itm.holiday && (
-                                <div className="py-1 mr-3 rounded-3xl text-[#d91111] text-[14px] font-medium">
+                                <div className="py-1 mr-6 rounded-3xl text-[#d91111] text-[14px] font-bold">
                                   {t("dashboard.holiday")}
                                 </div>
                               )}
                               {itm.event && (
-                                <div className="py-1 mr-3 text-center text-[14px] font-medium rounded-3xl text-[#4834D4] ">
+                                <div className="py-1 mr-6 text-center text-[14px] font-bold rounded-3xl text-[#4834D4] ">
                                   {t("dashboard.Event")}
                                 </div>
                               )}
