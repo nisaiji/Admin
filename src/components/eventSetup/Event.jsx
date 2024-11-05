@@ -509,8 +509,8 @@ const Event = () => {
                   key={index}
                   className="mb-4 rounded-lg overflow-hidden border-l-8 border-[#4834D4]"
                 >
-                  <div className="flex h-5 justify-between items-center bg-[#ffffff] text-[#4834D4] font-poppins px-2 text-lg">
-                    <div className="font-poppins-regular text-xl mt-4 mb-2 ml-4">
+                  <div className="flex h-5 justify-between items-center bg-[#ffffff] text-[#4834D4] font-poppins mt-2 px-1 text-lg">
+                    <div className="font-medium text-lg mt-4 mb-2 ml-4">
                       {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                     </div>
                     {/* delete icon for admin */}
@@ -530,7 +530,7 @@ const Event = () => {
                       <div
                         className={`${
                           false ? "bg-[#102945] text-white" : ""
-                        } py-0 px-2 ml-4 text-base font-semibold`}
+                        } py-0 px-1 ml-4 text-base font-semibold`}
                       >
                         {itm.title}
                       </div>
@@ -539,18 +539,18 @@ const Event = () => {
                       <div
                         className={`${
                           false ? "bg-[#102945] text-white" : ""
-                        } py-0 px-2 ml-4 text-xs font-poppins-regular`}
+                        } py-0 px-1 ml-4 text-xs font-poppins-regular`}
                       >
                         {itm.description}
                       </div>
                       <div className="flex">
                         {itm.holiday && (
-                          <div className="py-1 mr-3 rounded-3xl text-[#d91111] text-[14px] font-bold">
+                          <div className="py-1  rounded-3xl text-[#d91111] text-[14px] font-bold">
                             {t("dashboard.holiday")}
                           </div>
                         )}
                         {itm.event && (
-                          <div className="py-1 mr-3 text-center text-[14px] font-bold rounded-3xl text-[#4834D4]">
+                          <div className="py-1 text-center text-[14px] font-bold rounded-3xl text-[#4834D4]">
                             {t("dashboard.Event")}
                           </div>
                         )}

@@ -46,6 +46,45 @@ export default function Requests() {
     getRequest();
   }, []);
 
+  const requestsStatus = (status) => {
+    //accept,reject,complete,pending,notSet,expired
+    switch (status) {
+      case "accept":
+        return "Approved";
+        break;
+      case "reject":
+        return "Rejected";
+        break;
+      case "complete":
+        return "Completed";
+        break;
+
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+        break;
+    }
+  };
+
+  const reasonToChange = (reason) => {
+    switch (reason) {
+      case "forgotPassword":
+        return "Forgot Password";
+        break;
+      case "changePhone":
+        return "Changed Device";
+        break;
+      case "technical":
+        return "Technical";
+        break;
+      case "other":
+        return "Other";
+        break;
+      default:
+        return "";
+        break;
+    }
+  };
+
   const handleRequestAction = async (id, action) => {
     try {
       setLoading(true);
@@ -127,22 +166,22 @@ export default function Requests() {
                     ))}
                   </tr>
                 </thead>
-                <tbody className="text-sm font-normal text-gray-900">
+                <tbody className="text-sm font-normal text-black">
                   {filteredRequests.map((req, index) => (
                     <tr
                       key={index}
                       className={index % 2 === 0 ? "bg-[#4645900D]" : ""}
                     >
-                      <td className="p-4 text-sm font-poppins-bold text-center">
+                      <td className="p-4 text-sm font-medium text-center">
                         {req?.teacher?.firstname} {req?.teacher?.lastname}
                       </td>
-                      <td className="p-4 text-sm font-poppins-bold text-center">
-                        {req?.title}
+                      <td className="p-4 text-sm font-medium text-center">
+                        {reasonToChange(req?.title)}
                       </td>
-                      <td className="p-4 text-sm font-poppins-bold text-center">
+                      <td className="p-4 text-sm font-medium text-center">
                         {req?.teacher?.class}-{req?.teacher?.section}
                       </td>
-                      <td className="p-4 text-sm font-poppins-bold text-center">
+                      <td className="p-4 text-sm font-medium text-center">
                         {req?.teacher?.forgetPasswordCount}
                       </td>
                       <td className="py-2 px-4 text-sm font-poppins-bold text-center">
@@ -152,7 +191,7 @@ export default function Requests() {
                               onClick={() =>
                                 handleRequestAction(req?._id, "accept")
                               }
-                              className="text-green-500 font-poppins-bold"
+                              className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md"
                             >
                               Approve
                             </button>
@@ -160,18 +199,18 @@ export default function Requests() {
                               onClick={() =>
                                 handleRequestAction(req?._id, "reject")
                               }
-                              className="text-red-500 font-poppins-bold"
+                              className="text-[#DD1B10] font-poppins-bold border-2 border-[#DD1B10] p-1 px-3 rounded-md"
                             >
                               Reject
                             </button>
                           </div>
                         ) : (
-                          req.status
+                          requestsStatus(req.status)
                         )}
                       </td>
                       <td className="p-4 text-center">
-                        <div className="h-[35px] border border-[rgba(104, 104, 104, 0.25)] rounded-[10px] flex items-center justify-center">
-                          <div className=" w-20 text-sm font-poppins-bold text-center">
+                        <div className="h-[35px] border border-[rgba(104, 104, 104, 0.25)] bg-white rounded-[10px] flex items-center justify-center">
+                          <div className=" w-18 text-sm font-medium text-center">
                             {req?.otp || "-"}
                           </div>
                         </div>
