@@ -172,7 +172,7 @@ const Event = () => {
               className="w-full p-2 mb-2 border border-gray-300 rounded-lg"
             />
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="inline-flex items-center">
               <input
                 type="checkbox"
@@ -195,11 +195,16 @@ const Event = () => {
               />
               <span className="ml-2">{t("events.event")}</span>
             </label>
-          </div>
+          </div> */}
           <div className="flex justify-between mt-4">
             <button
               className="px-4 py-2 bg-[#6E6F81]/15 rounded-lg"
               onClick={() => isClose(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  isClose(false);
+                }
+              }}
             >
               {t("buttons.cancel")}
             </button>
@@ -208,6 +213,11 @@ const Event = () => {
               onClick={() =>
                 isSubmit(newEventForm, prevData?.editData?.eventId)
               }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  isSubmit(newEventForm, prevData?.editData?.eventId);
+                }
+              }}
             >
               {prevData?.editData?.eventId
                 ? t("buttons.update")
@@ -270,10 +280,10 @@ const Event = () => {
       toast.error(t("toasts.descRequired"));
       return false;
     }
-    if (!form.holiday && !form.event) {
-      toast.error(t("toasts.oneCheckbox"));
-      return false;
-    }
+    // if (!form.holiday && !form.event) {
+    //   toast.error(t("toasts.oneCheckbox"));
+    //   return false;
+    // }
     return true;
   };
 
@@ -287,6 +297,7 @@ const Event = () => {
         title: capitalizeFirstLetter(newEvent.title.trim()),
         description: capitalizeFirstLetter(newEvent.description.trim()),
         date: moment(newEvent.date).format("yyyy-MM-DD"),
+        holiday: true, //always holiday while creating event
       };
       let res;
       if (eventId) {
@@ -349,8 +360,10 @@ const Event = () => {
       if (isEdit) {
         newTempEvent = { ...newTempEvent, editData };
       }
-      setNewEvent(newTempEvent);
-      setShowAddEvent(true);
+      if (isAdmin) {
+        setNewEvent(newTempEvent);
+        setShowAddEvent(true);
+      }
     }
   };
 

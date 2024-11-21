@@ -60,7 +60,8 @@ const Navbar = () => {
     } else {
       removeItem("username");
     }
-    removeItem(KEY_ACCESS_TOKEN);
+    removeItem("access_token");
+    removeItem("refresh_token");
   };
 
   useEffect(() => {
@@ -138,17 +139,6 @@ const Navbar = () => {
                       {t("roles.teacher")}
                     </Link>
                     <Link
-                      to="/student"
-                      className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
-                    >
-                      <img
-                        src={studenticon}
-                        alt="studenticon"
-                        className="w-5 h-5 relative"
-                      />
-                      {t("roles.student")}
-                    </Link>
-                    <Link
                       to="/class-setup"
                       className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] hover:text-[#4834D4]  hover:bg-white"
                     >
@@ -176,11 +166,18 @@ const Navbar = () => {
             )}
           </div>
           {!isTeacher && (
-            <Link to="/requests" className="py-2">
-              <span className="text-[#040320] hover:text-[#4834D4] text-base font-bold">
-                {t("titles.requests")}
-              </span>
-            </Link>
+            <>
+              <Link to="/student" className="py-2">
+                <span className="text-[#040320] hover:text-[#4834D4] text-base font-bold">
+                {t("roles.student")}
+                </span>
+              </Link>
+              <Link to="/requests" className="py-2">
+                <span className="text-[#040320] hover:text-[#4834D4] text-base font-bold">
+                  {t("titles.requests")}
+                </span>
+              </Link>
+            </>
           )}
           <div
             className="relative rounded-xl mr-5"

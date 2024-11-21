@@ -65,7 +65,7 @@ export default function Studentlist() {
       getClassList();
       fetchStudents({});
     }
-  }, [id, pageNo]);
+  }, [id]);
 
   // Update section list when class changes
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function Studentlist() {
     classRef.current = searchClass;
     sectionRef.current = searchSection;
     fetchStudents({ searchSection });
-  }, [searchSection]);
+  }, [searchSection, pageNo]);
 
   // Generalized function to fetch students based on different conditions
   const fetchStudents = async ({ searchName = "", searchSection = "" }) => {
@@ -99,12 +99,15 @@ export default function Studentlist() {
     // Determine the query parameters based on the inputs
     if (searchName) {
       query += `&firstname=${searchName}`;
-    } else if (searchSection) {
+    }
+    if (searchSection) {
       query += `&section=${searchSection}`;
     }
 
     try {
       setLoading(true);
+      console.log("query= ", query);
+
       const response = await axiosClient.get(`${url}${query}`);
 
       if (response?.statusCode === 200) {
@@ -114,6 +117,8 @@ export default function Studentlist() {
         setStudentList(students);
       }
     } catch (e) {
+      console.log("error", e);
+
       toast.error(e);
     } finally {
       setLoading(false);
@@ -134,7 +139,7 @@ export default function Studentlist() {
   const handlePageChange = (event, value) => setPageNo(value);
 
   // Handle search
-  const handleSearch = () => fetchStudents({ searchName: name });
+  const handleSearch = () => fetchStudents({ searchName: name, searchSection });
 
   // Show student info
   const handleShowInfo = (student) => {
@@ -147,6 +152,7 @@ export default function Studentlist() {
     setName("");
     setSearchClass("");
     setSearchSection("");
+    setPageNo(1);
     fetchStudents({});
   };
 
@@ -278,6 +284,7 @@ export default function Studentlist() {
                         value={searchSection}
                         onChange={(e) => {
                           setSearchSection(e.target.value);
+                          setPageNo(1);
                         }}
                       >
                         {sectionList.map((itm) => {

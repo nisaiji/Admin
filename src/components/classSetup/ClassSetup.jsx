@@ -176,14 +176,12 @@ function ClassSetup() {
                         className="absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 bg-white p-1"
                       />
                     </div>
-                    <div onClick={() => toggleFlip(index)} className="relative">
-                      <img
-                        src={students}
-                        className="h-full w-full"
-                        alt="students"
-                      />
+                    <div
+                      onClick={() => toggleFlip(index)}
+                      className="size-40 border border-[#4834D4] rounded-[30px] flex flex-row items-end"
+                    >
                       <p
-                        className={`text-white text-center font-semibold text-xs md:text-base absolute -bottom-2 right-0 left-0 mb-2 bg-opacity-70 bg-black rounded-b-3xl py-1`}
+                        className={`text-white text-center w-full h-[66px] flex justify-center items-center text-2xl font-poppins-bold md:text-base bg-[#4834D4] rounded-b-3xl`}
                       >
                         {data.name}
                       </p>

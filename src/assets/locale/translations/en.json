@@ -292,6 +292,7 @@
     "youtube": "YouTube",
     "uploadPhoto": "Upload Photo",
     "imageSizeInfo": "Image size should be under 1MB and image ratio needs to be 1:1",
+    "selectSchoolBoard": "Select School Board",
     "cityPlaceholder": "Select City",
     "statePlaceholder": "Select State",
     "requiredField": "This field is required",
