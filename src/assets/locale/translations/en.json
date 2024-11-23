@@ -1,15 +1,15 @@
 {
   "dashboard": {
     "title": "Admin Dashboard",
-    "students": "Students",
-    "parents": "Parents",
+    "students": "Student",
+    "parents": "Parent",
     "attendance": "Attendance",
     "weekly": "Weekly",
     "monthly": "Monthly",
     "selectClass": "Select class",
     "selectSection": "Select section",
     "calendar": "Calendar",
-    "holidayAndEvents": "Holiday and Events",
+    "holidayAndEvents": "Holiday",
     "holiday": "Holiday",
     "Event": "Event"
   },
@@ -178,7 +178,7 @@
     "classTeacher": "Class Teacher",
     "reasonToReset": "Reason to Reset",
     "class": "Class",
-    "resetBefore": "Past Reset",
+    "resetBefore": "Past Resets",
     "otp": "OTP",
     "all": "All",
     "approved": "Approved",
@@ -189,11 +189,11 @@
     "personalDetails": "Personal Details",
     "guardianDetails": "Guardian Details",
     "student": "Student",
-    "students": "Students",
+    "students": "Student",
     "teacherDetails": "Teacher Details",
-    "teacherPersonalDetails": "Personal Details",
+    "teacherPersonalDetails": "Personal",
     "educationDetails": "Education Details",
-    "teacherSetup": "Teachers",
+    "teacherSetup": "Teacher",
     "class": "Class-",
     "section": "Section-",
     "classRoom": "Classroom",
@@ -205,7 +205,7 @@
     "showing": "Showing",
     "from": "from",
     "data": "data",
-    "requests": "Requests",
+    "requests": "Request",
     "passwordReset": "Password Reset"
   },
   "buttons": {
@@ -213,7 +213,7 @@
     "screenshot": "Take screenshot",
     "cancel": "Cancel",
     "submit": "Submit",
-    "update": "Update",
+    "update": "Add",
     "edit": "Edit",
     "save": "Save",
     "done": "Done",
@@ -269,7 +269,7 @@
     }
   },
   "events": {
-    "title": "Events & Holidays",
+    "title": "Holiday",
     "holiday": "Holiday",
     "event": "Event"
   },
@@ -364,7 +364,7 @@
   "logo": "LOGO",
   "A": "A",
   "setup": "Setup",
-  "event": "Events",
+  "event": "Calendar",
   "createSection": "Create Sections",
   "sections": "Sections",
   "ClassTeacher": "Class teacher",

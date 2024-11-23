@@ -163,10 +163,10 @@ const TeacherUpdate = () => {
       )}
       <Toaster position="top-center" reverseOrder={false} />
       <div className="bg-white rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border">
-        <h1 className="text-4xl font-poppins-bold mt-6">
+        <h1 className="text-2xl font-poppins-bold mt-6">
           {t("titles.teacherDetails")}
         </h1>
-        <h2 className="text-xl font-poppins-regular mt-6 text-left">
+        <h2 className="text-l font-poppins-regular mt-2 text-left">
           {t("titles.teacherPersonalDetails")}
         </h2>
         <div className="bg-[#F4F5F6] w-full p-5 box-border flex flex-col items-center my-5">
