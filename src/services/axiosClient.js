@@ -1,8 +1,8 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-// const baseURL = "http://localhost:4000/";
-const baseURL = "https://nisaiji.com/";
+const baseURL = "http://localhost:4000/";
+// const baseURL = "https://nisaiji.com/";
 
 export const axiosClient = axios.create({ baseURL });
 
@@ -37,11 +37,15 @@ axiosClient.interceptors.request.use(
 
 axiosClient.interceptors.response.use(
   async (response) => {
-    const data = response.data;
-    if (data.status === "ok") {
-      return data;
+    console.log(response);
+
+    if ([200, 201].includes(response?.status)) {
+      return response?.data;
     }
-    if (data.statusCode === 500 && data.message === "jwt expired") {
+    if (
+      response?.data?.statusCode === 500 &&
+      response?.data?.message === "jwt expired"
+    ) {
       const originalRequest = response.config;
 
       // Try refreshing the token
@@ -61,11 +65,11 @@ axiosClient.interceptors.response.use(
         localStorage.removeItem("searchClass");
         localStorage.removeItem("searchSection");
         window.location.replace("/login", "_self");
-        return Promise.reject(data.message);
+        return Promise.reject(response?.data?.message);
       }
     }
-    if (data.status == "error") {
-      return Promise.reject(data.message);
+    if (response?.data?.status == "error") {
+      return Promise.reject(response?.data?.message);
     }
   },
   async (error) => {
@@ -73,6 +77,6 @@ axiosClient.interceptors.response.use(
       toast.error("Check your internet connectivity");
       return;
     }
-    return Promise.reject(error.response.data.message);
+    return Promise.reject(error?.response?.data?.message);
   }
 );

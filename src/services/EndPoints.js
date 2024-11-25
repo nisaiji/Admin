@@ -32,6 +32,8 @@ const EndPoints = {
     UNASSIGNED_TEACHER: "teacher/unassigned",
     REPLACE_TEACHER: "section/replace-teacher",
     SECTION_INFO: "section",
+    GET_DEMO_EXCEL: "admin/students-excelsheet",
+    UPLOAD_EXCEL: "student/excel",
 
     // ADMIN SECTION STUDENTS
     GET_SECTION_STUDENTS: "student/admin",

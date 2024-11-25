@@ -106,8 +106,6 @@ export default function Studentlist() {
 
     try {
       setLoading(true);
-      console.log("query= ", query);
-
       const response = await axiosClient.get(`${url}${query}`);
 
       if (response?.statusCode === 200) {

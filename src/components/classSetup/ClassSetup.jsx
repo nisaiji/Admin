@@ -205,6 +205,7 @@ function ClassSetup() {
                               navigate("/student-section", {
                                 state: {
                                   sectionId: section._id,
+                                  classId: data._id,
                                   className: data.name,
                                   sectionName: section.name,
                                 },

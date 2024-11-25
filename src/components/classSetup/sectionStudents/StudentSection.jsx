@@ -7,17 +7,20 @@ import Search from "../../../assets/images/Search.png";
 import info from "../../../assets/images/info.png";
 import edit2 from "../../../assets/images/edit2.png";
 import delete2 from "../../../assets/images/delete2.png";
+import importIcon from "../../../assets/images/importIcon.png";
+import downloadIcon from "../../../assets/images/downloadIcon.png";
 import StudentInfo from "./StudentInfo";
 import DeletePopup from "../../DeleteMessagePopup";
 import Spinner from "../../Spinner";
 import EndPoints from "../../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import REGEX from "../../../utils/regix";
+import AttendancePopup from "../../AttendancePopup";
 
 export default function StudentSection() {
   const [t] = useTranslation();
   const location = useLocation();
-  const { sectionId, className, sectionName } = location.state;
+  const { sectionId, classId, className, sectionName } = location.state;
   const searchInputRef = useRef(null);
   const [students, setStudents] = useState([]);
   const [currStudent, setCurrStudent] = useState([]);
@@ -28,7 +31,9 @@ export default function StudentSection() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showAttendance, setShowAttendance] = useState(true);
   const newStudentFirstNameRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [newStudent, setNewStudent] = useState({
     SNo: null,
     firstname: "",
@@ -261,6 +266,76 @@ export default function StudentSection() {
     }
   };
 
+  const uploadExcelSheet = async (file) => {
+    try {
+      if (!file) {
+        toast.error("Please select a valid Excel file.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("classId", classId);
+      formData.append("sectionId", sectionId);
+      formData.append("file", file);
+
+      const res = await axiosClient.post(
+        EndPoints.ADMIN.UPLOAD_EXCEL,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (res?.statusCode === 201) {
+        toast.success(res?.result);
+        fetchStudents();
+      }
+    } catch (e) {
+      toast.error(e);
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // Trigger file input click
+    }
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      uploadExcelSheet(file); // Call upload API when file is selected
+    }
+  };
+
+  const getDemoExcelSheet = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosClient.get(EndPoints.ADMIN.GET_DEMO_EXCEL, {
+        responseType: "blob", // Required for binary file download
+      });
+
+      // Create a Blob from the response data
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Set the filename for download
+      link.setAttribute("download", "student-template.xlsx");
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearchInputChange = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -317,7 +392,7 @@ export default function StudentSection() {
           {/* search bar */}
           <div className="py-2">
             <div className="flex justify-between w-full relative">
-              <div className="relative w-full">
+              <div className="relative w-full mr-3">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <img src={Search} alt="" className="size-5" />
                 </div>
@@ -334,6 +409,33 @@ export default function StudentSection() {
                   } px-10 py-2 rounded-lg focus:outline-none border border-t-gray w-full`}
                   onFocus={() => searchInputRef.current.focus()}
                 />
+              </div>
+              {/* Hidden file input */}
+              <input
+                type="file"
+                accept=".xlsx, .xls"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <div className="flex flex-row">
+                <button
+                  type="button"
+                  onClick={handleButtonClick}
+                  className="bg-[#4834D4] rounded-l-lg border border-[#4834D4] py-3 px-6 flex flex-row justify-center items-center"
+                >
+                  <img src={importIcon} alt="" className="size-4 mr-2" />
+                  <div className="text-white text-sm font-poppins-bold">
+                    import
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={getDemoExcelSheet}
+                  className="bg-white py-3 px-6 border border-[#4834D4] rounded-r-lg"
+                >
+                  <img src={downloadIcon} alt="" className="w-7 h-5" />
+                </button>
               </div>
             </div>
           </div>
@@ -647,6 +749,14 @@ export default function StudentSection() {
           isVisible={showDeleteConfirmation}
           onClose={() => setShowDeleteConfirmation(false)}
           onDelete={handleDelete}
+        />
+      )}
+
+      {/* attendance popup */}
+      {showAttendance && (
+        <AttendancePopup
+          isVisible={showAttendance}
+          onClose={() => setShowAttendance(false)}
         />
       )}
     </div>

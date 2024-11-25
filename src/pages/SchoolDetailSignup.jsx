@@ -105,19 +105,19 @@ function SchoolDetailSignup() {
   // Formik instance
   const formik = useFormik({
     initialValues: {
-      schoolName: "",
-      affiliationNo: "",
-      email: "",
-      phone: "",
-      username: "",
+      schoolName: "schoolno1",
+      affiliationNo: "12345678",
+      email: "s1@mail.com",
+      phone: "5556667771",
+      username: "admin1",
       country: "",
       state: "",
       city: "",
       district: "",
       pincode: "",
       address: "",
-      password: "",
-      confirmPassword: "",
+      password: "s1@12345",
+      confirmPassword: "s1@12345",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -143,12 +143,16 @@ function SchoolDetailSignup() {
           EndPoints.ADMIN.ADMIN_REGISTER,
           data
         );
+        console.log({ response });
+
         // If registration is successful
         if ([200, 201].includes(response?.statusCode)) {
-          toast.success(response.result);
+          toast.success(response?.result);
           navigate("/login");
         }
       } catch (e) {
+        console.log({ e });
+
         toast.error(e);
       } finally {
         setLoading(false);
