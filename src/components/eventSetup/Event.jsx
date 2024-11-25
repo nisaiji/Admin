@@ -23,14 +23,14 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
     <div
       className={`${
         isDarkMode ? "bg-[#102945] " : "bg-white  "
-      } calendar rounded-lg w-full `}
+      } calendar pl-16 rounded-lg w-full `}
     >
-      <div className="month flex items-center justify-between py-2 px-14 text-xl font-semibold rounded-[14px] h-14 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
+      <div className="month flex items-center justify-between py-2 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
         <FontAwesomeIcon
           icon={faAngleLeft}
           className={`${
             isDarkMode ? "text-white" : "text-[#686868]"
-          } cursor-pointer size-6`}
+          } cursor-pointer size-5`}
           onClick={onPrevMonth}
         />
         <div className={`${isDarkMode ? "text-white" : ""} date`}>
@@ -40,17 +40,17 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
           icon={faAngleRight}
           className={`${
             isDarkMode ? "text-white" : "text-[#686868]"
-          } cursor-pointer size-6`}
+          } cursor-pointer size-5`}
           onClick={onNextMonth}
         />
       </div>
       <div
         className={`${
           isDarkMode ? "text-white" : "text-[#6E6F81]/75"
-        } weekdays grid grid-cols-7 text-md font-medium capitalize pt-4`}
+        } weekdays grid grid-cols-7 pl-6 text-sm font-medium capitalize pt-3`}
       >
         {CONSTANT.WEEKDAYS.map((day) => (
-          <div key={day} className="text-center">
+          <div key={day} className="text-left">
             {day}
           </div>
         ))}
@@ -83,7 +83,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
 
   return (
     <div
-      className={`day cursor-pointer rounded-[14px] flex font-bold p-3 w-[80px] h-[100px] border-2  ${renderCss()}`}
+      className={`day cursor-pointer rounded-[12px] flex font-bold text-[14px] p-2 w-[60px] h-[70px] border-2  ${renderCss()}`}
       onClick={onClick}
     >
       {day}
@@ -93,7 +93,9 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
 
 const DaysGrid = ({ days }) => {
   return (
-    <div className="days grid grid-cols-7 gap-[25px] px-4 py-3">{days}</div>
+    <div className="days grid grid-cols-7 ml-10 gap-[10px] px-8 py-3">
+      {days}
+    </div>
   );
 };
 
@@ -458,13 +460,13 @@ const Event = () => {
         </div>
       )}
       {/* left view */}
-      <div className="col-span-4 px-10 bg-white rounded-[16px] p-4 mt-5">
-        <div className="flex justify-between items-center mb-4">
+      <div className="col-span-4 px-10 bg-white rounded-[16px] p-4 mt-4">
+        <div className="flex justify-between items-center mb-3">
           <p className="text-2xl font-poppins-bold">
             {t("dashboard.calendar")}
           </p>
           <div
-            className={`goto flex justify-evenly items-center px-3 w-[220px] h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[14px] overflow-hidden`}
+            className={`goto flex px-4 gap-3 w-[150px] h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[8px] overflow-hidden`}
           >
             {/* search input */}
             <button className={`goto-mobnbtn py-1  text-white`}>
@@ -473,7 +475,7 @@ const Event = () => {
             <input
               type="text"
               placeholder={t("calendar.gotoDatePlaceholder")}
-              className={`date-input outline-none text-[14px] text-black w-28`}
+              className={`date-input outline-none text-[14px] text-black w-14`}
               onBlur={handleGotoDate}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -483,7 +485,7 @@ const Event = () => {
             />
           </div>
         </div>
-        <hr className="mb-8" />
+        <hr className="mb-4" />
         <Calendar
           className="px-10"
           month={month}
@@ -495,7 +497,7 @@ const Event = () => {
         <DaysGrid days={renderDays()} />
       </div>
       {/* right view */}
-      <div className="col-span-2 events-container relative bg-white rounded-[16px] py-4 px-10 mt-5 ">
+      <div className="col-span-2 events-container relative bg-white rounded-[16px] py-3 px-10 mt-4 ">
         {eventLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
             <Spinner />
@@ -515,15 +517,15 @@ const Event = () => {
               />
             </div>
           ) : (
-            <ul className="overflow-y-auto max-h-[750px] mt-10">
+            <ul className="overflow-y-auto max-h-[750px] mt-4">
               {/* list of events */}
               {events.map((itm, index) => (
                 <div
                   key={index}
                   className="mb-4 rounded-lg overflow-hidden border-l-8 border-[#4834D4]"
                 >
-                  <div className="flex h-5 justify-between items-center bg-[#ffffff] text-[#4834D4] font-poppins mt-2 px-1 text-lg">
-                    <div className="font-medium text-lg mt-4 mb-2 ml-4">
+                  <div className="flex h-0 justify-between items-center bg-[#ffffff] text-[#4834D4] font-poppins mt-4 px-1">
+                    <div className="font-medium text-xs mt-2 mb-4 ml-4">
                       {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                     </div>
                     {/* delete icon for admin */}
@@ -543,7 +545,7 @@ const Event = () => {
                       <div
                         className={`${
                           false ? "bg-[#102945] text-white" : ""
-                        } py-0 px-1 ml-4 text-base font-semibold`}
+                        } py-0 px-1 ml-4 text-base font-bold`}
                       >
                         {itm.title}
                       </div>
@@ -558,12 +560,12 @@ const Event = () => {
                       </div>
                       <div className="flex">
                         {itm.holiday && (
-                          <div className="py-1  rounded-3xl text-[#d91111] text-[14px] font-bold">
+                          <div className="py-0  rounded-3xl text-[#d91111] text-[12px] font-bold">
                             {t("dashboard.holiday")}
                           </div>
                         )}
                         {itm.event && (
-                          <div className="py-1 text-center text-[14px] font-bold rounded-3xl text-[#4834D4]">
+                          <div className="py-0 text-center text-[12px] font-bold rounded-3xl text-[#4834D4]">
                             {t("dashboard.Event")}
                           </div>
                         )}

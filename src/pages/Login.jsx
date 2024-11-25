@@ -56,8 +56,8 @@ function Login() {
           ? EndPoints.ADMIN.ADMIN_LOGIN
           : EndPoints.TEACHER.TEACHER_LOGIN;
         const payload = isAdmin
-          ? { email: values.userInput, password: values.password }
-          : { user: values.userInput, password: values.password };
+          ? { email: values.userInput, password: values.password, isApp: false }
+          : { user: values.userInput, password: values.password, isApp: false };
 
         // Submit login request
         const response = await axiosClient.post(endpoint, payload);

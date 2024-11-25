@@ -365,7 +365,7 @@ const Dashboard = () => {
       <Toaster position="top-center" reverseOrder={false} />
       <div className="container mx-[20px] py-[25px]">
         <div className="bg-white rounded-[16px] w-full mx-8">
-          <h1 className="text-2xl font-semibold mb-0 p-3 pl-10 pt-6">
+          <h1 className="text-xl font-semibold mb-0 p-3 pl-10 pt-6">
             {t("dashboard.title")}
           </h1>
           <hr className="mx-5" />
@@ -403,13 +403,13 @@ const Dashboard = () => {
         <div className="grid grid-rows-1 lg:grid-rows-1 gap-6 mb-4">
           <div className="bg-white p-6 w-full rounded-[16px] relative mx-8">
             <div className="flex justify-between mb-[20px]">
-              <h2 className="text-2xl font-semibold pl-5">
+              <h2 className="text-xl font-semibold pl-5">
                 {t("dashboard.attendance")}
               </h2>
               {/* Graph toggle button */}
-              <div className="flex justify-evenly bg-[#f2f2f4] w-56 p-2 rounded-[20px]">
+              <div className="flex justify-evenly bg-[#f2f2f4] w-56 p-2 rounded-[14px]">
                 <button
-                  className={`px-6 py-1 rounded-[14px] font-medium ${
+                  className={`px-5 py-1 rounded-[14px] font-medium text-[14px] ${
                     selectedOption === "Weekly"
                       ? "bg-[#040320] text-[#fafafa]"
                       : " text-[#040320]"
@@ -421,7 +421,7 @@ const Dashboard = () => {
                   {t("dashboard.weekly")}
                 </button>
                 <button
-                  className={`px-6 py-1 rounded-[14px] font-medium ${
+                  className={`px-6 py-1 rounded-[14px] font-medium text-[14px] ${
                     selectedOption === "Monthly"
                       ? "bg-[#040320] text-[#fafafa]"
                       : " text-[#040320]"
@@ -436,7 +436,7 @@ const Dashboard = () => {
 
               <div className="flex space-x-2 p-2 ">
                 <select
-                  className="px-4 w-[150px] h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] font-medium rounded-[14px] justify-center items-center"
+                  className="px-4 w-36 h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] font-medium rounded-[8px] justify-center items-center"
                   value={selectedClass}
                   onChange={(e) => {
                     setSelectedClass(e.target.value);
@@ -458,7 +458,7 @@ const Dashboard = () => {
                 </select>
 
                 <select
-                  className="px-2 w-[150px] h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] font-medium rounded-[14px] justify-center items-center"
+                  className="px-4 w-20 h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] font-medium rounded-[8px] justify-center items-center"
                   value={selectedSection}
                   onChange={(e) => setSelectedSection(e?.target?.value)}
                 >
@@ -536,13 +536,13 @@ const Dashboard = () => {
                         key={index}
                         className="mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-[#4834D4]"
                       >
-                        <div className="flex h-5 justify-between items-center bg-[#fffff] text-[#4834D4] font-poppins mt-2 px-2 text-lg">
-                          <div className="font-medium text-lg mt-4 mb-2 ml-4">
+                        <div className="flex h-0 justify-between items-center bg-[#fffff] text-[#4834D4] font-poppins mt-4 px-2 text-lg">
+                          <div className="font-medium text-sm mt-4 mb-4 ml-4">
                             {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                           </div>
                         </div>
-                        <div className="bg-[#ffffff] mt-2">
-                          <div className="flex py-1 justify-between items-center">
+                        <div className="bg-[#ffffff] mt-4">
+                          <div className="flex py-0 justify-between items-center">
                             <div
                               className={`${
                                 false ? "bg-[#102945] text-white" : ""
@@ -551,7 +551,7 @@ const Dashboard = () => {
                               {itm.title}
                             </div>
                           </div>
-                          <div className="flex pb-2 justify-between items-center">
+                          <div className="flex justify-between items-center">
                             <div
                               className={`${
                                 false ? "bg-[#102945] text-white" : ""
@@ -561,7 +561,7 @@ const Dashboard = () => {
                             </div>
                             <div className="flex">
                               {itm.holiday && (
-                                <div className="py-1 mr-6 rounded-3xl text-[#d91111] text-[14px] font-bold">
+                                <div className="py-1 mr-6 rounded-3xl text-[#d91111] text-[12px] font-bold">
                                   {t("dashboard.holiday")}
                                 </div>
                               )}

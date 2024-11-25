@@ -147,7 +147,7 @@ function ClassSetup() {
             <h3
               className={`${
                 isDarkMode ? "text-white" : "text-black"
-              } font-poppins-bold text-2xl md:text-4xl`}
+              } font-poppins-bold text-2xl md:text-2xl`}
             >
               {t("titles.classRoom")}
             </h3>
@@ -181,7 +181,7 @@ function ClassSetup() {
                       className="size-40 border border-[#4834D4] rounded-[30px] flex flex-row items-end"
                     >
                       <p
-                        className={`text-white text-center w-full h-[66px] flex justify-center items-center text-2xl font-poppins-bold md:text-base bg-[#4834D4] rounded-b-3xl`}
+                        className={`text-[#4834D4] text-center w-full h-[50px] flex justify-center items-center text-2xl font-poppins-bold md:text-base border-t border-[#4834D4] rounded-b-3xl`}
                       >
                         {data.name}
                       </p>
@@ -212,14 +212,18 @@ function ClassSetup() {
                               })
                             }
                             className={`${
-                              isDarkMode ? "border-white" : "border-rose-500"
-                            } w-4 h-4 md:w-6 md:h-6 mx-2 my-1 border rounded-lg flex justify-center items-center`}
+                              isDarkMode
+                                ? "border-white"
+                                : "border-[#D91111] border hover:bg-[#D91111]"
+                            } w-4 h-4 md:w-6 md:h-6 mx-2 my-1 border rounded-xl flex justify-center items-center`}
                             key={j}
                           >
                             <div
                               className={`${
-                                isDarkMode ? "text-white" : "text-rose-500"
-                              } text-xs md:text-base`}
+                                isDarkMode
+                                  ? "text-white"
+                                  : "text-[#D91111] hover:text-white"
+                              } text-xs font-semibold md:text-base`}
                             >
                               {section.name}
                             </div>
@@ -228,13 +232,13 @@ function ClassSetup() {
                       </div>
                     </div>
                     <Link
-                      className=" relative -top-8 flex justify-center items-center"
+                      className=" relative -top-10 flex justify-center items-center"
                       onClick={() => {
                         setClickedClassId(data["_id"]);
                         setAddSectionModelOpen(true);
                       }}
                     >
-                      <div className="bg-[#4834D4] text-white text-center text-xs md:text-sm py-1 px-3 rounded-full">
+                      <div className="bg-[#4834D4] text-white text-center text-xs md:text-sm font-medium py-1 px-3 rounded-lg">
                         {t("buttons.update")}
                       </div>
                     </Link>

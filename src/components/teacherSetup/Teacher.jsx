@@ -194,15 +194,15 @@ export default function Teacher() {
         >
           {/* Toast notifications */}
           <Toaster position="top-center" reverseOrder={false} />
-          <div className="px-4">
-            <div className="text-4xl font-semibold px-5 py-3">
+          <div className="px-5">
+            <div className="text-2xl font-semibold py-3">
               {t("titles.teacherSetup")}
             </div>
             {/* Search bar */}
-            <div className="p-3">
+            <div className="p-0 pt-2">
               <div className="flex justify-between w-full relative z-10">
                 <div className="relative w-full">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
                     <img src={Search} alt="" className="size-5" />
                   </div>
                   <input
@@ -215,7 +215,7 @@ export default function Teacher() {
                       isDarkMode
                         ? "bg-gray-800 text-white"
                         : "bg-[white] text-[#686868]/75 "
-                    } placeholder-[rgba(196, 196, 196, 0.40)] px-10 py-2 rounded-2xl focus:outline-none border border-[#05022B]/10 w-full`}
+                    } placeholder-[rgba(196, 196, 196, 0.40)] px-14 py-2 rounded-xl focus:outline-none border border-[#05022B]/10 w-full`}
                     onFocus={() => searchInputRef.current.focus()}
                   />
                 </div>

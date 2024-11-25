@@ -17,12 +17,12 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         isDarkMode ? "bg-[#102945] " : "bg-white  "
       } calendar rounded-lg w-full `}
     >
-      <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-l font-semibold rounded-lg h-10 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.25)]">
+      <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-l font-medium rounded-lg h-10 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.25)]">
         <FontAwesomeIcon
           icon={faAngleLeft}
           className={`${
             isDarkMode ? "text-white" : "text-[#686868]"
-          } cursor-pointer size-6`}
+          } cursor-pointer size-4`}
           onClick={onPrevMonth}
         />
         <div className={`${isDarkMode ? "text-white" : ""} date`}>
@@ -32,7 +32,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
           icon={faAngleRight}
           className={`${
             isDarkMode ? "text-white" : "text-[#686868]"
-          } cursor-pointer size-6`}
+          } cursor-pointer size-4`}
           onClick={onNextMonth}
         />
       </div>
