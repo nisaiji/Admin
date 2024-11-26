@@ -8,6 +8,7 @@ const initialState = {
   class: null,
   className: null,
   id: null,
+  schoolName: null,
 };
 
 const appAuthSlice = createSlice({
@@ -31,6 +32,7 @@ const appAuthSlice = createSlice({
       } else {
         state.role = decodeToken.role;
         state.id = decodeToken.adminId;
+        state.schoolName = decodeToken.schoolName;
       }
     },
   },

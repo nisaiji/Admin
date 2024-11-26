@@ -79,9 +79,9 @@ const Navbar = () => {
             <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
               <span className="text-[24px] font-bold">{t("A")}</span>
             </div>
-            <span className="font-bold text-[24px] ml-2 text-[#040320]">
+            {/* <span className="font-bold text-[24px] ml-2 text-[#040320]">
               {t("logo")}
-            </span>
+            </span> */}
           </Link>
         </div>
 
