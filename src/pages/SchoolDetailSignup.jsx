@@ -143,16 +143,12 @@ function SchoolDetailSignup() {
           EndPoints.ADMIN.ADMIN_REGISTER,
           data
         );
-        console.log({ response });
-
         // If registration is successful
         if ([200, 201].includes(response?.statusCode)) {
           toast.success(response?.result);
           navigate("/login");
         }
       } catch (e) {
-        console.log({ e });
-
         toast.error(e);
       } finally {
         setLoading(false);
@@ -186,28 +182,46 @@ function SchoolDetailSignup() {
           3
         </div>
       </div>
-      <div className="flex justify-around">
+      <div className="flex">
         <div
-          className={`text-sm text-center font-semibold ${
+          className={`text-sm w-1/3 text-center font-semibold ${
             currentStep === 1 ? "text-[#4834D4]" : "text-black"
           }`}
         >
           {t("register.basicInfo")}
         </div>
-        <div
+        {currentStep > 1 && (
+          <div
+            className={`text-sm w-1/3 text-center font-semibold ${
+              currentStep === 2 ? "text-[#4834D4]" : "text-black"
+            }`}
+          >
+            {t("register.addressInfo")}
+          </div>
+        )}
+        {currentStep > 2 && (
+          <div
+            className={`text-sm w-1/3 text-center font-semibold ${
+              currentStep === 3 ? "text-[#4834D4]" : "text-black"
+            }`}
+          >
+            {t("register.setPassword")}
+          </div>
+        )}
+        {/* <div
           className={`text-sm text-center -translate-x-5 ${
             currentStep === 2 ? "text-[#4834D4]" : "text-black"
           }`}
         >
           {t("register.addressInfo")}
-        </div>
-        <div
+        </div> */}
+        {/* <div
           className={`text-sm text-center  ${
             currentStep === 3 ? "text-[#4834D4]" : "text-black"
           }`}
         >
           {t("register.setPassword")}
-        </div>
+        </div> */}
       </div>
     </div>
   );

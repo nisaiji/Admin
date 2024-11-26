@@ -265,8 +265,8 @@
   },
   "eventForm": {
     "title": {
-      "add": "Add New Event",
-      "edit": "Edit Event"
+      "add": "Add New Holiday",
+      "edit": "Edit Holiday"
     },
     "form": {
       "title": "Title",

@@ -24,7 +24,6 @@ export default function Teacher() {
   const [teacherInfoModelOpen, setTeacherInfoModelOpen] = useState(false);
   const [currTeacher, setCurrTeacher] = useState([]);
   const [teachers, setTeachers] = useState([]);
-  const [validationError, setValidationError] = useState("");
   const [editSNo, setEditSNo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
@@ -68,12 +67,11 @@ export default function Teacher() {
   // Registers a new teacher
   const registerTeacher = async () => {
     try {
-      const error = validateData(newTeacher);
-      if (error) {
-        setValidationError(error);
+      const e = validateData(newTeacher);
+      if (e) {
+        toast.error(e);
         return;
       }
-      setValidationError("");
       setLoading(true);
 
       const response = await axiosClient.post(
@@ -430,12 +428,6 @@ export default function Teacher() {
                 </tbody>
               </table>
             </div>
-            {/* Validation error for Inputfields */}
-            {validationError !== "" && (
-              <div className="text-red-500 text-center mt-2">
-                {validationError}
-              </div>
-            )}
           </div>
         </div>
       </div>
