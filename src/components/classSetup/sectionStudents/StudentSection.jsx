@@ -442,40 +442,40 @@ export default function StudentSection() {
               </div> */}
             </div>
           </div>
-          <div className="overflow-x-auto mt-6">
+          <div className="overflow-x-auto relative mt-6 h-[400px]">
             <table
               className={`${
                 isDarkMode ? "bg-gray-800" : "bg-white"
-              } min-w-full shadow-md overflow-hidden`}
+              } min-w-full shadow-md border-separate border-spacing-0`}
             >
               <thead
                 className={`${
                   isDarkMode
                     ? "bg-gray-700 text-white"
                     : "bg-[#F4F5F6] text-[#6E6F81]/75"
-                } text-base font-medium`}
+                } text-base font-medium sticky top-0 z-10`}
               >
                 {/* table headings */}
                 <tr>
-                  <th className="px-2 py-2 border border-gray-400">
+                  <th className="px-2 py-2 border border-gray-400 bg-clip-padding">
                     {t("labels.sNo")}
                   </th>
-                  <th className=" py-2 border border-gray-400">
+                  <th className=" py-2 border border-gray-400 bg-clip-padding">
                     {t("labels.firstName")}
                   </th>
-                  <th className=" py-2 border border-gray-400">
+                  <th className=" py-2 border border-gray-400 bg-clip-padding">
                     {t("labels.lastName")}
                   </th>
-                  <th className=" w-36 py-2 border border-gray-400">
+                  <th className=" w-36 py-2 border border-gray-400 bg-clip-padding">
                     {t("labels.gender")}
                   </th>
-                  <th className=" py-2 border border-gray-400">
+                  <th className=" py-2 border border-gray-400 bg-clip-padding">
                     {t("labels.guardianName")}
                   </th>
-                  <th className=" py-2 border border-gray-400">
+                  <th className=" py-2 border border-gray-400 bg-clip-padding">
                     {t("labels.phone")}
                   </th>
-                  <th className="w-32 py-2 border border-gray-400">
+                  <th className="w-36 py-2 border border-gray-400 bg-clip-padding">
                     {t("labels.action")}
                   </th>
                 </tr>
