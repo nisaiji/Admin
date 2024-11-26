@@ -178,6 +178,10 @@
     "classTeacher": "Class Teacher",
     "reasonToReset": "Reason to Reset",
     "class": "Class",
+    "reasonForLeave": "Reason for leave",
+    "pastLeaves": "Past Leaves",
+    "description": "Class",
+    "username": "Username",
     "resetBefore": "Past Resets",
     "otp": "OTP",
     "all": "All",
@@ -206,7 +210,8 @@
     "from": "from",
     "data": "data",
     "requests": "Request",
-    "passwordReset": "Password Reset"
+    "passwordReset": "Password Reset",
+    "leave": "Leave"
   },
   "buttons": {
     "print": "print",

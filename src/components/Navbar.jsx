@@ -177,6 +177,11 @@ const Navbar = () => {
                   {t("titles.requests")}
                 </span>
               </Link>
+              {/* <Link to="/leave" className="py-2">
+                <span className="text-[#040320] hover:text-[#4834D4] text-sm font-bold">
+                  leave
+                </span>
+              </Link> */}
             </>
           )}
           <div

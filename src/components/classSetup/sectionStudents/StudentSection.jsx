@@ -277,7 +277,7 @@ export default function StudentSection() {
       formData.append("classId", classId);
       formData.append("sectionId", sectionId);
       formData.append("file", file);
-
+      setLoading(true);
       const res = await axiosClient.post(
         EndPoints.ADMIN.UPLOAD_EXCEL,
         formData,
@@ -292,7 +292,10 @@ export default function StudentSection() {
         fetchStudents();
       }
     } catch (e) {
-      toast.error(e);
+      const err = JSON.parse(e);
+      toast.error(`error in student ${err?.student} of ${err?.reason}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -392,7 +395,7 @@ export default function StudentSection() {
           {/* search bar */}
           <div className="py-2">
             <div className="flex justify-between w-full relative">
-              <div className="relative w-full mr-3">
+              <div className="relative w-full">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <img src={Search} alt="" className="size-5" />
                 </div>
@@ -418,7 +421,7 @@ export default function StudentSection() {
                 style={{ display: "none" }}
                 onChange={handleFileChange}
               />
-              <div className="flex flex-row">
+              {/* <div className="flex flex-row">
                 <button
                   type="button"
                   onClick={handleButtonClick}
@@ -436,7 +439,7 @@ export default function StudentSection() {
                 >
                   <img src={downloadIcon} alt="" className="w-7 h-5" />
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="overflow-x-auto mt-6">
@@ -753,12 +756,13 @@ export default function StudentSection() {
       )}
 
       {/* attendance popup */}
-      {showAttendance && (
+      {/* {showAttendance && (
         <AttendancePopup
           isVisible={showAttendance}
           onClose={() => setShowAttendance(false)}
+          sectionId={sectionId}
         />
-      )}
+      )} */}
     </div>
   );
 }

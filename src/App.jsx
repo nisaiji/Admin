@@ -22,6 +22,7 @@ import { useEffect } from "react";
 import { setAuthData } from "./store/AppAuthSlice";
 import SchoolDetailSignup from "./pages/SchoolDetailSignup";
 import Requests from "./components/dashBoard/Request";
+import Leaves from "./components/dashBoard/Leaves";
 
 function App() {
   const dispatch = useDispatch();
@@ -59,6 +60,7 @@ function App() {
                   <Route path="student-update" element={<StudentUpdate />} />
                   <Route path="admin-profile" element={<AdminProfile />} />
                   <Route path="requests" element={<Requests />} />
+                  {/* <Route path="leave" element={<Leaves />} /> */}
                 </>
               )}
             </Route>

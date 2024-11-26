@@ -1,8 +1,8 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const baseURL = "http://localhost:4000/";
-// const baseURL = "https://nisaiji.com/";
+// const baseURL = "http://localhost:4000/";
+const baseURL = "https://nisaiji.com/";
 
 export const axiosClient = axios.create({ baseURL });
 
@@ -37,8 +37,6 @@ axiosClient.interceptors.request.use(
 
 axiosClient.interceptors.response.use(
   async (response) => {
-    console.log(response);
-
     if ([200, 201].includes(response?.status)) {
       return response?.data;
     }

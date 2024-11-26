@@ -111,8 +111,6 @@ export default function Teacher() {
         setTeachers(teachersWithSNos);
       }
     } catch (e) {
-      console.log(e);
-      
       toast.error(e);
     } finally {
       setLoading(false);
