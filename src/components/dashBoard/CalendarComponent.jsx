@@ -15,7 +15,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
     <div
       className={`${
         isDarkMode ? "bg-[#102945] " : "bg-white  "
-      } calendar rounded-lg w-full `}
+      } calendar pl-4 rounded-lg w-full `}
     >
       <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-l font-medium rounded-lg h-10 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.25)]">
         <FontAwesomeIcon
@@ -76,7 +76,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
   return (
     <div
       className={`day ${renderCss()}
-       cursor-pointer rounded-[14px] flex font-bold p-3 w-[65px] h-[75px]`}
+       cursor-pointer rounded-[12px] flex font-bold ml-3 p-3 w-[60px] h-[70px]`}
       onClick={onClick}
     >
       {day}
@@ -86,7 +86,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
 
 const DaysGrid = ({ days }) => {
   return (
-    <div className="days grid grid-cols-7 gap-6 p-2 mt-2 justify-center items-center">
+    <div className="days grid grid-cols-7 gap-4 p-3 justify-center items-center">
       {days}
     </div>
   );

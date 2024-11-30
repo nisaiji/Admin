@@ -404,16 +404,16 @@ const Dashboard = () => {
 
         <div className="grid grid-rows-1 lg:grid-rows-1 gap-6 mb-4">
           <div className="bg-white p-6 w-full rounded-[16px] relative mx-8">
-            <div className="flex justify-between mb-[20px]">
+            <div className="flex justify-between mb-2">
               <h2 className="text-xl font-semibold pl-5">
                 {t("dashboard.attendance")}
               </h2>
               {/* Graph toggle button */}
-              <div className="flex justify-evenly bg-[#f2f2f4] w-56 p-2 rounded-[14px]">
+              <div className="flex justify-evenly bg-[#f2f2f4] w-48 p-1 rounded-[12px] h-8">
                 <button
-                  className={`px-5 py-1 rounded-[14px] font-medium text-[14px] ${
+                  className={`px-5 py-1 rounded-[8px] font-medium text-[12px] ${
                     selectedOption === "Weekly"
-                      ? "bg-[#040320] text-[#fafafa]"
+                      ? "bg-[#040320] h-6 text-[#fafafa]"
                       : " text-[#040320]"
                   }`}
                   onClick={() =>
@@ -423,9 +423,9 @@ const Dashboard = () => {
                   {t("dashboard.weekly")}
                 </button>
                 <button
-                  className={`px-6 py-1 rounded-[14px] font-medium text-[14px] ${
+                  className={`px-5 py-1 rounded-[8px] font-medium text-[12px] ${
                     selectedOption === "Monthly"
-                      ? "bg-[#040320] text-[#fafafa]"
+                      ? "bg-[#040320] h-6 text-[#fafafa]"
                       : " text-[#040320]"
                   }`}
                   onClick={() =>
@@ -436,9 +436,9 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              <div className="flex space-x-2 p-2 ">
+              <div className="flex space-x-2 p-1 ">
                 <select
-                  className="px-4 w-36 h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] font-medium rounded-[8px] justify-center items-center"
+                  className="px-4 w-25 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] font-medium rounded-[8px] justify-center items-center"
                   value={selectedClass}
                   onChange={(e) => {
                     setSelectedClass(e.target.value);
@@ -460,7 +460,7 @@ const Dashboard = () => {
                 </select>
 
                 <select
-                  className="px-4 w-20 h-[36px] border-2 border-[rgba(196, 196, 196, 0.40)] font-medium rounded-[8px] justify-center items-center"
+                  className="px-4 w-26 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] font-medium rounded-[8px] justify-center items-center"
                   value={selectedSection}
                   onChange={(e) => setSelectedSection(e?.target?.value)}
                 >
@@ -502,7 +502,7 @@ const Dashboard = () => {
               </h2>
               <hr className="mt-2" />
               <div className="flex justify-center mt-2">
-                <div className="w-full h-screen rounded-lg ">
+                <div className="w-full h-screen. rounded-lg ">
                   <CalendarComponent
                     events={calenderEvents}
                     updateDate={(newDate) => setDate(newDate)}
@@ -536,10 +536,10 @@ const Dashboard = () => {
                     {calenderEvents.map((itm, index) => (
                       <div
                         key={index}
-                        className="mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-[#4834D4]"
+                        className="mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-[#d91111]"
                       >
-                        <div className="flex h-0 justify-between items-center bg-[#fffff] text-[#4834D4] font-poppins mt-4 px-2 text-lg">
-                          <div className="font-medium text-sm mt-4 mb-4 ml-4">
+                        <div className="flex h-0 justify-between items-center bg-[#fffff] text-[#d91111] font-poppins mt-2 px-2 text-lg">
+                          <div className="font-medium text-xs mt-4 mb-2 ml-2">
                             {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                           </div>
                         </div>
@@ -548,7 +548,7 @@ const Dashboard = () => {
                             <div
                               className={`${
                                 false ? "bg-[#102945] text-white" : ""
-                              } py-0 px-2 ml-4 text-base font-semibold`}
+                              } py-0 px-2 ml-2 text-sm font-semibold`}
                             >
                               {itm.title}
                             </div>
@@ -557,13 +557,13 @@ const Dashboard = () => {
                             <div
                               className={`${
                                 false ? "bg-[#102945] text-white" : ""
-                              } py-0 px-2 ml-4 text-xs font-poppins-regular`}
+                              } py-0 px-2 ml-2 text-xs font-poppins-regular`}
                             >
                               {itm.description}
                             </div>
                             <div className="flex">
                               {itm.holiday && (
-                                <div className="py-1 mr-6 rounded-3xl text-[#d91111] text-[12px] font-bold">
+                                <div className="py-1 mr- rounded-3xl text-[#d91111] text-sm font-bold">
                                   {t("dashboard.holiday")}
                                 </div>
                               )}
