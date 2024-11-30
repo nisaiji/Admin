@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Search from "../../../assets/images/Search.png";
 import info from "../../../assets/images/info.png";
 import edit2 from "../../../assets/images/edit2.png";
+import book from "../../../assets/images/book.png";
 import delete2 from "../../../assets/images/delete2.png";
 import importIcon from "../../../assets/images/importIcon.png";
 import downloadIcon from "../../../assets/images/downloadIcon.png";
@@ -16,6 +17,7 @@ import EndPoints from "../../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import REGEX from "../../../utils/regix";
 import AttendancePopup from "../../AttendancePopup";
+import axios from "axios";
 
 export default function StudentSection() {
   const [t] = useTranslation();
@@ -31,7 +33,7 @@ export default function StudentSection() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showAttendance, setShowAttendance] = useState(true);
+  const [showAttendance, setShowAttendance] = useState(false);
   const newStudentFirstNameRef = useRef(null);
   const fileInputRef = useRef(null);
   const [newStudent, setNewStudent] = useState({
@@ -315,12 +317,14 @@ export default function StudentSection() {
   const getDemoExcelSheet = async () => {
     setLoading(true);
     try {
-      const response = await axiosClient.get(EndPoints.ADMIN.GET_DEMO_EXCEL, {
+      const response = await axios.get(EndPoints.ADMIN.GET_DEMO_EXCEL, {
         responseType: "blob", // Required for binary file download
       });
+      console.log({ response });
 
       // Create a Blob from the response data
       const url = window.URL.createObjectURL(new Blob([response]));
+      console.log({ url });
       const link = document.createElement("a");
       link.href = url;
 
@@ -374,28 +378,34 @@ export default function StudentSection() {
                   isDarkMode ? "text-white" : ""
                 } text-[20px] px-5 font-medium text-gray-800`}
               >
-                {t("roles.classTeacher")} -{" "}
                 {isTeacher
                   ? localStorage.getItem("firstname")
                   : `${classTeacher.firstname} ${classTeacher.lastname}`}
               </div>
-              <div
-                className={` ${
-                  isDarkMode ? "text-white" : ""
-                } text-[16px] px-5 py-1 font-poppins-regular text-gray-800`}
-              >
-                {isTeacher
-                  ? `${teacherClassName} ${teacherSectionName}`
-                  : `${t("titles.class")} ${className} | ${t(
-                      "titles.section"
-                    )} ${sectionName}`}
+              <div className="flex flex-row justify-center items-center">
+                <div
+                  className={` ${
+                    isDarkMode ? "text-white" : ""
+                  } text-[16px] px-2 py-1 font-poppins-regular text-gray-800`}
+                >
+                  {isTeacher
+                    ? `${teacherClassName} ${teacherSectionName}`
+                    : `${className}-${sectionName}`}
+                </div>
+                <div
+                  onClick={() => setShowAttendance(true)}
+                  className="flex flex-row justify-center items-center px-4 py-1 space-x-3 rounded border border-[#040320]"
+                >
+                  <img src={book} alt="" className="size-[10px] " />
+                  <span className="text-xs font-bold">Attendance</span>
+                </div>
               </div>
             </div>
           </div>
           {/* search bar */}
           <div className="py-2">
             <div className="flex justify-between w-full relative">
-              <div className="relative w-full">
+              <div className="relative w-full mr-3">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <img src={Search} alt="" className="size-5" />
                 </div>
@@ -421,11 +431,12 @@ export default function StudentSection() {
                 style={{ display: "none" }}
                 onChange={handleFileChange}
               />
-              {/* <div className="flex flex-row">
+              {/* download and import button */}
+              <div className="flex flex-row">
                 <button
                   type="button"
                   onClick={handleButtonClick}
-                  className="bg-[#4834D4] rounded-l-lg border border-[#4834D4] py-3 px-6 flex flex-row justify-center items-center"
+                  className="bg-[#4834D4] rounded-l-lg border border-[#4834D4] py-2 px-6 flex flex-row justify-center items-center"
                 >
                   <img src={importIcon} alt="" className="size-4 mr-2" />
                   <div className="text-white text-sm font-poppins-bold">
@@ -435,11 +446,11 @@ export default function StudentSection() {
                 <button
                   type="button"
                   onClick={getDemoExcelSheet}
-                  className="bg-white py-3 px-6 border border-[#4834D4] rounded-r-lg"
+                  className="bg-white w-[55px] h-[42px] flex justify-center items-center border border-[#4834D4] rounded-r-lg"
                 >
-                  <img src={downloadIcon} alt="" className="w-7 h-5" />
+                  <img src={downloadIcon} alt="" className="w-5 h-5" />
                 </button>
-              </div> */}
+              </div>
             </div>
           </div>
           <div className="overflow-x-auto relative mt-6 h-[400px]">
@@ -756,13 +767,14 @@ export default function StudentSection() {
       )}
 
       {/* attendance popup */}
-      {/* {showAttendance && (
+      {showAttendance && (
         <AttendancePopup
           isVisible={showAttendance}
           onClose={() => setShowAttendance(false)}
           sectionId={sectionId}
+          classId={classId}
         />
-      )} */}
+      )}
     </div>
   );
 }

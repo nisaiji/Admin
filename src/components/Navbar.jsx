@@ -79,9 +79,6 @@ const Navbar = () => {
             <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
               <span className="text-[24px] font-bold">{t("A")}</span>
             </div>
-            {/* <span className="font-bold text-[24px] ml-2 text-[#040320]">
-              {t("logo")}
-            </span> */}
           </Link>
         </div>
 
@@ -177,11 +174,11 @@ const Navbar = () => {
                   {t("titles.requests")}
                 </span>
               </Link>
-              {/* <Link to="/leave" className="py-2">
+              <Link to="/leave" className="py-2">
                 <span className="text-[#040320] hover:text-[#4834D4] text-sm font-bold">
                   leave
                 </span>
-              </Link> */}
+              </Link>
             </>
           )}
           <div

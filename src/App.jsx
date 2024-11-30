@@ -60,14 +60,13 @@ function App() {
                   <Route path="student-update" element={<StudentUpdate />} />
                   <Route path="admin-profile" element={<AdminProfile />} />
                   <Route path="requests" element={<Requests />} />
-                  {/* <Route path="leave" element={<Leaves />} /> */}
+                  <Route path="leave" element={<Leaves />} />
                 </>
               )}
             </Route>
           </Route>
           <Route element={<NotRequireUser />}>
             <Route path="/login" element={<Login />} />
-            {/* <Route path="/signup" element={<Signup />} /> */}
             <Route path="/signup" element={<SchoolDetailSignup />} />
           </Route>
         </Routes>

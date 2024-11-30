@@ -6,22 +6,19 @@ import closew from "../assets/images/closew.png";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
-export default function AttendancePopup({ isVisible, onClose, sectionId }) {
+export default function AttendancePopup({
+  isVisible,
+  onClose,
+  sectionId,
+  classId,
+}) {
+  const id = useSelector((state) => state.appAuth.id);
   const [isEditable, setIsEditable] = useState(false);
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const date = new Date();
-
-  useEffect(() => {
-    // Generate dummy data
-    const data = Array.from({ length: 20 }, (_, i) => ({
-      sno: i + 1,
-      studentName: `Student ${i + 1}`,
-      dates: Array.from({ length: 31 }, () => ""),
-    }));
-    setAttendanceData(data);
-  }, []);
 
   useEffect(() => {
     if (isVisible) {
@@ -64,7 +61,7 @@ export default function AttendancePopup({ isVisible, onClose, sectionId }) {
   if (!isVisible) return null;
 
   // get student api
-  const fetchStudents = async () => {
+  const getMonthlyAttendance = async () => {
     try {
       setLoading(true);
       const startTime = new Date(
@@ -82,12 +79,31 @@ export default function AttendancePopup({ isVisible, onClose, sectionId }) {
         999
       ).getTime();
 
-      const res = await axiosClient.post(
-        `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${sectionId}`,
-        { startTime, endTime }
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${id}&section=${sectionId}&classId=${classId}&startTime=${startTime}&endTime=${endTime}`
       );
+
       if (res?.statusCode === 200) {
-        console.log(res.result);
+        // setAttendanceData(res?.result?.attendances);
+        const attendances = res?.result?.attendances || [];
+        // console.log(attendances);
+        
+        const totalDays = new Date(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          0
+        ).getDate();
+
+        // Fill missing days with ""
+        const updatedAttendanceData = attendances.map((student) => ({
+          ...student,
+          attendances: Array.from(
+            { length: totalDays },
+            (_, i) => student.attendances[i] || "" // Use existing data or fill with ""
+          ),
+        }));
+
+        setAttendanceData(updatedAttendanceData);
       }
     } catch (e) {
       toast.error(e);
@@ -97,7 +113,7 @@ export default function AttendancePopup({ isVisible, onClose, sectionId }) {
   };
 
   useEffect(() => {
-    fetchStudents();
+    getMonthlyAttendance();
   }, []);
 
   return (
@@ -116,17 +132,28 @@ export default function AttendancePopup({ isVisible, onClose, sectionId }) {
           </div>
           <div className="text-white text-xl">Monthly Attendance</div>
           <div className="flex flex-row">
-            <img
-              src={editw}
-              alt=""
-              className="w-10 h-10 cursor-pointer"
-              onClick={handleEditToggle}
-            />
-            <img
-              src={downloadw}
-              alt=""
-              className="w-10 h-10 mx-4 cursor-pointer"
-            />
+            {isEditable ? (
+              <button
+                className="px-4 py-2 text-base font-poppins-regular rounded-full bg-white "
+                onClick={handleEditToggle}
+              >
+                Save
+              </button>
+            ) : (
+              <>
+                <img
+                  src={editw}
+                  alt=""
+                  className="w-10 h-10 cursor-pointer"
+                  onClick={handleEditToggle}
+                />
+                <img
+                  src={downloadw}
+                  alt=""
+                  className="w-10 h-10 mx-4 cursor-pointer"
+                />
+              </>
+            )}
             <img
               src={closew}
               alt=""
@@ -159,34 +186,51 @@ export default function AttendancePopup({ isVisible, onClose, sectionId }) {
               </tr>
             </thead>
             <tbody>
-              {attendanceData.map((row) => (
-                <tr key={row.sno}>
-                  <td className="border border-gray-300 p-1">{row.sno}</td>
+              {attendanceData.map((data, index) => (
+                <tr key={index}>
+                  <td className="border border-gray-300 p-1">{index+1}</td>
                   <td className="border border-gray-300 p-1">
-                    {row.studentName}
+                    {data?.firstname || ""} {data?.lastname || ""}
                   </td>
-                  {row.dates.map((value, idx) => (
-                    <td key={idx} className="border border-gray-300 p-1">
-                      <input
-                        type="text"
-                        value={value}
-                        disabled={!isEditable}
-                        onChange={(e) =>
-                          handleInputChange(row.sno, idx, e.target.value)
-                        }
-                        className={`w-full text-center focus:outline-none bg-transparent uppercase ${getCellStyle(
-                          value
-                        )}`}
-                      />
-                      {/* <select
-                        name="attendance"
-                        value={value}
-                        onChange={formik.values.attendance}
-                      >
-                        <option value="" label="" />
-                        <option value="P" label="P" />
-                        <option value="A" label="A" />
-                      </select> */}
+                  {data.attendances.map((value, idx) => (
+                    <td key={idx} className="border border-gray-300">
+                      {isEditable ? (
+                        <select
+                          name="attendance"
+                          value={value}
+                          onChange={(e) =>
+                            handleInputChange(index, idx, e.target.value)
+                          }
+                          className={`w-full text-center bg-transparent uppercase focus:outline-none ${
+                            value === "P"
+                              ? "text-[#0F4189]"
+                              : value === "A"
+                              ? "text-[#D91111]"
+                              : "text-black"
+                          }`}
+                        >
+                          <option value="" label="" />
+                          <option value="-" label="-" />
+                          <option
+                            value="P"
+                            label="P"
+                            className="text-[#0F4189]"
+                          />
+                          <option
+                            value="A"
+                            label="A"
+                            className="text-[#D91111]"
+                          />
+                        </select>
+                      ) : (
+                        <div
+                          className={`w-full text-center focus:outline-none bg-transparent uppercase ${getCellStyle(
+                            value
+                          )}`}
+                        >
+                          {value}
+                        </div>
+                      )}
                     </td>
                   ))}
                 </tr>

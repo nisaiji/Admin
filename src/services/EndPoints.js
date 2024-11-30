@@ -34,6 +34,7 @@ const EndPoints = {
     SECTION_INFO: "section",
     GET_DEMO_EXCEL: "admin/students-excelsheet",
     UPLOAD_EXCEL: "student/excel",
+    GET_ATTENDANCE: "attendance",
 
     // ADMIN SECTION STUDENTS
     GET_SECTION_STUDENTS: "student/admin",

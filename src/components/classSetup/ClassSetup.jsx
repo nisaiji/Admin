@@ -176,12 +176,14 @@ function ClassSetup() {
                         className="absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 bg-white p-1"
                       />
                     </div>
-                    <div
-                      onClick={() => toggleFlip(index)}
-                      className="size-40 border border-[#4834D4] rounded-[30px] flex flex-row items-end"
-                    >
+                    <div onClick={() => toggleFlip(index)} className="relative">
+                      <img
+                        src={students}
+                        className="h-full w-full"
+                        alt="students"
+                      />
                       <p
-                        className={`text-[#4834D4] text-center w-full h-[50px] flex justify-center items-center text-2xl font-poppins-bold md:text-base border-t border-[#4834D4] rounded-b-3xl`}
+                        className={`text-white text-center font-semibold text-xs md:text-base absolute -bottom-2 right-0 left-0 mb-2 bg-opacity-70 bg-black rounded-b-3xl py-1`}
                       >
                         {data.name}
                       </p>
@@ -212,18 +214,14 @@ function ClassSetup() {
                               })
                             }
                             className={`${
-                              isDarkMode
-                                ? "border-white"
-                                : "border-[#D91111] border hover:bg-[#D91111]"
-                            } w-4 h-4 md:w-6 md:h-6 mx-2 my-1 border rounded-xl flex justify-center items-center`}
+                              isDarkMode ? "border-white" : "border-rose-500"
+                            } w-4 h-4 md:w-6 md:h-6 mx-2 my-1 border rounded-lg flex justify-center items-center`}
                             key={j}
                           >
                             <div
                               className={`${
-                                isDarkMode
-                                  ? "text-white"
-                                  : "text-[#D91111] hover:text-white"
-                              } text-xs font-semibold md:text-base`}
+                                isDarkMode ? "text-white" : "text-rose-500"
+                              } text-xs md:text-base`}
                             >
                               {section.name}
                             </div>
@@ -232,13 +230,13 @@ function ClassSetup() {
                       </div>
                     </div>
                     <Link
-                      className=" relative -top-10 flex justify-center items-center"
+                      className=" relative -top-8 flex justify-center items-center"
                       onClick={() => {
                         setClickedClassId(data["_id"]);
                         setAddSectionModelOpen(true);
                       }}
                     >
-                      <div className="bg-[#4834D4] text-white text-center text-xs md:text-sm font-medium py-1 px-3 rounded-lg">
+                      <div className="bg-[#4834D4] text-white text-center text-xs md:text-sm py-1 px-3 rounded-full">
                         {t("buttons.update")}
                       </div>
                     </Link>

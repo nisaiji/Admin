@@ -517,7 +517,7 @@ const Event = () => {
               />
             </div>
           ) : (
-            <ul className="overflow-y-auto max-h-[750px] mt-4">
+            <ul className="overflow-y-auto max-h-[450px] mt-4">
               {/* list of events */}
               {events.map((itm, index) => (
                 <div
