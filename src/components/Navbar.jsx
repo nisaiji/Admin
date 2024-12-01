@@ -6,7 +6,8 @@ import classroomicon from "../assets/images/classroomicon.png";
 import calendaricon from "../assets/images/calendaricon.png";
 import studenticon from "../assets/images/studenticon.png";
 import dropdown from "../assets/images/dropdown.png";
-import profile from "../assets/images/profile.png";
+import user from "../assets/images/user profile.png";
+import logo from "../assets/images/deer logo.png";
 import { useTranslation } from "react-i18next";
 import {
   getItem,
@@ -72,13 +73,16 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className="bg-white border-b border-gray-100 px-10 py-6 text-white sticky top-0 z-40">
+    <div className="bg-[#fafafa] border-b border-gray-100 px-10 py-4 h-[72px] text-white sticky top-0 z-40 shadow-md shadow-gray-200">
       <div className="flex items-center justify-between">
         <div className="flex items-center ml-3">
           <Link to="/" className="flex items-center">
-            <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
+            <img src={logo} alt="logo" className="size-9" />
+
+            {/* <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
               <span className="text-[24px] font-bold">{t("A")}</span>
-            </div>
+
+            </div> */}
           </Link>
         </div>
 
@@ -92,16 +96,16 @@ const Navbar = () => {
               onClick={handleToggleMenu}
               className="flex justify-center items-center cursor-pointer"
             >
-              <button className="text-[#040320] hover:text-[#4834D4] px-2 py-2 text-sm font-bold rounded-md relative">
+              <button className="text-[#040320] hover:text-[#0F4189] px-2 py-2.5 text-sm font-bold rounded-md relative">
                 {t("setup")}
               </button>
-              <img src={dropdown} alt="dropdown" className="w-4 h-4" />
+              <img src={dropdown} alt="dropdown" className="w-3 h-3" />
             </div>
             {/* setup menu */}
             {menuOpen && (
               <div
                 ref={menuRef}
-                className="absolute top-10 w-36 bg-white rounded-[14px] shadow-lg z-10 justify-items-center "
+                className="absolute top-10 w-36 bg-[#fafafa] shadow-lg z-10 justify-items-center "
               >
                 {isTeacher ? (
                   <div className="py-1" onClick={closeMenus}>
@@ -111,13 +115,13 @@ const Navbar = () => {
                           state: { classId, sectionId },
                         })
                       }
-                      className="block px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
+                      className="block px-4 py-3 text-[#040320] hover:text-[#FF793F] hover:bg-[#E9EEF2]"
                     >
                       {t("titles.classRoom")}
                     </div>
                     <Link
                       to="/event"
-                      className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] text-sm hover:text-[#4834D4] hover:bg-white"
+                      className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                     >
                       {t("event")}
                     </Link>
@@ -126,7 +130,7 @@ const Navbar = () => {
                   <div className="py-1" onClick={closeMenus}>
                     <Link
                       to="/teacher"
-                      className="flex justify-start items-center gap-3 px-4 py-3 text-[#040320] text-sm hover:text-[#4834D4] hover:bg-white"
+                      className="flex justify-start items-center gap-3 px-4 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                     >
                       <img
                         src={teachericon}
@@ -137,7 +141,7 @@ const Navbar = () => {
                     </Link>
                     <Link
                       to="/class-setup"
-                      className="flex justify-start items-center gap-3 px-4 py-3 text-[#040320] text-sm hover:text-[#4834D4]  hover:bg-white"
+                      className="flex justify-start items-center gap-3 px-4 py-3 text-[#040320] text-sm hover:text-[#FF793F]  hover:bg-white"
                     >
                       <img
                         src={classroomicon}
@@ -148,7 +152,7 @@ const Navbar = () => {
                     </Link>
                     <Link
                       to="/event"
-                      className="flex justify-start items-center gap-3 px-4 py-3 text-[#040320] text-sm hover:text-[#4834D4] hover:bg-white"
+                      className="flex justify-start items-center gap-3 px-4 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                     >
                       <img
                         src={calendaricon}
@@ -165,18 +169,18 @@ const Navbar = () => {
           {!isTeacher && (
             <>
               <Link to="/student" className="py-2">
-                <span className="text-[#040320] hover:text-[#4834D4] text-sm font-bold">
+                <span className="text-[#040320] hover:text-[#0F4189] text-sm font-bold">
                   {t("roles.student")}
                 </span>
               </Link>
               <Link to="/requests" className="py-2">
-                <span className="text-[#040320] hover:text-[#4834D4] text-sm font-bold">
+                <span className="text-[#040320] hover:text-[#0F4189] text-sm font-bold">
                   {t("titles.requests")}
                 </span>
               </Link>
               <Link to="/leave" className="py-2">
-                <span className="text-[#040320] hover:text-[#4834D4] text-sm font-bold">
-                  leave
+                <span className="text-[#040320] hover:text-[#0F4189] text-sm font-bold">
+                  Leave
                 </span>
               </Link>
             </>
@@ -188,7 +192,7 @@ const Navbar = () => {
           >
             <div
               onClick={handleToggleProfileMenu}
-              className="flex items-center justify-center px-3 py-1 cursor-pointer"
+              className="flex items-center justify-center px-3 py-2 cursor-pointer"
             >
               {/* <div>
                 <div className="text-white text-base mr-3">
@@ -199,20 +203,20 @@ const Navbar = () => {
                 </div>
               </div>
               <img src={Down} alt="Dropdown" className="w-4 h-2" /> */}
-              <img src={profile} alt="Dropdown" className="size-6" />
+              <img src={user} alt="Dropdown" className="size-6" />
             </div>
             {/* profile menu */}
             {profileMenuOpen && (
               <div
                 ref={profileMenuRef}
-                className="absolute top-full right-0 w-[120px] text-[#040320] text-sm hover:text-[#4834D4] hover:bg-white bg-white rounded-xl shadow-lg z-10 justify-items-center"
+                className="absolute top-full right-0 w-[120px] text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white bg-white shadow-lg z-10 justify-items-center"
                 onClick={closeMenus}
               >
                 <div className="py-1">
                   {!isTeacher && (
                     <Link
                       to="/admin-profile"
-                      className="block px-4 py-3 text-[#040320] text-sm hover:text-[#4834D4] hover:bg-white"
+                      className="block px-4 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                     >
                       {t("profile")}
                     </Link>
@@ -220,7 +224,7 @@ const Navbar = () => {
                   <Link
                     onClick={handleLogout}
                     to="/login"
-                    className="block px-4 py-3 text-[#040320] text-sm hover:text-[#4834D4] hover:bg-white"
+                    className="block px-4 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                   >
                     {t("logout")}
                   </Link>

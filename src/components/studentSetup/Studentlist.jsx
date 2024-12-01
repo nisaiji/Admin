@@ -184,12 +184,12 @@ export default function Studentlist() {
   return (
     <div
       className={`${
-        isDarkMode ? "bg-[#112138]" : "bg-[#F4F5F6]"
+        isDarkMode ? "bg-[#112138]" : "bg-[#E9EEF2]"
       } flex px-6 flex-col`}
     >
       <Toaster />
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] opacity-50 z-30">
           <Spinner />
         </div>
       )}
@@ -200,10 +200,10 @@ export default function Studentlist() {
       />
       <div
         className={`${
-          isDarkMode ? "bg-[#112138]" : "bg-white"
-        } flex flex-col self-center w-full max-w-[100%] my-[25px] rounded-[16px] max-md:max-w-full min-h-screen`}
+          isDarkMode ? "bg-[#112138]" : "bg-[#fafafa]"
+        } flex flex-col self-center w-full max-w-[100%] my-4 rounded-[16px] max-md:max-w-full min-h-screen`}
       >
-        <h1 className="text-4xl px-14 py-6 font-poppins-bold ">
+        <h1 className="text-2xl px-14 py-6 font-poppins-bold ">
           {t("titles.students")}
         </h1>
         <div className="flex flex-col self-center w-full font-medium max-w-full max-md:max-w-full">
@@ -211,7 +211,7 @@ export default function Studentlist() {
           <div className="flex pl-4 gap-5 h-10 mt-5 max-md:flex-wrap max-md:mt-10 mb-10">
             <div className="flex flex-auto justify-around gap-3 text-md text-[#686868]/75 max-md:flex-wrap max-md:max-w-full">
               <div
-                className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px] basis-0 w-fit max-md:max-w-full max-md:hidden`}
+                className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px]  basis-0 w-fit max-md:max-w-full max-md:hidden`}
               >
                 <div className="flex gap-2 px-10 py-3.5 rounded-3xl w-full">
                   <div className="flex justify-between w-full">
@@ -272,7 +272,7 @@ export default function Studentlist() {
                     >
                       <InputLabel
                         id="demo-simple-select-label"
-                        className="bg-white mr-[10px] text-[14px]"
+                        className=" mr-[10px] text-[14px]"
                       >
                         {t("titles.section")}
                       </InputLabel>
@@ -314,7 +314,7 @@ export default function Studentlist() {
                       />
                     </div>
                     <button
-                      className="bg-[#F4F5F6] text-white hover:bg-white hover:border-[#686868]/25 hover:border-2 ml-2 w-20 text-lg rounded-md flex items-center justify-center"
+                      className="hover:bg-[#E9EEF2]/50 text-white bg-white hover:border-[#E9EEF2] hover:border-2 ml-2 w-20 text-lg rounded-md flex items-center justify-center"
                       onClick={handleClear}
                     >
                       <img src={clear} alt="Clear" className="w-6 h-6" />
@@ -329,12 +329,12 @@ export default function Studentlist() {
               <div className="w-full max-md:max-w-full">
                 <table
                   className={`${
-                    isDarkMode ? "bg-[#0D192F]" : "bg-white"
+                    isDarkMode ? "bg-[#0D192F]" : "bg-[#fafafa]"
                   } w-full mt-6 px-10 max-md:max-w-full`}
                 >
                   {/* table headings */}
                   <thead>
-                    <tr className="text-base  text-[#6E6F81]/75">
+                    <tr className="text-base text-[#0F4189]/75">
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
@@ -387,7 +387,7 @@ export default function Studentlist() {
                           i % 2 === 0
                             ? isDarkMode
                               ? "bg-[#0D2137]"
-                              : "bg-[#4645900D]"
+                              : "bg-[#E9EEF2]/50"
                             : ""
                         } border-t `}
                         key={i}
@@ -395,35 +395,35 @@ export default function Studentlist() {
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center max-sm:hidden`}
+                          } p-4 text-center text-sm max-sm:hidden`}
                         >
                           {student?.firstname}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-blue-950 max-xl:hidden`}
+                          } p-4 text-center text-sm text-blue-950 max-xl:hidden`}
                         >
                           {student?.gender}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center max-md:hidden`}
+                          } p-4 text-center text-sm max-md:hidden`}
                         >
                           {student?.parentDetails?.phone}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center max-lg:hidden`}
+                          } p-4 text-center text-sm max-lg:hidden`}
                         >
                           {student?.parentDetails?.email || CONSTANT.NA}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center max-lg:hidden`}
+                          } p-4 text-center text-sm max-lg:hidden`}
                         >
                           {student?.bloodGroup || CONSTANT.NA}
                         </td>
@@ -460,14 +460,14 @@ export default function Studentlist() {
                   <div className="mt-4 text-[#040320]">
                     <span
                       className={`${
-                        isDarkMode ? "text-white" : "text-[#9391a5]"
+                        isDarkMode ? "text-white" : "text-[#9391a5] text-xs"
                       } leading-5 `}
                     >
                       {t("titles.showing")}
                     </span>{" "}
                     <span
                       className={`${
-                        isDarkMode ? "text-white" : "text-[#152259]"
+                        isDarkMode ? "text-white" : "text-[#152259] text-xs"
                       } leading-5 `}
                     >
                       {pageNo * limit - (limit - 1)} -{" "}
@@ -475,7 +475,7 @@ export default function Studentlist() {
                     </span>
                     <span
                       className={`${
-                        isDarkMode ? "text-white" : "text-[#9391a5]"
+                        isDarkMode ? "text-white" : "text-[#9391a5] text-xs"
                       } leading-5 `}
                     >
                       {" "}
@@ -483,14 +483,14 @@ export default function Studentlist() {
                     </span>{" "}
                     <span
                       className={`${
-                        isDarkMode ? "text-white" : "text-[#152259]"
+                        isDarkMode ? "text-white" : "text-[#152259] text-xs"
                       } leading-5 `}
                     >
                       {totalStudentCount}
                     </span>
                     <span
                       className={`${
-                        isDarkMode ? "text-white" : "text-[#9391a5]"
+                        isDarkMode ? "text-white" : "text-[#9391a5] text-xs"
                       } leading-5 `}
                     >
                       {" "}
@@ -507,16 +507,16 @@ export default function Studentlist() {
                         <PaginationItem
                           {...item}
                           sx={{
-                            color: isDarkMode ? "white" : "#464590",
+                            color: isDarkMode ? "white" : "#0F4189",
                             borderColor:
                               item.type === "previous" || item.type === "next"
                                 ? "transparent"
-                                : "#4834D4",
+                                : "#0F4189",
                             borderWidth: "2px",
                             borderStyle: "solid",
                             "&.Mui-selected": {
                               color: "white",
-                              backgroundColor: "#4834D4",
+                              backgroundColor: "#0F4189",
                             },
                           }}
                         />

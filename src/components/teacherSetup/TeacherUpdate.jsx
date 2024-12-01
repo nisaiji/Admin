@@ -155,21 +155,21 @@ const TeacherUpdate = () => {
   ];
 
   return (
-    <div className="flex justify-center items-center w-full h-full bg-[#F4F5F6] pt-[25px]">
+    <div className="flex justify-center items-center w-full h-full bg-[#E9EEF2] pt-[25px]">
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="bg-white rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border">
+      <div className="bg-[#fafafa] rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border">
         <h1 className="text-2xl font-poppins-bold mt-6">
           {t("titles.teacherDetails")}
         </h1>
         <h2 className="text-l font-poppins-regular mt-2 text-left">
           {t("titles.teacherPersonalDetails")}
         </h2>
-        <div className="bg-[#F4F5F6] w-full p-5 box-border flex flex-col items-center my-5">
+        <div className="bg-[#E9EEF2]/50 w-full p-5 box-border flex flex-col items-center my-5">
           <form onSubmit={formik.handleSubmit} className="w-full">
             <div className="grid grid-cols-2 gap-4">
               {fields.map(
@@ -255,7 +255,7 @@ const TeacherUpdate = () => {
               </button>
               <button
                 type="submit"
-                className="bg-[#4834D4] text-white py-2 px-4 rounded-xl w-36"
+                className="bg-[#0F4189] text-white py-2 px-4 rounded-xl w-36"
               >
                 {t("buttons.save")}
               </button>

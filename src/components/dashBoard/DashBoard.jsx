@@ -243,14 +243,14 @@ const Dashboard = () => {
         {
           label: "Absent",
           data: absentData,
-          backgroundColor: "#DD1B10",
+          backgroundColor: "#FE4040",
           barThickness: 50,
           borderRadius: 10,
         },
         {
           label: "Present",
           data: presentData,
-          backgroundColor: "rgba(123, 121, 255, 0.20)",
+          backgroundColor: "#F2F8FF",
           barThickness: 50,
           borderRadius: 10,
         },
@@ -266,14 +266,14 @@ const Dashboard = () => {
       {
         label: "Absent",
         data: [],
-        backgroundColor: "#DD1B10",
+        backgroundColor: "#FF793F",
         barThickness: 50,
         borderRadius: 10,
       },
       {
         label: "Present",
         data: [],
-        backgroundColor: "rgba(123, 121, 255, 0.20)",
+        backgroundColor: "#F2F8FF",
         barThickness: 50,
         borderRadius: 10,
       },
@@ -287,13 +287,13 @@ const Dashboard = () => {
       {
         label: "Absent",
         data: [],
-        backgroundColor: "#DD1B10",
+        backgroundColor: "#FF793F",
         barThickness: 20,
       },
       {
         label: "Present",
         data: [],
-        backgroundColor: "rgba(123, 121, 255, 0.20)",
+        backgroundColor: "#F2F8FF",
         barThickness: 20,
       },
     ],
@@ -312,13 +312,13 @@ const Dashboard = () => {
         {
           label: "Absent",
           data: absentData,
-          backgroundColor: "#DD1B10",
+          backgroundColor: "#FF793F",
           barThickness: 20,
         },
         {
           label: "Present",
           data: presentData,
-          backgroundColor: "rgba(123, 121, 255, 0.20)",
+          backgroundColor: "#F2F8FF",
           barThickness: 20,
         },
       ],
@@ -362,34 +362,34 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="relative w-full min-h-screen bg-[#F4F5F6]">
+    <div className="relative w-full min-h-screen bg-[#E9EEF2]">
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="container mx-[20px] py-[25px]">
+      <div className="container mx-[20px] py-[15px]">
         <div className="bg-white rounded-[16px] w-full mx-8">
-          <h1 className="text-xl font-semibold mb-0 p-3 pl-10 pt-6">
+          <h1 className="text-xl font-semibold p-3 pl-10 pt-6">
             {/* {t("dashboard.title")} */}
             {schoolName}
           </h1>
           <hr className="mx-5" />
           {/* Grids */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-[25px] p-4 pl-10">
-            <div className="flex items-center justify-between p-6 rounded-2xl bg-[#4834D4]/5 mb-2 mt-2">
+            <div className="flex items-center justify-between p-6 rounded-2xl bg-[#0F4189]/5 mb-2 mt-2">
               <div className="px-3">
                 <p className="text-base font-medium text-[#9391A5]">
                   {t("dashboard.students")}
                 </p>
-                <p className="text-3xl mt-2 font-bold text-[#4834D4]">
+                <p className="text-3xl mt-2 font-bold text-[#0F4189]">
                   {renderStudentCount()}
                 </p>
               </div>
               <img src={dashboardstudent} className="w-12 h-12 mr-4" />
             </div>
-            <div className="flex items-center justify-between p-6 rounded-2xl bg-[#4cbc9a]/10 mb-2 mt-2">
+            <div className="flex items-center justify-between p-6 rounded-2xl bg-[#FF793F]/5 mb-2 mt-2">
               <div className="px-3">
                 <p className="text-base font-medium text-[#9391A5]">
                   {t("dashboard.parents")}
                 </p>
-                <p className="text-3xl mt-2 font-bold text-[#4CBC9A]">
+                <p className="text-3xl mt-2 font-bold text-[#FF793F]">
                   {parentCount}
                 </p>
               </div>
@@ -402,18 +402,18 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-rows-1 lg:grid-rows-1 gap-6 mb-4">
-          <div className="bg-white p-6 w-full rounded-[16px] relative mx-8">
+        <div className="grid grid-rows-1 lg:grid-rows-1 gap-6 mb-2">
+          <div className="bg-[#fafafa] p-6 w-full rounded-[16px] relative mx-8">
             <div className="flex justify-between mb-2">
               <h2 className="text-xl font-semibold pl-5">
                 {t("dashboard.attendance")}
               </h2>
               {/* Graph toggle button */}
-              <div className="flex justify-evenly bg-[#f2f2f4] w-48 p-1 rounded-[12px] h-8">
+              <div className="flex justify-evenly bg-[#E9EEF2] w-48 p-1 rounded-[12px] h-8">
                 <button
                   className={`px-5 py-1 rounded-[8px] font-medium text-[12px] ${
                     selectedOption === "Weekly"
-                      ? "bg-[#040320] h-6 text-[#fafafa]"
+                      ? "bg-[#0F4189] h-6 text-[#fafafa]"
                       : " text-[#040320]"
                   }`}
                   onClick={() =>
@@ -425,7 +425,7 @@ const Dashboard = () => {
                 <button
                   className={`px-5 py-1 rounded-[8px] font-medium text-[12px] ${
                     selectedOption === "Monthly"
-                      ? "bg-[#040320] h-6 text-[#fafafa]"
+                      ? "bg-[#0F4189] h-6 text-[#fafafa]"
                       : " text-[#040320]"
                   }`}
                   onClick={() =>
@@ -479,7 +479,7 @@ const Dashboard = () => {
             <hr />
             {/* Bar Graph */}
             {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30 mx-8 w-full">
+              <div className="absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 mx-8 w-full">
                 <Spinner />
               </div>
             )}
@@ -496,7 +496,7 @@ const Dashboard = () => {
 
           {/* Calender */}
           <div className="flex">
-            <div className="bg-white p-6 w-7/12 rounded-[16px] mr-[25px] mx-8">
+            <div className="bg-[#fafafa] p-6 w-7/12 rounded-[16px] mr-[25px] mx-8">
               <h2 className="text-xl font-semibold pl-6">
                 {t("dashboard.calendar")}
               </h2>
@@ -512,7 +512,7 @@ const Dashboard = () => {
             </div>
 
             {/* event list */}
-            <div className="bg-white py-2 px-8 w-5/12 rounded-[16px] relative">
+            <div className="bg-[#fafafa] py-2 px-8 w-5/12 rounded-[16px] relative">
               <h2 className="text-xl font-semibold my-2 pl-6 mt-4">
                 {t("dashboard.holidayAndEvents")}
               </h2>
@@ -528,7 +528,7 @@ const Dashboard = () => {
               ) : (
                 <div>
                   {eventLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+                    <div className="absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
                       <Spinner />
                     </div>
                   )}
@@ -536,19 +536,19 @@ const Dashboard = () => {
                     {calenderEvents.map((itm, index) => (
                       <div
                         key={index}
-                        className="mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-[#d91111]"
+                        className="mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-[#0F4189]"
                       >
-                        <div className="flex h-0 justify-between items-center bg-[#fffff] text-[#d91111] font-poppins mt-2 px-2 text-lg">
-                          <div className="font-medium text-xs mt-4 mb-2 ml-2">
+                        <div className="flex h-0 justify-between items-center bg-[#fafafa] text-[#0F4189] font-poppins mt-2 px-2 text-lg">
+                          <div className="font-medium text-sm mt-4 mb-2 ml-2">
                             {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                           </div>
                         </div>
-                        <div className="bg-[#ffffff] mt-4">
+                        <div className="bg-[#fafafa] mt-4">
                           <div className="flex py-0 justify-between items-center">
                             <div
                               className={`${
                                 false ? "bg-[#102945] text-white" : ""
-                              } py-0 px-2 ml-2 text-sm font-semibold`}
+                              } py-0 px-2 ml-2 text-xs font-semibold`}
                             >
                               {itm.title}
                             </div>
@@ -563,7 +563,7 @@ const Dashboard = () => {
                             </div>
                             <div className="flex">
                               {itm.holiday && (
-                                <div className="py-1 mr- rounded-3xl text-[#d91111] text-sm font-bold">
+                                <div className="py-1 px-3 mr-6 rounded-3xl bg-[#FE4040]/5 text-[#FE4040] text-xs font-bold">
                                   {t("dashboard.holiday")}
                                 </div>
                               )}

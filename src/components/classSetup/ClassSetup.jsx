@@ -129,20 +129,20 @@ function ClassSetup() {
     <>
       <Toaster />
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
       <div
         className={`${
-          isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-[#F4F5F6]"
+          isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-[#E9EEF2]"
         } w-full max-w-[1600px]`}
       >
         <div className="px-6 py-3">
           <div
             className={`${
-              isDarkMode ? "bg-[#0d192f]" : "bg-white"
-            } w-full my-3 px-10 py-6 min-h-[600px] rounded-[16px]`}
+              isDarkMode ? "bg-[#0d192f]" : "bg-[#fafafa]"
+            } w-full my-1 px-10 py-6 min-h-[600px] rounded-[16px]`}
           >
             <h3
               className={`${
@@ -163,7 +163,7 @@ function ClassSetup() {
                   <div
                     className={`${
                       isDarkMode ? "bg-[#152f54] bg-opacity-70" : ""
-                    } my-3 md:my-6 mx-3 md:mx-4 w-16 h-16 md:w-40 md:h-40 border-1 border-[#4834D4] rounded-3xl cursor-pointer`}
+                    } my-3 md:my-6 mx-3 md:mx-4 w-16 h-16 md:w-40 md:h-40 border-1 border-[#0F4189] rounded-3xl cursor-pointer`}
                   >
                     <div className="relative rounded-full h-[40] w-[40] z-10">
                       <img
@@ -173,7 +173,7 @@ function ClassSetup() {
                           setModalIsOpen(true);
                         }}
                         alt="^"
-                        className="absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 bg-white p-1"
+                        className="absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 bg-[#fafafa] p-1"
                       />
                     </div>
                     <div onClick={() => toggleFlip(index)} className="relative">
@@ -193,7 +193,7 @@ function ClassSetup() {
                   <div
                     className={`${
                       isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
-                    } mt-3 mx-3 md:mt-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border border-[#4834D4] font-bold rounded-3xl cursor-pointer`}
+                    } mt-3 mx-3 md:mt-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border border-[#0F4189] font-bold rounded-3xl cursor-pointer`}
                   >
                     <div
                       className="flex flex-col justify-between h-full"
@@ -236,7 +236,7 @@ function ClassSetup() {
                         setAddSectionModelOpen(true);
                       }}
                     >
-                      <div className="bg-[#4834D4] text-white text-center text-xs md:text-sm py-1 px-3 rounded-full">
+                      <div className="bg-[#0F4189] text-white text-center text-xs md:text-sm py-1 px-6 rounded-full">
                         {t("buttons.update")}
                       </div>
                     </Link>
@@ -247,7 +247,7 @@ function ClassSetup() {
               <div
                 className={`${
                   isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
-                } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border border-[#4834D4] rounded-3xl `}
+                } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border border-[#0F4189] rounded-3xl `}
               >
                 {/* available class dropdown */}
                 {!showDropdowns[classes.length] ? (
@@ -266,7 +266,7 @@ function ClassSetup() {
                   <select
                     value=""
                     onChange={(e) => handleNewClassSubmit(e.target.value)}
-                    className={`cursor-pointer shadow appearance-none border border-[#4834D4] rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline text-[#4834D4] text-center text-sm font-poppins-bold max-h-[150px] overflow-y-auto
+                    className={`cursor-pointer shadow appearance-none border border-[#0F4189] rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline text-[#0F4189] text-center text-sm font-poppins-bold max-h-[150px] overflow-y-auto
                     }`}
                   >
                     <option value="">{t("buttons.addClass")}</option>

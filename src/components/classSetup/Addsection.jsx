@@ -178,7 +178,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                 setAddSectionModelOpen(false);
                 await getAllClass();
               }}
-              className=" h-[30px] w-[100px] rounded-xl text-[16px] bg-[#4834D4] font-medium text-white"
+              className=" h-[30px] w-[100px] rounded-xl text-[16px] bg-[#0F4189] font-medium text-white"
             >
               {t("buttons.done")}
             </button>
@@ -235,7 +235,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                   {activeSection === section._id ? (
                     <button
                       onClick={() => handleUpdateTeacherSection(section)}
-                      className={`mr-2 bg-[#4834D4] text-white h-[30px] w-[60px] rounded-2xl `}
+                      className={`mr-2 bg-[#0F4189] text-white h-[30px] w-[60px] rounded-2xl `}
                     >
                       {t("buttons.save")}
                     </button>

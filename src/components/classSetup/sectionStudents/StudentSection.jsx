@@ -355,21 +355,21 @@ export default function StudentSection() {
   );
 
   return (
-    <div className="bg-[#F4F5F6] px-6 py-6 ">
+    <div className="bg-[#E9EEF2] px-6 py-6 ">
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#E9EEF2] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
       <div
         className={`${
-          isDarkMode ? "bg-[#0D192F] text-white" : "bg-white "
+          isDarkMode ? "bg-[#0D192F] text-white" : "bg-[#fafafa] "
         } p-4 min-h-screen rounded-[16px]`}
       >
         <Toaster position="top-center" reverseOrder={false} />
         <div className="px-6">
           <div className="flex justify-between">
-            <div className="text-4xl font-semibold px-2 py-3">
+            <div className="text-2xl font-semibold px-2 py-3">
               {t("titles.students")}
             </div>
             <div className="text-right py-3">
@@ -386,7 +386,7 @@ export default function StudentSection() {
                 <div
                   className={` ${
                     isDarkMode ? "text-white" : ""
-                  } text-[16px] px-2 py-1 font-poppins-regular text-gray-800`}
+                  } text-[14px] px-2 py-1 font-poppins-regular text-gray-800`}
                 >
                   {isTeacher
                     ? `${teacherClassName} ${teacherSectionName}`
@@ -394,10 +394,10 @@ export default function StudentSection() {
                 </div>
                 <div
                   onClick={() => setShowAttendance(true)}
-                  className="flex flex-row justify-center items-center px-4 py-1 space-x-3 rounded border border-[#040320]"
+                  className="flex flex-row justify-center items-center px-2 py-1 space-x-2 rounded border border-[#040320]"
                 >
                   <img src={book} alt="" className="size-[10px] " />
-                  <span className="text-xs font-bold">Attendance</span>
+                  <span className="text-xs font-medium">Attendance</span>
                 </div>
               </div>
             </div>
@@ -418,8 +418,8 @@ export default function StudentSection() {
                   className={`${
                     isDarkMode
                       ? "bg-gray-800 text-white"
-                      : "bg-white text-black"
-                  } px-10 py-2 rounded-lg focus:outline-none border border-t-gray w-full`}
+                      : "bg-[#E9EEF2]/50 text-black"
+                  } px-10 py-2 rounded-lg focus:outline-[#05022B]/10 border border-t-gray w-full`}
                   onFocus={() => searchInputRef.current.focus()}
                 />
               </div>
@@ -432,23 +432,23 @@ export default function StudentSection() {
                 onChange={handleFileChange}
               />
               {/* download and import button */}
-              <div className="flex flex-row">
+              <div className="flex flex-row pt-1">
                 <button
                   type="button"
                   onClick={handleButtonClick}
-                  className="bg-[#4834D4] rounded-l-lg border border-[#4834D4] py-2 px-6 flex flex-row justify-center items-center"
+                  className="bg-[#0F4189] rounded-l-lg h-[32px] border border-[#0F4189] py-1.5 px-4 flex flex-row justify-center items-center"
                 >
-                  <img src={importIcon} alt="" className="size-4 mr-2" />
-                  <div className="text-white text-sm font-poppins-bold">
+                  <img src={importIcon} alt="" className="size-3 mr-2" />
+                  <div className="text-white text-sm font-poppins-regular">
                     import
                   </div>
                 </button>
                 <button
                   type="button"
                   onClick={getDemoExcelSheet}
-                  className="bg-white w-[55px] h-[42px] flex justify-center items-center border border-[#4834D4] rounded-r-lg"
+                  className="bg-white w-[55px] h-[32px] flex justify-center items-center border border-[#0F4189] rounded-r-lg"
                 >
-                  <img src={downloadIcon} alt="" className="w-5 h-5" />
+                  <img src={downloadIcon} alt="" className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -463,30 +463,30 @@ export default function StudentSection() {
                 className={`${
                   isDarkMode
                     ? "bg-gray-700 text-white"
-                    : "bg-[#F4F5F6] text-[#6E6F81]/75"
+                    : "bg-[#fafafa] text-[#0F4189]/75"
                 } text-base font-medium sticky top-0 z-10`}
               >
                 {/* table headings */}
                 <tr>
-                  <th className="px-2 py-2 border border-gray-400 bg-clip-padding">
+                  <th className="px-2 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                     {t("labels.sNo")}
                   </th>
-                  <th className=" py-2 border border-gray-400 bg-clip-padding">
+                  <th className=" py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                     {t("labels.firstName")}
                   </th>
-                  <th className=" py-2 border border-gray-400 bg-clip-padding">
+                  <th className=" py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                     {t("labels.lastName")}
                   </th>
-                  <th className=" w-36 py-2 border border-gray-400 bg-clip-padding">
+                  <th className=" w-36 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                     {t("labels.gender")}
                   </th>
-                  <th className=" py-2 border border-gray-400 bg-clip-padding">
+                  <th className=" py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                     {t("labels.guardianName")}
                   </th>
-                  <th className=" py-2 border border-gray-400 bg-clip-padding">
+                  <th className=" py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                     {t("labels.phone")}
                   </th>
-                  <th className="w-36 py-2 border border-gray-400 bg-clip-padding">
+                  <th className="w-36 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                     {t("labels.action")}
                   </th>
                 </tr>
@@ -514,7 +514,7 @@ export default function StudentSection() {
                           )
                         }
                         placeholder={t("placeholders.firstName")}
-                        className={`w-full h-full px-2 py-1 font-poppins font-medium text-center border-none focus:outline-none ${
+                        className={`w-full h-full px-2 py-1 font-poppins font-medium text-center border-none ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-900"
@@ -615,7 +615,7 @@ export default function StudentSection() {
                       {editSNo === student.SNo ? (
                         <button
                           onClick={() => handleStudentAction(student, true)}
-                          className="bg-[#4834D4] text-white font-poppins-regular py-1.5 px-3 rounded-xl w-full h-full"
+                          className="bg-[#0F4189] text-white font-poppins-regular py-1.5 px-3 rounded-lg w-full h-full"
                         >
                           {t("buttons.save")}
                         </button>
@@ -642,10 +642,10 @@ export default function StudentSection() {
                 ))}
                 {/* input fields */}
                 <tr>
-                  <td className="px-2 py-2 text-center text-[#040320] font-poppins font-medium border border-[#c1c0ca]">
+                  <td className="px-2 py-0 text-center text-[#040320] font-poppins font-medium border border-[#c1c0ca]">
                     {students.length + 1}
                   </td>
-                  <td className=" py-2 border border-[#c1c0ca]">
+                  <td className=" py-1 px-1 border border-[#c1c0ca]">
                     <input
                       type="text"
                       value={newStudent.firstname}
@@ -653,7 +653,7 @@ export default function StudentSection() {
                         handleInputChange(null, "firstname", e.target.value)
                       }
                       placeholder={t("placeholders.firstName")}
-                      className={`w-full h-full px-2 py-1 font-poppins font-medium text-center  border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center border-none  focus:outline-offset-[5px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
@@ -661,7 +661,7 @@ export default function StudentSection() {
                       ref={newStudentFirstNameRef}
                     />
                   </td>
-                  <td className=" py-2 border border-[#c1c0ca]">
+                  <td className=" py-1 px-1 border border-[#c1c0ca]">
                     <input
                       type="text"
                       value={newStudent.lastname}
@@ -669,20 +669,20 @@ export default function StudentSection() {
                         handleInputChange(null, "lastname", e.target.value)
                       }
                       placeholder={t("placeholders.lastName")}
-                      className={`w-full h-full px-2 py-1 font-poppins font-medium text-center  border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none  focus:outline-offset-[5px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
                       }`}
                     />
                   </td>
-                  <td className=" py-2 border border-[#c1c0ca]">
+                  <td className=" py-0 border border-[#c1c0ca]">
                     <select
                       value={newStudent.gender}
                       onChange={(e) =>
                         handleInputChange(null, "gender", e.target.value)
                       }
-                      className={`w-full h-full px-2 py-1 font-poppins font-medium text-center border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-3 font-poppins font-medium text-center border-none focus:outline-offset-[2px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-black"
@@ -704,7 +704,7 @@ export default function StudentSection() {
                       ))}
                     </select>
                   </td>
-                  <td className=" py-2 border border-[#c1c0ca]">
+                  <td className=" py-1 px-1 border border-[#c1c0ca]">
                     <input
                       type="text"
                       value={newStudent.parentName}
@@ -712,14 +712,14 @@ export default function StudentSection() {
                         handleInputChange(null, "parentName", e.target.value)
                       }
                       placeholder={t("placeholders.parentName")}
-                      className={`w-full h-full px-2 py-1 font-poppins font-medium text-center  border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[5px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
                       }`}
                     />
                   </td>
-                  <td className=" py-2 border border-[#c1c0ca]">
+                  <td className=" py-1 px-1 border border-[#c1c0ca]">
                     <input
                       type="text"
                       value={newStudent.phone}
@@ -727,7 +727,7 @@ export default function StudentSection() {
                         handleInputChange(null, "phone", e.target.value)
                       }
                       placeholder={t("placeholders.phoneNumber")}
-                      className={`w-full h-full px-2 py-1 font-poppins font-medium text-center  border-none focus:outline-none ${
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[5px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
@@ -737,7 +737,7 @@ export default function StudentSection() {
                   <td className="px-2 py-2 border border-[#c1c0ca]">
                     <button
                       onClick={() => registerStudent()}
-                      className="bg-[#4834D4] text-white font-medium text-[16] py-1.5 px-3 rounded-xl w-full h-full"
+                      className="bg-[#0F4189] text-white font-medium text-[16] py-1.5 px-3 rounded-lg w-full h-full focus:outline-2 focus:outline-[#0F4189]"
                     >
                       {t("buttons.addStudent")}
                     </button>
