@@ -365,7 +365,7 @@ const Dashboard = () => {
     <div className="relative w-full min-h-screen bg-[#E9EEF2]">
       <Toaster position="top-center" reverseOrder={false} />
       <div className="container mx-[20px] py-[15px]">
-        <div className="bg-white rounded-[16px] w-full mx-8">
+        <div className="bg-[#fafafa] rounded-[16px] w-full mx-8">
           <h1 className="text-xl font-semibold p-3 pl-10 pt-6">
             {/* {t("dashboard.title")} */}
             {schoolName}
