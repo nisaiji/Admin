@@ -163,9 +163,9 @@ export default function StudentSection() {
     ) {
       return t("validationError.parentName");
     }
-    if (!REGEX.PHONE_LENGTH.test(student.phone.trim())) {
-      return t("validationError.validationPhone");
-    }
+    if (!student?.phone.trim()) return t("validationError.phone");
+    if (!REGEX.PHONE_LENGTH.test(student.phone))
+      return t("validationError.validationPhoneCount");
     return "";
   };
 

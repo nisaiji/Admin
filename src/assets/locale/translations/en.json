@@ -115,8 +115,8 @@
     "emailAddress": "Invalid email address",
     "passwordLength": "Password must be at least 8 characters",
     "phoneNumber": "Phone number should be 10 digits",
-    "phoneStart": "Phone number must start with a digit between 1 to 5",
-    "validationPhoneCount": "Phone number must be 10 digits and start with a number between 1 and 5"
+    "phoneStart": "Phone number must start with a digit between 6 to 9",
+    "validationPhoneCount": "Phone number must be 10 digits and start with a number between 6 and 9"
   },
   "placeholders": {
     "rollNumber": "Enter Roll Number",
