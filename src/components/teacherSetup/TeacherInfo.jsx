@@ -35,7 +35,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
   return (
     <>
       <div className="fixed inset-0 flex justify-center items-end pb-5 bg-gray-900 bg-opacity-50 z-50">
-        <div className="relative flex flex-col w-[80%] max-h-[90vh] bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="relative flex flex-col w-[80%] max-h-[90vh] bg-[#fafafa] rounded-lg shadow-lg overflow-hidden">
           <div
             className="absolute top-3 right-3 cursor-pointer"
             onClick={() => modelOpen(false)}

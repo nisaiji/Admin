@@ -111,14 +111,14 @@ export default function Leaves() {
   return (
     <>
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="bg-[#F4F5F6] px-6 py-[25px]">
-        <div className="bg-white min-h-screen rounded-[16px]">
-          <div className="text-4xl font-poppins-bold pl-12 py-6">
+      <div className="bg-[#E9EEF2] px-6 py-[25px]">
+        <div className="bg-[#fafafa] min-h-screen rounded-[16px]">
+          <div className="text-2xl font-poppins-bold pl-12 py-6">
             {t("titles.leave")}
           </div>
           <div className="flex space-x-4 mt-4 pl-12">
@@ -127,7 +127,7 @@ export default function Leaves() {
                 key={tab}
                 className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
                   selectedTab === tab
-                    ? "pb-3 border-b-[3px] border-[#4834d4]"
+                    ? "pb-3 border-b-[3px] border-[#FF793F]"
                     : ""
                 }`}
                 onClick={() => setSelectedTab(tab)}
@@ -142,22 +142,22 @@ export default function Leaves() {
               <thead>
                 <tr>
                   <th></th>
-                  <th className="p-4 text-base text-left font-poppins-bold text-[#686868]/75">
+                  <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
                     {t(`labels.classTeacher`)}
                   </th>
-                  <th className="p-4 text-base text-left font-poppins-bold text-[#686868]/75">
+                  <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
                     {t(`labels.reasonForLeave`)}
                   </th>
-                  <th className="p-4 text-base text-left font-poppins-bold text-[#686868]/75">
+                  <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
                     {t(`labels.class`)}
                   </th>
-                  <th className="p-4 text-base font-poppins-bold text-[#686868]/75">
+                  <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
                     {t(`labels.pastLeaves`)}
                   </th>
-                  <th className="p-4 text-base font-poppins-bold text-[#686868]/75">
+                  <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
                     {t(`labels.description`)}
                   </th>
-                  <th className="p-4 text-base font-poppins-bold text-[#686868]/75">
+                  <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
                     {t(`labels.action`)}
                   </th>
                 </tr>
@@ -303,7 +303,7 @@ export default function Leaves() {
                           className={`${
                             req.status === "accept"
                               ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-[#4834D4] text-white"
+                              : "bg-[#0F4189] text-white"
                           } text-xs font-poppins-bold px-4 py-2 rounded-md`}
                         >
                           Save
@@ -329,7 +329,7 @@ export default function Leaves() {
                               setCurrentReqId(req._id);
                               setshowConformationPopup(true);
                             }}
-                            className="text-[#DD1B10] font-poppins-bold border-2 border-[#DD1B10] p-1 px-3 rounded-md"
+                            className="text-[#FE4040] font-poppins-bold border-2 border-[#FE4040] p-1 px-3 rounded-md"
                           >
                             Reject
                           </button>

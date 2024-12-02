@@ -14,10 +14,10 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
   return (
     <div
       className={`${
-        isDarkMode ? "bg-[#102945] " : "bg-white  "
+        isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
       } calendar pl-4 rounded-lg w-full `}
     >
-      <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-l font-medium rounded-lg h-10 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.25)]">
+      <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-l font-medium rounded-lg h-10 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.25)] ">
         <FontAwesomeIcon
           icon={faAngleLeft}
           className={`${
@@ -57,19 +57,19 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
     if (isHoliday && hasEvent) {
       return `
         text-white
-        bg-gradient-to-br from-[#D91111] from-45% via-[#ffffff] to-[#4834D4] to-55%
-        border-[#D91111] border-t-0 border-r-0 border-b-0 border-l-0
+        bg-gradient-to-br from-[#D91111] from-45% via-[#fafafa] to-[#0F4189] to-55%
+        border-[#FE4040] border-t-0 border-r-0 border-b-0 border-l-0
         `;
     } else if (isHoliday) {
-      return `text-white bg-[#D91111] border-[#D91111]`;
-    } else if (hasEvent) {
-      return `text-white bg-[#4834D4] border-[#4834D4]`;
+      return `text-white bg-[#FE4040] border-[#FE4040]`;
+      // } else if (hasEvent) {
+      //   return `text-white bg-[#4834D4] border-[#4834D4]`;
     } else if (isSunday) {
-      return `text-[#FF9933] bg-[#FF9933]/10 border-[#ff9933]`;
+      return `text-[#F29E38] bg-[#F29E38]/10 border-[#F29E38]`;
     } else if (isToday) {
-      return `text-[#4834D4] bg-[#f4f5f6] border-4 border-[#4834D4]`;
+      return `text-[#0F4189] bg-[#E9EEF2] border-4 border-[#0F4189]`;
     } else {
-      return `text-black border-[#6E6F8126] bg-[#f4f5f6]`;
+      return `text-black border-[#6E6F8126] bg-[#E9EEF2]`;
     }
   };
 

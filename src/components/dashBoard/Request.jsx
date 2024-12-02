@@ -117,15 +117,15 @@ export default function Requests() {
   return (
     <>
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
-      <div className="bg-[#F4F5F6] px-6 py-[25px]">
-        <div className="bg-white min-h-screen rounded-[16px]">
+      <div className="bg-[#E9EEF2] px-6 py-4">
+        <div className="bg-[#fafafa] min-h-screen rounded-[16px]">
           <Toaster position="top-center" reverseOrder={false} />
           <div>
-            <div className="text-4xl font-poppins-bold pl-12 py-6">
+            <div className="text-2xl font-poppins-bold pl-12 py-6">
               {t("titles.passwordReset")}
             </div>
             <div className="flex space-x-4 mt-4 pl-12">
@@ -134,7 +134,7 @@ export default function Requests() {
                   key={tab}
                   className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
                     selectedTab === tab
-                      ? "pb-3 border-b-[3px] border-[#4834d4]"
+                      ? "pb-3 border-b-[3px] border-[#FF793F]"
                       : ""
                   }`}
                   onClick={() => setSelectedTab(tab)}
@@ -159,7 +159,7 @@ export default function Requests() {
                     ].map((label) => (
                       <th
                         key={label}
-                        className="p-4 text-base font-poppins-bold text-[#686868]/75"
+                        className="p-4 text-base font-poppins-bold text-[#0F4189]/75"
                       >
                         {t(`labels.${label}`)}
                       </th>
@@ -199,7 +199,7 @@ export default function Requests() {
                               onClick={() =>
                                 handleRequestAction(req?._id, "reject")
                               }
-                              className="text-[#DD1B10] font-poppins-bold border-2 border-[#DD1B10] p-1 px-3 rounded-md"
+                              className="text-[#FE4040] font-poppins-bold border-2 border-[#FE4040] p-1 px-3 rounded-md"
                             >
                               Reject
                             </button>
@@ -209,7 +209,7 @@ export default function Requests() {
                         )}
                       </td>
                       <td className="p-4 text-center">
-                        <div className="h-[35px] border border-[rgba(104, 104, 104, 0.25)] bg-white rounded-[10px] flex items-center justify-center">
+                        <div className="h-[35px] border border-[rgba(104, 104, 104, 0.25)] bg-[#fafafa] rounded-[10px] flex items-center justify-center">
                           <div className=" w-18 text-sm font-medium text-center">
                             {req?.otp || "-"}
                           </div>

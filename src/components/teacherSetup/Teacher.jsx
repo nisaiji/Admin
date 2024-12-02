@@ -178,14 +178,14 @@ export default function Teacher() {
     <>
       {/* Loading spinner */}
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#E9EEF2] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
-      <div className=" bg-[#F4F5F6] px-6 py-[25px] ">
+      <div className=" bg-[#E9EEF2] px-6 py-4 ">
         <div
           className={`${
-            isDarkMode ? "bg-[#0D192F] text-white" : "bg-white "
+            isDarkMode ? "bg-[#0D192F] text-white" : "bg-[#fafafa]"
           } p-4 min-h-screen rounded-[16px]`}
         >
           {/* Toast notifications */}
@@ -210,8 +210,12 @@ export default function Teacher() {
                     className={`${
                       isDarkMode
                         ? "bg-gray-800 text-white"
-                        : "bg-[white] text-[#686868]/75 "
-                    } placeholder-[rgba(196, 196, 196, 0.40)] px-14 py-2 rounded-xl focus:outline-none border border-[#05022B]/10 w-full`}
+                        : "bg-[#E9EEF2]/50 text-[#686868]"
+                    } placeholder-[rgba(196, 196, 196, 0.40)] px-14 py-2 rounded-xl focus:outline-[#05022B]/10 border border-[#05022B]/10 w-full ${
+                      searchQuery
+                        ? "border-[#0f4189]/25 text-[#2b2e4a] "
+                        : "border-[#05022B]/10 "
+                    }`}
                     onFocus={() => searchInputRef.current.focus()}
                   />
                 </div>
@@ -223,47 +227,47 @@ export default function Teacher() {
               <table
                 className={`${
                   isDarkMode ? "bg-gray-800" : "bg-white"
-                } min-w-full shadow-md border-separate border-spacing-0`}
+                } min-w-full border-separate border-spacing-0`}
               >
                 <thead
                   className={`${
                     isDarkMode
-                      ? "bg-gray-700 text-white"
-                      : "bg-[#F4F5F6] text-[#6E6F81]/75"
+                      ? "bg-[#2b2e4a] text-white"
+                      : "bg-[#fafafa] text-[#0F4189]/75"
                   } text-base font-medium sticky top-0 z-10`}
                 >
                   {/* Table headings */}
                   <tr>
-                    <th className="px-4 py-2 border border-gray-400 bg-clip-padding">
+                    <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                       {t("labels.sNo")}
                     </th>
-                    <th className="px-4 py-2 border border-gray-400 bg-clip-padding">
+                    <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                       {t("labels.firstName")}
                     </th>
-                    <th className="px-4 py-2 border border-gray-400 bg-clip-padding">
+                    <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                       {t("labels.lastName")}
                     </th>
-                    <th className="px-4 py-2 border border-gray-400 bg-clip-padding">
+                    <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                       {t("labels.phoneNumber")}
                     </th>
-                    <th className="px-4 py-2 border border-gray-400 bg-clip-padding">
+                    <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                       {t("labels.action")}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="text-sm font-normal text-gray-900">
+                <tbody className="text-sm font-normal text-[#2b2e4a]">
                   {filteredTeachers.map((teacher) => (
                     <tr key={teacher.SNo}>
                       {/* SNo */}
                       <td
                         className={`${
                           isDarkMode ? "text-white" : ""
-                        } px-4 py-2 font-medium text-center border text-sm border-[#c1c0ca] text-[#040320]`}
+                        } px-4 py-2 font-medium text-center border text-sm border-[#2b2e4a]/25 text-[#040320] `}
                       >
                         {teacher.SNo}
                       </td>
                       {/* First Name */}
-                      <td className="px-4 py-2 border text-sm border-[#c1c0ca]">
+                      <td className="px-4 py-2 border text-sm border-[#2b2e4a]/25 ">
                         <input
                           type="text"
                           value={teacher.firstname}
@@ -279,13 +283,13 @@ export default function Teacher() {
                             isDarkMode
                               ? "bg-gray-800 text-white"
                               : "bg-white text-[#040320]"
-                          }`}
+                          }focus:border-[#0F4189]`}
                           disabled={editSNo !== teacher.SNo}
                           autoFocus={editSNo === newTeacher.SNo}
                         />
                       </td>
                       {/* Last Name */}
-                      <td className="px-4 py-2 text-sm  border border-[#c1c0ca]">
+                      <td className="px-4 py-2 text-sm  border border-[#2b2e4a]/25">
                         <input
                           type="text"
                           value={teacher.lastname}
@@ -306,7 +310,7 @@ export default function Teacher() {
                         />
                       </td>
                       {/* Phone */}
-                      <td className="px-4 py-2 text-sm border border-[#c1c0ca]">
+                      <td className="px-4 py-2 text-sm border border-[#2b2e4a]/25">
                         <input
                           type="text"
                           value={teacher.phone}
@@ -327,7 +331,7 @@ export default function Teacher() {
                         />
                       </td>
                       {/* Actions */}
-                      <td className="pl-3 pr-5 py-2 text-sm font-poppins-bold border border-[#c1c0ca]">
+                      <td className="pl-3 pr-5 py-2 text-sm font-poppins-bold border border-[#2b2e4a]/25">
                         <div className="flex justify-evenly">
                           <button
                             onClick={() =>
@@ -358,12 +362,12 @@ export default function Teacher() {
                     <td
                       className={`${
                         isDarkMode ? "text-white" : ""
-                      } px-4 py-2 text-center text-[#040320] font-medium border border-[#c1c0ca]`}
+                      } px-4 py-2 text-center text-[#040320] font-medium border border-[#2b2e4a]/25`}
                     >
                       {teachers.length + 1}
                     </td>
                     {/* First Name */}
-                    <td className="px-4 py-2 border border-[#c1c0ca]">
+                    <td className="px-2 py-2 border border-[#2b2e4a]/25">
                       <input
                         type="text"
                         value={newTeacher.firstname}
@@ -371,7 +375,7 @@ export default function Teacher() {
                           handleInputChange(null, "firstname", e.target.value)
                         }
                         placeholder={t("placeholders.firstName")}
-                        className={`w-full h-full px-2 py-1 border-none focus:outline-none ${
+                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-8 focus:outline-[#0F4189]/75 ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-[#040320]"
@@ -381,7 +385,7 @@ export default function Teacher() {
                       />
                     </td>
                     {/* Last Name */}
-                    <td className="px-4 py-2 border border-[#c1c0ca]">
+                    <td className="px-2 py-2 border border-[#2b2e4a]/25">
                       <input
                         type="text"
                         value={newTeacher.lastname}
@@ -389,7 +393,7 @@ export default function Teacher() {
                           handleInputChange(null, "lastname", e.target.value)
                         }
                         placeholder={t("placeholders.lastName")}
-                        className={`w-full h-full px-2 py-1 border-none focus:outline-none ${
+                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-8 focus:outline-[#0F4189]/75 ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-[#040320]"
@@ -398,7 +402,7 @@ export default function Teacher() {
                       />
                     </td>
                     {/* Phone */}
-                    <td className="px-4 py-2 border border-[#c1c0ca]">
+                    <td className="px-2 py-2 border border-[#2b2e4a]/25">
                       <input
                         type="text"
                         value={newTeacher.phone}
@@ -406,7 +410,7 @@ export default function Teacher() {
                           handleInputChange(null, "phone", e.target.value)
                         }
                         placeholder={t("placeholders.phoneNumber")}
-                        className={`w-full h-full px-2 py-1 border-none focus:outline-none ${
+                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-8 focus:outline-[#0F4189]/75 ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-[#040320]"
@@ -415,9 +419,9 @@ export default function Teacher() {
                       />
                     </td>
                     {/* Actions */}
-                    <td className="px-4 py-2 border border-[#c1c0ca]">
+                    <td className="px-4 py-2 border border-[#2b2e4a]/25">
                       <button
-                        className="bg-[#4834D4] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full"
+                        className="bg-[#0F4189] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full focus:outline-2 focus:outline-[#0F4189]"
                         onClick={registerTeacher}
                         disabled={editSNo !== null}
                       >

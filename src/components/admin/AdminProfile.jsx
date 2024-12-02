@@ -234,17 +234,17 @@ export default function AdminProfile() {
   return (
     <form
       onSubmit={formik.handleSubmit}
-      className="flex flex-col items-center bg-[#F4F5F6] p-6"
+      className="flex flex-col items-center bg-[#E9EEF2] p-6"
     >
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
       {/* Account Setting */}
-      <div className="flex flex-col p-10 w-full rounded-2xl bg-white max-md:px-5 max-md:m-10 max-md:max-w-full">
+      <div className="flex flex-col p-10 w-full rounded-2xl bg-[#fafafa] max-md:px-5 max-md:m-10 max-md:max-w-full">
         <Toaster position="top-center" reverseOrder={false} />
-        <div className="text-4xl font-bold tracking-tight leading-8 text-neutral-800">
+        <div className="text-2xl font-bold tracking-tight leading-8 text-neutral-800">
           {t("adminProfile.accountSettings")}
         </div>
 
@@ -640,7 +640,7 @@ export default function AdminProfile() {
               onClick={handleProfileUpdate}
               type="button"
               // disabled={formik.isSubmitting || !formik.isValid}
-              className="px-6 py-2 text-white bg-[#4834D4] rounded-lg"
+              className="px-6 py-2 text-white bg-[#0F4189] rounded-lg"
             >
               {t("buttons.saveChanges")}
             </button>
@@ -666,7 +666,7 @@ export default function AdminProfile() {
                 : "border-gray-200"
             }`}
           >
-            <div className="flex items-center gap-1.5 font-medium text-[#4834D4]">
+            <div className="flex items-center gap-1.5 font-medium text-[#0F4189]">
               <div>+91</div>
               <img
                 loading="lazy"
@@ -877,7 +877,7 @@ export default function AdminProfile() {
             onClick={handleSocialProfileUpdate}
             type="button"
             disabled={formik.isSubmitting || !formik.isValid}
-            className="px-6 py-2 text-white bg-[#4834D4] rounded-lg"
+            className="px-6 py-2 text-white bg-[#0F4189] rounded-lg"
           >
             {t("buttons.saveChanges")}
           </button>

@@ -95,7 +95,12 @@ export default function AttendancePopup({
         const updatedAttendanceData = attendances.map((student) => {
           // Create a map of attendance data by date
           const attendanceByDate = student.attendances.reduce((acc, item) => {
-            acc[item.date] = item.teacherAttendance === "present" ? "P" : "A";
+            acc[item.date] =
+              item.teacherAttendance === "present"
+                ? "P"
+                : item.teacherAttendance === "absent"
+                ? "A"
+                : "";
             return acc;
           }, {});
 
@@ -104,10 +109,11 @@ export default function AttendancePopup({
             const currentDate = new Date(
               date.getFullYear(),
               date.getMonth(),
-              i + 1
+              i + 2
             )
               .toISOString()
               .split("T")[0]; // Format as YYYY-MM-DD
+
             return attendanceByDate[currentDate] || ""; // Fill with P/A or ""
           });
 
@@ -234,7 +240,6 @@ export default function AttendancePopup({
                           //   handleInputChange(index, idx, e.target.value)
                           // }
                           onChange={(e) => {
-                            console.log("Dropdown changed:", e.target.value);
                             handleInputChange(index, idx, e.target.value);
                           }}
                           className={`w-full text-center bg-transparent uppercase focus:outline-none ${

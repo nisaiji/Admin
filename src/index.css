@@ -4,27 +4,27 @@
 
 /* src/index.css */
 @font-face {
-    font-family: 'Poppins';
-    src: url('/src/assets/fonts/PoppinsLight.ttf') format('truetype');
-    font-weight: 300;
-    font-style: normal;
-  }
-  
-  @font-face {
-    font-family: 'Poppins';
-    src: url('/src/assets/fonts/PoppinsRegular.ttf') format('truetype');
-    font-weight: 500;
-    font-style: normal;
-  }
-  
-  @font-face {
-    font-family: 'Poppins';
-    src: url('/src/assets/fonts/PoppinsBold.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
-  }
-  
-  body {
-    font-family: 'Poppins', sans-serif;
-  }
-  
+  font-family: "Poppins";
+  src: url("/src/assets/fonts/helvetica-light-587ebe5a59211.ttf")
+    format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/src/assets/fonts/Helvetica.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/src/assets/fonts/NunitoSans_10pt-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+}
