@@ -1,8 +1,8 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const baseURL = "http://localhost:4000/";
-// const baseURL = "https://nisaiji.com/";
+// const baseURL = "http://localhost:4000/";
+const baseURL = "https://nisaiji.com/";
 
 export const axiosClient = axios.create({ baseURL });
 
