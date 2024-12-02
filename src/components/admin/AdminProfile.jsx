@@ -151,6 +151,7 @@ export default function AdminProfile() {
         requestBody
       );
       if (res?.statusCode === 200) {
+        localStorage.setItem("schoolName", values.schoolName);
         toast.success(res.result);
         getadmin();
       }
@@ -584,12 +585,11 @@ export default function AdminProfile() {
             </div>
           </div>
 
-           {/* city and Pincode */}
-           <div className="flex flex-row w-full space-x-5">
+          {/* city and Pincode */}
+          <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.city")}{" "}
-                <span className="text-red-500">*</span>
+                {t("adminProfile.city")} <span className="text-red-500">*</span>
               </label>
               <input
                 name="city"

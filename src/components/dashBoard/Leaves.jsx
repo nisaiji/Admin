@@ -5,7 +5,9 @@ import { useTranslation } from "react-i18next";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
 import dropdown from "../../assets/images/dropdown.png";
-import { useSelector } from "react-redux";
+import hide from "../../assets/images/hide.png";
+import show from "../../assets/images/show.png";
+import ConformationPopup from "../ConformationPopup";
 
 export default function Leaves() {
   const { t } = useTranslation();
@@ -13,6 +15,9 @@ export default function Leaves() {
   const [selectedTab, setSelectedTab] = useState("all");
   const [loading, setLoading] = useState(false);
   const [expandedRow, setExpandedRow] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConformationPopup, setshowConformationPopup] = useState(false);
+  const [currentReqId, setCurrentReqId] = useState("");
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -27,6 +32,7 @@ export default function Leaves() {
       );
       if (res?.statusCode === 200) {
         setRequests(res?.result?.leaveRequests[0]?.teachers || []);
+        // console.log({ requests });
       }
     } catch (e) {
       toast.error(e.message);
@@ -39,22 +45,38 @@ export default function Leaves() {
     fetchLeaves();
   }, []);
 
-  const toggleRow = (id) => {
-    setExpandedRow((prev) => (prev === id ? null : id));
-  };
-
-  const handleFormChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSave = () => {
-    console.log(formData);
-
-    // toast.success("Data saved successfully!");
-    setExpandedRow(null);
-    setFormData({})
-    fetchLeaves();
-    // Implement save logic here
+  const handleSave = async (id, status) => {
+    try {
+      let data;
+      if (status === "reject") {
+        data = {
+          leaveRequestId: id,
+          status: status,
+        };
+      } else {
+        // Validate form
+        if (!formData.username || !formData.password || !formData.fullname) {
+          toast.error("Please fill all the fields");
+          return;
+        }
+        data = {
+          leaveRequestId: id,
+          status: status,
+          username: formData.username,
+          tagline: formData.fullname,
+          password: formData.password,
+        };
+      }
+      const res = await axiosClient.put(EndPoints.ADMIN.UPDATE_LEAVE, data);
+      if (res?.statusCode === 200) {
+        toast.success(res?.result);
+        setExpandedRow(null);
+        setFormData({ username: "", password: "", fullname: "" });
+        fetchLeaves();
+      }
+    } catch (e) {
+      toast.error(e);
+    }
   };
 
   const filteredRequests =
@@ -67,6 +89,24 @@ export default function Leaves() {
       : selectedTab === "rejected"
       ? requests.filter((req) => req.status === "reject")
       : requests;
+
+  const requestsStatus = (status) => {
+    //accept,reject,complete,pending
+    switch (status) {
+      case "accept":
+        return "Approved";
+        break;
+      case "reject":
+        return "Rejected";
+        break;
+      case "complete":
+        return "Completed";
+        break;
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+        break;
+    }
+  };
 
   return (
     <>
@@ -102,13 +142,13 @@ export default function Leaves() {
               <thead>
                 <tr>
                   <th></th>
-                  <th className="p-4 text-base font-poppins-bold text-[#686868]/75">
+                  <th className="p-4 text-base text-left font-poppins-bold text-[#686868]/75">
                     {t(`labels.classTeacher`)}
                   </th>
-                  <th className="p-4 text-base font-poppins-bold text-[#686868]/75">
+                  <th className="p-4 text-base text-left font-poppins-bold text-[#686868]/75">
                     {t(`labels.reasonForLeave`)}
                   </th>
-                  <th className="p-4 text-base font-poppins-bold text-[#686868]/75">
+                  <th className="p-4 text-base text-left font-poppins-bold text-[#686868]/75">
                     {t(`labels.class`)}
                   </th>
                   <th className="p-4 text-base font-poppins-bold text-[#686868]/75">
@@ -130,10 +170,11 @@ export default function Leaves() {
                       index % 2 === 0 ? "bg-[#4645900D]" : ""
                     } border-t `}
                   >
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 align-top">
                       <img
                         src={dropdown}
                         onClick={() =>
+                          req.status === "accept" &&
                           setExpandedRow((prev) =>
                             prev === index ? null : index
                           )
@@ -144,17 +185,19 @@ export default function Leaves() {
                         }`}
                       />
                     </td>
-                    <td className="px-4 py-2">
-                      <p className="text-sm font-medium text-center">
+                    <td className="px-4 py-2 align-top">
+                      <p className="text-sm font-medium">
                         {req?.teacher?.firstname || ""}{" "}
                         {req?.teacher?.lastname || ""}
                       </p>
                       {expandedRow === index && (
                         <>
-                          <p className="text-sm font-medium py-1">username</p>
+                          <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
+                            username
+                          </p>
                           <input
                             type="text"
-                            placeholder="Username"
+                            placeholder="Enter Username"
                             value={formData.username}
                             onChange={(e) =>
                               setFormData((prev) => ({
@@ -162,21 +205,26 @@ export default function Leaves() {
                                 username: e.target.value,
                               }))
                             }
-                            className="mb-4 p-2 border rounded w-full"
+                            disabled={req?.status === "accept"}
+                            className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
+                              req?.status === "accept"
+                                ? "bg-gray-200 cursor-not-allowed"
+                                : ""
+                            }`}
                           />
                         </>
                       )}
                     </td>
-                    <td className="px-4 py-2">
-                      <p className="text-sm font-medium text-center">
-                        {req?.reason || ""}
-                      </p>
+                    <td className="px-4 py-2 align-top">
+                      <p className="text-sm font-medium">{req?.reason || ""}</p>
                       {expandedRow === index && (
                         <>
-                          <p className="text-sm font-medium py-1">full name</p>
+                          <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
+                            Teacher name
+                          </p>
                           <input
                             type="fullname"
-                            placeholder="fullname"
+                            placeholder="Substitute Teacher"
                             value={formData.fullname}
                             onChange={(e) =>
                               setFormData((prev) => ({
@@ -184,59 +232,91 @@ export default function Leaves() {
                                 fullname: e.target.value,
                               }))
                             }
-                            className="mb-4 p-2 border rounded w-full"
+                            disabled={req?.status === "accept"}
+                            className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
+                              req?.status === "accept"
+                                ? "bg-gray-200 cursor-not-allowed"
+                                : ""
+                            }`}
                           />
                         </>
                       )}
                     </td>
-                    <td className="px-4 py-2">
-                      <p className="text-sm font-medium text-center">
+                    <td className="px-4 py-2 align-top">
+                      <p className="text-sm font-medium">
                         {req?.teacher?.class || ""}{" "}
                         {req?.teacher?.section || ""}
                       </p>
                       {expandedRow === index && (
                         <>
-                          <p className="text-sm font-medium py-1">password</p>
-                          <input
-                            type="password"
-                            placeholder="Password"
-                            value={formData.password}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                password: e.target.value,
-                              }))
-                            }
-                            className="mb-4 p-2 border rounded w-full"
-                          />
+                          <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
+                            password
+                          </p>
+                          <div className="relative">
+                            <input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Password"
+                              value={formData.password}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  password: e.target.value,
+                                }))
+                              }
+                              disabled={req?.status === "accept"}
+                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
+                                req?.status === "accept"
+                                  ? "bg-gray-200 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            />
+                            {req.status === "accept" ? (
+                              <></>
+                            ) : (
+                              <div
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                className="absolute right-2 top-3 cursor-pointer text-gray-600"
+                              >
+                                <img
+                                  src={showPassword ? hide : show}
+                                  alt="passwordIcon"
+                                  className="relative right-1 top-0 transform w-6 h-6 cursor-pointer"
+                                  style={{
+                                    filter:
+                                      "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
                         </>
                       )}
                     </td>
-                    <td className="px-4 py-2">
-                      <p className="text-sm font-medium text-center">
+                    <td className="px-4 py-2 text-center space-y-7">
+                      <p className="text-sm font-medium">
                         {req?.pastLeaves || 0}
                       </p>
                       {expandedRow === index && (
                         <button
-                          onClick={() => handleSave()}
-                          className="bg-blue-500 text-white px-4 py-2 rounded"
+                          onClick={() => handleSave(req._id, "accept")}
+                          disabled={req?.status === "accept"}
+                          className={`${
+                            req.status === "accept"
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-[#4834D4] text-white"
+                          } text-xs font-poppins-bold px-4 py-2 rounded-md`}
                         >
                           Save
                         </button>
                       )}
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 align-top">
                       <p className="text-sm font-medium text-center">
                         {req?.description || ""}
                       </p>
                     </td>
-                    <td className="px-4 py-2 text-sm font-medium text-center">
+                    <td className="px-4 py-2 w-[200px] align-top text-sm font-medium text-center">
                       {req.status === "pending" ? (
-                        // expandedRow === index ? (
-                        //   <button className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md">
-                        //     Approved
-                        //   </button>
-                        // ) : (
                         <div className="flex justify-center gap-3">
                           <button
                             onClick={() => setExpandedRow(index)}
@@ -245,21 +325,21 @@ export default function Leaves() {
                             Approve
                           </button>
                           <button
-                            onClick={() =>
-                              handleRequestAction(req._id, "reject")
-                            }
+                            onClick={() => {
+                              setCurrentReqId(req._id);
+                              setshowConformationPopup(true);
+                            }}
                             className="text-[#DD1B10] font-poppins-bold border-2 border-[#DD1B10] p-1 px-3 rounded-md"
                           >
                             Reject
                           </button>
                         </div>
                       ) : (
-                        // )
                         <button
                           onClick={() => setExpandedRow(index)}
-                          className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md"
+                          className="text-white text-sm font-poppins-regular bg-[#68686880] py-1 px-3 rounded-md"
                         >
-                          {req.status}
+                          {requestsStatus(req?.status)}
                         </button>
                       )}
                     </td>
@@ -270,6 +350,16 @@ export default function Leaves() {
           </div>
         </div>
       </div>
+
+      <ConformationPopup
+        isVisible={showConformationPopup}
+        onClose={() => setshowConformationPopup(false)}
+        onSubmit={() => {
+          handleSave(currentReqId, "reject");
+          setshowConformationPopup(false);
+        }}
+        message={"Please Confirm reject this leave request"}
+      />
     </>
   );
 }

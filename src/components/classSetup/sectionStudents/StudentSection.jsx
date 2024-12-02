@@ -317,14 +317,13 @@ export default function StudentSection() {
   const getDemoExcelSheet = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(EndPoints.ADMIN.GET_DEMO_EXCEL, {
+      const response = await axiosClient.get(EndPoints.ADMIN.GET_DEMO_EXCEL, {
         responseType: "blob", // Required for binary file download
       });
-      console.log({ response });
 
       // Create a Blob from the response data
       const url = window.URL.createObjectURL(new Blob([response]));
-      console.log({ url });
+      // console.log({ url });
       const link = document.createElement("a");
       link.href = url;
 

@@ -47,6 +47,7 @@ const EndPoints = {
     UPDATE_EVENT: "holiday-event",
     DELETE_EVENT: "holiday-event",
     GET_LEAVES: "leave/admin",
+    UPDATE_LEAVE: "leave/admin",
 
     // ADMIN PROFILE
     GET_ADMIN: "admin",

@@ -105,19 +105,19 @@ function SchoolDetailSignup() {
   // Formik instance
   const formik = useFormik({
     initialValues: {
-      schoolName: "schoolno1",
-      affiliationNo: "12345678",
-      email: "s1@mail.com",
-      phone: "5556667771",
-      username: "admin1",
+      schoolName: "",
+      affiliationNo: "",
+      email: "",
+      phone: "",
+      username: "",
       country: "",
       state: "",
       city: "",
       district: "",
       pincode: "",
       address: "",
-      password: "s1@12345",
-      confirmPassword: "s1@12345",
+      password: "",
+      confirmPassword: "",
     },
     validationSchema,
     onSubmit: async (values) => {

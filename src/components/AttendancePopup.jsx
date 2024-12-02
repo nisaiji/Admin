@@ -20,6 +20,8 @@ export default function AttendancePopup({
   const [loading, setLoading] = useState(false);
   const date = new Date();
 
+  if (!isVisible) return null;
+
   useEffect(() => {
     if (isVisible) {
       document.body.style.overflow = "hidden"; // Disable scrolling
@@ -36,18 +38,17 @@ export default function AttendancePopup({
     setIsEditable((prev) => !prev);
   };
 
-  const handleInputChange = (sno, dateIndex, value) => {
-    const uppercaseValue = value.slice(0, 1).toUpperCase(); // Ensure single, uppercase letter
+  const handleInputChange = (studentIndex, dateIndex, value) => {
     setAttendanceData((prevData) =>
-      prevData.map((row) =>
-        row.sno === sno
+      prevData.map((student, idx) =>
+        idx === studentIndex
           ? {
-              ...row,
-              dates: row.dates.map((val, idx) =>
-                idx === dateIndex ? uppercaseValue : val
+              ...student,
+              attendances: student.attendances.map((attendance, i) =>
+                i === dateIndex ? value : attendance
               ),
             }
-          : row
+          : student
       )
     );
   };
@@ -57,8 +58,6 @@ export default function AttendancePopup({
     if (value === "A") return "text-[#D91111]";
     return "text-black";
   };
-
-  if (!isVisible) return null;
 
   // get student api
   const getMonthlyAttendance = async () => {
@@ -84,24 +83,52 @@ export default function AttendancePopup({
       );
 
       if (res?.statusCode === 200) {
-        // setAttendanceData(res?.result?.attendances);
         const attendances = res?.result?.attendances || [];
         // console.log(attendances);
-        
+
         const totalDays = new Date(
           date.getFullYear(),
           date.getMonth() + 1,
           0
         ).getDate();
 
+        const updatedAttendanceData = attendances.map((student) => {
+          // Create a map of attendance data by date
+          const attendanceByDate = student.attendances.reduce((acc, item) => {
+            acc[item.date] = item.teacherAttendance === "present" ? "P" : "A";
+            return acc;
+          }, {});
+
+          // Generate an array for all days in the month
+          const monthDates = Array.from({ length: totalDays }, (_, i) => {
+            const currentDate = new Date(
+              date.getFullYear(),
+              date.getMonth(),
+              i + 1
+            )
+              .toISOString()
+              .split("T")[0]; // Format as YYYY-MM-DD
+            return attendanceByDate[currentDate] || ""; // Fill with P/A or ""
+          });
+
+          return {
+            ...student,
+            attendances: monthDates,
+          };
+        });
         // Fill missing days with ""
-        const updatedAttendanceData = attendances.map((student) => ({
-          ...student,
-          attendances: Array.from(
-            { length: totalDays },
-            (_, i) => student.attendances[i] || "" // Use existing data or fill with ""
-          ),
-        }));
+        // const updatedAttendanceData = attendances.map((student) => ({
+        //   ...student,
+        //   attendances: Array.from(
+        //     { length: totalDays },
+        //     (_, i) =>
+        //       student?.attendances[i]?.teacherAttendance === "present"
+        //         ? "P"
+        //         : student?.attendances[i]?.teacherAttendance === "absent"
+        //         ? "A"
+        //         : "" // Use existing data or fill with ""
+        //   ),
+        // }));
 
         setAttendanceData(updatedAttendanceData);
       }
@@ -131,7 +158,7 @@ export default function AttendancePopup({
             />
           </div>
           <div className="text-white text-xl">Monthly Attendance</div>
-          <div className="flex flex-row">
+          <div className="flex flex-row w-[270px] justify-end">
             {isEditable ? (
               <button
                 className="px-4 py-2 text-base font-poppins-regular rounded-full bg-white "
@@ -174,12 +201,17 @@ export default function AttendancePopup({
           <table className="w-full text-center border border-gray-300">
             <thead className="sticky -top-4 bg-white z-10">
               <tr>
-                <th className="border border-gray-300 p-1">S.No</th>
-                <th className="border border-gray-300 p-1 w-[150px]">
+                <th className="border border-gray-300 p-1 font-poppins-regular">
+                  S.No
+                </th>
+                <th className="border border-gray-300 p-1 w-[200px] font-poppins-regular">
                   Student Name
                 </th>
                 {Array.from({ length: 31 }, (_, i) => (
-                  <th key={i} className="border border-gray-300 p-1 w-[35px]">
+                  <th
+                    key={i}
+                    className="border border-gray-300 p-1 w-[35px] font-poppins-regular"
+                  >
                     {i + 1}
                   </th>
                 ))}
@@ -188,7 +220,7 @@ export default function AttendancePopup({
             <tbody>
               {attendanceData.map((data, index) => (
                 <tr key={index}>
-                  <td className="border border-gray-300 p-1">{index+1}</td>
+                  <td className="border border-gray-300 p-1">{index + 1}</td>
                   <td className="border border-gray-300 p-1">
                     {data?.firstname || ""} {data?.lastname || ""}
                   </td>
@@ -198,9 +230,13 @@ export default function AttendancePopup({
                         <select
                           name="attendance"
                           value={value}
-                          onChange={(e) =>
-                            handleInputChange(index, idx, e.target.value)
-                          }
+                          // onChange={(e) =>
+                          //   handleInputChange(index, idx, e.target.value)
+                          // }
+                          onChange={(e) => {
+                            console.log("Dropdown changed:", e.target.value);
+                            handleInputChange(index, idx, e.target.value);
+                          }}
                           className={`w-full text-center bg-transparent uppercase focus:outline-none ${
                             value === "P"
                               ? "text-[#0F4189]"

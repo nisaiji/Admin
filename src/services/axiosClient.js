@@ -1,8 +1,8 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-// const baseURL = "http://localhost:4000/";
-const baseURL = "https://nisaiji.com/";
+const baseURL = "http://localhost:4000/";
+// const baseURL = "https://nisaiji.com/";
 
 export const axiosClient = axios.create({ baseURL });
 
@@ -37,8 +37,11 @@ axiosClient.interceptors.request.use(
 
 axiosClient.interceptors.response.use(
   async (response) => {
-    // console.log(response);
-
+    if (response.config.url.includes("admin/students-excelsheet")) {
+      if (response.status === 200) {
+        return response?.data;
+      }
+    }
     const data = response.data;
     if (data.status === "ok") {
       return data;

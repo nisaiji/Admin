@@ -23,8 +23,10 @@ const Navbar = () => {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [requestsMenuOpen, setRequestsMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const profileMenuRef = useRef(null);
+  const requestsMenuRef = useRef(null);
   const { t } = useTranslation();
 
   const handleToggleMenu = () => {
@@ -35,9 +37,12 @@ const Navbar = () => {
     setProfileMenuOpen((prevState) => !prevState);
   };
 
+  const handleToggleRequestsMenu = () => setRequestsMenuOpen((prev) => !prev);
+
   const closeMenus = () => {
     setMenuOpen(false);
     setProfileMenuOpen(false);
+    setRequestsMenuOpen(false);
   };
 
   // close menu when click outside
@@ -46,7 +51,9 @@ const Navbar = () => {
       menuRef.current &&
       !menuRef.current.contains(event.target) &&
       profileMenuRef.current &&
-      !profileMenuRef.current.contains(event.target)
+      !profileMenuRef.current.contains(event.target) &&
+      requestsMenuRef.current &&
+      !requestsMenuRef.current?.contains(event.target)
     ) {
       closeMenus();
     }
@@ -62,6 +69,7 @@ const Navbar = () => {
     }
     removeItem("access_token");
     removeItem("refresh_token");
+    removeItem("schoolName");
   };
 
   useEffect(() => {
@@ -92,10 +100,10 @@ const Navbar = () => {
               onClick={handleToggleMenu}
               className="flex justify-center items-center cursor-pointer"
             >
-              <button className="text-[#040320] hover:text-[#4834D4] px-2 py-2 text-sm font-bold rounded-md relative">
+              <button className="text-[#040320] hover:text-[#4834D4] flex flex-row gap-2 px-2 py-2 text-sm font-bold rounded-md relative group">
                 {t("setup")}
+              <img src={dropdown} alt="dropdown" className="w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180" />
               </button>
-              <img src={dropdown} alt="dropdown" className="w-4 h-4" />
             </div>
             {/* setup menu */}
             {menuOpen && (
@@ -162,6 +170,8 @@ const Navbar = () => {
               </div>
             )}
           </div>
+
+          {/* students setup*/}
           {!isTeacher && (
             <>
               <Link to="/student" className="py-2">
@@ -169,18 +179,49 @@ const Navbar = () => {
                   {t("roles.student")}
                 </span>
               </Link>
-              <Link to="/requests" className="py-2">
-                <span className="text-[#040320] hover:text-[#4834D4] text-sm font-bold">
-                  {t("titles.requests")}
-                </span>
-              </Link>
-              <Link to="/leave" className="py-2">
-                <span className="text-[#040320] hover:text-[#4834D4] text-sm font-bold">
-                  leave
-                </span>
-              </Link>
             </>
           )}
+
+          {/* Requests Menu */}
+          <div
+            className="relative"
+            onMouseEnter={() => setRequestsMenuOpen(true)}
+            onMouseLeave={() => setRequestsMenuOpen(false)}
+          >
+            <div
+              onClick={handleToggleRequestsMenu}
+              className="flex justify-center items-center cursor-pointer"
+            >
+              <button className="text-[#040320] hover:text-[#4834D4] flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group">
+                {t("titles.requests")}
+                <img
+                  src={dropdown}
+                  alt="dropdown"
+                  className="w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180"
+                />
+              </button>
+            </div>
+            {requestsMenuOpen && (
+              <div
+                ref={requestsMenuRef}
+                className="absolute top-10 w-40 bg-white rounded-[14px] shadow-lg z-10 justify-items-center"
+              >
+                <Link
+                  to="/requests"
+                  className="block px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
+                >
+                  Password Reset
+                </Link>
+                <Link
+                  to="/leave"
+                  className="block px-4 py-3 text-[#040320] hover:text-[#4834D4] hover:bg-white"
+                >
+                  {t("leave")}
+                </Link>
+              </div>
+            )}
+          </div>
+
           <div
             className="relative rounded-xl mr-5"
             onMouseEnter={() => setProfileMenuOpen(true)}

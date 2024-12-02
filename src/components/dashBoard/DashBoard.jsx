@@ -368,7 +368,7 @@ const Dashboard = () => {
         <div className="bg-white rounded-[16px] w-full mx-8">
           <h1 className="text-xl font-semibold mb-0 p-3 pl-10 pt-6">
             {/* {t("dashboard.title")} */}
-            {schoolName}
+            {localStorage.getItem("schoolName") || schoolName}
           </h1>
           <hr className="mx-5" />
           {/* Grids */}
