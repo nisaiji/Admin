@@ -83,12 +83,12 @@ export default function Leaves() {
     selectedTab === "all"
       ? requests
       : selectedTab === "approved"
-      ? requests.filter(
+        ? requests.filter(
           (req) => req.status === "accept" || req.status === "complete"
         )
-      : selectedTab === "rejected"
-      ? requests.filter((req) => req.status === "reject")
-      : requests;
+        : selectedTab === "rejected"
+          ? requests.filter((req) => req.status === "reject")
+          : requests;
 
   const requestsStatus = (status) => {
     //accept,reject,complete,pending
@@ -125,11 +125,10 @@ export default function Leaves() {
             {["all", "approved", "rejected"].map((tab) => (
               <div
                 key={tab}
-                className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
-                  selectedTab === tab
+                className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${selectedTab === tab
                     ? "pb-3 border-b-[3px] border-[#FF793F]"
                     : ""
-                }`}
+                  }`}
                 onClick={() => setSelectedTab(tab)}
               >
                 {t(`labels.${tab}`)}
@@ -166,9 +165,8 @@ export default function Leaves() {
                 {filteredRequests.map((req, index) => (
                   <tr
                     key={index}
-                    className={`${
-                      index % 2 === 0 ? "bg-[#4645900D]" : ""
-                    } border-t `}
+                    className={`${index % 2 === 0 ? "bg-[#4645900D]" : ""
+                      } border-t `}
                   >
                     <td className="px-4 py-2 align-top">
                       <img
@@ -180,9 +178,8 @@ export default function Leaves() {
                           )
                         }
                         alt=""
-                        className={`size-4 ml-8 ${
-                          expandedRow === index ? "rotate-180" : ""
-                        }`}
+                        className={`size-4 ml-8 ${expandedRow === index ? "rotate-180" : ""
+                          }`}
                       />
                     </td>
                     <td className="px-4 py-2 align-top">
@@ -196,6 +193,10 @@ export default function Leaves() {
                             username
                           </p>
                           <input
+                            autocomplete="off"
+                            autocapitalize="none"
+                            autoCorrect="off"
+                            spellcheck="false"
                             type="text"
                             placeholder="Enter Username"
                             value={formData.username}
@@ -206,11 +207,10 @@ export default function Leaves() {
                               }))
                             }
                             disabled={req?.status === "accept"}
-                            className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
-                              req?.status === "accept"
+                            className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${req?.status === "accept"
                                 ? "bg-gray-200 cursor-not-allowed"
                                 : ""
-                            }`}
+                              }`}
                           />
                         </>
                       )}
@@ -223,6 +223,10 @@ export default function Leaves() {
                             Teacher name
                           </p>
                           <input
+                            autocomplete="off"
+                            autocapitalize="none"
+                            autoCorrect="off"
+                            spellcheck="false"
                             type="fullname"
                             placeholder="Substitute Teacher"
                             value={formData.fullname}
@@ -233,11 +237,10 @@ export default function Leaves() {
                               }))
                             }
                             disabled={req?.status === "accept"}
-                            className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
-                              req?.status === "accept"
+                            className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${req?.status === "accept"
                                 ? "bg-gray-200 cursor-not-allowed"
                                 : ""
-                            }`}
+                              }`}
                           />
                         </>
                       )}
@@ -254,6 +257,10 @@ export default function Leaves() {
                           </p>
                           <div className="relative">
                             <input
+                              autocomplete="off"
+                              autocapitalize="none"
+                              autoCorrect="off"
+                              spellcheck="false"
                               type={showPassword ? "text" : "password"}
                               placeholder="Password"
                               value={formData.password}
@@ -264,11 +271,10 @@ export default function Leaves() {
                                 }))
                               }
                               disabled={req?.status === "accept"}
-                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
-                                req?.status === "accept"
+                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${req?.status === "accept"
                                   ? "bg-gray-200 cursor-not-allowed"
                                   : ""
-                              }`}
+                                }`}
                             />
                             {req.status === "accept" ? (
                               <></>
@@ -300,11 +306,10 @@ export default function Leaves() {
                         <button
                           onClick={() => handleSave(req._id, "accept")}
                           disabled={req?.status === "accept"}
-                          className={`${
-                            req.status === "accept"
+                          className={`${req.status === "accept"
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-[#0F4189] text-white"
-                          } text-xs font-poppins-bold px-4 py-2 rounded-md`}
+                            } text-xs font-poppins-bold px-4 py-2 rounded-md`}
                         >
                           Save
                         </button>
