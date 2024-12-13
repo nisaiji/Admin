@@ -277,7 +277,7 @@ export default function StudentUpdate() {
   );
 
   return (
-    <div className="flex justify-center items-center w-full h-full bg-[#F4F5F6] pt-[25px]">
+    <div className="flex justify-center items-center w-full h-full bg-[#93a3b6]/25 pt-[25px]">
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
           <Spinner />
@@ -285,11 +285,11 @@ export default function StudentUpdate() {
       )}
       <Toaster position="top-center" reverseOrder={false} />
       <div className="bg-white rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border">
-        <h1 className="text-4xl font-poppins-bold mt-6">
+        <h1 className="text-2xl font-poppins-bold mt-6">
           {t("titles.studentDetails")}
         </h1>
         <div className="w-full">
-          <h2 className="text-xl font-poppins-regular mt-6 text-left">
+          <h2 className="text-lg font-poppins-regular mt-6 text-left">
             {t("titles.personalDetails")}
           </h2>
           <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
@@ -315,7 +315,7 @@ export default function StudentUpdate() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#4834D4] text-white py-2 px-4 rounded-xl w-36"
+                  className="bg-[#0F4189] text-white py-2 px-4 rounded-xl w-36"
                 >
                   {t("buttons.save")}
                 </button>

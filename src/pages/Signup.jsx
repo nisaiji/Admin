@@ -170,7 +170,7 @@ function Signup() {
               {/* Submit button for form */}
               <button
                 type="submit"
-                className="w-full bg-[#4834D4] py-3 text-white mt-5"
+                className="w-full bg-[#0F4189] py-3 text-white mt-5"
                 disabled={loading}
               >
                 {loading ? t("register.submitting") : t("register.registerNow")}
@@ -180,7 +180,7 @@ function Signup() {
             {/* Link to login page for existing users */}
             <div className="text-right mt-2 text-sm">
               {t("register.haveAccount")}
-              <Link to="/login" className="text-blue-950 font-semibold">
+              <Link to="/login" className="text-[#0F4189] font-semibold">
                 {t("login.login")}
               </Link>
             </div>

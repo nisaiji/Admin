@@ -70,9 +70,9 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
                 ))}
               </div>
             </div>
-            <div className="flex justify-center items-center w-full md:w-1/3 pr-10">
+            <div className="flex justify-center items-start pt-24 w-full md:w-1/3 pr-2">
               <img
-                className="h-[370px] w-[300px] object-contain"
+                className="h-[200px] w-[200px] object-contain"
                 src={
                   currTeacher?.photo
                     ? `data:image/jpeg;base64,${currTeacher?.photo}`

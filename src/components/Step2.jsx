@@ -224,7 +224,7 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
       {/* Navigation buttons */}
       <div className="w-full mt-5 flex justify-between">
         <button
-          className="rounded-lg px-7 h-10 bg-[#4834D4] font-semibold flex items-center justify-center text-white"
+          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white"
           type="button"
           onClick={prevStep}
         >
@@ -239,7 +239,7 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
         </button>
 
         <button
-          className="rounded-lg px-7 h-10 bg-[#4834D4] font-semibold flex items-center justify-center text-white"
+          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center ml-auto text-white"
           type="button"
           onClick={nextStep}
         >

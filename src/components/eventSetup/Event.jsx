@@ -22,14 +22,16 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
   return (
     <div
       className={`${
-        isDarkMode ? "bg-[#102945] " : "bg-white  "
+        isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
       } calendar pl-16 rounded-lg w-full `}
     >
-      <div className="month flex items-center justify-between py-2 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
+      <div className="month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
         <FontAwesomeIcon
           icon={faAngleLeft}
           className={`${
-            isDarkMode ? "text-white" : "text-[#686868]"
+            isDarkMode
+              ? "text-white"
+              : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
           } cursor-pointer size-5`}
           onClick={onPrevMonth}
         />
@@ -39,7 +41,9 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         <FontAwesomeIcon
           icon={faAngleRight}
           className={`${
-            isDarkMode ? "text-white" : "text-[#686868]"
+            isDarkMode
+              ? "text-white"
+              : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
           } cursor-pointer size-5`}
           onClick={onNextMonth}
         />
@@ -77,7 +81,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
     } else if (isToday) {
       return `text-[#0F4189] bg-[#E9EEF2] border-4 border-[#0F4189]`;
     } else {
-      return `text-black border-[#6E6F8126] bg-[#E9EEF2]`;
+      return `text-black border-[#6E6F81]/15 bg-[#E9EEF2]`;
     }
   };
 
@@ -453,7 +457,7 @@ const Event = () => {
   };
 
   return (
-    <div className="grid grid-cols-6 gap-6 px-6 bg-[#E9EEF2]">
+    <div className="grid grid-cols-6 gap-6 px-6 bg-[#93a3b6]/25">
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#F4F5F6] bg-opacity-50 z-30">
           <Spinner />
@@ -466,7 +470,7 @@ const Event = () => {
             {t("dashboard.calendar")}
           </p>
           <div
-            className={`goto flex px-4 gap-3 w-[150px] h-[36px] bg-[#E9EEF2] border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[8px] overflow-hidden`}
+            className={`goto flex px-4 gap-3 w-[150px] h-[36px] bg-[#E9EEF2]/50 border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[8px] overflow-hidden`}
           >
             {/* search input */}
             <button className={`goto-mobnbtn py-1  text-white`}>
@@ -475,7 +479,7 @@ const Event = () => {
             <input
               type="text"
               placeholder={t("calendar.gotoDatePlaceholder")}
-              className={`date-input outline-none text-[14px] text-black w-14 bg-[#E9EEF2]/50 `}
+              className={`date-input outline-none text-[14px] text-black w-14 bg-[#E9EEF2]/25`}
               onBlur={handleGotoDate}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {

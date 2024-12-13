@@ -184,7 +184,7 @@ export default function Studentlist() {
   return (
     <div
       className={`${
-        isDarkMode ? "bg-[#112138]" : "bg-[#E9EEF2]"
+        isDarkMode ? "bg-[#112138]" : "bg-[#93a3b6]/25"
       } flex px-6 flex-col`}
     >
       <Toaster />

@@ -1,5 +1,6 @@
 import React from "react";
 import ArrowRight from "../assets/images/ArrowRight.png";
+import logo from "../assets/images/deer logo.png";
 import { useTranslation } from "react-i18next";
 
 // Reusable Input Component
@@ -74,7 +75,7 @@ const Step1 = ({ formik, nextStep }) => {
           <button
             onClick={nextStep}
             type="button"
-            className="rounded-lg px-7 h-10 bg-[#0F4189] font-semibold flex items-center justify-center ml-auto text-white"
+            className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center ml-auto text-white"
           >
             <div className="flex items-center gap-2">
               <p className="text-base">{t("adminProfile.next")}</p>

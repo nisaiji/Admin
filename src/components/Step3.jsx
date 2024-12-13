@@ -16,9 +16,9 @@ const Step3 = ({ formik, prevStep, loading }) => {
 
   return (
     <div className="flex flex-col">
-      <h5 className="font-bold text-xl mt-5 text-center">
+      {/* <h5 className="font-bold text-xl mt-5 text-center">
         {t("register.setYourPassword")}
-      </h5>
+      </h5> */}
       <form className="mt-5" onSubmit={formik.handleSubmit}>
         {/* Password Field */}
         <div className="mt-5 relative">
@@ -84,7 +84,7 @@ const Step3 = ({ formik, prevStep, loading }) => {
         <div className="flex justify-between w-full mt-5">
           {/* Back Button */}
           <button
-            className="rounded-lg px-7 h-10 bg-[#4834D4] font-semibold flex items-center justify-center text-white"
+            className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white"
             type="button" // No validation check on back button
             onClick={prevStep}
           >
@@ -100,7 +100,7 @@ const Step3 = ({ formik, prevStep, loading }) => {
 
           {/* Submit Button */}
           <button
-            className="rounded-lg px-7 h-10 bg-[#4834D4] font-semibold flex items-center justify-center text-white"
+            className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center ml-auto text-white"
             type="submit"
           >
             <div className="flex items-center gap-2">

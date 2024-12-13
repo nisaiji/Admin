@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Tick from "../assets/images/Tick.png";
+import logo from "../assets/images/deer logo.png";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
@@ -158,25 +159,25 @@ function SchoolDetailSignup() {
 
   const Progress = () => (
     <div>
-      <div className="bg-[#4834D4] h-1 w-[500px] mx-auto mt-6 translate-y-6"></div>
+      <div className="bg-[#0F4189] h-1 w-[500px] mx-auto mt-6 translate-y-6"></div>
       <div className="flex justify-around mb-2">
         <div
           className={`size-12 rounded-full flex items-center justify-center z-10 ${
-            currentStep === 1 ? "bg-[#4834D4]" : "bg-[#05022B]"
+            currentStep === 1 ? "bg-[#0F4189]" : "bg-[#05022B]"
           } text-white`}
         >
           {currentStep === 1 ? 1 : <img src={Tick} alt="Tick" />}
         </div>
         <div
           className={`size-12 rounded-full flex items-center justify-center z-10 ${
-            currentStep === 2 ? "bg-[#4834D4]" : "bg-[#05022B]"
+            currentStep === 2 ? "bg-[#0F4189]" : "bg-[#05022B]"
           } text-white`}
         >
           {currentStep <= 2 ? 2 : <img src={Tick} alt="Tick" />}
         </div>
         <div
           className={`size-12 rounded-full flex items-center justify-center z-10 ${
-            currentStep === 3 ? "bg-[#4834D4]" : "bg-[#05022B]"
+            currentStep === 3 ? "bg-[#0F4189]" : "bg-[#05022B]"
           } text-white`}
         >
           3
@@ -185,7 +186,7 @@ function SchoolDetailSignup() {
       <div className="flex">
         <div
           className={`text-sm w-1/3 text-center font-semibold ${
-            currentStep === 1 ? "text-[#4834D4]" : "text-black"
+            currentStep === 1 ? "text-[#0F4189]" : "text-black"
           }`}
         >
           {t("register.basicInfo")}
@@ -193,7 +194,7 @@ function SchoolDetailSignup() {
         {currentStep > 1 && (
           <div
             className={`text-sm w-1/3 text-center font-semibold ${
-              currentStep === 2 ? "text-[#4834D4]" : "text-black"
+              currentStep === 2 ? "text-[#0F4189]" : "text-black"
             }`}
           >
             {t("register.addressInfo")}
@@ -202,7 +203,7 @@ function SchoolDetailSignup() {
         {currentStep > 2 && (
           <div
             className={`text-sm w-1/3 text-center font-semibold ${
-              currentStep === 3 ? "text-[#4834D4]" : "text-black"
+              currentStep === 3 ? "text-[#0F4189]" : "text-black"
             }`}
           >
             {t("register.setPassword")}
@@ -231,17 +232,20 @@ function SchoolDetailSignup() {
       <div className="min-h-screen">
         <Toaster position="top-center" reverseOrder={false} />
         <div className="flex items-center justify-center h-full">
-          <div className="bg-white rounded-2xl backdrop-blur-lg w-[700px] mx-auto flex flex-col py-12">
+          <div className="bg-white rounded-2xl backdrop-blur-lg w-[700px] mx-auto flex flex-col py-6">
             <div className="text-center text-black">
               <h2 className="flex items-center justify-center gap-2 mb-4 text-3xl">
-                <Link to="/">
-                  <div className="bg-[#4834D4] w-12 h-12 flex items-center justify-center rounded-lg">
-                    <span className="text-white font-bold">A</span>
-                  </div>
+                <Link to="/" className="flex items-center">
+                  <img src={logo} alt="logo" className="size-10" />
+
+                  {/* <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
+              <span className="text-[24px] font-bold">{t("A")}</span>
+
+            </div> */}
                 </Link>
-                <span className="font-bold text-3xl">LOGO</span>
+                {/* <span className="font-bold text-3xl">LOGO</span> */}
               </h2>
-              <h2 className="font-bold text-4xl mt-3">
+              <h2 className="font-bold text-2xl mt-3 text-[#0F4189]">
                 {t("register.setupAccount")}
               </h2>
               <Progress />

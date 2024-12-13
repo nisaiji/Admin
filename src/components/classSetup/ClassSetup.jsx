@@ -135,7 +135,7 @@ function ClassSetup() {
       )}
       <div
         className={`${
-          isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-[#E9EEF2]"
+          isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-[#93a3b6]/25"
         } w-full max-w-[1600px]`}
       >
         <div className="px-6 py-3">
@@ -199,7 +199,7 @@ function ClassSetup() {
                       className="flex flex-col justify-between h-full"
                       onClick={() => toggleFlip(index)}
                     >
-                      <div className="px-4 py-3 flex flex-row flex-wrap ">
+                      <div className="px-4 py-3 flex flex-row flex-wrap">
                         {/* section data */}
                         {data.section.map((section, j) => (
                           <div
@@ -214,14 +214,18 @@ function ClassSetup() {
                               })
                             }
                             className={`${
-                              isDarkMode ? "border-white" : "border-rose-500"
-                            } w-4 h-4 md:w-6 md:h-6 mx-2 my-1 border rounded-lg flex justify-center items-center`}
+                              isDarkMode
+                                ? "border-white"
+                                : "border-[#FF793F] text-[#FF793F] hover:bg-[#FF793F] hover:text-[#ffffff]"
+                            } w-4 h-4 md:w-6 md:h-6 mx-2 my-2 border rounded-2xl flex justify-center items-center`}
                             key={j}
                           >
                             <div
                               className={`${
-                                isDarkMode ? "text-white" : "text-rose-500"
-                              } text-xs md:text-base`}
+                                isDarkMode
+                                  ? "text-white"
+                                  : "border-[#FF793F] text-[#FF793F] hover:bg-[#FF793F] hover:text-[#ffffff]"
+                              } text-sm`}
                             >
                               {section.name}
                             </div>

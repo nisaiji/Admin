@@ -6,6 +6,7 @@ import { axiosClient } from "../services/axiosClient";
 import LoginVideo from "../assets/videos/LoginVideo.mp4";
 import hide from "../assets/images/hide.png";
 import show from "../assets/images/show.png";
+import logo from "../assets/images/deer logo.png";
 import EndPoints from "../services/EndPoints";
 import Spinner from "../components/Spinner";
 import * as Yup from "yup";
@@ -89,10 +90,10 @@ function Login() {
   });
 
   return (
-    <div className="min-h-screen py-20 bg-[#FFFFFF] relative">
+    <div className="min-h-screen py-20 bg-[#fafafa] relative">
       {/* Background video for the login page */}
       <video
-        className="fixed top-0 left-0 h-[700px] w-[770px] bg-[#FFFFFF] bg-blend-multiply object-cover"
+        className="fixed top-0 left-0 h-[700px] w-[720px] bg-[#fafafa] bg-blend-multiply object-cover"
         autoPlay
         loop
         muted
@@ -106,30 +107,28 @@ function Login() {
         </h1>
       </div> */}
       {/* Form container */}
-      <div className="flex flex-col lg:flex-row mx-auto overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[540px] bg-[#C4C4C4]/20 backdrop-filter: blur(25px) rounded-3xl">
+      <div className="flex flex-col lg:flex-row mx-auto overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[460px] bg-[#93a3b6]/15 backdrop-filter: blur(25px) rounded-3xl">
         {/* Form starts here */}
         <form onSubmit={formik.handleSubmit} className="w-full h-full">
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#C4C4C4]/20 bg-opacity-50 z-30">
+            <div className="absolute inset-0 flex items-center justify-center bg-[#93a3b6]/10 bg-opacity-50 z-30">
               <Spinner />
             </div>
           )}
           {/* Logo section */}
-          <div className="text-[#040320] w-full px-[42px] py-[45px] justify-center">
+          <div className="text-[#0F4189] w-full px-[42px] py-4 justify-center">
             <h2 className="flex text-3xl mb-4 justify-center">
-              <Link to="/">
-                <div className="bg-[#040320] w-[30px] h-[30px] rounded-md flex justify-center items-center">
-                  <span className="text-white font-bold text-xl">
-                    {t("login.A")}
-                  </span>
-                </div>
+              <Link to="/" className="flex items-center">
+                <img src={logo} alt="logo" className="size-12" />
+
+                {/* <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
+              <span className="text-[24px] font-bold">{t("A")}</span>
+
+            </div> */}
               </Link>
-              <span className="font-bold text-xl ml-2 text-[#040320]">
-                {t("login.LOGO")}
-              </span>
             </h2>
-            <h2 className="font-bold text-[32px]">{t("login.login")}</h2>
-            <p className="text-[#040320]/70 py-3">{t("login.enterDetails")}</p>
+            <h2 className="font-bold text-[24px]">{t("login.login")}</h2>
+            {/* <p className="text-[#040320]/70 py-3">{t("login.enterDetails")}</p> */}
 
             {/* Input field for email/username */}
             <div className="mt-6 border-b border-[#686868]/60 w-full">
@@ -193,11 +192,11 @@ function Login() {
             {/* Submit button for login */}
             <div className="mt-6">
               <button
-                className="w-full py-1.5 text-center bg-[#4834d4] text-white font-poppins-bold rounded-lg disabled:opacity-50"
+                className="w-full py-1.5 text-center bg-[#0F4189] text-white font-poppins-bold rounded-lg disabled:opacity-50"
                 type="submit"
                 disabled={formik.isSubmitting}
               >
-                {t("login.login")}
+                {t("login.loginButton")}
               </button>
             </div>
 
@@ -206,18 +205,18 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setIsAdmin(!isAdmin)}
-                className="w-full py-1 border border-[#4834d4] text-[#4834d4] rounded-lg font-bold"
+                className="w-full py-1 border border-[#0F4189] text-[#0F4189] rounded-lg font-bold"
               >
                 {t("login.toggleButton")} {isAdmin ? "Teacher" : "Admin"}
               </button>
             </div>
 
             {isAdmin && (
-              <div className="flex justify-center text-white text-xs opacity-70 mt-6">
+              <div className="flex justify-center text-white text-xs mt-6">
                 <div className="text-[#040320]/70 pr-1">
                   {t("login.notHaveAccount")}
                 </div>
-                <Link to="/signup" className="text-[#4834d4] font-bold">
+                <Link to="/signup" className="text-[#0F4189] font-bold">
                   {t("login.register")}
                 </Link>
               </div>

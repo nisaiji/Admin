@@ -355,9 +355,9 @@ export default function StudentSection() {
   );
 
   return (
-    <div className="bg-[#E9EEF2] px-6 py-6 ">
+    <div className="bg-[#93a3b6]/25 px-6 py-6 ">
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#E9EEF2] bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6]/25 bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
@@ -376,7 +376,7 @@ export default function StudentSection() {
               <div
                 className={` ${
                   isDarkMode ? "text-white" : ""
-                } text-[20px] px-5 font-medium text-gray-800`}
+                } text-[20px] font-bold text-gray-800`}
               >
                 {isTeacher
                   ? localStorage.getItem("firstname")
@@ -394,10 +394,12 @@ export default function StudentSection() {
                 </div>
                 <div
                   onClick={() => setShowAttendance(true)}
-                  className="flex flex-row justify-center items-center px-2 py-1 space-x-2 rounded border border-[#040320]"
+                  className="flex flex-row justify-center items-center px-2 py-1 space-x-2 rounded border border-[#FF793F]/10 bg-[#FF793F]/10"
                 >
                   <img src={book} alt="" className="size-[10px] " />
-                  <span className="text-xs font-medium">Attendance</span>
+                  <span className="text-xs font-poppins-bold text-[#FF793F]">
+                    Attendance
+                  </span>
                 </div>
               </div>
             </div>
@@ -439,9 +441,7 @@ export default function StudentSection() {
                   className="bg-[#0F4189] rounded-l-lg h-[32px] border border-[#0F4189] py-1.5 px-4 flex flex-row justify-center items-center"
                 >
                   <img src={importIcon} alt="" className="size-3 mr-2" />
-                  <div className="text-white text-sm font-poppins-regular">
-                    import
-                  </div>
+                  <div className="text-white text-sm font-medium">Import</div>
                 </button>
                 <button
                   type="button"
@@ -645,7 +645,7 @@ export default function StudentSection() {
                   <td className="px-2 py-0 text-center text-[#040320] font-poppins font-medium border border-[#c1c0ca]">
                     {students.length + 1}
                   </td>
-                  <td className=" py-1 px-1 border border-[#c1c0ca]">
+                  <td className="py-1 px-2 border border-[#c1c0ca]">
                     <input
                       type="text"
                       value={newStudent.firstname}
@@ -653,7 +653,7 @@ export default function StudentSection() {
                         handleInputChange(null, "firstname", e.target.value)
                       }
                       placeholder={t("placeholders.firstName")}
-                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center border-none  focus:outline-offset-[5px] focus:outline-[#0F4189]/75 ${
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center border-none  focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
@@ -661,7 +661,7 @@ export default function StudentSection() {
                       ref={newStudentFirstNameRef}
                     />
                   </td>
-                  <td className=" py-1 px-1 border border-[#c1c0ca]">
+                  <td className="py-1 px-2 border border-[#c1c0ca]">
                     <input
                       type="text"
                       value={newStudent.lastname}
@@ -669,20 +669,20 @@ export default function StudentSection() {
                         handleInputChange(null, "lastname", e.target.value)
                       }
                       placeholder={t("placeholders.lastName")}
-                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none  focus:outline-offset-[5px] focus:outline-[#0F4189]/75 ${
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none  focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
                       }`}
                     />
                   </td>
-                  <td className=" py-0 border border-[#c1c0ca]">
+                  <td className="py-1 px-1 border border-[#c1c0ca]">
                     <select
                       value={newStudent.gender}
                       onChange={(e) =>
                         handleInputChange(null, "gender", e.target.value)
                       }
-                      className={`w-full h-full px-2 py-3 font-poppins font-medium text-center border-none focus:outline-offset-[2px] focus:outline-[#0F4189]/75 ${
+                      className={`w-full h-full px-2 py-3 font-poppins font-medium text-center border-none focus:outline-offset-[4px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-black"
@@ -704,7 +704,7 @@ export default function StudentSection() {
                       ))}
                     </select>
                   </td>
-                  <td className=" py-1 px-1 border border-[#c1c0ca]">
+                  <td className="py-1 px-2 border border-[#c1c0ca]">
                     <input
                       type="text"
                       value={newStudent.parentName}
@@ -712,14 +712,14 @@ export default function StudentSection() {
                         handleInputChange(null, "parentName", e.target.value)
                       }
                       placeholder={t("placeholders.parentName")}
-                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[5px] focus:outline-[#0F4189]/75 ${
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"
                       }`}
                     />
                   </td>
-                  <td className=" py-1 px-1 border border-[#c1c0ca]">
+                  <td className="py-1 px-2 border border-[#c1c0ca]">
                     <input
                       type="text"
                       value={newStudent.phone}
@@ -727,7 +727,7 @@ export default function StudentSection() {
                         handleInputChange(null, "phone", e.target.value)
                       }
                       placeholder={t("placeholders.phoneNumber")}
-                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[5px] focus:outline-[#0F4189]/75 ${
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
                           ? "bg-gray-800 text-white"
                           : "bg-white text-gray-900"

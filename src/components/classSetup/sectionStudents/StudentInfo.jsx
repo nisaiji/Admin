@@ -100,8 +100,8 @@ export default function StudentInfo({ currStudent, modelOpen }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex justify-center items-end pb-5 bg-gray-900 bg-opacity-50">
-        <div className="relative flex flex-col w-[80%] h-4/5 bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="fixed inset-0 z-50 flex justify-center items-end pb-5 bg-[#93a3b6]/25 bg-opacity-50">
+        <div className="relative flex flex-col w-[80%] h-4/5 bg-[#fafafa] rounded-lg shadow-lg overflow-hidden">
           <div
             className="absolute top-3 right-5 cursor-pointer"
             onClick={() => modelOpen(false)}
@@ -123,7 +123,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
                   <div className="flex pb-2" key={index}>
                     <p className="w-1/3">{label}</p>
                     <p className="w-1/5">-</p>
-                    <p className="w-1/3 font-poppins-bold">{value}</p>
+                    <p className="w-1/3 font-medium">{value}</p>
                   </div>
                 ))}
               </div>
@@ -134,15 +134,15 @@ export default function StudentInfo({ currStudent, modelOpen }) {
                   <div className="flex pb-2" key={index}>
                     <p className="w-1/3">{label}</p>
                     <p className="w-1/5">-</p>
-                    <p className="w-1/3 font-poppins-bold">{value}</p>
+                    <p className="w-1/3 font-medium">{value}</p>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="flex justify-center items-center w-full mt-32">
+            <div className="flex justify-end items-center w-full mr-6">
               <img
                 id="StudentInfoImage"
-                className="h-[370px] w-[300px] object-center"
+                className="h-[150px] w-[150px] object-center"
                 src={
                   currStudent?.photo
                     ? `data:image/jpeg;base64,${currStudent?.photo}`
@@ -153,9 +153,9 @@ export default function StudentInfo({ currStudent, modelOpen }) {
             </div>
           </div>
           {/* screenshot button */}
-          <div className="flex justify-center mt-5 space-x-5">
+          <div className="flex justify-end mt-5 mr-8 mb-4 space-x-5">
             <button
-              className="px-4 py-2 bg-green-500 text-white rounded"
+              className="px-4 py-2 bg-[#0f4189] text-white text-sm font-medium rounded-md"
               onClick={handleScreenshot}
             >
               {t("buttons.screenshot")}

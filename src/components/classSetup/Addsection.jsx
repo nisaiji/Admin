@@ -156,13 +156,13 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
     <>
       <div className="fixed inset-0 flex justify-center items-end pb-10 bg-[#686868] bg-opacity-50">
         {loading && (
-          <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+          <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
             <Spinner />
           </div>
         )}
         <div
           className={`${
-            isDarkMode ? "bg-blue-950" : "bg-white"
+            isDarkMode ? "bg-blue-950" : "bg-[#fafafa]"
           } w-full max-w-3xl h-3/4 py-10 px-12 rounded-2xl shadow-lg overflow-y-auto`}
         >
           <div className="flex justify-between items-center mb-4">
@@ -209,7 +209,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                     name="teacherId"
                     value={newSection.teacherId}
                     onChange={handleChange}
-                    className={` bg-white border border-[#686868] rounded-xl py-1 px-8 ${
+                    className={` bg-[#fafafa] border border-[#686868] rounded-xl py-1 px-8 ${
                       isDarkMode ? "bg-gray-300" : "text-black bg-[#686868]"
                     } w-[250px]`}
                     ref={selectRef}
@@ -224,7 +224,9 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                 ) : (
                   <div
                     className={`border border-[#686868]/25 rounded-xl py-1 px-8 ${
-                      isDarkMode ? "bg-gray-300" : "text-[#686868] bg-[#F4F5F6]"
+                      isDarkMode
+                        ? "bg-gray-300"
+                        : "text-[#686868] bg-[#93a3b6]/10"
                     } w-[250px]`}
                   >
                     {section.teacher.firstname} {section.teacher.lastname}
@@ -285,7 +287,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                   value={newSection.teacherId}
                   onChange={handleChange}
                   className={`border-2 border-[#686868]/25 rounded-xl py-1 px-8 ${
-                    isDarkMode ? "bg-gray-300" : "text-black bg-[#F4F5F6]"
+                    isDarkMode ? "bg-gray-300" : "text-black bg-[#93a3b6]/10"
                   } w-[250px]`}
                   ref={selectRef}
                   disabled={activeSection !== null}
@@ -299,7 +301,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                 </select>
                 <button
                   onClick={handleSaveSection}
-                  className={`mr-2 bg-[#4834D4] `}
+                  className={`mr-2 bg-[#0F4189] `}
                   style={{
                     height: 32,
                     width: 75,
