@@ -117,7 +117,7 @@ export default function Requests() {
   return (
     <>
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6]/50 bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
@@ -134,7 +134,7 @@ export default function Requests() {
                   key={tab}
                   className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
                     selectedTab === tab
-                      ? "pb-3 border-b-[3px] border-[#FF793F]"
+                      ? "pb-3 border-b-[3px] border-[#FF793F] text-[#FF793F]"
                       : ""
                   }`}
                   onClick={() => setSelectedTab(tab)}

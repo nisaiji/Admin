@@ -648,8 +648,8 @@ export default function AdminProfile() {
       </div>
 
       {/* Social Profile */}
-      <div className="flex flex-col p-10 mx-10 mt-6 rounded-2xl w-full bg-white max-w-[1320px] max-md:px-5">
-        <div className="text-4xl font-bold tracking-tight leading-6 text-neutral-800">
+      <div className="flex flex-col p-10 mx-10 mt-6 rounded-2xl w-full bg-white max-md:px-5">
+        <div className="text-2xl font-bold tracking-tight leading-6 text-neutral-800">
           {t("adminProfile.socialProfile")}
         </div>
         {/* phone */}

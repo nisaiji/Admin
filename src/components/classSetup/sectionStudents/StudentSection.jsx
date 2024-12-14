@@ -394,7 +394,7 @@ export default function StudentSection() {
                 </div>
                 <div
                   onClick={() => setShowAttendance(true)}
-                  className="flex flex-row justify-center items-center px-2 py-1 space-x-2 rounded border border-[#FF793F]/10 bg-[#FF793F]/10"
+                  className="flex flex-row justify-center items-center px-2 py-1 space-x-2 rounded border border-[#FF793F]/10 bg-[#FF793F]/10 hover:bg-[#FF793F]/10 hover:border-[#FF793F]/50"
                 >
                   <img src={book} alt="" className="size-[10px] " />
                   <span className="text-xs font-poppins-bold text-[#FF793F]">

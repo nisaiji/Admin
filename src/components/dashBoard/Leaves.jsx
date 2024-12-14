@@ -87,7 +87,7 @@ export default function Leaves() {
                 key={tab}
                 className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
                   selectedTab === tab
-                    ? "pb-3 border-b-[3px] border-[#FF793F]"
+                    ? "pb-3 border-b-[3px] border-[#FF793F] text-[#FF793F]"
                     : ""
                 }`}
                 onClick={() => setSelectedTab(tab)}
@@ -240,7 +240,7 @@ export default function Leaves() {
                         <div className="flex justify-center gap-3">
                           <button
                             onClick={() => setExpandedRow(index)}
-                            className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md"
+                            className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A]/50 bg-[#4CBC9A]/5 hover:bg-[#4CBC9A]/10 hover:border-[#4CBC9A] p-1 rounded-md"
                           >
                             Approve
                           </button>
@@ -248,7 +248,7 @@ export default function Leaves() {
                             onClick={() =>
                               handleRequestAction(req._id, "reject")
                             }
-                            className="text-[#FE4040] font-poppins-bold border-2 border-[#FE4040] p-1 px-3 rounded-md"
+                            className="text-[#FE4040] font-poppins-bold border-2 border-[#FE4040]/50 hover:bg-[#FE4040]/10 hover:border-[#FE4040] p-1 px-3 rounded-md"
                           >
                             Reject
                           </button>
@@ -257,7 +257,7 @@ export default function Leaves() {
                         // )
                         <button
                           onClick={() => setExpandedRow(index)}
-                          className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md"
+                          className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A]/50 bg-[#4CBC9A]/5 hover:bg-[#4CBC9A]/10 hover:border-[#4CBC9A] p-1 rounded-md"
                         >
                           {req.status}
                         </button>

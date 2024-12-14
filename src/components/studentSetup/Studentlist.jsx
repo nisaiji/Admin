@@ -213,20 +213,20 @@ export default function Studentlist() {
               <div
                 className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px]  basis-0 w-fit max-md:max-w-full max-md:hidden`}
               >
-                <div className="flex gap-2 px-10 py-3.5 rounded-3xl w-full">
+                <div className="flex gap-3 px-10 py-3.5 rounded-3xl w-full">
                   <div className="flex justify-between w-full">
                     <FormControl
-                      size="medium"
+                      size="small"
                       className={`${
                         isDarkMode ? "bg-blue-950" : ""
-                      } w-[150px] mr-[10px] rounded-[14px]`}
+                      } mx-3 w-[150px] mr-[10px] rounded-md bg-[#E9EEF2]/25`}
                     >
                       <InputLabel
                         id="demo-simple-select-label"
                         style={{
                           zIndex: 1,
-                          backgroundColor: "white",
-                          fontSize: 16,
+                          backgroundColor: "#FAFAFA",
+                          fontSize: 14,
                         }}
                       >
                         {t("titles.class")}
@@ -264,15 +264,20 @@ export default function Studentlist() {
                     </FormControl>
 
                     <FormControl
-                      size="medium"
+                      size="small"
                       sx={{ marginX: 1 }}
                       className={`${
                         isDarkMode ? "bg-blue-950" : ""
-                      } mx-2 w-[150px] mr-[10px] rounded-[14px]`}
+                      } mx-3 w-[150px] mr-[10px] rounded-[14px] bg-[#E9EEF2]/25`}
                     >
                       <InputLabel
                         id="demo-simple-select-label"
                         className=" mr-[10px] text-[14px]"
+                        style={{
+                          zIndex: 1,
+                          backgroundColor: "#FAFAFA",
+                          fontSize: 14,
+                        }}
                       >
                         {t("titles.section")}
                       </InputLabel>
@@ -294,14 +299,14 @@ export default function Studentlist() {
                         })}
                       </Select>
                     </FormControl>
-                    <div className="flex px-3 rounded-[14px]  mx-2 w-full max-w-[800px] shadow-sm border border-t-gray">
-                      <div className=" flex items-center pl-3 pointer-events-none">
+                    <div className="flex px-3 rounded-[4px] mx-0 w-full shadow-sm border border-t-gray bg-[#E9EEF2]/25">
+                      <div className=" flex items-center pr-4 pl-4pointer-events-none">
                         <img src={Search} alt="" className="size-5" />
                       </div>
                       <input
                         type="text"
                         placeholder={t("placeholders.search")}
-                        className="focus:outline-none pl-3 w-full"
+                        className="focus:outline-none pl-3 w-full bg-[#E9EEF2]/15 text-black"
                         onChange={(e) => {
                           setName(e.target.value);
                         }}
@@ -314,7 +319,7 @@ export default function Studentlist() {
                       />
                     </div>
                     <button
-                      className="hover:bg-[#E9EEF2]/50 text-white bg-white hover:border-[#E9EEF2] hover:border-2 ml-2 w-20 text-lg rounded-md flex items-center justify-center"
+                      className="hover:bg-white text-white bg-[#E9EEF2]/50 hover:border-[#E9EEF2] hover:border-2 ml-2 w-20 text-lg rounded-md flex items-center justify-center"
                       onClick={handleClear}
                     >
                       <img src={clear} alt="Clear" className="w-6 h-6" />

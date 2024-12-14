@@ -210,10 +210,10 @@ export default function Teacher() {
                     className={`${
                       isDarkMode
                         ? "bg-gray-800 text-white"
-                        : "bg-[#E9EEF2]/50 text-[#686868]"
+                        : "bg-[#E9EEF2]/50 text-black"
                     } placeholder-[rgba(196, 196, 196, 0.40)] px-14 py-2 rounded-xl focus:outline-[#05022B]/10 border border-[#05022B]/10 w-full ${
                       searchQuery
-                        ? "border-[#0f4189]/25 text-[#2b2e4a] "
+                        ? "border-[#0f4189]/25 text-[#2b2e4a]"
                         : "border-[#05022B]/10 "
                     }`}
                     onFocus={() => searchInputRef.current.focus()}

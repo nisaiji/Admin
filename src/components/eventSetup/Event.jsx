@@ -25,7 +25,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
       } calendar pl-16 rounded-lg w-full `}
     >
-      <div className="month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
+      <div className="month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)] hover:border-[#686868]/25">
         <FontAwesomeIcon
           icon={faAngleLeft}
           className={`${
@@ -81,7 +81,7 @@ const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
     } else if (isToday) {
       return `text-[#0F4189] bg-[#E9EEF2] border-4 border-[#0F4189]`;
     } else {
-      return `text-black border-[#6E6F81]/15 bg-[#E9EEF2]`;
+      return `text-black border-[#6E6F81]/15 bg-[#E9EEF2] hover:border-[#0F4189]/50 `;
     }
   };
 
@@ -470,7 +470,7 @@ const Event = () => {
             {t("dashboard.calendar")}
           </p>
           <div
-            className={`goto flex px-4 gap-3 w-[150px] h-[36px] bg-[#E9EEF2]/50 border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[8px] overflow-hidden`}
+            className={`goto flex px-4 gap-3 w-[150px] h-[36px] bg-[#E9EEF2]/50 border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[8px] overflow-hidden hover:border-[#686868]/25`}
           >
             {/* search input */}
             <button className={`goto-mobnbtn py-1  text-white`}>
