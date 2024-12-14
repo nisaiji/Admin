@@ -8,12 +8,18 @@ import DeletePopup from "../DeleteMessagePopup";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const { t } = useTranslation();
 
-  const [newSection, setNewSection] = useState({ name: "", teacherId: "" });
+  const [newSection, setNewSection] = useState({
+    name: "",
+    teacherId: "",
+    startTime: new Date(),
+  });
   const [sections, setSections] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [showForm, setShowForm] = useState(true);
@@ -69,6 +75,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
         name: getNextSectionName(sections),
         teacherId: newSection.teacherId,
         classId: clickedClassId,
+        startTime: newSection.startTime,
       };
       const res = await axiosClient.post(
         EndPoints.ADMIN.REGISTER_SECTION,
@@ -82,7 +89,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
       toast.error(e);
     } finally {
       setLoading(false);
-      setNewSection({ name: "", teacherId: "" });
+      setNewSection({ name: "", teacherId: "", startTime: new Date() });
       setShowForm(true);
     }
   };
@@ -163,7 +170,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
         <div
           className={`${
             isDarkMode ? "bg-blue-950" : "bg-white"
-          } w-full max-w-3xl h-3/4 py-10 px-12 rounded-2xl shadow-lg overflow-y-auto`}
+          } w-full max-w-3xl h-4/5 py-5 px-12 rounded-2xl shadow-lg overflow-y-auto`}
         >
           <div className="flex justify-between items-center mb-4">
             <div
@@ -183,18 +190,19 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
               {t("buttons.done")}
             </button>
           </div>
-          <div className="flex justify-around mt-[30px] mb-[10px] ">
+          <div className="flex justify-between px-8 mt-[30px] mb-[10px] ">
             <div className="font-medium text-[16px]">{t("sections")}</div>
             <div className="font-medium text-[16px]">{t("ClassTeacher")}</div>
+            <div className="font-medium text-[16px]">{t("startTime")}</div>
             <div className="font-medium text-[16px]">{t("Actions")}</div>
           </div>
           <hr />
-          <div className="my-6 max-h-56 overflow-y-auto">
+          <div className="my-6 max-h-72 overflow-y-auto">
             {/* section details */}
             {sections.map((section, index) => (
               <div
                 key={section._id}
-                className={`flex items-center justify-around mb-2 p-4 ${
+                className={`flex items-center justify-between mb-2 p-4 ${
                   isDarkMode ? "bg-blue-800" : ""
                 } rounded-lg shadow-sm`}
               >
@@ -230,12 +238,41 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                     {section.teacher.firstname} {section.teacher.lastname}
                   </div>
                 )}
+                <div className="mt-2">
+                  <DatePicker
+                    selected={section?.startTime || new Date()}
+                    // onChange={(date) => {
+                    //   const startOfDay = new Date(date);
+                    //   startOfDay.setHours(0, 0, 0, 0);
+                    //   const timestamp = startOfDay.getTime();
+                    //   setNewSection((prev) => ({
+                    //     ...prev,
+                    //     startTime: timestamp,
+                    //   }));
+                    // }}
+                    dateFormat="dd/MM/YYYY"
+                    maxDate={new Date()}
+                    onKeyDown={(e) => e.preventDefault()}
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    // disabled={activeSection !== section._id}
+                    disabled={true}
+                    className="border-2 rounded-xl py-1 px-4 w-36"
+                  />
+                </div>
                 {/* actions */}
                 <div className="flex items-center">
                   {activeSection === section._id ? (
                     <button
                       onClick={() => handleUpdateTeacherSection(section)}
-                      className={`mr-2 bg-[#0F4189] text-white h-[30px] w-[60px] rounded-2xl `}
+                      className={`mr-2 bg-[#4834D4] `}
+                      style={{
+                        height: 32,
+                        width: 75,
+                        borderRadius: 12,
+                        color: "white",
+                      }}
                     >
                       {t("buttons.save")}
                     </button>
@@ -269,7 +306,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
             {/* add section */}
             {showForm && (
               <div
-                className={`flex items-center justify-around mb-2 p-4 rounded-lg shadow-sm ${
+                className={`flex items-center justify-between mb-2 p-4 rounded-lg shadow-sm ${
                   isDarkMode ? "bg-blue-800" : ""
                 }`}
               >
@@ -297,6 +334,27 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                     </option>
                   ))}
                 </select>
+                <div className="mt-2">
+                  <DatePicker
+                    selected={newSection.startTime}
+                    onChange={(date) => {
+                      const startOfDay = new Date(date);
+                      startOfDay.setHours(0, 0, 0, 0);
+                      const timestamp = startOfDay.getTime();
+                      setNewSection((prev) => ({
+                        ...prev,
+                        startTime: timestamp,
+                      }));
+                    }}
+                    dateFormat="dd/MM/YYYY"
+                    maxDate={new Date()}
+                    onKeyDown={(e) => e.preventDefault()}
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    className="border-2 rounded-xl py-1 px-4 w-36"
+                  />
+                </div>
                 <button
                   onClick={handleSaveSection}
                   className={`mr-2 bg-[#4834D4] `}

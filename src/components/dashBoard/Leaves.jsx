@@ -7,7 +7,10 @@ import { axiosClient } from "../../services/axiosClient";
 import dropdown from "../../assets/images/dropdown.png";
 import hide from "../../assets/images/hide.png";
 import show from "../../assets/images/show.png";
+import cross from "../../assets/images/cross.png";
+import approve from "../../assets/images/approve.png";
 import ConformationPopup from "../ConformationPopup";
+import moment from "moment";
 
 export default function Leaves() {
   const { t } = useTranslation();
@@ -17,7 +20,8 @@ export default function Leaves() {
   const [expandedRow, setExpandedRow] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConformationPopup, setshowConformationPopup] = useState(false);
-  const [currentReqId, setCurrentReqId] = useState("");
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [currentReq, setCurrentReq] = useState([]);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -30,12 +34,12 @@ export default function Leaves() {
       const res = await axiosClient.get(
         `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&status=accept,reject,pending,complete&limit=1000`
       );
+
       if (res?.statusCode === 200) {
         setRequests(res?.result?.leaveRequests[0]?.teachers || []);
-        // console.log({ requests });
       }
     } catch (e) {
-      toast.error(e.message);
+      toast.error(e);
     } finally {
       setLoading(false);
     }
@@ -72,6 +76,7 @@ export default function Leaves() {
         toast.success(res?.result);
         setExpandedRow(null);
         setFormData({ username: "", password: "", fullname: "" });
+        setCurrentReq([]);
         fetchLeaves();
       }
     } catch (e) {
@@ -83,12 +88,12 @@ export default function Leaves() {
     selectedTab === "all"
       ? requests
       : selectedTab === "approved"
-        ? requests.filter(
+      ? requests.filter(
           (req) => req.status === "accept" || req.status === "complete"
         )
-        : selectedTab === "rejected"
-          ? requests.filter((req) => req.status === "reject")
-          : requests;
+      : selectedTab === "rejected"
+      ? requests.filter((req) => req.status === "reject")
+      : requests;
 
   const requestsStatus = (status) => {
     //accept,reject,complete,pending
@@ -125,10 +130,11 @@ export default function Leaves() {
             {["all", "approved", "rejected"].map((tab) => (
               <div
                 key={tab}
-                className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${selectedTab === tab
+                className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
+                  selectedTab === tab
                     ? "pb-3 border-b-[3px] border-[#FF793F]"
                     : ""
-                  }`}
+                }`}
                 onClick={() => setSelectedTab(tab)}
               >
                 {t(`labels.${tab}`)}
@@ -136,223 +142,280 @@ export default function Leaves() {
             ))}
           </div>
           <hr className="border-[#9391A5]/25 mx-10 -translate-y-[1px]" />
-          <div className="overflow-x-auto mt-6">
-            <table className="w-full shadow-sm overflow-hidden">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
-                    {t(`labels.classTeacher`)}
-                  </th>
-                  <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
-                    {t(`labels.reasonForLeave`)}
-                  </th>
-                  <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
-                    {t(`labels.class`)}
-                  </th>
-                  <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
-                    {t(`labels.pastLeaves`)}
-                  </th>
-                  <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
-                    {t(`labels.description`)}
-                  </th>
-                  <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
-                    {t(`labels.action`)}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRequests.map((req, index) => (
-                  <tr
-                    key={index}
-                    className={`${index % 2 === 0 ? "bg-[#4645900D]" : ""
+          {filteredRequests.length === 0 ? (
+            <div className="w-full h-48 flex justify-center items-center">
+              <p className="text-[#0F4189]/75 text-3xl font-poppins-bold">
+                No request right now
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto mt-6">
+              <table className="w-full shadow-sm overflow-hidden">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                      {t(`labels.classTeacher`)}
+                    </th>
+                    <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                      {t(`labels.reasonForLeave`)}
+                    </th>
+                    <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                      {t(`labels.class`)}
+                    </th>
+                    <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
+                      {t(`labels.pastLeaves`)}
+                    </th>
+                    <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
+                      {t(`labels.description`)}
+                    </th>
+                    <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
+                      {t(`labels.action`)}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRequests.map((req, index) => (
+                    <tr
+                      key={index}
+                      className={`${
+                        index % 2 === 0 ? "bg-[#4645900D]" : ""
                       } border-t `}
-                  >
-                    <td className="px-4 py-2 align-top">
-                      <img
-                        src={dropdown}
-                        onClick={() =>
-                          req.status === "accept" &&
-                          setExpandedRow((prev) =>
-                            prev === index ? null : index
-                          )
-                        }
-                        alt=""
-                        className={`size-4 ml-8 ${expandedRow === index ? "rotate-180" : ""
+                    >
+                      <td className="px-4 py-2 align-top">
+                        <img
+                          src={dropdown}
+                          onClick={() =>
+                            req?.status === "accept" ||
+                            (req?.status === "complete" &&
+                              setExpandedRow((prev) =>
+                                prev === index ? null : index
+                              ))
+                          }
+                          alt=""
+                          className={`size-4 ml-8 ${
+                            expandedRow === index ? "rotate-180" : ""
                           }`}
-                      />
-                    </td>
-                    <td className="px-4 py-2 align-top">
-                      <p className="text-sm font-medium">
-                        {req?.teacher?.firstname || ""}{" "}
-                        {req?.teacher?.lastname || ""}
-                      </p>
-                      {expandedRow === index && (
-                        <>
-                          <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
-                            username
-                          </p>
-                          <input
-                            autocomplete="off"
-                            autocapitalize="none"
-                            autoCorrect="off"
-                            spellcheck="false"
-                            type="text"
-                            placeholder="Enter Username"
-                            value={formData.username}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                username: e.target.value,
-                              }))
-                            }
-                            disabled={req?.status === "accept"}
-                            className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${req?.status === "accept"
-                                ? "bg-gray-200 cursor-not-allowed"
-                                : ""
-                              }`}
-                          />
-                        </>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 align-top">
-                      <p className="text-sm font-medium">{req?.reason || ""}</p>
-                      {expandedRow === index && (
-                        <>
-                          <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
-                            Teacher name
-                          </p>
-                          <input
-                            autocomplete="off"
-                            autocapitalize="none"
-                            autoCorrect="off"
-                            spellcheck="false"
-                            type="fullname"
-                            placeholder="Substitute Teacher"
-                            value={formData.fullname}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                fullname: e.target.value,
-                              }))
-                            }
-                            disabled={req?.status === "accept"}
-                            className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${req?.status === "accept"
-                                ? "bg-gray-200 cursor-not-allowed"
-                                : ""
-                              }`}
-                          />
-                        </>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 align-top">
-                      <p className="text-sm font-medium">
-                        {req?.teacher?.class || ""}{" "}
-                        {req?.teacher?.section || ""}
-                      </p>
-                      {expandedRow === index && (
-                        <>
-                          <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
-                            password
-                          </p>
-                          <div className="relative">
+                        />
+                      </td>
+                      <td className="px-4 py-2 align-top">
+                        <p className="text-sm font-medium">
+                          {req?.teacher?.firstname || ""}{" "}
+                          {req?.teacher?.lastname || ""}
+                        </p>
+                        {expandedRow === index && (
+                          <>
+                            <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
+                              username
+                            </p>
                             <input
                               autocomplete="off"
                               autocapitalize="none"
                               autoCorrect="off"
                               spellcheck="false"
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Password"
-                              value={formData.password}
+                              type="text"
+                              placeholder="Enter Username"
+                              value={
+                                req?.status === "accept" ||
+                                req?.status === "complete"
+                                  ? req?.guestTeacher?.username || ""
+                                  : formData.username
+                              }
                               onChange={(e) =>
                                 setFormData((prev) => ({
                                   ...prev,
-                                  password: e.target.value,
+                                  username: e.target.value,
                                 }))
                               }
-                              disabled={req?.status === "accept"}
-                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${req?.status === "accept"
+                              disabled={
+                                req?.status === "accept" ||
+                                req?.status === "complete"
+                              }
+                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
+                                req?.status === "accept" ||
+                                req?.status === "complete"
                                   ? "bg-gray-200 cursor-not-allowed"
                                   : ""
-                                }`}
+                              }`}
                             />
-                            {req.status === "accept" ? (
-                              <></>
-                            ) : (
-                              <div
-                                onClick={() => setShowPassword((prev) => !prev)}
-                                className="absolute right-2 top-3 cursor-pointer text-gray-600"
-                              >
-                                <img
-                                  src={showPassword ? hide : show}
-                                  alt="passwordIcon"
-                                  className="relative right-1 top-0 transform w-6 h-6 cursor-pointer"
-                                  style={{
-                                    filter:
-                                      "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
-                                  }}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 text-center space-y-7">
-                      <p className="text-sm font-medium">
-                        {req?.pastLeaves || 0}
-                      </p>
-                      {expandedRow === index && (
-                        <button
-                          onClick={() => handleSave(req._id, "accept")}
-                          disabled={req?.status === "accept"}
-                          className={`${req.status === "accept"
-                              ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-[#0F4189] text-white"
+                          </>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 align-top">
+                        <p className="text-sm font-medium">
+                          {req?.reason || ""}
+                        </p>
+                        {expandedRow === index && (
+                          <>
+                            <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
+                              Teacher name
+                            </p>
+                            <input
+                              autocomplete="off"
+                              autocapitalize="none"
+                              autoCorrect="off"
+                              spellcheck="false"
+                              type="fullname"
+                              placeholder="Substitute Teacher"
+                              value={
+                                req?.status === "accept" ||
+                                req?.status === "complete"
+                                  ? req?.guestTeacher?.tagline || ""
+                                  : formData.fullname
+                              }
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  fullname: e.target.value,
+                                }))
+                              }
+                              disabled={
+                                req?.status === "accept" ||
+                                req?.status === "complete"
+                              }
+                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
+                                req?.status === "accept" ||
+                                req?.status === "complete"
+                                  ? "bg-gray-200 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            />
+                          </>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 align-top">
+                        <p className="text-sm font-medium">
+                          {req?.teacher?.class || ""}{" "}
+                          {req?.teacher?.section || ""}
+                        </p>
+                        {expandedRow === index && (
+                          <>
+                            <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
+                              password
+                            </p>
+                            <div className="relative">
+                              <input
+                                autocomplete="off"
+                                autocapitalize="none"
+                                autoCorrect="off"
+                                spellcheck="false"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                value={
+                                  req?.status === "accept" ||
+                                  req?.status === "complete"
+                                    ? req?.guestTeacher?.password || ""
+                                    : formData.password
+                                }
+                                onChange={(e) =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    password: e.target.value,
+                                  }))
+                                }
+                                disabled={
+                                  req?.status === "accept" ||
+                                  req?.status === "complete"
+                                }
+                                className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
+                                  req?.status === "accept" ||
+                                  req?.status === "complete"
+                                    ? "bg-gray-200 cursor-not-allowed"
+                                    : ""
+                                }`}
+                              />
+                              {req?.status === "accept" ||
+                              req?.status === "complete" ? (
+                                <></>
+                              ) : (
+                                <div
+                                  onClick={() =>
+                                    setShowPassword((prev) => !prev)
+                                  }
+                                  className="absolute right-2 top-3 cursor-pointer text-gray-600"
+                                >
+                                  <img
+                                    src={showPassword ? hide : show}
+                                    alt="passwordIcon"
+                                    className="relative right-1 top-0 transform w-6 h-6 cursor-pointer"
+                                    style={{
+                                      filter:
+                                        "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-center space-y-7">
+                        <p className="text-sm font-medium">
+                          {req?.pastLeaves || 0}
+                        </p>
+                        {expandedRow === index && (
+                          <button
+                            onClick={() => handleSave(req._id, "accept")}
+                            disabled={
+                              req?.status === "accept" ||
+                              req?.status === "complete"
+                            }
+                            className={`${
+                              req?.status === "accept" ||
+                              req?.status === "complete"
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-[#0F4189] text-white"
                             } text-xs font-poppins-bold px-4 py-2 rounded-md`}
-                        >
-                          Save
-                        </button>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 align-top">
-                      <p className="text-sm font-medium text-center">
-                        {req?.description || ""}
-                      </p>
-                    </td>
-                    <td className="px-4 py-2 w-[200px] align-top text-sm font-medium text-center">
-                      {req.status === "pending" ? (
-                        <div className="flex justify-center gap-3">
+                          >
+                            Save
+                          </button>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 flex justify-center">
+                        <img
+                          src={approve}
+                          alt=""
+                          className="w-[70px] h-[32px] cursor-pointer"
+                          onClick={() => {
+                            setCurrentReq(req);
+                            setIsPopupOpen(true);
+                          }}
+                        />
+                      </td>
+                      <td className="px-4 py-2 w-[200px] align-top text-sm font-medium text-center">
+                        {req.status === "pending" ? (
+                          <div className="flex justify-center gap-3">
+                            <button
+                              onClick={() => setExpandedRow(index)}
+                              className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => {
+                                setCurrentReq(req);
+                                setshowConformationPopup(true);
+                              }}
+                              className="text-[#FE4040] font-poppins-bold border-2 border-[#FE4040] p-1 px-3 rounded-md"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : (
                           <button
                             onClick={() => setExpandedRow(index)}
-                            className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md"
+                            className="text-white text-sm font-poppins-regular bg-[#68686880] py-1 px-3 rounded-md"
                           >
-                            Approve
+                            {requestsStatus(req?.status)}
                           </button>
-                          <button
-                            onClick={() => {
-                              setCurrentReqId(req._id);
-                              setshowConformationPopup(true);
-                            }}
-                            className="text-[#FE4040] font-poppins-bold border-2 border-[#FE4040] p-1 px-3 rounded-md"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setExpandedRow(index)}
-                          className="text-white text-sm font-poppins-regular bg-[#68686880] py-1 px-3 rounded-md"
-                        >
-                          {requestsStatus(req?.status)}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
@@ -360,11 +423,69 @@ export default function Leaves() {
         isVisible={showConformationPopup}
         onClose={() => setshowConformationPopup(false)}
         onSubmit={() => {
-          handleSave(currentReqId, "reject");
+          handleSave(currentReq._id, "reject");
           setshowConformationPopup(false);
         }}
         message={"Please Confirm reject this leave request"}
       />
+
+      {/* Popup */}
+      {isPopupOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="p-6 bg-white rounded-2xl shadow-lg max-w-md w-full relative">
+            {/* Popup Header */}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">
+                {currentReq?.reason || ""}
+              </h3>
+              <img
+                className="h-10 w-10"
+                src={cross}
+                alt="Close"
+                onClick={() => {
+                  setCurrentReq([]);
+                  setIsPopupOpen(false);
+                }}
+              />
+            </div>
+
+            {/* Dates */}
+            <div className="flex flex-row gap-3 mb-4">
+              <div className="flex flex-col bg-gray-100 rounded-xl w-full border border-stone-500 border-opacity-30 p-3">
+                <span className="text-xs text-stone-500">Start Date</span>
+                <span className="text-sm text-slate-950">
+                  {moment(currentReq.startTime).format("DD/MM/YYYY") || ""}
+                </span>
+              </div>
+              <div className="flex flex-col bg-gray-100 rounded-xl w-full border border-stone-500 border-opacity-30 p-3">
+                <span className="text-xs text-stone-500">End Date</span>
+                <span className="text-sm text-slate-950">
+                  {moment(currentReq.endTime).format("DD/MM/YYYY") || ""}
+                </span>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Description
+              </label>
+              <textarea
+                id="description"
+                className="w-full h-[150px] px-4 py-2 mt-2 bg-gray-100 rounded-xl border border-stone-500 border-opacity-30"
+                placeholder="Description in 160 characters"
+                maxLength={160}
+                aria-label="Leave request description"
+                value={currentReq?.description || ""}
+                disabled={true}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

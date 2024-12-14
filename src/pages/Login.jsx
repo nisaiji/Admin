@@ -1,3 +1,4 @@
+// Import necessary dependencies and assets
 import { useState, useMemo } from "react";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,15 +14,40 @@ import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { setAuthData } from "../store/AppAuthSlice";
 
+/**
+ * Login Component
+ *
+ * This component renders the login page, allowing users to authenticate as either
+ * Admin or Teacher. It includes:
+ * - Form validation with Yup.
+ * - Form management with Formik.
+ * - API integration with axios for login requests.
+ * - UI toggles for password visibility and role switching.
+ * - A video background for aesthetic appeal.
+ */
 function Login() {
+  // Redux hook to dispatch actions
   const dispatch = useDispatch();
+
+  // State to toggle between Admin and Teacher login
   const [isAdmin, setIsAdmin] = useState(true);
+
+  // React Router hook for navigation
   const navigate = useNavigate();
+
+  // State for managing password visibility
   const [ishide, setIsHide] = useState(true);
+
+  // State for managing loading spinner visibility
   const [loading, setLoading] = useState(false);
+
+  // Translation hook for multilingual support
   const [t] = useTranslation();
 
-  // Memoized validation schema for login form to avoid recalculating on re-render
+  /**
+   * Memoized Yup validation schema
+   * Dynamically adjusts based on the login role (Admin/Teacher).
+   */
   const validationSchema = useMemo(
     () =>
       Yup.object({
@@ -40,18 +66,20 @@ function Login() {
     [isAdmin, t]
   );
 
-  // Setup formik for handling form submission, validation, and field management
+  /**
+   * Formik setup for managing form submission, validation, and field state.
+   */
   const formik = useFormik({
     initialValues: {
       userInput: "",
       password: "",
     },
-    validationSchema, // Schema to validate the input
+    validationSchema, // Validation schema for form fields
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        setLoading(true);
+        setLoading(true); // Show loading spinner
 
-        // Set API endpoint and payload based on Admin/Teacher toggle
+        // Define API endpoint and payload based on login role
         const endpoint = isAdmin
           ? EndPoints.ADMIN.ADMIN_LOGIN
           : EndPoints.TEACHER.TEACHER_LOGIN;
@@ -63,34 +91,39 @@ function Login() {
               platform: "web",
             };
 
-        // Submit login request
+        // Make API request for login
         const response = await axiosClient.post(endpoint, payload);
         const { result } = response;
 
-        // If login is successful
+        // Handle successful login
         if (response?.statusCode === 200) {
+          // Store user data in localStorage
           isAdmin
             ? localStorage.setItem("username", result?.username)
             : localStorage.setItem("firstname", result?.firstname);
           localStorage.setItem("access_token", result?.accessToken);
           localStorage.setItem("refresh_token", result?.refreshToken);
+
+          // Update Redux state with access token
           dispatch(setAuthData(result?.accessToken));
+
+          // Show success message and navigate to homepage
           toast.success(t("messages.login.success"));
           resetForm();
           navigate("/");
         }
       } catch (e) {
-        toast.error(e);
+        toast.error(e); // Show error message
       } finally {
-        setLoading(false);
-        setSubmitting(false);
+        setLoading(false); // Hide loading spinner
+        setSubmitting(false); // Reset form submission state
       }
     },
   });
 
   return (
     <div className="min-h-screen py-20 bg-[#FFFFFF] relative">
-      {/* Background video for the login page */}
+      {/* Background video */}
       <video
         className="fixed top-0 left-0 h-[700px] w-[770px] bg-[#FFFFFF] bg-blend-multiply object-cover"
         autoPlay
@@ -99,22 +132,17 @@ function Login() {
         src={LoginVideo}
         type="video/mp4"
       />
-      {/* Welcome text and description */}
-      {/* <div className="absolute top-[100px] left-[92px] z-10">
-        <h1 className="text-[#] text-[48px] leading-[60px] font-poppins font-semibold w-[50%]">
-          {t("login.welcome")}
-        </h1>
-      </div> */}
+
       {/* Form container */}
       <div className="flex flex-col lg:flex-row mx-auto overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[540px] bg-[#C4C4C4]/20 backdrop-filter: blur(25px) rounded-3xl">
-        {/* Form starts here */}
         <form onSubmit={formik.handleSubmit} className="w-full h-full">
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-[#C4C4C4]/20 bg-opacity-50 z-30">
               <Spinner />
             </div>
           )}
-          {/* Logo section */}
+
+          {/* Logo and header */}
           <div className="text-[#040320] w-full px-[42px] py-[45px] justify-center">
             <h2 className="flex text-3xl mb-4 justify-center">
               <Link to="/">
@@ -131,7 +159,7 @@ function Login() {
             <h2 className="font-bold text-[32px]">{t("login.login")}</h2>
             <p className="text-[#040320]/70 py-3">{t("login.enterDetails")}</p>
 
-            {/* Input field for email/username */}
+            {/* Email/username input */}
             <div className="mt-6 border-b border-[#686868]/60 w-full">
               <input
                 className="py-1 px-2 w-full bg-transparent text-[#040320] placeholder-[#686868]/50 focus:outline-none"
@@ -147,14 +175,13 @@ function Login() {
                 value={formik.values.userInput}
               />
             </div>
-            {/* Validation error for userInput */}
             {formik.touched.userInput && formik.errors.userInput && (
               <div className="text-red-500 text-xs">
                 {formik.errors.userInput}
               </div>
             )}
 
-            {/* Input field for password with toggle visibility feature */}
+            {/* Password input with visibility toggle */}
             <div className="mt-6 relative border-b border-[#686868]/60 w-full">
               <input
                 className="py-1 px-2 w-full bg-transparent text-[#040320] placeholder-[#686868]/50 focus:outline-none"
@@ -164,7 +191,6 @@ function Login() {
                 onChange={formik.handleChange}
                 value={formik.values.password}
               />
-              {/* Password visibility toggle */}
               <img
                 src={ishide ? hide : show}
                 onClick={() => setIsHide(!ishide)}
@@ -175,7 +201,6 @@ function Login() {
                     "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
                 }}
               />
-              {/* Validation error for password */}
               {formik.touched.password && formik.errors.password && (
                 <div className="text-red-500 text-xs">
                   {formik.errors.password}
@@ -190,7 +215,7 @@ function Login() {
               </Link>
             </div>
 
-            {/* Submit button for login */}
+            {/* Submit button */}
             <div className="mt-6">
               <button
                 className="w-full py-1.5 text-center bg-[#4834d4] text-white font-poppins-bold rounded-lg disabled:opacity-50"
@@ -201,7 +226,7 @@ function Login() {
               </button>
             </div>
 
-            {/* Toggle button to switch between Admin and Teacher login */}
+            {/* Toggle between Admin and Teacher */}
             <div className="mt-3">
               <button
                 type="button"
@@ -214,18 +239,18 @@ function Login() {
 
             {isAdmin && (
               <div className="flex justify-center text-white text-xs opacity-70 mt-6">
-                <div className="text-[#040320]/70 pr-1">
-                  {t("login.notHaveAccount")}
-                </div>
-                <Link to="/signup" className="text-[#4834d4] font-bold">
-                  {t("login.register")}
-                </Link>
+                <p>
+                  {t("login.registrationMessage")}{" "}
+                  <Link to="/signup" className="text-[#4834d4] font-bold">
+                    {t("login.register")}
+                  </Link>
+                </p>
               </div>
             )}
           </div>
         </form>
       </div>
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster />
     </div>
   );
 }

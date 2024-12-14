@@ -329,13 +329,52 @@ const Dashboard = () => {
   const chartOptions = {
     maintainAspectRatio: false,
     scales: {
-      x: { stacked: true, grid: { display: false } },
+      x: {
+        stacked: true,
+        grid: { display: false },
+      },
       y: {
         min: 0,
         max: totalStudentClassSectionWise,
         ticks: { stepSize: Math.ceil(totalStudentClassSectionWise / 10) },
         stacked: true,
         grid: { display: false },
+      },
+    },
+    plugins: {
+      tooltip: {
+        callbacks: {
+          title: (tooltipItems) => {
+            if (!tooltipItems || tooltipItems.length === 0) return "";
+
+            const index = tooltipItems[0].dataIndex;
+
+            // Calculate the date for Weekly or Monthly view
+            if (selectedOption === "Weekly") {
+              // Assuming the week starts on the current date
+              const startOfWeek = new Date(); // Replace with your starting date if needed
+              const currentDate = new Date(
+                startOfWeek.getFullYear(),
+                startOfWeek.getMonth(),
+                startOfWeek.getDate() + index
+              );
+              return currentDate.toLocaleDateString("en-GB"); // Format: dd/mm/yyyy
+            } else if (selectedOption === "Monthly") {
+              const year = date.year; // Year from your data
+              const month = date.month; // Month from your data (0-indexed)
+              const currentDate = new Date(year, month, index + 1);
+              return currentDate.toLocaleDateString("en-GB"); // Format: dd/mm/yyyy
+            }
+
+            return "";
+          },
+          label: (tooltipItem) => {
+            if (!tooltipItem) return "";
+            const dataset = tooltipItem.dataset || {};
+            const value = dataset.data?.[tooltipItem.dataIndex] || 0;
+            return `${dataset.label || "Value"}: ${value}`;
+          },
+        },
       },
     },
   };

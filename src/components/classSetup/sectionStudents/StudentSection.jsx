@@ -26,7 +26,7 @@ export default function StudentSection() {
   const searchInputRef = useRef(null);
   const [students, setStudents] = useState([]);
   const [currStudent, setCurrStudent] = useState([]);
-  const [classTeacher, setClassTeacher] = useState([]);
+  const [classData, setClassData] = useState([]);
   const [studentInfoModelOpen, setStudentInfoModelOpen] = useState(false);
   const [editSNo, setEditSNo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,7 +69,8 @@ export default function StudentSection() {
       const res = await axiosClient.get(
         `${EndPoints.ADMIN.SECTION_INFO}/${sectionId}`
       );
-      if (res?.statusCode === 200) setClassTeacher(res.result.teacher);
+
+      if (res?.statusCode === 200) setClassData(res?.result);
     } catch (e) {
       toast.error(e);
     }
@@ -379,7 +380,9 @@ export default function StudentSection() {
               >
                 {isTeacher
                   ? localStorage.getItem("firstname")
-                  : `${classTeacher.firstname} ${classTeacher.lastname}`}
+                  : `${classData?.teacher?.firstname || ""} ${
+                      classData?.teacher?.lastname || ""
+                    }`}
               </div>
               <div className="flex flex-row justify-center items-center">
                 <div
@@ -773,6 +776,9 @@ export default function StudentSection() {
           onClose={() => setShowAttendance(false)}
           sectionId={sectionId}
           classId={classId}
+          className={isTeacher ? teacherClassName : className}
+          sectionName={isTeacher ? teacherSectionName : sectionName}
+          startTime={classData?.section?.startTime || new Date()}
         />
       )}
     </div>

@@ -60,18 +60,10 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
 };
 
 // return days of month with handling styles
-const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
+const Day = ({ day, isHoliday, onClick, isSunday, isToday }) => {
   const renderCss = () => {
-    if (isHoliday && hasEvent) {
-      return `
-        text-white
-        bg-gradient-to-br from-[#D91111] from-45% via-[#ffffff] to-[#4834D4] to-55%
-        border-[#D91111] border-t-0 border-r-0 border-b-0 border-l-0
-        `;
-    } else if (isHoliday) {
+    if (isHoliday) {
       return `text-white bg-[#FE4040] border-[#FE4040]`;
-    } else if (hasEvent) {
-      return `text-white bg-[#4834D4] border-[#4834D4]`;
     } else if (isSunday) {
       return `text-[#F29E38] bg-[#F29E38]/5 border-[#F29E38]/25`;
     } else if (isToday) {
@@ -126,7 +118,6 @@ const Event = () => {
       title: prevData?.editData?.title || "",
       description: prevData?.editData?.description || "",
       holiday: prevData?.editData?.holiday || false,
-      event: prevData?.editData?.event || false,
       date: prevData?.date ? moment(prevData.date).format("YYYY-MM-DD") : "",
     });
     const handleChange = (e) => {
@@ -174,30 +165,6 @@ const Event = () => {
               className="w-full p-2 mb-2 border border-gray-300 rounded-lg"
             />
           </div>
-          {/* <div className="mb-4">
-            <label className="inline-flex items-center">
-              <input
-                type="checkbox"
-                name="holiday"
-                checked={newEventForm.holiday}
-                onChange={handleChange}
-                className="form-checkbox"
-              />
-              <span className="ml-2">{t("events.holiday")}</span>
-            </label>
-          </div>
-          <div className="mb-4">
-            <label className="inline-flex items-center">
-              <input
-                type="checkbox"
-                name="event"
-                checked={newEventForm.event}
-                onChange={handleChange}
-                className="form-checkbox"
-              />
-              <span className="ml-2">{t("events.event")}</span>
-            </label>
-          </div> */}
           <div className="flex justify-between mt-4">
             <button
               className="px-4 py-2 bg-[#6E6F81]/15 rounded-lg"
@@ -252,14 +219,6 @@ const Event = () => {
     }
   };
 
-  // const handleToday = () => {
-  //   const todayDate = new Date();
-  //   setToday(todayDate);
-  //   setMonth(todayDate.getMonth());
-  //   setYear(todayDate.getFullYear());
-  //   setActiveDay(todayDate.getDate());
-  // };
-
   const handleGotoDate = (e) => {
     const [mm, yyyy] = e.target.value.split("/");
     if (mm && yyyy && mm > 0 && mm < 13 && yyyy.length === 4) {
@@ -282,10 +241,6 @@ const Event = () => {
       toast.error(t("toasts.descRequired"));
       return false;
     }
-    // if (!form.holiday && !form.event) {
-    //   toast.error(t("toasts.oneCheckbox"));
-    //   return false;
-    // }
     return true;
   };
 
@@ -295,11 +250,9 @@ const Event = () => {
       setLoading(true);
       if (!validateForm(newEvent)) return;
       const formattedEvent = {
-        ...newEvent,
         title: capitalizeFirstLetter(newEvent.title.trim()),
         description: capitalizeFirstLetter(newEvent.description.trim()),
         date: moment(newEvent.date).format("yyyy-MM-DD"),
-        holiday: true, //always holiday while creating event
       };
       let res;
       if (eventId) {
@@ -317,7 +270,7 @@ const Event = () => {
       if (res?.statusCode === 200) {
         setShowAddEvent(false);
         fetchEvents();
-        toast.success(res.result);
+        toast.success(res?.result);
       }
     } catch (e) {
       toast.error(e);
@@ -400,11 +353,10 @@ const Event = () => {
         return returnValue ? null : false;
       };
 
-      const hasEvent = checkEventProperty(events, "event");
-      const isHoliday = checkEventProperty(events, "holiday");
       const title = checkEventProperty(events, "title", true);
       const description = checkEventProperty(events, "description", true);
       const eventId = checkEventProperty(events, "_id", true);
+      const isHoliday = title ? true : false;
 
       const handleClick = () => {
         if (eventId) {
@@ -413,7 +365,6 @@ const Event = () => {
             title,
             description,
             holiday: isHoliday,
-            event: hasEvent,
           });
         } else handleDayClick(day);
       };
@@ -423,7 +374,6 @@ const Event = () => {
           key={day}
           day={day}
           isActive={isActive}
-          hasEvent={hasEvent}
           isHoliday={isHoliday}
           onClick={handleClick}
           isSunday={isSunday}
@@ -559,16 +509,9 @@ const Event = () => {
                         {itm.description}
                       </div>
                       <div className="flex">
-                        {itm.holiday && (
-                          <div className="py-0.5 px-3 rounded-3xl text-[#FE4040] bg-[#FE4040]/5 text-[12px] font-bold">
-                            {t("dashboard.holiday")}
-                          </div>
-                        )}
-                        {itm.event && (
-                          <div className="py-0 text-center text-[12px] font-bold rounded-3xl text-[#4834D4]">
-                            {t("dashboard.Event")}
-                          </div>
-                        )}
+                        <div className="py-0.5 px-3 rounded-3xl text-[#FE4040] bg-[#FE4040]/5 text-[12px] font-bold">
+                          {t("dashboard.holiday")}
+                        </div>
                       </div>
                     </div>
                   </div>

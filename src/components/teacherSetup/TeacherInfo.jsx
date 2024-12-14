@@ -14,7 +14,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
       `${currTeacher?.firstname} ${currTeacher?.lastname}`,
     ],
     [
-      t("labels.university"),
+      t("labels.class"),
       `${currTeacher?.section?.classId?.name || ""} ${
         currTeacher?.section?.name || CONSTANT.NA
       }`,

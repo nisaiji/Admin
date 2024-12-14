@@ -3,8 +3,8 @@ const EndPoints = {
     // ADMIN AUTH
     ADMIN_REGISTER: "admin",
     ADMIN_LOGIN: "admin/login",
-    REQUESTS: "event/admin",
-    MODIFY_REQUEST: "event/admin",
+    REQUESTS: "change-password/admin",
+    MODIFY_REQUEST: "change-password/admin",
 
     // ADMIN DASHBOARD
     STUDENT_COUNT: "admin-dashboard/present-students",
@@ -35,6 +35,7 @@ const EndPoints = {
     GET_DEMO_EXCEL: "admin/students-excelsheet",
     UPLOAD_EXCEL: "student/excel",
     GET_ATTENDANCE: "attendance",
+    UPDATE_ATTENDANCE: "attendance/teacher/bulk-mark",
 
     // ADMIN SECTION STUDENTS
     GET_SECTION_STUDENTS: "student/admin",
