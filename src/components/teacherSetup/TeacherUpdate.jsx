@@ -155,7 +155,7 @@ const TeacherUpdate = () => {
   ];
 
   return (
-    <div className="flex justify-center items-center w-full h-full bg-[#E9EEF2] pt-[25px]">
+    <div className="flex justify-center items-center w-full h-full bg-[#93a3b6]/25 pt-[25px]">
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
           <Spinner />

@@ -81,7 +81,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className="bg-[#fafafa] border-b border-gray-100 px-10 py-4 h-[72px] text-white sticky top-0 z-40 shadow-md shadow-gray-200">
+    <div className="bg-[#fafafa] border-b border-gray-100 px-10 py-4 h-[72px] text-white sticky top-0 z-40 shadow-sm shadow-[#686868]/15">
       <div className="flex items-center justify-between">
         <div className="flex items-center ml-3">
           <Link to="/" className="flex items-center">
@@ -250,7 +250,7 @@ const Navbar = () => {
             {profileMenuOpen && (
               <div
                 ref={profileMenuRef}
-                className="absolute top-full right-0 w-[120px] text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white bg-white shadow-lg z-10 justify-items-center"
+                className="absolute top-full right-0 w-[120px] text-[#040320] text-sm bg-[#fafafa] shadow-lg z-10 justify-items-center"
                 onClick={closeMenus}
               >
                 <div className="py-1">

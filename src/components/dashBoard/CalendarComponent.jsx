@@ -21,7 +21,9 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         <FontAwesomeIcon
           icon={faAngleLeft}
           className={`${
-            isDarkMode ? "text-white" : "text-[#686868]"
+            isDarkMode
+              ? "text-white"
+              : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
           } cursor-pointer size-4`}
           onClick={onPrevMonth}
         />
@@ -31,7 +33,9 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         <FontAwesomeIcon
           icon={faAngleRight}
           className={`${
-            isDarkMode ? "text-white" : "text-[#686868]"
+            isDarkMode
+              ? "text-white"
+              : "text-[#686868] hover:bg-bg-[#E9EEF2] rounded-2xl p-1"
           } cursor-pointer size-4`}
           onClick={onNextMonth}
         />

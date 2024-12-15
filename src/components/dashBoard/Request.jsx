@@ -104,11 +104,11 @@ export default function Requests() {
   return (
     <>
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
-      <div className="bg-[#E9EEF2] px-6 py-4">
+      <div className="bg-[#93a3b6]/25 px-6 py-4">
         <div className="bg-[#fafafa] min-h-screen rounded-[16px]">
           <Toaster position="top-center" reverseOrder={false} />
           <div>

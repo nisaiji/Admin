@@ -234,7 +234,7 @@ export default function AdminProfile() {
   return (
     <form
       onSubmit={formik.handleSubmit}
-      className="flex flex-col items-center bg-[#E9EEF2] p-6"
+      className="flex flex-col items-center bg-[#93a3b6]/25 p-6"
     >
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">

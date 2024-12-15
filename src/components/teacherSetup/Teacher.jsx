@@ -178,11 +178,11 @@ export default function Teacher() {
     <>
       {/* Loading spinner */}
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#E9EEF2] bg-opacity-50 z-30">
+        <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30">
           <Spinner />
         </div>
       )}
-      <div className=" bg-[#E9EEF2] px-6 py-4 ">
+      <div className=" bg-[#93a3b6]/25 px-6 py-4 ">
         <div
           className={`${
             isDarkMode ? "bg-[#0D192F] text-white" : "bg-[#fafafa]"
@@ -367,7 +367,7 @@ export default function Teacher() {
                       {teachers.length + 1}
                     </td>
                     {/* First Name */}
-                    <td className="px-2 py-2 border border-[#2b2e4a]/25">
+                    <td className="py-1 px-3 border border-[#2b2e4a]/25">
                       <input
                         type="text"
                         value={newTeacher.firstname}
@@ -375,7 +375,7 @@ export default function Teacher() {
                           handleInputChange(null, "firstname", e.target.value)
                         }
                         placeholder={t("placeholders.firstName")}
-                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-8 focus:outline-[#0F4189]/75 ${
+                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-[#040320]"
@@ -385,7 +385,7 @@ export default function Teacher() {
                       />
                     </td>
                     {/* Last Name */}
-                    <td className="px-2 py-2 border border-[#2b2e4a]/25">
+                    <td className="py-1 px-3 border border-[#2b2e4a]/25">
                       <input
                         type="text"
                         value={newTeacher.lastname}
@@ -393,7 +393,7 @@ export default function Teacher() {
                           handleInputChange(null, "lastname", e.target.value)
                         }
                         placeholder={t("placeholders.lastName")}
-                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-8 focus:outline-[#0F4189]/75 ${
+                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-[#040320]"
@@ -402,7 +402,7 @@ export default function Teacher() {
                       />
                     </td>
                     {/* Phone */}
-                    <td className="px-2 py-2 border border-[#2b2e4a]/25">
+                    <td className="py-1 px-3 border border-[#2b2e4a]/25">
                       <input
                         type="text"
                         value={newTeacher.phone}
@@ -410,7 +410,7 @@ export default function Teacher() {
                           handleInputChange(null, "phone", e.target.value)
                         }
                         placeholder={t("placeholders.phoneNumber")}
-                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-8 focus:outline-[#0F4189]/75 ${
+                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
                           isDarkMode
                             ? "bg-gray-800 text-white"
                             : "bg-white text-[#040320]"

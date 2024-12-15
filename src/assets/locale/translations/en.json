@@ -56,7 +56,7 @@
     "welcome": "Empowering Schools, One Click at a Time",
     "managementHub": "",
     "simplify": "Simplify School Management with ease!",
-    "login": "Login",
+    "login": "Welcome, login here",
     "enterDetails": "Enter your account details",
     "LOGO": "LOGO",
     "placeholders": {
@@ -215,7 +215,7 @@
   },
   "buttons": {
     "print": "print",
-    "screenshot": "Take screenshot",
+    "screenshot": "Download",
     "cancel": "Cancel",
     "submit": "Submit",
     "update": "Add",

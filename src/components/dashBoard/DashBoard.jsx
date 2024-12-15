@@ -245,14 +245,14 @@ const Dashboard = () => {
           data: absentData,
           backgroundColor: "#FE4040",
           barThickness: 50,
-          borderRadius: 10,
+          borderRadius: 14,
         },
         {
           label: "Present",
           data: presentData,
-          backgroundColor: "#F2F8FF",
+          backgroundColor: "#E9EEF2",
           barThickness: 50,
-          borderRadius: 10,
+          borderRadius: 14,
         },
       ],
     };
@@ -268,14 +268,14 @@ const Dashboard = () => {
         data: [],
         backgroundColor: "#FF793F",
         barThickness: 50,
-        borderRadius: 10,
+        borderRadius: 14,
       },
       {
         label: "Present",
         data: [],
-        backgroundColor: "#F2F8FF",
+        backgroundColor: "#E9EEF2",
         barThickness: 50,
-        borderRadius: 10,
+        borderRadius: 14,
       },
     ],
   };
@@ -293,7 +293,7 @@ const Dashboard = () => {
       {
         label: "Present",
         data: [],
-        backgroundColor: "#F2F8FF",
+        backgroundColor: "#E9EEF2",
         barThickness: 20,
       },
     ],
@@ -318,7 +318,7 @@ const Dashboard = () => {
         {
           label: "Present",
           data: presentData,
-          backgroundColor: "#F2F8FF",
+          backgroundColor: "#E9EEF2",
           barThickness: 20,
         },
       ],
@@ -401,17 +401,17 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="relative w-full min-h-screen bg-[#E9EEF2]">
+    <div className="relative w-full min-h-screen bg-[#93a3b6]/25">
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="container mx-[20px] py-[15px]">
-        <div className="bg-[#fafafa] rounded-[16px] w-full mx-8">
+      <div className="container mx-[20px] py-[15px] justify-center">
+        <div className="bg-[#fafafa] justify-center rounded-[16px] w-full mx-8">
           <h1 className="text-xl font-semibold p-3 pl-10 pt-6">
             {/* {t("dashboard.title")} */}
             {localStorage.getItem("schoolName") || schoolName}
           </h1>
           <hr className="mx-5" />
           {/* Grids */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-[25px] p-4 pl-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 p-4 pl-10">
             <div className="flex items-center justify-between p-6 rounded-2xl bg-[#0F4189]/5 mb-2 mt-2">
               <div className="px-3">
                 <p className="text-base font-medium text-[#9391A5]">
@@ -441,8 +441,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-rows-1 lg:grid-rows-1 gap-6 mb-2">
-          <div className="bg-[#fafafa] p-6 w-full rounded-[16px] relative mx-8">
+        <div className="grid grid-rows-1 lg:grid-rows-1 gap-4">
+          <div className="bg-[#fafafa] justify-center p-6 w-full rounded-[16px] relative mx-8">
             <div className="flex justify-between mb-2">
               <h2 className="text-xl font-semibold pl-5">
                 {t("dashboard.attendance")}
@@ -607,7 +607,7 @@ const Dashboard = () => {
                                 </div>
                               )}
                               {itm.event && (
-                                <div className="py-1 mr-6 text-center text-[14px] font-bold rounded-3xl text-[#4834D4] ">
+                                <div className="py-1 mr-6 text-center text-[14px] font-bold rounded-3xl text-[#0F4189] ">
                                   {t("dashboard.Event")}
                                 </div>
                               )}
