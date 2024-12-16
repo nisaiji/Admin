@@ -375,7 +375,8 @@ export default function AttendancePopup({
             Monthly Attendance Sheet
           </div>
           <div className="text-xl font-poppins-regular text-[#686868] text-center w-full my-2">
-            November 2024
+          {currentDate.toLocaleString("default", { month: "long" })}{" "}
+          {currentDate.getFullYear()}
           </div>
           <table className="w-full text-center border border-gray-300">
             <thead className="sticky -top-4 bg-white z-10">
