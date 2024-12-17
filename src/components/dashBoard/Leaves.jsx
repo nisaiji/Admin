@@ -186,15 +186,20 @@ export default function Leaves() {
                         <img
                           src={dropdown}
                           onClick={() =>
-                            req?.status === "accept" ||
-                            (req?.status === "complete" &&
-                              setExpandedRow((prev) =>
-                                prev === index ? null : index
-                              ))
+                            (req?.status === "accept" ||
+                              req?.status === "complete") &&
+                            setExpandedRow((prev) =>
+                              prev === index ? null : index
+                            )
                           }
                           alt=""
                           className={`size-4 ml-8 ${
                             expandedRow === index ? "rotate-180" : ""
+                          } ${
+                            req?.status === "accept" ||
+                            req?.status === "complete"
+                              ? "cursor-pointer"
+                              : "cursor-not-allowed"
                           }`}
                         />
                       </td>
@@ -402,10 +407,7 @@ export default function Leaves() {
                             </button>
                           </div>
                         ) : (
-                          <button
-                            onClick={() => setExpandedRow(index)}
-                            className="text-white text-sm font-poppins-regular bg-[#68686880] py-1 px-3 rounded-md"
-                          >
+                          <button className="text-white text-sm font-poppins-regular bg-[#68686880] py-1 px-3 rounded-md cursor-not-allowed">
                             {requestsStatus(req?.status)}
                           </button>
                         )}
