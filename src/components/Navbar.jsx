@@ -220,7 +220,7 @@ const Navbar = () => {
                   to="/leave"
                   className="block px-4 py-3 text-[#040320] hover:text-[#0F4189] hover:bg-white"
                 >
-                  {t("leave")}
+                  {t("leaves")}
                 </Link>
               </div>
             )}

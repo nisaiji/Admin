@@ -1,8 +1,8 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const baseURL = "http://93.127.166.31:4001/";
-// const baseURL = "https://nisaiji.com/";
+// const baseURL = "http://93.127.166.31:4001/";
+const baseURL = "https://nisaiji.com/";
 
 export const axiosClient = axios.create({ baseURL });
 

@@ -378,5 +378,6 @@
   "profile": "Profile",
   "logout": "Log Out",
   "duplicate": "Duplicate child adding for same parent",
-  "sameEntry": "same entry"
+  "sameEntry": "same entry",
+  "leaves": "Leaves"
 }

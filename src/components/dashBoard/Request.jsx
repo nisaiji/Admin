@@ -57,7 +57,7 @@ export default function Requests() {
       case "forgotPassword":
         return "Forgot Password";
         break;
-      case "changePhone":
+      case "changeDevice":
         return "Changed Device";
         break;
       case "technical":
