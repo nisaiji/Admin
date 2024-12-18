@@ -384,17 +384,17 @@ export default function StudentSection() {
                       classData?.teacher?.lastname || ""
                     }`}
               </div>
-              <div className="flex flex-row justify-center items-center">
+              <div className="flex flex-row justify-end items-center">
                 <div
                   className={` ${
                     isDarkMode ? "text-white" : ""
-                  } text-[14px] px-2 py-1 font-poppins-regular text-gray-800`}
+                  } text-[14px] py-1 font-poppins-regular text-gray-800`}
                 >
                   {isTeacher
                     ? `${teacherClassName} ${teacherSectionName}`
                     : `${className}-${sectionName}`}
                 </div>
-                <div
+                {/* <div
                   onClick={() => setShowAttendance(true)}
                   className="flex flex-row justify-center items-center px-2 py-1 space-x-2 rounded border border-[#FF793F]/10 bg-[#FF793F]/10"
                 >
@@ -402,7 +402,7 @@ export default function StudentSection() {
                   <span className="text-xs font-poppins-bold text-[#FF793F]">
                     Attendance
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
