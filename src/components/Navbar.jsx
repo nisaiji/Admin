@@ -214,7 +214,7 @@ const Navbar = () => {
             {requestsMenuOpen && (
               <div
                 ref={requestsMenuRef}
-                className="absolute top-10 w-40 bg-[#fafafa] shadow-lg z-10 justify-items-center "
+                className="absolute top-10 w-40 bg-[#fafafa] shadow-lg z-10 "
               >
                 <Link
                   to="/requests"
@@ -229,7 +229,7 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/leave"
-                  className="flex justify-start items-start gap-3 px-10 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
+                  className="flex justify-start items-start gap-3 px-3 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                 >
                   <img src={leave} alt="leaves" className="w-4 h-4 relative" />
                   {t("leaves")}
