@@ -212,7 +212,7 @@
     "data": "data",
     "requests": "Request",
     "passwordReset": "Password Reset",
-    "leave": "Leaves"
+    "leave": "Leave"
   },
   "buttons": {
     "print": "print",
@@ -380,5 +380,5 @@
   "logout": "Log Out",
   "duplicate": "Duplicate child adding for same parent",
   "sameEntry": "same entry",
-  "leaves": "Leaves"
+  "leaves": "Leave"
 }
