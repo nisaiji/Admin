@@ -243,7 +243,7 @@ const Dashboard = () => {
         {
           label: "Absent",
           data: absentData,
-          backgroundColor: "#FE4040",
+          backgroundColor: "#FF793F",
           barThickness: 50,
           borderRadius: 14,
         },
@@ -477,7 +477,7 @@ const Dashboard = () => {
 
               <div className="flex space-x-2 p-1 ">
                 <select
-                  className="px-4 w-25 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] font-medium rounded-[8px] justify-center items-center"
+                  className="px-4 w-25 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] bg-[#E9EEF2]/50 hover:bg-[#E9EEF2] font-medium rounded-[8px] justify-center items-center"
                   value={selectedClass}
                   onChange={(e) => {
                     setSelectedClass(e.target.value);
@@ -499,7 +499,7 @@ const Dashboard = () => {
                 </select>
 
                 <select
-                  className="px-4 w-26 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] font-medium rounded-[8px] justify-center items-center"
+                  className="px-4 w-26 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] bg-[#E9EEF2]/50 hover:bg-[#E9EEF2] text-[14px] font-medium rounded-[8px] justify-center items-center"
                   value={selectedSection}
                   onChange={(e) => setSelectedSection(e?.target?.value)}
                 >

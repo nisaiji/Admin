@@ -4,6 +4,8 @@ import { useSelector } from "react-redux";
 import teachericon from "../assets/images/teachericon.png";
 import classroomicon from "../assets/images/classroomicon.png";
 import calendaricon from "../assets/images/calendaricon.png";
+import leave from "../assets/images/leaves.png";
+import passwordReset from "../assets/images/passwordReset.png";
 import studenticon from "../assets/images/studenticon.png";
 import dropdown from "../assets/images/dropdown.png";
 import user from "../assets/images/user profile.png";
@@ -106,7 +108,11 @@ const Navbar = () => {
             >
               <button className="text-[#040320] hover:text-[#0F4189] flex flex-row gap-2 px-2 py-2.5 text-sm font-bold rounded-md relative group">
                 {t("setup")}
-              <img src={dropdown} alt="dropdown" className="w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180" />
+                <img
+                  src={dropdown}
+                  alt="dropdown"
+                  className="w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180"
+                />
               </button>
             </div>
             {/* setup menu */}
@@ -196,7 +202,7 @@ const Navbar = () => {
               onClick={handleToggleRequestsMenu}
               className="flex justify-center items-center cursor-pointer"
             >
-              <button className="text-[#040320] hover:text-[#4834D4] flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group">
+              <button className="text-[#040320] hover:text-[#0F4189] flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group">
                 {t("titles.requests")}
                 <img
                   src={dropdown}
@@ -208,18 +214,24 @@ const Navbar = () => {
             {requestsMenuOpen && (
               <div
                 ref={requestsMenuRef}
-                className="absolute top-10 w-40 bg-white rounded-[14px] shadow-lg z-10 justify-items-center"
+                className="absolute top-10 w-40 bg-[#fafafa] shadow-lg z-10 justify-items-center "
               >
                 <Link
                   to="/requests"
-                  className="block px-4 py-3 text-[#040320] hover:text-[#0F4189] hover:bg-white"
+                  className="flex justify-start items-center gap-3 px-3 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                 >
+                  <img
+                    src={passwordReset}
+                    alt="passwordReset"
+                    className="w-4 h-4 relative"
+                  />
                   Password Reset
                 </Link>
                 <Link
                   to="/leave"
-                  className="block px-4 py-3 text-[#040320] hover:text-[#0F4189] hover:bg-white"
+                  className="flex justify-start items-start gap-3 px-10 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                 >
+                  <img src={leave} alt="leaves" className="w-4 h-4 relative" />
                   {t("leaves")}
                 </Link>
               </div>
