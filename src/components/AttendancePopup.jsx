@@ -25,6 +25,8 @@ export default function AttendancePopup({
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [holidays, setHolidays] = useState({});
+  // console.log(holidays);
 
   if (!isVisible) return null;
 
@@ -33,6 +35,70 @@ export default function AttendancePopup({
     currentDate.getMonth() + 1,
     0
   ).getDate();
+
+  const handleHolidaySelection = (dateIndex) => {
+    const selectedDate = moment(
+      new Date(currentDate.getFullYear(), currentDate.getMonth(), dateIndex + 1)
+    ).format("YYYY-MM-DD");
+
+    const isSunday =
+      new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        dateIndex + 1
+      ).getDay() === 0;
+
+    if (isSunday) {
+      toast.error("You cannot remove Sunday as a holiday.");
+      return;
+    }
+
+    if (holidays[selectedDate]) {
+      // Remove holiday
+      setHolidays((prev) => {
+        const updated = { ...prev };
+        delete updated[selectedDate];
+        return updated;
+      });
+      // Clear attendance for all students on the selected date
+      setAttendanceData((prevData) =>
+        prevData.map((student) => ({
+          ...student,
+          attendances: student.attendances.map((attendance, i) =>
+            i === dateIndex ? { ...attendance, attendance: "" } : attendance
+          ),
+        }))
+      );
+    } else {
+      // Mark as holiday
+      setHolidays((prev) => ({
+        ...prev,
+        [selectedDate]: true,
+      }));
+      // Update attendance for all students for the selected date
+      setAttendanceData((prevData) =>
+        prevData.map((student) => ({
+          ...student,
+          attendances: student.attendances.map((attendance, i) =>
+            i === dateIndex
+              ? { ...attendance, attendance: "H" } // Mark as Holiday
+              : attendance
+          ),
+        }))
+      );
+    }
+  };
+
+  const isSundayOrHoliday = (dateIndex) => {
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      dateIndex + 1
+    );
+    const isSunday = date.getDay() === 0;
+    const formattedDate = moment(date).format("YYYY-MM-DD");
+    return isSunday || holidays[formattedDate];
+  };
 
   useEffect(() => {
     if (isVisible) {
@@ -101,13 +167,36 @@ export default function AttendancePopup({
   };
 
   useEffect(() => {
+    fetchEvents();
     fetchMonthlyAttendance();
   }, [currentDate]);
 
   const handleSaveAttendance = async () => {
     try {
       setLoading(true);
-      const attendances = attendanceData || [];
+      const attendances = attendanceData;
+
+      // Validate attendance
+      // const hasEmptyAttendance = attendanceData.some((student) =>
+      //   student.attendances.some((item) => {
+      //     const itemDate = item.date;
+      //     const startDate = moment(startTime).format("YYYY-MM-DD");
+      //     const today = moment(new Date()).format("YYYY-MM-DD");
+      //     // Check if attendance is empty for dates within the range
+      //     // return (
+      //     //   item.attendance === "" &&
+      //     //   itemDate.isSameOrAfter(startDate) &&
+      //     //   itemDate.isSameOrBefore(today)
+      //     // );
+      //   })
+      // );
+      // console.log({ hasEmptyAttendance });
+
+      // if (hasEmptyAttendance) {
+      //   toast.error("Please fill all the cells to save the attendance");
+      //   return;
+      // }
+
       const studentsAttendances = {};
       attendances.forEach((student) => {
         student.attendances.forEach((item) => {
@@ -149,7 +238,7 @@ export default function AttendancePopup({
 
   const getCellStyle = (value) => {
     if (value === "P") return "text-[#0F4189]";
-    if (value === "A") return "text-[#D91111]";
+    if (value === "A" || value === "H") return "text-[#D91111]";
     return "text-black";
   };
 
@@ -193,17 +282,16 @@ export default function AttendancePopup({
 
           // Generate an array for all days in the month
           const monthDates = Array.from({ length: totalDays }, (_, i) => {
-            let dateKey = new Date(
-              currentDate.getFullYear(),
-              currentDate.getMonth(),
-              i + 2
-            )
-              .toISOString()
-              .split("T")[0];
+            const dateKey = moment(
+              new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
+            ).format("YYYY-MM-DD");
 
             return {
               date: dateKey,
-              attendance: attendanceByDate[dateKey] || "",
+              attendance:
+                dateKey in holidays || new Date(dateKey).getDay() === 0
+                  ? "H"
+                  : attendanceByDate[dateKey] || "",
             };
           });
 
@@ -221,9 +309,40 @@ export default function AttendancePopup({
     }
   };
 
-  useEffect(() => {
-    fetchMonthlyAttendance();
-  }, []);
+  // get events api
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
+        startTime: new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          1
+        ).getTime(),
+        endTime: new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          0,
+          23,
+          59,
+          59,
+          999
+        ).getTime(),
+      });
+
+      if (res?.statusCode === 200) {
+        const holidayMap = res?.result?.reduce((acc, item) => {
+          acc[moment(item.date).format("YYYY-MM-DD")] = true;
+          return acc;
+        }, {});
+        setHolidays(holidayMap);
+      }
+    } catch (e) {
+      toast.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // attendance download in pdf format
   const downloadAttendance = () => {
@@ -285,7 +404,7 @@ export default function AttendancePopup({
           const cellValue = data.cell.raw; // Get cell value
           if (cellValue === "P") {
             data.cell.styles.textColor = "#0F4189"; // Blue for "P"
-          } else if (cellValue === "A") {
+          } else if (cellValue === "A" || cellValue === "H") {
             data.cell.styles.textColor = "#D91111"; // Red for "A"
           }
         }
@@ -375,8 +494,8 @@ export default function AttendancePopup({
             Monthly Attendance Sheet
           </div>
           <div className="text-xl font-poppins-regular text-[#686868] text-center w-full my-2">
-          {currentDate.toLocaleString("default", { month: "long" })}{" "}
-          {currentDate.getFullYear()}
+            {currentDate.toLocaleString("default", { month: "long" })}{" "}
+            {currentDate.getFullYear()}
           </div>
           <table className="w-full text-center border border-gray-300">
             <thead className="sticky -top-4 bg-white z-10">
@@ -387,12 +506,35 @@ export default function AttendancePopup({
                 <th className="border border-gray-300 p-1 w-[150px] font-poppins-regular">
                   Student Name
                 </th>
-                {Array.from({ length: 31 }, (_, i) => (
-                  <th
-                    key={i}
-                    className="border border-gray-300 py-1 w-[35px] font-poppins-regular"
-                  >
-                    {i + 1}
+                {Array.from({ length: totalDays }, (_, i) => (
+                  <th key={i} className="relative">
+                    <div className="flex flex-col items-center">
+                      <span>{i + 1}</span>
+                      <select
+                        disabled={!isEditable}
+                        value={
+                          isSundayOrHoliday(i) ||
+                          holidays[
+                            moment(
+                              new Date(
+                                currentDate.getFullYear(),
+                                currentDate.getMonth(),
+                                i + 1
+                              )
+                            ).format("YYYY-MM-DD")
+                          ]
+                            ? "H"
+                            : ""
+                        }
+                        onChange={() => handleHolidaySelection(i)}
+                        className={`mt-1 text-xs bg-gray-200 rounded ${
+                          isEditable ? "cursor-pointer" : "cursor-not-allowed"
+                        }`}
+                      >
+                        <option value=""></option>
+                        <option value="H">H</option>
+                      </select>
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -409,7 +551,10 @@ export default function AttendancePopup({
                       {isEditable ? (
                         <select
                           name="attendance"
-                          value={value.attendance}
+                          value={
+                            isSundayOrHoliday(idx) ? "H" : value.attendance
+                          }
+                          disabled={isSundayOrHoliday(idx)}
                           onChange={(e) => {
                             handleInputChange(index, idx, e.target.value);
                           }}
@@ -422,6 +567,11 @@ export default function AttendancePopup({
                           }`}
                         >
                           <option value="" label="" />
+                          <option
+                            value="H"
+                            label="H"
+                            style={{ display: "none" }}
+                          />
                           <option
                             value="P"
                             label="P"

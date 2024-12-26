@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import eventBack from "../../assets/images/eventBack.png";
 import noevents from "../../assets/images/noevents.png";
@@ -22,7 +22,7 @@ const Dashboard = () => {
   const schoolName = useSelector((state) => state.appAuth.schoolName);
   const [selectedOption, setSelectedOption] = useState("Monthly");
   const [studentPresentCountData, setStudentPresentCountData] = useState(null);
-  const [studentCountData, setStudentCountData] = useState(null);
+  const [studentAbsentCountData, setStudentAbsentCountData] = useState(null);
   const [parentCount, setParentCount] = useState(0);
   const [calenderEvents, setCalenderEvents] = useState([]);
   const [chartData, setChartData] = useState(null);
@@ -79,19 +79,19 @@ const Dashboard = () => {
       999
     ).getTime();
     const result = await fetchData(`${url}`, "post", { startTime, endTime });
-    setStudentCountData(result?.totalCount);
-    setStudentPresentCountData(result?.presentCount);
+    setStudentAbsentCountData(result?.absentCount || 0);
+    setStudentPresentCountData(result?.presentCount || 0);
   };
 
   // parent count api
-  const getParentCount = async () => {
-    const url = isTeacher
-      ? EndPoints.TEACHER.PARENT_COUNT
-      : EndPoints.ADMIN.PARENT_COUNT;
-    const result = await fetchData(`${url}`);
+  // const getParentCount = async () => {
+  //   const url = isTeacher
+  //     ? EndPoints.TEACHER.PARENT_COUNT
+  //     : EndPoints.ADMIN.PARENT_COUNT;
+  //   const result = await fetchData(`${url}`);
 
-    if (result) setParentCount(result.parentCount);
-  };
+  //   if (result) setParentCount(result.parentCount);
+  // };
 
   // returns class and section list
   const getClassList = async () => {
@@ -101,14 +101,14 @@ const Dashboard = () => {
       setClassList(result);
       const [firstClass] = result;
       setSectionList(firstClass?.section || []);
-      setSelectedClass(firstClass?._id || "");
-      setSelectedSection(firstClass?.section[0]?._id || "");
+      // setSelectedClass(firstClass?._id || "");
+      // setSelectedSection(firstClass?.section[0]?._id || "");
     }
   };
 
   useEffect(() => {
-    getStudentCount();
-    getParentCount();
+    // getStudentCount();
+    // getParentCount();
     getClassList();
   }, []);
 
@@ -161,7 +161,7 @@ const Dashboard = () => {
     const weekData = Array(7).fill({ present: 0, absent: 0 });
 
     attendanceData.forEach((item) => {
-      const dayIndex = new Date(item.date).getDay(); // Get day of the week (0-6)
+      const dayIndex = (new Date(item.date).getDay() + 6) % 7;
       weekData[dayIndex] = {
         present: item.presentCount,
         absent: item.absentCount,
@@ -187,6 +187,64 @@ const Dashboard = () => {
     });
 
     return monthData;
+  };
+
+  // api for monthly, weekly chart
+  const getDailyAttendanceChart = async () => {
+    const currentDates = {
+      startTime: new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
+      endTime: new Date(new Date().setHours(23, 59, 59, 999)).getTime(),
+    };
+
+    setLoading(true);
+    const result = await fetchData(
+      `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`,
+      "post",
+      currentDates
+    );
+    if (result) {
+      setStudentAbsentCountData(result?.sectionAttendance[0]?.absentCount || 0);
+      setStudentPresentCountData(
+        result?.sectionAttendance[0]?.presentCount || 0
+      );
+    }
+    setLoading(false);
+  };
+
+  // api for monthly, weekly chart
+  const getSchoolAttendanceChart = async (type) => {
+    const currentDates =
+      type === "Weekly"
+        ? getCurrentWeekDates()
+        : {
+            startTime: new Date(date.year, date.month, 1).getTime(),
+            endTime: new Date(
+              date.year,
+              date.month + 1,
+              0,
+              23,
+              59,
+              59,
+              999
+            ).getTime(),
+          };
+    setLoading(true);
+
+    const result = await fetchData(
+      `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}`,
+      "post",
+      currentDates
+    );
+
+    if (result) {
+      if (type === "Weekly") {
+        weeklyData(result?.attendances, result?.totalStudent);
+      } else {
+        monthlyData(result?.attendances, result?.totalStudent);
+      }
+      setTotalStudentClassSectionWise(result?.totalStudent);
+    }
+    setLoading(false);
   };
 
   // api for monthly, weekly chart
@@ -224,8 +282,18 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (selectedSection) {
-      getAttendanceChart(selectedOption);
+    if (selectedOption === "Daily") {
+      if (selectedSection) {
+        getDailyAttendanceChart();
+      } else {
+        getStudentCount();
+      }
+    } else {
+      if (selectedSection) {
+        getAttendanceChart(selectedOption);
+      } else {
+        getSchoolAttendanceChart(selectedOption);
+      }
     }
   }, [selectedSection, selectedOption]);
 
@@ -234,6 +302,7 @@ const Dashboard = () => {
   // Weekly data of chart
   const weeklyData = (attendanceData, total) => {
     const transformedData = transformWeeklyData(attendanceData);
+
     const absentData = transformedData.map((day) => day.absent);
     const presentData = transformedData.map((day) => day.present);
 
@@ -352,12 +421,17 @@ const Dashboard = () => {
             // Calculate the date for Weekly or Monthly view
             if (selectedOption === "Weekly") {
               // Assuming the week starts on the current date
-              const startOfWeek = new Date(); // Replace with your starting date if needed
+              const startOfWeek = new Date(); // Starting point of the week
+              startOfWeek.setDate(
+                startOfWeek.getDate() - ((startOfWeek.getDay() + 6) % 7) // Adjust to Monday
+              );
               const currentDate = new Date(
                 startOfWeek.getFullYear(),
                 startOfWeek.getMonth(),
                 startOfWeek.getDate() + index
               );
+              // console.log({startOfWeek,currentDate});
+
               return currentDate.toLocaleDateString("en-GB"); // Format: dd/mm/yyyy
             } else if (selectedOption === "Monthly") {
               const year = date.year; // Year from your data
@@ -365,7 +439,6 @@ const Dashboard = () => {
               const currentDate = new Date(year, month, index + 1);
               return currentDate.toLocaleDateString("en-GB"); // Format: dd/mm/yyyy
             }
-
             return "";
           },
           label: (tooltipItem) => {
@@ -379,12 +452,53 @@ const Dashboard = () => {
     },
   };
 
-  const renderStudentCount = () => {
-    if (studentCountData > 0) {
-      return `${studentPresentCountData || 0}/${studentCountData || 0}`;
-    } else {
-      return "0";
-    }
+  // const renderStudentCount = () => {
+  //   if (studentCountData > 0) {
+  //     return `${studentPresentCountData || 0}/${studentCountData || 0}`;
+  //   } else {
+  //     return "0";
+  //   }
+  // };
+
+  const renderPieChart = () => {
+    const hasAttendance =
+      studentPresentCountData > 0 || studentAbsentCountData > 0;
+
+    const data = {
+      labels: hasAttendance ? ["Present", "Absent"] : ["No Attendance"],
+      datasets: [
+        {
+          data: hasAttendance
+            ? [studentPresentCountData, studentAbsentCountData]
+            : [1],
+          backgroundColor: hasAttendance ? ["#4caf50", "#d91111"] : ["gray"],
+          borderWidth: 2,
+        },
+      ],
+    };
+    const options = {
+      cutout: "70%", // Makes the pie chart hollow (controls the doughnut size)
+      plugins: {
+        legend: {
+          display: true,
+          position: "top",
+          labels: {
+            font: {
+              size: 14,
+            },
+            color: "#333", // Legend text color
+          },
+        },
+      },
+      maintainAspectRatio: false,
+      responsive: true,
+    };
+
+    return (
+      <div style={{ width: "100%", height: "100%" }}>
+        <Doughnut data={data} options={options} />
+      </div>
+    );
   };
 
   // render charts of weekly and monthly
@@ -411,7 +525,7 @@ const Dashboard = () => {
           </h1>
           <hr className="mx-5" />
           {/* Grids */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 p-4 pl-10">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 p-4 pl-10">
             <div className="flex items-center justify-between p-6 rounded-2xl bg-[#0F4189]/5 mb-2 mt-2">
               <div className="px-3">
                 <p className="text-base font-medium text-[#9391A5]">
@@ -438,7 +552,7 @@ const Dashboard = () => {
                 className="w-12 h-12 mr-4"
               />
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="grid grid-rows-1 lg:grid-rows-1 gap-4">
@@ -448,7 +562,19 @@ const Dashboard = () => {
                 {t("dashboard.attendance")}
               </h2>
               {/* Graph toggle button */}
-              <div className="flex justify-evenly bg-[#E9EEF2] w-48 p-1 rounded-[12px] h-8">
+              <div className="flex justify-evenly bg-[#E9EEF2] w-64 p-1 rounded-[12px] h-8">
+                <button
+                  className={`px-5 py-1 rounded-[8px] font-medium text-[12px] ${
+                    selectedOption === "Daily"
+                      ? "bg-[#0F4189] h-6 text-[#fafafa]"
+                      : " text-[#040320]"
+                  }`}
+                  onClick={() =>
+                    handleOptionChange({ target: { value: "Daily" } })
+                  }
+                >
+                  {t("dashboard.daily")}
+                </button>
                 <button
                   className={`px-5 py-1 rounded-[8px] font-medium text-[12px] ${
                     selectedOption === "Weekly"
@@ -484,8 +610,8 @@ const Dashboard = () => {
                     const classData = classList.filter(
                       (itm) => itm["_id"] == e.target.value
                     );
-                    setSectionList(classData[0]["section"]);
-                    setSelectedSection("");
+                    setSectionList(classData[0]?.section);
+                    setSelectedSection(classData[0]?.section[0]?._id || "");
                   }}
                 >
                   <option value="">{t("dashboard.selectClass")}</option>
@@ -528,14 +654,14 @@ const Dashboard = () => {
                   selectedOption === "Weekly" ? "w-8/12" : "w-11/12"
                 }`}
               >
-                {renderChart()}
+                {selectedOption === "Daily" ? renderPieChart() : renderChart()}
               </div>
             </div>
           </div>
 
           {/* Calender */}
-          <div className="flex">
-            <div className="bg-[#fafafa] p-6 w-7/12 rounded-[16px] mr-[25px] mx-8">
+          <div className="flex flex-row w-full mx-8 space-x-8">
+            <div className="bg-[#fafafa] p-6 w-7/12 rounded-[16px]">
               <h2 className="text-xl font-semibold pl-6">
                 {t("dashboard.calendar")}
               </h2>
@@ -551,7 +677,7 @@ const Dashboard = () => {
             </div>
 
             {/* event list */}
-            <div className="bg-[#fafafa] py-2 px-8 w-5/12 rounded-[16px] relative">
+            <div className="bg-[#fafafa] w-5/12 py-2 px-8 rounded-[16px]">
               <h2 className="text-xl font-semibold my-2 pl-6 mt-4">
                 {t("dashboard.holidayAndEvents")}
               </h2>

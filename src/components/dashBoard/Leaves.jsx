@@ -309,7 +309,7 @@ export default function Leaves() {
                                 value={
                                   req?.status === "accept" ||
                                   req?.status === "complete"
-                                    ? req?.guestTeacher?.password || ""
+                                    ? req?.guestTeacher?.secretKey || ""
                                     : formData.password
                                 }
                                 onChange={(e) =>
