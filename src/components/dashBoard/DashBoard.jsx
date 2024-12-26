@@ -84,14 +84,14 @@ const Dashboard = () => {
   };
 
   // parent count api
-  // const getParentCount = async () => {
-  //   const url = isTeacher
-  //     ? EndPoints.TEACHER.PARENT_COUNT
-  //     : EndPoints.ADMIN.PARENT_COUNT;
-  //   const result = await fetchData(`${url}`);
+  const getParentCount = async () => {
+    const url = isTeacher
+      ? EndPoints.TEACHER.PARENT_COUNT
+      : EndPoints.ADMIN.PARENT_COUNT;
+    const result = await fetchData(`${url}`);
 
-  //   if (result) setParentCount(result.parentCount);
-  // };
+    if (result) setParentCount(result.parentCount);
+  };
 
   // returns class and section list
   const getClassList = async () => {
@@ -108,7 +108,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     // getStudentCount();
-    // getParentCount();
+    getParentCount();
     getClassList();
   }, []);
 
@@ -525,8 +525,8 @@ const Dashboard = () => {
           </h1>
           <hr className="mx-5" />
           {/* Grids */}
-          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 p-4 pl-10">
-            <div className="flex items-center justify-between p-6 rounded-2xl bg-[#0F4189]/5 mb-2 mt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 p-4 pl-10">
+            {/* <div className="flex items-center justify-between p-6 rounded-2xl bg-[#0F4189]/5 mb-2 mt-2">
               <div className="px-3">
                 <p className="text-base font-medium text-[#9391A5]">
                   {t("dashboard.students")}
@@ -536,7 +536,7 @@ const Dashboard = () => {
                 </p>
               </div>
               <img src={dashboardstudent} className="w-12 h-12 mr-4" />
-            </div>
+            </div> */}
             <div className="flex items-center justify-between p-6 rounded-2xl bg-[#FF793F]/5 mb-2 mt-2">
               <div className="px-3">
                 <p className="text-base font-medium text-[#9391A5]">
@@ -552,7 +552,7 @@ const Dashboard = () => {
                 className="w-12 h-12 mr-4"
               />
             </div>
-          </div> */}
+          </div>
         </div>
 
         <div className="grid grid-rows-1 lg:grid-rows-1 gap-4">
