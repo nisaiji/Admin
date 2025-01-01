@@ -115,8 +115,6 @@ export default function Studentlist() {
         setStudentList(students);
       }
     } catch (e) {
-      console.log("error", e);
-
       toast.error(e);
     } finally {
       setLoading(false);
@@ -301,7 +299,7 @@ export default function Studentlist() {
                       <input
                         type="text"
                         placeholder={t("placeholders.search")}
-                        className="focus:outline-none pl-3 w-full"
+                        className="focus:outline-none pl-3 w-full bg-[#fafafa]"
                         onChange={(e) => {
                           setName(e.target.value);
                         }}

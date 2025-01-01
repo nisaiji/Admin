@@ -167,8 +167,7 @@ export default function AttendancePopup({
   };
 
   useEffect(() => {
-    fetchEvents();
-    fetchMonthlyAttendance();
+    fetchEvents()
   }, [currentDate]);
 
   const handleSaveAttendance = async () => {
@@ -177,25 +176,27 @@ export default function AttendancePopup({
       const attendances = attendanceData;
 
       // Validate attendance
-      // const hasEmptyAttendance = attendanceData.some((student) =>
-      //   student.attendances.some((item) => {
-      //     const itemDate = item.date;
-      //     const startDate = moment(startTime).format("YYYY-MM-DD");
-      //     const today = moment(new Date()).format("YYYY-MM-DD");
-      //     // Check if attendance is empty for dates within the range
-      //     // return (
-      //     //   item.attendance === "" &&
-      //     //   itemDate.isSameOrAfter(startDate) &&
-      //     //   itemDate.isSameOrBefore(today)
-      //     // );
-      //   })
-      // );
-      // console.log({ hasEmptyAttendance });
+      const hasEmptyAttendance = attendanceData.some((student) =>
+        student.attendances.some((item) => {
+          const itemDate = item.date;
+          const startDate = moment(startTime).format("YYYY-MM-DD");
+          const today = moment(new Date()).format("YYYY-MM-DD");
 
-      // if (hasEmptyAttendance) {
-      //   toast.error("Please fill all the cells to save the attendance");
-      //   return;
-      // }
+          // console.log(
+          //   item.attendance === "" && itemDate > startDate && itemDate <= today
+          // );
+
+          // Check if attendance is empty for dates within the range
+          return (
+            item?.attendance === "" && itemDate > startDate && itemDate <= today
+          );
+        })
+      );
+
+      if (hasEmptyAttendance) {
+        toast.error("Please fill all the cells to save the attendance");
+        return;
+      }
 
       const studentsAttendances = {};
       attendances.forEach((student) => {
@@ -226,13 +227,13 @@ export default function AttendancePopup({
 
       if (res.statusCode === 200) {
         toast.success(res?.result);
+        setIsEditable(false);
         fetchMonthlyAttendance();
       }
     } catch (e) {
       toast.error(e);
     } finally {
       setLoading(false);
-      setIsEditable(false);
     }
   };
 
@@ -294,12 +295,15 @@ export default function AttendancePopup({
                   : attendanceByDate[dateKey] || "",
             };
           });
+          // console.log({monthDates});
 
           return {
             ...student,
             attendances: monthDates,
           };
         });
+        // console.log({ updatedAttendanceData });
+
         setAttendanceData(updatedAttendanceData);
       }
     } catch (e) {
@@ -508,9 +512,9 @@ export default function AttendancePopup({
                 </th>
                 {Array.from({ length: totalDays }, (_, i) => (
                   <th key={i} className="relative">
-                    <div className="flex flex-col items-center">
+                    <div className={`flex flex-col items-center`}>
                       <span>{i + 1}</span>
-                      <select
+                      {/* <select
                         disabled={!isEditable}
                         value={
                           isSundayOrHoliday(i) ||
@@ -533,7 +537,7 @@ export default function AttendancePopup({
                       >
                         <option value=""></option>
                         <option value="H">H</option>
-                      </select>
+                      </select> */}
                     </div>
                   </th>
                 ))}

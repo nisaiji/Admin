@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
+import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 import eventBack from "../../assets/images/eventBack.png";
 import noevents from "../../assets/images/noevents.png";
 import ParentIcon from "../../assets/images/ParentIcon.png";
@@ -81,6 +82,7 @@ const Dashboard = () => {
     const result = await fetchData(`${url}`, "post", { startTime, endTime });
     setStudentAbsentCountData(result?.absentCount || 0);
     setStudentPresentCountData(result?.presentCount || 0);
+    setTotalStudentClassSectionWise(result?.totalCount || 0);
   };
 
   // parent count api
@@ -202,11 +204,13 @@ const Dashboard = () => {
       "post",
       currentDates
     );
+
     if (result) {
       setStudentAbsentCountData(result?.sectionAttendance[0]?.absentCount || 0);
       setStudentPresentCountData(
         result?.sectionAttendance[0]?.presentCount || 0
       );
+      setTotalStudentClassSectionWise(result?.totalStudent);
     }
     setLoading(false);
   };
@@ -460,9 +464,53 @@ const Dashboard = () => {
   //   }
   // };
 
+  // const renderPieChart = () => {
+  //   const hasAttendance =
+  //     studentPresentCountData > 0 || studentAbsentCountData > 0;
+
+  //   const data = {
+  //     labels: hasAttendance ? ["Present", "Absent"] : ["No Attendance"],
+  //     datasets: [
+  //       {
+  //         data: hasAttendance
+  //           ? [studentPresentCountData, studentAbsentCountData]
+  //           : [1],
+  //         backgroundColor: hasAttendance ? ["#4caf50", "#d91111"] : ["gray"],
+  //         borderWidth: 2,
+  //       },
+  //     ],
+  //   };
+  //   const options = {
+  //     cutout: "70%", // Makes the pie chart hollow (controls the doughnut size)
+  //     plugins: {
+  //       legend: {
+  //         display: true,
+  //         position: "top",
+  //         labels: {
+  //           font: {
+  //             size: 14,
+  //           },
+  //           color: "#333", // Legend text color
+  //         },
+  //       },
+  //     },
+  //     maintainAspectRatio: false,
+  //     responsive: true,
+  //   };
+
+  //   return (
+  //     <div style={{ width: "100%", height: "100%" }}>
+  //       <Doughnut data={data} options={options} />
+  //     </div>
+  //   );
+  // };
+
+  // Register required chart elements
+  Chart.register(ArcElement, Tooltip, Legend);
   const renderPieChart = () => {
     const hasAttendance =
       studentPresentCountData > 0 || studentAbsentCountData > 0;
+    const totalStudents = studentPresentCountData + studentAbsentCountData;
 
     const data = {
       labels: hasAttendance ? ["Present", "Absent"] : ["No Attendance"],
@@ -476,6 +524,7 @@ const Dashboard = () => {
         },
       ],
     };
+
     const options = {
       cutout: "70%", // Makes the pie chart hollow (controls the doughnut size)
       plugins: {
@@ -489,10 +538,48 @@ const Dashboard = () => {
             color: "#333", // Legend text color
           },
         },
+        tooltip: {
+          enabled: hasAttendance, // Disable tooltip when no attendance
+        },
+        // Custom plugin to show totalStudents at the center
+        centerText: {
+          display: true,
+          text: `Attendance ${studentPresentCountData}/${totalStudentClassSectionWise}`,
+          color: "#333",
+          font: {
+            size: "18px",
+            weight: "bold",
+          },
+        },
       },
       maintainAspectRatio: false,
       responsive: true,
     };
+
+    // Define the plugin for showing center text
+    Chart.register({
+      id: "centerText",
+      beforeDraw(chart) {
+        if (chart.config.options.plugins.centerText?.display) {
+          const { width } = chart;
+          const { height } = chart;
+          const ctx = chart.ctx;
+          const text = chart.config.options.plugins.centerText.text;
+          const fontSize = chart.config.options.plugins.centerText.font.size;
+          const fontWeight =
+            chart.config.options.plugins.centerText.font.weight;
+          const color = chart.config.options.plugins.centerText.color;
+
+          ctx.save();
+          ctx.font = `${fontWeight} ${fontSize} sans-serif`;
+          ctx.fillStyle = color;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(text, width / 2, height / 2);
+          ctx.restore();
+        }
+      },
+    });
 
     return (
       <div style={{ width: "100%", height: "100%" }}>

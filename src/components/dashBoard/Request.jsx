@@ -54,7 +54,7 @@ export default function Requests() {
 
   const reasonToChange = (reason) => {
     switch (reason) {
-      case "forgotPassword":
+      case "forgetPassword":
         return "Forgot Password";
         break;
       case "changeDevice":
