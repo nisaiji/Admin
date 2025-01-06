@@ -251,6 +251,7 @@ export default function StudentUpdate() {
                 name={name}
                 placeholder={placeholder}
                 onChange={formik.handleChange}
+                maxLength={name === "phone" ? 10 : ""}
                 value={formik.values[name]}
                 className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
               />

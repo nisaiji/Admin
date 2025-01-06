@@ -16,6 +16,7 @@ const InputField = ({ label, name, type, placeholder, formik, className }) => (
       placeholder={placeholder}
       onChange={formik.handleChange}
       value={formik.values[name]}
+      maxLength={name === "affiliationNo" ? 8 : ""}
     />
     {formik.touched[name] && formik.errors[name] && (
       <div className="text-[#FE4040] text-sm text-left pl-3">
@@ -63,14 +64,26 @@ const Step1 = ({ formik, nextStep }) => {
           placeholder={t("placeholders.emailAddress")}
           formik={formik}
         />
-        <InputField
-          label={t("adminProfile.Phone")}
-          name="phone"
-          type="text"
-          placeholder={t("placeholders.phone")}
-          formik={formik}
-        />
-
+        <div className={`mt-5`}>
+          <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
+            {t("adminProfile.Phone")}
+          </p>
+          <p className="absolute mt-[17px] ml-6">+91</p>
+          <input
+            className="text-black rounded-xl border border-[#E9EAF0] py-2 pl-[55px] mt-2 w-full"
+            type="text"
+            name="phone"
+            placeholder={t("placeholders.phone")}
+            onChange={formik.handleChange}
+            value={formik.values["phone"]}
+            maxLength={10}
+          />
+          {formik.touched["phone"] && formik.errors["phone"] && (
+            <div className="text-[#FE4040] text-sm text-left pl-3">
+              {formik.errors["phone"]}
+            </div>
+          )}
+        </div>
         <div className="mt-5">
           <button
             onClick={nextStep}

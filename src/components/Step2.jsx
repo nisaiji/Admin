@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ArrowRight from "../assets/images/ArrowRight.png";
 import { useTranslation } from "react-i18next";
-import Countries from "../utils/Countries.json";
+// import Countries from "../utils/Countries.json";
 import StateAndDistricts from "../utils/StatesAndDistricts.json";
 
 const Step2 = ({ formik, nextStep, prevStep }) => {
@@ -9,6 +9,7 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
+  const Countries = [{ name: "India", code: "IN" }];
 
   // Handle country selection
   const handleCountryChange = (e) => {

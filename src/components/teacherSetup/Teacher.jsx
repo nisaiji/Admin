@@ -314,6 +314,7 @@ export default function Teacher() {
                         <input
                           type="text"
                           value={teacher.phone}
+                          maxLength={10}
                           onChange={(e) =>
                             handleInputChange(
                               teacher.SNo,
@@ -406,6 +407,7 @@ export default function Teacher() {
                       <input
                         type="text"
                         value={newTeacher.phone}
+                        maxLength={10}
                         onChange={(e) =>
                           handleInputChange(null, "phone", e.target.value)
                         }

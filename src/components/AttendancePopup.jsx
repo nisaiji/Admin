@@ -167,7 +167,7 @@ export default function AttendancePopup({
   };
 
   useEffect(() => {
-    fetchEvents()
+    fetchEvents();
   }, [currentDate]);
 
   const handleSaveAttendance = async () => {
@@ -261,10 +261,12 @@ export default function AttendancePopup({
         59,
         999
       ).getTime();
+      // console.log("start");
 
       const res = await axiosClient.get(
         `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${id}&section=${sectionId}&classId=${classId}&startTime=${startTime}&endTime=${endTime}`
       );
+      // console.log(res?.result);
 
       if (res?.statusCode === 200) {
         const attendances = res?.result?.attendances || [];

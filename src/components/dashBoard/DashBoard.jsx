@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
-import eventBack from "../../assets/images/eventBack.png";
 import noevents from "../../assets/images/noevents.png";
 import ParentIcon from "../../assets/images/ParentIcon.png";
 import DownIcon from "../../assets/images/Down.png";
@@ -40,6 +39,27 @@ const Dashboard = () => {
     year: moment().year(),
   });
 
+  const getStartEndOfDay = () => ({
+    startTime: moment().startOf("day").valueOf(),
+    endTime: moment().endOf("day").valueOf(),
+  });
+
+  const getStartEndOfWeek = () => ({
+    startTime: moment().startOf("isoWeek").valueOf(),
+    endTime: moment().endOf("isoWeek").valueOf(),
+  });
+
+  const getStartEndOfMonth = () => ({
+    startTime: moment().startOf("month").valueOf(),
+    endTime: moment().endOf("month").valueOf(),
+  });
+
+  const [attendanceTime, setAttendanceTime] = useState({
+    day: getStartEndOfDay(),
+    week: getStartEndOfWeek(),
+    month: getStartEndOfMonth(),
+  });
+
   const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
 
   // Centralized the axios request logic to reduce repetitive code.
@@ -64,22 +84,10 @@ const Dashboard = () => {
     const url = isTeacher
       ? EndPoints.TEACHER.STUDENT_COUNT
       : EndPoints.ADMIN.STUDENT_COUNT;
-    const today = new Date();
-    const startTime = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    ).getTime();
-    const endTime = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      23,
-      59,
-      59,
-      999
-    ).getTime();
-    const result = await fetchData(`${url}`, "post", { startTime, endTime });
+    const result = await fetchData(`${url}`, "post", {
+      startTime: attendanceTime.day.startTime,
+      endTime: attendanceTime.day.endTime,
+    });
     setStudentAbsentCountData(result?.absentCount || 0);
     setStudentPresentCountData(result?.presentCount || 0);
     setTotalStudentClassSectionWise(result?.totalCount || 0);
@@ -103,13 +111,10 @@ const Dashboard = () => {
       setClassList(result);
       const [firstClass] = result;
       setSectionList(firstClass?.section || []);
-      // setSelectedClass(firstClass?._id || "");
-      // setSelectedSection(firstClass?.section[0]?._id || "");
     }
   };
 
   useEffect(() => {
-    // getStudentCount();
     getParentCount();
     getClassList();
   }, []);
@@ -140,23 +145,23 @@ const Dashboard = () => {
   }, [date]);
 
   // return startTime and endTime of current week
-  function getCurrentWeekDates() {
-    const currentDate = new Date();
-    const dayOfWeek = currentDate.getDay();
-    const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
-    // Start date (Monday)
-    const startTime = new Date(currentDate);
-    startTime.setDate(currentDate.getDate() + diff);
-    startTime.setHours(0, 0, 0, 0);
-    // End date (Sunday)
-    const endTime = new Date(startTime);
-    endTime.setDate(startTime.getDate() + 6);
-    endTime.setHours(23, 59, 59, 999);
-    return {
-      startTime: startTime.getTime(),
-      endTime: endTime.getTime(),
-    };
-  }
+  // function getCurrentWeekDates() {
+  //   const currentDate = new Date();
+  //   const dayOfWeek = currentDate.getDay();
+  //   const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+  //   // Start date (Monday)
+  //   const startTime = new Date(currentDate);
+  //   startTime.setDate(currentDate.getDate() + diff);
+  //   startTime.setHours(0, 0, 0, 0);
+  //   // End date (Sunday)
+  //   const endTime = new Date(startTime);
+  //   endTime.setDate(startTime.getDate() + 6);
+  //   endTime.setHours(23, 59, 59, 999);
+  //   return {
+  //     startTime: startTime.getTime(),
+  //     endTime: endTime.getTime(),
+  //   };
+  // }
 
   // Transform attendance data into array of 7 for weekly data
   const transformWeeklyData = (attendanceData) => {
@@ -193,16 +198,14 @@ const Dashboard = () => {
 
   // api for monthly, weekly chart
   const getDailyAttendanceChart = async () => {
-    const currentDates = {
-      startTime: new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
-      endTime: new Date(new Date().setHours(23, 59, 59, 999)).getTime(),
-    };
-
     setLoading(true);
     const result = await fetchData(
       `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`,
       "post",
-      currentDates
+      {
+        startTime: attendanceTime.day.startTime,
+        endTime: attendanceTime.day.endTime,
+      }
     );
 
     if (result) {
@@ -219,18 +222,13 @@ const Dashboard = () => {
   const getSchoolAttendanceChart = async (type) => {
     const currentDates =
       type === "Weekly"
-        ? getCurrentWeekDates()
+        ? {
+            startTime: attendanceTime.week.startTime,
+            endTime: attendanceTime.week.endTime,
+          }
         : {
-            startTime: new Date(date.year, date.month, 1).getTime(),
-            endTime: new Date(
-              date.year,
-              date.month + 1,
-              0,
-              23,
-              59,
-              59,
-              999
-            ).getTime(),
+            startTime: attendanceTime.month.startTime,
+            endTime: attendanceTime.month.endTime,
           };
     setLoading(true);
 
@@ -255,18 +253,13 @@ const Dashboard = () => {
   const getAttendanceChart = async (type) => {
     const currentDates =
       type === "Weekly"
-        ? getCurrentWeekDates()
+        ? {
+            startTime: attendanceTime.week.startTime,
+            endTime: attendanceTime.week.endTime,
+          }
         : {
-            startTime: new Date(date.year, date.month, 1).getTime(),
-            endTime: new Date(
-              date.year,
-              date.month + 1,
-              0,
-              23,
-              59,
-              59,
-              999
-            ).getTime(),
+            startTime: attendanceTime.month.startTime,
+            endTime: attendanceTime.month.endTime,
           };
     setLoading(true);
 
@@ -299,7 +292,7 @@ const Dashboard = () => {
         getSchoolAttendanceChart(selectedOption);
       }
     }
-  }, [selectedSection, selectedOption]);
+  }, [selectedSection, selectedOption, attendanceTime]);
 
   const handleOptionChange = (event) => setSelectedOption(event.target.value);
 
@@ -456,55 +449,6 @@ const Dashboard = () => {
     },
   };
 
-  // const renderStudentCount = () => {
-  //   if (studentCountData > 0) {
-  //     return `${studentPresentCountData || 0}/${studentCountData || 0}`;
-  //   } else {
-  //     return "0";
-  //   }
-  // };
-
-  // const renderPieChart = () => {
-  //   const hasAttendance =
-  //     studentPresentCountData > 0 || studentAbsentCountData > 0;
-
-  //   const data = {
-  //     labels: hasAttendance ? ["Present", "Absent"] : ["No Attendance"],
-  //     datasets: [
-  //       {
-  //         data: hasAttendance
-  //           ? [studentPresentCountData, studentAbsentCountData]
-  //           : [1],
-  //         backgroundColor: hasAttendance ? ["#4caf50", "#d91111"] : ["gray"],
-  //         borderWidth: 2,
-  //       },
-  //     ],
-  //   };
-  //   const options = {
-  //     cutout: "70%", // Makes the pie chart hollow (controls the doughnut size)
-  //     plugins: {
-  //       legend: {
-  //         display: true,
-  //         position: "top",
-  //         labels: {
-  //           font: {
-  //             size: 14,
-  //           },
-  //           color: "#333", // Legend text color
-  //         },
-  //       },
-  //     },
-  //     maintainAspectRatio: false,
-  //     responsive: true,
-  //   };
-
-  //   return (
-  //     <div style={{ width: "100%", height: "100%" }}>
-  //       <Doughnut data={data} options={options} />
-  //     </div>
-  //   );
-  // };
-
   // Register required chart elements
   Chart.register(ArcElement, Tooltip, Legend);
   const renderPieChart = () => {
@@ -601,6 +545,70 @@ const Dashboard = () => {
     />
   );
 
+  const handleChangeDate = (direction) => {
+    setAttendanceTime((prev) => {
+      const newTime = { ...prev };
+
+      if (selectedOption === "Daily") {
+        newTime.day.startTime =
+          direction === "next"
+            ? moment(prev.day.startTime).add(1, "days").startOf("day").valueOf()
+            : moment(prev.day.startTime)
+                .subtract(1, "days")
+                .startOf("day")
+                .valueOf();
+        newTime.day.endTime =
+          direction === "next"
+            ? moment(prev.day.endTime).add(1, "days").endOf("day").valueOf()
+            : moment(prev.day.endTime)
+                .subtract(1, "days")
+                .endOf("day")
+                .valueOf();
+      } else if (selectedOption === "Weekly") {
+        newTime.week.startTime =
+          direction === "next"
+            ? moment(prev.week.startTime)
+                .add(1, "week")
+                .startOf("week")
+                .valueOf()
+            : moment(prev.week.startTime)
+                .subtract(1, "week")
+                .startOf("week")
+                .valueOf();
+        newTime.week.endTime =
+          direction === "next"
+            ? moment(prev.week.endTime).add(1, "week").endOf("week").valueOf()
+            : moment(prev.week.endTime)
+                .subtract(1, "week")
+                .endOf("week")
+                .valueOf();
+      } else if (selectedOption === "Monthly") {
+        newTime.month.startTime =
+          direction === "next"
+            ? moment(prev.month.startTime)
+                .add(1, "month")
+                .startOf("month")
+                .valueOf()
+            : moment(prev.month.startTime)
+                .subtract(1, "month")
+                .startOf("month")
+                .valueOf();
+        newTime.month.endTime =
+          direction === "next"
+            ? moment(prev.month.endTime)
+                .add(1, "month")
+                .endOf("month")
+                .valueOf()
+            : moment(prev.month.endTime)
+                .subtract(1, "month")
+                .endOf("month")
+                .valueOf();
+      }
+
+      return newTime;
+    });
+  };
+
   return (
     <div className="relative w-full min-h-screen bg-[#93a3b6]/25">
       <Toaster position="top-center" reverseOrder={false} />
@@ -613,17 +621,6 @@ const Dashboard = () => {
           <hr className="mx-5" />
           {/* Grids */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 p-4 pl-10">
-            {/* <div className="flex items-center justify-between p-6 rounded-2xl bg-[#0F4189]/5 mb-2 mt-2">
-              <div className="px-3">
-                <p className="text-base font-medium text-[#9391A5]">
-                  {t("dashboard.students")}
-                </p>
-                <p className="text-3xl mt-2 font-bold text-[#0F4189]">
-                  {renderStudentCount()}
-                </p>
-              </div>
-              <img src={dashboardstudent} className="w-12 h-12 mr-4" />
-            </div> */}
             <div className="flex items-center justify-between p-6 rounded-2xl bg-[#FF793F]/5 mb-2 mt-2">
               <div className="px-3">
                 <p className="text-base font-medium text-[#9391A5]">
@@ -735,6 +732,37 @@ const Dashboard = () => {
                 <Spinner />
               </div>
             )}
+            <div className="flex justify-end items-center py-3">
+              <div className="flex justify-between items-center space-x-2 w-[230px]">
+                <img
+                  src={DownIcon}
+                  onClick={() => handleChangeDate("previous")}
+                  alt=""
+                  className="h-3 w-5 rotate-90 object-contain cursor-pointer"
+                />
+                <div className="text-xl font-poppins-regular">
+                  {selectedOption === "Daily"
+                    ? moment(attendanceTime.day.startTime).format(
+                        "ddd, DD MMM YYYY"
+                      )
+                    : selectedOption === "Weekly"
+                    ? `${moment(attendanceTime.week.startTime).format(
+                        "D"
+                      )} - ${moment(attendanceTime.week.endTime).format(
+                        "D MMM YYYY"
+                      )}`
+                    : moment(attendanceTime.month.startTime).format(
+                        "MMMM YYYY"
+                      )}
+                </div>
+                <img
+                  src={DownIcon}
+                  onClick={() => handleChangeDate("next")}
+                  alt=""
+                  className="h-3 w-5 -rotate-90 object-contain cursor-pointer"
+                />
+              </div>
+            </div>
             <div className="flex justify-center mb-4">
               <div
                 className={`h-96 flex justify-center ${

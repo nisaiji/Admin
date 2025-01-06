@@ -593,6 +593,7 @@ export default function StudentSection() {
                       <input
                         type="text"
                         value={student.phone}
+                        maxLength={10}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
@@ -726,6 +727,7 @@ export default function StudentSection() {
                     <input
                       type="text"
                       value={newStudent.phone}
+                      maxLength={10}
                       onChange={(e) =>
                         handleInputChange(null, "phone", e.target.value)
                       }

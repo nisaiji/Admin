@@ -223,6 +223,7 @@ const TeacherUpdate = () => {
                           placeholder={placeholder}
                           onChange={formik.handleChange}
                           value={formik.values[name]}
+                          maxLength={name === "phone" ? 10 : ""}
                           className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
                         />
                       )}
