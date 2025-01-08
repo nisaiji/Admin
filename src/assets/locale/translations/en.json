@@ -50,7 +50,8 @@
     "addressInfo": "Address Information",
     "setPassword": "Set Password",
     "setYourPassword": "Set Your Password",
-    "setupAccount": "Setup your Account"
+    "setupAccount": "Setup your Account",
+    "finish": "Finish"
   },
   "login": {
     "A": "A",

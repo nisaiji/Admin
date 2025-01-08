@@ -30,6 +30,7 @@ const Dashboard = () => {
   const [sectionList, setSectionList] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
+  const [startTime, setStartTime] = useState("");
   const [eventLoading, setEventLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [totalStudentClassSectionWise, setTotalStudentClassSectionWise] =
@@ -218,7 +219,7 @@ const Dashboard = () => {
     setLoading(false);
   };
 
-  // api for monthly, weekly chart
+  // api for monthly, weekly chart for school
   const getSchoolAttendanceChart = async (type) => {
     const currentDates =
       type === "Weekly"
@@ -244,7 +245,7 @@ const Dashboard = () => {
       } else {
         monthlyData(result?.attendances, result?.totalStudent);
       }
-      setTotalStudentClassSectionWise(result?.totalStudent);
+      setTotalStudentClassSectionWise(result?.totalStudents);
     }
     setLoading(false);
   };
@@ -545,7 +546,15 @@ const Dashboard = () => {
     />
   );
 
+  // console.log(classList);
+
   const handleChangeDate = (direction) => {
+    // console.log({
+    //   startTime,
+    //   today: moment().startOf("day").valueOf(),
+    //   day: attendanceTime.day.startTime,
+    // });
+
     setAttendanceTime((prev) => {
       const newTime = { ...prev };
 
@@ -696,6 +705,7 @@ const Dashboard = () => {
                     );
                     setSectionList(classData[0]?.section);
                     setSelectedSection(classData[0]?.section[0]?._id || "");
+                    setStartTime(classData[0]?.section[0]?.startTime || "");
                   }}
                 >
                   <option value="">{t("dashboard.selectClass")}</option>

@@ -12,6 +12,7 @@ import EndPoints from "../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
 import REGEX from "../utils/regix";
 import { useTranslation } from "react-i18next";
+import Step4 from "../components/Step4";
 
 function SchoolDetailSignup() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -147,7 +148,8 @@ function SchoolDetailSignup() {
         // If registration is successful
         if ([200, 201].includes(response?.statusCode)) {
           toast.success(response?.result);
-          navigate("/login");
+          // navigate("/login");
+          setCurrentStep((prev) => prev + 1); // Move to the next step
         }
       } catch (e) {
         toast.error(e);
@@ -180,12 +182,19 @@ function SchoolDetailSignup() {
             currentStep === 3 ? "bg-[#0F4189]" : "bg-[#05022B]"
           } text-white`}
         >
-          3
+          {currentStep <= 3 ? 3 : <img src={Tick} alt="Tick" />}
+        </div>
+        <div
+          className={`size-12 rounded-full flex items-center justify-center z-10 ${
+            currentStep === 4 ? "bg-[#0F4189]" : "bg-[#05022B]"
+          } text-white`}
+        >
+          4
         </div>
       </div>
       <div className="flex">
         <div
-          className={`text-sm w-1/3 text-center font-semibold ${
+          className={`text-sm w-1/4 text-center font-semibold ${
             currentStep === 1 ? "text-[#0F4189]" : "text-black"
           }`}
         >
@@ -193,7 +202,7 @@ function SchoolDetailSignup() {
         </div>
         {currentStep > 1 && (
           <div
-            className={`text-sm w-1/3 text-center font-semibold ${
+            className={`text-sm w-1/4 text-center font-semibold ${
               currentStep === 2 ? "text-[#0F4189]" : "text-black"
             }`}
           >
@@ -202,27 +211,22 @@ function SchoolDetailSignup() {
         )}
         {currentStep > 2 && (
           <div
-            className={`text-sm w-1/3 text-center font-semibold ${
+            className={`text-sm w-1/4 text-center font-semibold ${
               currentStep === 3 ? "text-[#0F4189]" : "text-black"
             }`}
           >
             {t("register.setPassword")}
           </div>
         )}
-        {/* <div
-          className={`text-sm text-center -translate-x-5 ${
-            currentStep === 2 ? "text-[#4834D4]" : "text-black"
-          }`}
-        >
-          {t("register.addressInfo")}
-        </div> */}
-        {/* <div
-          className={`text-sm text-center  ${
-            currentStep === 3 ? "text-[#4834D4]" : "text-black"
-          }`}
-        >
-          {t("register.setPassword")}
-        </div> */}
+        {currentStep > 3 && (
+          <div
+            className={`text-sm w-1/4 text-center font-semibold ${
+              currentStep === 4 ? "text-[#0F4189]" : "text-black"
+            }`}
+          >
+            {t("register.finish")}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -268,6 +272,7 @@ function SchoolDetailSignup() {
                     loading={loading}
                   />
                 )}
+                {currentStep === 4 && <Step4 />}
               </div>
             </div>
           </div>
