@@ -56,15 +56,9 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
 };
 
 // return days of month with handling styles
-const Day = ({ day, hasEvent, isHoliday, onClick, isSunday, isToday }) => {
+const Day = ({ day, isHoliday, onClick, isSunday, isToday }) => {
   const renderCss = () => {
-    if (isHoliday && hasEvent) {
-      return `
-        text-white
-        bg-gradient-to-br from-[#D91111] from-45% via-[#fafafa] to-[#0F4189] to-55%
-        border-[#FE4040] border-t-0 border-r-0 border-b-0 border-l-0
-        `;
-    } else if (isHoliday) {
+    if (isHoliday) {
       return `text-white bg-[#FE4040] border-[#FE4040]`;
       // } else if (hasEvent) {
       //   return `text-white bg-[#4834D4] border-[#4834D4]`;
@@ -165,15 +159,10 @@ const CalendarComponent = ({ updateDate }) => {
         day === today.getDate() &&
         month === today.getMonth() &&
         year === today.getFullYear();
-      const hasEvent = eventsArr.some(
-        (event) =>
-          event.event &&
-          new Date(event.date).toDateString() ===
-            new Date(year, month, day).toDateString()
-      );
+        
       const isHoliday = eventsArr.some(
         (event) =>
-          event.holiday &&
+          event.title &&
           new Date(event.date).toDateString() ===
             new Date(year, month, day).toDateString()
       );
@@ -183,7 +172,6 @@ const CalendarComponent = ({ updateDate }) => {
           key={day}
           day={day}
           isActive={isActive}
-          hasEvent={hasEvent}
           isHoliday={isHoliday}
           isSunday={isSunday}
           isToday={isToday}

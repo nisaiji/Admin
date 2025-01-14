@@ -23,6 +23,7 @@ import { setAuthData } from "./store/AppAuthSlice";
 import SchoolDetailSignup from "./pages/SchoolDetailSignup";
 import Requests from "./components/dashBoard/Request";
 import Leaves from "./components/dashBoard/Leaves";
+import TeacherProfile from "./components/admin/TeacherProfile";
 
 function App() {
   const dispatch = useDispatch();
@@ -43,8 +44,9 @@ function App() {
             <Route path="/" element={<Home />}>
               {role === "teacher" ? (
                 <>
+                  <Route path="" element={<DashBoard />} />
                   <Route path="student-section" element={<StudentSection />} />
-                  <Route path="event" element={<Event />} />
+                  <Route path="teacher-profile" element={<TeacherProfile />} />
                 </>
               ) : (
                 <>

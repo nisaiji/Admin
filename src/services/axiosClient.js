@@ -47,7 +47,21 @@ axiosClient.interceptors.response.use(
     if (data.status === "ok") {
       return data;
     }
-
+    if (
+      data?.statusCode === 404 &&
+      data?.status === "error" &&
+      data?.message === "Admin not exists"
+    ) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("username");
+      localStorage.removeItem("firstname");
+      localStorage.removeItem("searchClass");
+      localStorage.removeItem("searchSection");
+      window.location.replace("/login", "_self");
+      toast.error(data?.message);
+      return;
+    }
     if (data?.statusCode === 500 && data?.message === "jwt expired") {
       const originalRequest = response.config;
 
@@ -68,7 +82,8 @@ axiosClient.interceptors.response.use(
         localStorage.removeItem("searchClass");
         localStorage.removeItem("searchSection");
         window.location.replace("/login", "_self");
-        return Promise.reject(data?.message);
+        toast.error(data?.message);
+        return;
       }
     }
     if (data?.status == "error") {
@@ -76,12 +91,22 @@ axiosClient.interceptors.response.use(
     }
   },
   async (error) => {
-    // console.log({error});
-    
     if (error.message === "Network Error") {
       toast.error("Check your internet connectivity");
       return;
     }
-    return Promise.reject(error?.response?.data?.message);
+    const err = error?.response?.data;
+    if (err.statusCode === 403 && err.status === "error") {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("username");
+      localStorage.removeItem("firstname");
+      localStorage.removeItem("searchClass");
+      localStorage.removeItem("searchSection");
+      window.location.replace("/login", "_self");
+      toast.error(err?.message);
+      return;
+    }
+    return Promise.reject(err.message);
   }
 );

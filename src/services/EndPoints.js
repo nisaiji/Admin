@@ -34,8 +34,8 @@ const EndPoints = {
     SECTION_INFO: "section",
     GET_DEMO_EXCEL: "admin/students-excelsheet",
     UPLOAD_EXCEL: "student/excel",
-    GET_ATTENDANCE: "attendance",
-    UPDATE_ATTENDANCE: "attendance/teacher/bulk-mark",
+    GET_ATTENDANCE: "attendance/admin",
+    UPDATE_ATTENDANCE: "attendance/admin/bulk-mark",
 
     // ADMIN SECTION STUDENTS
     GET_SECTION_STUDENTS: "student/admin",
@@ -56,14 +56,13 @@ const EndPoints = {
     SOCIAL_PROFILE_UPDATE: "admin/social",
   },
   TEACHER: {
-    // STUDENT_DELETE: "student/delete",
-    // STUDENT_UPDATE: "student/update",
-    // UPDATE_STUDENT: "dashboard/present-students",
-
     // TEACHER DASHBOARD
     DASHBOARD_CALENDER_EVENTS: "dashboard/holiday-events",
     DASHBOARD_WEEKLY_ATTENDANCE: "dashboard/weekly-attendance",
     DASHBOARD_MONTHLY_ATTENDANCE: "dashboard/monthly-attendance",
+
+    // ADMIN DASHBOARD
+    DASHBOARD_ATTENDANCE_STATUS: "teacher-dashboard/attendance-status",
 
     // TEACHER STUDENT SETUP
     GET_STUDENT_LIST: "student/teacher",
@@ -74,9 +73,13 @@ const EndPoints = {
     REGISTER_SECTION_STUDENT: "student/teacher",
     UPDATE_SECTION_STUDENT: "student/teacher",
     DELETE_SECTION_STUDENT: "student/teacher",
+    GET_ATTENDANCE: "attendance/teacher",
+    UPDATE_ATTENDANCE: "attendance/teacher/bulk-mark",
 
-    // ADMIN PROFILE
+    // TEACHER PROFILE
     TEACHER_LOGIN: "teacher/login",
+    GET_TEACHER: "teacher",
+    PROFILE_UPDATE: "teacher",
   },
   COMMON: {
     CLASS_LIST: "class/all",

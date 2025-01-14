@@ -18,15 +18,21 @@ export default function AttendancePopup({
   classId,
   className,
   sectionName,
-  startTime,
+  startTimeForAdmin,
 }) {
   const id = useSelector((state) => state.appAuth.id);
+  const sectionStartTime = useSelector(
+    (state) => state.appAuth.sectionStartTime
+  );
+  const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
+  const teacherSectionId = useSelector((state) => state.appAuth.section);
   const [isEditable, setIsEditable] = useState(false);
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [holidays, setHolidays] = useState({});
-  // console.log(holidays);
+
+  const startTime = isTeacher ? sectionStartTime : startTimeForAdmin;
 
   if (!isVisible) return null;
 
@@ -35,59 +41,6 @@ export default function AttendancePopup({
     currentDate.getMonth() + 1,
     0
   ).getDate();
-
-  const handleHolidaySelection = (dateIndex) => {
-    const selectedDate = moment(
-      new Date(currentDate.getFullYear(), currentDate.getMonth(), dateIndex + 1)
-    ).format("YYYY-MM-DD");
-
-    const isSunday =
-      new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        dateIndex + 1
-      ).getDay() === 0;
-
-    if (isSunday) {
-      toast.error("You cannot remove Sunday as a holiday.");
-      return;
-    }
-
-    if (holidays[selectedDate]) {
-      // Remove holiday
-      setHolidays((prev) => {
-        const updated = { ...prev };
-        delete updated[selectedDate];
-        return updated;
-      });
-      // Clear attendance for all students on the selected date
-      setAttendanceData((prevData) =>
-        prevData.map((student) => ({
-          ...student,
-          attendances: student.attendances.map((attendance, i) =>
-            i === dateIndex ? { ...attendance, attendance: "" } : attendance
-          ),
-        }))
-      );
-    } else {
-      // Mark as holiday
-      setHolidays((prev) => ({
-        ...prev,
-        [selectedDate]: true,
-      }));
-      // Update attendance for all students for the selected date
-      setAttendanceData((prevData) =>
-        prevData.map((student) => ({
-          ...student,
-          attendances: student.attendances.map((attendance, i) =>
-            i === dateIndex
-              ? { ...attendance, attendance: "H" } // Mark as Holiday
-              : attendance
-          ),
-        }))
-      );
-    }
-  };
 
   const isSundayOrHoliday = (dateIndex) => {
     const date = new Date(
@@ -123,13 +76,24 @@ export default function AttendancePopup({
       const startYear = new Date(startTime).getFullYear();
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
+      // console.log(
+      //   newDate.getFullYear() < startYear,
+      //   newDate.getMonth() < startMonth,
+      //   newDate.getFullYear() > currentYear,
+      //   newDate.getMonth() > currentMonth
+      // );
 
       if (
-        (newDate.getFullYear() === startYear &&
-          newDate.getMonth() < startMonth) ||
-        (newDate.getFullYear() === currentYear &&
-          newDate.getMonth() > currentMonth)
+        newDate.getFullYear() < startYear ||
+        newDate.getMonth() < startMonth ||
+        newDate.getFullYear() > currentYear ||
+        newDate.getMonth() > currentMonth
       ) {
+        toast.error(
+          `You can only change month between the ${moment(startTime).format(
+            "MMMM YYYY"
+          )} to ${moment().format("MMMM YYYY")}.`
+        );
         return prevDate; // Prevent changes beyond allowed range
       }
       return newDate;
@@ -142,11 +106,15 @@ export default function AttendancePopup({
       currentDate.getMonth(),
       dateIndex + 1
     );
-    if (attendanceDate < new Date(startTime) || attendanceDate > new Date()) {
+
+    if (
+      moment(attendanceDate).valueOf() < startTime ||
+      attendanceDate > moment().endOf("days").valueOf()
+    ) {
       toast.error(
         `You can only edit attendance between the ${moment(startTime).format(
           "DD/MM/YYYY"
-        )} and ${moment(currentDate).format("DD/MM/YYYY")}.`
+        )} and ${moment().format("DD/MM/YYYY")}.`
       );
       return;
     }
@@ -166,10 +134,6 @@ export default function AttendancePopup({
     );
   };
 
-  useEffect(() => {
-    fetchEvents();
-  }, [currentDate]);
-
   const handleSaveAttendance = async () => {
     try {
       setLoading(true);
@@ -183,12 +147,14 @@ export default function AttendancePopup({
           const today = moment(new Date()).format("YYYY-MM-DD");
 
           // console.log(
-          //   item.attendance === "" && itemDate > startDate && itemDate <= today
+          //   item.attendance === "" && itemDate >= startDate && itemDate <= today
           // );
 
           // Check if attendance is empty for dates within the range
           return (
-            item?.attendance === "" && itemDate > startDate && itemDate <= today
+            item?.attendance === "" &&
+            itemDate >= startDate &&
+            itemDate <= today
           );
         })
       );
@@ -218,12 +184,11 @@ export default function AttendancePopup({
           });
         });
       });
-
+      const url = isTeacher
+        ? `${EndPoints.TEACHER.UPDATE_ATTENDANCE}/${teacherSectionId}`
+        : `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${sectionId}`;
       // API call
-      const res = await axiosClient.post(
-        `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${sectionId}`,
-        { studentsAttendances }
-      );
+      const res = await axiosClient.post(url, { studentsAttendances });
 
       if (res.statusCode === 200) {
         toast.success(res?.result);
@@ -262,10 +227,10 @@ export default function AttendancePopup({
         999
       ).getTime();
       // console.log("start");
-
-      const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${id}&section=${sectionId}&classId=${classId}&startTime=${startTime}&endTime=${endTime}`
-      );
+      const url = isTeacher
+        ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${teacherSectionId}&startTime=${startTime}&endTime=${endTime}`
+        : `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${id}&section=${sectionId}&classId=${classId}&startTime=${startTime}&endTime=${endTime}`;
+      const res = await axiosClient.get(url);
       // console.log(res?.result);
 
       if (res?.statusCode === 200) {
@@ -349,6 +314,15 @@ export default function AttendancePopup({
       setLoading(false);
     }
   };
+
+  // Trigger fetchMonthlyAttendance when holidays update
+  useEffect(() => {
+    fetchMonthlyAttendance();
+  }, [holidays]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [currentDate]);
 
   // attendance download in pdf format
   const downloadAttendance = () => {
@@ -516,92 +490,112 @@ export default function AttendancePopup({
                   <th key={i} className="relative">
                     <div className={`flex flex-col items-center`}>
                       <span>{i + 1}</span>
-                      {/* <select
-                        disabled={!isEditable}
-                        value={
-                          isSundayOrHoliday(i) ||
-                          holidays[
-                            moment(
-                              new Date(
-                                currentDate.getFullYear(),
-                                currentDate.getMonth(),
-                                i + 1
-                              )
-                            ).format("YYYY-MM-DD")
-                          ]
-                            ? "H"
-                            : ""
-                        }
-                        onChange={() => handleHolidaySelection(i)}
-                        className={`mt-1 text-xs bg-gray-200 rounded ${
-                          isEditable ? "cursor-pointer" : "cursor-not-allowed"
-                        }`}
-                      >
-                        <option value=""></option>
-                        <option value="H">H</option>
-                      </select> */}
                     </div>
                   </th>
                 ))}
+                <th className="border border-gray-300 p-1 w-[50px] font-poppins-regular">
+                  Total Attendance
+                </th>
               </tr>
             </thead>
             <tbody>
-              {attendanceData.map((data, index) => (
-                <tr key={index}>
-                  <td className="border border-gray-300 p-1">{index + 1}</td>
-                  <td className="border border-gray-300 p-1">
-                    {data?.firstname || ""} {data?.lastname || ""}
-                  </td>
-                  {data.attendances.map((value, idx) => (
-                    <td key={idx} className="border border-gray-300">
-                      {isEditable ? (
-                        <select
-                          name="attendance"
-                          value={
-                            isSundayOrHoliday(idx) ? "H" : value.attendance
-                          }
-                          disabled={isSundayOrHoliday(idx)}
-                          onChange={(e) => {
-                            handleInputChange(index, idx, e.target.value);
-                          }}
-                          className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring focus:ring-black ${
-                            value?.attendance === "P"
-                              ? "text-[#0F4189]"
-                              : value?.attendance === "A"
-                              ? "text-[#D91111]"
-                              : "text-black"
-                          }`}
-                        >
-                          <option value="" label="" />
-                          <option
-                            value="H"
-                            label="H"
-                            style={{ display: "none" }}
-                          />
-                          <option
-                            value="P"
-                            label="P"
-                            className="text-[#0F4189]"
-                          />
-                          <option
-                            value="A"
-                            label="A"
-                            className="text-[#D91111]"
-                          />
-                        </select>
-                      ) : (
-                        <div
-                          className={`w-full text-center focus:outline-none bg-transparent uppercase ${getCellStyle(
-                            value?.attendance
-                          )}`}
-                        >
-                          {value?.attendance}
-                        </div>
-                      )}
+              {attendanceData.map((data, index) => {
+                const totalPresent = data.attendances.filter(
+                  (a) => a.attendance === "P"
+                ).length;
+                const totalAbsent = data.attendances.filter(
+                  (a) => a.attendance === "A"
+                ).length;
+                return (
+                  <tr key={index}>
+                    <td className="border border-gray-300 p-1">{index + 1}</td>
+                    <td className="border border-gray-300 p-1">
+                      {data?.firstname || ""} {data?.lastname || ""}
                     </td>
-                  ))}
-                </tr>
-              ))}
+                    {data.attendances.map((value, idx) => (
+                      <td key={idx} className="border border-gray-300">
+                        {isEditable ? (
+                          <select
+                            name="attendance"
+                            value={
+                              isSundayOrHoliday(idx) ? "H" : value.attendance
+                            }
+                            disabled={isSundayOrHoliday(idx)}
+                            onChange={(e) => {
+                              handleInputChange(index, idx, e.target.value);
+                            }}
+                            className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring focus:ring-black ${
+                              value?.attendance === "P"
+                                ? "text-[#0F4189]"
+                                : value?.attendance === "A"
+                                ? "text-[#D91111]"
+                                : "text-black"
+                            }`}
+                          >
+                            <option value="" label="" />
+                            <option
+                              value="H"
+                              label="H"
+                              style={{ display: "none" }}
+                            />
+                            <option
+                              value="P"
+                              label="P"
+                              className="text-[#0F4189]"
+                            />
+                            <option
+                              value="A"
+                              label="A"
+                              className="text-[#D91111]"
+                            />
+                          </select>
+                        ) : (
+                          <div
+                            className={`w-full text-center focus:outline-none bg-transparent uppercase ${getCellStyle(
+                              value?.attendance
+                            )}`}
+                          >
+                            {value?.attendance}
+                          </div>
+                        )}
+                      </td>
+                    ))}
+                    {/* Horizontal totals */}
+                    <td className="border border-gray-300 p-1">
+                      {totalPresent}/{totalDays}
+                    </td>
+                  </tr>
+                );
+              })}
+              {/* Vertical totals */}
+              <tr>
+                <td
+                  colSpan="2"
+                  className="border border-gray-300 font-bold p-1"
+                >
+                  Total
+                </td>
+                {Array.from({ length: totalDays }, (_, dayIndex) => {
+                  const totalPresentForDay = attendanceData.filter(
+                    (student) =>
+                      student.attendances[dayIndex]?.attendance === "P"
+                  ).length;
+                  const totalAbsentForDay = attendanceData.filter(
+                    (student) =>
+                      student.attendances[dayIndex]?.attendance === "A"
+                  ).length;
+
+                  return (
+                    <td key={dayIndex} className="border border-gray-300 p-1">
+                      {totalPresentForDay}/{attendanceData?.length || 0}
+                    </td>
+                  );
+                })}
+                <td
+                  colSpan="2"
+                  className="border border-gray-300 font-bold p-1"
+                ></td>
+              </tr>
             </tbody>
           </table>
         </div>

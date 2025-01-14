@@ -3,9 +3,7 @@ import { Bar, Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 import noevents from "../../assets/images/noevents.png";
-import ParentIcon from "../../assets/images/ParentIcon.png";
 import DownIcon from "../../assets/images/Down.png";
-import dashboardstudent from "../../assets/images/dashboardstudent.png";
 import CalendarComponent from "./CalendarComponent.jsx";
 import { useSelector } from "react-redux";
 import EndPoints from "../../services/EndPoints.js";
@@ -23,7 +21,6 @@ const Dashboard = () => {
   const [selectedOption, setSelectedOption] = useState("Monthly");
   const [studentPresentCountData, setStudentPresentCountData] = useState(null);
   const [studentAbsentCountData, setStudentAbsentCountData] = useState(null);
-  const [parentCount, setParentCount] = useState(0);
   const [calenderEvents, setCalenderEvents] = useState([]);
   const [chartData, setChartData] = useState(null);
   const [classList, setClassList] = useState([]);
@@ -46,8 +43,8 @@ const Dashboard = () => {
   });
 
   const getStartEndOfWeek = () => ({
-    startTime: moment().startOf("isoWeek").valueOf(),
-    endTime: moment().endOf("isoWeek").valueOf(),
+    startTime: moment().startOf("Week").valueOf(),
+    endTime: moment().endOf("Week").valueOf(),
   });
 
   const getStartEndOfMonth = () => ({
@@ -94,16 +91,6 @@ const Dashboard = () => {
     setTotalStudentClassSectionWise(result?.totalCount || 0);
   };
 
-  // parent count api
-  const getParentCount = async () => {
-    const url = isTeacher
-      ? EndPoints.TEACHER.PARENT_COUNT
-      : EndPoints.ADMIN.PARENT_COUNT;
-    const result = await fetchData(`${url}`);
-
-    if (result) setParentCount(result.parentCount);
-  };
-
   // returns class and section list
   const getClassList = async () => {
     const result = await fetchData(EndPoints.COMMON.CLASS_LIST);
@@ -116,7 +103,6 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    getParentCount();
     getClassList();
   }, []);
 
@@ -145,34 +131,18 @@ const Dashboard = () => {
     getCalenderEvents();
   }, [date]);
 
-  // return startTime and endTime of current week
-  // function getCurrentWeekDates() {
-  //   const currentDate = new Date();
-  //   const dayOfWeek = currentDate.getDay();
-  //   const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
-  //   // Start date (Monday)
-  //   const startTime = new Date(currentDate);
-  //   startTime.setDate(currentDate.getDate() + diff);
-  //   startTime.setHours(0, 0, 0, 0);
-  //   // End date (Sunday)
-  //   const endTime = new Date(startTime);
-  //   endTime.setDate(startTime.getDate() + 6);
-  //   endTime.setHours(23, 59, 59, 999);
-  //   return {
-  //     startTime: startTime.getTime(),
-  //     endTime: endTime.getTime(),
-  //   };
-  // }
-
   // Transform attendance data into array of 7 for weekly data
   const transformWeeklyData = (attendanceData) => {
-    const weekData = Array(7).fill({ present: 0, absent: 0 });
+    const weekData = Array(7).fill({ present: 0, absent: 0, na: 0 });
 
     attendanceData.forEach((item) => {
-      const dayIndex = (new Date(item.date).getDay() + 6) % 7;
+
+      const dayIndex = new Date(item.date).getDay() % 7;
       weekData[dayIndex] = {
         present: item.presentCount,
         absent: item.absentCount,
+        na:
+          totalStudentClassSectionWise - (item.presentCount + item.absentCount),
       };
     });
 
@@ -184,6 +154,7 @@ const Dashboard = () => {
     const monthData = Array.from({ length: daysInMonth }, () => ({
       present: 0,
       absent: 0,
+      na: 0,
     }));
 
     attendanceData.forEach((item) => {
@@ -191,32 +162,40 @@ const Dashboard = () => {
       monthData[dayIndex] = {
         present: item.presentCount,
         absent: item.absentCount,
+        na:
+          totalStudentClassSectionWise - (item.presentCount + item.absentCount),
       };
     });
 
     return monthData;
   };
 
-  // api for monthly, weekly chart
+  // api for daily attendance pie chart
   const getDailyAttendanceChart = async () => {
-    setLoading(true);
-    const result = await fetchData(
-      `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`,
-      "post",
-      {
+    try {
+      const url = isTeacher
+        ? EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS
+        : `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`;
+      setLoading(true);
+      const response = await axiosClient.post(url, {
         startTime: attendanceTime.day.startTime,
         endTime: attendanceTime.day.endTime,
+      });
+      const result = response?.result;
+      if (response?.statusCode === 200) {
+        setStudentAbsentCountData(
+          result?.sectionAttendance[0]?.absentCount || 0
+        );
+        setStudentPresentCountData(
+          result?.sectionAttendance[0]?.presentCount || 0
+        );
+        setTotalStudentClassSectionWise(result?.totalStudent);
       }
-    );
-
-    if (result) {
-      setStudentAbsentCountData(result?.sectionAttendance[0]?.absentCount || 0);
-      setStudentPresentCountData(
-        result?.sectionAttendance[0]?.presentCount || 0
-      );
-      setTotalStudentClassSectionWise(result?.totalStudent);
+    } catch (e) {
+      toast.error(e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // api for monthly, weekly chart for school
@@ -252,47 +231,57 @@ const Dashboard = () => {
 
   // api for monthly, weekly chart
   const getAttendanceChart = async (type) => {
-    const currentDates =
-      type === "Weekly"
-        ? {
-            startTime: attendanceTime.week.startTime,
-            endTime: attendanceTime.week.endTime,
-          }
-        : {
-            startTime: attendanceTime.month.startTime,
-            endTime: attendanceTime.month.endTime,
-          };
-    setLoading(true);
+    try {
+      const currentDates =
+        type === "Weekly"
+          ? {
+              startTime: attendanceTime.week.startTime,
+              endTime: attendanceTime.week.endTime,
+            }
+          : {
+              startTime: attendanceTime.month.startTime,
+              endTime: attendanceTime.month.endTime,
+            };
+      setLoading(true);
+      const url = isTeacher
+        ? EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS
+        : `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`;
 
-    const result = await fetchData(
-      `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`,
-      "post",
-      currentDates
-    );
+      const response = await axiosClient.post(url, currentDates);
 
-    if (result) {
-      if (type === "Weekly")
-        weeklyData(result?.sectionAttendance, result?.totalStudent);
-      else monthlyData(result?.sectionAttendance, result?.totalStudent);
-      setTotalStudentClassSectionWise(result?.totalStudent);
+      const result = response.result;
+      if (response?.statusCode === 200) {
+        if (type === "Weekly")
+          weeklyData(result?.sectionAttendance, result?.totalStudent);
+        else monthlyData(result?.sectionAttendance, result?.totalStudent);
+        setTotalStudentClassSectionWise(result?.totalStudent);
+      }
+    } catch (e) {
+      toast.error(e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    if (selectedOption === "Daily") {
-      if (selectedSection) {
-        getDailyAttendanceChart();
+    const fetchChartData = () => {
+      if (selectedOption === "Daily") {
+        if (isTeacher || selectedSection) {
+          getDailyAttendanceChart();
+        } else {
+          getStudentCount();
+        }
       } else {
-        getStudentCount();
+        if (selectedSection) {
+          getAttendanceChart(selectedOption);
+        } else {
+          isTeacher
+            ? getAttendanceChart(selectedOption)
+            : getSchoolAttendanceChart(selectedOption);
+        }
       }
-    } else {
-      if (selectedSection) {
-        getAttendanceChart(selectedOption);
-      } else {
-        getSchoolAttendanceChart(selectedOption);
-      }
-    }
+    };
+    fetchChartData();
   }, [selectedSection, selectedOption, attendanceTime]);
 
   const handleOptionChange = (event) => setSelectedOption(event.target.value);
@@ -303,6 +292,7 @@ const Dashboard = () => {
 
     const absentData = transformedData.map((day) => day.absent);
     const presentData = transformedData.map((day) => day.present);
+    const NAData = transformedData.map((day) => day.na);
 
     const data = {
       labels: CONSTANT.WEEKDAYS,
@@ -317,6 +307,13 @@ const Dashboard = () => {
         {
           label: "Present",
           data: presentData,
+          backgroundColor: "#D9E2E9",
+          barThickness: 50,
+          borderRadius: 14,
+        },
+        {
+          label: "NA",
+          data: NAData,
           backgroundColor: "#E9EEF2",
           barThickness: 50,
           borderRadius: 14,
@@ -372,6 +369,7 @@ const Dashboard = () => {
     const transformedData = transformMonthlyData(attendanceData, daysInMonth);
     const absentData = transformedData.map((day) => day.absent);
     const presentData = transformedData.map((day) => day.present);
+    const NAData = transformedData.map((day) => day.na);
 
     const data = {
       labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
@@ -385,6 +383,12 @@ const Dashboard = () => {
         {
           label: "Present",
           data: presentData,
+          backgroundColor: "#D9E2E9",
+          barThickness: 20,
+        },
+        {
+          label: "NA",
+          data: NAData,
           backgroundColor: "#E9EEF2",
           barThickness: 20,
         },
@@ -419,18 +423,11 @@ const Dashboard = () => {
             // Calculate the date for Weekly or Monthly view
             if (selectedOption === "Weekly") {
               // Assuming the week starts on the current date
-              const startOfWeek = new Date(); // Starting point of the week
-              startOfWeek.setDate(
-                startOfWeek.getDate() - ((startOfWeek.getDay() + 6) % 7) // Adjust to Monday
-              );
-              const currentDate = new Date(
-                startOfWeek.getFullYear(),
-                startOfWeek.getMonth(),
-                startOfWeek.getDate() + index
-              );
-              // console.log({startOfWeek,currentDate});
-
-              return currentDate.toLocaleDateString("en-GB"); // Format: dd/mm/yyyy
+              const currentDate = moment(attendanceTime.week.startTime)
+                .startOf("day")
+                .day(index)
+                .valueOf();
+              return moment(currentDate).format("DD/MM/yyyy"); // Format: dd/mm/yyyy
             } else if (selectedOption === "Monthly") {
               const year = date.year; // Year from your data
               const month = date.month; // Month from your data (0-indexed)
@@ -458,13 +455,20 @@ const Dashboard = () => {
     const totalStudents = studentPresentCountData + studentAbsentCountData;
 
     const data = {
-      labels: hasAttendance ? ["Present", "Absent"] : ["No Attendance"],
+      labels: hasAttendance ? ["Present", "Absent", "NA"] : ["No Attendance"],
       datasets: [
         {
           data: hasAttendance
-            ? [studentPresentCountData, studentAbsentCountData]
+            ? [
+                studentPresentCountData,
+                studentAbsentCountData,
+                totalStudentClassSectionWise -
+                  (studentPresentCountData + studentAbsentCountData),
+              ]
             : [1],
-          backgroundColor: hasAttendance ? ["#4caf50", "#d91111"] : ["gray"],
+          backgroundColor: hasAttendance
+            ? ["#D9E2E9", "#FF793F", "#E9EEF2"]
+            : ["gray"],
           borderWidth: 2,
         },
       ],
@@ -546,109 +550,74 @@ const Dashboard = () => {
     />
   );
 
-  // console.log(classList);
-
   const handleChangeDate = (direction) => {
-    // console.log({
-    //   startTime,
-    //   today: moment().startOf("day").valueOf(),
-    //   day: attendanceTime.day.startTime,
-    // });
-
     setAttendanceTime((prev) => {
       const newTime = { ...prev };
 
       if (selectedOption === "Daily") {
-        newTime.day.startTime =
-          direction === "next"
-            ? moment(prev.day.startTime).add(1, "days").startOf("day").valueOf()
-            : moment(prev.day.startTime)
-                .subtract(1, "days")
-                .startOf("day")
-                .valueOf();
-        newTime.day.endTime =
-          direction === "next"
-            ? moment(prev.day.endTime).add(1, "days").endOf("day").valueOf()
-            : moment(prev.day.endTime)
-                .subtract(1, "days")
-                .endOf("day")
-                .valueOf();
+        newTime.day.startTime = moment(prev.day.startTime)
+          .add(direction === "next" ? 1 : -1, "days")
+          .startOf("day")
+          .valueOf();
+
+        newTime.day.endTime = moment(prev.day.endTime)
+          .add(direction === "next" ? 1 : -1, "days")
+          .endOf("day")
+          .valueOf();
       } else if (selectedOption === "Weekly") {
-        newTime.week.startTime =
-          direction === "next"
-            ? moment(prev.week.startTime)
-                .add(1, "week")
-                .startOf("week")
-                .valueOf()
-            : moment(prev.week.startTime)
-                .subtract(1, "week")
-                .startOf("week")
-                .valueOf();
-        newTime.week.endTime =
-          direction === "next"
-            ? moment(prev.week.endTime).add(1, "week").endOf("week").valueOf()
-            : moment(prev.week.endTime)
-                .subtract(1, "week")
-                .endOf("week")
-                .valueOf();
+        newTime.week.startTime = moment(prev.week.startTime)
+          .add(direction === "next" ? 1 : -1, "week")
+          .startOf("week")
+          .valueOf();
+
+        newTime.week.endTime = moment(prev.week.endTime)
+          .add(direction === "next" ? 1 : -1, "week")
+          .endOf("week")
+          .valueOf();
       } else if (selectedOption === "Monthly") {
-        newTime.month.startTime =
-          direction === "next"
-            ? moment(prev.month.startTime)
-                .add(1, "month")
-                .startOf("month")
-                .valueOf()
-            : moment(prev.month.startTime)
-                .subtract(1, "month")
-                .startOf("month")
-                .valueOf();
-        newTime.month.endTime =
-          direction === "next"
-            ? moment(prev.month.endTime)
-                .add(1, "month")
-                .endOf("month")
-                .valueOf()
-            : moment(prev.month.endTime)
-                .subtract(1, "month")
-                .endOf("month")
-                .valueOf();
+        newTime.month.startTime = moment(prev.month.startTime)
+          .add(direction === "next" ? 1 : -1, "month")
+          .startOf("month")
+          .valueOf();
+
+        newTime.month.endTime = moment(prev.month.endTime)
+          .add(direction === "next" ? 1 : -1, "month")
+          .endOf("month")
+          .valueOf();
       }
 
       return newTime;
     });
   };
 
+  const Clock = () => {
+    const [currentTime, setCurrentTime] = useState(
+      moment().format("DD-MM-YYYY hh:mm A")
+    );
+
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setCurrentTime(moment().format("DD-MM-YYYY hh:mm A"));
+      }, 1000); // Update every second
+
+      return () => clearInterval(timer); // Cleanup on unmount
+    }, []);
+
+    return <div className="text-xl font-semibold">{currentTime}</div>;
+  };
+
   return (
-    <div className="relative w-full min-h-screen bg-[#93a3b6]/25">
+    <div className="relative w-full min-h-screen bg-[#93a3b6]/25 select-none">
       <Toaster position="top-center" reverseOrder={false} />
       <div className="container mx-[20px] py-[15px] justify-center">
-        <div className="bg-[#fafafa] justify-center rounded-[16px] w-full mx-8">
-          <h1 className="text-xl font-semibold p-3 pl-10 pt-6">
-            {/* {t("dashboard.title")} */}
-            {localStorage.getItem("schoolName") || schoolName}
-          </h1>
-          <hr className="mx-5" />
-          {/* Grids */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 p-4 pl-10">
-            <div className="flex items-center justify-between p-6 rounded-2xl bg-[#FF793F]/5 mb-2 mt-2">
-              <div className="px-3">
-                <p className="text-base font-medium text-[#9391A5]">
-                  {t("dashboard.parents")}
-                </p>
-                <p className="text-3xl mt-2 font-bold text-[#FF793F]">
-                  {parentCount}
-                </p>
-              </div>
-              <img
-                src={ParentIcon}
-                alt="User Graduate"
-                className="w-12 h-12 mr-4"
-              />
-            </div>
+        <div className="grid grid-rows-1 lg:grid-rows-1 gap-3">
+          <div className="bg-[#fafafa] flex justify-between rounded-[16px] w-full mx-8 px-8 p-5">
+            <h1 className="text-xl font-semibold">
+              {localStorage.getItem("schoolName") || schoolName}
+            </h1>
+            <Clock />
           </div>
-        </div>
-
-        <div className="grid grid-rows-1 lg:grid-rows-1 gap-4">
+          <hr className="mx-5" />
           <div className="bg-[#fafafa] justify-center p-6 w-full rounded-[16px] relative mx-8">
             <div className="flex justify-between mb-2">
               <h2 className="text-xl font-semibold pl-5">
@@ -694,55 +663,6 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              <div className="flex space-x-2 p-1 ">
-                <select
-                  className="px-4 w-25 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] bg-[#E9EEF2]/50 hover:bg-[#E9EEF2] font-medium rounded-[8px] justify-center items-center"
-                  value={selectedClass}
-                  onChange={(e) => {
-                    setSelectedClass(e.target.value);
-                    const classData = classList.filter(
-                      (itm) => itm["_id"] == e.target.value
-                    );
-                    setSectionList(classData[0]?.section);
-                    setSelectedSection(classData[0]?.section[0]?._id || "");
-                    setStartTime(classData[0]?.section[0]?.startTime || "");
-                  }}
-                >
-                  <option value="">{t("dashboard.selectClass")}</option>
-                  {classList.map((itm) => {
-                    return (
-                      <option key={itm["_id"]} value={itm["_id"]}>
-                        {itm.name}
-                      </option>
-                    );
-                  })}
-                </select>
-
-                <select
-                  className="px-4 w-26 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] bg-[#E9EEF2]/50 hover:bg-[#E9EEF2] text-[14px] font-medium rounded-[8px] justify-center items-center"
-                  value={selectedSection}
-                  onChange={(e) => setSelectedSection(e?.target?.value)}
-                >
-                  <option value="">{t("dashboard.selectSection")}</option>
-                  {sectionList &&
-                    sectionList.map((itm) => {
-                      return (
-                        <option key={itm["_id"]} value={itm["_id"]}>
-                          {itm.name}
-                        </option>
-                      );
-                    })}
-                </select>
-              </div>
-            </div>
-            <hr />
-            {/* Bar Graph */}
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 mx-8 w-full">
-                <Spinner />
-              </div>
-            )}
-            <div className="flex justify-end items-center py-3">
               <div className="flex justify-between items-center space-x-2 w-[230px]">
                 <img
                   src={DownIcon}
@@ -772,6 +692,58 @@ const Dashboard = () => {
                   className="h-3 w-5 -rotate-90 object-contain cursor-pointer"
                 />
               </div>
+            </div>
+            <hr />
+            {/* Bar Graph */}
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 mx-8 w-full">
+                <Spinner />
+              </div>
+            )}
+            <div className="flex justify-end items-center py-3">
+              {/* class and section dropdoown */}
+              {!isTeacher && (
+                <div className="flex space-x-2 p-1 ">
+                  <select
+                    className="px-4 w-25 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] bg-[#E9EEF2]/50 hover:bg-[#E9EEF2] font-medium rounded-[8px] justify-center items-center"
+                    value={selectedClass}
+                    onChange={(e) => {
+                      setSelectedClass(e.target.value);
+                      const classData = classList.filter(
+                        (itm) => itm["_id"] == e.target.value
+                      );
+                      setSectionList(classData[0]?.section);
+                      setSelectedSection(classData[0]?.section[0]?._id || "");
+                      setStartTime(classData[0]?.section[0]?.startTime || "");
+                    }}
+                  >
+                    <option value="">{t("dashboard.selectClass")}</option>
+                    {classList.map((itm) => {
+                      return (
+                        <option key={itm["_id"]} value={itm["_id"]}>
+                          {itm.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+
+                  <select
+                    className="px-4 w-26 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] bg-[#E9EEF2]/50 hover:bg-[#E9EEF2] text-[14px] font-medium rounded-[8px] justify-center items-center"
+                    value={selectedSection}
+                    onChange={(e) => setSelectedSection(e?.target?.value)}
+                  >
+                    <option value="">{t("dashboard.selectSection")}</option>
+                    {sectionList &&
+                      sectionList.map((itm) => {
+                        return (
+                          <option key={itm["_id"]} value={itm["_id"]}>
+                            {itm.name}
+                          </option>
+                        );
+                      })}
+                  </select>
+                </div>
+              )}
             </div>
             <div className="flex justify-center mb-4">
               <div

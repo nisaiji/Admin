@@ -192,6 +192,7 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
             type="text"
             name="pincode"
             placeholder={t("placeholders.pincode")}
+            maxLength={6}
             onChange={formik.handleChange}
             value={formik.values.pincode}
           />

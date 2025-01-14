@@ -270,7 +270,7 @@ export default function Studentlist() {
                     >
                       <InputLabel
                         id="demo-simple-select-label"
-                        className=" mr-[10px] text-[14px]"
+                        className=" mr-[10px] text-[14px] bg-white"
                       >
                         {t("titles.section")}
                       </InputLabel>
@@ -338,7 +338,7 @@ export default function Studentlist() {
                           isDarkMode ? "text-white" : ""
                         } text-center px-4 py-2 max-sm:hidden`}
                       >
-                        {t("labels.firstName")}
+                        {t("labels.fullName")}
                       </th>
                       <th
                         className={`${
@@ -395,7 +395,7 @@ export default function Studentlist() {
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
                           } p-4 text-center text-sm max-sm:hidden`}
                         >
-                          {student?.firstname}
+                          {student?.firstname} {student?.lastname}
                         </td>
                         <td
                           className={`${

@@ -97,50 +97,42 @@ const Navbar = () => {
         </div>
 
         <div className="flex space-x-12">
-          <div
-            className="relative items-end z-10"
-            onMouseEnter={() => setMenuOpen(true)}
-            onMouseLeave={() => setMenuOpen(false)}
-          >
+          {isTeacher ? (
             <div
-              onClick={handleToggleMenu}
-              className="flex justify-center items-center cursor-pointer"
+              onClick={() =>
+                navigate("/student-section", {
+                  state: { classId, sectionId },
+                })
+              }
+              className="block px-4 py-3 text-[#040320] cursor-pointer"
             >
-              <button className="text-[#040320] hover:text-[#0F4189] flex flex-row gap-2 px-2 py-2.5 text-sm font-bold rounded-md relative group">
-                {t("setup")}
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  className="w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180"
-                />
-              </button>
+              {t("titles.classRoom")}
             </div>
-            {/* setup menu */}
-            {menuOpen && (
+          ) : (
+            <div
+              className="relative items-end z-10"
+              onMouseEnter={() => setMenuOpen(true)}
+              onMouseLeave={() => setMenuOpen(false)}
+            >
               <div
-                ref={menuRef}
-                className="absolute top-10 w-36 bg-[#fafafa] shadow-lg z-10 justify-items-center "
+                onClick={handleToggleMenu}
+                className="flex justify-center items-center cursor-pointer"
               >
-                {isTeacher ? (
-                  <div className="py-1" onClick={closeMenus}>
-                    <div
-                      onClick={() =>
-                        navigate("/student-section", {
-                          state: { classId, sectionId },
-                        })
-                      }
-                      className="block px-4 py-3 text-[#040320] hover:text-[#FF793F] hover:bg-[#E9EEF2]"
-                    >
-                      {t("titles.classRoom")}
-                    </div>
-                    <Link
-                      to="/event"
-                      className="flex justify-start items-center gap-4 px-4 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
-                    >
-                      {t("event")}
-                    </Link>
-                  </div>
-                ) : (
+                <button className="text-[#040320] hover:text-[#0F4189] flex flex-row gap-2 px-2 py-2.5 text-sm font-bold rounded-md relative group">
+                  {t("setup")}
+                  <img
+                    src={dropdown}
+                    alt="dropdown"
+                    className="w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180"
+                  />
+                </button>
+              </div>
+              {/* setup menu */}
+              {menuOpen && (
+                <div
+                  ref={menuRef}
+                  className="absolute top-10 w-36 bg-[#fafafa] shadow-lg z-10 justify-items-center "
+                >
                   <div className="py-1" onClick={closeMenus}>
                     <Link
                       to="/teacher"
@@ -176,10 +168,10 @@ const Navbar = () => {
                       {t("event")}
                     </Link>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* students setup*/}
           {!isTeacher && (
@@ -193,51 +185,56 @@ const Navbar = () => {
           )}
 
           {/* Requests Menu */}
-          <div
-            className="relative"
-            onMouseEnter={() => setRequestsMenuOpen(true)}
-            onMouseLeave={() => setRequestsMenuOpen(false)}
-          >
+          {!isTeacher && (
             <div
-              onClick={handleToggleRequestsMenu}
-              className="flex justify-center items-center cursor-pointer"
+              className="relative"
+              onMouseEnter={() => setRequestsMenuOpen(true)}
+              onMouseLeave={() => setRequestsMenuOpen(false)}
             >
-              <button className="text-[#040320] hover:text-[#0F4189] flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group">
-                {t("titles.requests")}
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  className="w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180"
-                />
-              </button>
-            </div>
-            {requestsMenuOpen && (
               <div
-                ref={requestsMenuRef}
-                className="absolute top-10 w-40 bg-[#fafafa] shadow-lg z-10 "
+                onClick={handleToggleRequestsMenu}
+                className="flex justify-center items-center cursor-pointer"
               >
-                <Link
-                  to="/requests"
-                  className="flex justify-start items-center gap-3 px-3 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
-                >
+                <button className="text-[#040320] hover:text-[#0F4189] flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group">
+                  {t("titles.requests")}
                   <img
-                    src={passwordReset}
-                    alt="passwordReset"
-                    className="w-4 h-4 relative"
+                    src={dropdown}
+                    alt="dropdown"
+                    className="w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180"
                   />
-                  Password Reset
-                </Link>
-                <Link
-                  to="/leave"
-                  className="flex justify-start items-start gap-3 px-3 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
-                >
-                  <img src={leave} alt="leaves" className="w-4 h-4 relative" />
-                  {t("leaves")}
-                </Link>
+                </button>
               </div>
-            )}
-          </div>
-
+              {requestsMenuOpen && (
+                <div
+                  ref={requestsMenuRef}
+                  className="absolute top-10 w-40 bg-[#fafafa] shadow-lg z-10 "
+                >
+                  <Link
+                    to="/requests"
+                    className="flex justify-start items-center gap-3 px-3 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
+                  >
+                    <img
+                      src={passwordReset}
+                      alt="passwordReset"
+                      className="w-4 h-4 relative"
+                    />
+                    Password Reset
+                  </Link>
+                  <Link
+                    to="/leave"
+                    className="flex justify-start items-start gap-3 px-3 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
+                  >
+                    <img
+                      src={leave}
+                      alt="leaves"
+                      className="w-4 h-4 relative"
+                    />
+                    {t("leaves")}
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
           <div
             className="relative rounded-xl mr-5"
             onMouseEnter={() => setProfileMenuOpen(true)}
@@ -247,15 +244,6 @@ const Navbar = () => {
               onClick={handleToggleProfileMenu}
               className="flex items-center justify-center px-3 py-2 cursor-pointer"
             >
-              {/* <div>
-                <div className="text-white text-base mr-3">
-                  {isTeacher ? getItem("firstname") : getItem("username")}
-                </div>
-                <div className="text-white text-xs">
-                  {isTeacher ? t("roles.teacher") : t("roles.admin")}
-                </div>
-              </div>
-              <img src={Down} alt="Dropdown" className="w-4 h-2" /> */}
               <img src={user} alt="Dropdown" className="size-6" />
             </div>
             {/* profile menu */}
@@ -266,14 +254,12 @@ const Navbar = () => {
                 onClick={closeMenus}
               >
                 <div className="py-1">
-                  {!isTeacher && (
-                    <Link
-                      to="/admin-profile"
-                      className="block px-4 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
-                    >
-                      {t("profile")}
-                    </Link>
-                  )}
+                  <Link
+                    to={isTeacher ? "/teacher-profile" : "/admin-profile"}
+                    className="block px-4 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
+                  >
+                    {t("profile")}
+                  </Link>
                   <Link
                     onClick={handleLogout}
                     to="/login"
