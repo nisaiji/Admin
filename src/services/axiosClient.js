@@ -28,6 +28,8 @@ async function refreshAccessToken() {
 axiosClient.interceptors.request.use(
   (request) => {
     const accessToken = localStorage.getItem("access_token");
+    console.log(accessToken);
+
     request.headers["Authorization"] = `Bearer ${accessToken}`;
     return request;
   },
@@ -58,9 +60,10 @@ axiosClient.interceptors.response.use(
       localStorage.removeItem("firstname");
       localStorage.removeItem("searchClass");
       localStorage.removeItem("searchSection");
-      window.location.replace("/login", "_self");
-      toast.error(data?.message);
-      return;
+      setTimeout(() => {
+        window.location.replace("/login", "_self");
+      }, 2000);
+      return Promise.reject(data?.message);
     }
     if (data?.statusCode === 500 && data?.message === "jwt expired") {
       const originalRequest = response.config;
@@ -81,9 +84,10 @@ axiosClient.interceptors.response.use(
         localStorage.removeItem("firstname");
         localStorage.removeItem("searchClass");
         localStorage.removeItem("searchSection");
-        window.location.replace("/login", "_self");
-        toast.error(data?.message);
-        return;
+        setTimeout(() => {
+          window.location.replace("/login", "_self");
+        }, 2000);
+        return Promise.reject(data?.message);
       }
     }
     if (data?.status == "error") {
@@ -96,17 +100,18 @@ axiosClient.interceptors.response.use(
       return;
     }
     const err = error?.response?.data;
-    if (err.statusCode === 403 && err.status === "error") {
+    if (err?.statusCode === 403 && err?.status === "error") {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("username");
       localStorage.removeItem("firstname");
       localStorage.removeItem("searchClass");
       localStorage.removeItem("searchSection");
-      window.location.replace("/login", "_self");
-      toast.error(err?.message);
-      return;
+      setTimeout(() => {
+        window.location.replace("/login", "_self");
+      }, 2000);
+      return Promise.reject(err?.message);
     }
-    return Promise.reject(err.message);
+    return Promise.reject(err?.message);
   }
 );

@@ -126,7 +126,7 @@ function Login() {
     <div className="min-h-screen py-20 bg-[#fafafa] relative">
       {/* Background video */}
       <video
-        className="fixed top-0 left-0 h-[700px] w-[720px] bg-[#fafafa] bg-blend-multiply object-cover"
+        className="fixed top-0 left-0 h-full w-[55%] bg-[#fafafa] bg-blend-multiply object-cover"
         autoPlay
         loop
         muted
@@ -148,15 +148,9 @@ function Login() {
             <h2 className="flex text-3xl mb-4 justify-center">
               <Link to="/" className="flex items-center">
                 <img src={logo} alt="logo" className="size-12" />
-
-                {/* <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
-              <span className="text-[24px] font-bold">{t("A")}</span>
-
-            </div> */}
               </Link>
             </h2>
             <h2 className="font-bold text-[24px]">{t("login.login")}</h2>
-            {/* <p className="text-[#040320]/70 py-3">{t("login.enterDetails")}</p> */}
 
             {/* Email/username input */}
             <div className="mt-6 border-b border-[#686868]/60 w-full">

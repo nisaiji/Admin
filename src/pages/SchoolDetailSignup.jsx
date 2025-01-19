@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Step1 from "../components/Step1";
 import Step2 from "../components/Step2";
 import Step3 from "../components/Step3";
@@ -13,28 +13,78 @@ import toast, { Toaster } from "react-hot-toast";
 import REGEX from "../utils/regix";
 import { useTranslation } from "react-i18next";
 import Step4 from "../components/Step4";
+import axios from "axios";
+import Spinner from "../components/Spinner";
 
 function SchoolDetailSignup() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [progressChecking, setProgressChecking] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const [t] = useTranslation();
+  const navigate = useNavigate();
 
-  const nextStep = () => {
-    formik.validateForm().then((errors) => {
-      if (Object.keys(errors).length === 0) {
-        if (currentStep === 3) {
-          formik.handleSubmit(); // Submit the form on the last step
-        } else {
-          setCurrentStep((prev) => prev + 1); // Move to the next step
-        }
-      } else {
-        // There are validation errors, do not proceed
-        formik.setTouched(errors); // Mark the fields as touched to show the validation errors
+  // const baseURL = "http://localhost:4000";
+  const baseURL = "https://nisaiji.com";
+  const accessToken = localStorage.getItem("temp_access_token");
+  const getadmin = async () => {
+    try {
+      setLoading(true);
+      if (!accessToken) {
+        console.log("Access token is missing");
+        return;
       }
-    });
+
+      const res = await axios.get(`${baseURL}/${EndPoints.ADMIN.GET_ADMIN}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (res?.status === 200) {
+        const data = res?.data?.result;
+        // console.log(data);
+        if (data?.username) {
+          setCurrentStep(4);
+        } else if (data?.pincode) {
+          setCurrentStep(3);
+        } else if (data?.phone) {
+          setCurrentStep(2);
+        }
+        if (progressChecking) {
+          if (data?.isActive) {
+            localStorage.setItem(
+              "access_token",
+              localStorage.getItem("temp_access_token")
+            );
+            localStorage.setItem(
+              "refresh_token",
+              localStorage.getItem("temp_refresh_token")
+            );
+            localStorage.removeItem("temp_access_token");
+            localStorage.removeItem("temp_refresh_token");
+            toast.success(t("messages.login.success"));
+            setTimeout(() => {
+              navigate("/");
+            }, 1500);
+            n;
+          } else {
+            toast.error(
+              "Registerations already in progress - please wait for some time"
+            );
+          }
+          setProgressChecking(false);
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching admin data:", e);
+    } finally {
+      setLoading(false);
+    }
   };
-  const prevStep = () => setCurrentStep((prev) => prev - 1);
+
+  useEffect(() => {
+    getadmin();
+  }, []);
 
   // Validation schema for each step
   const validationSchema = () => {
@@ -45,14 +95,6 @@ function SchoolDetailSignup() {
             .trim()
             .min(8, t("validationError.schoolNameLength"))
             .required(t("validationError.schoolName")),
-          affiliationNo: Yup.string()
-            .trim()
-            .min(8, t("validationError.affiliationNumberLength"))
-            .required(t("validationError.affiliationNumber")),
-          email: Yup.string()
-            .trim()
-            .email(t("validationError.emailAddress"))
-            .required(t("validationError.email")),
           phone: Yup.string()
             .required(t("validationError.phone"))
             .trim()
@@ -62,10 +104,21 @@ function SchoolDetailSignup() {
               t("validationError.phoneStart"),
               (value) => (value ? REGEX.PHONE_TEST.test(value) : false)
             ),
-          username: Yup.string()
+          email: Yup.string()
             .trim()
-            .min(5, t("validationError.usernameLength"))
-            .required(t("validationError.username")),
+            .email(t("validationError.emailAddress"))
+            .required(t("validationError.email")),
+          password: Yup.string()
+            .trim()
+            .min(8, t("validationError.passwordLength"))
+            .required(t("validationError.password")),
+          confirmPassword: Yup.string()
+            .trim()
+            .oneOf(
+              [Yup.ref("password"), null],
+              t("validationError.passwordMatch")
+            )
+            .required(t("validationError.confirmPassword")),
         });
       case 2:
         return Yup.object().shape({
@@ -81,17 +134,14 @@ function SchoolDetailSignup() {
         });
       case 3:
         return Yup.object().shape({
-          password: Yup.string()
+          affiliationNo: Yup.string()
             .trim()
-            .min(8, t("validationError.passwordLength"))
-            .required(t("validationError.password")),
-          confirmPassword: Yup.string()
+            .min(8, t("validationError.affiliationNumberLength"))
+            .required(t("validationError.affiliationNumber")),
+          username: Yup.string()
             .trim()
-            .oneOf(
-              [Yup.ref("password"), null],
-              t("validationError.passwordMatch")
-            )
-            .required(t("validationError.confirmPassword")),
+            .min(5, t("validationError.usernameLength"))
+            .required(t("validationError.username")),
         });
       default:
         return Yup.object();
@@ -123,33 +173,68 @@ function SchoolDetailSignup() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      if (!formik.isValid || !formik.dirty) return;
-      const data = {
-        schoolName: capitalizeFirstLetter(values.schoolName).trim(),
-        affiliationNo: values.affiliationNo.trim(),
-        email: values.email.toLowerCase().trim(),
-        phone: values.phone.trim(),
-        username: capitalizeFirstLetter(values.username).trim(),
-        country: capitalizeFirstLetter(values.country).trim(),
-        state: capitalizeFirstLetter(values.state).trim(),
-        city: capitalizeFirstLetter(values.city).trim(),
-        district: capitalizeFirstLetter(values.district).trim(),
-        pincode: values.pincode.trim(),
-        address: capitalizeFirstLetter(values.address).trim(),
-        password: values.password.trim(),
-      };
-      setLoading(true);
       try {
-        // Send a POST request to register a new admin
-        const response = await axiosClient.post(
-          EndPoints.ADMIN.ADMIN_REGISTER,
-          data
-        );
-        // If registration is successful
-        if ([200, 201].includes(response?.statusCode)) {
-          toast.success(response?.result);
-          // navigate("/login");
-          setCurrentStep((prev) => prev + 1); // Move to the next step
+        setLoading(true);
+        if (currentStep === 1) {
+          const data = {
+            schoolName: capitalizeFirstLetter(values.schoolName).trim(),
+            email: values.email.toLowerCase().trim(),
+            phone: values.phone.trim(),
+            password: values.password.trim(),
+          };
+          const res = await axiosClient.post(
+            EndPoints.ADMIN.ADMIN_REGISTER,
+            data
+          );
+          if ([200, 201].includes(res?.statusCode)) {
+            localStorage.setItem("temp_access_token", res?.result?.accessToken);
+            localStorage.setItem(
+              "temp_refresh_token",
+              res?.result?.refreshToken
+            );
+            toast.success(res?.result?.msg);
+            setCurrentStep((prev) => prev + 1);
+          }
+        } else if (currentStep === 2) {
+          const data = {
+            country: capitalizeFirstLetter(values.country).trim(),
+            state: capitalizeFirstLetter(values.state).trim(),
+            city: capitalizeFirstLetter(values.city).trim(),
+            district: capitalizeFirstLetter(values.district).trim(),
+            pincode: values.pincode.trim(),
+            address: capitalizeFirstLetter(values.address).trim(),
+          };
+          const res = await axios.put(
+            `${baseURL}/${EndPoints.ADMIN.ADMIN_UPDATE_ADDRESS}`,
+            data,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          );
+          if (res?.data?.statusCode === 200) {
+            toast.success(res?.data?.result);
+            setCurrentStep((prev) => prev + 1);
+          }
+        } else if (currentStep === 3) {
+          const data = {
+            affiliationNo: values.affiliationNo.trim(),
+            username: capitalizeFirstLetter(values.username).trim(),
+          };
+          const res = await axios.put(
+            `${baseURL}/${EndPoints.ADMIN.ADMIN_UPDATE_DETAILS}`,
+            data,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          );
+          if (res?.data?.statusCode === 200) {
+            toast.success(res?.data?.result);
+            setCurrentStep((prev) => prev + 1);
+          }
         }
       } catch (e) {
         toast.error(e);
@@ -215,7 +300,7 @@ function SchoolDetailSignup() {
               currentStep === 3 ? "text-[#0F4189]" : "text-black"
             }`}
           >
-            {t("register.setPassword")}
+            {t("register.accountDetails")}
           </div>
         )}
         {currentStep > 3 && (
@@ -234,6 +319,11 @@ function SchoolDetailSignup() {
   return (
     <>
       <div className="min-h-screen">
+        {loading && (
+          <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30">
+            <Spinner />
+          </div>
+        )}
         <Toaster position="top-center" reverseOrder={false} />
         <div className="flex items-center justify-center h-full">
           <div className="bg-white rounded-2xl backdrop-blur-lg w-[700px] mx-auto flex flex-col py-6">
@@ -241,38 +331,24 @@ function SchoolDetailSignup() {
               <h2 className="flex items-center justify-center gap-2 mb-4 text-3xl">
                 <Link to="/" className="flex items-center">
                   <img src={logo} alt="logo" className="size-10" />
-
-                  {/* <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
-              <span className="text-[24px] font-bold">{t("A")}</span>
-
-            </div> */}
                 </Link>
-                {/* <span className="font-bold text-3xl">LOGO</span> */}
               </h2>
               <h2 className="font-bold text-2xl mt-3 text-[#0F4189]">
                 {t("register.setupAccount")}
               </h2>
               <Progress />
               <div className="px-20">
-                {currentStep === 1 && (
-                  <Step1 formik={formik} nextStep={nextStep} />
-                )}
-                {currentStep === 2 && (
-                  <Step2
-                    formik={formik}
-                    prevStep={prevStep}
-                    nextStep={nextStep}
+                {currentStep === 1 && <Step1 formik={formik} />}
+                {currentStep === 2 && <Step2 formik={formik} />}
+                {currentStep === 3 && <Step3 formik={formik} />}
+                {currentStep === 4 && (
+                  <Step4
+                    checkProgress={() => {
+                      setProgressChecking(true);
+                      getadmin();
+                    }}
                   />
                 )}
-                {currentStep === 3 && (
-                  <Step3
-                    formik={formik}
-                    prevStep={prevStep}
-                    onSubmit={formik.handleSubmit}
-                    loading={loading}
-                  />
-                )}
-                {currentStep === 4 && <Step4 />}
               </div>
             </div>
           </div>

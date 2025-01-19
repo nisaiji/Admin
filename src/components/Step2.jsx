@@ -224,31 +224,12 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
       </div>
 
       {/* Navigation buttons */}
-      <div className="w-full mt-5 flex justify-between">
-        <button
-          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white"
-          type="button"
-          onClick={prevStep}
-        >
-          <div className="flex items-center gap-2">
-            <img
-              className="w-6 h-6 rotate-180"
-              src={ArrowRight}
-              alt="Arrow Left"
-            />
-            <p className="text-base">{t("adminProfile.back")}</p>
-          </div>
-        </button>
-
+      <div className="w-full mt-5 flex justify-end">
         <button
           className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center ml-auto text-white"
-          type="button"
-          onClick={nextStep}
+          type="submit"
         >
-          <div className="flex items-center gap-2">
-            <p className="text-base">{t("adminProfile.next")}</p>
-            <img className="w-6 h-6" src={ArrowRight} alt="Arrow Right" />
-          </div>
+          <p className="text-base">{t("buttons.submit")}</p>
         </button>
       </div>
     </form>

@@ -592,12 +592,12 @@ const Dashboard = () => {
 
   const Clock = () => {
     const [currentTime, setCurrentTime] = useState(
-      moment().format("DD-MM-YYYY hh:mm A")
+      moment().format("DD-MM-YYYY hh:mm:ss A")
     );
 
     useEffect(() => {
       const timer = setInterval(() => {
-        setCurrentTime(moment().format("DD-MM-YYYY hh:mm A"));
+        setCurrentTime(moment().format("DD-MM-YYYY hh:mm:ss A"));
       }, 1000); // Update every second
 
       return () => clearInterval(timer); // Cleanup on unmount

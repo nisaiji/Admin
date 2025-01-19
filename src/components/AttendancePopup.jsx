@@ -262,15 +262,12 @@ export default function AttendancePopup({
                   : attendanceByDate[dateKey] || "",
             };
           });
-          // console.log({monthDates});
 
           return {
             ...student,
             attendances: monthDates,
           };
         });
-        // console.log({ updatedAttendanceData });
-
         setAttendanceData(updatedAttendanceData);
       }
     } catch (e) {
@@ -343,14 +340,35 @@ export default function AttendancePopup({
       "S.No",
       "Student Name",
       ...Array.from({ length: totalDays }, (_, i) => i + 1),
+      "Total Attendance",
     ];
 
     // Table rows
-    const rows = attendanceData.map((student, index) => [
-      index + 1,
-      `${student?.firstname || ""} ${student?.lastname || ""}`,
-      ...student?.attendances.map((item) => item.attendance || ""),
-    ]);
+    const rows = attendanceData.map((student, index) => {
+      const totalPresent = student.attendances.filter(
+        (a) => a.attendance === "P"
+      ).length;
+      return [
+        index + 1,
+        `${student?.firstname || ""} ${student?.lastname || ""}`,
+        ...student?.attendances.map((item) => item.attendance || ""),
+        `${totalPresent}/${totalDays}`, // Horizontal total
+      ];
+    });
+
+    // Add vertical totals (final row)
+    const totalRow = [
+      "Total",
+      "",
+      ...Array.from({ length: totalDays }, (_, dayIndex) => {
+        const totalPresentForDay = attendanceData.filter(
+          (student) => student.attendances[dayIndex]?.attendance === "P"
+        ).length;
+        return `${totalPresentForDay}/${attendanceData?.length || 0}`;
+      }),
+      "", // Empty cell for total column
+    ];
+    rows.push(totalRow); // Add vertical total row to rows
 
     // Add table to PDF
     doc.autoTable({
@@ -359,11 +377,12 @@ export default function AttendancePopup({
       head: [headers],
       body: rows,
       styles: {
-        fontSize: 7,
+        fontSize: 6,
         lineWidth: 0.01,
         lineColor: [0, 0, 0],
         textColor: [0, 0, 0],
         fillColor: [255, 255, 255],
+        cellPadding: 1,
       },
       headStyles: {
         textColor: [0, 0, 0],
@@ -373,11 +392,12 @@ export default function AttendancePopup({
       },
       alternateRowStyles: { fillColor: [255, 255, 255] },
       columnStyles: {
-        0: { cellWidth: 7 }, // S.No
-        1: { cellWidth: 15 }, // Student Name
+        0: { cellWidth: 9 }, // S.No
+        1: { cellWidth: 13 }, // Student Name
         ...Array.from({ length: totalDays }, (_, i) => ({
           [i + 2]: { cellWidth: 6 }, // date
         })).reduce((acc, style) => Object.assign(acc, style), {}),
+        [totalDays + 2]: { cellWidth: 15 }, // Total Attendance column
       },
       didParseCell: (data) => {
         if (data.section === "body" && data.column.index > 1) {
@@ -400,7 +420,7 @@ export default function AttendancePopup({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-40">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-40 select-none">
       <div className="bg-black bg-opacity-50 h-screen p-4 shadow flex flex-col">
         {/* Header */}
         <div className="flex flex-row justify-between items-center mb-4">
@@ -480,20 +500,20 @@ export default function AttendancePopup({
           <table className="w-full text-center border border-gray-300">
             <thead className="sticky -top-4 bg-white z-10">
               <tr>
-                <th className="border border-gray-300 w-[30px] p-1 font-poppins-regular">
+                <th className="border border-gray-300 w-[30px] p-1 font-poppins-bold">
                   S.No
                 </th>
-                <th className="border border-gray-300 p-1 w-[150px] font-poppins-regular">
+                <th className="border border-gray-300 p-1 w-[150px] font-poppins-bold">
                   Student Name
                 </th>
                 {Array.from({ length: totalDays }, (_, i) => (
-                  <th key={i} className="relative">
+                  <th key={i} className="relative border border-gray-300">
                     <div className={`flex flex-col items-center`}>
                       <span>{i + 1}</span>
                     </div>
                   </th>
                 ))}
-                <th className="border border-gray-300 p-1 w-[50px] font-poppins-regular">
+                <th className="border border-gray-300 p-1 w-[50px] font-poppins-bold">
                   Total Attendance
                 </th>
               </tr>
@@ -561,7 +581,7 @@ export default function AttendancePopup({
                       </td>
                     ))}
                     {/* Horizontal totals */}
-                    <td className="border border-gray-300 p-1">
+                    <td className="border border-gray-300 p-1 font-poppins-regular">
                       {totalPresent}/{totalDays}
                     </td>
                   </tr>
@@ -571,7 +591,7 @@ export default function AttendancePopup({
               <tr>
                 <td
                   colSpan="2"
-                  className="border border-gray-300 font-bold p-1"
+                  className="border border-gray-300 font-poppins-regular p-1"
                 >
                   Total
                 </td>
@@ -586,7 +606,10 @@ export default function AttendancePopup({
                   ).length;
 
                   return (
-                    <td key={dayIndex} className="border border-gray-300 p-1">
+                    <td
+                      key={dayIndex}
+                      className="border border-gray-300 font-poppins-regular p-1"
+                    >
                       {totalPresentForDay}/{attendanceData?.length || 0}
                     </td>
                   );

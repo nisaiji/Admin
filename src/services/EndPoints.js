@@ -2,6 +2,9 @@ const EndPoints = {
   ADMIN: {
     // ADMIN AUTH
     ADMIN_REGISTER: "admin",
+    GET_DEACTIVATE_ADMIN: "admin/deactivate",
+    ADMIN_UPDATE_ADDRESS: "admin/address",
+    ADMIN_UPDATE_DETAILS: "admin/details",
     ADMIN_LOGIN: "admin/login",
     REQUESTS: "change-password/admin",
     MODIFY_REQUEST: "change-password/admin",
