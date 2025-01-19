@@ -30,7 +30,7 @@ function SchoolDetailSignup() {
     try {
       setLoading(true);
       if (!accessToken) {
-        console.log("Access token is missing");
+        // console.log("Access token is missing");
         return;
       }
 
@@ -76,7 +76,7 @@ function SchoolDetailSignup() {
         }
       }
     } catch (e) {
-      console.error("Error fetching admin data:", e);
+      // console.error("Error fetching admin data:", e);
     } finally {
       setLoading(false);
     }

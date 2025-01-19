@@ -149,7 +149,7 @@ export default function Teacher() {
 
       if (response?.statusCode === 200) {
         getTeacher();
-        console.log(response);
+        // console.log(response);
 
         toast.success(response.result);
       }
