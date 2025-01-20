@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Step1 from "../components/Step1";
 import Step2 from "../components/Step2";
 import Step3 from "../components/Step3";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Tick from "../assets/images/Tick.png";
@@ -13,60 +13,30 @@ import toast, { Toaster } from "react-hot-toast";
 import REGEX from "../utils/regix";
 import { useTranslation } from "react-i18next";
 import Step4 from "../components/Step4";
-import axios from "axios";
 import Spinner from "../components/Spinner";
 
 function SchoolDetailSignup() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [progressChecking, setProgressChecking] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(location?.state?.page || 1);
   const [t] = useTranslation();
-  const navigate = useNavigate();
 
-  // const baseURL = "http://localhost:4000";
-  const baseURL = "https://nisaiji.com";
-  const accessToken = localStorage.getItem("temp_access_token");
   const getadmin = async () => {
     try {
       setLoading(true);
-      if (!accessToken) {
-        // console.log("Access token is missing");
-        return;
-      }
+      const res = await axiosClient.get(EndPoints.ADMIN.GET_ADMIN);
 
-      const res = await axios.get(`${baseURL}/${EndPoints.ADMIN.GET_ADMIN}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      if (res?.statusCode === 200) {
+        const data = res?.result;
 
-      if (res?.status === 200) {
-        const data = res?.data?.result;
-        // console.log(data);
-        if (data?.username) {
-          setCurrentStep(4);
-        } else if (data?.pincode) {
-          setCurrentStep(3);
-        } else if (data?.phone) {
-          setCurrentStep(2);
-        }
         if (progressChecking) {
           if (data?.isActive) {
-            localStorage.setItem(
-              "access_token",
-              localStorage.getItem("temp_access_token")
-            );
-            localStorage.setItem(
-              "refresh_token",
-              localStorage.getItem("temp_refresh_token")
-            );
-            localStorage.removeItem("temp_access_token");
-            localStorage.removeItem("temp_refresh_token");
-            toast.success(t("messages.login.success"));
+            toast.success("Registration process completed.");
             setTimeout(() => {
-              navigate("/");
+              navigate("/login");
             }, 1500);
-            n;
           } else {
             toast.error(
               "Registerations already in progress - please wait for some time"
@@ -81,10 +51,6 @@ function SchoolDetailSignup() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    getadmin();
-  }, []);
 
   // Validation schema for each step
   const validationSchema = () => {
@@ -187,11 +153,6 @@ function SchoolDetailSignup() {
             data
           );
           if ([200, 201].includes(res?.statusCode)) {
-            localStorage.setItem("temp_access_token", res?.result?.accessToken);
-            localStorage.setItem(
-              "temp_refresh_token",
-              res?.result?.refreshToken
-            );
             toast.success(res?.result?.msg);
             setCurrentStep((prev) => prev + 1);
           }
@@ -204,17 +165,14 @@ function SchoolDetailSignup() {
             pincode: values.pincode.trim(),
             address: capitalizeFirstLetter(values.address).trim(),
           };
-          const res = await axios.put(
-            `${baseURL}/${EndPoints.ADMIN.ADMIN_UPDATE_ADDRESS}`,
-            data,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
+          const res = await axiosClient.put(
+            EndPoints.ADMIN.ADMIN_UPDATE_ADDRESS,
+            data
           );
-          if (res?.data?.statusCode === 200) {
-            toast.success(res?.data?.result);
+          // console.log({res});
+
+          if (res?.statusCode === 200) {
+            toast.success(res?.result);
             setCurrentStep((prev) => prev + 1);
           }
         } else if (currentStep === 3) {
@@ -222,17 +180,12 @@ function SchoolDetailSignup() {
             affiliationNo: values.affiliationNo.trim(),
             username: capitalizeFirstLetter(values.username).trim(),
           };
-          const res = await axios.put(
-            `${baseURL}/${EndPoints.ADMIN.ADMIN_UPDATE_DETAILS}`,
-            data,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
+          const res = await axiosClient.put(
+            EndPoints.ADMIN.ADMIN_UPDATE_DETAILS,
+            data
           );
-          if (res?.data?.statusCode === 200) {
-            toast.success(res?.data?.result);
+          if (res?.statusCode === 200) {
+            toast.success(res?.result);
             setCurrentStep((prev) => prev + 1);
           }
         }

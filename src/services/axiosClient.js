@@ -27,8 +27,10 @@ async function refreshAccessToken() {
 
 axiosClient.interceptors.request.use(
   (request) => {
-    const accessToken = localStorage.getItem("access_token");
-    console.log(accessToken);
+    const accessToken =
+      localStorage.getItem("temp_access_token") ||
+      localStorage.getItem("access_token");
+    // console.log(accessToken);
 
     request.headers["Authorization"] = `Bearer ${accessToken}`;
     return request;
@@ -46,6 +48,8 @@ axiosClient.interceptors.response.use(
       }
     }
     const data = response.data;
+    // console.log("data", data);
+
     if (data.status === "ok") {
       return data;
     }
@@ -61,7 +65,7 @@ axiosClient.interceptors.response.use(
       localStorage.removeItem("searchClass");
       localStorage.removeItem("searchSection");
       setTimeout(() => {
-        window.location.replace("/login", "_self");
+        // window.location.replace("/login", "_self");
       }, 2000);
       return Promise.reject(data?.message);
     }
@@ -85,7 +89,7 @@ axiosClient.interceptors.response.use(
         localStorage.removeItem("searchClass");
         localStorage.removeItem("searchSection");
         setTimeout(() => {
-          window.location.replace("/login", "_self");
+          // window.location.replace("/login", "_self");
         }, 2000);
         return Promise.reject(data?.message);
       }
@@ -95,6 +99,8 @@ axiosClient.interceptors.response.use(
     }
   },
   async (error) => {
+    // console.log("api error", error);
+
     if (error.message === "Network Error") {
       toast.error("Check your internet connectivity");
       return;

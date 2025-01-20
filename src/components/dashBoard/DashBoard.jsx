@@ -603,7 +603,7 @@ const Dashboard = () => {
       return () => clearInterval(timer); // Cleanup on unmount
     }, []);
 
-    return <div className="text-xl font-semibold">{currentTime}</div>;
+    return <div className="text-xl font-poppins-regular">{currentTime}</div>;
   };
 
   return (

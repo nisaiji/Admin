@@ -4,7 +4,6 @@ import NotRequireUser from "./components/NotRequireUser";
 import RequireUser from "./components/RequireUser";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
 import ClassSetup from "./components/classSetup/ClassSetup";
 import TeacherPage from "./components/teacherSetup/Teacher";
 import Event from "./components/eventSetup/Event";

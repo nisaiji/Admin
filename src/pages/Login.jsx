@@ -1,6 +1,7 @@
 // Import necessary dependencies and assets
 import { useState, useMemo } from "react";
 import { useFormik } from "formik";
+import { jwtDecode } from "jwt-decode";
 import { Link, useNavigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { axiosClient } from "../services/axiosClient";
@@ -72,8 +73,8 @@ function Login() {
    */
   const formik = useFormik({
     initialValues: {
-      userInput: "",
-      password: "",
+      userInput: "s6@mail.com",
+      password: "s6@12345",
     },
     validationSchema, // Validation schema for form fields
     onSubmit: async (values, { setSubmitting, resetForm }) => {
@@ -93,25 +94,29 @@ function Login() {
             };
 
         // Make API request for login
-        const response = await axiosClient.post(endpoint, payload);
-        const { result } = response;
+        const res = await axiosClient.post(endpoint, payload);
 
-        // Handle successful login
-        if (response?.statusCode === 200) {
-          // Store user data in localStorage
-          isAdmin
-            ? localStorage.setItem("username", result?.username)
-            : localStorage.setItem("firstname", result?.firstname);
-          localStorage.setItem("access_token", result?.accessToken);
-          localStorage.setItem("refresh_token", result?.refreshToken);
-
-          // Update Redux state with access token
-          dispatch(setAuthData(result?.accessToken));
-
-          // Show success message and navigate to homepage
-          toast.success(t("messages.login.success"));
-          resetForm();
-          navigate("/");
+        if (res?.statusCode === 200) {
+          const decodedToken = jwtDecode(res?.result?.accessToken);
+          // console.log(decodedToken);
+          if (decodedToken?.active) {
+            localStorage.setItem("access_token", res?.result?.accessToken);
+            localStorage.setItem("refresh_token", res?.result?.refreshToken);
+            localStorage.removeItem("temp_access_token");
+            dispatch(setAuthData(res?.result?.accessToken));
+            toast.success(t("messages.login.success"));
+            resetForm();
+            navigate("/");
+          } else {
+            localStorage.setItem("temp_access_token", res?.result?.accessToken);
+            if (!decodedToken?.pincode) {
+              navigate("/signup", { state: { page: 2 } });
+            } else if (!decodedToken?.username) {
+              navigate("/signup", { state: { page: 3 } });
+            } else {
+              navigate("/signup", { state: { page: 4 } });
+            }
+          }
         }
       } catch (e) {
         toast.error(e); // Show error message
