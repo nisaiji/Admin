@@ -73,8 +73,8 @@ function Login() {
    */
   const formik = useFormik({
     initialValues: {
-      userInput: "s6@mail.com",
-      password: "s6@12345",
+      userInput: "",
+      password: "",
     },
     validationSchema, // Validation schema for form fields
     onSubmit: async (values, { setSubmitting, resetForm }) => {
