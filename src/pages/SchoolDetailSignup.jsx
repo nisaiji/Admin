@@ -20,7 +20,9 @@ function SchoolDetailSignup() {
   const location = useLocation();
   const [progressChecking, setProgressChecking] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState(location?.state?.page || 1);
+  const [currentStep, setCurrentStep] = useState(
+    Number(localStorage.getItem("page")) || 1
+  );
   const [t] = useTranslation();
 
   const getadmin = async () => {
@@ -33,9 +35,15 @@ function SchoolDetailSignup() {
 
         if (progressChecking) {
           if (data?.isActive) {
+            localStorage.setItem(
+              "access_token",
+              localStorage.getItem("temp_access_token")
+            );
+            localStorage.removeItem("temp_access_token");
             toast.success("Registration process completed.");
+            localStorage.removeItem("page");
             setTimeout(() => {
-              navigate("/login");
+              navigate("/");
             }, 1500);
           } else {
             toast.error(
@@ -153,8 +161,11 @@ function SchoolDetailSignup() {
             data
           );
           if ([200, 201].includes(res?.statusCode)) {
+            localStorage.setItem("refresh_token", res?.result?.refreshToken);
+            localStorage.setItem("temp_access_token", res?.result?.accessToken);
             toast.success(res?.result?.msg);
             setCurrentStep((prev) => prev + 1);
+            localStorage.setItem("page", 2);
           }
         } else if (currentStep === 2) {
           const data = {
@@ -174,6 +185,7 @@ function SchoolDetailSignup() {
           if (res?.statusCode === 200) {
             toast.success(res?.result);
             setCurrentStep((prev) => prev + 1);
+            localStorage.setItem("page", 3);
           }
         } else if (currentStep === 3) {
           const data = {
@@ -187,6 +199,7 @@ function SchoolDetailSignup() {
           if (res?.statusCode === 200) {
             toast.success(res?.result);
             setCurrentStep((prev) => prev + 1);
+            localStorage.setItem("page", 4);
           }
         }
       } catch (e) {
@@ -286,10 +299,12 @@ function SchoolDetailSignup() {
                   <img src={logo} alt="logo" className="size-10" />
                 </Link>
               </h2>
+
               <h2 className="font-bold text-2xl mt-3 text-[#0F4189]">
                 {t("register.setupAccount")}
               </h2>
               <Progress />
+              {console.log(currentStep)}
               <div className="px-20">
                 {currentStep === 1 && <Step1 formik={formik} />}
                 {currentStep === 2 && <Step2 formik={formik} />}

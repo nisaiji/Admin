@@ -58,14 +58,15 @@ axiosClient.interceptors.response.use(
       data?.status === "error" &&
       data?.message === "Admin not exists"
     ) {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      localStorage.removeItem("username");
-      localStorage.removeItem("firstname");
-      localStorage.removeItem("searchClass");
-      localStorage.removeItem("searchSection");
+      localStorage.clear()
+      // localStorage.removeItem("access_token");
+      // localStorage.removeItem("refresh_token");
+      // localStorage.removeItem("username");
+      // localStorage.removeItem("firstname");
+      // localStorage.removeItem("searchClass");
+      // localStorage.removeItem("searchSection");
       setTimeout(() => {
-        // window.location.replace("/login", "_self");
+        window.location.replace("/login", "_self");
       }, 2000);
       return Promise.reject(data?.message);
     }
@@ -82,17 +83,29 @@ axiosClient.interceptors.response.use(
         // Retry the original request with the new access token
         return axiosClient(originalRequest);
       } else {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("username");
-        localStorage.removeItem("firstname");
-        localStorage.removeItem("searchClass");
-        localStorage.removeItem("searchSection");
+        localStorage.clear()
+        // localStorage.removeItem("access_token");
+        // localStorage.removeItem("refresh_token");
+        // localStorage.removeItem("username");
+        // localStorage.removeItem("firstname");
+        // localStorage.removeItem("searchClass");
+        // localStorage.removeItem("searchSection");
         setTimeout(() => {
-          // window.location.replace("/login", "_self");
+          window.location.replace("/login", "_self");
         }, 2000);
         return Promise.reject(data?.message);
       }
+    } else if (data?.statusCode === 500 && data?.message === "jwt malformed") {
+      localStorage.clear()
+      // localStorage.removeItem("access_token");
+      // localStorage.removeItem("refresh_token");
+      // localStorage.removeItem("username");
+      // localStorage.removeItem("firstname");
+      // localStorage.removeItem("searchClass");
+      // localStorage.removeItem("searchSection");
+      setTimeout(() => {
+        window.location.replace("/login", "_self");
+      }, 2000);
     }
     if (data?.status == "error") {
       return Promise.reject(data?.message);

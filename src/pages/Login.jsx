@@ -109,13 +109,16 @@ function Login() {
             navigate("/");
           } else {
             localStorage.setItem("temp_access_token", res?.result?.accessToken);
+            let page;
             if (!decodedToken?.pincode) {
-              navigate("/signup", { state: { page: 2 } });
+              page = 2;
             } else if (!decodedToken?.username) {
-              navigate("/signup", { state: { page: 3 } });
+              page = 3;
             } else {
-              navigate("/signup", { state: { page: 4 } });
+              page = 4;
             }
+            navigate("/signup");
+            localStorage.setItem("page", page);
           }
         }
       } catch (e) {
