@@ -33,6 +33,8 @@ export default function AttendancePopup({
   const [holidays, setHolidays] = useState({});
 
   const startTime = isTeacher ? sectionStartTime : startTimeForAdmin;
+  // console.log({sectionStartTime});
+  
 
   if (!isVisible) return null;
 

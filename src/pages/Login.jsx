@@ -98,27 +98,39 @@ function Login() {
 
         if (res?.statusCode === 200) {
           const decodedToken = jwtDecode(res?.result?.accessToken);
-          // console.log(decodedToken);
-          if (decodedToken?.active) {
+          if (decodedToken.role === "admin") {
+            // console.log(decodedToken);
+            if (decodedToken?.active) {
+              localStorage.setItem("access_token", res?.result?.accessToken);
+              localStorage.setItem("refresh_token", res?.result?.refreshToken);
+              localStorage.removeItem("temp_access_token");
+              dispatch(setAuthData(res?.result?.accessToken));
+              toast.success(t("messages.login.success"));
+              resetForm();
+              navigate("/");
+            } else {
+              localStorage.setItem(
+                "temp_access_token",
+                res?.result?.accessToken
+              );
+              let page;
+              if (!decodedToken?.pincode) {
+                page = 2;
+              } else if (!decodedToken?.username) {
+                page = 3;
+              } else {
+                page = 4;
+              }
+              navigate("/signup");
+              localStorage.setItem("page", page);
+            }
+          } else {
             localStorage.setItem("access_token", res?.result?.accessToken);
             localStorage.setItem("refresh_token", res?.result?.refreshToken);
-            localStorage.removeItem("temp_access_token");
             dispatch(setAuthData(res?.result?.accessToken));
             toast.success(t("messages.login.success"));
             resetForm();
             navigate("/");
-          } else {
-            localStorage.setItem("temp_access_token", res?.result?.accessToken);
-            let page;
-            if (!decodedToken?.pincode) {
-              page = 2;
-            } else if (!decodedToken?.username) {
-              page = 3;
-            } else {
-              page = 4;
-            }
-            navigate("/signup");
-            localStorage.setItem("page", page);
           }
         }
       } catch (e) {

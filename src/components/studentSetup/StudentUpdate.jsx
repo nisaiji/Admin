@@ -218,6 +218,7 @@ export default function StudentUpdate() {
                 name={name}
                 onChange={formik.handleChange}
                 value={formik.values[name]}
+                onBlur={formik.handleBlur}
                 className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
               >
                 <option value="" label={label} />
@@ -235,6 +236,8 @@ export default function StudentUpdate() {
                 onChange={(date) =>
                   formik.setFieldValue("dob", moment(date).format("DD/MM/YYYY"))
                 }
+                onBlur={() => formik.setFieldTouched("dob", true)}
+                onCalendarClose={() => formik.setFieldTouched("dob", true)}
                 dateFormat="dd/MM/yyyy"
                 placeholderText={placeholder}
                 className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
@@ -251,6 +254,7 @@ export default function StudentUpdate() {
                 name={name}
                 placeholder={placeholder}
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 maxLength={name === "phone" ? 10 : ""}
                 value={formik.values[name]}
                 className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"

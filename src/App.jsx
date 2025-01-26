@@ -17,23 +17,51 @@ import AdminProfile from "./components/admin/AdminProfile";
 import i18n from "./assets/locale/i18n";
 import { I18nextProvider } from "react-i18next";
 import { getItem } from "./services/LocalStorageManager";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { setAuthData } from "./store/AppAuthSlice";
 import SchoolDetailSignup from "./pages/SchoolDetailSignup";
 import Requests from "./components/dashBoard/Request";
 import Leaves from "./components/dashBoard/Leaves";
 import TeacherProfile from "./components/admin/TeacherProfile";
+import desktop from "./assets/images/desktop.png";
 
 function App() {
   const dispatch = useDispatch();
   const role = useSelector((state) => state.appAuth.role);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    // console.log({ userAgent });
+
+    if (
+      /android|iPad|iPhone|iPod|windows phone/i.test(userAgent.toLowerCase())
+    ) {
+      setIsMobile(true);
+    }
     const token = getItem("access_token");
     if (token) {
       dispatch(setAuthData(token));
     }
   }, [dispatch]);
+
+  if (isMobile) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-center px-4">
+        <h1 className="text-4xl text-red-500 font-bold uppercase mb-4">
+          Please open in desktop view
+        </h1>
+        <img src={desktop} alt="" className="size-12" />
+        {/* <p className="text-lg text-gray-700 max-w-md leading-relaxed">
+          This content is not accessible on mobile devices. Please use a desktop
+          browser for the best experience.
+        </p>
+        <p className="text-sm text-gray-600 mt-4">
+          If you believe this is an error, contact support for assistance.
+        </p> */}
+      </div>
+    );
+  }
 
   return (
     <>

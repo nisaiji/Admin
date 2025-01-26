@@ -304,7 +304,6 @@ function SchoolDetailSignup() {
                 {t("register.setupAccount")}
               </h2>
               <Progress />
-              {console.log(currentStep)}
               <div className="px-20">
                 {currentStep === 1 && <Step1 formik={formik} />}
                 {currentStep === 2 && <Step2 formik={formik} />}

@@ -18,7 +18,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
   const [newSection, setNewSection] = useState({
     name: "",
     teacherId: "",
-    startTime: new Date(),
+    startTime: new Date().getTime(),
   });
   const [sections, setSections] = useState([]);
   const [teachers, setTeachers] = useState([]);
@@ -89,7 +89,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
       toast.error(e);
     } finally {
       setLoading(false);
-      setNewSection({ name: "", teacherId: "", startTime: new Date() });
+      setNewSection({ name: "", teacherId: "", startTime: new Date().getTime() });
       setShowForm(true);
     }
   };
