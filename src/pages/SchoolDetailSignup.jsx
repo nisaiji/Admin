@@ -15,6 +15,23 @@ import { useTranslation } from "react-i18next";
 import Step4 from "../components/Step4";
 import Spinner from "../components/Spinner";
 
+/**
+ * SchoolDetailSignup Component
+ *
+ * A multi-step form for school registration that includes validation, API calls,
+ * and progress tracking. The form consists of 4 steps:
+ * 1. Basic Information (school name, email, phone, password)
+ * 2. Address Details (country, state, city, district, pincode, address)
+ * 3. Account Details (affiliation number, username)
+ * 4. Completion (registration finalization)
+ *
+ * Dependencies:
+ * - React, React Router, Formik, Yup for form management and validation
+ * - react-hot-toast for notifications
+ * - axiosClient for API requests
+ * - i18next for translations
+ */
+
 function SchoolDetailSignup() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,6 +42,9 @@ function SchoolDetailSignup() {
   );
   const [t] = useTranslation();
 
+  /**
+   * Fetches admin data to verify registration progress.
+   */
   const getadmin = async () => {
     try {
       setLoading(true);
@@ -60,10 +80,12 @@ function SchoolDetailSignup() {
     }
   };
 
-  // Validation schema for each step
+  /**
+   * Returns validation schema based on the current step of the form.
+   */
   const validationSchema = () => {
     switch (currentStep) {
-      case 1:
+      case 1: // Validation for Step 1 (Basic Info)
         return Yup.object().shape({
           schoolName: Yup.string()
             .trim()
@@ -94,7 +116,7 @@ function SchoolDetailSignup() {
             )
             .required(t("validationError.confirmPassword")),
         });
-      case 2:
+      case 2: // Validation for Step 2 (Address Info)
         return Yup.object().shape({
           country: Yup.string().trim().required(t("validationError.country")),
           state: Yup.string().trim().required(t("validationError.state")),
@@ -106,7 +128,7 @@ function SchoolDetailSignup() {
             .required(t("validationError.pincode")),
           address: Yup.string().trim().required(t("validationError.address")),
         });
-      case 3:
+      case 3: // Validation for Step 3 (Account Details)
         return Yup.object().shape({
           affiliationNo: Yup.string()
             .trim()
@@ -122,7 +144,12 @@ function SchoolDetailSignup() {
     }
   };
 
-  // Capitalizes the first letter of a string
+  /**
+   * Capitalizes the first letter of a given string.
+   *
+   * @param {string} string - The input string.
+   * @returns {string} - The capitalized string.
+   */
   const capitalizeFirstLetter = (string) => {
     if (!string) return string;
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -210,6 +237,9 @@ function SchoolDetailSignup() {
     },
   });
 
+  /**
+   * Renders the progress bar and step indicators.
+   */
   const Progress = () => (
     <div>
       <div className="bg-[#0F4189] h-1 w-[500px] mx-auto mt-6 translate-y-6"></div>

@@ -11,6 +11,18 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import moment from "moment";
 
+/**
+ * AttendancePopup Component
+ * Displays a popup to manage monthly attendance data for students.
+ *
+ * @param {boolean} isVisible - Determines if the popup is visible
+ * @param {Function} onClose - Function to close the popup
+ * @param {string} sectionId - Section ID of the class
+ * @param {string} classId - Class ID
+ * @param {string} className - Class name
+ * @param {string} sectionName - Section name
+ * @param {number} startTimeForAdmin - Section Start time for attendance applicable for admin
+ */
 export default function AttendancePopup({
   isVisible,
   onClose,
@@ -20,30 +32,39 @@ export default function AttendancePopup({
   sectionName,
   startTimeForAdmin,
 }) {
+  // Redux state selectors
   const id = useSelector((state) => state.appAuth.id);
   const sectionStartTime = useSelector(
     (state) => state.appAuth.sectionStartTime
   );
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const teacherSectionId = useSelector((state) => state.appAuth.section);
+  // Component state variables
   const [isEditable, setIsEditable] = useState(false);
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [holidays, setHolidays] = useState({});
-
+  // Start time based on role
   const startTime = isTeacher ? sectionStartTime : startTimeForAdmin;
   // console.log({sectionStartTime});
-  
 
+  // Return null if the popup is not visible
   if (!isVisible) return null;
 
+  // Total days in the current month
   const totalDays = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth() + 1,
     0
   ).getDate();
 
+  /**
+   * Check if a specific date is a Sunday or a holiday.
+   *
+   * @param {number} dateIndex - Index of the date in the month (0-based)
+   * @returns {boolean} - True if the date is a Sunday or a holiday
+   */
   const isSundayOrHoliday = (dateIndex) => {
     const date = new Date(
       currentDate.getFullYear(),
@@ -55,18 +76,24 @@ export default function AttendancePopup({
     return isSunday || holidays[formattedDate];
   };
 
+  // Prevent body scrolling when the popup is visible
   useEffect(() => {
     if (isVisible) {
-      document.body.style.overflow = "hidden"; // Disable scrolling
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = ""; // Restore scrolling
+      document.body.style.overflow = "";
     }
 
     return () => {
-      document.body.style.overflow = ""; // Clean up on unmount
+      document.body.style.overflow = "";
     };
   }, [isVisible]);
 
+  /**
+   * Change the displayed month in the popup.
+   *
+   * @param {number} increment - Positive or negative number to change months
+   */
   const changeMonth = (increment) => {
     setCurrentDate((prevDate) => {
       const newDate = new Date(
@@ -78,13 +105,7 @@ export default function AttendancePopup({
       const startYear = new Date(startTime).getFullYear();
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
-      // console.log(
-      //   newDate.getFullYear() < startYear,
-      //   newDate.getMonth() < startMonth,
-      //   newDate.getFullYear() > currentYear,
-      //   newDate.getMonth() > currentMonth
-      // );
-
+      // Prevent changing to months outside the allowed range
       if (
         newDate.getFullYear() < startYear ||
         newDate.getMonth() < startMonth ||
@@ -96,12 +117,19 @@ export default function AttendancePopup({
             "MMMM YYYY"
           )} to ${moment().format("MMMM YYYY")}.`
         );
-        return prevDate; // Prevent changes beyond allowed range
+        return prevDate;
       }
       return newDate;
     });
   };
 
+  /**
+   * Handle attendance input changes for a specific student and date.
+   *
+   * @param {number} studentIndex - Index of the student in the data array
+   * @param {number} dateIndex - Index of the date in the attendance array
+   * @param {string} value - New attendance value ("P" or "A")
+   */
   const handleInputChange = (studentIndex, dateIndex, value) => {
     const attendanceDate = new Date(
       currentDate.getFullYear(),
@@ -109,6 +137,7 @@ export default function AttendancePopup({
       dateIndex + 1
     );
 
+    // Ensure the date is within the valid range
     if (
       moment(attendanceDate).valueOf() < startTime ||
       attendanceDate > moment().endOf("days").valueOf()
@@ -136,12 +165,15 @@ export default function AttendancePopup({
     );
   };
 
+   /**
+   * Save the attendance data to the backend API.
+   */
   const handleSaveAttendance = async () => {
     try {
       setLoading(true);
       const attendances = attendanceData;
 
-      // Validate attendance
+       // Check for empty attendance cells within the valid range
       const hasEmptyAttendance = attendanceData.some((student) =>
         student.attendances.some((item) => {
           const itemDate = item.date;
@@ -186,6 +218,8 @@ export default function AttendancePopup({
           });
         });
       });
+
+      // Determine API endpoint based on role
       const url = isTeacher
         ? `${EndPoints.TEACHER.UPDATE_ATTENDANCE}/${teacherSectionId}`
         : `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${sectionId}`;
@@ -210,7 +244,9 @@ export default function AttendancePopup({
     return "text-black";
   };
 
-  // get student api
+  /**
+   * Fetch monthly attendance data for the current month.
+   */
   const fetchMonthlyAttendance = async () => {
     try {
       setLoading(true);

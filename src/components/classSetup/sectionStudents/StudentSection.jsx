@@ -20,22 +20,27 @@ import AttendancePopup from "../../AttendancePopup";
 import axios from "axios";
 
 export default function StudentSection() {
+  // Importing necessary modules and hooks
   const [t] = useTranslation();
   const location = useLocation();
   const { sectionId, classId, className, sectionName } = location.state;
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+
+  // References for input and file handling
+  const newStudentFirstNameRef = useRef(null);
   const searchInputRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // State variables for managing component data and UI
   const [students, setStudents] = useState([]);
   const [currStudent, setCurrStudent] = useState([]);
   const [classData, setClassData] = useState([]);
   const [studentInfoModelOpen, setStudentInfoModelOpen] = useState(false);
   const [editSNo, setEditSNo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showAttendance, setShowAttendance] = useState(false);
-  const newStudentFirstNameRef = useRef(null);
-  const fileInputRef = useRef(null);
   const [newStudent, setNewStudent] = useState({
     SNo: null,
     firstname: "",
@@ -47,6 +52,7 @@ export default function StudentSection() {
   });
   const genders = [t("options.male"), t("options.female"), t("options.other")];
 
+  // User role and section details from Redux state
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const id = useSelector((state) => state.appAuth.id);
   const teacherSectionId = useSelector((state) => state.appAuth.section);
@@ -76,6 +82,7 @@ export default function StudentSection() {
     }
   };
 
+  // Handles displaying student information in a modal
   const handleShowInfo = (student) => {
     setCurrStudent(student);
     setStudentInfoModelOpen(true);
@@ -170,9 +177,11 @@ export default function StudentSection() {
     return "";
   };
 
+  // Capitalizes the first letter of a string
   const capitalize = (str) =>
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
+  // Updates student data in state
   const handleInputChange = (sNo, field, value) => {
     if (sNo === null) {
       setNewStudent({ ...newStudent, [field]: value });
@@ -269,6 +278,7 @@ export default function StudentSection() {
     }
   };
 
+  // Uploads an Excel sheet containing student data
   const uploadExcelSheet = async (file) => {
     try {
       if (!file) {
@@ -315,6 +325,7 @@ export default function StudentSection() {
     }
   };
 
+  // download the excel sheet in pdf format
   const getDemoExcelSheet = async () => {
     setLoading(true);
     try {
@@ -610,7 +621,7 @@ export default function StudentSection() {
                         disabled={editSNo !== student.SNo}
                       />
                     </td>
-                    {/* actions */}
+                    {/* actions buttons */}
                     <td
                       className={`${
                         isDarkMode ? "text-white" : ""
@@ -739,6 +750,7 @@ export default function StudentSection() {
                       }`}
                     />
                   </td>
+                  {/* add student button */}
                   <td className="px-2 py-2 border border-[#c1c0ca]">
                     <button
                       onClick={() => registerStudent()}

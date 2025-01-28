@@ -16,6 +16,11 @@ import India from "../../assets/images/India.png";
 import location from "../../assets/images/location.png";
 import moment from "moment";
 
+/**
+ * Capitalizes the first letter of a string and converts the rest to lowercase.
+ * @param {string} str - The input string.
+ * @returns {string} The capitalized string.
+ */
 const capitalize = (str) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
@@ -25,7 +30,10 @@ export default function StudentUpdate() {
   const [t] = useTranslation();
   const [loading, setLoading] = useState(false);
 
-  // validation schema
+  /**
+   * Validation schema for the student update form.
+   * Defines required fields, types, and custom validation rules.
+   */
   const validationSchema = Yup.object({
     firstname: Yup.string().required(t("validationError.firstName")),
     lastname: Yup.string().required(t("validationError.lastName")),
@@ -61,6 +69,10 @@ export default function StudentUpdate() {
     parentAddress: Yup.string().required(t("validationError.address")),
   });
 
+  /**
+   * Formik initialization for managing form state and handling submission.
+   * Handles input values, validation, and API calls for updating student data.
+   */
   const formik = useFormik({
     initialValues: {
       firstname: student?.firstname || "",
@@ -206,7 +218,11 @@ export default function StudentUpdate() {
     },
   ];
 
-  // logic for input fields to reduce repetative code
+  /**
+   * Renders input fields dynamically based on the provided configuration.
+   * @param {Array} fields - The fields to render.
+   * @returns {JSX.Element} The rendered input fields.
+   */
   const renderFields = (fields) => (
     <div className="grid grid-cols-2 gap-4">
       {fields.map(({ label, name, type, placeholder, options, icon }) => (
@@ -297,6 +313,7 @@ export default function StudentUpdate() {
           <h2 className="text-lg font-poppins-regular mt-6 text-left">
             {t("titles.personalDetails")}
           </h2>
+          {/* student input fields */}
           <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
             <form onSubmit={formik.handleSubmit} className="w-full">
               {renderFields(studentFields)}
@@ -307,6 +324,7 @@ export default function StudentUpdate() {
             {t("titles.guardianDetails")}
           </h2>
           <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
+            {/* Parent input fields */}
             <form onSubmit={formik.handleSubmit} className="w-full">
               {renderFields(guardianFields)}
               {/* save and cancel buttons */}

@@ -28,6 +28,7 @@ function ClassSetup() {
   const [showDropdowns, setShowDropdowns] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Class options (mapped with translation keys)
   const classOptions = [
     "preNursery",
     "nursery",
@@ -47,10 +48,11 @@ function ClassSetup() {
     "twelve",
   ].map((key) => t(`options.${key}`));
 
+  // Function to compare class names for sorting
   const compareClasses = (a, b) =>
     classOptions.indexOf(a.name) - classOptions.indexOf(b.name);
 
-  // card flip
+  // Toggle the flip state for class cards
   const toggleFlip = (index) =>
     setIsFlipped((prev) => {
       const updated = [...prev];
@@ -58,7 +60,7 @@ function ClassSetup() {
       return updated;
     });
 
-  // get classlist api
+  // Function to fetch the list of classes via API
   const getAllClass = async () => {
     try {
       setLoading(true);
@@ -74,7 +76,7 @@ function ClassSetup() {
     }
   };
 
-  // register class api
+  // Function to handle the creation of a new class
   const handleNewClassSubmit = async (name) => {
     const existingClassNames = classes.map((cls) => cls.name);
     if (existingClassNames.includes(name))
@@ -121,6 +123,7 @@ function ClassSetup() {
     getAllClass();
   }, []);
 
+  // Available class options that aren't already taken
   const availableClassOptions = classOptions.filter(
     (option) => !classes.some((cls) => cls.name === option)
   );
@@ -233,6 +236,7 @@ function ClassSetup() {
                         ))}
                       </div>
                     </div>
+                    {/* update section button */}
                     <Link
                       className=" relative -top-8 flex justify-center items-center"
                       onClick={() => {

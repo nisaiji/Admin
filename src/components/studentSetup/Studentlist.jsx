@@ -26,26 +26,27 @@ import { useTranslation } from "react-i18next";
 import CONSTANT from "../../utils/constants";
 
 export default function Studentlist() {
+  // Import necessary modules and hooks
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  // Redux selectors to fetch required state
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const id = useSelector((state) => state.appAuth.id);
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
+  // State variables for pagination, modal visibility, and student data
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalStudentCount, setTotalStudentCount] = useState(5);
-
   const [openInfoModal, setOpenInfoModal] = useState(false);
   const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
 
+  // State variables for managing students, classes, and filters
   const [studentList, setStudentList] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState([]);
   const [idForDelete, setIdForDelete] = useState();
   const [name, setName] = useState("");
-
-  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
   const [searchClass, setSearchClass] = useState(
@@ -55,11 +56,12 @@ export default function Studentlist() {
     () => localStorage.getItem("searchSection") || ""
   );
 
+  // State variables for loading and references
   const [loading, setLoading] = useState(false);
-
   const classRef = useRef(searchClass);
   const sectionRef = useRef(searchSection);
 
+  // Fetch initial data when the component is mounted
   useEffect(() => {
     if (id) {
       getClassList();
@@ -67,7 +69,7 @@ export default function Studentlist() {
     }
   }, [id]);
 
-  // Update section list when class changes
+  // Update section list when the selected class changes
   useEffect(() => {
     if (searchClass && classList.length > 0) {
       const classData = classList.find((itm) => itm["_id"] === searchClass);
@@ -75,7 +77,7 @@ export default function Studentlist() {
     }
   }, [searchClass, classList]);
 
-  // Sync local storage and fetch section-wise students when searchSection changes
+  // Sync local storage and fetch students when the section filter changes
   useEffect(() => {
     localStorage.setItem("searchClass", searchClass);
     localStorage.setItem("searchSection", searchSection);
@@ -84,7 +86,10 @@ export default function Studentlist() {
     fetchStudents({ searchSection });
   }, [searchSection, pageNo]);
 
-  // Generalized function to fetch students based on different conditions
+  /**
+   * Fetch students based on filters and pagination.
+   * @param {Object} params - Contains searchName and searchSection.
+   */
   const fetchStudents = async ({ searchName = "", searchSection = "" }) => {
     if (!id) {
       return;
@@ -121,7 +126,9 @@ export default function Studentlist() {
     }
   };
 
-  // Fetch class list
+  /**
+   * Fetch the list of classes from the API.
+   */
   const getClassList = async () => {
     try {
       const res = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
@@ -131,19 +138,30 @@ export default function Studentlist() {
     }
   };
 
-  // Handle page change
+  /**
+   * Handle page change for pagination.
+   * @param {Object} event - Event object.
+   * @param {number} value - New page number.
+   */
   const handlePageChange = (event, value) => setPageNo(value);
 
-  // Handle search
+  /**
+   * Handle student search based on name and section.
+   */
   const handleSearch = () => fetchStudents({ searchName: name, searchSection });
 
-  // Show student info
+  /**
+   * Show information modal for a specific student.
+   * @param {Object} student - Selected student object.
+   */
   const handleShowInfo = (student) => {
     setSelectedStudent(student);
     setOpenInfoModal(true);
   };
 
-  // Clear search filters
+  /**
+   * Clear all search filters and reset pagination.
+   */
   const handleClear = () => {
     setName("");
     setSearchClass("");
@@ -152,13 +170,18 @@ export default function Studentlist() {
     fetchStudents({});
   };
 
-  // Handle student deletion
+  /**
+   * Trigger delete confirmation modal for a student.
+   * @param {string} studentId - ID of the student to be deleted.
+   */
   const handleDelete = (studentId) => {
     setIdForDelete(studentId);
     setDeleteConfirmModal(true);
   };
 
-  // Confirm student deletion
+  /**
+   * Confirm and delete a student from the list.
+   */
   const handleConfirmDelete = async () => {
     const url = isTeacher
       ? EndPoints.TEACHER.DELETE_STUDENT
@@ -213,6 +236,7 @@ export default function Studentlist() {
               >
                 <div className="flex gap-2 px-10 py-3.5 rounded-3xl w-full">
                   <div className="flex justify-between w-full">
+                    {/* class select dropdown */}
                     <FormControl
                       size="medium"
                       className={`${
@@ -261,6 +285,7 @@ export default function Studentlist() {
                       </Select>
                     </FormControl>
 
+                    {/* section select dropdown */}
                     <FormControl
                       size="medium"
                       sx={{ marginX: 1 }}
@@ -292,6 +317,7 @@ export default function Studentlist() {
                         })}
                       </Select>
                     </FormControl>
+                    {/* search Bar */}
                     <div className="flex px-3 rounded-[14px]  mx-2 w-full max-w-[800px] shadow-sm border border-t-gray">
                       <div className=" flex items-center pl-3 pointer-events-none">
                         <img src={Search} alt="" className="size-5" />
@@ -311,6 +337,7 @@ export default function Studentlist() {
                         }}
                       />
                     </div>
+                    {/* clear button */}
                     <button
                       className="hover:bg-[#E9EEF2]/50 text-white bg-white hover:border-[#E9EEF2] hover:border-2 ml-2 w-20 text-lg rounded-md flex items-center justify-center"
                       onClick={handleClear}
@@ -425,7 +452,7 @@ export default function Studentlist() {
                         >
                           {student?.bloodGroup || CONSTANT.NA}
                         </td>
-                        {/* Action Icons */}
+                        {/* Action Buttons */}
                         <td
                           className={`${
                             isDarkMode ? "text-white" : ""

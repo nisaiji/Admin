@@ -4,6 +4,13 @@ import { useTranslation } from "react-i18next";
 // import Countries from "../utils/Countries.json";
 import StateAndDistricts from "../utils/StatesAndDistricts.json";
 
+/**
+ * Step2 Component - Handles the second step of a multi-step form.
+ * Allows users to input address details such as country, state, district, city, pincode, and address.
+ * @param {object} formik - Formik object for managing form state and validation.
+ * @param {function} nextStep - Callback to proceed to the next step.
+ * @param {function} prevStep - Callback to return to the previous step.
+ */
 const Step2 = ({ formik, nextStep, prevStep }) => {
   const [t] = useTranslation();
   const [selectedCountry, setSelectedCountry] = useState("");
@@ -11,7 +18,11 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
   const [districts, setDistricts] = useState([]);
   const Countries = [{ name: "India", code: "IN" }];
 
-  // Handle country selection
+    /**
+   * Handles the change of the country dropdown.
+   * Resets related fields when a new country is selected.
+   * Updates the states based on the selected country.
+   */
   const handleCountryChange = (e) => {
     const country = e.target.value;
     setSelectedCountry(country);
@@ -34,7 +45,11 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
     }
   };
 
-  // Handle state selection
+   /**
+   * Handles the change of the state dropdown.
+   * Resets related fields when a new state is selected.
+   * Updates the districts based on the selected state.
+   */
   const handleStateChange = (e) => {
     const selectedState = StateAndDistricts.states.find(
       (state) => state.state === e.target.value

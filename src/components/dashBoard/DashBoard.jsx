@@ -37,21 +37,27 @@ const Dashboard = () => {
     year: moment().year(),
   });
 
+  // Gets the start and end of the current day
   const getStartEndOfDay = () => ({
     startTime: moment().startOf("day").valueOf(),
     endTime: moment().endOf("day").valueOf(),
   });
 
+  // Gets the start and end of the current week
   const getStartEndOfWeek = () => ({
     startTime: moment().startOf("Week").valueOf(),
     endTime: moment().endOf("Week").valueOf(),
   });
 
+  // Gets the start and end of the current month
   const getStartEndOfMonth = () => ({
     startTime: moment().startOf("month").valueOf(),
     endTime: moment().endOf("month").valueOf(),
   });
 
+  /**
+ * State initialization for attendance times (day, week, month)
+ */
   const [attendanceTime, setAttendanceTime] = useState({
     day: getStartEndOfDay(),
     week: getStartEndOfWeek(),
@@ -60,7 +66,14 @@ const Dashboard = () => {
 
   const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
 
-  // Centralized the axios request logic to reduce repetitive code.
+  /**
+ * Helper function to fetch data from an API.
+ * 
+ * @param {string} url - The API endpoint.
+ * @param {string} method - HTTP method (default is 'get').
+ * @param {object} data - Request payload for POST or PUT requests.
+ * @returns {Promise<any>} - Returns the fetched data or null if there's an error.
+ */
   const fetchData = async (url, method = "get", data = null) => {
     try {
       const response = await axiosClient[method](
@@ -77,7 +90,10 @@ const Dashboard = () => {
     return null;
   };
 
-  // student count api
+  /**
+ * Fetches and sets the student count for present, absent, and total students
+ * based on the selected time range (day).
+ */
   const getStudentCount = async () => {
     const url = isTeacher
       ? EndPoints.TEACHER.STUDENT_COUNT
@@ -91,7 +107,9 @@ const Dashboard = () => {
     setTotalStudentClassSectionWise(result?.totalCount || 0);
   };
 
-  // returns class and section list
+  /**
+ * Fetches and sets the list of available classes and their corresponding sections.
+ */
   const getClassList = async () => {
     const result = await fetchData(EndPoints.COMMON.CLASS_LIST);
 
@@ -106,6 +124,9 @@ const Dashboard = () => {
     getClassList();
   }, []);
 
+  /**
+ * Fetches calendar events based on the selected month.
+ */
   const getCalenderEvents = async () => {
     const startTime = new Date(date.year, date.month, 1).getTime();
     const endTime = new Date(
@@ -131,7 +152,12 @@ const Dashboard = () => {
     getCalenderEvents();
   }, [date]);
 
-  // Transform attendance data into array of 7 for weekly data
+  /**
+ * Transforms weekly attendance data into an array of 7 days.
+ * 
+ * @param {Array} attendanceData - The attendance data for the week.
+ * @returns {Array} - Transformed weekly attendance data.
+ */
   const transformWeeklyData = (attendanceData) => {
     const weekData = Array(7).fill({ present: 0, absent: 0, na: 0 });
 
@@ -149,7 +175,13 @@ const Dashboard = () => {
     return weekData;
   };
 
-  // Transform attendance data into array for the full month
+  /**
+ * Transforms monthly attendance data into an array for the full month.
+ * 
+ * @param {Array} attendanceData - The attendance data for the month.
+ * @param {number} daysInMonth - Number of days in the current month.
+ * @returns {Array} - Transformed monthly attendance data.
+ */
   const transformMonthlyData = (attendanceData, daysInMonth) => {
     const monthData = Array.from({ length: daysInMonth }, () => ({
       present: 0,
@@ -170,7 +202,9 @@ const Dashboard = () => {
     return monthData;
   };
 
-  // api for daily attendance pie chart
+/**
+ * Fetches daily attendance chart data for the teacher or specific section.
+ */
   const getDailyAttendanceChart = async () => {
     try {
       const url = isTeacher
@@ -363,10 +397,11 @@ const Dashboard = () => {
     ],
   };
 
-  // Monthly data of chart
+  // Function to process and display monthly attendance data
   const monthlyData = (attendanceData, total) => {
     const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
     const transformedData = transformMonthlyData(attendanceData, daysInMonth);
+     // Extract absent, present, and NA data
     const absentData = transformedData.map((day) => day.absent);
     const presentData = transformedData.map((day) => day.present);
     const NAData = transformedData.map((day) => day.na);
@@ -397,6 +432,7 @@ const Dashboard = () => {
     setChartData(data);
   };
 
+  // Chart options for customizing the chart display
   const chartOptions = {
     maintainAspectRatio: false,
     scales: {
@@ -550,6 +586,7 @@ const Dashboard = () => {
     />
   );
 
+  // Function to handle date changes (previous/next)
   const handleChangeDate = (direction) => {
     setAttendanceTime((prev) => {
       const newTime = { ...prev };
@@ -590,6 +627,7 @@ const Dashboard = () => {
     });
   };
 
+  // Function to render the clock with current time
   const Clock = () => {
     const [currentTime, setCurrentTime] = useState(
       moment().format("DD-MM-YYYY hh:mm:ss A")
@@ -662,7 +700,7 @@ const Dashboard = () => {
                   {t("dashboard.monthly")}
                 </button>
               </div>
-
+              {/* date change buttons */}
               <div className="flex justify-between items-center space-x-2 w-[230px]">
                 <img
                   src={DownIcon}
@@ -745,6 +783,7 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
+            {/* Pie/Bar charts */}
             <div className="flex justify-center mb-4">
               <div
                 className={`h-96 flex justify-center ${
@@ -756,7 +795,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Calender */}
+          {/* Calender component */}
           <div className="flex flex-row w-full mx-8 space-x-8">
             <div className="bg-[#fafafa] p-6 w-7/12 rounded-[16px]">
               <h2 className="text-xl font-semibold pl-6">
@@ -789,11 +828,13 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div>
+                  {/* event loading */}
                   {eventLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
                       <Spinner />
                     </div>
                   )}
+                  {/* event list */}
                   <div className="overflow-y-auto max-h-screen">
                     {calenderEvents.map((itm, index) => (
                       <div

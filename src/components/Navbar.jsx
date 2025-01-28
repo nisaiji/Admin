@@ -6,16 +6,11 @@ import classroomicon from "../assets/images/classroomicon.png";
 import calendaricon from "../assets/images/calendaricon.png";
 import leave from "../assets/images/leaves.png";
 import passwordReset from "../assets/images/passwordReset.png";
-import studenticon from "../assets/images/studenticon.png";
 import dropdown from "../assets/images/dropdown.png";
 import user from "../assets/images/user profile.png";
 import logo from "../assets/images/deer logo.png";
 import { useTranslation } from "react-i18next";
-import {
-  getItem,
-  KEY_ACCESS_TOKEN,
-  removeItem,
-} from "../services/LocalStorageManager";
+import { removeItem } from "../services/LocalStorageManager";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -32,23 +27,27 @@ const Navbar = () => {
   const requestsMenuRef = useRef(null);
   const { t } = useTranslation();
 
+  // Handle the toggle state of the main menu
   const handleToggleMenu = () => {
     setMenuOpen((prevState) => !prevState);
   };
 
+  // Handle the toggle state of the profile menu
   const handleToggleProfileMenu = () => {
     setProfileMenuOpen((prevState) => !prevState);
   };
 
+  // Handle the toggle state of the requests menu
   const handleToggleRequestsMenu = () => setRequestsMenuOpen((prev) => !prev);
 
+  // Close all menus
   const closeMenus = () => {
     setMenuOpen(false);
     setProfileMenuOpen(false);
     setRequestsMenuOpen(false);
   };
 
-  // close menu when click outside
+  // close all menus when click outside
   const handleOutsideClick = (event) => {
     if (
       menuRef.current &&
@@ -62,17 +61,9 @@ const Navbar = () => {
     }
   };
 
+  // Logout function that clears the user data and tokens
   const handleLogout = () => {
-    if (isTeacher) {
-      removeItem("class");
-      removeItem("section");
-      removeItem("firstname");
-    } else {
-      removeItem("username");
-    }
-    removeItem("access_token");
-    removeItem("refresh_token");
-    removeItem("schoolName");
+    localStorage.clear();
   };
 
   useEffect(() => {
@@ -88,11 +79,6 @@ const Navbar = () => {
         <div className="flex items-center ml-3">
           <Link to="/" className="flex items-center">
             <img src={logo} alt="logo" className="size-9" />
-
-            {/* <div className="bg-[#4834D4] size-10 rounded-2xl flex justify-center items-center">
-              <span className="text-[24px] font-bold">{t("A")}</span>
-
-            </div> */}
           </Link>
         </div>
 

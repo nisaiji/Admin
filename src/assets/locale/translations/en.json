@@ -51,6 +51,8 @@
     "accountDetails": "Account Details",
     "setYourPassword": "Set Your Password",
     "setupAccount": "Setup your Account",
+    "verificationPending": "Verification Pending",
+    "pendingMessage": "It might take up to 24 working hours to complete the verification process",
     "finish": "Finish"
   },
   "login": {
@@ -234,7 +236,8 @@
     "addStudent": "Add Student",
     "addClass": "Add Class",
     "today": "Today",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "checkProgress": "Check Progress"
   },
   "toasts": {
     "sectionLimit": "Reached maximum section limit",

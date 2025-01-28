@@ -16,9 +16,15 @@ import India from "../../assets/images/India.png";
 import location from "../../assets/images/location.png";
 import moment from "moment/moment";
 
+/**
+ * Capitalizes the first letter of a string and converts the rest to lowercase.
+ * @param {string} string - Input string to capitalize.
+ * @returns {string} - Capitalized string.
+ */
 const capitalize = (str) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
+// Utility function to filter out empty values from an object
 const filterEmptyValues = (data) =>
   Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== ""));
 
@@ -28,7 +34,7 @@ const TeacherUpdate = () => {
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
 
-  // validation schema
+  // Validation schema using Yup
   const validationSchema = Yup.object({
     firstname: Yup.string().required(t("validationError.firstName")),
     lastname: Yup.string().required(t("validationError.lastName")),
@@ -69,7 +75,8 @@ const TeacherUpdate = () => {
           {}
         );
         const filteredTeacherData = filterEmptyValues(teacherData);
-
+        
+        // Make API request to update teacher details
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
           filteredTeacherData

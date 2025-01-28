@@ -58,13 +58,7 @@ axiosClient.interceptors.response.use(
       data?.status === "error" &&
       data?.message === "Admin not exists"
     ) {
-      localStorage.clear()
-      // localStorage.removeItem("access_token");
-      // localStorage.removeItem("refresh_token");
-      // localStorage.removeItem("username");
-      // localStorage.removeItem("firstname");
-      // localStorage.removeItem("searchClass");
-      // localStorage.removeItem("searchSection");
+      localStorage.clear();
       setTimeout(() => {
         window.location.replace("/login", "_self");
       }, 2000);
@@ -83,26 +77,14 @@ axiosClient.interceptors.response.use(
         // Retry the original request with the new access token
         return axiosClient(originalRequest);
       } else {
-        localStorage.clear()
-        // localStorage.removeItem("access_token");
-        // localStorage.removeItem("refresh_token");
-        // localStorage.removeItem("username");
-        // localStorage.removeItem("firstname");
-        // localStorage.removeItem("searchClass");
-        // localStorage.removeItem("searchSection");
+        localStorage.clear();
         setTimeout(() => {
           window.location.replace("/login", "_self");
         }, 2000);
         return Promise.reject(data?.message);
       }
     } else if (data?.statusCode === 500 && data?.message === "jwt malformed") {
-      localStorage.clear()
-      // localStorage.removeItem("access_token");
-      // localStorage.removeItem("refresh_token");
-      // localStorage.removeItem("username");
-      // localStorage.removeItem("firstname");
-      // localStorage.removeItem("searchClass");
-      // localStorage.removeItem("searchSection");
+      localStorage.clear();
       setTimeout(() => {
         window.location.replace("/login", "_self");
       }, 2000);
@@ -120,12 +102,7 @@ axiosClient.interceptors.response.use(
     }
     const err = error?.response?.data;
     if (err?.statusCode === 403 && err?.status === "error") {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      localStorage.removeItem("username");
-      localStorage.removeItem("firstname");
-      localStorage.removeItem("searchClass");
-      localStorage.removeItem("searchSection");
+      localStorage.clear();
       setTimeout(() => {
         window.location.replace("/login", "_self");
       }, 2000);

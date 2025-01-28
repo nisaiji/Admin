@@ -26,7 +26,7 @@ export default function AdminProfile() {
   const [districts, setDistricts] = useState([]);
   const { t } = useTranslation();
 
-  // vaidation schema
+  // vaidation schema for the form using Yup
   const validationSchema = Yup.object({
     schoolName: Yup.string().trim().required(t("validationError.schoolName")),
     principal: Yup.string().trim().required(t("validationError.principalName")),
@@ -48,7 +48,7 @@ export default function AdminProfile() {
       .required(t("validationError.email")),
   });
 
-  // formik for handeling form
+  // Formik instance for handling form state and submission
   const formik = useFormik({
     initialValues: {
       schoolName: "",
@@ -77,7 +77,7 @@ export default function AdminProfile() {
     onSubmit: (values) => {},
   });
 
-  // get admin api
+  // get admin data from the API
   const getadmin = async () => {
     try {
       setLoading(true);
@@ -129,7 +129,7 @@ export default function AdminProfile() {
       }
 
       setLoading(true);
-
+      // Prepare request body for profile update
       const requestBody = {
         schoolName: values.schoolName,
         principal: values.principal,
@@ -162,7 +162,7 @@ export default function AdminProfile() {
     }
   };
 
-  // soial details update api
+  // update soial details API
   const handleSocialProfileUpdate = async () => {
     try {
       await Yup.reach(validationSchema, "phone").validate(formik.values.phone);
@@ -249,7 +249,7 @@ export default function AdminProfile() {
         </div>
 
         <div className="flex flex-wrap gap-5 mt-5 w-full">
-          {/* School Name and Email */}
+          {/* School Name */}
           <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
@@ -274,7 +274,7 @@ export default function AdminProfile() {
                 </div>
               )}
             </div>
-
+            {/* Email */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.Email")}{" "}
@@ -300,7 +300,7 @@ export default function AdminProfile() {
             </div>
           </div>
 
-          {/* Principal and Admin */}
+          {/* Principal */}
           <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
@@ -325,7 +325,7 @@ export default function AdminProfile() {
                 </div>
               )}
             </div>
-
+            {/* Admin name */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.adminName")}{" "}
@@ -351,7 +351,7 @@ export default function AdminProfile() {
             </div>
           </div>
 
-          {/* Affiliation No and School No */}
+          {/* Affiliation No */}
           <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
@@ -376,7 +376,7 @@ export default function AdminProfile() {
                 </div>
               )}
             </div>
-
+            {/* School No */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.schoolNumber")}
@@ -401,7 +401,7 @@ export default function AdminProfile() {
             </div>
           </div>
 
-          {/* Address and School Board */}
+          {/* Address */}
           <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
@@ -426,7 +426,7 @@ export default function AdminProfile() {
                 </div>
               )}
             </div>
-
+            {/* School Board */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.schoolBoard")}{" "}
@@ -585,8 +585,8 @@ export default function AdminProfile() {
             </div>
           </div>
 
-          {/* city and Pincode */}
           <div className="flex flex-row w-full space-x-5">
+            {/* city */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.city")} <span className="text-red-500">*</span>
@@ -609,7 +609,7 @@ export default function AdminProfile() {
                 </div>
               )}
             </div>
-
+            {/* pincode */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.pincode")}{" "}

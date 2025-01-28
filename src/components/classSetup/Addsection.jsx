@@ -29,12 +29,21 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
   const [loading, setLoading] = useState(false);
   const selectRef = useRef(null);
 
-  // Helper function to get next section name based on length
+  /**
+   * Helper function to generate the next section name based on the length of existing sections.
+   * @param {Array} sections - The current list of sections.
+   * @returns {string} - The next section name.
+   */
   const getNextSectionName = (sections) => {
     const letters = t("options.sections");
     return sections.length <= letters.length ? letters[sections.length] : "";
   };
 
+  /**
+   * Fetches data for the sections and teachers.
+   * This is an asynchronous function that fetches sections and unassigned teachers from the API.
+   * It updates the `sections` and `teachers` states with the fetched data.
+   */
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -60,7 +69,10 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
     fetchData();
   }, [fetchData]);
 
-  // Function to handle saving a new section
+  /**
+   * Handles the saving of a new section.
+   * This function checks if the section limit is reached, if a teacher is selected, and then attempts to save the section.
+   */
   const handleSaveSection = async () => {
     if (sections.length >= 8) {
       return toast.error(t("toasts.sectionLimit"));
@@ -89,12 +101,21 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
       toast.error(e);
     } finally {
       setLoading(false);
-      setNewSection({ name: "", teacherId: "", startTime: new Date().getTime() });
+      // Reset new section form state
+      setNewSection({
+        name: "",
+        teacherId: "",
+        startTime: new Date().getTime(),
+      });
       setShowForm(true);
     }
   };
 
-  // Function to handle updating a teacher in an existing section
+  /**
+   * Handles updating a teacher in an existing section.
+   * This function updates the teacher for a specific section.
+   * @param {Object} section - The section to update.
+   */
   const handleUpdateTeacherSection = async (section) => {
     if (!newSection.teacherId) {
       return toast.error(t("toasts.selectTeacher"));
@@ -120,19 +141,30 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
     }
   };
 
+  /**
+   * Handles the click event for updating a section.
+   * @param {Object} section - The section to update.
+   */
   const handleUpdateClick = async (section) => {
     await fetchData();
     setActiveSection(section._id);
     setNewSection({ name: section.name, teacherId: newSection.teacherId });
   };
 
-  // Handle change in form inputs
+  /**
+   * Handles changes in form inputs.
+   * This function updates the `newSection` state when input values change.
+   * @param {Event} e - The event triggered by input changes.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewSection((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Function to handle deletion of a section
+  /**
+   * Handles the deletion of a section.
+   * This function deletes a section based on the section ID and updates the UI accordingly.
+   */
   const handleSectionDelete = async () => {
     try {
       setLoading(true);
@@ -152,7 +184,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
     }
   };
 
-  // Focus on the select element if activeSection is set
+  // Focus on the select element if active section is set
   useEffect(() => {
     if (selectRef.current) {
       selectRef.current.focus();
@@ -243,15 +275,6 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                 <div className="mt-2">
                   <DatePicker
                     selected={section?.startTime || new Date()}
-                    // onChange={(date) => {
-                    //   const startOfDay = new Date(date);
-                    //   startOfDay.setHours(0, 0, 0, 0);
-                    //   const timestamp = startOfDay.getTime();
-                    //   setNewSection((prev) => ({
-                    //     ...prev,
-                    //     startTime: timestamp,
-                    //   }));
-                    // }}
                     dateFormat="dd/MM/YYYY"
                     maxDate={new Date()}
                     onKeyDown={(e) => e.preventDefault()}

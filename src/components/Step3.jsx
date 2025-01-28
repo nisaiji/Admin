@@ -2,6 +2,11 @@ import React from "react";
 import ArrowRight from "../assets/images/ArrowRight.png";
 import { useTranslation } from "react-i18next";
 
+/**
+ * Step3 Component - Handles the third step of a multi-step form.
+ * Collects the affiliation number and admin name.
+ * @param {object} formik - Formik object for managing form state and validation.
+ */
 const Step3 = ({ formik }) => {
   const [t] = useTranslation();
 

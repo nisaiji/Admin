@@ -8,6 +8,7 @@ import EndPoints from "../../services/EndPoints";
 import moment from "moment";
 import CONSTANT from "../../utils/constants";
 
+// Calendar Component - Displays a calendar with month navigation and event handling
 const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
   const isDarkMode = false;
 
@@ -17,6 +18,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
       } calendar pl-4 rounded-lg w-full `}
     >
+      {/* Month Navigation */}
       <div className="month flex items-center justify-between p-4 pl-14 pr-14 text-l font-medium rounded-lg h-10 w-12/12 capitalize border-2 border-[rgba(196, 196, 196, 0.25)] ">
         <FontAwesomeIcon
           icon={faAngleLeft}
@@ -40,6 +42,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
           onClick={onNextMonth}
         />
       </div>
+      {/* Weekdays header */}
       <div
         className={`${
           isDarkMode ? "text-white" : "text-[#040320]"
@@ -54,14 +57,12 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
     </div>
   );
 };
-
-// return days of month with handling styles
+// Day Component - Displays each day in the calendar with appropriate styling
 const Day = ({ day, isHoliday, onClick, isSunday, isToday }) => {
+  // Render CSS classes based on day conditions (holiday, Sunday, today)
   const renderCss = () => {
     if (isHoliday) {
       return `text-white bg-[#FE4040] border-[#FE4040]`;
-      // } else if (hasEvent) {
-      //   return `text-white bg-[#4834D4] border-[#4834D4]`;
     } else if (isSunday) {
       return `text-[#F29E38] bg-[#F29E38]/10 border-[#F29E38]`;
     } else if (isToday) {
@@ -82,6 +83,7 @@ const Day = ({ day, isHoliday, onClick, isSunday, isToday }) => {
   );
 };
 
+// Days Grid Component - Displays all the days of the month in a grid layout
 const DaysGrid = ({ days }) => {
   return (
     <div className="days grid grid-cols-7 gap-4 p-3 justify-center items-center">
@@ -90,7 +92,7 @@ const DaysGrid = ({ days }) => {
   );
 };
 
-// Calendar component
+// CalendarComponent - Manages the logic of the calendar, events, and month navigation
 const CalendarComponent = ({ updateDate }) => {
   const [today, setToday] = useState(new Date());
   const [month, setMonth] = useState(today.getMonth());
@@ -102,7 +104,7 @@ const CalendarComponent = ({ updateDate }) => {
     fetchEvents();
   }, [month]);
 
-  // get event api
+  // Fetch events for the selected month
   const fetchEvents = async () => {
     try {
       const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
@@ -120,7 +122,7 @@ const CalendarComponent = ({ updateDate }) => {
     }
   };
 
-  // handle month change
+  // Handle month navigation (previous/next month)
   const updateCalendar = (newMonth, newYear) => {
     setMonth(newMonth);
     setYear(newYear);
@@ -149,9 +151,11 @@ const CalendarComponent = ({ updateDate }) => {
     const daysInMonth = getDaysInMonth(month, year);
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const days = [];
+    // Add empty divs for the days before the 1st of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(<div key={`empty-${i}`} className="empty"></div>);
     }
+    // Add day cells for each day in the month
     for (let day = 1; day <= daysInMonth; day++) {
       const isActive = day === activeDay;
       const isSunday = new Date(year, month, day).getDay() === 0;
@@ -159,7 +163,7 @@ const CalendarComponent = ({ updateDate }) => {
         day === today.getDate() &&
         month === today.getMonth() &&
         year === today.getFullYear();
-        
+
       const isHoliday = eventsArr.some(
         (event) =>
           event.title &&

@@ -5,6 +5,11 @@ import { useTranslation } from "react-i18next";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
 
+/**
+ * `Requests` component displays a list of requests made by users.
+ * Allows the admin to filter requests based on their status (approved, rejected, etc.).
+ * Provides functionality to approve, reject, or modify the status of requests.
+ */
 export default function Requests() {
   const { t } = useTranslation();
   const currentDate = new Date();
@@ -12,6 +17,10 @@ export default function Requests() {
   const [selectedTab, setSelectedTab] = useState("all");
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Fetches the requests from the API.
+   * It calls the API endpoint with the appropriate query parameters and updates the `requests` state.
+   */
   const getRequest = async () => {
     try {
       setLoading(true);
@@ -33,45 +42,51 @@ export default function Requests() {
     getRequest();
   }, []);
 
+  /**
+   * Returns a label based on the request's status.
+   * @param {string} status - The status of the request (e.g., 'accept', 'reject', etc.)
+   * @returns {string} - A label based on the request's status
+   */
   const requestsStatus = (status) => {
     //accept,reject,complete,pending,notSet,expired
     switch (status) {
       case "accept":
         return "Approved";
-        break;
       case "reject":
         return "Rejected";
-        break;
       case "complete":
         return "Completed";
-        break;
-
       default:
         return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-        break;
     }
   };
 
+  /**
+   * Converts the reason string into a label.
+   * @param {string} reason - The reason for the request (e.g., 'forgetPassword', 'changeDevice', etc.)
+   * @returns {string} - A reason
+   */
   const reasonToChange = (reason) => {
     switch (reason) {
       case "forgetPassword":
         return "Forgot Password";
-        break;
       case "changeDevice":
         return "Changed Device";
-        break;
       case "technical":
         return "Technical";
-        break;
       case "other":
         return "Other";
-        break;
       default:
         return "";
-        break;
     }
   };
 
+  /**
+   * Handles the action (approve, reject, etc.) for a specific request.
+   * Updates the request's status via the API.
+   * @param {string} id - The ID of the request
+   * @param {string} action - The action to perform (e.g., 'accept', 'reject')
+   */
   const handleRequestAction = async (id, action) => {
     try {
       setLoading(true);
@@ -90,6 +105,10 @@ export default function Requests() {
     }
   };
 
+  /**
+   * Filters the requests based on the selected tab (e.g., "approved", "rejected", etc.).
+   * @returns {Array} - The filtered list of requests
+   */
   const filteredRequests =
     selectedTab === "all"
       ? requests
@@ -103,6 +122,7 @@ export default function Requests() {
 
   return (
     <>
+      {/* loader */}
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30">
           <Spinner />
@@ -115,6 +135,7 @@ export default function Requests() {
             <div className="text-2xl font-poppins-bold pl-12 py-6">
               {t("titles.passwordReset")}
             </div>
+            {/* tabs */}
             <div className="flex space-x-4 mt-4 pl-12">
               {["all", "approved", "rejected"].map((tab) => (
                 <div
@@ -140,6 +161,7 @@ export default function Requests() {
             ) : (
               <div className="overflow-x-auto mt-6">
                 <table className="w-full shadow-sm overflow-hidden">
+                  {/* table heading */}
                   <thead>
                     <tr>
                       {[
@@ -159,6 +181,7 @@ export default function Requests() {
                       ))}
                     </tr>
                   </thead>
+                  {/* table body */}
                   <tbody className="text-sm font-normal text-black">
                     {filteredRequests.map((req, index) => (
                       <tr
@@ -177,6 +200,7 @@ export default function Requests() {
                         <td className="p-4 text-sm font-medium text-center">
                           {req?.teacher?.forgetPasswordCount}
                         </td>
+                        {/* action buttons */}
                         <td className="py-2 px-4 w-[200px] text-sm font-poppins-bold text-center">
                           {req.status === "pending" ? (
                             <div className="flex justify-center gap-3">

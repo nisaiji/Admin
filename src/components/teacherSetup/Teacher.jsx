@@ -36,13 +36,21 @@ export default function Teacher() {
     phone: "",
   });
 
-  // Capitalizes the first letter of a string
+  /**
+   * Capitalizes the first letter of a string and converts the rest to lowercase.
+   * @param {string} string - Input string to capitalize.
+   * @returns {string} - Capitalized string.
+   */
   const capitalizeFirstLetter = (string) => {
     if (!string) return string;
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
-  // Validates teacher data
+  /**
+   * Validates the teacher's data before submission.
+   * @param {object} teacher - Teacher object containing data to validate.
+   * @returns {string} - Error message, if any; otherwise, an empty string.
+   */
   const validateData = (teacher) => {
     if (
       !teacher.firstname.trim() ||
@@ -64,7 +72,9 @@ export default function Teacher() {
     return "";
   };
 
-  // Registers a new teacher
+  /**
+   * Registers a new teacher by sending their data to the API.
+   */
   const registerTeacher = async () => {
     try {
       const e = validateData(newTeacher);
@@ -85,9 +95,9 @@ export default function Teacher() {
 
       if ([200, 201].includes(response?.statusCode)) {
         toast.success(response.result);
-        getTeacher();
+        getTeacher(); // Refresh the teacher list
         setNewTeacher({ SNo: null, firstname: "", lastname: "", phone: "" });
-        newTeacherFirstNameRef.current?.focus();
+        newTeacherFirstNameRef.current?.focus(); // Focus on the first name input
       }
     } catch (e) {
       toast.error(e);
@@ -96,7 +106,9 @@ export default function Teacher() {
     }
   };
 
-  // Fetches the teacher list from the server
+  /**
+   * Fetches the list of teachers from the server.
+   */
   const getTeacher = async () => {
     try {
       setLoading(true);
@@ -120,13 +132,21 @@ export default function Teacher() {
     getTeacher();
   }, []);
 
-  // Shows teacher info modal
+  /**
+   * Opens the teacher information modal with selected teacher data.
+   * @param {object} teacher - Selected teacher object.
+   */
   const handleShowInfo = (teacher) => {
     setCurrTeacher(teacher);
     setTeacherInfoModelOpen(true);
   };
 
-  // Handles input change for both new and existing teachers
+  /**
+   * Handles changes in the input fields for both new and existing teachers.
+   * @param {number|null} SNo - Serial number of the teacher or null for new teacher.
+   * @param {string} field - Field name being updated.
+   * @param {string} value - New value for the field.
+   */
   const handleInputChange = (SNo, field, value) => {
     if (SNo === null) {
       setNewTeacher({ ...newTeacher, [field]: value });
@@ -139,7 +159,9 @@ export default function Teacher() {
     }
   };
 
-  // Deletes a teacher
+  /**
+   * Deletes the currently selected teacher.
+   */
   const handleDelete = async () => {
     try {
       setLoading(true);
@@ -161,7 +183,10 @@ export default function Teacher() {
     }
   };
 
-  // Filters teachers based on search query
+  /**
+   * Handles the search input field's value change.
+   * @param {object} e - Event object containing the new search query.
+   */
   const handleSearchInputChange = (e) => {
     setSearchQuery(e.target.value);
   };

@@ -25,15 +25,28 @@ import Leaves from "./components/dashBoard/Leaves";
 import TeacherProfile from "./components/admin/TeacherProfile";
 import desktop from "./assets/images/desktop.png";
 
+/**
+ * Main application component for handling routes and rendering views.
+ */
 function App() {
   const dispatch = useDispatch();
+  /**
+   * Role of the logged-in user, fetched from the Redux store.
+   * @type {string|null} role - User role (e.g., "teacher", "admin").
+   */
   const role = useSelector((state) => state.appAuth.role);
+  /**
+   * State to detect if the user is accessing the app on a mobile device.
+   * @type {boolean} isMobile
+   */
   const [isMobile, setIsMobile] = useState(false);
 
+  /**
+   * Effect to handle initial app setup, such as detecting the device type and setting authentication data if a token is present.
+   */
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    // console.log({ userAgent });
-
+    // Detect if the device is mobile
     if (
       /android|iPad|iPhone|iPod|windows phone/i.test(userAgent.toLowerCase())
     ) {
@@ -45,6 +58,7 @@ function App() {
     }
   }, [dispatch]);
 
+  // If the user is on a mobile device, render a message prompting them to switch to desktop view
   if (isMobile) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-center px-4">
@@ -52,13 +66,6 @@ function App() {
           Please open in desktop view
         </h1>
         <img src={desktop} alt="" className="size-12" />
-        {/* <p className="text-lg text-gray-700 max-w-md leading-relaxed">
-          This content is not accessible on mobile devices. Please use a desktop
-          browser for the best experience.
-        </p>
-        <p className="text-sm text-gray-600 mt-4">
-          If you believe this is an error, contact support for assistance.
-        </p> */}
       </div>
     );
   }
@@ -67,16 +74,19 @@ function App() {
     <>
       <I18nextProvider i18n={i18n}>
         <Routes>
+          {/* Routes that require user authentication */}
           <Route element={<RequireUser />}>
             <Route path="/" element={<Home />}>
               {role === "teacher" ? (
                 <>
+                  {/* Routes available for teacher users */}
                   <Route path="" element={<DashBoard />} />
                   <Route path="student-section" element={<StudentSection />} />
                   <Route path="teacher-profile" element={<TeacherProfile />} />
                 </>
               ) : (
                 <>
+                  {/* Routes available for admin users */}
                   <Route path="" element={<DashBoard />} />
                   <Route path="student-list" element={<Studentlist />} />
                   <Route path="student" element={<Studentlist />} />
@@ -94,6 +104,7 @@ function App() {
               )}
             </Route>
           </Route>
+          {/* Routes that do not require user authentication */}
           <Route element={<NotRequireUser />}>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SchoolDetailSignup />} />

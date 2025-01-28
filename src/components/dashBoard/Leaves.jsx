@@ -28,6 +28,10 @@ export default function Leaves() {
     fullname: "",
   });
 
+  /**
+   * Fetches leave requests from the API
+   * Sends a GET request to fetch the leave requests and updates the state accordingly.
+   */
   const fetchLeaves = async () => {
     try {
       setLoading(true);
@@ -45,10 +49,20 @@ export default function Leaves() {
     }
   };
 
+  /**
+   * Effect hook that runs when the component mounts
+   * Fetches the leave requests when the component loads.
+   */
   useEffect(() => {
     fetchLeaves();
   }, []);
 
+  /**
+   * Handles the action of saving, approving, or rejecting a leave request.
+   * Sends a PUT request to update the status of the leave request.
+   * @param {string} id - The ID of the leave request
+   * @param {string} status - The new status (approve/reject)
+   */
   const handleSave = async (id, status) => {
     try {
       let data;
@@ -71,6 +85,7 @@ export default function Leaves() {
           password: formData.password,
         };
       }
+      // Send a PUT request to update the leave status
       const res = await axiosClient.put(EndPoints.ADMIN.UPDATE_LEAVE, data);
       if (res?.statusCode === 200) {
         toast.success(res?.result);
@@ -84,6 +99,10 @@ export default function Leaves() {
     }
   };
 
+  /**
+   * Filters the leave requests based on the selected tab (all, approved, rejected)
+   * @returns {Array} - The filtered list of leave requests based on the selected tab
+   */
   const filteredRequests =
     selectedTab === "all"
       ? requests
@@ -95,26 +114,28 @@ export default function Leaves() {
       ? requests.filter((req) => req.status === "reject")
       : requests;
 
+  /**
+   * Translates status codes to human-readable text.
+   * @param {string} status - The status code (accept, reject, complete, etc.)
+   * @returns {string} - The translated status string
+   */
   const requestsStatus = (status) => {
     //accept,reject,complete,pending
     switch (status) {
       case "accept":
         return "Approved";
-        break;
       case "reject":
         return "Rejected";
-        break;
       case "complete":
         return "Completed";
-        break;
       default:
         return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-        break;
     }
   };
 
   return (
     <>
+    {/* loader */}
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30">
           <Spinner />
@@ -126,6 +147,7 @@ export default function Leaves() {
           <div className="text-2xl font-poppins-bold pl-12 py-6">
             {t("titles.leave")}
           </div>
+          {/* tabs */}
           <div className="flex space-x-4 mt-4 pl-12">
             {["all", "approved", "rejected"].map((tab) => (
               <div
@@ -151,6 +173,7 @@ export default function Leaves() {
           ) : (
             <div className="overflow-x-auto mt-6">
               <table className="w-full shadow-sm overflow-hidden">
+                {/* table heading */}
                 <thead>
                   <tr>
                     <th></th>
@@ -174,6 +197,7 @@ export default function Leaves() {
                     </th>
                   </tr>
                 </thead>
+                {/* table body */}
                 <tbody>
                   {filteredRequests.map((req, index) => (
                     <tr
@@ -182,6 +206,7 @@ export default function Leaves() {
                         index % 2 === 0 ? "bg-[#4645900D]" : ""
                       } border-t `}
                     >
+                      {/* row expand button */}
                       <td className="px-4 py-2 align-top">
                         <img
                           src={dropdown}
@@ -387,6 +412,7 @@ export default function Leaves() {
                           }}
                         />
                       </td>
+                      {/* action buttons */}
                       <td className="px-4 py-2 w-[200px] align-top text-sm font-medium text-center">
                         {req.status === "pending" ? (
                           <div className="flex justify-center gap-3">
@@ -420,7 +446,8 @@ export default function Leaves() {
           )}
         </div>
       </div>
-
+      
+      {/* confirm popup of reject leave */}
       <ConformationPopup
         isVisible={showConformationPopup}
         onClose={() => setshowConformationPopup(false)}
@@ -431,7 +458,7 @@ export default function Leaves() {
         message={"Please Confirm reject this leave request"}
       />
 
-      {/* Popup */}
+      {/* Leave Description Popup */}
       {isPopupOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
           <div className="p-6 bg-white rounded-2xl shadow-lg max-w-md w-full relative">

@@ -14,7 +14,7 @@ export default function TeacherProfile() {
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
 
-  // vaidation schema
+  // Validation schema using Yup to enforce validation rules on form fields
   const validationSchema = Yup.object({
     firstname: Yup.string().trim().required(t("validationError.firstName")),
     lastname: Yup.string().trim().required(t("validationError.lastName")),
@@ -22,13 +22,11 @@ export default function TeacherProfile() {
     gender: Yup.string().required(t("validationError.gender")),
     bloodGroup: Yup.string().required(t("validationError.bloodGroup")),
     university: Yup.string().trim().required(t("validationError.university")),
-    degree: Yup.string()
-      .trim()
-      .required(t("validationError.qualification")),
+    degree: Yup.string().trim().required(t("validationError.qualification")),
     phone: Yup.string().trim().length(10).required(t("validationError.phone")),
   });
 
-  // formik for handeling form
+  // Formik configuration for managing form state, validation, and submission
   const formik = useFormik({
     initialValues: {
       firstname: "",
@@ -60,7 +58,7 @@ export default function TeacherProfile() {
     },
   });
 
-  // get admin api
+  // Function to fetch teacher details from the server
   const getTeacher = async () => {
     try {
       setLoading(true);
@@ -107,7 +105,7 @@ export default function TeacherProfile() {
         </div>
 
         <div className="flex flex-wrap gap-5 mt-5 w-full">
-          {/* firstName and lastName */}
+          {/* firstName */}
           <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
@@ -132,7 +130,7 @@ export default function TeacherProfile() {
                 </div>
               )}
             </div>
-
+            {/* lastname */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("labels.lastName")} <span className="text-red-500">*</span>
@@ -157,8 +155,8 @@ export default function TeacherProfile() {
             </div>
           </div>
 
-          {/* DOB and Gender */}
           <div className="flex flex-row w-full space-x-5">
+            {/* DOB */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("labels.dob")} <span className="text-red-500">*</span>
@@ -174,7 +172,6 @@ export default function TeacherProfile() {
                 }
                 dateFormat="dd/MM/yyyy"
                 placeholderText={t("placeholders.dob")}
-                // className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.dob && formik.touched.dob
                     ? "border-red-500"
@@ -187,25 +184,13 @@ export default function TeacherProfile() {
                 showYearDropdown
                 dropdownMode="select"
               />
-              {/* <input
-                name="dob"
-                placeholder={t("placeholders.dob")}
-                value={formik.values.dob}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.dob && formik.touched.dob
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
-              /> */}
               {formik.errors.dob && formik.touched.dob && (
                 <div className="text-red-500 text-sm mt-1">
                   {formik.errors.dob}
                 </div>
               )}
             </div>
-
+            {/* gender dropdown */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("labels.gender")} <span className="text-red-500">*</span>
@@ -234,8 +219,8 @@ export default function TeacherProfile() {
             </div>
           </div>
 
-          {/* BloodGroup and Phone */}
           <div className="flex flex-row w-full space-x-5">
+            {/* BloodGroup dropdown */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("labels.bloodGroup")} <span className="text-red-500">*</span>
@@ -267,7 +252,7 @@ export default function TeacherProfile() {
                 </div>
               )}
             </div>
-
+            {/* phone */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("labels.phone")} <span className="text-red-500">*</span>
@@ -292,8 +277,8 @@ export default function TeacherProfile() {
             </div>
           </div>
 
-          {/* university and qualification */}
           <div className="flex flex-row w-full space-x-5">
+            {/* university */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("labels.university")} <span className="text-red-500">*</span>
@@ -316,7 +301,7 @@ export default function TeacherProfile() {
                 </div>
               )}
             </div>
-
+            {/* Qualification */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("labels.qualification")}{" "}

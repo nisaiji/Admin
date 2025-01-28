@@ -5,11 +5,19 @@ import html2canvas from "html2canvas";
 import { useTranslation } from "react-i18next";
 import CONSTANT from "../../../utils/constants";
 
+/**
+ * A modal component to display detailed information about a student.
+ * 
+ * @param {Object} currStudent - Current student's details.
+ * @param {Function} modelOpen - Function to toggle the modal visibility.
+ * 
+ * @returns {JSX.Element} Student information modal component.
+ */
 export default function StudentInfo({ currStudent, modelOpen }) {
   const [t] = useTranslation();
   const captureRef = useRef(null);
 
-  // print schema
+  // print student information in pdf format
   const handleScreenshot = () => {
     const hiddenContainer = document.createElement("div");
     hiddenContainer.style.position = "fixed";

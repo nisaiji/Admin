@@ -3,7 +3,15 @@ import hide from "../assets/images/hide.png";
 import show from "../assets/images/show.png";
 import { useTranslation } from "react-i18next";
 
-// Reusable Input Component
+/**
+ * Reusable Input Component
+ * @param {string} label - The label for the input field.
+ * @param {string} name - The name attribute of the input field.
+ * @param {string} type - The type of the input field (e.g., text, email, password).
+ * @param {string} placeholder - Placeholder text for the input field.
+ * @param {object} formik - Formik object for form handling.
+ * @param {string} className - Additional classes for custom styling.
+ */
 const InputField = ({ label, name, type, placeholder, formik, className }) => (
   <div className={`mt-5 ${className}`}>
     <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
@@ -26,6 +34,11 @@ const InputField = ({ label, name, type, placeholder, formik, className }) => (
   </div>
 );
 
+/**
+ * Step1 Component - First step of a multi-step form.
+ * Handles user inputs for school name, phone, email, and password fields.
+ * @param {object} formik - Formik object for managing form state and validation.
+ */
 const Step1 = ({ formik }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

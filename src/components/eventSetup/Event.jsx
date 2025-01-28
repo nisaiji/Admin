@@ -15,7 +15,7 @@ import moment from "moment";
 import { useTranslation } from "react-i18next";
 import CONSTANT from "../../utils/constants";
 
-// Calendar Header Component
+// Calendar Component - Displays a calendar with month navigation and event handling
 const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
   const isDarkMode = false;
 
@@ -25,6 +25,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
       } calendar pl-16 rounded-lg w-full `}
     >
+      {/* Month Navigation */}
       <div className="month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
         <FontAwesomeIcon
           icon={faAngleLeft}
@@ -48,6 +49,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
           onClick={onNextMonth}
         />
       </div>
+      {/* Weekdays header */}
       <div
         className={`${
           isDarkMode ? "text-white" : "text-[#6E6F81]/75"
@@ -63,7 +65,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
   );
 };
 
-// return days of month with handling styles
+// Day Component - Displays each day in the calendar with appropriate styling
 const Day = ({ day, isHoliday, onClick, isSunday, isToday }) => {
   const renderCss = () => {
     if (isHoliday) {
@@ -87,6 +89,7 @@ const Day = ({ day, isHoliday, onClick, isSunday, isToday }) => {
   );
 };
 
+// Days Grid Component - Displays all the days of the month in a grid layout
 const DaysGrid = ({ days }) => {
   return (
     <div className="days grid grid-cols-7 ml-10 gap-[10px] px-8 py-3">
@@ -95,7 +98,7 @@ const DaysGrid = ({ days }) => {
   );
 };
 
-// Event Component
+// Event - Manages the logic of the calendar, events, and month navigation
 const Event = () => {
   const isAdmin = useSelector((state) => state.appAuth.role) === "admin";
   const isDarkMode = false;
@@ -202,7 +205,7 @@ const Event = () => {
     );
   };
 
-  // get events api
+  // Fetch events for the selected month
   const fetchEvents = async () => {
     setEventLoading(true);
     try {
@@ -223,6 +226,7 @@ const Event = () => {
     }
   };
 
+  // set calendar of selected month
   const handleGotoDate = (e) => {
     const [mm, yyyy] = e.target.value.split("/");
     if (mm && yyyy && mm > 0 && mm < 13 && yyyy.length === 4) {
@@ -230,6 +234,7 @@ const Event = () => {
     }
   };
 
+  // capitalize the first letter
   const capitalizeFirstLetter = (string) => {
     if (!string) return string;
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -331,10 +336,10 @@ const Event = () => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDayOffset = new Date(year, month, 1).getDay();
     const days = [];
-
+    // Add empty divs for the days before the 1st of the month
     for (let i = 0; i < firstDayOffset; i++)
       days.push(<div key={`empty-${i}`} className="empty" />);
-
+    // Add day cells for each day in the month
     for (let day = 1; day <= daysInMonth; day++) {
       const isActive = day === activeDay;
       const targetDate = moment(new Date(year, month, day)).format(
