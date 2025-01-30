@@ -2,8 +2,8 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 // const baseURL = "http://93.127.166.31:4001/";
-// const baseURL = "http://localhost:4000/";
-const baseURL = "https://nisaiji.com/";
+const baseURL = "http://localhost:4000/";
+// const baseURL = "https://nisaiji.com/";
 
 export const axiosClient = axios.create({ baseURL });
 
@@ -101,6 +101,13 @@ axiosClient.interceptors.response.use(
       return;
     }
     const err = error?.response?.data;
+    if (err?.statusCode === 404 && err?.status === "error") {
+      localStorage.clear();
+      setTimeout(() => {
+        window.location.replace("/login", "_self");
+      }, 2000);
+      return Promise.reject(err?.message);
+    }
     if (err?.statusCode === 403 && err?.status === "error") {
       localStorage.clear();
       setTimeout(() => {
