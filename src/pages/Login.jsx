@@ -1,5 +1,5 @@
 // Import necessary dependencies and assets
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useFormik } from "formik";
 import { jwtDecode } from "jwt-decode";
 import { Link, useNavigate } from "react-router-dom";
@@ -231,6 +231,7 @@ function Login() {
             {/* Submit button */}
             <div className="mt-6">
               <button
+                name="submit"
                 className="w-full py-1.5 text-center bg-[#0F4189] text-white font-poppins-bold rounded-lg disabled:opacity-50"
                 type="submit"
                 disabled={formik.isSubmitting}
