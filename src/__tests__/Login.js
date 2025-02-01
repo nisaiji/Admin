@@ -54,7 +54,7 @@ describe("Login Component", () => {
     renderComponent();
     expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
-    userEvent.click(screen.getByRole("button", { name: /login.loginButton/i }));
+    userEvent.click(screen.getByTestId("submit"));
   });
 
   test("toggles password visibility", async () => {

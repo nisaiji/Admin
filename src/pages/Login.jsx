@@ -232,6 +232,7 @@ function Login() {
             <div className="mt-6">
               <button
                 name="submit"
+                data-testid='submit'
                 className="w-full py-1.5 text-center bg-[#0F4189] text-white font-poppins-bold rounded-lg disabled:opacity-50"
                 type="submit"
                 disabled={formik.isSubmitting}
