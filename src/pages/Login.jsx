@@ -98,8 +98,7 @@ function Login() {
 
         if (res?.statusCode === 200) {
           const decodedToken = jwtDecode(res?.result?.accessToken);
-          if (decodedToken.role === "admin") {
-            // console.log(decodedToken);
+          if (decodedToken?.role === "admin") {
             if (decodedToken?.active) {
               localStorage.setItem("access_token", res?.result?.accessToken);
               localStorage.setItem("refresh_token", res?.result?.refreshToken);
@@ -186,6 +185,7 @@ function Login() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.userInput}
+                data-testid="email-input"
               />
             </div>
             {formik.touched.userInput && formik.errors.userInput && (
@@ -203,6 +203,7 @@ function Login() {
                 placeholder={t("login.placeholders.password")}
                 onChange={formik.handleChange}
                 value={formik.values.password}
+                data-testid="password-input"
               />
               <img
                 src={ishide ? hide : show}
@@ -227,7 +228,6 @@ function Login() {
                 {t("login.forgotPassword")}
               </Link>
             </div>
-
             {/* Submit button */}
             <div className="mt-6">
               <button
@@ -240,7 +240,6 @@ function Login() {
                 {t("login.loginButton")}
               </button>
             </div>
-
             {/* Toggle between Admin and Teacher */}
             <div className="mt-3">
               <button
