@@ -18,7 +18,7 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
   const [districts, setDistricts] = useState([]);
   const Countries = [{ name: "India", code: "IN" }];
 
-    /**
+  /**
    * Handles the change of the country dropdown.
    * Resets related fields when a new country is selected.
    * Updates the states based on the selected country.
@@ -45,7 +45,7 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
     }
   };
 
-   /**
+  /**
    * Handles the change of the state dropdown.
    * Resets related fields when a new state is selected.
    * Updates the districts based on the selected state.
@@ -83,6 +83,7 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
               name="country"
               value={formik.values.country}
               onChange={handleCountryChange}
+              data-testid="countrylist"
             >
               <option value="" label={t("placeholders.selectCountry")} />
               {Countries.map((country) => (
@@ -110,6 +111,7 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
                 name="state"
                 value={formik.values.state}
                 onChange={handleStateChange}
+                data-testid="statelist"
               >
                 <option value="" label={t("placeholders.selectState")} />
                 {states.map((state) => (
@@ -149,6 +151,7 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
                 name="district"
                 value={formik.values.district}
                 onChange={formik.handleChange}
+                data-testid="districtlist"
               >
                 <option value="" label={t("placeholders.selectDistrict")} />
                 {districts.map((district) => (

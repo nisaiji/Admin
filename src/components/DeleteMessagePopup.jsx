@@ -32,6 +32,7 @@ export default function DeletePopup({ isVisible, onClose, onDelete }) {
           <button
             className="border border-[#d91111] bg-[#d91111] text-white shadow-sm rounded-lg px-4 py-2 text-base font-poppins-regular"
             onClick={onDelete}
+            data-testid="confirmdeleteTeacher"
           >
             {t("buttons.delete")}
           </button>

@@ -294,6 +294,7 @@ export default function Teacher() {
                       {/* First Name */}
                       <td className="px-4 py-2 border text-sm border-[#2b2e4a]/25 ">
                         <input
+                          data-testid="savedFirstname"
                           type="text"
                           value={teacher.firstname}
                           onChange={(e) =>
@@ -316,6 +317,7 @@ export default function Teacher() {
                       {/* Last Name */}
                       <td className="px-4 py-2 text-sm  border border-[#2b2e4a]/25">
                         <input
+                          data-testid="savedLastname"
                           type="text"
                           value={teacher.lastname}
                           onChange={(e) =>
@@ -337,6 +339,7 @@ export default function Teacher() {
                       {/* Phone */}
                       <td className="px-4 py-2 text-sm border border-[#2b2e4a]/25">
                         <input
+                          data-testid="savedPhone"
                           type="text"
                           value={teacher.phone}
                           maxLength={10}
@@ -376,6 +379,7 @@ export default function Teacher() {
                               setCurrTeacher(teacher);
                               setShowDeleteConfirmation(true);
                             }}
+                            data-testid="deleteTeacher"
                           >
                             <img src={delete2} alt="" className="size-5" />
                           </button>
@@ -395,6 +399,7 @@ export default function Teacher() {
                     {/* First Name */}
                     <td className="py-1 px-3 border border-[#2b2e4a]/25">
                       <input
+                        data-testid="firstnameInput"
                         type="text"
                         value={newTeacher.firstname}
                         onChange={(e) =>
@@ -413,6 +418,7 @@ export default function Teacher() {
                     {/* Last Name */}
                     <td className="py-1 px-3 border border-[#2b2e4a]/25">
                       <input
+                        data-testid="lastnameInput"
                         type="text"
                         value={newTeacher.lastname}
                         onChange={(e) =>
@@ -430,6 +436,7 @@ export default function Teacher() {
                     {/* Phone */}
                     <td className="py-1 px-3 border border-[#2b2e4a]/25">
                       <input
+                        data-testid="phoneInput"
                         type="text"
                         value={newTeacher.phone}
                         maxLength={10}
@@ -451,6 +458,7 @@ export default function Teacher() {
                         className="bg-[#0F4189] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full focus:outline-2 focus:outline-[#0F4189]"
                         onClick={registerTeacher}
                         disabled={editSNo !== null}
+                        data-testid="addTeacher"
                       >
                         {t("buttons.addTeacher")}
                       </button>

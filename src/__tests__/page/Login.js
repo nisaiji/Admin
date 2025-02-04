@@ -4,30 +4,24 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import configureStore from "redux-mock-store";
-import Login from "../pages/Login";
-import { axiosClient } from "../services/axiosClient";
+import Login from "../../pages/Login";
+import { axiosClient } from "../../services/axiosClient";
 import toast from "react-hot-toast";
 
-// Correctly mock `useNavigate`
+// Mock the navigate function
 const mockNavigate = jest.fn();
+
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
-  useNavigate: () => mockNavigate,
+  useNavigate: jest.fn(),
 }));
 
-jest.mock("../services/axiosClient", () => ({
+jest.mock("../../services/axiosClient", () => ({
   axiosClient: {
     post: jest.fn(),
   },
 }));
-
-jest.mock("react-hot-toast", () => ({
-  Toaster: ({ children }) => children,
-  useToast: jest.fn().mockReturnValue({
-    error: jest.fn(),
-    success: jest.fn(),
-  }),
-}));
+jest.mock("react-hot-toast");
 
 const mockStore = configureStore([]);
 
@@ -35,16 +29,13 @@ describe("Login Component", () => {
   let store;
 
   beforeEach(() => {
-    store = mockStore({
-      auth: { user: null }, // Add relevant state if needed
-    });
+    store = mockStore({ auth: { user: null } });
     store.dispatch = jest.fn();
   });
-
   const renderComponent = () =>
     render(
       <Provider store={store}>
-        <MemoryRouter initialEntries={["/"]}>
+        <MemoryRouter>
           <Login />
         </MemoryRouter>
       </Provider>
@@ -54,7 +45,6 @@ describe("Login Component", () => {
     renderComponent();
     expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
-    userEvent.click(screen.getByTestId("submit"));
   });
 
   test("toggles password visibility", async () => {
@@ -62,23 +52,16 @@ describe("Login Component", () => {
     const passwordInput = screen.getByPlaceholderText(/password/i);
     const toggleIcon = screen.getByRole("img", { name: /show password/i });
 
-    // Initial type should be password
     expect(passwordInput).toHaveAttribute("type", "password");
-
-    // Click to toggle visibility
     await userEvent.click(toggleIcon);
     expect(passwordInput).toHaveAttribute("type", "text");
-
-    // Click to toggle visibility back
     await userEvent.click(toggleIcon);
     expect(passwordInput).toHaveAttribute("type", "password");
   });
 
-  test("validates form submission", async () => {
+  test("validates empty form submission", async () => {
     renderComponent();
-    await userEvent.click(
-      screen.getByRole("button", { name: /login.loginButton/i })
-    );
+    await userEvent.click(screen.getByTestId("submit"));
 
     await waitFor(() => {
       expect(
@@ -88,16 +71,34 @@ describe("Login Component", () => {
     });
   });
 
-  // test.only("handles login failure", async () => {
-  //   axiosClient.post.mockRejectedValue(new Error("Unauthorized user"));
-  //   renderComponent();
+  test.skip("handles login success", async () => {
+    axiosClient.post.mockResolvedValue({
+      statusCode: 200,
+      result: { accessToken: "fakeToken", refreshToken: "fakeRefreshToken" },
+    });
 
-  //   userEvent.type(screen.getByPlaceholderText(/email/i), "test@example.com");
-  //   userEvent.type(screen.getByPlaceholderText(/password/i), "wrongpass");
-  //   userEvent.click(screen.getByRole("button", { name: /login.loginButton/i }));
+    renderComponent();
+    userEvent.type(screen.getByPlaceholderText(/email/i), "s1@mail.com");
+    userEvent.type(screen.getByPlaceholderText(/password/i), "s1@12345");
+    const submitButton = screen.getByTestId("submit");
+    fireEvent.click(submitButton);
 
-  //   await waitFor(() => {
-  //     expect(toast.error).toHaveBeenCalledWith("Unauthorized user");
-  //   });
-  // });
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/");
+    });
+  });
+
+  test.skip("handles login failure", async () => {
+    axiosClient.post.mockRejectedValue("Unauthorized user");
+    renderComponent();
+
+    userEvent.type(screen.getByPlaceholderText(/email/i), "test@example.com");
+    userEvent.type(screen.getByPlaceholderText(/password/i), "wrongpass");
+    const submitButton = screen.getByTestId("submit");
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Unauthorized user");
+    });
+  });
 });
