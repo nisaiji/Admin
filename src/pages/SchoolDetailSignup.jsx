@@ -14,6 +14,8 @@ import REGEX from "../utils/regix";
 import { useTranslation } from "react-i18next";
 import Step4 from "../components/Step4";
 import Spinner from "../components/Spinner";
+import { setAuthData } from "../store/AppAuthSlice";
+import { useDispatch } from "react-redux";
 
 /**
  * SchoolDetailSignup Component
@@ -34,6 +36,7 @@ import Spinner from "../components/Spinner";
 
 function SchoolDetailSignup() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
   const [progressChecking, setProgressChecking] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -62,6 +65,7 @@ function SchoolDetailSignup() {
             localStorage.removeItem("temp_access_token");
             toast.success("Registration process completed.");
             localStorage.removeItem("page");
+            dispatch(setAuthData(localStorage.getItem("access_token")));
             setTimeout(() => {
               navigate("/");
             }, 1500);

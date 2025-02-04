@@ -22,6 +22,7 @@ export default function Step4({ checkProgress }) {
           className="rounded-lg px-4 mt-3 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white"
           type="button"
           onClick={checkProgress}
+          data-testid="checkProgress"
         >
           <div className="flex items-center gap-2">
             <p className="text-base">{t("buttons.checkProgress")}</p>

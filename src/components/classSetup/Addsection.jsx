@@ -283,7 +283,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                     dropdownMode="select"
                     // disabled={activeSection !== section._id}
                     disabled={true}
-                    className="border-2 rounded-xl py-1 px-4 w-36"
+                    className="border-2 rounded-xl py-1 px-4 w-36 z-50"
                   />
                 </div>
                 {/* actions */}
@@ -377,7 +377,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode="select"
-                    className="border-2 rounded-xl py-1 px-4 w-36"
+                    className="border-2 rounded-xl py-1 px-4 w-36 z-50"
                   />
                 </div>
                 <button

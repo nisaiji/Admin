@@ -108,9 +108,11 @@ export default function AttendancePopup({
       // Prevent changing to months outside the allowed range
       if (
         newDate.getFullYear() < startYear ||
-        newDate.getMonth() < startMonth ||
+        (newDate.getFullYear() === startYear &&
+          newDate.getMonth() < startMonth) ||
         newDate.getFullYear() > currentYear ||
-        newDate.getMonth() > currentMonth
+        (newDate.getFullYear() === currentYear &&
+          newDate.getMonth() > currentMonth)
       ) {
         toast.error(
           `You can only change month between the ${moment(startTime).format(
@@ -165,7 +167,7 @@ export default function AttendancePopup({
     );
   };
 
-   /**
+  /**
    * Save the attendance data to the backend API.
    */
   const handleSaveAttendance = async () => {
@@ -173,7 +175,7 @@ export default function AttendancePopup({
       setLoading(true);
       const attendances = attendanceData;
 
-       // Check for empty attendance cells within the valid range
+      // Check for empty attendance cells within the valid range
       const hasEmptyAttendance = attendanceData.some((student) =>
         student.attendances.some((item) => {
           const itemDate = item.date;

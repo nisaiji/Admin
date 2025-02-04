@@ -151,6 +151,7 @@ const Step1 = ({ formik }) => {
         <button
           type="submit"
           className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center ml-auto text-white"
+          data-testid="submitPage1"
         >
           <div className="flex items-center gap-2">
             <p className="text-base">{t("buttons.submit")}</p>

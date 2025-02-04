@@ -1,41 +1,60 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import React from 'react';
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import configureStore from "redux-mock-store";
 import Login from "../../pages/Login";
 import { axiosClient } from "../../services/axiosClient";
-import toast from "react-hot-toast";
+import EndPoints from "../../services/EndPoints";
+import { Toaster, toast } from "react-hot-toast";
+import { jwtDecode } from "jwt-decode";
+import { setAuthData } from '../../store/AppAuthSlice';
 
-// Mock the navigate function
+
+// Mock `useNavigate`
 const mockNavigate = jest.fn();
+const mockJWTDecode = jest.fn();
 
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
-  useNavigate: jest.fn(),
+  useNavigate: () => mockNavigate,
 }));
 
+
 jest.mock("../../services/axiosClient", () => ({
-  axiosClient: {
+  axiosClient: {  
     post: jest.fn(),
   },
 }));
-jest.mock("react-hot-toast");
+
+jest.mock("react-hot-toast", () => ({
+  Toaster: ({ children }) => children,
+  toast: {
+    error: jest.fn(),
+    success: jest.fn(),
+  },
+}));
+
+// Mock jwtDecode
+jest.mock("jwt-decode", () => ({
+  jwtDecode: jest.fn(),
+}));
+
 
 const mockStore = configureStore([]);
+const store = mockStore({});
 
 describe("Login Component", () => {
-  let store;
-
   beforeEach(() => {
-    store = mockStore({ auth: { user: null } });
-    store.dispatch = jest.fn();
+    jest.clearAllMocks();
   });
-  const renderComponent = () =>
+
+  renderComponent = () =>
     render(
       <Provider store={store}>
         <MemoryRouter>
+          <Toaster />
           <Login />
         </MemoryRouter>
       </Provider>
@@ -64,41 +83,127 @@ describe("Login Component", () => {
     await userEvent.click(screen.getByTestId("submit"));
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/validationError.email|validationError.username/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/validationError.email|validationError.username/i)).toBeInTheDocument();
       expect(screen.getByText(/validationError.password/i)).toBeInTheDocument();
     });
   });
 
-  test.skip("handles login success", async () => {
-    axiosClient.post.mockResolvedValue({
-      statusCode: 200,
-      result: { accessToken: "fakeToken", refreshToken: "fakeRefreshToken" },
+  test("calls API and navigates on successful login if role teacher", async () => {
+    // Mock jwtDecode return value
+    jwtDecode.mockReturnValue({
+      role: "teacher",
+      active: true,
     });
 
     renderComponent();
-    userEvent.type(screen.getByPlaceholderText(/email/i), "s1@mail.com");
-    userEvent.type(screen.getByPlaceholderText(/password/i), "s1@12345");
-    const submitButton = screen.getByTestId("submit");
-    fireEvent.click(submitButton);
 
+    // Fill in form fields
+    await userEvent.type(screen.getByTestId("email-input"), "test@example.com");
+    await userEvent.type(screen.getByTestId("password-input"), "correctpassword");
+
+    // Mock API response
+    axiosClient.post.mockResolvedValueOnce({ statusCode: 200, result: { accessToken: 'mockToken', refreshToken: 'mockRefreshToken' } });
+
+    // Click submit button
+    await userEvent.click(screen.getByTestId("submit"));
+
+    // Ensure API was called with correct data
     await waitFor(() => {
+      expect(axiosClient.post).toHaveBeenCalledTimes(1);
+      expect(axiosClient.post).toHaveBeenCalledWith(EndPoints.ADMIN.ADMIN_LOGIN, {
+        email: "test@example.com",
+        password: "correctpassword",
+      });
+      expect(jwtDecode).toHaveBeenCalledWith("mockToken");
+      expect(localStorage.getItem("access_token")).toBe("mockToken");
+      expect(localStorage.getItem("refresh_token")).toBe("mockRefreshToken");
+      expect(store.getActions()).toContainEqual(setAuthData("mockToken"));
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
   });
 
-  test.skip("handles login failure", async () => {
-    axiosClient.post.mockRejectedValue("Unauthorized user");
+  test("calls API and navigates on successful login if role admin and active is true", async () => {
+    // Mock jwtDecode return value
+    jwtDecode.mockReturnValue({
+      role: "admin",
+      active: true,
+    });
+
     renderComponent();
 
-    userEvent.type(screen.getByPlaceholderText(/email/i), "test@example.com");
-    userEvent.type(screen.getByPlaceholderText(/password/i), "wrongpass");
-    const submitButton = screen.getByTestId("submit");
-    fireEvent.click(submitButton);
+    // Fill in form fields
+    await userEvent.type(screen.getByTestId("email-input"), "test@example.com");
+    await userEvent.type(screen.getByTestId("password-input"), "correctpassword");
+
+    // Mock API response
+    axiosClient.post.mockResolvedValueOnce({ statusCode: 200, result: { accessToken: 'mockToken', refreshToken: 'mockRefreshToken' } });
+
+    // Click submit button
+    await userEvent.click(screen.getByTestId("submit"));
+
+    // Ensure API was called with correct data
+    await waitFor(() => {
+      expect(axiosClient.post).toHaveBeenCalledTimes(1);
+      expect(axiosClient.post).toHaveBeenCalledWith(EndPoints.ADMIN.ADMIN_LOGIN, {
+        email: "test@example.com",
+        password: "correctpassword",
+      });
+      expect(jwtDecode).toHaveBeenCalledWith("mockToken");
+      expect(localStorage.getItem("access_token")).toBe("mockToken");
+      expect(localStorage.getItem("refresh_token")).toBe("mockRefreshToken");
+      expect(store.getActions()).toContainEqual(setAuthData("mockToken"));
+      expect(mockNavigate).toHaveBeenCalledWith("/");
+    });
+  });
+
+  test("calls API and navigates on successful login if role admin and active is false", async () => {
+    // Mock jwtDecode return value
+    jwtDecode.mockReturnValue({
+      role: "admin",
+      active: false,
+    });
+
+    renderComponent();
+
+    // Fill in form fields
+    await userEvent.type(screen.getByTestId("email-input"), "test@example.com");
+    await userEvent.type(screen.getByTestId("password-input"), "correctpassword");
+
+    // Mock API response
+    axiosClient.post.mockResolvedValueOnce({ statusCode: 200, result: { accessToken: 'mockToken', refreshToken: 'mockRefreshToken' } });
+
+    // Click submit button
+    await userEvent.click(screen.getByTestId("submit"));
+
+    // Ensure API was called with correct data
+    await waitFor(() => {
+      expect(axiosClient.post).toHaveBeenCalledTimes(1);
+      expect(axiosClient.post).toHaveBeenCalledWith(EndPoints.ADMIN.ADMIN_LOGIN, {
+        email: "test@example.com",
+        password: "correctpassword",
+      });
+      expect(jwtDecode).toHaveBeenCalledWith("mockToken");
+      expect(localStorage.getItem("temp_access_token")).toBe("mockToken");
+      expect(mockNavigate).toHaveBeenCalledWith("/signup");
+    });
+  });
+
+  test("handles login failure", async () => {
+    renderComponent();
+    // Fill in form fields
+    await userEvent.type(screen.getByTestId("email-input"), "test@example.com");
+    await userEvent.type(screen.getByTestId("password-input"), "wrongpass");
+    axiosClient.post.mockRejectedValueOnce("Network Error");
+    await userEvent.click(screen.getByTestId("submit"));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Unauthorized user");
+      // Ensure toast.error was called
+      expect(axiosClient.post).toHaveBeenCalledTimes(1);
+      expect(axiosClient.post).toHaveBeenCalledWith(EndPoints.ADMIN.ADMIN_LOGIN, {
+        email: "test@example.com",
+        password: "wrongpass",
+      });
     });
+    expect(toast.error).toHaveBeenCalledWith("Network Error");
   });
 });
