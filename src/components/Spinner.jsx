@@ -1,3 +1,4 @@
+import React from 'react';
 import Loader from "../assets/images/Loader.gif";
 import React from "react";
 
