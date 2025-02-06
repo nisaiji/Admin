@@ -74,7 +74,7 @@ export default function AdminProfile() {
       youtube: "",
     },
     validationSchema,
-    onSubmit: (values) => {},
+    onSubmit: (values) => { },
   });
 
   // get admin data from the API
@@ -262,11 +262,11 @@ export default function AdminProfile() {
                 value={formik.values.schoolName}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.schoolName && formik.touched.schoolName
+                data-testid='schoolName'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolName && formik.touched.schoolName
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               />
               {formik.errors.schoolName && formik.touched.schoolName && (
                 <div className="text-red-500 text-sm mt-1">
@@ -286,11 +286,11 @@ export default function AdminProfile() {
                 value={formik.values.email}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.email && formik.touched.email
+                data-testid='email'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.email && formik.touched.email
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               />
               {formik.errors.email && formik.touched.email && (
                 <div className="text-red-500 text-sm mt-1">
@@ -313,11 +313,11 @@ export default function AdminProfile() {
                 value={formik.values.principal}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.principal && formik.touched.principal
+                data-testid='principal'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.principal && formik.touched.principal
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               />
               {formik.errors.principal && formik.touched.principal && (
                 <div className="text-red-500 text-sm mt-1">
@@ -337,11 +337,11 @@ export default function AdminProfile() {
                 value={formik.values.username}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.username && formik.touched.username
+                data-testid='username'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.username && formik.touched.username
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               />
               {formik.errors.username && formik.touched.username && (
                 <div className="text-red-500 text-sm mt-1">
@@ -364,11 +364,11 @@ export default function AdminProfile() {
                 value={formik.values.affiliationNo}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.affiliationNo && formik.touched.affiliationNo
+                data-testid='affiliationNo'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.affiliationNo && formik.touched.affiliationNo
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               />
               {formik.errors.affiliationNo && formik.touched.affiliationNo && (
                 <div className="text-red-500 text-sm mt-1">
@@ -387,11 +387,11 @@ export default function AdminProfile() {
                 value={formik.values.schoolNumber}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.schoolNumber && formik.touched.schoolNumber
+                data-testid='schoolNumber'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolNumber && formik.touched.schoolNumber
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               />
               {formik.errors.schoolNumber && formik.touched.schoolNumber && (
                 <div className="text-red-500 text-sm mt-1">
@@ -414,11 +414,11 @@ export default function AdminProfile() {
                 value={formik.values.address}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.address && formik.touched.address
+                data-testid='address'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.address && formik.touched.address
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               />
               {formik.errors.address && formik.touched.address && (
                 <div className="text-red-500 text-sm mt-1">
@@ -437,11 +437,11 @@ export default function AdminProfile() {
                 value={formik.values.schoolBoard}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.schoolBoard && formik.touched.schoolBoard
+                data-testid='schoolBoard'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolBoard && formik.touched.schoolBoard
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               >
                 <option value="">{t("adminProfile.selectSchoolBoard")}</option>
                 <option value="CBSE">CBSE</option>
@@ -451,7 +451,7 @@ export default function AdminProfile() {
                 <option value="Other">{t("options.other")}</option>
               </select>
               {formik.errors.schoolBoard && formik.touched.schoolBoard && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className="text-red-500 text-sm mt-1" data-testid="schoolBoardError">
                   {formik.errors.schoolBoard}
                 </div>
               )}
@@ -467,15 +467,15 @@ export default function AdminProfile() {
                 <span className="text-red-500">*</span>
               </label>
               <select
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.country && formik.touched.country
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.country && formik.touched.country
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
                 name="country"
                 value={formik.values.country}
                 onChange={handleCountryChange}
                 onBlur={formik.handleBlur}
+                data-testid='country'
               >
                 <option value="" label={t("placeholders.selectCountry")} />
                 {Countries.map((country) => (
@@ -500,14 +500,14 @@ export default function AdminProfile() {
               {selectedCountry === "India" ? (
                 <select
                   onBlur={formik.handleBlur}
-                  className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.state && formik.touched.state
+                  className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.state && formik.touched.state
                       ? "border-red-500"
                       : "border-gray-200"
-                  } text-black bg-white border`}
+                    } text-black bg-white border`}
                   name="state"
                   value={formik.values.state}
                   onChange={handleStateChange}
+                  data-testid='state-select'
                 >
                   <option value="" label={t("placeholders.selectState")} />
                   {states.map((state) => (
@@ -518,17 +518,17 @@ export default function AdminProfile() {
                 </select>
               ) : (
                 <input
-                  className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.schoolBoard && formik.touched.schoolBoard
+                  className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolBoard && formik.touched.schoolBoard
                       ? "border-red-500"
                       : "border-gray-200"
-                  } text-black bg-white border`}
+                    } text-black bg-white border`}
                   type="text"
                   name="state"
                   placeholder={t("placeholders.state")}
                   onChange={formik.handleChange}
                   value={formik.values.state}
                   onBlur={formik.handleBlur}
+                  data-testid='state-input'
                 />
               )}
               {formik.errors.state && formik.touched.state && (
@@ -545,15 +545,15 @@ export default function AdminProfile() {
               </label>
               {selectedCountry === "India" ? (
                 <select
-                  className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.state && formik.touched.state
+                  className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.state && formik.touched.state
                       ? "border-red-500"
                       : "border-gray-200"
-                  } text-black bg-white border`}
+                    } text-black bg-white border`}
                   name="district"
                   value={formik.values.district}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
+                  data-testid='district-select'
                 >
                   <option value="" label={t("placeholders.selectDistrict")} />
                   {districts.map((district) => (
@@ -570,11 +570,11 @@ export default function AdminProfile() {
                   onChange={formik.handleChange}
                   value={formik.values.district}
                   onBlur={formik.handleBlur}
-                  className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.schoolBoard && formik.touched.schoolBoard
+                  className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolBoard && formik.touched.schoolBoard
                       ? "border-red-500"
                       : "border-gray-200"
-                  } text-black bg-white border`}
+                    } text-black bg-white border`}
+                  data-testid='district-input'
                 />
               )}
               {formik.errors.district && formik.touched.district && (
@@ -597,11 +597,11 @@ export default function AdminProfile() {
                 value={formik.values.city}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.city && formik.touched.city
+                data-testid='city'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.city && formik.touched.city
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               />
               {formik.errors.city && formik.touched.city && (
                 <div className="text-red-500 text-sm mt-1">
@@ -621,11 +621,11 @@ export default function AdminProfile() {
                 value={formik.values.pincode}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.pincode && formik.touched.pincode
+                data-testid='pincode'
+                className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.pincode && formik.touched.pincode
                     ? "border-red-500"
                     : "border-gray-200"
-                } text-black bg-white border`}
+                  } text-black bg-white border`}
               />
               {formik.errors.pincode && formik.touched.pincode && (
                 <div className="text-red-500 text-sm mt-1">
@@ -639,6 +639,7 @@ export default function AdminProfile() {
             <button
               onClick={handleProfileUpdate}
               type="button"
+              data-testid="account-submit"
               // disabled={formik.isSubmitting || !formik.isValid}
               className="px-6 py-2 text-white bg-[#0F4189] rounded-lg"
             >
@@ -660,11 +661,10 @@ export default function AdminProfile() {
             <span className="text-red-500">*</span>
           </div>
           <div
-            className={`flex gap-5 px-5 py-2 mt-1 bg-white border ${
-              formik.errors.phone && formik.touched.phone
+            className={`flex gap-5 px-5 py-2 mt-1 bg-white border ${formik.errors.phone && formik.touched.phone
                 ? "border-red-500"
                 : "border-gray-200"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-1.5 font-medium text-[#0F4189]">
               <div>+91</div>
@@ -680,10 +680,11 @@ export default function AdminProfile() {
               value={formik.values.phone}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
+              data-testid='phone'
               className="flex-auto text-black bg-transparent outline-none"
             />
             {formik.errors.phone && formik.touched.phone && (
-              <div className="text-red-500 text-sm mt-1">
+              <div className="text-red-500 text-sm mt-1" data-testid={'phone-error'}>
                 {formik.errors.phone}
               </div>
             )}
@@ -702,6 +703,7 @@ export default function AdminProfile() {
               value={formik.values.website}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
+              data-testid='website'
               className="flex-auto bg-transparent text-black outline-none"
             />
             {formik.errors.website && formik.touched.website && (
@@ -729,6 +731,7 @@ export default function AdminProfile() {
                 value={formik.values.facebook}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid='facebook'
                 className="flex-auto bg-transparent text-black outline-none"
               />
               {formik.errors.facebook && formik.touched.facebook && (
@@ -755,6 +758,7 @@ export default function AdminProfile() {
                 value={formik.values.instagram}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid='instagram'
                 className="flex-auto bg-transparent text-black outline-none"
               />
               {formik.errors.instagram && formik.touched.instagram && (
@@ -781,6 +785,7 @@ export default function AdminProfile() {
                 value={formik.values.linkedin}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid='linkedin'
                 className="flex-auto bg-transparent text-black outline-none"
               />
               {formik.errors.linkedin && formik.touched.linkedin && (
@@ -809,6 +814,7 @@ export default function AdminProfile() {
                 value={formik.values.twitter}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid='twitter'
                 className="flex-auto bg-transparent text-black outline-none"
               />
               {formik.errors.twitter && formik.touched.twitter && (
@@ -835,6 +841,7 @@ export default function AdminProfile() {
                 value={formik.values.whatsapp}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid='whatsapp'
                 className="flex-auto bg-transparent text-black outline-none"
               />
               {formik.errors.whatsapp && formik.touched.whatsapp && (
@@ -861,6 +868,7 @@ export default function AdminProfile() {
                 value={formik.values.youtube}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid='youtube'
                 className="flex-auto bg-transparent text-black outline-none"
               />
               {formik.errors.youtube && formik.touched.youtube && (
@@ -876,6 +884,7 @@ export default function AdminProfile() {
           <button
             onClick={handleSocialProfileUpdate}
             type="button"
+            data-testid="social-submit"
             disabled={formik.isSubmitting || !formik.isValid}
             className="px-6 py-2 text-white bg-[#0F4189] rounded-lg"
           >
