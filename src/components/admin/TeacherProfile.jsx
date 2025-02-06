@@ -118,6 +118,7 @@ export default function TeacherProfile() {
                 value={formik.values.firstname}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid="firstname"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.firstname && formik.touched.firstname
                     ? "border-red-500"
@@ -141,6 +142,7 @@ export default function TeacherProfile() {
                 value={formik.values.lastname}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid="lastname"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.lastname && formik.touched.lastname
                     ? "border-red-500"
@@ -200,6 +202,7 @@ export default function TeacherProfile() {
                 value={formik.values.gender}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid="gender"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.gender && formik.touched.gender
                     ? "border-red-500"
@@ -230,6 +233,7 @@ export default function TeacherProfile() {
                 value={formik.values.bloodGroup}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid="bloodGroup"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.bloodGroup && formik.touched.bloodGroup
                     ? "border-red-500"
@@ -263,6 +267,7 @@ export default function TeacherProfile() {
                 value={formik.values.phone}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid="phone"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.phone && formik.touched.phone
                     ? "border-red-500"
@@ -289,6 +294,7 @@ export default function TeacherProfile() {
                 value={formik.values.university}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid="university"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.university && formik.touched.university
                     ? "border-red-500"
@@ -313,6 +319,7 @@ export default function TeacherProfile() {
                 value={formik.values.degree}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                data-testid="degree"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.degree && formik.touched.degree
                     ? "border-red-500"
@@ -332,6 +339,7 @@ export default function TeacherProfile() {
           <div className="flex gap-5 mt-7">
             <button
               type="submit"
+              data-testid="submit"
               className="px-6 py-2 text-white bg-[#0F4189] rounded-lg"
             >
               {t("buttons.saveChanges")}
