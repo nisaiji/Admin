@@ -264,6 +264,7 @@ const TeacherUpdate = () => {
               <button
                 type="submit"
                 className="bg-[#0F4189] text-white py-2 px-4 rounded-xl w-36"
+                data-testid="updateTeacherInfo"
               >
                 {t("buttons.save")}
               </button>

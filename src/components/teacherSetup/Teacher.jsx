@@ -379,9 +379,8 @@ export default function Teacher() {
                               setCurrTeacher(teacher);
                               setShowDeleteConfirmation(true);
                             }}
-                            data-testid="deleteTeacher"
                           >
-                            <img src={delete2} alt="" className="size-5" />
+                            <img src={delete2} alt="deleteTeacher" className="size-5" />
                           </button>
                         </div>
                       </td>
