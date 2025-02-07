@@ -268,8 +268,9 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                         ? "bg-gray-300"
                         : "text-[#686868] bg-[#93a3b6]/10"
                     } w-[250px]`}
+                    data-tsetid="savedTeacherName"
                   >
-                    {section.teacher.firstname} {section.teacher.lastname}
+                    {section?.teacher?.firstname} {section?.teacher?.lastname}
                   </div>
                 )}
                 <div className="mt-2">
@@ -321,7 +322,11 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                         }`}
                         disabled={index !== sections.length - 1}
                       >
-                        <img src={delete2} alt="" className="size-7 mr-3" />
+                        <img
+                          src={delete2}
+                          alt="deleteSection"
+                          className="size-7 mr-3"
+                        />
                       </button>
                     </>
                   )}
@@ -351,6 +356,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                   } w-[250px]`}
                   ref={selectRef}
                   disabled={activeSection !== null}
+                  data-testid="selectTeacher"
                 >
                   <option value="">{t("labels.assignTeacher")}</option>
                   {teachers.map((teacher) => (

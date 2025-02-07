@@ -59,7 +59,7 @@ const renderComponent = () => {
 };
 
 describe("Teacher Component", () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
@@ -111,7 +111,8 @@ describe("Teacher Component", () => {
 
   test("calls registerTeacher API on form submission remaining toast", async () => {
     axiosClient.post.mockResolvedValueOnce({
-      data: { statusCode: 201, result: "Teacher added successfully" },
+      statusCode: 201,
+      result: "Teacher added successfully",
     });
 
     renderComponent();
@@ -137,9 +138,9 @@ describe("Teacher Component", () => {
           phone: "7234567891",
         }
       );
-
       // expect(toast.success).toHaveBeenCalledWith("Teacher added successfully");
     });
+    // expect(toast.success).toHaveBeenCalledWith("Teacher added successfully");
   });
 
   test("deletes a teacher remaining toast", async () => {

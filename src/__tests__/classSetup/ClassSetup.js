@@ -1,14 +1,21 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { Provider, useDispatch, useSelector } from "react-redux";
 import configureStore from "redux-mock-store";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import { MemoryRouter } from "react-router-dom";
-import { toast, Toaster } from "react-hot-toast";
-import Modal from "react-modal";
+import toast, { Toaster } from "react-hot-toast";
+import ClassSetup from "../../components/classSetup/ClassSetup";
 
-
+global.matchMedia =
+  global.matchMedia ||
+  function () {
+    return {
+      matches: false,
+      addListener: () => {},
+      removeListener: () => {},
+    };
+  };
 
 jest.mock("react-hot-toast", () => ({
   Toaster: ({ children }) => children,
@@ -18,6 +25,7 @@ jest.mock("react-hot-toast", () => ({
   },
 }));
 
+const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
@@ -43,13 +51,6 @@ jest.mock("react-redux", () => ({
   useDispatch: jest.fn(),
 }));
 
-// useSelector.mockImplementation((selector) =>
-//   selector({
-//     // Provide mock Redux state here
-//   })
-// );
-// useDispatch.mockReturnValue(jest.fn()); // Mock dispatch function
-
 describe("ClassSetup Component", () => {
   const mockStore = configureStore([]);
   let store;
@@ -60,12 +61,10 @@ describe("ClassSetup Component", () => {
 
   const renderComponent = () =>
     render(
-      <Provider store={store}>
-        <MemoryRouter>
-          <Toaster />
-          <ClassSetup />
-        </MemoryRouter>
-      </Provider>
+      <MemoryRouter>
+        <Toaster />
+        <ClassSetup />
+      </MemoryRouter>
     );
 
   test("renders class setup component", () => {
@@ -73,55 +72,122 @@ describe("ClassSetup Component", () => {
     expect(screen.getByText("titles.classRoom")).toBeInTheDocument();
   });
 
-  //   test("fetches and displays classes", async () => {
-  //     axiosClient.get.mockResolvedValueOnce({
-  //       statusCode: 200,
-  //       result: [{ _id: "1", name: "one", section: [] }],
-  //     });
-  //     renderComponent();
+  test("fetches and displays classes", async () => {
+    axiosClient.get.mockResolvedValueOnce({
+      statusCode: 200,
+      result: [{ _id: "1", name: "one", section: [] }],
+    });
+    renderComponent();
 
-  //     await waitFor(() =>
-  //       expect(axiosClient.get).toHaveBeenCalledWith(EndPoints.COMMON.CLASS_LIST)
-  //     );
-  //     expect(screen.getByText(/one/i)).toBeInTheDocument();
-  //   });
+    await waitFor(() =>
+      expect(axiosClient.get).toHaveBeenCalledWith(EndPoints.COMMON.CLASS_LIST)
+    );
+    expect(screen.getByText("one")).toBeInTheDocument();
+  });
 
-  //   test("adds a new class", async () => {
-  //     axiosClient.post.mockResolvedValueOnce({
-  //       statusCode: 201,
-  //       result: "Class added successfully",
-  //     });
-  //     axiosClient.get.mockResolvedValueOnce({
-  //       statusCode: 200,
-  //       result: [{ _id: "2", name: "two", section: [] }],
-  //     });
+  test("section page visible in classes", async () => {
+    axiosClient.get.mockResolvedValueOnce({
+      statusCode: 200,
+      result: [{ _id: "1", name: "one", section: [] }],
+    });
+    renderComponent();
 
-  //     renderComponent();
+    await waitFor(() =>
+      expect(axiosClient.get).toHaveBeenCalledWith(EndPoints.COMMON.CLASS_LIST)
+    );
+    expect(screen.getByText("one")).toBeInTheDocument();
 
-  //     fireEvent.change(screen.getByRole("combobox"), {
-  //       target: { value: "two" },
-  //     });
-  //     await waitFor(() => expect(axiosClient.post).toHaveBeenCalled());
-  //   });
+    fireEvent.click(screen.getByText("one"));
+    fireEvent.click(screen.getByText("buttons.update"));
+    expect(screen.getByText("createSection")).toBeInTheDocument();
+  });
 
-  //   test("deletes a class", async () => {
-  //     axiosClient.delete.mockResolvedValueOnce({
-  //       statusCode: 200,
-  //       result: "Class deleted successfully",
-  //     });
-  //     axiosClient.get.mockResolvedValueOnce({ statusCode: 200, result: [] });
+  test.skip("renders section without crashing", async () => {
+    renderComponent();
 
-  //     renderComponent();
+    expect(screen.getByText("createSection")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(axiosClient.get).toHaveBeenCalled();
+      expect(axiosClient.get).toHaveBeenCalledWith(
+        `${EndPoints.ADMIN.CLASS_SECTION}/${clickedClassId}`
+      );
+      expect(axiosClient.get).toHaveBeenCalledWith(
+        EndPoints.ADMIN.UNASSIGNED_TEACHER
+      );
+    });
+  });
 
-  //     fireEvent.click(screen.getByAltText("^"));
-  //     await waitFor(() => expect(axiosClient.delete).toHaveBeenCalled());
-  //   });
+  test.skip("adds a new section when form is submitted", async () => {
+    axiosClient.post.mockResolvedValueOnce({
+      statusCode: 201,
+      result: "Success",
+    });
 
-  //   test("handles API errors", async () => {
-  //     axiosClient.get.mockRejectedValueOnce("Error fetching data");
+    renderComponent();
 
-  //     renderComponent();
+    fireEvent.change(screen.getByTestId("selectTeacher"), {
+      target: { value: "teacher1" },
+    });
+    fireEvent.click(screen.getByText("buttons.save"));
 
-  //     await waitFor(() => expect(axiosClient.get).toHaveBeenCalled());
-  //   });
+    await waitFor(() => {
+      expect(axiosClient.post).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test.skip("adds a new class", async () => {
+    axiosClient.post.mockResolvedValueOnce({
+      statusCode: 201,
+      result: "Class added successfully",
+    });
+
+    renderComponent();
+
+    fireEvent.click(screen.getByAltText("addClass"));
+    fireEvent.change(screen.getByTestId("classlist"), {
+      target: { value: "two" },
+    });
+    await waitFor(() => {
+      expect(axiosClient.post).toHaveBeenCalledTimes(1);
+      expect(axiosClient.post).toHaveBeenCalledWith(
+        EndPoints.ADMIN.REGISTER_CLASS,
+        { name: "" }
+      );
+    });
+  });
+
+  test.skip("deletes a class", async () => {
+    axiosClient.get.mockResolvedValueOnce({
+      statusCode: 200,
+      result: [{ _id: "1", name: "one", section: [] }],
+    });
+    axiosClient.delete.mockResolvedValueOnce({
+      statusCode: 200,
+      result: "Class deleted successfully",
+    });
+
+    renderComponent();
+
+    await waitFor(() =>
+      expect(axiosClient.get).toHaveBeenCalledWith(EndPoints.COMMON.CLASS_LIST)
+    );
+    expect(screen.getByText("one")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByAltText("deleteClass"));
+    const confirmDeleteButton = screen.getByTestId("confirmdeleteTeacher");
+    fireEvent.click(confirmDeleteButton);
+
+    await waitFor(() => expect(axiosClient.delete).toHaveBeenCalled());
+  });
+
+  test.skip("handles API errors", async () => {
+    axiosClient.get.mockRejectedValueOnce("Error fetching data");
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(axiosClient.get).toHaveBeenCalledTimes(1);
+      expect(toast.error).toHaveBeenCalledWith("Error fetching data");
+    });
+  });
 });

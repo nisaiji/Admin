@@ -175,7 +175,7 @@ function ClassSetup() {
                           setClickedClassId(data._id);
                           setModalIsOpen(true);
                         }}
-                        alt="^"
+                        alt="deleteClass"
                         className="absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 bg-[#fafafa] p-1"
                       />
                     </div>
@@ -261,7 +261,7 @@ function ClassSetup() {
                 {!showDropdowns[classes.length] ? (
                   <img
                     src={addclass}
-                    alt=""
+                    alt="addClass"
                     className="size-[48px] cursor-pointer"
                     onClick={() =>
                       setShowDropdowns({
@@ -276,6 +276,7 @@ function ClassSetup() {
                     onChange={(e) => handleNewClassSubmit(e.target.value)}
                     className={`cursor-pointer shadow appearance-none border border-[#0F4189] rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline text-[#0F4189] text-center text-sm font-poppins-bold max-h-[150px] overflow-y-auto
                     }`}
+                    data-testid="classlist"
                   >
                     <option value="">{t("buttons.addClass")}</option>
                     {availableClassOptions.map((item, i) => (
