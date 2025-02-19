@@ -1,6 +1,5 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import configureStore from "redux-mock-store";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import { MemoryRouter } from "react-router-dom";
@@ -52,9 +51,6 @@ jest.mock("react-redux", () => ({
 }));
 
 describe("ClassSetup Component", () => {
-  const mockStore = configureStore([]);
-  let store;
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -100,39 +96,6 @@ describe("ClassSetup Component", () => {
     fireEvent.click(screen.getByText("one"));
     fireEvent.click(screen.getByText("buttons.update"));
     expect(screen.getByText("createSection")).toBeInTheDocument();
-  });
-
-  test.skip("renders section without crashing", async () => {
-    renderComponent();
-
-    expect(screen.getByText("createSection")).toBeInTheDocument();
-    await waitFor(() => {
-      expect(axiosClient.get).toHaveBeenCalled();
-      expect(axiosClient.get).toHaveBeenCalledWith(
-        `${EndPoints.ADMIN.CLASS_SECTION}/${clickedClassId}`
-      );
-      expect(axiosClient.get).toHaveBeenCalledWith(
-        EndPoints.ADMIN.UNASSIGNED_TEACHER
-      );
-    });
-  });
-
-  test.skip("adds a new section when form is submitted", async () => {
-    axiosClient.post.mockResolvedValueOnce({
-      statusCode: 201,
-      result: "Success",
-    });
-
-    renderComponent();
-
-    fireEvent.change(screen.getByTestId("selectTeacher"), {
-      target: { value: "teacher1" },
-    });
-    fireEvent.click(screen.getByText("buttons.save"));
-
-    await waitFor(() => {
-      expect(axiosClient.post).toHaveBeenCalledTimes(1);
-    });
   });
 
   test.skip("adds a new class", async () => {

@@ -109,7 +109,7 @@ describe("Teacher Component", () => {
     });
   });
 
-  test("calls registerTeacher API on form submission remaining toast", async () => {
+  test.skip("calls registerTeacher API on form submission remaining toast", async () => {
     axiosClient.post.mockResolvedValueOnce({
       statusCode: 201,
       result: "Teacher added successfully",

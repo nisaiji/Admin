@@ -55,7 +55,7 @@ export default function StudentUpdate() {
       .email(t("validationError.emailAddress"))
       .required(t("validationError.email")),
     phone: Yup.string()
-      .required()
+      .required(t("validationError.phone"))
       .matches(REGEX.PHONE, t("validationError.phoneNumber"))
       .test(
         "starts-with-1-to-5",
@@ -82,7 +82,7 @@ export default function StudentUpdate() {
       dob: student?.dob || "",
       address: student?.address || "",
       parentName: student?.parentDetails?.fullname || "",
-      parentGender: student.parentDetails?.gender || "",
+      parentGender: student?.parentDetails?.gender || "",
       parentAge: student?.parentDetails?.age || "",
       parentEmail: student?.parentDetails?.email || "",
       phone: student?.parentDetails?.phone || "",
@@ -236,6 +236,7 @@ export default function StudentUpdate() {
                 value={formik.values[name]}
                 onBlur={formik.handleBlur}
                 className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
+                data-testid="selectOptions"
               >
                 <option value="" label={label} />
                 {options.map((option) => (

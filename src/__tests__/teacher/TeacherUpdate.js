@@ -52,9 +52,8 @@ describe("TeacherUpdate Component", () => {
 
   test("renders form fields correctly", () => {
     renderComponent();
-    expect(
-      screen.getByPlaceholderText("placeholders.firstName")
-    ).toBeInTheDocument();
+    const firstname = screen.getByPlaceholderText("placeholders.firstName");
+    expect(firstname).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText("placeholders.lastName")
     ).toBeInTheDocument();

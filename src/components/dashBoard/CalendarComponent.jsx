@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import "tailwindcss/tailwind.css";
+// import "tailwindcss/tailwind.css";
 import toast, { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import noevents from "../../assets/images/noevents.png";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import "tailwindcss/tailwind.css";
+// import "tailwindcss/tailwind.css";
 import deleteEvent from "../../assets/images/deleteEvent.png";
 import Search from "../../assets/images/Search.png";
 import toast, { Toaster } from "react-hot-toast";
@@ -35,6 +35,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
               : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
           } cursor-pointer size-5`}
           onClick={onPrevMonth}
+          data-testid="prev"
         />
         <div className={`${isDarkMode ? "text-white" : ""} date`}>
           {moment({ year, month }).format("MMMM YYYY")}
@@ -47,6 +48,7 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
               : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
           } cursor-pointer size-5`}
           onClick={onNextMonth}
+          data-testid="next"
         />
       </div>
       {/* Weekdays header */}

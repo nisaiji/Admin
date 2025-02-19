@@ -396,6 +396,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
                     color: "white",
                   }}
                   disabled={activeSection !== null}
+                  data-testid="addSection"
                 >
                   {t("buttons.save")}
                 </button>

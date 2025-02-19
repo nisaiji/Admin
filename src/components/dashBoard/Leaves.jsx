@@ -404,7 +404,7 @@ export default function Leaves() {
                       <td className="px-4 py-2 flex justify-center">
                         <img
                           src={approve}
-                          alt=""
+                          alt="description"
                           className="w-[70px] h-[32px] cursor-pointer"
                           onClick={() => {
                             setCurrentReq(req);

@@ -518,6 +518,7 @@ export default function StudentSection() {
                     </td>
                     <td className=" py-2 border text-sm border-[#c1c0ca]">
                       <input
+                        data-testid="firstname"
                         type="text"
                         value={student.firstname}
                         onChange={(e) =>
@@ -637,10 +638,18 @@ export default function StudentSection() {
                       ) : (
                         <div className="flex justify-around">
                           <button onClick={() => handleEdit(student.SNo)}>
-                            <img src={edit2} alt="" className="size-5" />
+                            <img
+                              src={edit2}
+                              alt="editStudent"
+                              className="size-5"
+                            />
                           </button>
                           <button onClick={() => handleShowInfo(student)}>
-                            <img src={info} alt="" className="size-5" />
+                            <img
+                              src={info}
+                              alt="infoStudent"
+                              className="size-5"
+                            />
                           </button>
                           <button
                             onClick={() => {
@@ -648,7 +657,11 @@ export default function StudentSection() {
                               setShowDeleteConfirmation(true);
                             }}
                           >
-                            <img src={delete2} alt="" className="size-5" />
+                            <img
+                              src={delete2}
+                              alt="deleteStudent"
+                              className="size-5"
+                            />
                           </button>
                         </div>
                       )}
@@ -693,6 +706,7 @@ export default function StudentSection() {
                   </td>
                   <td className="py-1 px-1 border border-[#c1c0ca]">
                     <select
+                      data-testid="gender"
                       value={newStudent.gender}
                       onChange={(e) =>
                         handleInputChange(null, "gender", e.target.value)

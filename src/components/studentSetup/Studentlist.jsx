@@ -264,6 +264,7 @@ export default function Studentlist() {
                           );
                           setSectionList(classData[0]["section"]);
                         }}
+                        data-testid="classlist"
                       >
                         {classList
                           .sort((a, b) => {
@@ -307,6 +308,7 @@ export default function Studentlist() {
                           setSearchSection(e.target.value);
                           setPageNo(1);
                         }}
+                        data-testid="sectionlist"
                       >
                         {sectionList.map((itm) => {
                           return (
@@ -466,13 +468,13 @@ export default function Studentlist() {
                                 })
                               }
                             >
-                              <img src={edit2} alt="" className="size-5" />
+                              <img src={edit2} alt="editStudent" className="size-5" />
                             </button>
                             <button onClick={() => handleShowInfo(student)}>
-                              <img src={info} alt="" className="size-5" />
+                              <img src={info} alt="infoStudent" className="size-5" />
                             </button>
                             <button onClick={() => handleDelete(student._id)}>
-                              <img src={delete2} alt="" className="size-5" />
+                              <img src={delete2} alt="deleteStudent" className="size-5" />
                             </button>
                           </div>
                         </td>
