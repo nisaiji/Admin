@@ -230,7 +230,7 @@ const Event = () => {
 
   // set calendar of selected month
   const handleGotoDate = (e) => {
-    const [mm, yyyy] = e.target.value.split("/");
+    const [yyyy, mm] = e.target.value.split("/");
     if (mm && yyyy && mm > 0 && mm < 13 && yyyy.length === 4) {
       updateCalendar(mm - 1, parseInt(yyyy));
     }
@@ -427,7 +427,7 @@ const Event = () => {
             {t("dashboard.calendar")}
           </p>
           <div
-            className={`goto flex px-4 gap-3 w-[150px] h-[36px] bg-[#E9EEF2]/50 border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[8px] overflow-hidden`}
+            className={`flex justify-around w-32 h-[36px] bg-[#E9EEF2]/50 border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[8px] overflow-hidden`}
           >
             {/* search input */}
             <button className={`goto-mobnbtn py-1  text-white`}>
@@ -436,8 +436,16 @@ const Event = () => {
             <input
               type="text"
               placeholder={t("calendar.gotoDatePlaceholder")}
-              className={`date-input outline-none text-[14px] text-black w-14 bg-[#E9EEF2]/25`}
+              className={`date-input outline-none text-[14px] w-20 text-black bg-[#E9EEF2]/25`}
               onBlur={handleGotoDate}
+              maxLength={7}
+              onChange={(e) => {
+                let value = e.target.value.replace(/\D/g, "");
+                if (value.length > 4) {
+                  value = value.slice(0, 4) + "/" + value.slice(4);
+                }
+                e.target.value = value;
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleGotoDate(e);

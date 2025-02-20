@@ -11,6 +11,14 @@ import cross from "../../assets/images/cross.png";
 import approve from "../../assets/images/approve.png";
 import ConformationPopup from "../ConformationPopup";
 import moment from "moment";
+import {
+  FormControl,
+  MenuItem,
+  Pagination,
+  PaginationItem,
+  Select,
+} from "@mui/material";
+import { Stack } from "@mui/system";
 
 export default function Leaves() {
   const { t } = useTranslation();
@@ -22,6 +30,9 @@ export default function Leaves() {
   const [showConformationPopup, setshowConformationPopup] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentReq, setCurrentReq] = useState([]);
+  const [pageNo, setPageNo] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalRequestCount, setTotalRequestCount] = useState(1);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -36,11 +47,11 @@ export default function Leaves() {
     try {
       setLoading(true);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&status=accept,reject,pending,complete&limit=1000`
+        `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&page=${pageNo}&limit=${limit}&status=accept,reject,pending,complete`
       );
-
       if (res?.statusCode === 200) {
         setRequests(res?.result?.leaveRequests[0]?.teachers || []);
+        setTotalRequestCount(res?.result?.totalLeaveRequests);
       }
     } catch (e) {
       toast.error(e);
@@ -55,7 +66,7 @@ export default function Leaves() {
    */
   useEffect(() => {
     fetchLeaves();
-  }, []);
+  }, [pageNo, limit]);
 
   /**
    * Handles the action of saving, approving, or rejecting a leave request.
@@ -133,9 +144,16 @@ export default function Leaves() {
     }
   };
 
+  /**
+   * Handle page change for pagination.
+   * @param {Object} event - Event object.
+   * @param {number} value - New page number.
+   */
+  const handlePageChange = (event, value) => setPageNo(value);
+
   return (
     <>
-    {/* loader */}
+      {/* loader */}
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30">
           <Spinner />
@@ -442,11 +460,83 @@ export default function Leaves() {
                   ))}
                 </tbody>
               </table>
+              {/* pagination logic */}
+              <div className="flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
+                <div className="text-[#9391a5] text-base leading-5">
+                  {t("titles.showing")}
+                  <span className="text-[#152259]">
+                    {" "}
+                    {pageNo * limit - (limit - 1)} -{" "}
+                    {Math.min(totalRequestCount, pageNo * limit)}{" "}
+                  </span>
+                  {t("titles.from")}
+                  <span className="text-[#152259]"> {totalRequestCount} </span>
+                  {t("titles.data")}
+                </div>
+
+                <div className="flex items-center gap-4">
+                  {/* Dropdown to select how many data per page */}
+                  <FormControl variant="outlined" size="small">
+                    <Select
+                      value={limit}
+                      onChange={(e) => {
+                        setLimit(e.target.value);
+                        setPageNo(1);
+                      }}
+                      sx={{
+                        border: "1px solid #d1d5db",
+                        borderRadius: "6px",
+                        minWidth: "80px",
+                        backgroundColor: "#fafafa",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          border: "none",
+                        },
+                      }}
+                    >
+                      <MenuItem value={1}>1</MenuItem>
+                      <MenuItem value={2}>2</MenuItem>
+                      <MenuItem value={3}>3</MenuItem>
+                      <MenuItem value={10}>10</MenuItem>
+                      <MenuItem value={20}>20</MenuItem>
+                      <MenuItem value={25}>25</MenuItem>
+                      <MenuItem value={50}>50</MenuItem>
+                      <MenuItem value={100}>100</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <Stack spacing={2}>
+                    <Pagination
+                      count={Math.ceil(totalRequestCount / limit)}
+                      shape="rounded"
+                      page={pageNo}
+                      onChange={handlePageChange}
+                      renderItem={(item) => (
+                        <PaginationItem
+                          {...item}
+                          sx={{
+                            color: "#0F4189",
+                            borderColor:
+                              item.type === "previous" || item.type === "next"
+                                ? "transparent"
+                                : "#0F4189",
+                            borderWidth: "2px",
+                            borderStyle: "solid",
+                            "&.Mui-selected": {
+                              color: "white",
+                              backgroundColor: "#0F4189",
+                            },
+                          }}
+                        />
+                      )}
+                    />
+                  </Stack>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
-      
+
       {/* confirm popup of reject leave */}
       <ConformationPopup
         isVisible={showConformationPopup}

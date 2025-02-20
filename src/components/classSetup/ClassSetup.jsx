@@ -219,19 +219,11 @@ function ClassSetup() {
                             className={`${
                               isDarkMode
                                 ? "border-white"
-                                : "border-[#FF793F] text-[#FF793F] hover:bg-[#FF793F] hover:text-[#ffffff]"
-                            } w-4 h-4 md:w-6 md:h-6 mx-2 my-2 border rounded-2xl flex justify-center items-center`}
+                                : "border-[#FF793F] text-[#FF793F] hover:bg-[#FF793F] hover:text-white"
+                            } w-4 h-4 md:w-6 md:h-6 m-2 border rounded-2xl flex justify-center items-center text-sm`}
                             key={j}
                           >
-                            <div
-                              className={`${
-                                isDarkMode
-                                  ? "text-white"
-                                  : "border-[#FF793F] text-[#FF793F] hover:bg-[#FF793F] hover:text-[#ffffff]"
-                              } text-sm`}
-                            >
-                              {section.name}
-                            </div>
+                            {section.name}
                           </div>
                         ))}
                       </div>

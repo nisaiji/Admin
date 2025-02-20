@@ -204,7 +204,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
             isDarkMode ? "bg-blue-950" : "bg-[#fafafa]"
           } w-full max-w-3xl h-4/5 py-5 px-12 rounded-2xl shadow-lg overflow-y-auto`}
         >
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4 mx-4">
             <div
               className={`text-2xl font-bold ${
                 isDarkMode ? "text-white" : "text-black"

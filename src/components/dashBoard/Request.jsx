@@ -4,6 +4,14 @@ import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
+import {
+  FormControl,
+  MenuItem,
+  Pagination,
+  PaginationItem,
+  Select,
+} from "@mui/material";
+import { Stack } from "@mui/system";
 
 /**
  * `Requests` component displays a list of requests made by users.
@@ -16,6 +24,9 @@ export default function Requests() {
   const [requests, setRequests] = useState([]);
   const [selectedTab, setSelectedTab] = useState("all");
   const [loading, setLoading] = useState(false);
+  const [pageNo, setPageNo] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalRequestCount, setTotalRequestCount] = useState(1);
 
   /**
    * Fetches the requests from the API.
@@ -25,11 +36,11 @@ export default function Requests() {
     try {
       setLoading(true);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.REQUESTS}?model=teacher&reason=forgetPassword&status=accept,reject,complete,pending,notSet,expired`
+        `${EndPoints.ADMIN.REQUESTS}?model=teacher&page=${pageNo}&limit=${limit}&reason=forgetPassword&status=accept,reject,complete,pending,notSet,expired`
       );
-
       if (res?.statusCode === 200) {
         setRequests(res?.result?.requests);
+        setTotalRequestCount(res?.result?.totalRequests);
       }
     } catch (e) {
       toast.error(e);
@@ -40,7 +51,7 @@ export default function Requests() {
 
   useEffect(() => {
     getRequest();
-  }, []);
+  }, [limit, pageNo]);
 
   /**
    * Returns a label based on the request's status.
@@ -80,6 +91,13 @@ export default function Requests() {
         return "";
     }
   };
+
+  /**
+   * Handle page change for pagination.
+   * @param {Object} event - Event object.
+   * @param {number} value - New page number.
+   */
+  const handlePageChange = (event, value) => setPageNo(value);
 
   /**
    * Handles the action (approve, reject, etc.) for a specific request.
@@ -236,6 +254,81 @@ export default function Requests() {
                     ))}
                   </tbody>
                 </table>
+                {/* pagination logic */}
+                <div className="flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
+                  <div className="text-[#9391a5] text-base leading-5">
+                    {t("titles.showing")}
+                    <span className="text-[#152259]">
+                      {" "}
+                      {pageNo * limit - (limit - 1)} -{" "}
+                      {Math.min(totalRequestCount, pageNo * limit)}{" "}
+                    </span>
+                    {t("titles.from")}
+                    <span className="text-[#152259]">
+                      {" "}
+                      {totalRequestCount}{" "}
+                    </span>
+                    {t("titles.data")}
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    {/* Dropdown to select how many data per page */}
+                    <FormControl variant="outlined" size="small">
+                      <Select
+                        value={limit}
+                        onChange={(e) => {
+                          setLimit(e.target.value);
+                          setPageNo(1);
+                        }}
+                        sx={{
+                          border: "1px solid #d1d5db",
+                          borderRadius: "6px",
+                          minWidth: "80px",
+                          backgroundColor: "#fafafa",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            border: "none",
+                          },
+                        }}
+                      >
+                        <MenuItem value={1}>1</MenuItem>
+                        <MenuItem value={2}>2</MenuItem>
+                        <MenuItem value={3}>3</MenuItem>
+                        <MenuItem value={10}>10</MenuItem>
+                        <MenuItem value={20}>20</MenuItem>
+                        <MenuItem value={25}>25</MenuItem>
+                        <MenuItem value={50}>50</MenuItem>
+                        <MenuItem value={100}>100</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    <Stack spacing={2}>
+                      <Pagination
+                        count={Math.ceil(totalRequestCount / limit)}
+                        shape="rounded"
+                        page={pageNo}
+                        onChange={handlePageChange}
+                        renderItem={(item) => (
+                          <PaginationItem
+                            {...item}
+                            sx={{
+                              color: "#0F4189",
+                              borderColor:
+                                item.type === "previous" || item.type === "next"
+                                  ? "transparent"
+                                  : "#0F4189",
+                              borderWidth: "2px",
+                              borderStyle: "solid",
+                              "&.Mui-selected": {
+                                color: "white",
+                                backgroundColor: "#0F4189",
+                              },
+                            }}
+                          />
+                        )}
+                      />
+                    </Stack>
+                  </div>
+                </div>
               </div>
             )}
           </div>

@@ -45,6 +45,7 @@ export default function AttendancePopup({
   const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [holidays, setHolidays] = useState({});
+  const [totalAttendanceDays, setTotalAttendanceDays] = useState(0);
   // Start time based on role
   const startTime = isTeacher ? sectionStartTime : startTimeForAdmin;
   // console.log({sectionStartTime});
@@ -308,7 +309,16 @@ export default function AttendancePopup({
             attendances: monthDates,
           };
         });
+
+        const totalHolidays = Array.from({ length: totalDays }, (_, i) => {
+          const dateKey = moment(
+            new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
+          ).format("YYYY-MM-DD");
+          return dateKey in holidays || new Date(dateKey).getDay() === 0;
+        }).filter(Boolean).length;
+
         setAttendanceData(updatedAttendanceData);
+        setTotalAttendanceDays(totalDays - totalHolidays);
       }
     } catch (e) {
       toast.error(e);
@@ -622,7 +632,7 @@ export default function AttendancePopup({
                     ))}
                     {/* Horizontal totals */}
                     <td className="border border-gray-300 p-1 font-poppins-regular">
-                      {totalPresent}/{totalDays}
+                      {totalPresent}/{totalAttendanceDays}
                     </td>
                   </tr>
                 );

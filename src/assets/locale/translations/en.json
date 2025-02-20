@@ -15,7 +15,7 @@
     "Event": "Event"
   },
   "calendar": {
-    "gotoDatePlaceholder": "MM/YYYY",
+    "gotoDatePlaceholder": "YYYY/MM",
 
     "title": "Calendar",
     "today": "Today",
@@ -380,7 +380,7 @@
   "createSection": "Create Sections",
   "sections": "Sections",
   "startTime": "Start Time",
-  "ClassTeacher": "Class teacher",
+  "ClassTeacher": "Class Teacher",
   "Actions": "Actions",
   "profile": "Profile",
   "logout": "Log Out",

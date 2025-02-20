@@ -84,7 +84,7 @@ export default function Studentlist() {
     classRef.current = searchClass;
     sectionRef.current = searchSection;
     fetchStudents({ searchSection });
-  }, [searchSection, pageNo]);
+  }, [searchSection, pageNo, limit]);
 
   /**
    * Fetch students based on filters and pagination.
@@ -114,9 +114,8 @@ export default function Studentlist() {
       const response = await axiosClient.get(`${url}${query}`);
 
       if (response?.statusCode === 200) {
-        const { totalStudents, students, pageSize } = response?.result;
+        const { totalStudents, students } = response?.result;
         setTotalStudentCount(totalStudents);
-        setLimit(pageSize);
         setStudentList(students);
       }
     } catch (e) {
@@ -232,30 +231,39 @@ export default function Studentlist() {
           <div className="flex pl-4 gap-5 h-10 mt-5 max-md:flex-wrap max-md:mt-10 mb-10">
             <div className="flex flex-auto justify-around gap-3 text-md text-[#686868]/75 max-md:flex-wrap max-md:max-w-full">
               <div
-                className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px]  basis-0 w-fit max-md:max-w-full max-md:hidden`}
+                className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px] basis-0 w-fit max-md:max-w-full max-md:hidden`}
               >
-                <div className="flex gap-2 px-10 py-3.5 rounded-3xl w-full">
+                <div className="flex gap-2 px-10 rounded-3xl w-full">
                   <div className="flex justify-between w-full">
-                    {/* class select dropdown */}
+                    {/* Class select dropdown */}
                     <FormControl
                       size="medium"
-                      className={`${
-                        isDarkMode ? "bg-blue-950" : ""
-                      } w-[150px] mr-[10px] rounded-[14px]`}
+                      sx={{
+                        width: "150px",
+                        mr: "10px",
+                        border: "1px solid #d1d5db", // Tailwind's border-gray-300 equivalent
+                        borderRadius: "14px",
+                        backgroundColor: "#fafafa",
+                        // Remove the default outline
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          border: "none",
+                        },
+                      }}
                     >
                       <InputLabel
-                        id="demo-simple-select-label"
-                        style={{
+                        id="class-select-label"
+                        sx={{
                           zIndex: 1,
-                          backgroundColor: "white",
+                          backgroundColor: "#fafafa",
                           fontSize: 16,
+                          px: 0.5,
                         }}
                       >
                         {t("titles.class")}
                       </InputLabel>
                       <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
+                        labelId="class-select-label"
+                        id="class-select"
                         value={searchClass}
                         onChange={(e) => {
                           setSearchClass(e.target.value);
@@ -286,23 +294,33 @@ export default function Studentlist() {
                       </Select>
                     </FormControl>
 
-                    {/* section select dropdown */}
+                    {/* Section select dropdown */}
                     <FormControl
                       size="medium"
-                      sx={{ marginX: 1 }}
-                      className={`${
-                        isDarkMode ? "bg-blue-950" : ""
-                      } mx-2 w-[150px] mr-[10px] rounded-[14px]`}
+                      sx={{
+                        width: "150px",
+                        mr: "10px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "14px",
+                        backgroundColor: "#fafafa",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          border: "none",
+                        },
+                      }}
                     >
                       <InputLabel
-                        id="demo-simple-select-label"
-                        className=" mr-[10px] text-[14px] bg-white"
+                        id="section-select-label"
+                        sx={{
+                          backgroundColor: "#fafafa",
+                          fontSize: 16,
+                          px: 0.5,
+                        }}
                       >
                         {t("titles.section")}
                       </InputLabel>
                       <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
+                        labelId="section-select-label"
+                        id="section-select"
                         value={searchSection}
                         onChange={(e) => {
                           setSearchSection(e.target.value);
@@ -319,10 +337,10 @@ export default function Studentlist() {
                         })}
                       </Select>
                     </FormControl>
-                    {/* search Bar */}
-                    <div className="flex px-3 rounded-[14px]  mx-2 w-full max-w-[800px] shadow-sm border border-t-gray">
-                      <div className=" flex items-center pl-3 pointer-events-none">
-                        <img src={Search} alt="" className="size-5" />
+                    {/* Search Bar */}
+                    <div className="flex px-3 rounded-[14px] mx-2 w-full max-w-[800px] shadow-sm border border-gray-300">
+                      <div className="flex items-center pl-3 pointer-events-none">
+                        <img src={Search} alt="" className="w-5 h-5" />
                       </div>
                       <input
                         type="text"
@@ -339,9 +357,9 @@ export default function Studentlist() {
                         }}
                       />
                     </div>
-                    {/* clear button */}
+                    {/* Clear button */}
                     <button
-                      className="hover:bg-[#E9EEF2]/50 text-white bg-white hover:border-[#E9EEF2] hover:border-2 ml-2 w-20 text-lg rounded-md flex items-center justify-center"
+                      className="hover:bg-[#E9EEF2]/50 hover:bg-white border-[#E9EEF2] border-2 ml-2 w-20 text-lg rounded-[14px] flex items-center justify-center"
                       onClick={handleClear}
                     >
                       <img src={clear} alt="Clear" className="w-6 h-6" />
@@ -468,13 +486,25 @@ export default function Studentlist() {
                                 })
                               }
                             >
-                              <img src={edit2} alt="editStudent" className="size-5" />
+                              <img
+                                src={edit2}
+                                alt="editStudent"
+                                className="size-5"
+                              />
                             </button>
                             <button onClick={() => handleShowInfo(student)}>
-                              <img src={info} alt="infoStudent" className="size-5" />
+                              <img
+                                src={info}
+                                alt="infoStudent"
+                                className="size-5"
+                              />
                             </button>
                             <button onClick={() => handleDelete(student._id)}>
-                              <img src={delete2} alt="deleteStudent" className="size-5" />
+                              <img
+                                src={delete2}
+                                alt="deleteStudent"
+                                className="size-5"
+                              />
                             </button>
                           </div>
                         </td>
@@ -483,73 +513,76 @@ export default function Studentlist() {
                   </tbody>
                 </table>
                 {/* pagination logic */}
-                <div className="flex gap-5 justify-between items-start my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
-                  <div className="mt-4 text-[#040320]">
-                    <span
-                      className={`${
-                        isDarkMode ? "text-white" : "text-[#9391a5] text-xs"
-                      } leading-5 `}
-                    >
-                      {t("titles.showing")}
-                    </span>{" "}
-                    <span
-                      className={`${
-                        isDarkMode ? "text-white" : "text-[#152259] text-xs"
-                      } leading-5 `}
-                    >
+                <div className="flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
+                  <div className="text-[#9391a5] text-base leading-5">
+                    {t("titles.showing")}
+                    <span className="text-[#152259]">
+                      {" "}
                       {pageNo * limit - (limit - 1)} -{" "}
-                      {Math.min(totalStudentCount, pageNo * limit)}
+                      {Math.min(totalStudentCount, pageNo * limit)}{" "}
                     </span>
-                    <span
-                      className={`${
-                        isDarkMode ? "text-white" : "text-[#9391a5] text-xs"
-                      } leading-5 `}
-                    >
+                    {t("titles.from")}
+                    <span className="text-[#152259]">
                       {" "}
-                      {t("titles.from")}
-                    </span>{" "}
-                    <span
-                      className={`${
-                        isDarkMode ? "text-white" : "text-[#152259] text-xs"
-                      } leading-5 `}
-                    >
-                      {totalStudentCount}
+                      {totalStudentCount}{" "}
                     </span>
-                    <span
-                      className={`${
-                        isDarkMode ? "text-white" : "text-[#9391a5] text-xs"
-                      } leading-5 `}
-                    >
-                      {" "}
-                      {t("titles.data")}
-                    </span>
+                    {t("titles.data")}
                   </div>
-                  <Stack spacing={2}>
-                    <Pagination
-                      count={Math.ceil(totalStudentCount / limit)}
-                      shape="rounded"
-                      page={pageNo}
-                      onChange={handlePageChange}
-                      renderItem={(item) => (
-                        <PaginationItem
-                          {...item}
-                          sx={{
-                            color: isDarkMode ? "white" : "#0F4189",
-                            borderColor:
-                              item.type === "previous" || item.type === "next"
-                                ? "transparent"
-                                : "#0F4189",
-                            borderWidth: "2px",
-                            borderStyle: "solid",
-                            "&.Mui-selected": {
-                              color: "white",
-                              backgroundColor: "#0F4189",
-                            },
-                          }}
-                        />
-                      )}
-                    />
-                  </Stack>
+
+                  <div className="flex items-center gap-4">
+                    {/* Dropdown to select how many data per page */}
+                    <FormControl variant="outlined" size="small">
+                      <Select
+                        value={limit}
+                        onChange={(e) => {
+                          setLimit(e.target.value);
+                          setPageNo(1);
+                        }}
+                        sx={{
+                          border: "1px solid #d1d5db",
+                          borderRadius: "6px",
+                          minWidth: "80px",
+                          backgroundColor: "#fafafa",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            border: "none",
+                          },
+                        }}
+                      >
+                        <MenuItem value={10}>10</MenuItem>
+                        <MenuItem value={20}>20</MenuItem>
+                        <MenuItem value={25}>25</MenuItem>
+                        <MenuItem value={50}>50</MenuItem>
+                        <MenuItem value={100}>100</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    <Stack spacing={2}>
+                      <Pagination
+                        count={Math.ceil(totalStudentCount / limit)}
+                        shape="rounded"
+                        page={pageNo}
+                        onChange={handlePageChange}
+                        renderItem={(item) => (
+                          <PaginationItem
+                            {...item}
+                            sx={{
+                              color: isDarkMode ? "white" : "#0F4189",
+                              borderColor:
+                                item.type === "previous" || item.type === "next"
+                                  ? "transparent"
+                                  : "#0F4189",
+                              borderWidth: "2px",
+                              borderStyle: "solid",
+                              "&.Mui-selected": {
+                                color: "white",
+                                backgroundColor: "#0F4189",
+                              },
+                            }}
+                          />
+                        )}
+                      />
+                    </Stack>
+                  </div>
                 </div>
               </div>
             </>
