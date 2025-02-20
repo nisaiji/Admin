@@ -39,14 +39,21 @@ function Addsection({
     startTime: new Date().getTime(),
   });
   const [sections, setSections] = useState([]);
+  const [selectedTeachersList, setSelectedTeachersList] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [showForm, setShowForm] = useState(true);
-  const [activeSection, setActiveSection] = useState(null);
+  const [selectedSection, setSelectedSection] = useState(null);
   const [deleteSectionId, setDeleteSectionId] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const selectRef = useRef(null);
+
+  console.log('selectedSection', selectedSection);
+  console.log('sections', sections);
+  console.log('teachers', teachers);
+  console.log('newSection', newSection);
+
 
   /**
    * Helper function to generate the next section name based on the length of existing sections.
@@ -86,7 +93,7 @@ function Addsection({
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []);
 
   /**
    * Handles the saving of a new section.
@@ -146,7 +153,7 @@ function Addsection({
    * @param {Object} section - The section to update.
    */
   const handleUpdateTeacherSection = async (section) => {
-    if (!newSection.teacherId) {
+    if (!selectedSection.teacherId) {
       return toast.error(t("toasts.selectTeacher"));
     }
 
@@ -154,14 +161,14 @@ function Addsection({
       setLoading(true);
       const res = await axiosClient.put(EndPoints.ADMIN.REPLACE_TEACHER, {
         sectionId: section._id,
-        teacherId: newSection.teacherId,
+        teacherId: selectedSection.teacherId,
       });
 
       if (res?.statusCode === 200) {
         fetchData();
         toast.success(res.result);
-        setNewSection({ name: section.name, teacherId: newSection.teacherId });
-        setActiveSection(null);
+        // setNewSection({ name: section.name, teacherId: newSection.teacherId });
+        setSelectedSection(null);
       }
     } catch (e) {
       toast.error(e);
@@ -175,9 +182,13 @@ function Addsection({
    * @param {Object} section - The section to update.
    */
   const handleUpdateClick = async (section) => {
-    await fetchData();
-    setActiveSection(section._id);
-    setNewSection({ name: section.name, teacherId: newSection.teacherId });
+    setSelectedSection({ ...section, teacherId: section?.teacher?._id });
+    setSelectedTeachersList([section?.teacher, ...teachers])
+    setNewSection({
+      name: "",
+      teacherId: "",
+      startTime: new Date().getTime(),
+    });
   };
 
   /**
@@ -185,9 +196,11 @@ function Addsection({
    * This function updates the `newSection` state when input values change.
    * @param {Event} e - The event triggered by input changes.
    */
-  const handleChange = (e) => {
+  const handleChange = (e, action) => {
     const { name, value } = e.target;
-    setNewSection((prev) => ({ ...prev, [name]: value }));
+    if (action === 'update') {
+      setSelectedSection((prev) => ({ ...prev, teacherId: value }));
+    } else setNewSection((prev) => ({ ...prev, [name]: value }));
   };
 
   /**
@@ -218,7 +231,11 @@ function Addsection({
     if (selectRef.current) {
       selectRef.current.focus();
     }
-  }, [activeSection]);
+  }, [selectedSection]);
+
+  console.log('selectedSection', selectedSection);
+  console.log('sections', sections);
+
 
   return (
     <>
@@ -229,15 +246,13 @@ function Addsection({
           </div>
         )}
         <div
-          className={`${
-            isDarkMode ? "bg-blue-950" : "bg-[#fafafa]"
-          } w-full max-w-3xl h-4/5 py-5 px-12 rounded-2xl shadow-lg overflow-y-auto`}
+          className={`${isDarkMode ? "bg-blue-950" : "bg-[#fafafa]"
+            } w-full max-w-3xl h-4/5 py-5 px-12 rounded-2xl shadow-lg overflow-y-auto`}
         >
           <div className="flex justify-between items-center mb-4 mx-4">
             <div
-              className={`text-2xl font-bold ${
-                isDarkMode ? "text-white" : "text-black"
-              } `}
+              className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-black"
+                } `}
             >
               {t("createSection")}
             </div>
@@ -259,66 +274,55 @@ function Addsection({
           </div>
           <hr />
           <div className="my-6 max-h-72 overflow-y-auto">
-            {/* section details */}
             {sections.map((section, index) => (
               <div
                 key={section._id}
-                className={`flex items-center justify-between mb-2 p-4 ${
-                  isDarkMode ? "bg-blue-800" : ""
-                } rounded-lg shadow-sm`}
+                className={`flex items-center justify-between mb-2 p-4 ${isDarkMode ? "bg-blue-800" : ""
+                  } rounded-lg shadow-sm`}
               >
                 <div className="flex justify-center items-center bg-[#DD1B10] ml-8 size-7 rounded-full ">
                   <div className={`text-lg font-medium text-white`}>
                     {section.name}
                   </div>
                 </div>
-                {/* teacher dropdown */}
-                {activeSection === section._id ? (
-                  <select
-                    name="teacherId"
-                    value={newSection.teacherId}
-                    onChange={handleChange}
-                    className={` bg-[#fafafa] border border-[#686868] rounded-xl py-1 px-8 ${
-                      isDarkMode ? "bg-gray-300" : "text-black bg-[#686868]"
+                {selectedSection && selectedSection?._id === section?._id ? <select
+                  name="teacherId"
+                  value={selectedSection?.teacherId}
+                  onChange={(e) => handleChange(e, 'update')}
+                  className={` bg-[#fafafa] border border-[#686868] rounded-xl py-1 px-8 ${isDarkMode ? "bg-gray-300" : "text-black bg-[#686868]"
                     } w-[250px]`}
-                    ref={selectRef}
-                  >
-                    <option value="">{t("labels.assignTeacher")}</option>
-                    {teachers.map((teacher) => (
-                      <option key={teacher._id} value={teacher._id}>
-                        {teacher.firstname} {teacher.lastname}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <div
-                    className={`border border-[#686868]/25 rounded-xl py-1 px-8 ${
-                      isDarkMode
-                        ? "bg-gray-300"
-                        : "text-[#686868] bg-[#93a3b6]/10"
+                  ref={selectRef}
+                >
+                  <option value="">{t("labels.assignTeacher")}</option>
+                  {selectedTeachersList.map((teacher) => (
+                    <option key={teacher._id} value={teacher._id}>
+                      {teacher.firstname} {teacher.lastname}
+                    </option>
+                  ))}
+                </select> : <div
+                  className={`border border-[#686868]/25 rounded-xl py-1 px-8 ${isDarkMode
+                    ? "bg-gray-300"
+                    : "text-[#686868] bg-[#93a3b6]/10"
                     } w-[250px]`}
-                    data-tsetid="savedTeacherName"
-                  >
-                    {section?.teacher?.firstname} {section?.teacher?.lastname}
-                  </div>
-                )}
-                <div className="mt-2">
-                  <DatePicker
-                    selected={section?.startTime || new Date()}
-                    dateFormat="dd/MM/YYYY"
-                    maxDate={new Date()}
-                    onKeyDown={(e) => e.preventDefault()}
-                    showMonthDropdown
-                    showYearDropdown
-                    dropdownMode="select"
-                    // disabled={activeSection !== section._id}
-                    disabled={true}
-                    className="border-2 rounded-xl py-1 px-4 w-36 z-50"
-                  />
-                </div>
-                {/* actions */}
+                  data-tsetid="savedTeacherName"
+                >
+                  {section?.teacher?.firstname} {section?.teacher?.lastname}
+                </div>}
+                <DatePicker
+                  selected={(selectedSection?._id === section?._id ? selectedSection?.startTime : section?.startTime) || new Date()}
+                  dateFormat="dd/MM/YYYY"
+                  // maxDate={new Date()}
+                  onKeyDown={(e) => e.preventDefault()}
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+
+                  // disabled={selectedSection !== section._id}
+                  readOnly={true}
+                  className="border-2 rounded-xl py-1 px-4 w-36 z-50"
+                />
                 <div className="flex items-center">
-                  {activeSection === section._id ? (
+                  {selectedSection?._id === section._id ? (
                     <button
                       onClick={() => handleUpdateTeacherSection(section)}
                       className={`mr-2 bg-[#4834D4] `}
@@ -336,7 +340,6 @@ function Addsection({
                       <div
                         onClick={() => handleUpdateClick(section)}
                         style={{ marginRight: 10, cursor: "pointer" }}
-                        disabled={activeSection !== null}
                       >
                         <img src={edit2} alt="" className="size-7" />
                       </div>
@@ -345,10 +348,9 @@ function Addsection({
                           setDeleteSectionId(section._id);
                           setShowDeleteConfirmation(true);
                         }}
-                        className={`${
-                          index !== sections.length - 1 &&
+                        className={`${index !== sections.length - 1 &&
                           "opacity-50 cursor-not-allowed"
-                        }`}
+                          }`}
                         disabled={index !== sections.length - 1}
                       >
                         <img
@@ -365,9 +367,8 @@ function Addsection({
             {/* add section */}
             {showForm && (
               <div
-                className={`flex items-center justify-between mb-2 p-4 rounded-lg shadow-sm ${
-                  isDarkMode ? "bg-blue-800" : ""
-                }`}
+                className={`flex items-center justify-between mb-2 p-4 rounded-lg shadow-sm ${isDarkMode ? "bg-blue-800" : ""
+                  }`}
               >
                 <div className="flex items-center">
                   <div className="flex justify-center items-center bg-[#DD1B10] size-7 ml-8 rounded-full ">
@@ -379,12 +380,11 @@ function Addsection({
                 <select
                   name="teacherId"
                   value={newSection.teacherId}
-                  onChange={handleChange}
-                  className={`border-2 border-[#686868]/25 rounded-xl py-1 px-8 ${
-                    isDarkMode ? "bg-gray-300" : "text-black bg-[#93a3b6]/10"
-                  } w-[250px]`}
+                  onChange={(e) => handleChange(e, 'add')}
+                  className={`border-2 border-[#686868]/25 rounded-xl py-1 px-8 ${isDarkMode ? "bg-gray-300" : "text-black bg-[#93a3b6]/10"
+                    } w-[250px]`}
                   ref={selectRef}
-                  disabled={activeSection !== null}
+                  disabled={selectedSection}
                   data-testid="selectTeacher"
                 >
                   <option value="">{t("labels.assignTeacher")}</option>
@@ -394,27 +394,26 @@ function Addsection({
                     </option>
                   ))}
                 </select>
-                <div className="mt-2">
-                  <DatePicker
-                    selected={newSection.startTime}
-                    onChange={(date) => {
-                      const startOfDay = new Date(date);
-                      startOfDay.setHours(0, 0, 0, 0);
-                      const timestamp = startOfDay.getTime();
-                      setNewSection((prev) => ({
-                        ...prev,
-                        startTime: timestamp,
-                      }));
-                    }}
-                    dateFormat="dd/MM/YYYY"
-                    maxDate={new Date()}
-                    onKeyDown={(e) => e.preventDefault()}
-                    showMonthDropdown
-                    showYearDropdown
-                    dropdownMode="select"
-                    className="border-2 rounded-xl py-1 px-4 w-36 z-50"
-                  />
-                </div>
+                <DatePicker
+                  selected={newSection.startTime}
+                  onChange={(date) => {
+                    const startOfDay = new Date(date);
+                    startOfDay.setHours(0, 0, 0, 0);
+                    const timestamp = startOfDay.getTime();
+                    setNewSection((prev) => ({
+                      ...prev,
+                      startTime: timestamp,
+                    }));
+                  }}
+                  dateFormat="dd/MM/YYYY"
+                  // maxDate={new Date()}
+                  onKeyDown={(e) => e.preventDefault()}
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  readOnly={selectedSection}
+                  className="border-2 rounded-xl py-1 px-4 w-36 z-50"
+                />
                 <button
                   onClick={handleSaveSection}
                   className={`mr-2 bg-[#0F4189] `}
@@ -424,7 +423,7 @@ function Addsection({
                     borderRadius: 12,
                     color: "white",
                   }}
-                  disabled={activeSection !== null}
+                  disabled={selectedSection}
                   data-testid="addSection"
                 >
                   {t("buttons.save")}
