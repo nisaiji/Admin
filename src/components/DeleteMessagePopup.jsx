@@ -1,9 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import deleteIcon from "../assets/images/deleteIcon.png";
 import { useTranslation } from "react-i18next";
 
 export default function DeletePopup({ isVisible, onClose, onDelete }) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (isVisible) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isVisible]);
+
   if (!isVisible) return null;
 
   return (

@@ -10,10 +10,28 @@ import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import cross from "../../assets/images/cross.png";
 
-function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
+function Addsection({
+  isVisible,
+  setAddSectionModelOpen,
+  clickedClassId,
+  getAllClass,
+}) {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (isVisible) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isVisible]);
 
   const [newSection, setNewSection] = useState({
     name: "",
@@ -27,6 +45,7 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
   const [deleteSectionId, setDeleteSectionId] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [toastDisplayed, setToastDisplayed] = useState(false);
   const selectRef = useRef(null);
 
   /**
@@ -75,10 +94,20 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
    */
   const handleSaveSection = async () => {
     if (sections.length >= 8) {
-      return toast.error(t("toasts.sectionLimit"));
+      if (!toastDisplayed) {
+        setToastDisplayed(true);
+        toast.error(t("toasts.sectionLimit"));
+        setTimeout(() => setToastDisplayed(false), 3000);
+      }
+      return;
     }
     if (!newSection.teacherId) {
-      return toast.error(t("toasts.selectTeacher"));
+      if (!toastDisplayed) {
+        setToastDisplayed(true);
+        toast.error(t("toasts.selectTeacher"));
+        setTimeout(() => setToastDisplayed(false), 3000);
+      }
+      return;
     }
 
     try {
@@ -212,15 +241,15 @@ function Addsection({ setAddSectionModelOpen, clickedClassId, getAllClass }) {
             >
               {t("createSection")}
             </div>
-            <button
+            <img
               onClick={async () => {
                 setAddSectionModelOpen(false);
                 await getAllClass();
               }}
-              className=" h-[30px] w-[100px] rounded-xl text-[16px] bg-[#0F4189] font-medium text-white"
-            >
-              {t("buttons.done")}
-            </button>
+              className="h-10 w-10 cursor-pointer"
+              src={cross}
+              alt="Close"
+            />
           </div>
           <div className="flex justify-between px-8 mt-[30px] mb-[10px] ">
             <div className="font-medium text-[16px]">{t("sections")}</div>

@@ -116,9 +116,13 @@ export default function TeacherProfile() {
                 name="firstname"
                 placeholder={t("placeholders.firstName")}
                 value={formik.values.firstname}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  e.target.value = e.target.value.replace(/[^a-zA-Z]/g, "");
+                  formik.handleChange(e);
+                }}
                 onBlur={formik.handleBlur}
                 data-testid="firstname"
+                maxLength={15}
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.firstname && formik.touched.firstname
                     ? "border-red-500"
@@ -140,9 +144,13 @@ export default function TeacherProfile() {
                 name="lastname"
                 placeholder={t("placeholders.lastName")}
                 value={formik.values.lastname}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  e.target.value = e.target.value.replace(/[^a-zA-Z]/g, "");
+                  formik.handleChange(e);
+                }}
                 onBlur={formik.handleBlur}
                 data-testid="lastname"
+                maxLength={15}
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.lastname && formik.touched.lastname
                     ? "border-red-500"

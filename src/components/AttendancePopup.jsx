@@ -45,6 +45,7 @@ export default function AttendancePopup({
   const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [holidays, setHolidays] = useState({});
+  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [totalAttendanceDays, setTotalAttendanceDays] = useState(0);
   // Start time based on role
   const startTime = isTeacher ? sectionStartTime : startTimeForAdmin;
@@ -115,11 +116,15 @@ export default function AttendancePopup({
         (newDate.getFullYear() === currentYear &&
           newDate.getMonth() > currentMonth)
       ) {
-        toast.error(
-          `You can only change month between the ${moment(startTime).format(
-            "MMMM YYYY"
-          )} to ${moment().format("MMMM YYYY")}.`
-        );
+        if (!toastDisplayed) {
+          setToastDisplayed(true);
+          toast.error(
+            `You can only change month between the ${moment(startTime).format(
+              "MMMM YYYY"
+            )} to ${moment().format("MMMM YYYY")}.`
+          );
+          setTimeout(() => setToastDisplayed(false), 3000);
+        }
         return prevDate;
       }
       return newDate;
@@ -145,11 +150,15 @@ export default function AttendancePopup({
       moment(attendanceDate).valueOf() < startTime ||
       attendanceDate > moment().endOf("days").valueOf()
     ) {
-      toast.error(
-        `You can only edit attendance between the ${moment(startTime).format(
-          "DD/MM/YYYY"
-        )} and ${moment().format("DD/MM/YYYY")}.`
-      );
+      if (!toastDisplayed) {
+        setToastDisplayed(true);
+        toast.error(
+          `You can only edit attendance between the ${moment(startTime).format(
+            "DD/MM/YYYY"
+          )} and ${moment().format("DD/MM/YYYY")}.`
+        );
+        setTimeout(() => setToastDisplayed(false), 3000);
+      }
       return;
     }
     setAttendanceData((prevData) =>
@@ -197,7 +206,11 @@ export default function AttendancePopup({
       );
 
       if (hasEmptyAttendance) {
-        toast.error("Please fill all the cells to save the attendance");
+        if (!toastDisplayed) {
+          setToastDisplayed(true);
+          toast.error("Please fill all the cells to save the attendance");
+          setTimeout(() => setToastDisplayed(false), 3000);
+        }
         return;
       }
 

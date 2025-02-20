@@ -41,6 +41,7 @@ export default function StudentSection() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showAttendance, setShowAttendance] = useState(false);
+  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [newStudent, setNewStudent] = useState({
     SNo: null,
     firstname: "",
@@ -183,12 +184,13 @@ export default function StudentSection() {
 
   // Updates student data in state
   const handleInputChange = (sNo, field, value) => {
+    const formattedValue = value.replace(/[^a-zA-Z0-9]/g, "").trimStart();
     if (sNo === null) {
-      setNewStudent({ ...newStudent, [field]: value });
+      setNewStudent({ ...newStudent, [field]: formattedValue });
     } else {
       setStudents((prev) =>
         prev.map((student, idx) =>
-          idx === sNo - 1 ? { ...student, [field]: value } : student
+          idx === sNo - 1 ? { ...student, [field]: formattedValue } : student
         )
       );
     }
@@ -198,7 +200,11 @@ export default function StudentSection() {
   const handleStudentAction = async (student, isUpdate = false) => {
     const e = validateData(student);
     if (e) {
-      toast.error(e);
+      if (!toastDisplayed) {
+        setToastDisplayed(true);
+        toast.error(e);
+        setTimeout(() => setToastDisplayed(false), 3000);
+      }
       return;
     }
 
@@ -528,6 +534,7 @@ export default function StudentSection() {
                             e.target.value
                           )
                         }
+                        maxLength={15}
                         placeholder={t("placeholders.firstName")}
                         className={`w-full h-full px-2 py-1 font-poppins font-medium text-center border-none ${
                           isDarkMode
@@ -548,6 +555,7 @@ export default function StudentSection() {
                             e.target.value
                           )
                         }
+                        maxLength={15}
                         placeholder={t("placeholders.lastName")}
                         className={`w-full h-full px-2 py-1 font-poppins font-medium text-center  border-none focus:outline-none ${
                           isDarkMode
@@ -592,6 +600,7 @@ export default function StudentSection() {
                             e.target.value
                           )
                         }
+                        maxLength={20}
                         placeholder={t("placeholders.parentName")}
                         className={`w-full h-full px-2 py-1 font-poppins font-medium text-center  border-none focus:outline-none ${
                           isDarkMode
@@ -680,6 +689,7 @@ export default function StudentSection() {
                       onChange={(e) =>
                         handleInputChange(null, "firstname", e.target.value)
                       }
+                      maxLength={15}
                       placeholder={t("placeholders.firstName")}
                       className={`w-full h-full px-2 py-2 font-poppins font-medium text-center border-none  focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
@@ -696,6 +706,7 @@ export default function StudentSection() {
                       onChange={(e) =>
                         handleInputChange(null, "lastname", e.target.value)
                       }
+                      maxLength={15}
                       placeholder={t("placeholders.lastName")}
                       className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none  focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
@@ -740,6 +751,7 @@ export default function StudentSection() {
                       onChange={(e) =>
                         handleInputChange(null, "parentName", e.target.value)
                       }
+                      maxLength={20}
                       placeholder={t("placeholders.parentName")}
                       className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
                         isDarkMode
@@ -767,10 +779,11 @@ export default function StudentSection() {
                   {/* add student button */}
                   <td className="px-2 py-2 border border-[#c1c0ca]">
                     <button
+                      disabled={loading}
                       onClick={() => registerStudent()}
                       className="bg-[#0F4189] text-white font-medium text-[16] py-1.5 px-3 rounded-lg w-full h-full focus:outline-2 focus:outline-[#0F4189]"
                     >
-                      {t("buttons.addStudent")}
+                      {loading ? "Adding..." : t("buttons.addStudent")}
                     </button>
                   </td>
                 </tr>

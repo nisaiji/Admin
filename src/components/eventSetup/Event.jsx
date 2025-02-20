@@ -114,6 +114,7 @@ const Event = () => {
   const [eventToDelete, setEventToDelete] = useState(null);
   const [eventLoading, setEventLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [disableButton, setDisableButton] = useState(false);
   const [newEvent, setNewEvent] = useState();
   const [t] = useTranslation();
 
@@ -188,6 +189,7 @@ const Event = () => {
             </button>
             <button
               className="px-4 py-2 bg-[#0F4189] text-white rounded-lg"
+              disabled={loading}
               onClick={() =>
                 isSubmit(newEventForm, prevData?.editData?.eventId)
               }
@@ -258,6 +260,10 @@ const Event = () => {
   // api for handeling register and update event
   const handleAddEvent = async (newEvent, eventId) => {
     try {
+      if (disableButton) return;
+
+      setDisableButton(true);
+      setTimeout(() => setDisableButton(false), 3000);
       setLoading(true);
       if (!validateForm(newEvent)) return;
       const formattedEvent = {

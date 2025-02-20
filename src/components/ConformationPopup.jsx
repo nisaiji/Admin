@@ -1,8 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-export default function ConformationPopup({ isVisible, onClose, onSubmit,message }) {
+export default function ConformationPopup({
+  isVisible,
+  onClose,
+  onSubmit,
+  message,
+}) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (isVisible) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isVisible]);
+
   if (!isVisible) return null;
 
   return (
@@ -11,9 +29,7 @@ export default function ConformationPopup({ isVisible, onClose, onSubmit,message
         <div className="flex">
           <div className="ml-3">
             <div className="flex justify-betweens">
-              <p className="font-semibold text-black">
-                {message}
-              </p>
+              <p className="font-semibold text-black">{message}</p>
             </div>
           </div>
         </div>

@@ -36,9 +36,10 @@ const TeacherUpdate = () => {
 
   // Validation schema using Yup
   const validationSchema = Yup.object({
-    firstname: Yup.string().required(t("validationError.firstName")),
-    lastname: Yup.string().required(t("validationError.lastName")),
+    firstname: Yup.string().trim().required(t("validationError.firstName")),
+    lastname: Yup.string().trim().required(t("validationError.lastName")),
     phone: Yup.string()
+      .trim()
       .required(t("validationError.phone"))
       .matches(REGEX.PHONE, t("validationError.phoneNumber"))
       .test(
@@ -228,9 +229,33 @@ const TeacherUpdate = () => {
                           type={type}
                           name={name}
                           placeholder={placeholder}
-                          onChange={formik.handleChange}
+                          onChange={(e) => {
+                            if (["firstname", "lastname"].includes(name)) {
+                              e.target.value = e.target.value.replace(
+                                /[^a-zA-Z]/g,
+                                ""
+                              );
+                            }
+                            formik.handleChange(e);
+                          }}
+                          onKeyDown={(e) => {
+                            if (
+                              ["firstname", "lastname"]
+                                .includes(name)
+                                .trimStart() &&
+                              /[^a-zA-Z\s]/.test(e.key)
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
                           value={formik.values[name]}
-                          maxLength={name === "phone" ? 10 : ""}
+                          maxLength={
+                            name === "phone"
+                              ? 10
+                              : name === "firstname" || name == "lastname"
+                              ? 15
+                              : ""
+                          }
                           className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
                         />
                       )}
