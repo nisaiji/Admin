@@ -29,6 +29,7 @@ export default function Teacher() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [newTeacher, setNewTeacher] = useState({
     SNo: null,
     firstname: "",
@@ -79,7 +80,11 @@ export default function Teacher() {
     try {
       const e = validateData(newTeacher);
       if (e) {
-        toast.error(e);
+        if (!toastDisplayed) {
+          setToastDisplayed(true);
+          toast.error(e);
+          setTimeout(() => setToastDisplayed(false), 3000);
+        }
         return;
       }
       setLoading(true);
@@ -148,12 +153,14 @@ export default function Teacher() {
    * @param {string} value - New value for the field.
    */
   const handleInputChange = (SNo, field, value) => {
+    // Allow only single spaces between words
+    const formattedValue = value.replace(/[^a-zA-Z0-9]/g, "").trimStart();
     if (SNo === null) {
-      setNewTeacher({ ...newTeacher, [field]: value });
+      setNewTeacher({ ...newTeacher, [field]: formattedValue });
     } else {
       setTeachers((prevTeachers) =>
         prevTeachers.map((teacher) =>
-          teacher.SNo === SNo ? { ...teacher, [field]: value } : teacher
+          teacher.SNo === SNo ? { ...teacher, [field]: formattedValue } : teacher
         )
       );
     }
@@ -304,6 +311,7 @@ export default function Teacher() {
                               e.target.value
                             )
                           }
+                          maxLength={15}
                           placeholder={t("placeholders.firstName")}
                           className={`w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none ${
                             isDarkMode
@@ -327,6 +335,7 @@ export default function Teacher() {
                               e.target.value
                             )
                           }
+                          maxLength={15}
                           placeholder={t("placeholders.lastName")}
                           className={`w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none ${
                             isDarkMode
@@ -380,7 +389,11 @@ export default function Teacher() {
                               setShowDeleteConfirmation(true);
                             }}
                           >
-                            <img src={delete2} alt="deleteTeacher" className="size-5" />
+                            <img
+                              src={delete2}
+                              alt="deleteTeacher"
+                              className="size-5"
+                            />
                           </button>
                         </div>
                       </td>
@@ -404,6 +417,7 @@ export default function Teacher() {
                         onChange={(e) =>
                           handleInputChange(null, "firstname", e.target.value)
                         }
+                        maxLength={15}
                         placeholder={t("placeholders.firstName")}
                         className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
                           isDarkMode
@@ -423,6 +437,7 @@ export default function Teacher() {
                         onChange={(e) =>
                           handleInputChange(null, "lastname", e.target.value)
                         }
+                        maxLength={15}
                         placeholder={t("placeholders.lastName")}
                         className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
                           isDarkMode
@@ -456,10 +471,10 @@ export default function Teacher() {
                       <button
                         className="bg-[#0F4189] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full focus:outline-2 focus:outline-[#0F4189]"
                         onClick={registerTeacher}
-                        disabled={editSNo !== null}
+                        disabled={editSNo !== null || loading}
                         data-testid="addTeacher"
                       >
-                        {t("buttons.addTeacher")}
+                        {loading ? "Adding..." : t("buttons.addTeacher")}
                       </button>
                     </td>
                   </tr>

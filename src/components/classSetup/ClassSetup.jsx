@@ -23,6 +23,7 @@ function ClassSetup() {
   const [classes, setClasses] = useState([]);
   const [isFlipped, setIsFlipped] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [clickedClassId, setClickedClassId] = useState("");
   const [addSectionModelOpen, setAddSectionModelOpen] = useState(false);
   const [showDropdowns, setShowDropdowns] = useState({});
@@ -244,41 +245,61 @@ function ClassSetup() {
                 </ReactCardFlip>
               ))}
 
-              <div
-                className={`${
-                  isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
-                } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border border-[#0F4189] rounded-3xl `}
-              >
-                {/* available class dropdown */}
-                {!showDropdowns[classes.length] ? (
-                  <img
-                    src={addclass}
-                    alt="addClass"
-                    className="size-[48px] cursor-pointer"
-                    onClick={() =>
-                      setShowDropdowns({
-                        ...showDropdowns,
-                        [classes.length]: true,
-                      })
-                    }
-                  />
-                ) : (
-                  <select
-                    value=""
-                    onChange={(e) => handleNewClassSubmit(e.target.value)}
-                    className={`cursor-pointer shadow appearance-none border border-[#0F4189] rounded-lg w-10/12 py-1 px-2 leading-tight focus:outline-none focus:shadow-outline text-[#0F4189] text-center text-sm font-poppins-bold max-h-[150px] overflow-y-auto
-                    }`}
-                    data-testid="classlist"
-                  >
-                    <option value="">{t("buttons.addClass")}</option>
-                    {availableClassOptions.map((item, i) => (
-                      <option key={i} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
+              {classes.length < 16 && (
+                <div
+                  className={`${
+                    isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
+                  } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border border-[#0F4189] rounded-3xl `}
+                >
+                  {/* available class dropdown */}
+                  {!showDropdowns[classes.length] ? (
+                    <img
+                      src={addclass}
+                      alt="addClass"
+                      className="size-[48px] cursor-pointer"
+                      onClick={() =>
+                        setShowDropdowns({
+                          ...showDropdowns,
+                          [classes.length]: true,
+                        })
+                      }
+                    />
+                  ) : (
+                    <div className="relative w-10/12">
+                      <div
+                        value=""
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="cursor-pointer shadow appearance-none border border-[#0F4189] rounded-lg w-full py-1 px-2 leading-tight 
+               focus:outline-none focus:shadow-outline text-[#0F4189] text-center text-sm font-poppins-bold"
+                        data-testid="classlist"
+                      >
+                        {t("buttons.addClass")}
+                      </div>
+
+                      {/* Dropdown Options */}
+                      {isOpen && (
+                        <div
+                          className="absolute left-0 w-full border border-[#0F4189] bg-white rounded-lg shadow-lg max-h-[150px] 
+                  overflow-y-auto z-50 mt-1"
+                        >
+                          {availableClassOptions.map((item, i) => (
+                            <div
+                              key={i}
+                              onClick={() => {
+                                handleNewClassSubmit(item);
+                                setIsOpen(false);
+                              }}
+                              className="py-1 px-2 cursor-pointer hover:bg-blue-100 text-[#0F4189] text-center text-sm font-poppins-bold"
+                            >
+                              {item}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             {/* No class */}
             {classes.length < 1 && !loading && (
@@ -306,6 +327,7 @@ function ClassSetup() {
       {/* add section model */}
       {addSectionModelOpen && (
         <Addsection
+          isVisible={addSectionModelOpen}
           setAddSectionModelOpen={setAddSectionModelOpen}
           clickedClassId={clickedClassId}
           getAllClass={getAllClass}
