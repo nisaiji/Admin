@@ -253,19 +253,19 @@ export default function AdminProfile() {
           <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.schoolName")}{" "}
+                {t("adminProfile.schoolName")}
                 <span className="text-red-500">*</span>
               </label>
               <input
                 name="schoolName"
-                placeholder={t("adminProfile.schoolName")}
+                placeholder={t("placeholders.schoolName")}
                 value={formik.values.schoolName}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid='schoolName'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolName && formik.touched.schoolName
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               />
               {formik.errors.schoolName && formik.touched.schoolName && (
@@ -277,19 +277,19 @@ export default function AdminProfile() {
             {/* Email */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.Email")}{" "}
+                {t("adminProfile.Email")}
                 <span className="text-red-500">*</span>
               </label>
               <input
                 name="email"
-                placeholder={t("adminProfile.Email")}
+                placeholder={t("placeholders.Email")}
                 value={formik.values.email}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid='email'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.email && formik.touched.email
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               />
               {formik.errors.email && formik.touched.email && (
@@ -304,19 +304,19 @@ export default function AdminProfile() {
           <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.principal")}{" "}
+                {t("adminProfile.principal")}
                 <span className="text-red-500">*</span>
               </label>
               <input
                 name="principal"
-                placeholder={t("adminProfile.principal")}
+                placeholder={t("placeholders.principal")}
                 value={formik.values.principal}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid='principal'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.principal && formik.touched.principal
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               />
               {formik.errors.principal && formik.touched.principal && (
@@ -328,19 +328,19 @@ export default function AdminProfile() {
             {/* Admin name */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.adminName")}{" "}
+                {t("adminProfile.adminName")}
                 <span className="text-red-500">*</span>
               </label>
               <input
                 name="username"
-                placeholder={t("adminProfile.adminName")}
+                placeholder={t("placeholders.adminName")}
                 value={formik.values.username}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid='username'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.username && formik.touched.username
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               />
               {formik.errors.username && formik.touched.username && (
@@ -355,19 +355,19 @@ export default function AdminProfile() {
           <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.affiliationNumber")}{" "}
+                {t("adminProfile.affiliationNumber")}
                 <span className="text-red-500">*</span>
               </label>
               <input
                 name="affiliationNo"
-                placeholder={t("adminProfile.affiliationNumber")}
+                placeholder={t("placeholders.affiliationNumber")}
                 value={formik.values.affiliationNo}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid='affiliationNo'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.affiliationNo && formik.touched.affiliationNo
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               />
               {formik.errors.affiliationNo && formik.touched.affiliationNo && (
@@ -383,14 +383,14 @@ export default function AdminProfile() {
               </label>
               <input
                 name="schoolNumber"
-                placeholder={t("adminProfile.schoolNumber")}
+                placeholder={t("placeholders.schoolNumber")}
                 value={formik.values.schoolNumber}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid='schoolNumber'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolNumber && formik.touched.schoolNumber
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               />
               {formik.errors.schoolNumber && formik.touched.schoolNumber && (
@@ -405,19 +405,19 @@ export default function AdminProfile() {
           <div className="flex flex-row w-full space-x-5">
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.schoolAddress")}{" "}
+                {t("adminProfile.schoolAddress")}
                 <span className="text-red-500">*</span>
               </label>
               <input
                 name="address"
-                placeholder={t("adminProfile.schoolAddress")}
+                placeholder={t("placeholders.schoolAdress")}
                 value={formik.values.address}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid='address'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.address && formik.touched.address
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               />
               {formik.errors.address && formik.touched.address && (
@@ -429,7 +429,7 @@ export default function AdminProfile() {
             {/* School Board */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.schoolBoard")}{" "}
+                {t("adminProfile.schoolBoard")}
                 <span className="text-red-500">*</span>
               </label>
               <select
@@ -439,8 +439,8 @@ export default function AdminProfile() {
                 onBlur={formik.handleBlur}
                 data-testid='schoolBoard'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolBoard && formik.touched.schoolBoard
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               >
                 <option value="">{t("adminProfile.selectSchoolBoard")}</option>
@@ -463,13 +463,13 @@ export default function AdminProfile() {
             {/* country */}
             <div className="w-full md:w-1/3">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.country")}{" "}
+                {t("adminProfile.country")}
                 <span className="text-red-500">*</span>
               </label>
               <select
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.country && formik.touched.country
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
                 name="country"
                 value={formik.values.country}
@@ -494,15 +494,15 @@ export default function AdminProfile() {
             {/* state */}
             <div className="w-full md:w-1/3">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.state")}{" "}
+                {t("adminProfile.state")}
                 <span className="text-red-500">*</span>
               </label>
               {selectedCountry === "India" ? (
                 <select
                   onBlur={formik.handleBlur}
                   className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.state && formik.touched.state
-                      ? "border-red-500"
-                      : "border-gray-200"
+                    ? "border-red-500"
+                    : "border-gray-200"
                     } text-black bg-white border`}
                   name="state"
                   value={formik.values.state}
@@ -519,8 +519,8 @@ export default function AdminProfile() {
               ) : (
                 <input
                   className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolBoard && formik.touched.schoolBoard
-                      ? "border-red-500"
-                      : "border-gray-200"
+                    ? "border-red-500"
+                    : "border-gray-200"
                     } text-black bg-white border`}
                   type="text"
                   name="state"
@@ -540,14 +540,14 @@ export default function AdminProfile() {
             {/* district */}
             <div className="w-full md:w-1/3">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.district")}{" "}
+                {t("adminProfile.district")}
                 <span className="text-red-500">*</span>
               </label>
               {selectedCountry === "India" ? (
                 <select
                   className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.state && formik.touched.state
-                      ? "border-red-500"
-                      : "border-gray-200"
+                    ? "border-red-500"
+                    : "border-gray-200"
                     } text-black bg-white border`}
                   name="district"
                   value={formik.values.district}
@@ -571,8 +571,8 @@ export default function AdminProfile() {
                   value={formik.values.district}
                   onBlur={formik.handleBlur}
                   className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.schoolBoard && formik.touched.schoolBoard
-                      ? "border-red-500"
-                      : "border-gray-200"
+                    ? "border-red-500"
+                    : "border-gray-200"
                     } text-black bg-white border`}
                   data-testid='district-input'
                 />
@@ -589,18 +589,18 @@ export default function AdminProfile() {
             {/* city */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.city")} <span className="text-red-500">*</span>
+                {t("adminProfile.city")}<span className="text-red-500">*</span>
               </label>
               <input
                 name="city"
-                placeholder={t("adminProfile.city")}
+                placeholder={t("placeholders.city")}
                 value={formik.values.city}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid='city'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.city && formik.touched.city
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               />
               {formik.errors.city && formik.touched.city && (
@@ -612,19 +612,19 @@ export default function AdminProfile() {
             {/* pincode */}
             <div className="w-full md:w-4/5">
               <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.pincode")}{" "}
+                {t("adminProfile.pincode")}
                 <span className="text-red-500">*</span>
               </label>
               <input
                 name="pincode"
-                placeholder={t("adminProfile.pincode")}
+                placeholder={t("placeholders.pincode")}
                 value={formik.values.pincode}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid='pincode'
                 className={`p-2 mt-1 w-full text-base leading-6 ${formik.errors.pincode && formik.touched.pincode
-                    ? "border-red-500"
-                    : "border-gray-200"
+                  ? "border-red-500"
+                  : "border-gray-200"
                   } text-black bg-white border`}
               />
               {formik.errors.pincode && formik.touched.pincode && (
@@ -662,8 +662,8 @@ export default function AdminProfile() {
           </div>
           <div
             className={`flex gap-5 px-5 py-2 mt-1 bg-white border ${formik.errors.phone && formik.touched.phone
-                ? "border-red-500"
-                : "border-gray-200"
+              ? "border-red-500"
+              : "border-gray-200"
               }`}
           >
             <div className="flex items-center gap-1.5 font-medium text-[#0F4189]">
