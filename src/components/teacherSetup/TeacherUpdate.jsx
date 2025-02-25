@@ -15,6 +15,7 @@ import mail from "../../assets/images/mail.png";
 import India from "../../assets/images/India.png";
 import location from "../../assets/images/location.png";
 import moment from "moment/moment";
+import Breadcrumbs from "../BreadCrumbs";
 
 /**
  * Capitalizes the first letter of a string and converts the rest to lowercase.
@@ -76,7 +77,7 @@ const TeacherUpdate = () => {
           {}
         );
         const filteredTeacherData = filterEmptyValues(teacherData);
-        
+
         // Make API request to update teacher details
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
@@ -171,7 +172,8 @@ const TeacherUpdate = () => {
       )}
       <Toaster position="top-center" reverseOrder={false} />
       <div className="bg-[#fafafa] rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border">
-        <h1 className="text-2xl font-poppins-bold mt-6">
+        <Breadcrumbs />
+        <h1 className="text-2xl font-poppins-bold mt-3">
           {t("titles.teacherDetails")}
         </h1>
         <h2 className="text-l font-poppins-regular mt-2 text-left">

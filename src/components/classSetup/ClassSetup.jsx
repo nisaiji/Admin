@@ -13,6 +13,7 @@ import DeletePopup from "../DeleteMessagePopup";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
+import Breadcrumbs from "../BreadCrumbs";
 
 Modal.setAppElement("#root");
 
@@ -28,6 +29,7 @@ function ClassSetup() {
   const [addSectionModelOpen, setAddSectionModelOpen] = useState(false);
   const [showDropdowns, setShowDropdowns] = useState({});
   const [loading, setLoading] = useState(false);
+  const [toastDisplayed, setToastDisplayed] = useState(false);
 
   // Class options (mapped with translation keys)
   const classOptions = [
@@ -103,6 +105,9 @@ function ClassSetup() {
 
   // delete class api
   const handleDeleteClass = async () => {
+    if (toastDisplayed) return;
+    setToastDisplayed(true);
+    setTimeout(() => setToastDisplayed(false), 3000);
     try {
       setLoading(true);
       const response = await axiosClient.delete(
@@ -148,6 +153,7 @@ function ClassSetup() {
               isDarkMode ? "bg-[#0d192f]" : "bg-[#fafafa]"
             } w-full my-1 px-10 py-6 min-h-[600px] rounded-[16px]`}
           >
+            <Breadcrumbs />
             <h3
               className={`${
                 isDarkMode ? "text-white" : "text-black"
@@ -208,7 +214,7 @@ function ClassSetup() {
                         {data.section.map((section, j) => (
                           <div
                             onClick={() =>
-                              navigate("/student-section", {
+                              navigate("/class-setup/student-section", {
                                 state: {
                                   sectionId: section._id,
                                   classId: data._id,

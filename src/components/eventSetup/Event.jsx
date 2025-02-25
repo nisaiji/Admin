@@ -14,6 +14,7 @@ import EndPoints from "../../services/EndPoints";
 import moment from "moment";
 import { useTranslation } from "react-i18next";
 import CONSTANT from "../../utils/constants";
+import Breadcrumbs from "../BreadCrumbs";
 
 // Calendar Component - Displays a calendar with month navigation and event handling
 const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
@@ -139,6 +140,10 @@ const Event = () => {
     };
     if (!isOpen) return null;
 
+    const isFormValid =
+      newEventForm.title.trim() !== "" &&
+      newEventForm.description.trim() !== "";
+
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="bg-[#fafafa] p-6 rounded-lg w-80">
@@ -188,8 +193,10 @@ const Event = () => {
               {t("buttons.cancel")}
             </button>
             <button
-              className="px-4 py-2 bg-[#0F4189] text-white rounded-lg"
-              disabled={loading}
+              className={`px-4 py-2 bg-[#0F4189] text-white rounded-lg ${
+                isFormValid ? "cursor-pointer" : "cursor-not-allowed"
+              }`}
+              disabled={loading || !isFormValid}
               onClick={() =>
                 isSubmit(newEventForm, prevData?.editData?.eventId)
               }
@@ -259,13 +266,13 @@ const Event = () => {
 
   // api for handeling register and update event
   const handleAddEvent = async (newEvent, eventId) => {
-    try {
-      if (disableButton) return;
+    if (disableButton) return;
+    if (!validateForm(newEvent)) return;
 
-      setDisableButton(true);
-      setTimeout(() => setDisableButton(false), 3000);
+    setDisableButton(true);
+    setTimeout(() => setDisableButton(false), 3000);
+    try {
       setLoading(true);
-      if (!validateForm(newEvent)) return;
       const formattedEvent = {
         title: capitalizeFirstLetter(newEvent.title.trim()),
         description: capitalizeFirstLetter(newEvent.description.trim()),
@@ -428,6 +435,7 @@ const Event = () => {
       )}
       {/* left view */}
       <div className="col-span-4 px-10 bg-[#fafafa] rounded-[16px] p-4 mt-4">
+        <Breadcrumbs />
         <div className="flex justify-between items-center mb-3">
           <p className="text-2xl font-poppins-bold">
             {t("dashboard.calendar")}

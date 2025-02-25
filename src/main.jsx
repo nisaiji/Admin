@@ -5,7 +5,7 @@ import ReactDOM from "react-dom/client"; // React DOM client for rendering the R
 import { Provider } from "react-redux"; // Used to provide the Redux store to the application
 
 // Import HashRouter from React Router for managing routing with hash-based URLs
-import { HashRouter } from "react-router-dom";
+import { BrowserRouter, HashRouter } from "react-router-dom";
 
 // Import the main App component
 import App from "./App.jsx"; // The root component of the application
@@ -22,10 +22,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
    * Wrap the application with HashRouter for routing functionality.
    * - Ensures that the app's routing works with hash-based URLs (useful for environments like GitHub Pages).
    */
-  <HashRouter>
+  <BrowserRouter>
     <Provider store={store}>
       {/* Render the root App component */}
       <App />
     </Provider>
-  </HashRouter>
+  </BrowserRouter>
 );

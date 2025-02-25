@@ -13,6 +13,7 @@ import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import REGEX from "../../utils/regix";
+import Breadcrumbs from "../BreadCrumbs";
 
 export default function Teacher() {
   const navigate = useNavigate();
@@ -160,7 +161,9 @@ export default function Teacher() {
     } else {
       setTeachers((prevTeachers) =>
         prevTeachers.map((teacher) =>
-          teacher.SNo === SNo ? { ...teacher, [field]: formattedValue } : teacher
+          teacher.SNo === SNo
+            ? { ...teacher, [field]: formattedValue }
+            : teacher
         )
       );
     }
@@ -170,6 +173,9 @@ export default function Teacher() {
    * Deletes the currently selected teacher.
    */
   const handleDelete = async () => {
+    if (toastDisplayed) return;
+    setToastDisplayed(true);
+    setTimeout(() => setToastDisplayed(false), 3000);
     try {
       setLoading(true);
       const response = await axiosClient.delete(
@@ -223,6 +229,7 @@ export default function Teacher() {
           {/* Toast notifications */}
           <Toaster position="top-center" reverseOrder={false} />
           <div className="px-5">
+            <Breadcrumbs />
             <div className="text-2xl font-semibold py-3">
               {t("titles.teacherSetup")}
             </div>
@@ -373,7 +380,7 @@ export default function Teacher() {
                         <div className="flex justify-evenly">
                           <button
                             onClick={() =>
-                              navigate("/teacher-update", {
+                              navigate("/teacher/teacher-update", {
                                 state: teacher,
                               })
                             }

@@ -88,18 +88,20 @@ function App() {
                 <>
                   {/* Routes available for admin users */}
                   <Route path="" element={<DashBoard />} />
-                  <Route path="student-list" element={<Studentlist />} />
-                  <Route path="student" element={<Studentlist />} />
+                  <Route path="students-list" element={<Studentlist />} />
                   <Route path="teacher" element={<TeacherPage />} />
-                  <Route path="teacher-update" element={<TeacherUpdate />} />
+                  <Route path="teacher/teacher-update" element={<TeacherUpdate />} />
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
                   <Route path="add-section" element={<Addsection />} />
-                  <Route path="student-section" element={<StudentSection />} />
-                  <Route path="student-update" element={<StudentUpdate />} />
+                  <Route
+                    path="class-setup/student-section"
+                    element={<StudentSection />}
+                  />
+                  <Route path="students-list/student-update" element={<StudentUpdate />} />
                   <Route path="admin-profile" element={<AdminProfile />} />
-                  <Route path="requests" element={<Requests />} />
-                  <Route path="leave" element={<Leaves />} />
+                  <Route path="password-reset-requests" element={<Requests />} />
+                  <Route path="teacher-leaves" element={<Leaves />} />
                 </>
               )}
             </Route>

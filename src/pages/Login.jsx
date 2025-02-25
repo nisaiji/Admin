@@ -106,7 +106,7 @@ function Login() {
               dispatch(setAuthData(res?.result?.accessToken));
               toast.success(t("messages.login.success"));
               resetForm();
-              navigate("/");
+              navigate("/", { replace: true });
             } else {
               localStorage.setItem(
                 "temp_access_token",
@@ -129,7 +129,7 @@ function Login() {
             dispatch(setAuthData(res?.result?.accessToken));
             toast.success(t("messages.login.success"));
             resetForm();
-            navigate("/");
+            navigate("/", { replace: true });
           }
         }
       } catch (e) {
@@ -232,7 +232,7 @@ function Login() {
             <div className="mt-6">
               <button
                 name="submit"
-                data-testid='submit'
+                data-testid="submit"
                 className="w-full py-1.5 text-center bg-[#0F4189] text-white font-poppins-bold rounded-lg disabled:opacity-50"
                 type="submit"
                 disabled={formik.isSubmitting}

@@ -24,6 +24,7 @@ import DeletePopup from "../DeleteMessagePopup";
 import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 import CONSTANT from "../../utils/constants";
+import Breadcrumbs from "../BreadCrumbs";
 
 export default function Studentlist() {
   // Import necessary modules and hooks
@@ -223,9 +224,12 @@ export default function Studentlist() {
           isDarkMode ? "bg-[#112138]" : "bg-[#fafafa]"
         } flex flex-col self-center w-full max-w-[100%] my-4 rounded-[16px] max-md:max-w-full min-h-screen`}
       >
-        <h1 className="text-2xl px-14 py-6 font-poppins-bold ">
-          {t("titles.students")}
-        </h1>
+        <div className="px-14 py-6">
+          <Breadcrumbs />
+          <h1 className="text-2xl font-poppins-bold ">
+            {t("titles.students")}
+          </h1>
+        </div>
         <div className="flex flex-col self-center w-full font-medium max-w-full max-md:max-w-full">
           {/* Search Bar*/}
           <div className="flex pl-4 gap-5 h-10 mt-5 max-md:flex-wrap max-md:mt-10 mb-10">
@@ -481,7 +485,7 @@ export default function Studentlist() {
                           <div className="flex justify-around">
                             <button
                               onClick={() =>
-                                navigate("/student-update", {
+                                navigate("/students-list/student-update", {
                                   state: student,
                                 })
                               }

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import profileEmpty from "../../../assets/images/profileEmpty.png";
 import cross from "../../../assets/images/cross.png";
 import html2canvas from "html2canvas";
@@ -7,15 +7,27 @@ import CONSTANT from "../../../utils/constants";
 
 /**
  * A modal component to display detailed information about a student.
- * 
+ *
  * @param {Object} currStudent - Current student's details.
  * @param {Function} modelOpen - Function to toggle the modal visibility.
- * 
+ *
  * @returns {JSX.Element} Student information modal component.
  */
 export default function StudentInfo({ currStudent, modelOpen }) {
   const [t] = useTranslation();
   const captureRef = useRef(null);
+
+  useEffect(() => {
+    if (modelOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [modelOpen]);
 
   // print student information in pdf format
   const handleScreenshot = () => {
