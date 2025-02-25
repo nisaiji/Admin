@@ -2,8 +2,8 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 // const baseURL = "http://localhost:4000/";
-const baseURL = "https://api.sharedri.com";
-// const baseURL = "http://development-api.nisaiji.com";
+// const baseURL = "https://api.sharedri.com";
+const baseURL = "http://development-api.nisaiji.com";
 
 export const axiosClient = axios.create({ baseURL });
 
@@ -53,11 +53,7 @@ axiosClient.interceptors.response.use(
     if (data.status === "ok") {
       return data;
     }
-    if (
-      data?.statusCode === 404 &&
-      data?.status === "error" &&
-      data?.message === "Admin not exists"
-    ) {
+    if (data?.statusCode === 410) {
       localStorage.clear();
       setTimeout(() => {
         window.location.replace("/login", "_self");
