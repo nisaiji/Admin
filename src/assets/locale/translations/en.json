@@ -249,7 +249,7 @@
     "classExists": "Class already exists.",
     "titleRequired": "Title is required",
     "descRequired": "Description is required",
-    "oneCheckbox": "Please select at least one checkbox (Holiday or Event) "
+    "oneCheckbox": "Please select at least one checkbox (Holiday) "
   },
   "options": {
     "preNursery": "Pre-Nursery",
