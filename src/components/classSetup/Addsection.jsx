@@ -152,6 +152,10 @@ function Addsection({
    * @param {Object} section - The section to update.
    */
   const handleUpdateTeacherSection = async (section) => {
+    if (selectedSection?.teacher?._id === selectedSection.teacherId) {
+      setSelectedSection(null);
+      return;
+    }
     if (!selectedSection.teacherId) {
       return toast.error(t("toasts.selectTeacher"));
     }
@@ -240,7 +244,7 @@ function Addsection({
 
   return (
     <>
-      <div className="fixed inset-0 flex justify-center items-end pb-10 bg-[#686868] bg-opacity-50">
+      <div className="fixed inset-0 flex justify-center items-end pb-10 bg-[#686868] bg-opacity-50 z-20">
         {loading && (
           <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
             <Spinner />

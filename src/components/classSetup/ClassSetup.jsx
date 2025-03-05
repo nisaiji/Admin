@@ -286,7 +286,7 @@ function ClassSetup() {
                       {isOpen && (
                         <div
                           className="absolute left-0 w-full border border-[#0F4189] bg-white rounded-lg shadow-lg max-h-[150px] 
-                  overflow-y-auto z-50 mt-1"
+                  overflow-y-auto mt-0.5"
                         >
                           {availableClassOptions.map((item, i) => (
                             <div

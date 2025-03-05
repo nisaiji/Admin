@@ -102,20 +102,20 @@ export default function StudentInfo({ currStudent, modelOpen }) {
 
   // parent details
   const guardianDetails = [
-    [t("labels.fullName"), currStudent?.parentDetails?.fullname || CONSTANT.NA],
-    [t("labels.gender"), currStudent?.parentDetails?.gender || CONSTANT.NA],
-    [t("labels.age"), currStudent?.parentDetails?.age || CONSTANT.NA],
-    [t("labels.email"), currStudent?.parentDetails?.email || CONSTANT.NA],
+    [t("labels.guardianName"), currStudent?.parentDetails?.fullname || CONSTANT.NA],
+    // [t("labels.gender"), currStudent?.parentDetails?.gender || CONSTANT.NA],
+    // [t("labels.age"), currStudent?.parentDetails?.age || CONSTANT.NA],
+    // [t("labels.email"), currStudent?.parentDetails?.email || CONSTANT.NA],
     [t("labels.phoneNumber"), currStudent?.parentDetails?.phone || CONSTANT.NA],
-    [
-      t("labels.qualification"),
-      currStudent?.parentDetails?.qualification || CONSTANT.NA,
-    ],
-    [
-      t("labels.occupation"),
-      currStudent?.parentDetails?.occupation || CONSTANT.NA,
-    ],
-    [t("labels.address"), currStudent?.parentDetails?.address || CONSTANT.NA],
+    // [
+    //   t("labels.qualification"),
+    //   currStudent?.parentDetails?.qualification || CONSTANT.NA,
+    // ],
+    // [
+    //   t("labels.occupation"),
+    //   currStudent?.parentDetails?.occupation || CONSTANT.NA,
+    // ],
+    // [t("labels.address"), currStudent?.parentDetails?.address || CONSTANT.NA],
   ];
 
   return (

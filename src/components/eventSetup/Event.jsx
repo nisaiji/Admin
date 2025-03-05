@@ -454,11 +454,23 @@ const Event = () => {
               onBlur={handleGotoDate}
               maxLength={7}
               onChange={(e) => {
-                let value = e.target.value.replace(/\D/g, "");
+                let value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+
                 if (value.length > 4) {
-                  value = value.slice(0, 4) + "/" + value.slice(4);
+                  value = value.slice(0, 4) + "/" + value.slice(4, 6);
                 }
-                e.target.value = value;
+
+                let [year, month] = value.split("/");
+
+                if (year && (year < "2000" || year > "2050")) {
+                  year = year.slice(0, 3); // Prevent invalid year entry
+                }
+
+                if (month && (month < "01" || month > "12")) {
+                  month = month.slice(0, 1); // Prevent invalid month entry
+                }
+
+                e.target.value = [year, month].filter(Boolean).join("/");
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
