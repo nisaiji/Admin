@@ -19,6 +19,7 @@ import {
   Select,
 } from "@mui/material";
 import { Stack } from "@mui/system";
+import Breadcrumbs from "../BreadCrumbs";
 
 export default function Leaves() {
   const { t } = useTranslation();
@@ -47,7 +48,7 @@ export default function Leaves() {
     try {
       setLoading(true);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&page=${pageNo}&limit=${limit}&status=accept,reject,pending,complete`
+        `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&page=${pageNo}&limit=${limit}&status=accept,reject,pending,complete,expired`
       );
       if (res?.statusCode === 200) {
         setRequests(res?.result?.leaveRequests[0]?.teachers || []);
@@ -121,9 +122,12 @@ export default function Leaves() {
         ? requests.filter(
           (req) => req.status === "accept" || req.status === "complete"
         )
-        : selectedTab === "rejected"
-          ? requests.filter((req) => req.status === "reject")
-          : requests;
+
+      : selectedTab === "rejected"
+      ? requests.filter(
+          (req) => req.status === "reject" || req.status === "expired"
+        )
+      : requests;
 
   /**
    * Translates status codes to human-readable text.
@@ -162,8 +166,11 @@ export default function Leaves() {
       <Toaster position="top-center" reverseOrder={false} />
       <div className="bg-[#93a3b6]/25 px-6 py-[25px]">
         <div className="bg-[#fafafa] min-h-screen rounded-[16px]">
-          <div className="text-2xl font-poppins-bold pl-12 py-6">
-            {t("titles.leave")}
+          <div className="pl-12 py-6">
+            <Breadcrumbs />
+            <div className="text-2xl font-poppins-bold">
+              {t("titles.leave")}
+            </div>
           </div>
           {/* tabs */}
           <div className="flex space-x-4 mt-4 pl-12">

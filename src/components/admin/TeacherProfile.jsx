@@ -8,6 +8,7 @@ import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 import moment from "moment";
 import DatePicker from "react-datepicker";
+import Breadcrumbs from "../BreadCrumbs";
 
 export default function TeacherProfile() {
   const [teacher, setTeacher] = useState([]);
@@ -100,6 +101,7 @@ export default function TeacherProfile() {
       {/* Account Setting */}
       <div className="flex flex-col p-10 w-full rounded-2xl bg-[#fafafa] max-md:px-5 max-md:m-10 max-md:max-w-full">
         <Toaster position="top-center" reverseOrder={false} />
+        <Breadcrumbs />
         <div className="text-2xl font-bold tracking-tight leading-8 text-neutral-800">
           {t("adminProfile.accountSettings")}
         </div>

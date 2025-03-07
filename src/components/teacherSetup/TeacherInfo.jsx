@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import profileEmpty from "../../assets/images/profileEmpty.png";
 import cross from "../../assets/images/cross.png";
 import CONSTANT from "../../utils/constants";
@@ -7,14 +7,26 @@ import { useTranslation } from "react-i18next";
 export default function TeacherInfo({ currTeacher, modelOpen }) {
   const [t] = useTranslation();
 
-/**
- * A modal component to display detailed information about a teacher.
- * 
- * @param {Object} currTeacher - Current teacher's details.
- * @param {Function} modelOpen - Function to toggle the modal visibility.
- * 
- * @returns {JSX.Element} Teacher information modal component.
- */
+  useEffect(() => {
+    if (modelOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [modelOpen]);
+
+  /**
+   * A modal component to display detailed information about a teacher.
+   *
+   * @param {Object} currTeacher - Current teacher's details.
+   * @param {Function} modelOpen - Function to toggle the modal visibility.
+   *
+   * @returns {JSX.Element} Teacher information modal component.
+   */
   const personalDetails = [
     [
       t("labels.fullName"),

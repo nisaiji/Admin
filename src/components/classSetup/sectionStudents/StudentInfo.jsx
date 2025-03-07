@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import profileEmpty from "../../../assets/images/profileEmpty.png";
 import cross from "../../../assets/images/cross.png";
 import html2canvas from "html2canvas";
@@ -7,15 +7,27 @@ import CONSTANT from "../../../utils/constants";
 
 /**
  * A modal component to display detailed information about a student.
- * 
+ *
  * @param {Object} currStudent - Current student's details.
  * @param {Function} modelOpen - Function to toggle the modal visibility.
- * 
+ *
  * @returns {JSX.Element} Student information modal component.
  */
 export default function StudentInfo({ currStudent, modelOpen }) {
   const [t] = useTranslation();
   const captureRef = useRef(null);
+
+  useEffect(() => {
+    if (modelOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [modelOpen]);
 
   // print student information in pdf format
   const handleScreenshot = () => {
@@ -90,20 +102,20 @@ export default function StudentInfo({ currStudent, modelOpen }) {
 
   // parent details
   const guardianDetails = [
-    [t("labels.fullName"), currStudent?.parentDetails?.fullname || CONSTANT.NA],
-    [t("labels.gender"), currStudent?.parentDetails?.gender || CONSTANT.NA],
-    [t("labels.age"), currStudent?.parentDetails?.age || CONSTANT.NA],
-    [t("labels.email"), currStudent?.parentDetails?.email || CONSTANT.NA],
+    [t("labels.guardianName"), currStudent?.parentDetails?.fullname || CONSTANT.NA],
+    // [t("labels.gender"), currStudent?.parentDetails?.gender || CONSTANT.NA],
+    // [t("labels.age"), currStudent?.parentDetails?.age || CONSTANT.NA],
+    // [t("labels.email"), currStudent?.parentDetails?.email || CONSTANT.NA],
     [t("labels.phoneNumber"), currStudent?.parentDetails?.phone || CONSTANT.NA],
-    [
-      t("labels.qualification"),
-      currStudent?.parentDetails?.qualification || CONSTANT.NA,
-    ],
-    [
-      t("labels.occupation"),
-      currStudent?.parentDetails?.occupation || CONSTANT.NA,
-    ],
-    [t("labels.address"), currStudent?.parentDetails?.address || CONSTANT.NA],
+    // [
+    //   t("labels.qualification"),
+    //   currStudent?.parentDetails?.qualification || CONSTANT.NA,
+    // ],
+    // [
+    //   t("labels.occupation"),
+    //   currStudent?.parentDetails?.occupation || CONSTANT.NA,
+    // ],
+    // [t("labels.address"), currStudent?.parentDetails?.address || CONSTANT.NA],
   ];
 
   return (

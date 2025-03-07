@@ -64,7 +64,7 @@
     "LOGO": "LOGO",
     "placeholders": {
       "email": "Email",
-      "username": "Username, email or phone",
+      "username": "Username, Email or Phone",
       "password": "Password"
     },
     "forgotPassword": "Forgot Password?",
@@ -81,7 +81,7 @@
   },
   "validationError": {
     "username": "Username is required",
-    "usernameLength": "username should be atleast 5 char long",
+    "usernameLength": "Username should be atleast 5 char long",
     "firstName": "Firstname is required",
     "lastName": "Lastname is required",
     "email": "Email is required",
@@ -98,8 +98,8 @@
     "district": "District is required",
     "pincodeDigit": "Pincode must be 6 digits only",
     "pincode": "Pincode is required",
-    "passwordMatch": "Password and confirm password does not match",
-    "confirmPassword": "Confirm password is required",
+    "passwordMatch": "Password and Confirm Password does not match",
+    "confirmPassword": "Confirm Password is required",
     "state": "State is required",
     "city": "City is required",
     "address": "Address is required",
@@ -210,7 +210,7 @@
     "class": "Class-",
     "section": "Section-",
     "classRoom": "Classroom",
-    "noClassroom": "No Classroom at This time",
+    "noClassroom": "No Classroom at this time",
     "noClassroomDesc": "Classroom will appear here after you create it using the icon above",
     "message": "No Student at this time",
     "subMessage": "Students will appear here after they enroll in your School",
@@ -223,7 +223,7 @@
     "leave": "Leave"
   },
   "buttons": {
-    "print": "print",
+    "print": "Print",
     "screenshot": "Download",
     "cancel": "Cancel",
     "submit": "Submit",

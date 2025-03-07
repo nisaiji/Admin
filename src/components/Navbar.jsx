@@ -162,7 +162,7 @@ const Navbar = () => {
           {/* students setup*/}
           {!isTeacher && (
             <>
-              <Link to="/student" className="py-2">
+              <Link to="/students-list" className="py-2">
                 <span className="text-[#040320] hover:text-[#0F4189] text-sm font-bold">
                   {t("roles.student")}
                 </span>
@@ -196,7 +196,7 @@ const Navbar = () => {
                   className="absolute top-10 w-40 bg-[#fafafa] shadow-lg z-10 "
                 >
                   <Link
-                    to="/requests"
+                    to="/password-reset-requests"
                     className="flex justify-start items-center gap-3 px-3 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                   >
                     <img
@@ -207,7 +207,7 @@ const Navbar = () => {
                     Password Reset
                   </Link>
                   <Link
-                    to="/leave"
+                    to="/teacher-leaves"
                     className="flex justify-start items-start gap-3 px-3 py-3 text-[#040320] text-sm hover:text-[#FF793F] hover:bg-white"
                   >
                     <img

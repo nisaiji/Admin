@@ -56,8 +56,8 @@ const Dashboard = () => {
   });
 
   /**
- * State initialization for attendance times (day, week, month)
- */
+   * State initialization for attendance times (day, week, month)
+   */
   const [attendanceTime, setAttendanceTime] = useState({
     day: getStartEndOfDay(),
     week: getStartEndOfWeek(),
@@ -67,13 +67,13 @@ const Dashboard = () => {
   const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
 
   /**
- * Helper function to fetch data from an API.
- * 
- * @param {string} url - The API endpoint.
- * @param {string} method - HTTP method (default is 'get').
- * @param {object} data - Request payload for POST or PUT requests.
- * @returns {Promise<any>} - Returns the fetched data or null if there's an error.
- */
+   * Helper function to fetch data from an API.
+   *
+   * @param {string} url - The API endpoint.
+   * @param {string} method - HTTP method (default is 'get').
+   * @param {object} data - Request payload for POST or PUT requests.
+   * @returns {Promise<any>} - Returns the fetched data or null if there's an error.
+   */
   const fetchData = async (url, method = "get", data = null) => {
     try {
       const response = await axiosClient[method](
@@ -91,9 +91,9 @@ const Dashboard = () => {
   };
 
   /**
- * Fetches and sets the student count for present, absent, and total students
- * based on the selected time range (day).
- */
+   * Fetches and sets the student count for present, absent, and total students
+   * based on the selected time range (day).
+   */
   const getStudentCount = async () => {
     const url = isTeacher
       ? EndPoints.TEACHER.STUDENT_COUNT
@@ -108,8 +108,8 @@ const Dashboard = () => {
   };
 
   /**
- * Fetches and sets the list of available classes and their corresponding sections.
- */
+   * Fetches and sets the list of available classes and their corresponding sections.
+   */
   const getClassList = async () => {
     const result = await fetchData(EndPoints.COMMON.CLASS_LIST);
 
@@ -125,8 +125,8 @@ const Dashboard = () => {
   }, []);
 
   /**
- * Fetches calendar events based on the selected month.
- */
+   * Fetches calendar events based on the selected month.
+   */
   const getCalenderEvents = async () => {
     const startTime = new Date(date.year, date.month, 1).getTime();
     const endTime = new Date(
@@ -153,16 +153,15 @@ const Dashboard = () => {
   }, [date]);
 
   /**
- * Transforms weekly attendance data into an array of 7 days.
- * 
- * @param {Array} attendanceData - The attendance data for the week.
- * @returns {Array} - Transformed weekly attendance data.
- */
+   * Transforms weekly attendance data into an array of 7 days.
+   *
+   * @param {Array} attendanceData - The attendance data for the week.
+   * @returns {Array} - Transformed weekly attendance data.
+   */
   const transformWeeklyData = (attendanceData) => {
     const weekData = Array(7).fill({ present: 0, absent: 0, na: 0 });
 
     attendanceData.forEach((item) => {
-
       const dayIndex = new Date(item.date).getDay() % 7;
       weekData[dayIndex] = {
         present: item.presentCount,
@@ -176,12 +175,12 @@ const Dashboard = () => {
   };
 
   /**
- * Transforms monthly attendance data into an array for the full month.
- * 
- * @param {Array} attendanceData - The attendance data for the month.
- * @param {number} daysInMonth - Number of days in the current month.
- * @returns {Array} - Transformed monthly attendance data.
- */
+   * Transforms monthly attendance data into an array for the full month.
+   *
+   * @param {Array} attendanceData - The attendance data for the month.
+   * @param {number} daysInMonth - Number of days in the current month.
+   * @returns {Array} - Transformed monthly attendance data.
+   */
   const transformMonthlyData = (attendanceData, daysInMonth) => {
     const monthData = Array.from({ length: daysInMonth }, () => ({
       present: 0,
@@ -202,9 +201,9 @@ const Dashboard = () => {
     return monthData;
   };
 
-/**
- * Fetches daily attendance chart data for the teacher or specific section.
- */
+  /**
+   * Fetches daily attendance chart data for the teacher or specific section.
+   */
   const getDailyAttendanceChart = async () => {
     try {
       const url = isTeacher
@@ -399,9 +398,9 @@ const Dashboard = () => {
 
   // Function to process and display monthly attendance data
   const monthlyData = (attendanceData, total) => {
-    const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
+    const daysInMonth = moment(attendanceTime.month.startTime).daysInMonth();
     const transformedData = transformMonthlyData(attendanceData, daysInMonth);
-     // Extract absent, present, and NA data
+    // Extract absent, present, and NA data
     const absentData = transformedData.map((day) => day.absent);
     const presentData = transformedData.map((day) => day.present);
     const NAData = transformedData.map((day) => day.na);
@@ -701,21 +700,21 @@ const Dashboard = () => {
                 </button>
               </div>
               {/* date change buttons */}
-              <div className="flex justify-between items-center space-x-2 w-[230px]">
+              <div className="flex justify-between items-center space-x-2 w-[270px]">
                 <img
                   src={DownIcon}
                   onClick={() => handleChangeDate("previous")}
                   alt=""
                   className="h-3 w-5 rotate-90 object-contain cursor-pointer"
                 />
-                <div className="text-xl font-poppins-regular">
+                <div className="text-base font-poppins-regular">
                   {selectedOption === "Daily"
                     ? moment(attendanceTime.day.startTime).format(
-                        "ddd, DD MMM YYYY"
+                        "dddd, DD MMM YYYY"
                       )
                     : selectedOption === "Weekly"
                     ? `${moment(attendanceTime.week.startTime).format(
-                        "D"
+                        "D MMM YYYY"
                       )} - ${moment(attendanceTime.week.endTime).format(
                         "D MMM YYYY"
                       )}`
@@ -723,12 +722,34 @@ const Dashboard = () => {
                         "MMMM YYYY"
                       )}
                 </div>
-                <img
-                  src={DownIcon}
-                  onClick={() => handleChangeDate("next")}
-                  alt=""
-                  className="h-3 w-5 -rotate-90 object-contain cursor-pointer"
-                />
+                {!(
+                  selectedOption === "Daily" &&
+                  attendanceTime.day.startTime ===
+                    moment().startOf("day").valueOf()
+                ) &&
+                !(
+                  selectedOption === "Weekly" &&
+                  attendanceTime.week.startTime ===
+                    moment().startOf("week").valueOf()
+                ) &&
+                !(
+                  selectedOption === "Monthly" &&
+                  attendanceTime.month.startTime ===
+                    moment().startOf("month").valueOf()
+                ) ? (
+                  <img
+                    src={DownIcon}
+                    onClick={() => handleChangeDate("next")}
+                    alt=""
+                    className="h-3 w-5 -rotate-90 object-contain cursor-pointer"
+                  />
+                ) : (
+                  <img
+                    src={DownIcon}
+                    alt=""
+                    className="h-3 w-5 -rotate-90 object-contain opacity-5 cursor-not-allowed"
+                  />
+                )}
               </div>
             </div>
             <hr />

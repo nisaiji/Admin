@@ -12,6 +12,7 @@ import {
   Select,
 } from "@mui/material";
 import { Stack } from "@mui/system";
+import Breadcrumbs from "../BreadCrumbs";
 
 /**
  * `Requests` component displays a list of requests made by users.
@@ -149,9 +150,12 @@ export default function Requests() {
       <div className="bg-[#93a3b6]/25 px-6 py-4">
         <div className="bg-[#fafafa] min-h-screen rounded-[16px]">
           <Toaster position="top-center" reverseOrder={false} />
-          <div>
-            <div className="text-2xl font-poppins-bold pl-12 py-6">
-              {t("titles.passwordReset")}
+          <div className="pl-12 py-6">
+            <Breadcrumbs />
+            <div>
+              <div className="text-2xl font-poppins-bold">
+                {t("titles.passwordReset")}
+              </div>
             </div>
             {/* tabs */}
             <div className="flex space-x-4 mt-4 pl-12">

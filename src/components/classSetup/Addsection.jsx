@@ -49,11 +49,10 @@ function Addsection({
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const selectRef = useRef(null);
 
-  console.log('selectedSection', selectedSection);
-  console.log('sections', sections);
-  console.log('teachers', teachers);
-  console.log('newSection', newSection);
-
+  // console.log("selectedSection", selectedSection);
+  // console.log("sections", sections);
+  // console.log("teachers", teachers);
+  // console.log("newSection", newSection);
 
   /**
    * Helper function to generate the next section name based on the length of existing sections.
@@ -153,6 +152,10 @@ function Addsection({
    * @param {Object} section - The section to update.
    */
   const handleUpdateTeacherSection = async (section) => {
+    if (selectedSection?.teacher?._id === selectedSection.teacherId) {
+      setSelectedSection(null);
+      return;
+    }
     if (!selectedSection.teacherId) {
       return toast.error(t("toasts.selectTeacher"));
     }
@@ -183,7 +186,7 @@ function Addsection({
    */
   const handleUpdateClick = async (section) => {
     setSelectedSection({ ...section, teacherId: section?.teacher?._id });
-    setSelectedTeachersList([section?.teacher, ...teachers])
+    setSelectedTeachersList([section?.teacher, ...teachers]);
     setNewSection({
       name: "",
       teacherId: "",
@@ -198,7 +201,7 @@ function Addsection({
    */
   const handleChange = (e, action) => {
     const { name, value } = e.target;
-    if (action === 'update') {
+    if (action === "update") {
       setSelectedSection((prev) => ({ ...prev, teacherId: value }));
     } else setNewSection((prev) => ({ ...prev, [name]: value }));
   };
@@ -208,6 +211,9 @@ function Addsection({
    * This function deletes a section based on the section ID and updates the UI accordingly.
    */
   const handleSectionDelete = async () => {
+    if (toastDisplayed) return;
+    setToastDisplayed(true);
+    setTimeout(() => setToastDisplayed(false), 3000);
     try {
       setLoading(true);
       const res = await axiosClient.delete(
@@ -233,26 +239,27 @@ function Addsection({
     }
   }, [selectedSection]);
 
-  console.log('selectedSection', selectedSection);
-  console.log('sections', sections);
-
+  // console.log("selectedSection", selectedSection);
+  // console.log("sections", sections);
 
   return (
     <>
-      <div className="fixed inset-0 flex justify-center items-end pb-10 bg-[#686868] bg-opacity-50">
+      <div className="fixed inset-0 flex justify-center items-end pb-10 bg-[#686868] bg-opacity-50 z-20">
         {loading && (
           <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
             <Spinner />
           </div>
         )}
         <div
-          className={`${isDarkMode ? "bg-blue-950" : "bg-[#fafafa]"
-            } w-full max-w-3xl h-4/5 py-5 px-12 rounded-2xl shadow-lg overflow-y-auto`}
+          className={`${
+            isDarkMode ? "bg-blue-950" : "bg-[#fafafa]"
+          } w-full max-w-3xl h-4/5 py-5 px-12 rounded-2xl shadow-lg overflow-y-auto`}
         >
           <div className="flex justify-between items-center mb-4 mx-4">
             <div
-              className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-black"
-                } `}
+              className={`text-2xl font-bold ${
+                isDarkMode ? "text-white" : "text-black"
+              } `}
             >
               {t("createSection")}
             </div>
@@ -277,46 +284,56 @@ function Addsection({
             {sections.map((section, index) => (
               <div
                 key={section._id}
-                className={`flex items-center justify-between mb-2 p-4 ${isDarkMode ? "bg-blue-800" : ""
-                  } rounded-lg shadow-sm`}
+                className={`flex items-center justify-between mb-2 p-4 ${
+                  isDarkMode ? "bg-blue-800" : ""
+                } rounded-lg shadow-sm`}
               >
                 <div className="flex justify-center items-center bg-[#DD1B10] ml-8 size-7 rounded-full ">
                   <div className={`text-lg font-medium text-white`}>
                     {section.name}
                   </div>
                 </div>
-                {selectedSection && selectedSection?._id === section?._id ? <select
-                  name="teacherId"
-                  value={selectedSection?.teacherId}
-                  onChange={(e) => handleChange(e, 'update')}
-                  className={` bg-[#fafafa] border border-[#686868] rounded-xl py-1 px-8 ${isDarkMode ? "bg-gray-300" : "text-black bg-[#686868]"
+                {selectedSection && selectedSection?._id === section?._id ? (
+                  <select
+                    name="teacherId"
+                    value={selectedSection?.teacherId}
+                    onChange={(e) => handleChange(e, "update")}
+                    className={` bg-[#fafafa] border border-[#686868] rounded-xl py-1 px-8 ${
+                      isDarkMode ? "bg-gray-300" : "text-black bg-[#686868]"
                     } w-[250px]`}
-                  ref={selectRef}
-                >
-                  <option value="">{t("labels.assignTeacher")}</option>
-                  {selectedTeachersList.map((teacher) => (
-                    <option key={teacher._id} value={teacher._id}>
-                      {teacher.firstname} {teacher.lastname}
-                    </option>
-                  ))}
-                </select> : <div
-                  className={`border border-[#686868]/25 rounded-xl py-1 px-8 ${isDarkMode
-                    ? "bg-gray-300"
-                    : "text-[#686868] bg-[#93a3b6]/10"
+                    ref={selectRef}
+                  >
+                    <option value="">{t("labels.assignTeacher")}</option>
+                    {selectedTeachersList.map((teacher) => (
+                      <option key={teacher._id} value={teacher._id}>
+                        {teacher.firstname} {teacher.lastname}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div
+                    className={`border border-[#686868]/25 rounded-xl py-1 px-8 ${
+                      isDarkMode
+                        ? "bg-gray-300"
+                        : "text-[#686868] bg-[#93a3b6]/10"
                     } w-[250px]`}
-                  data-tsetid="savedTeacherName"
-                >
-                  {section?.teacher?.firstname} {section?.teacher?.lastname}
-                </div>}
+                    data-tsetid="savedTeacherName"
+                  >
+                    {section?.teacher?.firstname} {section?.teacher?.lastname}
+                  </div>
+                )}
                 <DatePicker
-                  selected={(selectedSection?._id === section?._id ? selectedSection?.startTime : section?.startTime) || new Date()}
+                  selected={
+                    (selectedSection?._id === section?._id
+                      ? selectedSection?.startTime
+                      : section?.startTime) || new Date()
+                  }
                   dateFormat="dd/MM/YYYY"
                   // maxDate={new Date()}
                   onKeyDown={(e) => e.preventDefault()}
                   showMonthDropdown
                   showYearDropdown
                   dropdownMode="select"
-
                   // disabled={selectedSection !== section._id}
                   readOnly={true}
                   className="border-2 rounded-xl py-1 px-4 w-36 z-50"
@@ -348,9 +365,10 @@ function Addsection({
                           setDeleteSectionId(section._id);
                           setShowDeleteConfirmation(true);
                         }}
-                        className={`${index !== sections.length - 1 &&
+                        className={`${
+                          index !== sections.length - 1 &&
                           "opacity-50 cursor-not-allowed"
-                          }`}
+                        }`}
                         disabled={index !== sections.length - 1}
                       >
                         <img
@@ -367,8 +385,9 @@ function Addsection({
             {/* add section */}
             {showForm && (
               <div
-                className={`flex items-center justify-between mb-2 p-4 rounded-lg shadow-sm ${isDarkMode ? "bg-blue-800" : ""
-                  }`}
+                className={`flex items-center justify-between mb-2 p-4 rounded-lg shadow-sm ${
+                  isDarkMode ? "bg-blue-800" : ""
+                }`}
               >
                 <div className="flex items-center">
                   <div className="flex justify-center items-center bg-[#DD1B10] size-7 ml-8 rounded-full ">
@@ -380,9 +399,10 @@ function Addsection({
                 <select
                   name="teacherId"
                   value={newSection.teacherId}
-                  onChange={(e) => handleChange(e, 'add')}
-                  className={`border-2 border-[#686868]/25 rounded-xl py-1 px-8 ${isDarkMode ? "bg-gray-300" : "text-black bg-[#93a3b6]/10"
-                    } w-[250px]`}
+                  onChange={(e) => handleChange(e, "add")}
+                  className={`border-2 border-[#686868]/25 rounded-xl py-1 px-8 ${
+                    isDarkMode ? "bg-gray-300" : "text-black bg-[#93a3b6]/10"
+                  } w-[250px]`}
                   ref={selectRef}
                   disabled={selectedSection}
                   data-testid="selectTeacher"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import addclass from "../../assets/images/addclass.png";
 import students from "../../assets/images/students.png";
 import trash from "../../assets/images/trash.png";
@@ -13,6 +13,8 @@ import DeletePopup from "../DeleteMessagePopup";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
+import Breadcrumbs from "../BreadCrumbs";
+import CustomDropdown from "../CustomDropdown";
 
 Modal.setAppElement("#root");
 
@@ -23,11 +25,13 @@ function ClassSetup() {
   const [classes, setClasses] = useState([]);
   const [isFlipped, setIsFlipped] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
   const [clickedClassId, setClickedClassId] = useState("");
   const [addSectionModelOpen, setAddSectionModelOpen] = useState(false);
   const [showDropdowns, setShowDropdowns] = useState({});
   const [loading, setLoading] = useState(false);
+  const [toastDisplayed, setToastDisplayed] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef();
 
   // Class options (mapped with translation keys)
   const classOptions = [
@@ -103,6 +107,9 @@ function ClassSetup() {
 
   // delete class api
   const handleDeleteClass = async () => {
+    if (toastDisplayed) return;
+    setToastDisplayed(true);
+    setTimeout(() => setToastDisplayed(false), 3000);
     try {
       setLoading(true);
       const response = await axiosClient.delete(
@@ -122,6 +129,18 @@ function ClassSetup() {
 
   useEffect(() => {
     getAllClass();
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Available class options that aren't already taken
@@ -148,6 +167,7 @@ function ClassSetup() {
               isDarkMode ? "bg-[#0d192f]" : "bg-[#fafafa]"
             } w-full my-1 px-10 py-6 min-h-[600px] rounded-[16px]`}
           >
+            <Breadcrumbs />
             <h3
               className={`${
                 isDarkMode ? "text-white" : "text-black"
@@ -208,7 +228,7 @@ function ClassSetup() {
                         {data.section.map((section, j) => (
                           <div
                             onClick={() =>
-                              navigate("/student-section", {
+                              navigate("/class-setup/student-section", {
                                 state: {
                                   sectionId: section._id,
                                   classId: data._id,
@@ -265,26 +285,20 @@ function ClassSetup() {
                       }
                     />
                   ) : (
-                    <div className="relative w-10/12">
-                      <div
-                        value=""
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="cursor-pointer shadow appearance-none border border-[#0F4189] rounded-lg w-full py-1 px-2 leading-tight 
-               focus:outline-none focus:shadow-outline text-[#0F4189] text-center text-sm font-poppins-bold"
+                    <div className="relative w-10/12" ref={dropdownRef}>
+                      <button
+                        onClick={() => setIsOpen((prev) => !prev)}
+                        className="cursor-pointer shadow appearance-none border border-[#0F4189] leading-tight focus:outline-none focus:shadow-outline text-[#0F4189] text-center text-sm font-poppins-bold rounded-lg w-full py-1 px-2 max-h-[150px] mt-0.5"
                         data-testid="classlist"
                       >
                         {t("buttons.addClass")}
-                      </div>
+                      </button>
 
-                      {/* Dropdown Options */}
                       {isOpen && (
-                        <div
-                          className="absolute left-0 w-full border border-[#0F4189] bg-white rounded-lg shadow-lg max-h-[150px] 
-                  overflow-y-auto z-50 mt-1"
-                        >
-                          {availableClassOptions.map((item, i) => (
-                            <div
-                              key={i}
+                        <ul className="absolute left-0 w-full border border-[#0F4189] bg-white rounded-lg shadow-lg max-h-[150px] overflow-y-auto mt-0.5">
+                          {availableClassOptions.map((item, index) => (
+                            <li
+                              key={index}
                               onClick={() => {
                                 handleNewClassSubmit(item);
                                 setIsOpen(false);
@@ -292,9 +306,9 @@ function ClassSetup() {
                               className="py-1 px-2 cursor-pointer hover:bg-blue-100 text-[#0F4189] text-center text-sm font-poppins-bold"
                             >
                               {item}
-                            </div>
+                            </li>
                           ))}
-                        </div>
+                        </ul>
                       )}
                     </div>
                   )}
