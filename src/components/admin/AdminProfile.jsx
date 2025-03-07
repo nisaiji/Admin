@@ -290,7 +290,7 @@ export default function AdminProfile() {
               </label>
               <input
                 name="email"
-                placeholder={t("placeholders.Email")}
+                placeholder={t("placeholders.emailAddress")}
                 value={formik.values.email}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -757,7 +757,7 @@ export default function AdminProfile() {
               />
               <input
                 name="facebook"
-                placeholder={t("adminProfile.userName")}
+                placeholder={t("adminProfile.facebook")}
                 value={formik.values.facebook}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -811,7 +811,7 @@ export default function AdminProfile() {
               />
               <input
                 name="linkedin"
-                placeholder={t("adminProfile.userName")}
+                placeholder={t("adminProfile.linkedin")}
                 value={formik.values.linkedin}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -840,7 +840,7 @@ export default function AdminProfile() {
               />
               <input
                 name="twitter"
-                placeholder={t("adminProfile.userName")}
+                placeholder={t("adminProfile.twitter")}
                 value={formik.values.twitter}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -867,7 +867,7 @@ export default function AdminProfile() {
               />
               <input
                 name="whatsapp"
-                placeholder={t("adminProfile.Phone")}
+                placeholder={t("adminProfile.whatsapp")}
                 value={formik.values.whatsapp}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -894,7 +894,7 @@ export default function AdminProfile() {
               />
               <input
                 name="youtube"
-                placeholder={t("adminProfile.userName")}
+                placeholder={t("adminProfile.youtube")}
                 value={formik.values.youtube}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}

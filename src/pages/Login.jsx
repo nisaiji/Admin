@@ -215,19 +215,19 @@ function Login() {
                     "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
                 }}
               />
-              {formik.touched.password && formik.errors.password && (
-                <div className="text-red-500 text-xs">
-                  {formik.errors.password}
-                </div>
-              )}
             </div>
+            {formik.touched.password && formik.errors.password && (
+              <div className="text-red-500 text-xs">
+                {formik.errors.password}
+              </div>
+            )}
 
             {/* Forgot password link */}
-            <div className="text-white text-end text-sm mt-6">
+            {/* <div className="text-white text-end text-sm mt-6">
               <Link to="/forgot-password" className="text-[#040320]/70">
                 {t("login.forgotPassword")}
               </Link>
-            </div>
+            </div> */}
             {/* Submit button */}
             <div className="mt-6">
               <button

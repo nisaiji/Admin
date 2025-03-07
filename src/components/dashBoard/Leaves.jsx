@@ -48,7 +48,7 @@ export default function Leaves() {
     try {
       setLoading(true);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&page=${pageNo}&limit=${limit}&status=accept,reject,pending,complete`
+        `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&page=${pageNo}&limit=${limit}&status=accept,reject,pending,complete,expired`
       );
       if (res?.statusCode === 200) {
         setRequests(res?.result?.leaveRequests[0]?.teachers || []);
@@ -123,7 +123,9 @@ export default function Leaves() {
           (req) => req.status === "accept" || req.status === "complete"
         )
       : selectedTab === "rejected"
-      ? requests.filter((req) => req.status === "reject")
+      ? requests.filter(
+          (req) => req.status === "reject" || req.status === "expired"
+        )
       : requests;
 
   /**
