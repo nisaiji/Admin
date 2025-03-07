@@ -90,7 +90,7 @@ function App() {
                   <Route path="" element={<DashBoard />} />
                   <Route path="students-list" element={<Studentlist />} />
                   <Route path="teacher" element={<TeacherPage />} />
-                  <Route path="teacher/teacher-update" element={<TeacherUpdate />} />
+                  <Route path="teacher/edit-teacher" element={<TeacherUpdate />} />
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
                   <Route path="add-section" element={<Addsection />} />

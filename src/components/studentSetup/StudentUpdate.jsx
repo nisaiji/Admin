@@ -273,9 +273,17 @@ export default function StudentUpdate() {
                 placeholder={placeholder}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                maxLength={name === "phone" ? 10 : ""}
+                maxLength={
+                  name === "phone"
+                    ? 10
+                    : name === "firstname" || name == "lastname"
+                    ? 15
+                    : name == "parentName"
+                    ? 20
+                    : ""
+                }
                 value={formik.values[name]}
-                className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
+                className="border-2 border-[#05022B]/10 rounded-lg pl-2 pr-10 py-1.5 w-full"
               />
             )}
             {icon && (

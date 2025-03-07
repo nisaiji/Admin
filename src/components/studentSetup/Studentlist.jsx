@@ -62,6 +62,25 @@ export default function Studentlist() {
   const classRef = useRef(searchClass);
   const sectionRef = useRef(searchSection);
 
+  const classOptions = [
+    "preNursery",
+    "nursery",
+    "LKG",
+    "UKG",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+  ].map((key) => t(`options.${key}`));
+
   // Fetch initial data when the component is mounted
   useEffect(() => {
     if (id) {
@@ -132,7 +151,17 @@ export default function Studentlist() {
   const getClassList = async () => {
     try {
       const res = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
-      setClassList(res.result);
+
+      // Filter out classes without sections and then sort them.
+      const filteredSortedClasses = res.result
+        .filter((cls) => cls?.section?.length > 0)
+        .sort((a, b) => {
+          const aIndex = classOptions.indexOf(a.name);
+          const bIndex = classOptions.indexOf(b.name);
+          return aIndex - bIndex;
+        });
+
+      setClassList(filteredSortedClasses);
     } catch (e) {
       toast.error(e);
     }
@@ -375,54 +404,54 @@ export default function Studentlist() {
           </div>
           {studentList?.length > 0 ? (
             <>
-              <div className="w-full max-md:max-w-full">
+              <div className="overflow-x-auto relative h-[400px]">
                 <table
                   className={`${
                     isDarkMode ? "bg-[#0D192F]" : "bg-[#fafafa]"
-                  } w-full mt-6 px-10 max-md:max-w-full`}
+                  } min-w-full mt-6 px-10 border-separate border-spacing-0`}
                 >
                   {/* table headings */}
-                  <thead>
+                  <thead className="bg-[#fafafa] text-[#0F4189]/75 text-base font-medium sticky top-0 z-10">
                     <tr className="text-base text-[#0F4189]/75">
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-sm:hidden`}
+                        } text-center px-4 py-2 max-sm:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.fullName")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-xl:hidden`}
+                        } text-center px-4 py-2 max-xl:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.gender")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-md:hidden`}
+                        } text-center px-4 py-2 max-md:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.phoneNumber")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-lg:hidden`}
+                        } text-center px-4 py-2 max-lg:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.email")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-lg:hidden`}
+                        } text-center px-4 py-2 max-lg:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.bloodGroup")}
                       </th>
                       <th
                         className={`${
                           isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2`}
+                        } text-center px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.action")}
                       </th>
@@ -444,35 +473,35 @@ export default function Studentlist() {
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm max-sm:hidden`}
+                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-sm:hidden`}
                         >
                           {student?.firstname} {student?.lastname}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm text-blue-950 max-xl:hidden`}
+                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-xl:hidden`}
                         >
                           {student?.gender}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm max-md:hidden`}
+                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-md:hidden`}
                         >
                           {student?.parentDetails?.phone}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm max-lg:hidden`}
+                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-lg:hidden`}
                         >
                           {student?.parentDetails?.email || CONSTANT.NA}
                         </td>
                         <td
                           className={`${
                             isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm max-lg:hidden`}
+                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-lg:hidden`}
                         >
                           {student?.bloodGroup || CONSTANT.NA}
                         </td>
@@ -480,7 +509,7 @@ export default function Studentlist() {
                         <td
                           className={`${
                             isDarkMode ? "text-white" : ""
-                          } p-4 text-center`}
+                          } p-4 text-center font-medium border border-[#2b2e4a]/25 text-[#040320]`}
                         >
                           <div className="flex justify-around">
                             <button

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import Spinner from "../Spinner";
+import Spinner from "../../components/Spinner";
 import { useTranslation } from "react-i18next";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
@@ -12,7 +12,7 @@ import {
   Select,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import Breadcrumbs from "../BreadCrumbs";
+import Breadcrumbs from "../../components/BreadCrumbs";
 
 /**
  * `Requests` component displays a list of requests made by users.

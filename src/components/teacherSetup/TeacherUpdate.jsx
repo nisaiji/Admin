@@ -256,9 +256,9 @@ const TeacherUpdate = () => {
                               ? 10
                               : name === "firstname" || name == "lastname"
                               ? 15
-                              : ""
+                              : ''
                           }
-                          className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
+                          className="border-2 border-[#05022B]/10 rounded-lg pl-2 pr-10 py-1.5 w-full"
                         />
                       )}
                       {formik.touched[name] && formik.errors[name] && (
