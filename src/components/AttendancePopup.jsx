@@ -67,15 +67,24 @@ export default function AttendancePopup({
    * @param {number} dateIndex - Index of the date in the month (0-based)
    * @returns {boolean} - True if the date is a Sunday or a holiday
    */
-  const isSundayOrHoliday = (dateIndex) => {
+  const isSunday = (dateIndex) => {
     const date = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
       dateIndex + 1
     );
     const isSunday = date.getDay() === 0;
+    return isSunday;
+  };
+
+  const isHoliday = (dateIndex) => {
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      dateIndex + 1
+    );
     const formattedDate = moment(date).format("YYYY-MM-DD");
-    return isSunday || holidays[formattedDate];
+    return holidays[formattedDate];
   };
 
   // Prevent body scrolling when the popup is visible
@@ -147,9 +156,20 @@ export default function AttendancePopup({
 
     // Ensure the date is within the valid range
     if (
-      moment(attendanceDate).valueOf() < startTime ||
-      attendanceDate > moment().endOf("days").valueOf()
+      moment(attendanceDate).format("DD/MM/YYYY") <
+        moment(startTime).format("DD/MM/YYYY") ||
+      moment(attendanceDate).format("DD/MM/YYYY") >
+        moment().startOf("days").format("DD/MM/YYYY")
     ) {
+      // console.log(
+      //   moment(attendanceDate).format("DD/MM/YYYY"),
+      //   moment(startTime).format("DD/MM/YYYY")
+      // );
+      // console.log(
+      //   moment(attendanceDate).format("DD/MM/YYYY"),
+      //   moment().startOf("days").format("DD/MM/YYYY")
+      // );
+
       if (!toastDisplayed) {
         setToastDisplayed(true);
         toast.error(
@@ -254,12 +274,6 @@ export default function AttendancePopup({
     }
   };
 
-  const getCellStyle = (value) => {
-    if (value === "P") return "text-[#0F4189]";
-    if (value === "A" || value === "H") return "text-[#D91111]";
-    return "text-black";
-  };
-
   /**
    * Fetch monthly attendance data for the current month.
    */
@@ -311,8 +325,10 @@ export default function AttendancePopup({
             return {
               date: dateKey,
               attendance:
-                dateKey in holidays || new Date(dateKey).getDay() === 0
+                dateKey in holidays
                   ? "H"
+                  : new Date(dateKey).getDay() === 0
+                  ? "S"
                   : attendanceByDate[dateKey] || "",
             };
           });
@@ -435,12 +451,12 @@ export default function AttendancePopup({
 
     // Add table to PDF
     doc.autoTable({
-      margin: { left: 1, right: 1 },
+      margin: { left: 0, right: 0 },
       startY: 30,
       head: [headers],
       body: rows,
       styles: {
-        fontSize: 6,
+        fontSize: 5,
         lineWidth: 0.01,
         lineColor: [0, 0, 0],
         textColor: [0, 0, 0],
@@ -456,9 +472,9 @@ export default function AttendancePopup({
       alternateRowStyles: { fillColor: [255, 255, 255] },
       columnStyles: {
         0: { cellWidth: 9 }, // S.No
-        1: { cellWidth: 13 }, // Student Name
+        1: { cellWidth: 15 }, // Student Name
         ...Array.from({ length: totalDays }, (_, i) => ({
-          [i + 2]: { cellWidth: 6 }, // date
+          [i + 2]: { cellWidth: 5.5 }, // date
         })).reduce((acc, style) => Object.assign(acc, style), {}),
         [totalDays + 2]: { cellWidth: 15 }, // Total Attendance column
       },
@@ -467,7 +483,11 @@ export default function AttendancePopup({
           const cellValue = data.cell.raw; // Get cell value
           if (cellValue === "P") {
             data.cell.styles.textColor = "#0F4189"; // Blue for "P"
-          } else if (cellValue === "A" || cellValue === "H") {
+          } else if (
+            cellValue === "A" ||
+            cellValue === "H" ||
+            cellValue === "S"
+          ) {
             data.cell.styles.textColor = "#D91111"; // Red for "A"
           }
         }
@@ -595,54 +615,64 @@ export default function AttendancePopup({
                     <td className="border border-gray-300 p-1">
                       {data?.firstname || ""} {data?.lastname || ""}
                     </td>
-                    {data.attendances.map((value, idx) => (
-                      <td key={idx} className="border border-gray-300">
-                        {isEditable ? (
-                          <select
-                            name="attendance"
-                            value={
-                              isSundayOrHoliday(idx) ? "H" : value.attendance
-                            }
-                            disabled={isSundayOrHoliday(idx)}
-                            onChange={(e) => {
-                              handleInputChange(index, idx, e.target.value);
-                            }}
-                            className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring focus:ring-black ${
-                              value?.attendance === "P"
-                                ? "text-[#0F4189]"
-                                : value?.attendance === "A"
-                                ? "text-[#D91111]"
-                                : "text-black"
-                            }`}
-                          >
-                            <option value="" label="" />
-                            <option
-                              value="H"
-                              label="H"
-                              style={{ display: "none" }}
-                            />
-                            <option
-                              value="P"
-                              label="P"
-                              className="text-[#0F4189]"
-                            />
-                            <option
-                              value="A"
-                              label="A"
-                              className="text-[#D91111]"
-                            />
-                          </select>
-                        ) : (
-                          <div
-                            className={`w-full text-center focus:outline-none bg-transparent uppercase ${getCellStyle(
-                              value?.attendance
-                            )}`}
-                          >
-                            {value?.attendance}
-                          </div>
-                        )}
-                      </td>
-                    ))}
+                    {data.attendances.map((value, idx) => {
+                      const attendance = isSunday(idx)
+                        ? "S"
+                        : isHoliday(idx)
+                        ? "H"
+                        : value.attendance;
+                      return (
+                        <td key={idx} className="border border-gray-300">
+                          {isEditable &&
+                          attendance !== "S" &&
+                          attendance !== "H" ? (
+                            <select
+                              name="attendance"
+                              value={attendance}
+                              disabled={isSunday(idx) || isHoliday(idx)}
+                              onChange={(e) => {
+                                handleInputChange(index, idx, e.target.value);
+                              }}
+                              className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring focus:ring-black ${
+                                value?.attendance === "P"
+                                  ? "text-[#0F4189]"
+                                  : value?.attendance === "A"
+                                  ? "text-[#D91111]"
+                                  : "text-black"
+                              }`}
+                            >
+                              <option value="" label="" />
+                              <option
+                                value="P"
+                                label="P"
+                                className="text-[#0F4189]"
+                              />
+                              <option
+                                value="A"
+                                label="A"
+                                className="text-[#D91111]"
+                              />
+                            </select>
+                          ) : (
+                            <div
+                              className={`w-full text-center focus:outline-none bg-transparent uppercase
+                              ${
+                                attendance === "P"
+                                  ? "text-[#0F4189]"
+                                  : attendance === "A" ||
+                                    attendance === "S" ||
+                                    attendance === "H"
+                                  ? "text-[#D91111]"
+                                  : "text-black"
+                              }
+                              `}
+                            >
+                              {attendance}
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
                     {/* Horizontal totals */}
                     <td className="border border-gray-300 p-1 font-poppins-regular">
                       {totalPresent}/{totalAttendanceDays}

@@ -14,6 +14,7 @@ import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import REGEX from "../../utils/regix";
 import Breadcrumbs from "../BreadCrumbs";
+import CONSTANT from "../../utils/constants";
 
 export default function Teacher() {
   const navigate = useNavigate();
@@ -281,6 +282,9 @@ export default function Teacher() {
                       {t("labels.sNo")}
                     </th>
                     <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
+                      {t("labels.class")}
+                    </th>
+                    <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                       {t("labels.firstName")}
                     </th>
                     <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
@@ -289,6 +293,7 @@ export default function Teacher() {
                     <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                       {t("labels.phoneNumber")}
                     </th>
+
                     <th className="px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding">
                       {t("labels.action")}
                     </th>
@@ -304,6 +309,14 @@ export default function Teacher() {
                         } px-4 py-2 font-medium text-center border text-sm border-[#2b2e4a]/25 text-[#040320] `}
                       >
                         {teacher.SNo}
+                      </td>
+                      {/* class */}
+                      <td className="px-4 py-2 text-sm border border-[#2b2e4a]/25">
+                        <div className="w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none bg-white text[#040320]">
+                          {`${teacher.section?.classId?.name || CONSTANT.NA} ${
+                            teacher.section?.name || ""
+                          }`}
+                        </div>
                       </td>
                       {/* First Name */}
                       <td className="px-4 py-2 border text-sm border-[#2b2e4a]/25 ">
@@ -380,7 +393,7 @@ export default function Teacher() {
                         <div className="flex justify-evenly">
                           <button
                             onClick={() =>
-                              navigate("/teacher/teacher-update", {
+                              navigate("/teacher/edit-teacher", {
                                 state: teacher,
                               })
                             }
@@ -390,18 +403,26 @@ export default function Teacher() {
                           <button onClick={() => handleShowInfo(teacher)}>
                             <img src={info} alt="" className="size-5" />
                           </button>
-                          <button
-                            onClick={() => {
-                              setCurrTeacher(teacher);
-                              setShowDeleteConfirmation(true);
-                            }}
-                          >
+                          {teacher?.section ? (
+                            <button
+                              onClick={() => {
+                                setCurrTeacher(teacher);
+                                setShowDeleteConfirmation(true);
+                              }}
+                            >
+                              <img
+                                src={delete2}
+                                alt="deleteTeacher"
+                                className="size-5"
+                              />
+                            </button>
+                          ) : (
                             <img
                               src={delete2}
                               alt="deleteTeacher"
-                              className="size-5"
+                              className="size-5 cursor-not-allowed opacity-50"
                             />
-                          </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -414,6 +435,10 @@ export default function Teacher() {
                       } px-4 py-2 text-center text-[#040320] font-medium border border-[#2b2e4a]/25`}
                     >
                       {teachers.length + 1}
+                    </td>
+                    {/* class */}
+                    <td className="py-1 px-3 text-center border border-[#2b2e4a]/25">
+                      {CONSTANT.NA}
                     </td>
                     {/* First Name */}
                     <td className="py-1 px-3 border border-[#2b2e4a]/25">

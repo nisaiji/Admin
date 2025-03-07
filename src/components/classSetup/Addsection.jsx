@@ -255,7 +255,7 @@ function Addsection({
             isDarkMode ? "bg-blue-950" : "bg-[#fafafa]"
           } w-full max-w-3xl h-4/5 py-5 px-12 rounded-2xl shadow-lg overflow-y-auto`}
         >
-          <div className="flex justify-between items-center mb-4 mx-4">
+          <div className="flex justify-between items-center mb-4">
             <div
               className={`text-2xl font-bold ${
                 isDarkMode ? "text-white" : "text-black"
@@ -273,7 +273,7 @@ function Addsection({
               alt="Close"
             />
           </div>
-          <div className="flex justify-between px-8 mt-[30px] mb-[10px] ">
+          <div className="mx-auto grid grid-cols-[140px_250px_164px_78px] items-start mt-8 mb-2">
             <div className="font-medium text-[16px]">{t("sections")}</div>
             <div className="font-medium text-[16px]">{t("ClassTeacher")}</div>
             <div className="font-medium text-[16px]">{t("startTime")}</div>
@@ -288,7 +288,7 @@ function Addsection({
                   isDarkMode ? "bg-blue-800" : ""
                 } rounded-lg shadow-sm`}
               >
-                <div className="flex justify-center items-center bg-[#DD1B10] ml-8 size-7 rounded-full ">
+                <div className="flex justify-center items-center bg-[#DD1B10] size-7 rounded-full ">
                   <div className={`text-lg font-medium text-white`}>
                     {section.name}
                   </div>
@@ -330,13 +330,13 @@ function Addsection({
                   }
                   dateFormat="dd/MM/YYYY"
                   // maxDate={new Date()}
-                  onKeyDown={(e) => e.preventDefault()}
-                  showMonthDropdown
-                  showYearDropdown
-                  dropdownMode="select"
+                  // onKeyDown={(e) => e.preventDefault()}
+                  // showMonthDropdown
+                  // showYearDropdown
+                  // dropdownMode="select"
                   // disabled={selectedSection !== section._id}
                   readOnly={true}
-                  className="border-2 rounded-xl py-1 px-4 w-36 z-50"
+                  className="border-2 rounded-xl py-1 px-4 w-36 z-50 cursor-not-allowed opacity-50 focus:outline-none"
                 />
                 <div className="flex items-center">
                   {selectedSection?._id === section._id ? (
@@ -390,7 +390,7 @@ function Addsection({
                 }`}
               >
                 <div className="flex items-center">
-                  <div className="flex justify-center items-center bg-[#DD1B10] size-7 ml-8 rounded-full ">
+                  <div className="flex justify-center items-center bg-[#DD1B10] size-7 rounded-full ">
                     <div className={`text-lg font-medium text-white`}>
                       {getNextSectionName(sections)}
                     </div>
@@ -431,7 +431,7 @@ function Addsection({
                   showMonthDropdown
                   showYearDropdown
                   dropdownMode="select"
-                  readOnly={selectedSection}
+                  disabled={selectedSection}
                   className="border-2 rounded-xl py-1 px-4 w-36 z-50"
                 />
                 <button

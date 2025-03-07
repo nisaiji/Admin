@@ -187,7 +187,7 @@ function ClassSetup() {
                   <div
                     className={`${
                       isDarkMode ? "bg-[#152f54] bg-opacity-70" : ""
-                    } my-3 md:my-6 mx-3 md:mx-4 w-16 h-16 md:w-40 md:h-40 border-1 border-[#0F4189] rounded-3xl cursor-pointer`}
+                    } m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 rounded-3xl cursor-pointer`}
                   >
                     <div className="relative rounded-full h-[40] w-[40] z-10">
                       <img
@@ -269,7 +269,7 @@ function ClassSetup() {
                 <div
                   className={`${
                     isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
-                  } m-3 md:m-6 w-16 h-16 md:w-40 md:h-40 flex justify-center items-center border border-[#0F4189] rounded-3xl `}
+                  } m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border border-[#0F4189] rounded-3xl flex justify-center items-center`}
                 >
                   {/* available class dropdown */}
                   {!showDropdowns[classes.length] ? (

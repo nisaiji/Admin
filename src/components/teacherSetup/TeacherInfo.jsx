@@ -8,12 +8,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
   const [t] = useTranslation();
 
   useEffect(() => {
-    if (modelOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-
+    document.body.style.overflow = modelOpen ? "hidden" : "auto";
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -54,10 +49,10 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
 
   return (
     <>
-      <div className="fixed inset-0 flex justify-center items-end pb-5 bg-gray-900 bg-opacity-50 z-50">
-        <div className="relative flex flex-col w-[80%] max-h-[90vh] bg-[#fafafa] rounded-lg shadow-lg overflow-hidden">
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50 p-4">
+        <div className="relative bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-3xl">
           <div
-            className="absolute top-3 right-3 cursor-pointer"
+            className="absolute top-4 right-4 cursor-pointer text-gray-600 hover:text-gray-800"
             onClick={() => modelOpen(false)}
           >
             <img className="h-10 w-10" src={cross} alt="Close" />
@@ -67,30 +62,42 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
               <h2 className="text-2xl font-bold mb-4">
                 {t("titles.teacherDetails")}
               </h2>
-              <h3 className="pb-2 font-bold">
-                {t("titles.teacherPersonalDetails")}
-              </h3>
-              <div className="pb-6 font-medium">
-                {personalDetails.map(([label, value], index) => (
-                  <div className="flex pb-2" key={index}>
-                    <p className="w-1/3">{label}</p>
-                    <p className="w-1/5">-</p>
-                    <p className="w-1/3 font-poppins-bold">{value}</p>
-                  </div>
-                ))}
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold mb-2">
+                  {t("titles.teacherPersonalDetails")}
+                </h3>
+                <div className="space-y-2">
+                  {personalDetails.map(([label, value], index) => (
+                    <div className="flex" key={index}>
+                      <span className="w-1/3 font-medium text-gray-700">
+                        {label}:
+                      </span>
+                      <span className="w-2/3 font-semibold text-gray-900">
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <h3 className="pb-2 font-bold">{t("titles.educationDetails")}</h3>
-              <div className="font-medium">
-                {educationDetails.map(([label, value], index) => (
-                  <div className="flex pb-2" key={index}>
-                    <p className="w-1/3">{label}</p>
-                    <p className="w-1/5">-</p>
-                    <p className="w-1/3 font-poppins-bold">{value}</p>
-                  </div>
-                ))}
+              <div>
+                <h3 className="text-xl font-semibold mb-2">
+                  {t("titles.educationDetails")}
+                </h3>
+                <div className="space-y-2">
+                  {educationDetails.map(([label, value], index) => (
+                    <div className="flex" key={index}>
+                      <span className="w-1/3 font-medium text-gray-700">
+                        {label}:
+                      </span>
+                      <span className="w-2/3 font-semibold text-gray-900">
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="flex justify-center items-start pt-24 w-full md:w-1/3 pr-2">
+            <div className="md:w-1/3 p-6 flex items-center justify-center border-t md:border-t-0 md:border-l border-gray-200">
               <img
                 className="h-[200px] w-[200px] object-contain"
                 src={
