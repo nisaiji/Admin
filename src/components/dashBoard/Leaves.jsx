@@ -119,9 +119,10 @@ export default function Leaves() {
     selectedTab === "all"
       ? requests
       : selectedTab === "approved"
-      ? requests.filter(
+        ? requests.filter(
           (req) => req.status === "accept" || req.status === "complete"
         )
+
       : selectedTab === "rejected"
       ? requests.filter(
           (req) => req.status === "reject" || req.status === "expired"
@@ -176,11 +177,10 @@ export default function Leaves() {
             {["all", "approved", "rejected"].map((tab) => (
               <div
                 key={tab}
-                className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
-                  selectedTab === tab
+                className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${selectedTab === tab
                     ? "pb-3 border-b-[3px] border-[#FF793F]"
                     : ""
-                }`}
+                  }`}
                 onClick={() => setSelectedTab(tab)}
               >
                 {t(`labels.${tab}`)}
@@ -226,9 +226,8 @@ export default function Leaves() {
                   {filteredRequests.map((req, index) => (
                     <tr
                       key={index}
-                      className={`${
-                        index % 2 === 0 ? "bg-[#4645900D]" : ""
-                      } border-t `}
+                      className={`${index % 2 === 0 ? "bg-[#4645900D]" : ""
+                        } border-t `}
                     >
                       {/* row expand button */}
                       <td className="px-4 py-2 align-top">
@@ -242,14 +241,12 @@ export default function Leaves() {
                             )
                           }
                           alt=""
-                          className={`size-4 ml-8 ${
-                            expandedRow === index ? "rotate-180" : ""
-                          } ${
-                            req?.status === "accept" ||
-                            req?.status === "complete"
+                          className={`size-4 ml-8 ${expandedRow === index ? "rotate-180" : ""
+                            } ${req?.status === "accept" ||
+                              req?.status === "complete"
                               ? "cursor-pointer"
                               : "cursor-not-allowed"
-                          }`}
+                            }`}
                         />
                       </td>
                       <td className="px-4 py-2 align-top">
@@ -271,7 +268,7 @@ export default function Leaves() {
                               placeholder="Enter Username"
                               value={
                                 req?.status === "accept" ||
-                                req?.status === "complete"
+                                  req?.status === "complete"
                                   ? req?.guestTeacher?.username || ""
                                   : formData.username
                               }
@@ -285,12 +282,11 @@ export default function Leaves() {
                                 req?.status === "accept" ||
                                 req?.status === "complete"
                               }
-                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
-                                req?.status === "accept" ||
-                                req?.status === "complete"
+                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${req?.status === "accept" ||
+                                  req?.status === "complete"
                                   ? "bg-gray-200 cursor-not-allowed"
                                   : ""
-                              }`}
+                                }`}
                             />
                           </>
                         )}
@@ -313,7 +309,7 @@ export default function Leaves() {
                               placeholder="Substitute Teacher"
                               value={
                                 req?.status === "accept" ||
-                                req?.status === "complete"
+                                  req?.status === "complete"
                                   ? req?.guestTeacher?.tagline || ""
                                   : formData.fullname
                               }
@@ -327,12 +323,11 @@ export default function Leaves() {
                                 req?.status === "accept" ||
                                 req?.status === "complete"
                               }
-                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
-                                req?.status === "accept" ||
-                                req?.status === "complete"
+                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${req?.status === "accept" ||
+                                  req?.status === "complete"
                                   ? "bg-gray-200 cursor-not-allowed"
                                   : ""
-                              }`}
+                                }`}
                             />
                           </>
                         )}
@@ -357,7 +352,7 @@ export default function Leaves() {
                                 placeholder="Password"
                                 value={
                                   req?.status === "accept" ||
-                                  req?.status === "complete"
+                                    req?.status === "complete"
                                     ? req?.guestTeacher?.secretKey || ""
                                     : formData.password
                                 }
@@ -371,15 +366,14 @@ export default function Leaves() {
                                   req?.status === "accept" ||
                                   req?.status === "complete"
                                 }
-                                className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
-                                  req?.status === "accept" ||
-                                  req?.status === "complete"
+                                className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${req?.status === "accept" ||
+                                    req?.status === "complete"
                                     ? "bg-gray-200 cursor-not-allowed"
                                     : ""
-                                }`}
+                                  }`}
                               />
                               {req?.status === "accept" ||
-                              req?.status === "complete" ? (
+                                req?.status === "complete" ? (
                                 <></>
                               ) : (
                                 <div
@@ -414,12 +408,11 @@ export default function Leaves() {
                               req?.status === "accept" ||
                               req?.status === "complete"
                             }
-                            className={`${
-                              req?.status === "accept" ||
-                              req?.status === "complete"
+                            className={`${req?.status === "accept" ||
+                                req?.status === "complete"
                                 ? "bg-gray-400 cursor-not-allowed"
                                 : "bg-[#0F4189] text-white"
-                            } text-xs font-poppins-bold px-4 py-2 rounded-md`}
+                              } text-xs font-poppins-bold px-4 py-2 rounded-md`}
                           >
                             Save
                           </button>
@@ -551,7 +544,7 @@ export default function Leaves() {
           handleSave(currentReq._id, "reject");
           setshowConformationPopup(false);
         }}
-        message={"Please Confirm reject this leave request"}
+        message={"Please confirm if you want to reject this leave request."}
       />
 
       {/* Leave Description Popup */}

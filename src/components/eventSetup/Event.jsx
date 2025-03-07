@@ -22,19 +22,17 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
 
   return (
     <div
-      className={`${
-        isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
-      } calendar pl-16 rounded-lg w-full `}
+      className={`${isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
+        } calendar pl-16 rounded-lg w-full `}
     >
       {/* Month Navigation */}
       <div className="month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
         <FontAwesomeIcon
           icon={faAngleLeft}
-          className={`${
-            isDarkMode
-              ? "text-white"
-              : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
-          } cursor-pointer size-5`}
+          className={`${isDarkMode
+            ? "text-white"
+            : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
+            } cursor-pointer size-5`}
           onClick={onPrevMonth}
           data-testid="prev"
         />
@@ -43,20 +41,18 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         </div>
         <FontAwesomeIcon
           icon={faAngleRight}
-          className={`${
-            isDarkMode
-              ? "text-white"
-              : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
-          } cursor-pointer size-5`}
+          className={`${isDarkMode
+            ? "text-white"
+            : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
+            } cursor-pointer size-5`}
           onClick={onNextMonth}
           data-testid="next"
         />
       </div>
       {/* Weekdays header */}
       <div
-        className={`${
-          isDarkMode ? "text-white" : "text-[#6E6F81]/75"
-        } weekdays grid grid-cols-7 pl-6 text-sm font-medium capitalize pt-3`}
+        className={`${isDarkMode ? "text-white" : "text-[#6E6F81]/75"
+          } weekdays grid grid-cols-7 pl-6 text-sm font-medium capitalize pt-3`}
       >
         {CONSTANT.WEEKDAYS.map((day) => (
           <div key={day} className="text-left">
@@ -255,10 +251,6 @@ const Event = () => {
   const validateForm = (form) => {
     if (!form.title.trim()) {
       toast.error(t("toasts.titleRequired"));
-      return false;
-    }
-    if (!form.description.trim()) {
-      toast.error(t("toasts.descRequired"));
       return false;
     }
     return true;
@@ -538,18 +530,16 @@ const Event = () => {
                   <div className="bg-[#fafafa] mt-2">
                     <div className="flex py-1 justify-between items-center">
                       <div
-                        className={`${
-                          false ? "bg-[#102945] text-white" : ""
-                        } py-0 px-1 ml-4 text-xs font-bold`}
+                        className={`${false ? "bg-[#102945] text-white" : ""
+                          } py-0 px-1 ml-4 text-xs font-bold`}
                       >
                         {itm.title}
                       </div>
                     </div>
                     <div className="flex pb-2 justify-between items-center">
                       <div
-                        className={`${
-                          false ? "bg-[#102945] text-white" : ""
-                        } py-0 px-1 ml-4 text-xs font-poppins-regular`}
+                        className={`${false ? "bg-[#102945] text-white" : ""
+                          } py-0 px-1 ml-4 text-xs font-poppins-regular`}
                       >
                         {itm.description}
                       </div>
