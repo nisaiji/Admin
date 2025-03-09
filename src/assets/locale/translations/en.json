@@ -273,6 +273,10 @@
     "female": "Female",
     "other": "Other"
   },
+  "confirm": {
+    "leave": "Please confirm if you want to reject this leave request.",
+    "sectionStartTime": "Please confirm that the entered Start Date is the correct date to begin the session."
+  },
   "eventForm": {
     "title": {
       "add": "Add New Holiday",

@@ -85,9 +85,14 @@ export default function AdminProfile() {
       setLoading(true);
       const res = await axiosClient.get(EndPoints.ADMIN.GET_ADMIN);
       if (res?.statusCode === 200) {
-        const initialState = res.result.state || "";
-        const state = statesAndCity.states.find((s) => s.name === initialState);
-        setFilteredCities(state ? state.cities : []);
+        if (res?.result?.country === "Indai") {
+          setSelectedCountry("India");
+        }
+        const initialState = res?.result?.state || "";
+        const state = statesAndCity?.states.find(
+          (s) => s.name === initialState
+        );
+        setFilteredCities(state ? state?.cities : []);
         setAdmin(res?.result);
         formik.setValues({
           ...formik.initialValues,
@@ -205,6 +210,9 @@ export default function AdminProfile() {
     // Reset fields when changing the country
     formik.setFieldValue("state", "");
     formik.setFieldValue("district", "");
+    formik.setFieldValue("pincode", "");
+    formik.setFieldValue("city", "");
+    formik.setFieldValue("address", "");
 
     if (country === "India") {
       // Accessing the states array inside the StateAndDistricts object
@@ -224,6 +232,9 @@ export default function AdminProfile() {
 
     // Reset fields when changing the state
     formik.setFieldValue("district", "");
+    formik.setFieldValue("pincode", "");
+    formik.setFieldValue("city", "");
+    formik.setFieldValue("address", "");
 
     formik.setFieldValue("state", e.target.value);
     if (selectedState) {
@@ -647,6 +658,7 @@ export default function AdminProfile() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid="pincode"
+                maxLength={6}
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.pincode && formik.touched.pincode
                     ? "border-red-500"
@@ -666,7 +678,6 @@ export default function AdminProfile() {
               onClick={handleProfileUpdate}
               type="button"
               data-testid="account-submit"
-              // disabled={formik.isSubmitting || !formik.isValid}
               className="px-6 py-2 text-white bg-[#0F4189] rounded-lg"
             >
               {t("buttons.saveChanges")}
@@ -708,6 +719,7 @@ export default function AdminProfile() {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               data-testid="phone"
+              maxLength={10}
               className="flex-auto text-black bg-transparent outline-none"
             />
             {formik.errors.phone && formik.touched.phone && (
@@ -915,7 +927,6 @@ export default function AdminProfile() {
             onClick={handleSocialProfileUpdate}
             type="button"
             data-testid="social-submit"
-            disabled={formik.isSubmitting || !formik.isValid}
             className="px-6 py-2 text-white bg-[#0F4189] rounded-lg"
           >
             {t("buttons.saveChanges")}

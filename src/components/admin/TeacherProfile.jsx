@@ -194,7 +194,8 @@ export default function TeacherProfile() {
                 onKeyDown={(e) => e.preventDefault()}
                 showMonthDropdown
                 showYearDropdown
-                dropdownMode="select"
+                scrollableYearDropdown={true}
+                dropdownMode="scroll"
               />
               {formik.errors.dob && formik.touched.dob && (
                 <div className="text-red-500 text-sm mt-1">

@@ -59,6 +59,7 @@ export default function Studentlist() {
 
   // State variables for loading and references
   const [loading, setLoading] = useState(false);
+  const debounceTimeoutRef = useRef(null);
   const classRef = useRef(searchClass);
   const sectionRef = useRef(searchSection);
 
@@ -177,7 +178,14 @@ export default function Studentlist() {
   /**
    * Handle student search based on name and section.
    */
-  const handleSearch = () => fetchStudents({ searchName: name, searchSection });
+  useEffect(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    debounceTimeoutRef.current = setTimeout(async () => {
+      fetchStudents({ searchName: name, searchSection });
+    }, 1000);
+  }, [name]);
 
   /**
    * Show information modal for a specific student.
@@ -261,7 +269,7 @@ export default function Studentlist() {
         </div>
         <div className="flex flex-col self-center w-full font-medium max-w-full max-md:max-w-full">
           {/* Search Bar*/}
-          <div className="flex pl-4 gap-5 h-10 mt-5 max-md:flex-wrap max-md:mt-10 mb-10">
+          <div className="flex gap-5 max-md:flex-wrap mb-5">
             <div className="flex flex-auto justify-around gap-3 text-md text-[#686868]/75 max-md:flex-wrap max-md:max-w-full">
               <div
                 className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px] basis-0 w-fit max-md:max-w-full max-md:hidden`}
@@ -273,7 +281,6 @@ export default function Studentlist() {
                       size="medium"
                       sx={{
                         width: "150px",
-                        mr: "10px",
                         border: "1px solid #d1d5db", // Tailwind's border-gray-300 equivalent
                         borderRadius: "14px",
                         backgroundColor: "#fafafa",
@@ -332,7 +339,6 @@ export default function Studentlist() {
                       size="medium"
                       sx={{
                         width: "150px",
-                        mr: "10px",
                         border: "1px solid #d1d5db",
                         borderRadius: "14px",
                         backgroundColor: "#fafafa",
@@ -370,8 +376,9 @@ export default function Studentlist() {
                         })}
                       </Select>
                     </FormControl>
+
                     {/* Search Bar */}
-                    <div className="flex px-3 rounded-[14px] mx-2 w-full max-w-[800px] shadow-sm border border-gray-300">
+                    <div className="flex px-3 rounded-[14px] w-full max-w-[800px] shadow-sm border border-gray-300">
                       <div className="flex items-center pl-3 pointer-events-none">
                         <img src={Search} alt="" className="w-5 h-5" />
                       </div>
@@ -383,16 +390,12 @@ export default function Studentlist() {
                           setName(e.target.value);
                         }}
                         value={name}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleSearch();
-                          }
-                        }}
                       />
                     </div>
+
                     {/* Clear button */}
                     <button
-                      className="hover:bg-[#E9EEF2]/50 hover:bg-white border-[#E9EEF2] border-2 ml-2 w-20 text-lg rounded-[14px] flex items-center justify-center"
+                      className="hover:bg-[#E9EEF2]/50 hover:bg-white border-[#E9EEF2] border-2 w-20 text-lg rounded-[14px] flex items-center justify-center"
                       onClick={handleClear}
                     >
                       <img src={clear} alt="Clear" className="w-6 h-6" />
@@ -408,7 +411,7 @@ export default function Studentlist() {
                 <table
                   className={`${
                     isDarkMode ? "bg-[#0D192F]" : "bg-[#fafafa]"
-                  } min-w-full mt-6 px-10 border-separate border-spacing-0`}
+                  } min-w-full px-10 border-separate border-spacing-0`}
                 >
                   {/* table headings */}
                   <thead className="bg-[#fafafa] text-[#0F4189]/75 text-base font-medium sticky top-0 z-10">
@@ -623,7 +626,10 @@ export default function Studentlist() {
             <>
               {/* no student */}
               <div className="flex flex-col items-center justify-center text-center pb-6">
-                <img src={nostudent} className="mb-4 size-52" />
+                <img
+                  src={nostudent}
+                  className="mb-4 h-[200px] w-[250px] object-contain"
+                />
                 <p
                   className={`${
                     isDarkMode ? "text-white" : "text-blue-950"

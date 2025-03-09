@@ -224,7 +224,8 @@ const TeacherUpdate = () => {
                           onKeyDown={(e) => e.preventDefault()}
                           showMonthDropdown
                           showYearDropdown
-                          dropdownMode="select"
+                          scrollableYearDropdown={true}
+                          dropdownMode="scroll"
                         />
                       ) : (
                         <input
@@ -256,7 +257,7 @@ const TeacherUpdate = () => {
                               ? 10
                               : name === "firstname" || name == "lastname"
                               ? 15
-                              : ''
+                              : ""
                           }
                           className="border-2 border-[#05022B]/10 rounded-lg pl-2 pr-10 py-1.5 w-full"
                         />

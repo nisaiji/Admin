@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import cross from "../../assets/images/cross.png";
+import ConformationPopup from "../ConformationPopup";
 
 function Addsection({
   isVisible,
@@ -20,6 +21,7 @@ function Addsection({
 }) {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const { t } = useTranslation();
+  const [showConformationPopup, setshowConformationPopup] = useState(false);
 
   useEffect(() => {
     if (isVisible) {
@@ -94,11 +96,7 @@ function Addsection({
     fetchData();
   }, []);
 
-  /**
-   * Handles the saving of a new section.
-   * This function checks if the section limit is reached, if a teacher is selected, and then attempts to save the section.
-   */
-  const handleSaveSection = async () => {
+  const checkValidation = () => {
     if (sections.length >= 8) {
       if (!toastDisplayed) {
         setToastDisplayed(true);
@@ -115,7 +113,13 @@ function Addsection({
       }
       return;
     }
-
+    setshowConformationPopup(true);
+  };
+  /**
+   * Handles the saving of a new section.
+   * This function checks if the section limit is reached, if a teacher is selected, and then attempts to save the section.
+   */
+  const handleSaveSection = async () => {
     try {
       setLoading(true);
       const sectionData = {
@@ -342,13 +346,7 @@ function Addsection({
                   {selectedSection?._id === section._id ? (
                     <button
                       onClick={() => handleUpdateTeacherSection(section)}
-                      className={`mr-2 bg-[#4834D4] `}
-                      style={{
-                        height: 32,
-                        width: 75,
-                        borderRadius: 12,
-                        color: "white",
-                      }}
+                      className={`mr-2 w-[75px] h-[32px] border border-[#4834D4] text-[#4834D4] rounded-xl`}
                     >
                       {t("buttons.save")}
                     </button>
@@ -430,12 +428,13 @@ function Addsection({
                   onKeyDown={(e) => e.preventDefault()}
                   showMonthDropdown
                   showYearDropdown
-                  dropdownMode="select"
+                  scrollableYearDropdown={true}
+                  dropdownMode="scroll"
                   disabled={selectedSection}
                   className="border-2 rounded-xl py-1 px-4 w-36 z-50"
                 />
                 <button
-                  onClick={handleSaveSection}
+                  onClick={checkValidation}
                   className={`mr-2 bg-[#0F4189] `}
                   style={{
                     height: 32,
@@ -452,6 +451,17 @@ function Addsection({
             )}
           </div>
         </div>
+
+        {/* confirm popup of section startDate */}
+        <ConformationPopup
+          isVisible={showConformationPopup}
+          onClose={() => setshowConformationPopup(false)}
+          onSubmit={() => {
+            handleSaveSection();
+            setshowConformationPopup(false);
+          }}
+          message={t("confirm.sectionStartTime")}
+        />
 
         {/* delete comfirmation popup */}
         {showDeleteConfirmation && (
