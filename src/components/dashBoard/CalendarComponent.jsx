@@ -74,8 +74,7 @@ const Day = ({ day, isHoliday, onClick, isSunday, isToday }) => {
 
   return (
     <div
-      className={`day ${renderCss()}
-       cursor-pointer rounded-[12px] flex font-bold ml-3 p-3 w-[60px] h-[70px]`}
+      className={`day ${renderCss()} rounded-[12px] flex font-bold ml-3 p-3 w-[60px] h-[70px]`}
       onClick={onClick}
     >
       {day}

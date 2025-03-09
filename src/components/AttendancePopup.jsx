@@ -89,11 +89,7 @@ export default function AttendancePopup({
 
   // Prevent body scrolling when the popup is visible
   useEffect(() => {
-    if (isVisible) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = isVisible ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -254,6 +250,7 @@ export default function AttendancePopup({
           });
         });
       });
+// console.log({studentsAttendances});
 
       // Determine API endpoint based on role
       const url = isTeacher

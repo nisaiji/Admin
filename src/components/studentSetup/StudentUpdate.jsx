@@ -264,7 +264,8 @@ export default function StudentUpdate() {
                 onKeyDown={(e) => e.preventDefault()}
                 showMonthDropdown
                 showYearDropdown
-                dropdownMode="select"
+                scrollableYearDropdown={true}
+                dropdownMode="scroll"
               />
             ) : (
               <input

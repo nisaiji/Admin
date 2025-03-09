@@ -36,6 +36,24 @@ const Dashboard = () => {
     month: moment().month(),
     year: moment().year(),
   });
+  const classOptions = [
+    "preNursery",
+    "nursery",
+    "LKG",
+    "UKG",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+  ].map((key) => t(`options.${key}`));
 
   // Gets the start and end of the current day
   const getStartEndOfDay = () => ({
@@ -114,8 +132,17 @@ const Dashboard = () => {
     const result = await fetchData(EndPoints.COMMON.CLASS_LIST);
 
     if (result) {
-      setClassList(result);
-      const [firstClass] = result;
+      // Filter out classes without sections and then sort them.
+      const filteredSortedClasses = result
+        .filter((cls) => cls?.section?.length > 0)
+        .sort((a, b) => {
+          const aIndex = classOptions.indexOf(a.name);
+          const bIndex = classOptions.indexOf(b.name);
+          return aIndex - bIndex;
+        });
+
+      setClassList(filteredSortedClasses);
+      const [firstClass] = filteredSortedClasses;
       setSectionList(firstClass?.section || []);
     }
   };

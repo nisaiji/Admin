@@ -10,11 +10,7 @@ export default function ConformationPopup({
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (isVisible) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
+    document.body.style.overflow = isVisible ? "hidden" : "auto";
 
     return () => {
       document.body.style.overflow = "auto";
@@ -28,7 +24,7 @@ export default function ConformationPopup({
       <div className="bg-white p-5 rounded shadow-lg">
         <div className="flex">
           <div className="ml-3">
-            <div className="flex justify-betweens">
+            <div className="flex justify-betweens max-w-[400px]">
               <p className="font-semibold text-black">{message}</p>
             </div>
           </div>
