@@ -285,13 +285,13 @@ const TeacherUpdate = () => {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="border-2 border-[#686868]/75 text-[#040320] py-2 px-4 rounded-xl w-36"
+                className="border-2 border-[#686868]/75 text-[#040320] py-2 px-4 rounded-xl w-36 transition-all duration-200 ease-in-out active:scale-90"
               >
                 {t("buttons.cancel")}
               </button>
               <button
                 type="submit"
-                className="bg-[#0F4189] text-white py-2 px-4 rounded-xl w-36"
+                className="bg-[#0F4189] text-white py-2 px-4 rounded-xl w-36 transition-all duration-200 ease-in-out active:scale-90"
                 data-testid="updateTeacherInfo"
               >
                 {t("buttons.save")}

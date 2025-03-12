@@ -257,7 +257,7 @@ function ClassSetup() {
                         setAddSectionModelOpen(true);
                       }}
                     >
-                      <div className="bg-[#0F4189] text-white text-center text-xs md:text-sm py-1 px-6 rounded-full">
+                      <div className="bg-[#0F4189] text-white text-center text-xs md:text-sm py-1 px-6 rounded-full transition-all duration-200 ease-in-out active:scale-90">
                         {t("buttons.update")}
                       </div>
                     </Link>

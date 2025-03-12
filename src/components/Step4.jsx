@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
  * Step4 Component - Displays a "Verification Pending" screen and provides an option to check progress.
  * @param {function} checkProgress - Function to handle the progress check when the button is clicked.
  */
-export default function Step4({ checkProgress }) {
+export default function Step4({ checkProgress, isDisable }) {
   const [t] = useTranslation();
   return (
     <>
@@ -19,10 +19,11 @@ export default function Step4({ checkProgress }) {
           {t("register.pendingMessage")}
         </p>
         <button
-          className="rounded-lg px-4 mt-3 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white"
+          className="rounded-lg px-4 mt-3 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           type="button"
           onClick={checkProgress}
           data-testid="checkProgress"
+          disabled={isDisable}
         >
           <div className="flex items-center gap-2">
             <p className="text-base">{t("buttons.checkProgress")}</p>

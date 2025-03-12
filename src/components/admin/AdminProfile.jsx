@@ -14,7 +14,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 import statesAndCity from "../../assets/locale/statesAndCity/en";
-import Countries from "../../utils/Countries.json";
+// import Countries from "../../utils/Countries.json";
 import StateAndDistricts from "../../utils/StatesAndDistricts.json";
 import Breadcrumbs from "../BreadCrumbs";
 
@@ -27,6 +27,7 @@ export default function AdminProfile() {
   const [districts, setDistricts] = useState([]);
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const { t } = useTranslation();
+  const Countries = [{ name: "India", code: "IN" }];
 
   // vaidation schema for the form using Yup
   const validationSchema = Yup.object({
@@ -85,19 +86,19 @@ export default function AdminProfile() {
       setLoading(true);
       const res = await axiosClient.get(EndPoints.ADMIN.GET_ADMIN);
       if (res?.statusCode === 200) {
-        if (res?.result?.country === "Indai") {
+        if (res?.result?.country === "India") {
           setSelectedCountry("India");
+          setStates(StateAndDistricts.states);
+          const selectedState = StateAndDistricts.states.find(
+            (state) => state.state === res?.result?.state
+          );
+          setDistricts(selectedState ? selectedState.districts : []);
         }
-        const initialState = res?.result?.state || "";
-        const state = statesAndCity?.states.find(
-          (s) => s.name === initialState
-        );
-        setFilteredCities(state ? state?.cities : []);
+
         setAdmin(res?.result);
         formik.setValues({
           ...formik.initialValues,
           ...res.result,
-          state: initialState,
         });
       }
     } catch (e) {
@@ -507,7 +508,11 @@ export default function AdminProfile() {
                 onBlur={formik.handleBlur}
                 data-testid="country"
               >
-                <option value="" label={t("placeholders.selectCountry")} />
+                <option
+                  value=""
+                  label={t("placeholders.selectCountry")}
+                  disabled
+                />
                 {Countries.map((country) => (
                   <option key={country.code} value={country.name}>
                     {country.name}
@@ -527,26 +532,33 @@ export default function AdminProfile() {
                 {t("adminProfile.state")}
                 <span className="text-red-500">*</span>
               </label>
-              {selectedCountry === "India" ? (
-                <select
-                  onBlur={formik.handleBlur}
-                  className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.state && formik.touched.state
-                      ? "border-red-500"
-                      : "border-gray-200"
-                  } text-black bg-white border`}
-                  name="state"
-                  value={formik.values.state}
-                  onChange={handleStateChange}
-                  data-testid="state-select"
-                >
-                  <option value="" label={t("placeholders.selectState")} />
-                  {states.map((state) => (
-                    <option key={state.state} value={state.state}>
-                      {state.state}
-                    </option>
-                  ))}
-                </select>
+
+              <select
+                onBlur={formik.handleBlur}
+                className={`p-2 mt-1 w-full text-base leading-6 ${
+                  formik.errors.state && formik.touched.state
+                    ? "border-red-500"
+                    : "border-gray-200"
+                } text-black bg-white border`}
+                name="state"
+                value={formik.values.state}
+                onChange={handleStateChange}
+                data-testid="state-select"
+                // disabled={!formik.values.country}
+              >
+                <option
+                  value=""
+                  label={t("placeholders.selectState")}
+                  disabled
+                />
+                {states.map((state) => (
+                  <option key={state.state} value={state.state}>
+                    {state.state}
+                  </option>
+                ))}
+              </select>
+              {/* {selectedCountry === "India" ? (
+                <></>
               ) : (
                 <input
                   className={`p-2 mt-1 w-full text-base leading-6 ${
@@ -562,7 +574,7 @@ export default function AdminProfile() {
                   onBlur={formik.handleBlur}
                   data-testid="state-input"
                 />
-              )}
+              )} */}
               {formik.errors.state && formik.touched.state && (
                 <div className="text-red-500 text-sm mt-1">
                   {formik.errors.state}
@@ -575,26 +587,32 @@ export default function AdminProfile() {
                 {t("adminProfile.district")}
                 <span className="text-red-500">*</span>
               </label>
-              {selectedCountry === "India" ? (
-                <select
-                  className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.state && formik.touched.state
-                      ? "border-red-500"
-                      : "border-gray-200"
-                  } text-black bg-white border`}
-                  name="district"
-                  value={formik.values.district}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  data-testid="district-select"
-                >
-                  <option value="" label={t("placeholders.selectDistrict")} />
-                  {districts.map((district) => (
-                    <option key={district} value={district}>
-                      {district}
-                    </option>
-                  ))}
-                </select>
+
+              <select
+                className={`p-2 mt-1 w-full text-base leading-6 ${
+                  formik.errors.state && formik.touched.state
+                    ? "border-red-500"
+                    : "border-gray-200"
+                } text-black bg-white border`}
+                name="district"
+                value={formik.values.district}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                data-testid="district-select"
+                // disabled={!formik.values.state}
+              >
+                <option
+                  value=""
+                  label={t("placeholders.selectDistrict")}
+                  disabled
+                />
+                {districts.map((district) => (
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
+                ))}
+              </select>
+              {/* {selectedCountry === "India" ? (<></>
               ) : (
                 <input
                   type="text"
@@ -610,7 +628,7 @@ export default function AdminProfile() {
                   } text-black bg-white border`}
                   data-testid="district-input"
                 />
-              )}
+              )} */}
               {formik.errors.district && formik.touched.district && (
                 <div className="text-red-500 text-sm mt-1">
                   {formik.errors.district}
