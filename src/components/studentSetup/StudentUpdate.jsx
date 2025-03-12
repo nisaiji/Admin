@@ -69,6 +69,7 @@ export default function StudentUpdate() {
     parentOccupation: Yup.string().required(t("validationError.occupation")),
     parentAddress: Yup.string().required(t("validationError.address")),
   });
+  // console.log(student);
 
   /**
    * Formik initialization for managing form state and handling submission.

@@ -38,8 +38,8 @@ function SchoolDetailSignup() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const [progressChecking, setProgressChecking] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [currentStep, setCurrentStep] = useState(
     Number(localStorage.getItem("page")) || 1
   );
@@ -48,15 +48,18 @@ function SchoolDetailSignup() {
   /**
    * Fetches admin data to verify registration progress.
    */
-  const getadmin = async () => {
+  const getadmin = async (shouldCheckProgress = false) => {
     try {
+      if (toastDisplayed) return;
+      setToastDisplayed(true);
+      setTimeout(() => setToastDisplayed(false), 3000);
       setLoading(true);
       const res = await axiosClient.get(EndPoints.ADMIN.GET_ADMIN);
 
       if (res?.statusCode === 200) {
         const data = res?.result;
 
-        if (progressChecking) {
+        if (shouldCheckProgress) {
           if (data?.isActive) {
             localStorage.setItem(
               "access_token",
@@ -74,7 +77,6 @@ function SchoolDetailSignup() {
               "Registerations already in progress - please wait for some time"
             );
           }
-          setProgressChecking(false);
         }
       }
     } catch (e) {
@@ -136,7 +138,7 @@ function SchoolDetailSignup() {
         return Yup.object().shape({
           affiliationNo: Yup.string()
             .trim()
-            .min(8, t("validationError.affiliationNumberLength"))
+            .min(6, t("validationError.affiliationNumberLength"))
             .required(t("validationError.affiliationNumber")),
           username: Yup.string()
             .trim()
@@ -159,6 +161,10 @@ function SchoolDetailSignup() {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
+  const goBack = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
   // Formik instance
   const formik = useFormik({
     initialValues: {
@@ -182,7 +188,7 @@ function SchoolDetailSignup() {
         setLoading(true);
         if (currentStep === 1) {
           const data = {
-            schoolName: capitalizeFirstLetter(values.schoolName).trim(),
+            schoolName: values.schoolName.trim(),
             email: values.email.toLowerCase().trim(),
             phone: values.phone.trim(),
             password: values.password.trim(),
@@ -205,7 +211,7 @@ function SchoolDetailSignup() {
             city: capitalizeFirstLetter(values.city).trim(),
             district: capitalizeFirstLetter(values.district).trim(),
             pincode: values.pincode.trim(),
-            address: capitalizeFirstLetter(values.address).trim(),
+            address: values.address.trim(),
           };
           const res = await axiosClient.put(
             EndPoints.ADMIN.ADMIN_UPDATE_ADDRESS,
@@ -221,7 +227,7 @@ function SchoolDetailSignup() {
         } else if (currentStep === 3) {
           const data = {
             affiliationNo: values.affiliationNo.trim(),
-            username: capitalizeFirstLetter(values.username).trim(),
+            username: values.username.trim(),
           };
           const res = await axiosClient.put(
             EndPoints.ADMIN.ADMIN_UPDATE_DETAILS,
@@ -339,15 +345,15 @@ function SchoolDetailSignup() {
               </h2>
               <Progress />
               <div className="px-20">
-                {currentStep === 1 && <Step1 formik={formik} />}
-                {currentStep === 2 && <Step2 formik={formik} />}
-                {currentStep === 3 && <Step3 formik={formik} />}
+                {currentStep === 1 && <Step1 formik={formik} goback={goBack} />}
+                {currentStep === 2 && <Step2 formik={formik} goback={goBack} />}
+                {currentStep === 3 && <Step3 formik={formik} goback={goBack} />}
                 {currentStep === 4 && (
                   <Step4
                     checkProgress={() => {
-                      setProgressChecking(true);
-                      getadmin();
+                      getadmin(true);
                     }}
+                    isDisable={toastDisplayed}
                   />
                 )}
               </div>

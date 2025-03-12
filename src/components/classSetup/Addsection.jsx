@@ -272,7 +272,7 @@ function Addsection({
                 setAddSectionModelOpen(false);
                 await getAllClass();
               }}
-              className="h-10 w-10 cursor-pointer"
+              className="h-10 w-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
               src={cross}
               alt="Close"
             />
@@ -346,7 +346,7 @@ function Addsection({
                   {selectedSection?._id === section._id ? (
                     <button
                       onClick={() => handleUpdateTeacherSection(section)}
-                      className={`mr-2 w-[75px] h-[32px] border border-[#4834D4] text-[#4834D4] rounded-xl`}
+                      className={`mr-2 w-[75px] h-[32px] border border-[#4834D4] text-[#4834D4] rounded-xl transition-all duration-200 ease-in-out active:scale-90`}
                     >
                       {t("buttons.save")}
                     </button>
@@ -435,7 +435,7 @@ function Addsection({
                 />
                 <button
                   onClick={checkValidation}
-                  className={`mr-2 bg-[#0F4189] `}
+                  className={`mr-2 bg-[#0F4189] transition-all duration-200 ease-in-out active:scale-90`}
                   style={{
                     height: 32,
                     width: 75,

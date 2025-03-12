@@ -109,12 +109,14 @@ export default function StudentSection() {
       const res = await axiosClient.get(`${url}${query}`);
 
       if (res?.statusCode === 200) {
-        const studentList = res?.result?.students.map((student, index) => ({
-          ...student,
-          SNo: index + 1,
-          parentName: student.parentDetails?.fullname || "",
-          phone: student.parentDetails?.phone || "",
-        }));
+        const studentList = res?.result?.students
+          .map((student, index, array) => ({
+            ...student,
+            SNo: array.length - index,
+            parentName: student.parentDetails?.fullname || "",
+            phone: student.parentDetails?.phone || "",
+          }))
+          .reverse();
         setStudents(studentList);
       }
     } catch (e) {
@@ -435,7 +437,7 @@ export default function StudentSection() {
                 </div>
                 <div
                   onClick={() => setShowAttendance(true)}
-                  className="flex flex-row justify-center items-center px-2 py-1 space-x-2 cursor-pointer rounded border border-[#FF793F]/10 bg-[#FF793F]/10"
+                  className="flex flex-row justify-center items-center px-2 py-1 space-x-2 cursor-pointer rounded border border-[#FF793F]/10 bg-[#FF793F]/10 transition-all duration-200 ease-in-out active:scale-90"
                 >
                   <img src={book} alt="" className="size-[10px] " />
                   <span className="text-xs font-poppins-bold text-[#FF793F]">
@@ -534,6 +536,116 @@ export default function StudentSection() {
                 </tr>
               </thead>
               <tbody className="text-sm font-normal text-gray-900">
+                {/* input fields */}
+                <tr>
+                  <td className="px-2 py-0 text-center text-[#040320] font-poppins font-medium border border-[#c1c0ca]">
+                    -
+                  </td>
+                  <td className="py-1 px-2 border border-[#c1c0ca]">
+                    <input
+                      type="text"
+                      value={newStudent.firstname}
+                      onChange={(e) =>
+                        handleInputChange(null, "firstname", e.target.value)
+                      }
+                      maxLength={15}
+                      placeholder={t("placeholders.firstName")}
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center border-none  focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
+                        isDarkMode
+                          ? "bg-gray-800 text-white"
+                          : "bg-white text-gray-900"
+                      }`}
+                      ref={newStudentFirstNameRef}
+                    />
+                  </td>
+                  <td className="py-1 px-2 border border-[#c1c0ca]">
+                    <input
+                      type="text"
+                      value={newStudent.lastname}
+                      onChange={(e) =>
+                        handleInputChange(null, "lastname", e.target.value)
+                      }
+                      maxLength={15}
+                      placeholder={t("placeholders.lastName")}
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none  focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
+                        isDarkMode
+                          ? "bg-gray-800 text-white"
+                          : "bg-white text-gray-900"
+                      }`}
+                    />
+                  </td>
+                  <td className="py-1 px-1 border border-[#c1c0ca]">
+                    <select
+                      data-testid="gender"
+                      value={newStudent.gender}
+                      onChange={(e) =>
+                        handleInputChange(null, "gender", e.target.value)
+                      }
+                      className={`w-full h-full px-2 py-3 font-poppins font-medium text-center border-none focus:outline-offset-[4px] focus:outline-[#0F4189]/75 ${
+                        isDarkMode
+                          ? "bg-gray-800 text-white"
+                          : "bg-white text-black"
+                      }
+                      ${
+                        newStudent.gender === ""
+                          ? "text-gray-400"
+                          : "text-black"
+                      }
+                      `}
+                    >
+                      <option value="" disabled>
+                        {t("placeholders.selectGender")}
+                      </option>
+                      {genders.map((gender, index) => (
+                        <option key={index} value={gender}>
+                          {gender}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="py-1 px-2 border border-[#c1c0ca]">
+                    <input
+                      type="text"
+                      value={newStudent.parentName}
+                      onChange={(e) =>
+                        handleInputChange(null, "parentName", e.target.value)
+                      }
+                      maxLength={20}
+                      placeholder={t("placeholders.parentName")}
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
+                        isDarkMode
+                          ? "bg-gray-800 text-white"
+                          : "bg-white text-gray-900"
+                      }`}
+                    />
+                  </td>
+                  <td className="py-1 px-2 border border-[#c1c0ca]">
+                    <input
+                      type="text"
+                      value={newStudent.phone}
+                      maxLength={10}
+                      onChange={(e) =>
+                        handleInputChange(null, "phone", e.target.value)
+                      }
+                      placeholder={t("placeholders.phoneNumber")}
+                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
+                        isDarkMode
+                          ? "bg-gray-800 text-white"
+                          : "bg-white text-gray-900"
+                      }`}
+                    />
+                  </td>
+                  {/* add student button */}
+                  <td className="px-2 py-2 border border-[#c1c0ca]">
+                    <button
+                      disabled={loading}
+                      onClick={() => registerStudent()}
+                      className="bg-[#0F4189] text-white font-medium text-[16] py-1.5 px-3 rounded-lg w-full h-full transition-all duration-200 ease-in-out active:scale-90"
+                    >
+                      {loading ? "Adding..." : t("buttons.addStudent")}
+                    </button>
+                  </td>
+                </tr>
                 {/* student data */}
                 {filteredStudents.map((student) => (
                   <tr key={student.SNo}>
@@ -665,7 +777,7 @@ export default function StudentSection() {
                       {editSNo === student.SNo ? (
                         <button
                           onClick={() => handleStudentAction(student, true)}
-                          className="bg-[#0F4189] text-white font-poppins-regular py-1.5 px-3 rounded-lg w-full h-full"
+                          className="bg-[#0F4189] text-white font-poppins-regular py-1.5 px-3 rounded-lg w-full h-full transition-all duration-200 ease-in-out active:scale-90"
                         >
                           {t("buttons.save")}
                         </button>
@@ -702,116 +814,6 @@ export default function StudentSection() {
                     </td>
                   </tr>
                 ))}
-                {/* input fields */}
-                <tr>
-                  <td className="px-2 py-0 text-center text-[#040320] font-poppins font-medium border border-[#c1c0ca]">
-                    {students.length + 1}
-                  </td>
-                  <td className="py-1 px-2 border border-[#c1c0ca]">
-                    <input
-                      type="text"
-                      value={newStudent.firstname}
-                      onChange={(e) =>
-                        handleInputChange(null, "firstname", e.target.value)
-                      }
-                      maxLength={15}
-                      placeholder={t("placeholders.firstName")}
-                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center border-none  focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
-                        isDarkMode
-                          ? "bg-gray-800 text-white"
-                          : "bg-white text-gray-900"
-                      }`}
-                      ref={newStudentFirstNameRef}
-                    />
-                  </td>
-                  <td className="py-1 px-2 border border-[#c1c0ca]">
-                    <input
-                      type="text"
-                      value={newStudent.lastname}
-                      onChange={(e) =>
-                        handleInputChange(null, "lastname", e.target.value)
-                      }
-                      maxLength={15}
-                      placeholder={t("placeholders.lastName")}
-                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none  focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
-                        isDarkMode
-                          ? "bg-gray-800 text-white"
-                          : "bg-white text-gray-900"
-                      }`}
-                    />
-                  </td>
-                  <td className="py-1 px-1 border border-[#c1c0ca]">
-                    <select
-                      data-testid="gender"
-                      value={newStudent.gender}
-                      onChange={(e) =>
-                        handleInputChange(null, "gender", e.target.value)
-                      }
-                      className={`w-full h-full px-2 py-3 font-poppins font-medium text-center border-none focus:outline-offset-[4px] focus:outline-[#0F4189]/75 ${
-                        isDarkMode
-                          ? "bg-gray-800 text-white"
-                          : "bg-white text-black"
-                      }
-                      ${
-                        newStudent.gender === ""
-                          ? "text-gray-400"
-                          : "text-black"
-                      }
-                      `}
-                    >
-                      <option value="" disabled>
-                        {t("placeholders.selectGender")}
-                      </option>
-                      {genders.map((gender, index) => (
-                        <option key={index} value={gender}>
-                          {gender}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="py-1 px-2 border border-[#c1c0ca]">
-                    <input
-                      type="text"
-                      value={newStudent.parentName}
-                      onChange={(e) =>
-                        handleInputChange(null, "parentName", e.target.value)
-                      }
-                      maxLength={20}
-                      placeholder={t("placeholders.parentName")}
-                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
-                        isDarkMode
-                          ? "bg-gray-800 text-white"
-                          : "bg-white text-gray-900"
-                      }`}
-                    />
-                  </td>
-                  <td className="py-1 px-2 border border-[#c1c0ca]">
-                    <input
-                      type="text"
-                      value={newStudent.phone}
-                      maxLength={10}
-                      onChange={(e) =>
-                        handleInputChange(null, "phone", e.target.value)
-                      }
-                      placeholder={t("placeholders.phoneNumber")}
-                      className={`w-full h-full px-2 py-2 font-poppins font-medium text-center  border-none focus:outline-offset-[8px] focus:outline-[#0F4189]/75 ${
-                        isDarkMode
-                          ? "bg-gray-800 text-white"
-                          : "bg-white text-gray-900"
-                      }`}
-                    />
-                  </td>
-                  {/* add student button */}
-                  <td className="px-2 py-2 border border-[#c1c0ca]">
-                    <button
-                      disabled={loading}
-                      onClick={() => registerStudent()}
-                      className="bg-[#0F4189] text-white font-medium text-[16] py-1.5 px-3 rounded-lg w-full h-full focus:outline-2 focus:outline-[#0F4189]"
-                    >
-                      {loading ? "Adding..." : t("buttons.addStudent")}
-                    </button>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>

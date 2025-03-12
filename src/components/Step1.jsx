@@ -39,7 +39,7 @@ const InputField = ({ label, name, type, placeholder, formik, className }) => (
  * Handles user inputs for school name, phone, email, and password fields.
  * @param {object} formik - Formik object for managing form state and validation.
  */
-const Step1 = ({ formik }) => {
+const Step1 = ({ formik, goback }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -67,7 +67,7 @@ const Step1 = ({ formik }) => {
           className="text-black rounded-xl border border-[#E9EAF0] py-2 pl-[55px] mt-2 w-full"
           type="text"
           name="phone"
-          placeholder={t("placeholders.phone")}
+          placeholder={t("placeholders.phoneNumber")}
           onChange={formik.handleChange}
           value={formik.values["phone"]}
           maxLength={10}
@@ -147,10 +147,18 @@ const Step1 = ({ formik }) => {
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="flex justify-between w-full mt-5">
+        <button
+          type="button"
+          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+          data-testid="back"
+          onClick={goback}
+        >
+          <p className="text-base">{t("buttons.back")}</p>
+        </button>
         <button
           type="submit"
-          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center ml-auto text-white"
+          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           data-testid="submitPage1"
         >
           <div className="flex items-center gap-2">

@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
  * Collects the affiliation number and admin name.
  * @param {object} formik - Formik object for managing form state and validation.
  */
-const Step3 = ({ formik }) => {
+const Step3 = ({ formik, goback }) => {
   const [t] = useTranslation();
 
   return (
@@ -24,7 +24,8 @@ const Step3 = ({ formik }) => {
             placeholder={t("placeholders.affiliationNo")}
             onChange={formik.handleChange}
             value={formik.values["affiliationNo"]}
-            maxLength={8}
+            maxLength={16}
+            minLength={6}
           />
           {formik.touched["affiliationNo"] &&
             formik.errors["affiliationNo"] && (
@@ -54,7 +55,15 @@ const Step3 = ({ formik }) => {
         {/* Navigation buttons */}
         <div className="flex justify-between w-full mt-5">
           <button
-            className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center ml-auto text-white"
+            type="button"
+            className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+            data-testid="back"
+            onClick={goback}
+          >
+            <p className="text-base">{t("buttons.back")}</p>
+          </button>
+          <button
+            className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
             type="submit"
           >
             <div className="flex items-center gap-2">

@@ -137,8 +137,7 @@ const Event = () => {
     if (!isOpen) return null;
 
     const isFormValid =
-      newEventForm.title.trim() !== "" &&
-      newEventForm.description.trim() !== "";
+      newEventForm.title.trim() !== ""
 
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -266,8 +265,8 @@ const Event = () => {
     try {
       setLoading(true);
       const formattedEvent = {
-        title: capitalizeFirstLetter(newEvent.title.trim()),
-        description: capitalizeFirstLetter(newEvent.description.trim()),
+        title: capitalizeFirstLetter(newEvent?.title?.trim()),
+        description: capitalizeFirstLetter(newEvent?.description?.trim()),
         date: moment(newEvent.date).format("yyyy-MM-DD"),
       };
       let res;
@@ -454,13 +453,13 @@ const Event = () => {
 
                 let [year, month] = value.split("/");
 
-                if (year && (year < "2000" || year > "2050")) {
-                  year = year.slice(0, 3); // Prevent invalid year entry
-                }
+                // if (year && (year < "2000" || year > "2050")) {
+                //   year = year.slice(0, 3); // Prevent invalid year entry
+                // }
 
-                if (month && (month < "01" || month > "12")) {
-                  month = month.slice(0, 1); // Prevent invalid month entry
-                }
+                // if (month && (month < "01" || month > "12")) {
+                //   month = month.slice(0, 1); // Prevent invalid month entry
+                // }
 
                 e.target.value = [year, month].filter(Boolean).join("/");
               }}

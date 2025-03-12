@@ -3,6 +3,7 @@ import ArrowRight from "../assets/images/ArrowRight.png";
 import { useTranslation } from "react-i18next";
 // import Countries from "../utils/Countries.json";
 import StateAndDistricts from "../utils/StatesAndDistricts.json";
+import CustomDropdown from "./CustomDropdown";
 
 /**
  * Step2 Component - Handles the second step of a multi-step form.
@@ -11,7 +12,7 @@ import StateAndDistricts from "../utils/StatesAndDistricts.json";
  * @param {function} nextStep - Callback to proceed to the next step.
  * @param {function} prevStep - Callback to return to the previous step.
  */
-const Step2 = ({ formik, nextStep, prevStep }) => {
+const Step2 = ({ formik, goback }) => {
   const [t] = useTranslation();
   const [selectedCountry, setSelectedCountry] = useState("");
   const [states, setStates] = useState([]);
@@ -35,14 +36,8 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
     formik.setFieldValue("city", "");
     formik.setFieldValue("address", "");
 
-    if (country === "India") {
-      // Accessing the states array inside the StateAndDistricts object
-      setStates(StateAndDistricts.states);
-      setDistricts([]); // Reset districts
-    } else {
-      setStates([]);
-      setDistricts([]);
-    }
+    setStates(country === "India" ? StateAndDistricts.states : []);
+    setDistricts([]);
   };
 
   /**
@@ -79,13 +74,19 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
               {t("adminProfile.country")}
             </p>
             <select
-              className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
+              className={`text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full ${
+                formik.values.country ? "text-black" : "text-gray-400"
+              }`}
               name="country"
               value={formik.values.country}
               onChange={handleCountryChange}
               data-testid="countrylist"
             >
-              <option value="" label={t("placeholders.selectCountry")} />
+              <option
+                value=""
+                label={t("placeholders.selectCountry")}
+                disabled
+              />
               {Countries.map((country) => (
                 <option key={country.code} value={country.name}>
                   {country.name}
@@ -105,21 +106,26 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
             <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
               {t("adminProfile.state")}
             </p>
-            {selectedCountry === "India" ? (
-              <select
-                className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
-                name="state"
-                value={formik.values.state}
-                onChange={handleStateChange}
-                data-testid="statelist"
-              >
-                <option value="" label={t("placeholders.selectState")} />
-                {states.map((state) => (
-                  <option key={state.state} value={state.state}>
-                    {state.state}
-                  </option>
-                ))}
-              </select>
+
+            <select
+              className={`text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full ${
+                formik.values.state ? "text-black" : "text-gray-400"
+              }`}
+              name="state"
+              value={formik.values.state}
+              onChange={handleStateChange}
+              data-testid="statelist"
+              disabled={!formik.values.country}
+            >
+              <option value="" label={t("placeholders.selectState")} disabled />
+              {states.map((state) => (
+                <option key={state.state} value={state.state}>
+                  {state.state}
+                </option>
+              ))}
+            </select>
+            {/* {selectedCountry === "India" ? (
+              <></>
             ) : (
               <input
                 className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
@@ -128,8 +134,9 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
                 placeholder={t("placeholders.state")}
                 onChange={formik.handleChange}
                 value={formik.values.state}
+                disabled={!formik.values.country}
               />
-            )}
+            )} */}
             {formik.touched.state && formik.errors.state && (
               <div className="text-red-500 text-sm text-left pl-3">
                 {formik.errors.state}
@@ -145,21 +152,29 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
             <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
               {t("adminProfile.district")}
             </p>
-            {selectedCountry === "India" ? (
-              <select
-                className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
-                name="district"
-                value={formik.values.district}
-                onChange={formik.handleChange}
-                data-testid="districtlist"
-              >
-                <option value="" label={t("placeholders.selectDistrict")} />
-                {districts.map((district) => (
-                  <option key={district} value={district}>
-                    {district}
-                  </option>
-                ))}
-              </select>
+            <select
+              className={`text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full ${
+                formik.values.district ? "text-black" : "text-gray-400"
+              }`}
+              name="district"
+              value={formik.values.district}
+              onChange={formik.handleChange}
+              data-testid="districtlist"
+              disabled={!formik.values.state}
+            >
+              <option
+                value=""
+                label={t("placeholders.selectDistrict")}
+                disabled
+              />
+              {districts.map((district) => (
+                <option key={district} value={district}>
+                  {district}
+                </option>
+              ))}
+            </select>
+            {/* {selectedCountry === "India" ? (
+              <></>
             ) : (
               <input
                 className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
@@ -168,8 +183,9 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
                 placeholder={t("placeholders.district")}
                 onChange={formik.handleChange}
                 value={formik.values.district}
+                disabled={!formik.values.state}
               />
-            )}
+            )} */}
             {formik.touched.district && formik.errors.district && (
               <div className="text-red-500 text-sm text-left pl-3">
                 {formik.errors.district}
@@ -184,12 +200,13 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
               {t("adminProfile.city")}
             </p>
             <input
-              className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
+              className="text-black rounded-lg border h-[39px] border-gray-300 py-2 px-5 mt-2 w-full"
               type="text"
               name="city"
               placeholder={t("placeholders.city")}
               onChange={formik.handleChange}
               value={formik.values.city}
+              disabled={!formik.values.district}
             />
             {formik.touched.city && formik.errors.city && (
               <div className="text-red-500 text-sm text-left pl-3">
@@ -200,39 +217,43 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
         </div>
       </div>
       <div className="flex">
-        {/* picode */}
-        <div className="mt-5" tabIndex={"5"}>
-          <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
-            {t("adminProfile.pincode")}
-          </p>
-          <input
-            className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
-            type="text"
-            name="pincode"
-            placeholder={t("placeholders.pincode")}
-            maxLength={6}
-            onChange={formik.handleChange}
-            value={formik.values.pincode}
-          />
-          {formik.touched.pincode && formik.errors.pincode && (
-            <div className="text-red-500 text-sm text-left pl-3">
-              {formik.errors.pincode}
-            </div>
-          )}
+        <div className="w-1/2">
+          {/* picode */}
+          <div className="mt-5" tabIndex={"5"}>
+            <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
+              {t("adminProfile.pincode")}
+            </p>
+            <input
+              className="text-black rounded-lg border border-gray-300 h-[39px] py-2 px-5 mt-2 w-full"
+              type="text"
+              name="pincode"
+              placeholder={t("placeholders.pincode")}
+              maxLength={6}
+              onChange={formik.handleChange}
+              value={formik.values.pincode}
+              disabled={!formik.values.district}
+            />
+            {formik.touched.pincode && formik.errors.pincode && (
+              <div className="text-red-500 text-sm text-left pl-3">
+                {formik.errors.pincode}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="mt-5" tabIndex={"6"}>
         <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
-          {t("adminProfile.address")}
+          {t("adminProfile.schoolAddress")}
         </p>
         <input
-          className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
+          className="text-black rounded-lg border border-gray-300 h-[39px] py-2 px-5 mt-2 w-full"
           type="text"
           name="address"
-          placeholder={t("placeholders.address")}
+          placeholder={t("placeholders.schoolAdress")}
           onChange={formik.handleChange}
           value={formik.values.address}
+          disabled={!formik.values.district}
         />
         {formik.touched.address && formik.errors.address && (
           <div className="text-red-500 text-sm text-left pl-3">
@@ -242,9 +263,17 @@ const Step2 = ({ formik, nextStep, prevStep }) => {
       </div>
 
       {/* Navigation buttons */}
-      <div className="w-full mt-5 flex justify-end">
+      <div className="w-full mt-5 flex justify-between">
         <button
-          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center ml-auto text-white"
+          type="button"
+          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+          data-testid="back"
+          onClick={goback}
+        >
+          <p className="text-base">{t("buttons.back")}</p>
+        </button>
+        <button
+          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           type="submit"
         >
           <p className="text-base">{t("buttons.submit")}</p>

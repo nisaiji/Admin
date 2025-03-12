@@ -43,6 +43,8 @@ function Login() {
   // State for managing loading spinner visibility
   const [loading, setLoading] = useState(false);
 
+  const [toastDisplayed, setToastDisplayed] = useState(false);
+
   // Translation hook for multilingual support
   const [t] = useTranslation();
 
@@ -79,6 +81,9 @@ function Login() {
     validationSchema, // Validation schema for form fields
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
+        if (toastDisplayed) return;
+        setToastDisplayed(true);
+        setTimeout(() => setToastDisplayed(false), 3000);
         setLoading(true); // Show loading spinner
 
         // Define API endpoint and payload based on login role
@@ -233,7 +238,7 @@ function Login() {
               <button
                 name="submit"
                 data-testid="submit"
-                className="w-full py-1.5 text-center bg-[#0F4189] text-white font-poppins-bold rounded-lg disabled:opacity-50"
+                className="w-full py-1.5 text-center bg-[#0F4189] text-white font-poppins-bold rounded-lg disabled:opacity-50 transition-all duration-200 ease-in-out active:scale-90"
                 type="submit"
                 disabled={formik.isSubmitting}
               >
@@ -245,7 +250,7 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setIsAdmin(!isAdmin)}
-                className="w-full py-1 border border-[#0F4189] text-[#0F4189] rounded-lg font-bold"
+                className="w-full py-1 border border-[#0F4189] text-[#0F4189] rounded-lg font-bold transition-all duration-200 ease-in-out active:scale-90"
               >
                 {t("login.toggleButton")} {isAdmin ? "Teacher" : "Admin"}
               </button>

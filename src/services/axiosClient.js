@@ -97,7 +97,8 @@ axiosClient.interceptors.response.use(
       return;
     }
     const err = error?.response?.data;
-    if (err?.statusCode === 403 && err?.statusCode === 410) {
+
+    if (err?.statusCode === 403 || err?.statusCode === 410) {
       localStorage.clear();
       setTimeout(() => {
         window.location.replace("/login", "_self");

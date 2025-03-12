@@ -120,11 +120,21 @@ export default function Teacher() {
     try {
       setLoading(true);
       const response = await axiosClient.get(EndPoints.ADMIN.TEACHER_LIST);
+      // if (response?.statusCode === 200) {
+      //   const teachersWithSNos = response?.result
+      //     ?.map((teacher, index) => ({
+      //       ...teacher,
+      //       SNo: index + 1,
+      //     }))
+      //   setTeachers(teachersWithSNos);
+      // }
       if (response?.statusCode === 200) {
-        const teachersWithSNos = response?.result?.map((teacher, index) => ({
-          ...teacher,
-          SNo: index + 1,
-        }));
+        const teachersWithSNos = response?.result
+          ?.map((teacher, index, array) => ({
+            ...teacher,
+            SNo: array.length - index, // Assigning SNo in reverse order
+          }))
+          .reverse(); // Reverse the array order
         setTeachers(teachersWithSNos);
       }
     } catch (e) {
@@ -299,6 +309,89 @@ export default function Teacher() {
                   </tr>
                 </thead>
                 <tbody className="text-sm font-normal text-[#2b2e4a]">
+                  <tr>
+                    {/* SNo */}
+                    <td
+                      className={`${
+                        isDarkMode ? "text-white" : ""
+                      } px-4 py-2 text-center text-[#040320] font-medium border border-[#2b2e4a]/25`}
+                    >
+                      -
+                    </td>
+                    {/* First Name */}
+                    <td className="py-1 px-3 border border-[#2b2e4a]/25">
+                      <input
+                        data-testid="firstnameInput"
+                        type="text"
+                        value={newTeacher.firstname}
+                        onChange={(e) =>
+                          handleInputChange(null, "firstname", e.target.value)
+                        }
+                        maxLength={15}
+                        placeholder={t("placeholders.firstName")}
+                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
+                          isDarkMode
+                            ? "bg-gray-800 text-white"
+                            : "bg-white text-[#040320]"
+                        } font-poppins font-medium text-center`}
+                        ref={newTeacherFirstNameRef}
+                        disabled={editSNo !== null}
+                      />
+                    </td>
+                    {/* Last Name */}
+                    <td className="py-1 px-3 border border-[#2b2e4a]/25">
+                      <input
+                        data-testid="lastnameInput"
+                        type="text"
+                        value={newTeacher.lastname}
+                        onChange={(e) =>
+                          handleInputChange(null, "lastname", e.target.value)
+                        }
+                        maxLength={15}
+                        placeholder={t("placeholders.lastName")}
+                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
+                          isDarkMode
+                            ? "bg-gray-800 text-white"
+                            : "bg-white text-[#040320]"
+                        } font-poppins font-medium text-center`}
+                        disabled={editSNo !== null}
+                      />
+                    </td>
+                    {/* Phone */}
+                    <td className="py-1 px-3 border border-[#2b2e4a]/25">
+                      <input
+                        data-testid="phoneInput"
+                        type="text"
+                        value={newTeacher.phone}
+                        maxLength={10}
+                        onChange={(e) =>
+                          handleInputChange(null, "phone", e.target.value)
+                        }
+                        placeholder={t("placeholders.phoneNumber")}
+                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
+                          isDarkMode
+                            ? "bg-gray-800 text-white"
+                            : "bg-white text-[#040320]"
+                        } font-poppins font-medium text-center`}
+                        disabled={editSNo !== null}
+                      />
+                    </td>
+                    {/* class */}
+                    <td className="py-1 px-3 text-center border border-[#2b2e4a]/25">
+                      {CONSTANT.NA}
+                    </td>
+                    {/* Actions */}
+                    <td className="px-4 py-2 border border-[#2b2e4a]/25">
+                      <button
+                        className="bg-[#0F4189] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full transition-all duration-200 ease-in-out active:scale-90"
+                        onClick={registerTeacher}
+                        disabled={editSNo !== null || loading}
+                        data-testid="addTeacher"
+                      >
+                        {loading ? "Adding..." : t("buttons.addTeacher")}
+                      </button>
+                    </td>
+                  </tr>
                   {filteredTeachers.map((teacher) => (
                     <tr key={teacher.SNo}>
                       {/* SNo */}
@@ -426,89 +519,6 @@ export default function Teacher() {
                       </td>
                     </tr>
                   ))}
-                  <tr>
-                    {/* SNo */}
-                    <td
-                      className={`${
-                        isDarkMode ? "text-white" : ""
-                      } px-4 py-2 text-center text-[#040320] font-medium border border-[#2b2e4a]/25`}
-                    >
-                      {teachers.length + 1}
-                    </td>
-                    {/* First Name */}
-                    <td className="py-1 px-3 border border-[#2b2e4a]/25">
-                      <input
-                        data-testid="firstnameInput"
-                        type="text"
-                        value={newTeacher.firstname}
-                        onChange={(e) =>
-                          handleInputChange(null, "firstname", e.target.value)
-                        }
-                        maxLength={15}
-                        placeholder={t("placeholders.firstName")}
-                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
-                          isDarkMode
-                            ? "bg-gray-800 text-white"
-                            : "bg-white text-[#040320]"
-                        } font-poppins font-medium text-center`}
-                        ref={newTeacherFirstNameRef}
-                        disabled={editSNo !== null}
-                      />
-                    </td>
-                    {/* Last Name */}
-                    <td className="py-1 px-3 border border-[#2b2e4a]/25">
-                      <input
-                        data-testid="lastnameInput"
-                        type="text"
-                        value={newTeacher.lastname}
-                        onChange={(e) =>
-                          handleInputChange(null, "lastname", e.target.value)
-                        }
-                        maxLength={15}
-                        placeholder={t("placeholders.lastName")}
-                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
-                          isDarkMode
-                            ? "bg-gray-800 text-white"
-                            : "bg-white text-[#040320]"
-                        } font-poppins font-medium text-center`}
-                        disabled={editSNo !== null}
-                      />
-                    </td>
-                    {/* Phone */}
-                    <td className="py-1 px-3 border border-[#2b2e4a]/25">
-                      <input
-                        data-testid="phoneInput"
-                        type="text"
-                        value={newTeacher.phone}
-                        maxLength={10}
-                        onChange={(e) =>
-                          handleInputChange(null, "phone", e.target.value)
-                        }
-                        placeholder={t("placeholders.phoneNumber")}
-                        className={`w-full h-full px-2 py-1 border-none focus:outline-offset-[12px] focus:outline-[#0F4189]/75 ${
-                          isDarkMode
-                            ? "bg-gray-800 text-white"
-                            : "bg-white text-[#040320]"
-                        } font-poppins font-medium text-center`}
-                        disabled={editSNo !== null}
-                      />
-                    </td>
-                    {/* class */}
-                    <td className="py-1 px-3 text-center border border-[#2b2e4a]/25">
-                      {CONSTANT.NA}
-                    </td>
-                    {/* Actions */}
-                    <td className="px-4 py-2 border border-[#2b2e4a]/25">
-                      <button
-                        className="bg-[#0F4189] text-white font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full focus:outline-2 focus:outline-[#0F4189]"
-                        onClick={registerTeacher}
-                        disabled={editSNo !== null || loading}
-                        data-testid="addTeacher"
-                      >
-                        {loading ? "Adding..." : t("buttons.addTeacher")}
-                      </button>
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div>

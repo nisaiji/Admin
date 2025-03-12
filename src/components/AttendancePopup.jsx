@@ -201,30 +201,42 @@ export default function AttendancePopup({
       setLoading(true);
       const attendances = attendanceData;
 
-      // Check for empty attendance cells within the valid range
-      const hasEmptyAttendance = attendanceData.some((student) =>
-        student.attendances.some((item) => {
-          const itemDate = item.date;
-          const startDate = moment(startTime).format("YYYY-MM-DD");
-          const today = moment(new Date()).format("YYYY-MM-DD");
+      // Define the date range for checking
+      const startDate = moment(startTime).format("DD-MM-YYYY");
+      const today = moment(new Date()).format("DD-MM-YYYY");
 
-          // console.log(
-          //   item.attendance === "" && itemDate >= startDate && itemDate <= today
-          // );
+      // Group attendance statuses by day
+      const dayAttendance = {};
+      attendanceData.forEach((student) => {
+        student.attendances.forEach((item) => {
+          const itemDate = moment(item.date).format("DD-MM-YYYY");
+          if (itemDate >= startDate && itemDate <= today) {
+            if (!dayAttendance[itemDate]) {
+              dayAttendance[itemDate] = [];
+            }
+            dayAttendance[itemDate].push(item.attendance);
+          }
+        });
+      });
 
-          // Check if attendance is empty for dates within the range
-          return (
-            item?.attendance === "" &&
-            itemDate >= startDate &&
-            itemDate <= today
-          );
-        })
-      );
+      // Check each day: valid if all empty OR all filled; invalid if a mix
+      const invalidDays = [];
+      Object.entries(dayAttendance).forEach(([date, statuses]) => {
+        const allEmpty = statuses.every((status) => status === "");
+        const allFilled = statuses.every((status) => status !== "");
+        if (!allEmpty && !allFilled) {
+          invalidDays.push(date);
+        }
+      });
 
-      if (hasEmptyAttendance) {
+      if (invalidDays.length > 0) {
         if (!toastDisplayed) {
           setToastDisplayed(true);
-          toast.error("Please fill all the cells to save the attendance");
+          toast.error(
+            `Please fill all the cells to save the attendance. Incomplete attendance on: ${invalidDays.join(
+              ", "
+            )}`
+          );
           setTimeout(() => setToastDisplayed(false), 3000);
         }
         return;
@@ -250,7 +262,6 @@ export default function AttendancePopup({
           });
         });
       });
-// console.log({studentsAttendances});
 
       // Determine API endpoint based on role
       const url = isTeacher
@@ -334,6 +345,15 @@ export default function AttendancePopup({
             ...student,
             attendances: monthDates,
           };
+        });
+
+        // Sort by firstname, and if equal, sort by lastname
+        updatedAttendanceData.sort((a, b) => {
+          const firstNameComparison = a.firstname.localeCompare(b.firstname);
+          if (firstNameComparison === 0) {
+            return a.lastname.localeCompare(b.lastname);
+          }
+          return firstNameComparison;
         });
 
         const totalHolidays = Array.from({ length: totalDays }, (_, i) => {
@@ -508,7 +528,7 @@ export default function AttendancePopup({
             <img
               src={backIcon}
               alt="Previous Month"
-              className="w-10 h-10 cursor-pointer"
+              className="w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
               onClick={() =>
                 isEditable
                   ? toast.error(
@@ -524,7 +544,7 @@ export default function AttendancePopup({
             <img
               src={backIcon}
               alt="Next Month"
-              className="w-10 h-10 rotate-180 cursor-pointer"
+              className="w-10 h-10 rotate-180 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
               onClick={() =>
                 isEditable
                   ? toast.error(
@@ -538,7 +558,7 @@ export default function AttendancePopup({
           <div className="flex flex-row w-[270px] justify-end">
             {isEditable ? (
               <button
-                className="px-4 py-2 text-base font-poppins-regular rounded-full bg-white "
+                className="px-4 py-2 text-base font-poppins-regular rounded-full bg-white transition-all duration-200 ease-in-out active:scale-90"
                 onClick={handleSaveAttendance}
               >
                 Save
@@ -548,21 +568,21 @@ export default function AttendancePopup({
                 <img
                   src={editw}
                   alt=""
-                  className="w-10 h-10 cursor-pointer"
+                  className="w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
                   onClick={() => setIsEditable(true)}
                 />
                 <img
                   onClick={downloadAttendance}
                   src={downloadw}
                   alt=""
-                  className="w-10 h-10 mx-4 cursor-pointer"
+                  className="w-10 h-10 mx-4 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
                 />
               </>
             )}
             <img
               src={closew}
               alt=""
-              className="w-10 h-10 cursor-pointer"
+              className="w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
               onClick={onClose}
             />
           </div>

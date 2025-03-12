@@ -37,13 +37,13 @@ export default function DeletePopup({ isVisible, onClose, onDelete }) {
         </div>
         <div className="mt-4 flex justify-end">
           <button
-            className="border border-[#d9d9d9] bg-white shadow-sm rounded-lg px-4 py-2 mr-2 text-base font-poppins-bold"
+            className="border border-[#d9d9d9] bg-white shadow-sm rounded-lg px-4 py-2 mr-2 text-base font-poppins-bold transition-all duration-200 ease-in-out active:scale-90"
             onClick={onClose}
           >
             {t("buttons.cancel")}
           </button>
           <button
-            className="border border-[#d91111] bg-[#d91111] text-white shadow-sm rounded-lg px-4 py-2 text-base font-poppins-regular"
+            className="border border-[#d91111] bg-[#d91111] text-white shadow-sm rounded-lg px-4 py-2 text-base font-poppins-regular transition-all duration-200 ease-in-out active:scale-90"
             onClick={onDelete}
             data-testid="confirmdeleteTeacher"
           >

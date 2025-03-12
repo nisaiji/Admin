@@ -220,7 +220,9 @@ export default function TeacherProfile() {
                     : "border-gray-200"
                 } text-black bg-white border`}
               >
-                <option value="">{t("placeholders.selectGender")}</option>
+                <option value="" disabled>
+                  {t("placeholders.selectGender")}
+                </option>
                 <option value="Male">{t("options.male")}</option>
                 <option value="Female">{t("options.female")}</option>
                 <option value="Other">{t("options.other")}</option>
@@ -251,7 +253,9 @@ export default function TeacherProfile() {
                     : "border-gray-200"
                 } text-black bg-white border`}
               >
-                <option value="">{t("placeholders.bloodGroup")}</option>
+                <option value="" disabled>
+                  {t("placeholders.bloodGroup")}
+                </option>
                 <option value="A+">A+</option>
                 <option value="A-">A-</option>
                 <option value="B+">B+</option>
