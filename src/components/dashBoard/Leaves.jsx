@@ -34,11 +34,24 @@ export default function Leaves() {
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
+  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
     fullname: "",
   });
+
+  // Compute the status query based on the selected tab.
+  const getStatusQuery = (tab) => {
+    switch (tab) {
+      case "approved":
+        return "accept,complete";
+      case "rejected":
+        return "reject,expired";
+      default:
+        return "accept,reject,pending,complete,expired";
+    }
+  };
 
   /**
    * Fetches leave requests from the API
@@ -47,8 +60,9 @@ export default function Leaves() {
   const fetchLeaves = async () => {
     try {
       setLoading(true);
+      const statusQuery = getStatusQuery(selectedTab);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&page=${pageNo}&limit=${limit}&status=accept,reject,pending,complete,expired`
+        `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&page=${pageNo}&limit=${limit}&status=${statusQuery}`
       );
       if (res?.statusCode === 200) {
         setRequests(res?.result?.leaveRequests[0]?.teachers || []);
@@ -67,8 +81,21 @@ export default function Leaves() {
    */
   useEffect(() => {
     fetchLeaves();
-  }, [pageNo, limit]);
+  }, [pageNo, limit, selectedTab]);
 
+  const validateData = () => {
+    if (!formData.username || !formData.password || !formData.fullname) {
+      return t("validationError.fillAll");
+    } else if (formData.username.length < 5) {
+      return t("validationError.usernameLength");
+    } else if (formData.fullname.length < 5) {
+      return t("validationError.fullnameLength");
+    } else if (formData.password.length < 8) {
+      return t("validationError.passwordLength");
+    } else {
+      return "";
+    }
+  };
   /**
    * Handles the action of saving, approving, or rejecting a leave request.
    * Sends a PUT request to update the status of the leave request.
@@ -77,6 +104,9 @@ export default function Leaves() {
    */
   const handleSave = async (id, status) => {
     try {
+      if (toastDisplayed) return;
+      setToastDisplayed(true);
+      setTimeout(() => setToastDisplayed(false), 3000);
       let data;
       if (status === "reject") {
         data = {
@@ -85,10 +115,9 @@ export default function Leaves() {
         };
       } else {
         // Validate form
-        if (!formData.username || !formData.password || !formData.fullname) {
-          toast.error("Please fill all the fields");
-          return;
-        }
+        const e = validateData();
+        if (e) return toast.error(e);
+
         data = {
           leaveRequestId: id,
           status: status,
@@ -129,7 +158,6 @@ export default function Leaves() {
       : requests;
 
   /**
-   * Translates status codes to human-readable text.
    * @param {string} status - The status code (accept, reject, complete, etc.)
    * @returns {string} - The translated status string
    */
@@ -142,6 +170,21 @@ export default function Leaves() {
         return "Rejected";
       case "complete":
         return "Completed";
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+    }
+  };
+
+  /**
+   * @param {string} status - The status code (accept, reject, complete, etc.)
+   * @returns {string} - The translated status string
+   */
+  const reasonStatus = (status) => {
+    switch (status) {
+      case "MedicalLeave":
+        return "Medical Leave";
+      case "OtherReason":
+        return "Other Reason";
       default:
         return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
     }
@@ -163,7 +206,7 @@ export default function Leaves() {
         </div>
       )}
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="bg-[#93a3b6]/25 px-6 py-[25px]">
+      <div className="bg-[#93a3b6]/25 px-6 py-[25px] select-none">
         <div className="bg-[#fafafa] min-h-screen rounded-[16px]">
           <div className="pl-12 py-6">
             <Breadcrumbs />
@@ -181,7 +224,10 @@ export default function Leaves() {
                     ? "pb-3 border-b-[3px] border-[#FF793F]"
                     : ""
                 }`}
-                onClick={() => setSelectedTab(tab)}
+                onClick={() => {
+                  setSelectedTab(tab);
+                  setPageNo(1);
+                }}
               >
                 {t(`labels.${tab}`)}
               </div>
@@ -248,7 +294,7 @@ export default function Leaves() {
                             req?.status === "accept" ||
                             req?.status === "complete"
                               ? "cursor-pointer"
-                              : "cursor-not-allowed"
+                              : "opacity-50"
                           }`}
                         />
                       </td>
@@ -260,7 +306,7 @@ export default function Leaves() {
                         {expandedRow === index && (
                           <>
                             <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
-                              username
+                              {t(`labels.username`)}
                             </p>
                             <input
                               autocomplete="off"
@@ -297,12 +343,12 @@ export default function Leaves() {
                       </td>
                       <td className="px-4 py-2 align-top">
                         <p className="text-sm font-medium">
-                          {req?.reason || ""}
+                          {reasonStatus(req?.reason || "")}
                         </p>
                         {expandedRow === index && (
                           <>
                             <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
-                              Teacher name
+                              {t(`labels.teacherName`)}
                             </p>
                             <input
                               autocomplete="off"
@@ -345,7 +391,7 @@ export default function Leaves() {
                         {expandedRow === index && (
                           <>
                             <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
-                              password
+                              {t(`labels.password`)}
                             </p>
                             <div className="relative">
                               <input
@@ -353,7 +399,7 @@ export default function Leaves() {
                                 autocapitalize="none"
                                 autoCorrect="off"
                                 spellcheck="false"
-                                type={showPassword ? "text" : "password"}
+                                type={showPassword ? "password" : "text"}
                                 placeholder="Password"
                                 value={
                                   req?.status === "accept" ||
@@ -417,7 +463,7 @@ export default function Leaves() {
                             className={`${
                               req?.status === "accept" ||
                               req?.status === "complete"
-                                ? "bg-gray-400 cursor-not-allowed"
+                                ? "opacity-0"
                                 : "bg-[#0F4189] text-white"
                             } text-xs font-poppins-bold px-4 py-2 rounded-md`}
                           >
@@ -457,7 +503,14 @@ export default function Leaves() {
                             </button>
                           </div>
                         ) : (
-                          <button className="text-white text-sm font-poppins-regular bg-[#68686880] py-1 px-3 rounded-md cursor-not-allowed">
+                          <button
+                            className={`text-white text-sm font-poppins-regular py-1 px-3 rounded-md cursor-not-allowed ${
+                              req?.status === "accept" ||
+                              req?.status === "complete"
+                                ? "bg-[#4CBC9A]"
+                                : "bg-[#FE4040]"
+                            }`}
+                          >
                             {requestsStatus(req?.status)}
                           </button>
                         )}

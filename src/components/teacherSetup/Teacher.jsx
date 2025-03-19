@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
 import toast, { Toaster } from "react-hot-toast";
 import Search from "../../assets/images/Search.png";
+import cross from "../../assets/images/cross.png";
 import info from "../../assets/images/info.png";
 import edit2 from "../../assets/images/edit2.png";
 import delete2 from "../../assets/images/delete2.png";
@@ -268,6 +269,15 @@ export default function Teacher() {
                     }`}
                     onFocus={() => searchInputRef.current.focus()}
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute inset-y-0 right-0 flex items-center pr-2"
+                    >
+                      <img src={cross} alt="" className="size-8" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -17,6 +17,14 @@ import statesAndCity from "../../assets/locale/statesAndCity/en";
 // import Countries from "../../utils/Countries.json";
 import StateAndDistricts from "../../utils/StatesAndDistricts.json";
 import Breadcrumbs from "../BreadCrumbs";
+import {
+  Box,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 
 export default function AdminProfile() {
   const [admin, setAdmin] = useState([]);
@@ -206,7 +214,6 @@ export default function AdminProfile() {
   const handleCountryChange = (e) => {
     const country = e.target.value;
     setSelectedCountry(country);
-    formik.setFieldValue("country", country);
 
     // Reset fields when changing the country
     formik.setFieldValue("state", "");
@@ -215,6 +222,7 @@ export default function AdminProfile() {
     formik.setFieldValue("city", "");
     formik.setFieldValue("address", "");
 
+    formik.setFieldValue("country", country);
     if (country === "India") {
       // Accessing the states array inside the StateAndDistricts object
       setStates(StateAndDistricts.states);
@@ -232,10 +240,10 @@ export default function AdminProfile() {
     );
 
     // Reset fields when changing the state
-    formik.setFieldValue("district", "");
-    formik.setFieldValue("pincode", "");
     formik.setFieldValue("city", "");
+    formik.setFieldValue("pincode", "");
     formik.setFieldValue("address", "");
+    formik.setFieldValue("district", "");
 
     formik.setFieldValue("state", e.target.value);
     if (selectedState) {
@@ -458,25 +466,57 @@ export default function AdminProfile() {
                 {t("adminProfile.schoolBoard")}
                 <span className="text-red-500">*</span>
               </label>
-              <select
-                name="schoolBoard"
-                value={formik.values.schoolBoard}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                data-testid="schoolBoard"
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.schoolBoard && formik.touched.schoolBoard
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+              <FormControl
+                fullWidth
+                variant="outlined"
+                error={formik.errors.schoolBoard && formik.touched.schoolBoard}
               >
-                <option value="">{t("adminProfile.selectSchoolBoard")}</option>
-                <option value="CBSE">CBSE</option>
-                <option value="ICSE">ICSE</option>
-                <option value="StateBoard">State Board</option>
-                <option value="IB">IB</option>
-                <option value="Other">{t("options.other")}</option>
-              </select>
+                <Select
+                  name="schoolBoard"
+                  value={formik.values.schoolBoard}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  data-testid="schoolBoard"
+                  displayEmpty
+                  renderValue={(selected) => {
+                    if (!selected) {
+                      return (
+                        <span style={{ color: "gray" }}>
+                          {t("adminProfile.selectSchoolBoard")}
+                        </span>
+                      );
+                    }
+                    return selected;
+                  }}
+                  sx={{
+                    mt: 0.5,
+                    width: "100%",
+                    fontSize: "1rem",
+                    color: formik.values.schoolBoard ? "black" : "gray",
+                    backgroundColor: "white",
+                    border:
+                      formik.errors.schoolBoard && formik.touched.schoolBoard
+                        ? "1px solid red"
+                        : "1px solid #E5E7EB",
+                    borderRadius: "0.5rem",
+                    "& .MuiSelect-select": {
+                      fontSize: "1rem",
+                      lineHeight: "1.5rem",
+                      p: 1,
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    {t("adminProfile.selectSchoolBoard")}
+                  </MenuItem>
+                  <MenuItem value="CBSE">CBSE</MenuItem>
+                  <MenuItem value="ICSE">ICSE</MenuItem>
+                  <MenuItem value="StateBoard">State Board</MenuItem>
+                  <MenuItem value="IB">IB</MenuItem>
+                  <MenuItem value="Other">{t("options.other")}</MenuItem>
+                </Select>
+              </FormControl>
+
               {formik.errors.schoolBoard && formik.touched.schoolBoard && (
                 <div
                   className="text-red-500 text-sm mt-1"
@@ -489,153 +529,161 @@ export default function AdminProfile() {
           </div>
 
           {/* Country, State, and District */}
-          <div className="flex flex-row w-full space-x-5">
-            {/* country */}
-            <div className="w-full md:w-1/3">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              width: "100%",
+              gap: 2,
+            }}
+          >
+            {/* Country Dropdown */}
+            <FormControl
+              fullWidth
+              sx={{ width: { xs: "100%", md: "33%" } }}
+              error={formik.errors.country && formik.touched.country}
+            >
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.country")}
                 <span className="text-red-500">*</span>
               </label>
-              <select
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.country && formik.touched.country
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+              <Select
+                labelId="country-label"
                 name="country"
                 value={formik.values.country}
                 onChange={handleCountryChange}
                 onBlur={formik.handleBlur}
                 data-testid="country"
+                displayEmpty
+                sx={{
+                  mt: 1,
+                  backgroundColor: "white",
+                  border: (theme) =>
+                    formik.errors.country && formik.touched.country
+                      ? "1px solid red"
+                      : "1px solid #E5E7EB",
+                  color: "black",
+                  "& .MuiSelect-select": {
+                    fontSize: "1rem",
+                    lineHeight: "1.5rem",
+                    p: 1,
+                  },
+                }}
               >
-                <option
-                  value=""
-                  label={t("placeholders.selectCountry")}
-                  disabled
-                />
+                <MenuItem value="" disabled>
+                  {t("placeholders.selectCountry")}
+                </MenuItem>
                 {Countries.map((country) => (
-                  <option key={country.code} value={country.name}>
+                  <MenuItem key={country.code} value={country.name}>
                     {country.name}
-                  </option>
+                  </MenuItem>
                 ))}
-              </select>
-
+              </Select>
               {formik.errors.country && formik.touched.country && (
                 <div className="text-red-500 text-sm mt-1">
                   {formik.errors.country}
                 </div>
               )}
-            </div>
-            {/* state */}
-            <div className="w-full md:w-1/3">
+            </FormControl>
+
+            {/* State Dropdown */}
+            <FormControl
+              fullWidth
+              sx={{ width: { xs: "100%", md: "33%" } }}
+              error={formik.errors.state && formik.touched.state}
+            >
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.state")}
                 <span className="text-red-500">*</span>
               </label>
-
-              <select
-                onBlur={formik.handleBlur}
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.state && formik.touched.state
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+              <Select
+                labelId="state-label"
                 name="state"
                 value={formik.values.state}
                 onChange={handleStateChange}
+                onBlur={formik.handleBlur}
                 data-testid="state-select"
-                // disabled={!formik.values.country}
+                displayEmpty
+                sx={{
+                  mt: 1,
+                  backgroundColor: "white",
+                  border: (theme) =>
+                    formik.errors.state && formik.touched.state
+                      ? "1px solid red"
+                      : "1px solid #E5E7EB",
+                  color: "black",
+                  "& .MuiSelect-select": {
+                    fontSize: "1rem",
+                    lineHeight: "1.5rem",
+                    p: 1,
+                  },
+                }}
               >
-                <option
-                  value=""
-                  label={t("placeholders.selectState")}
-                  disabled
-                />
+                <MenuItem value="" disabled>
+                  {t("placeholders.selectState")}
+                </MenuItem>
                 {states.map((state) => (
-                  <option key={state.state} value={state.state}>
+                  <MenuItem key={state.state} value={state.state}>
                     {state.state}
-                  </option>
+                  </MenuItem>
                 ))}
-              </select>
-              {/* {selectedCountry === "India" ? (
-                <></>
-              ) : (
-                <input
-                  className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.schoolBoard && formik.touched.schoolBoard
-                      ? "border-red-500"
-                      : "border-gray-200"
-                  } text-black bg-white border`}
-                  type="text"
-                  name="state"
-                  placeholder={t("placeholders.state")}
-                  onChange={formik.handleChange}
-                  value={formik.values.state}
-                  onBlur={formik.handleBlur}
-                  data-testid="state-input"
-                />
-              )} */}
+              </Select>
               {formik.errors.state && formik.touched.state && (
                 <div className="text-red-500 text-sm mt-1">
                   {formik.errors.state}
                 </div>
               )}
-            </div>
-            {/* district */}
-            <div className="w-full md:w-1/3">
+            </FormControl>
+
+            {/* District Dropdown */}
+            <FormControl
+              fullWidth
+              sx={{ width: { xs: "100%", md: "33%" } }}
+              error={formik.errors.district && formik.touched.district}
+            >
               <label className="text-sm font-semibold leading-5 text-neutral-800">
                 {t("adminProfile.district")}
                 <span className="text-red-500">*</span>
               </label>
-
-              <select
-                className={`p-2 mt-1 w-full text-base leading-6 ${
-                  formik.errors.state && formik.touched.state
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+              <Select
+                labelId="district-label"
                 name="district"
                 value={formik.values.district}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid="district-select"
-                // disabled={!formik.values.state}
+                displayEmpty
+                sx={{
+                  mt: 1,
+                  backgroundColor: "white",
+                  border: (theme) =>
+                    formik.errors.district && formik.touched.district
+                      ? "1px solid red"
+                      : "1px solid #E5E7EB",
+                  color: "black",
+                  "& .MuiSelect-select": {
+                    fontSize: "1rem",
+                    lineHeight: "1.5rem",
+                    p: 1,
+                  },
+                }}
               >
-                <option
-                  value=""
-                  label={t("placeholders.selectDistrict")}
-                  disabled
-                />
+                <MenuItem value="" disabled>
+                  {t("placeholders.selectDistrict")}
+                </MenuItem>
                 {districts.map((district) => (
-                  <option key={district} value={district}>
+                  <MenuItem key={district} value={district}>
                     {district}
-                  </option>
+                  </MenuItem>
                 ))}
-              </select>
-              {/* {selectedCountry === "India" ? (<></>
-              ) : (
-                <input
-                  type="text"
-                  name="district"
-                  placeholder={t("placeholders.district")}
-                  onChange={formik.handleChange}
-                  value={formik.values.district}
-                  onBlur={formik.handleBlur}
-                  className={`p-2 mt-1 w-full text-base leading-6 ${
-                    formik.errors.schoolBoard && formik.touched.schoolBoard
-                      ? "border-red-500"
-                      : "border-gray-200"
-                  } text-black bg-white border`}
-                  data-testid="district-input"
-                />
-              )} */}
+              </Select>
               {formik.errors.district && formik.touched.district && (
                 <div className="text-red-500 text-sm mt-1">
                   {formik.errors.district}
                 </div>
               )}
-            </div>
-          </div>
+            </FormControl>
+          </Box>
 
           <div className="flex flex-row w-full space-x-5">
             {/* city */}

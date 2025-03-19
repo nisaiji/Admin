@@ -12,6 +12,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import cross from "../../assets/images/cross.png";
 import ConformationPopup from "../ConformationPopup";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 function Addsection({
   isVisible,
@@ -298,22 +299,76 @@ function Addsection({
                   </div>
                 </div>
                 {selectedSection && selectedSection?._id === section?._id ? (
-                  <select
+                  // <select
+                  //   name="teacherId"
+                  //   value={selectedSection?.teacherId}
+                  //   onChange={(e) => handleChange(e, "update")}
+                  //   className={` bg-[#fafafa] border border-[#686868] rounded-xl py-1 px-8 ${
+                  //     isDarkMode ? "bg-gray-300" : "text-black bg-[#686868]"
+                  //   } w-[250px]`}
+                  //   ref={selectRef}
+                  // >
+                  //   <option value="">{t("labels.assignTeacher")}</option>
+                  //   {selectedTeachersList.map((teacher) => (
+                  //     <option key={teacher._id} value={teacher._id}>
+                  //       {teacher.firstname} {teacher.lastname}
+                  //     </option>
+                  //   ))}
+                  // </select>
+                  <FormControl
+                  fullWidth
+                  sx={{
+                    width: "250px",
+                  }}
+                  >
+                  <Select
+                    labelId="teacher-select-label"
                     name="teacherId"
                     value={selectedSection?.teacherId}
                     onChange={(e) => handleChange(e, "update")}
-                    className={` bg-[#fafafa] border border-[#686868] rounded-xl py-1 px-8 ${
-                      isDarkMode ? "bg-gray-300" : "text-black bg-[#686868]"
-                    } w-[250px]`}
-                    ref={selectRef}
+                    inputProps={{
+                      "data-testid": "selectTeacher",
+                      ref: selectRef,
+                    }}
+                    displayEmpty
+                    renderValue={(selected) => {
+                      if (!selected) {
+                        return (
+                          <span style={{ color: "gray" }}>
+                            {t("labels.assignTeacher")}
+                          </span>
+                        );
+                      }
+                      const teacherObj = selectedTeachersList.find(
+                        (teacher) => teacher._id === selected
+                      );
+                      return teacherObj
+                        ? `${teacherObj.firstname} ${teacherObj.lastname}`
+                        : selected;
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "2px solid rgba(104,104,104,0.25)",
+                        borderRadius: "0.75rem",
+                      },
+                      "& .MuiSelect-select": {
+                        py: "0.25rem",
+                        px: "2rem",
+                        backgroundColor: "rgba(147,163,182,0.1)",
+                        color: newSection?.teacherId === "" ? "gray" : "black",
+                      },
+                    }}
                   >
-                    <option value="">{t("labels.assignTeacher")}</option>
+                    <MenuItem value="" disabled>
+                      <em>{t("labels.assignTeacher")}</em>
+                    </MenuItem>
                     {selectedTeachersList.map((teacher) => (
-                      <option key={teacher._id} value={teacher._id}>
+                      <MenuItem key={teacher._id} value={teacher._id}>
                         {teacher.firstname} {teacher.lastname}
-                      </option>
+                      </MenuItem>
                     ))}
-                  </select>
+                  </Select>
+                </FormControl>
                 ) : (
                   <div
                     className={`border border-[#686868]/25 rounded-xl py-1 px-8 ${
@@ -348,7 +403,10 @@ function Addsection({
                       onClick={() => handleUpdateTeacherSection(section)}
                       className={`mr-2 w-[75px] h-[32px] border border-[#4834D4] text-[#4834D4] rounded-xl transition-all duration-200 ease-in-out active:scale-90`}
                     >
-                      {t("buttons.save")}
+                      {selectedSection?.teacher?._id ===
+                      selectedSection.teacherId
+                        ? t("buttons.cancel")
+                        : t("buttons.save")}
                     </button>
                   ) : (
                     <>
@@ -394,7 +452,7 @@ function Addsection({
                     </div>
                   </div>
                 </div>
-                <select
+                {/* <select
                   name="teacherId"
                   value={newSection.teacherId}
                   onChange={(e) => handleChange(e, "add")}
@@ -411,7 +469,62 @@ function Addsection({
                       {teacher.firstname} {teacher.lastname}
                     </option>
                   ))}
-                </select>
+                </select> */}
+                <FormControl
+                  fullWidth
+                  disabled={selectedSection}
+                  sx={{
+                    width: "250px",
+                  }}
+                >
+                  <Select
+                    labelId="teacher-select-label"
+                    name="teacherId"
+                    value={newSection?.teacherId}
+                    onChange={(e) => handleChange(e, "add")}
+                    inputProps={{
+                      "data-testid": "selectTeacher",
+                      ref: selectRef,
+                    }}
+                    displayEmpty
+                    renderValue={(selected) => {
+                      if (!selected) {
+                        return (
+                          <span style={{ color: "gray" }}>
+                            {t("labels.assignTeacher")}
+                          </span>
+                        );
+                      }
+                      const teacherObj = teachers.find(
+                        (teacher) => teacher._id === selected
+                      );
+                      return teacherObj
+                        ? `${teacherObj.firstname} ${teacherObj.lastname}`
+                        : selected;
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "2px solid rgba(104,104,104,0.25)",
+                        borderRadius: "0.75rem",
+                      },
+                      "& .MuiSelect-select": {
+                        py: "0.25rem",
+                        px: "2rem",
+                        backgroundColor: "rgba(147,163,182,0.1)",
+                        color: newSection?.teacherId === "" ? "gray" : "black",
+                      },
+                    }}
+                  >
+                    <MenuItem value="" disabled>
+                      <em>{t("labels.assignTeacher")}</em>
+                    </MenuItem>
+                    {teachers.map((teacher) => (
+                      <MenuItem key={teacher._id} value={teacher._id}>
+                        {teacher.firstname} {teacher.lastname}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 <DatePicker
                   selected={newSection.startTime}
                   onChange={(date) => {

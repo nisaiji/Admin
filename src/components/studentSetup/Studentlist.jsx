@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import PaginationItem from "@mui/material/PaginationItem";
 import info from "../../assets/images/info.png";
+import cross from "../../assets/images/cross.png";
 import edit2 from "../../assets/images/edit2.png";
 import delete2 from "../../assets/images/delete2.png";
 import Search from "../../assets/images/Search.png";
@@ -391,6 +392,15 @@ export default function Studentlist() {
                         }}
                         value={name}
                       />
+                      {name && (
+                        <button
+                          type="button"
+                          onClick={() => setName("")}
+                          className="flex items-center"
+                        >
+                          <img src={cross} alt="" className="size-8" />
+                        </button>
+                      )}
                     </div>
 
                     {/* Clear button */}

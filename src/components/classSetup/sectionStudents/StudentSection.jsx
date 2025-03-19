@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { axiosClient } from "../../../services/axiosClient";
 import toast, { Toaster } from "react-hot-toast";
 import Search from "../../../assets/images/Search.png";
+import cross from "../../../assets/images/cross.png";
 import info from "../../../assets/images/info.png";
 import edit2 from "../../../assets/images/edit2.png";
 import book from "../../../assets/images/book.png";
@@ -109,14 +110,15 @@ export default function StudentSection() {
       const res = await axiosClient.get(`${url}${query}`);
 
       if (res?.statusCode === 200) {
-        const studentList = res?.result?.students
-          .map((student, index, array) => ({
+        const studentList = res?.result?.students.map(
+          (student, index, array) => ({
             ...student,
-            SNo: array.length - index,
+            SNo: index + 1,
             parentName: student.parentDetails?.fullname || "",
             phone: student.parentDetails?.phone || "",
-          }))
-          .reverse();
+          })
+        );
+        // console.table(studentList)
         setStudents(studentList);
       }
     } catch (e) {
@@ -323,7 +325,7 @@ export default function StudentSection() {
           },
         }
       );
-      if (res?.statusCode === 201) {
+      if (res?.statusCode === 201 || res?.statusCode === 200) {
         toast.success(res?.result);
         fetchStudents();
       }
@@ -335,17 +337,12 @@ export default function StudentSection() {
     }
   };
 
-  const handleButtonClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click(); // Trigger file input click
-    }
-  };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
       uploadExcelSheet(file); // Call upload API when file is selected
     }
+    e.target.value = "";
   };
 
   // download the excel sheet in pdf format
@@ -467,6 +464,15 @@ export default function StudentSection() {
                   } px-10 py-2 rounded-lg focus:outline-[#05022B]/10 border border-t-gray w-full`}
                   onFocus={() => searchInputRef.current.focus()}
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute inset-y-0 right-0 flex items-center pr-2"
+                  >
+                    <img src={cross} alt="" className="size-8" />
+                  </button>
+                )}
               </div>
               {/* Hidden file input */}
               <input
@@ -480,7 +486,7 @@ export default function StudentSection() {
               <div className="flex flex-row">
                 <button
                   type="button"
-                  onClick={handleButtonClick}
+                  onClick={() => fileInputRef?.current?.click()}
                   className="bg-[#0F4189] rounded-l-lg h-[40px] border border-[#0F4189] py-1.5 px-4 flex flex-row justify-center items-center"
                 >
                   <img src={importIcon} alt="" className="size-3 mr-2" />

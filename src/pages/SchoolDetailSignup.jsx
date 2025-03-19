@@ -354,6 +354,7 @@ function SchoolDetailSignup() {
                       getadmin(true);
                     }}
                     isDisable={toastDisplayed}
+                    goback={goBack}
                   />
                 )}
               </div>
