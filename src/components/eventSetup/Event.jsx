@@ -22,17 +22,19 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
 
   return (
     <div
-      className={`${isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
-        } calendar pl-16 rounded-lg w-full `}
+      className={`${
+        isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
+      } calendar pl-16 rounded-lg w-full `}
     >
       {/* Month Navigation */}
       <div className="month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
         <FontAwesomeIcon
           icon={faAngleLeft}
-          className={`${isDarkMode
-            ? "text-white"
-            : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
-            } cursor-pointer size-5`}
+          className={`${
+            isDarkMode
+              ? "text-white"
+              : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
+          } cursor-pointer size-5`}
           onClick={onPrevMonth}
           data-testid="prev"
         />
@@ -41,18 +43,20 @@ const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
         </div>
         <FontAwesomeIcon
           icon={faAngleRight}
-          className={`${isDarkMode
-            ? "text-white"
-            : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
-            } cursor-pointer size-5`}
+          className={`${
+            isDarkMode
+              ? "text-white"
+              : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
+          } cursor-pointer size-5`}
           onClick={onNextMonth}
           data-testid="next"
         />
       </div>
       {/* Weekdays header */}
       <div
-        className={`${isDarkMode ? "text-white" : "text-[#6E6F81]/75"
-          } weekdays grid grid-cols-7 pl-6 text-sm font-medium capitalize pt-3`}
+        className={`${
+          isDarkMode ? "text-white" : "text-[#6E6F81]/75"
+        } weekdays grid grid-cols-7 pl-6 text-sm font-medium capitalize pt-3`}
       >
         {CONSTANT.WEEKDAYS.map((day) => (
           <div key={day} className="text-left">
@@ -136,8 +140,7 @@ const Event = () => {
     };
     if (!isOpen) return null;
 
-    const isFormValid =
-      newEventForm.title.trim() !== ""
+    const isFormValid = newEventForm.title.trim() !== "";
 
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -208,6 +211,51 @@ const Event = () => {
           </div>
         </div>
       </div>
+      // <div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+      //   <div class="bg-white rounded-2xl p-6 w-96 shadow-lg">
+      //     <div class="flex justify-between items-center border-b pb-2">
+      //       <h2 class="text-lg font-semibold text-gray-700">
+      //         Remove Sunday Holiday Title
+      //       </h2>
+      //       <button class="text-gray-500 hover:text-gray-700">&times;</button>
+      //     </div>
+
+      //     <div class="mt-4">
+      //       <label class="flex items-center space-x-2 bg-gray-100 p-3 rounded-lg">
+      //         <span class="text-gray-500">📅</span>
+      //         <span class="text-gray-700">Sunday, March 16</span>
+      //       </label>
+      //     </div>
+
+      //     <div class="mt-4">
+      //       <label class="flex items-center space-x-2 bg-gray-100 p-3 rounded-lg">
+      //         <span class="text-gray-500">☰</span>
+      //         <input
+      //           type="text"
+      //           placeholder="Add Description"
+      //           class="w-full bg-transparent outline-none text-gray-700"
+      //         />
+      //       </label>
+      //     </div>
+
+      //     <div class="mt-4 flex items-center space-x-2">
+      //       <input
+      //         type="checkbox"
+      //         id="working-day"
+      //         class="w-5 h-5 border border-gray-400 rounded"
+      //       />
+      //       <label for="working-day" class="text-gray-700">
+      //         Mark As Working Day
+      //       </label>
+      //     </div>
+
+      //     <div class="mt-6 text-right">
+      //       <button class="bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-800">
+      //         Done
+      //       </button>
+      //     </div>
+      //   </div>
+      // </div>
     );
   };
 
@@ -529,16 +577,18 @@ const Event = () => {
                   <div className="bg-[#fafafa] mt-2">
                     <div className="flex py-1 justify-between items-center">
                       <div
-                        className={`${false ? "bg-[#102945] text-white" : ""
-                          } py-0 px-1 ml-4 text-xs font-bold`}
+                        className={`${
+                          false ? "bg-[#102945] text-white" : ""
+                        } py-0 px-1 ml-4 text-xs font-bold`}
                       >
                         {itm.title}
                       </div>
                     </div>
                     <div className="flex pb-2 justify-between items-center">
                       <div
-                        className={`${false ? "bg-[#102945] text-white" : ""
-                          } py-0 px-1 ml-4 text-xs font-poppins-regular`}
+                        className={`${
+                          false ? "bg-[#102945] text-white" : ""
+                        } py-0 px-1 ml-4 text-xs font-poppins-regular`}
                       >
                         {itm.description}
                       </div>

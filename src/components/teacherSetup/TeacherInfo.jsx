@@ -14,14 +14,6 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
     };
   }, [modelOpen]);
 
-  /**
-   * A modal component to display detailed information about a teacher.
-   *
-   * @param {Object} currTeacher - Current teacher's details.
-   * @param {Function} modelOpen - Function to toggle the modal visibility.
-   *
-   * @returns {JSX.Element} Teacher information modal component.
-   */
   const personalDetails = [
     [
       t("labels.fullName"),
@@ -48,69 +40,68 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
   ];
 
   return (
-    <>
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50 p-4">
-        <div className="relative bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-3xl">
-          <div
-            className="absolute top-4 right-4 cursor-pointer text-gray-600 hover:text-gray-800"
-            onClick={() => modelOpen(false)}
-          >
-            <img className="h-10 w-10" src={cross} alt="Close" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <h2 className="text-xl font-bold">{t("titles.teacherDetails")}</h2>
+          <button onClick={() => modelOpen(false)} aria-label="Close">
+            <img src={cross} alt="Close" className="h-6 w-6" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-5 flex flex-col lg:flex-row gap-6">
+          <div className="flex-1">
+            <section>
+              <h3 className="text-lg font-semibold mb-2">
+                {t("titles.teacherPersonalDetails")}
+              </h3>
+              <div className="space-y-2">
+                {personalDetails.map(([label, value], index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between border-b pb-1"
+                  >
+                    <span className="font-medium text-gray-700">{label}</span>
+                    <span className="text-gray-900">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-5">
+              <h3 className="text-lg font-semibold mb-2">
+                {t("titles.educationDetails")}
+              </h3>
+              <div className="space-y-2">
+                {educationDetails.map(([label, value], index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between border-b pb-1"
+                  >
+                    <span className="font-medium text-gray-700">{label}</span>
+                    <span className="text-gray-900">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
-          <div className="flex flex-col md:flex-row overflow-y-auto">
-            <div className="w-full md:w-2/3 p-6">
-              <h2 className="text-2xl font-bold mb-4">
-                {t("titles.teacherDetails")}
-              </h2>
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-2">
-                  {t("titles.teacherPersonalDetails")}
-                </h3>
-                <div className="space-y-2">
-                  {personalDetails.map(([label, value], index) => (
-                    <div className="flex" key={index}>
-                      <span className="w-1/3 font-medium text-gray-700">
-                        {label}:
-                      </span>
-                      <span className="w-2/3 font-semibold text-gray-900">
-                        {value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">
-                  {t("titles.educationDetails")}
-                </h3>
-                <div className="space-y-2">
-                  {educationDetails.map(([label, value], index) => (
-                    <div className="flex" key={index}>
-                      <span className="w-1/3 font-medium text-gray-700">
-                        {label}:
-                      </span>
-                      <span className="w-2/3 font-semibold text-gray-900">
-                        {value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="md:w-1/3 p-6 flex items-center justify-center border-t md:border-t-0 md:border-l border-gray-200">
-              <img
-                className="h-[200px] w-[200px] object-contain"
-                src={
-                  currTeacher?.photo
-                    ? `data:image/jpeg;base64,${currTeacher?.photo}`
-                    : profileEmpty
-                }
-                alt="Teacher"
-              />
-            </div>
+
+          {/* Teacher Photo */}
+          <div className="flex-shrink-0 flex items-center justify-center">
+            <img
+              className="h-40 w-40 object-cover rounded-full border border-gray-300"
+              src={
+                currTeacher?.photo
+                  ? `data:image/jpeg;base64,${currTeacher?.photo}`
+                  : profileEmpty
+              }
+              alt={t("titles.teacherDetails")}
+            />
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -18,18 +18,13 @@ export default function StudentInfo({ currStudent, modelOpen }) {
   const captureRef = useRef(null);
 
   useEffect(() => {
-    if (modelOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-
+    document.body.style.overflow = modelOpen ? "hidden" : "auto";
     return () => {
       document.body.style.overflow = "auto";
     };
   }, [modelOpen]);
 
-  // print student information in pdf format
+  // Print student information in pdf format.
   const handleScreenshot = () => {
     const hiddenContainer = document.createElement("div");
     hiddenContainer.style.position = "fixed";
@@ -45,7 +40,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     imageContainer.style.right = "50px";
     imageContainer.style.width = "100px";
     imageContainer.style.height = "130px";
-    imageContainer.style.border = "1px solid black";
+    imageContainer.style.border = "1px solid #ccc";
     imageContainer.style.overflow = "hidden";
     imageContainer.style.backgroundColor = "white";
 
@@ -53,8 +48,8 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     imageElement.src = currStudent?.photo
       ? `data:image/jpeg;base64,${currStudent?.photo}`
       : profileEmpty;
-    imageElement.style.width = "100px";
-    imageElement.style.height = "130px";
+    imageElement.style.width = "100%";
+    imageElement.style.height = "100%";
     imageElement.style.objectFit = "cover";
 
     imageContainer.appendChild(imageElement);
@@ -83,7 +78,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     });
   };
 
-  // student details
+  // Student details array.
   const personalDetails = [
     [
       t("labels.fullName"),
@@ -100,89 +95,89 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     [t("labels.address"), currStudent?.address || CONSTANT.NA],
   ];
 
-  // parent details
+  // Guardian details array.
   const guardianDetails = [
-    [t("labels.guardianName"), currStudent?.parentDetails?.fullname || CONSTANT.NA],
-    // [t("labels.gender"), currStudent?.parentDetails?.gender || CONSTANT.NA],
-    // [t("labels.age"), currStudent?.parentDetails?.age || CONSTANT.NA],
-    // [t("labels.email"), currStudent?.parentDetails?.email || CONSTANT.NA],
+    [
+      t("labels.guardianName"),
+      currStudent?.parentDetails?.fullname || CONSTANT.NA,
+    ],
     [t("labels.phoneNumber"), currStudent?.parentDetails?.phone || CONSTANT.NA],
-    // [
-    //   t("labels.qualification"),
-    //   currStudent?.parentDetails?.qualification || CONSTANT.NA,
-    // ],
-    // [
-    //   t("labels.occupation"),
-    //   currStudent?.parentDetails?.occupation || CONSTANT.NA,
-    // ],
-    // [t("labels.address"), currStudent?.parentDetails?.address || CONSTANT.NA],
   ];
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 flex justify-center items-end pb-5 bg-[#93a3b6]/25 bg-opacity-50">
-        <div className="relative flex flex-col w-[80%] h-4/5 bg-[#fafafa] rounded-lg shadow-lg overflow-hidden">
-          <div
-            className="absolute top-3 right-5 cursor-pointer"
-            onClick={() => modelOpen(false)}
-          >
-            <img className="h-10 w-10" src={cross} alt="close" />
-          </div>
-          <div
-            ref={captureRef}
-            className="flex flex-col lg:flex-row overflow-y-auto p-6"
-          >
-            <div className="w-full">
-              <h2 className="text-2xl font-bold mb-4">
-                {t("titles.studentDetails")}
-              </h2>
-              <h3 className="pb-2 font-bold">{t("titles.personalDetails")}</h3>
-              <div className="pb-6 font-medium">
-                {/* student details */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <h2 className="text-xl font-bold">{t("titles.studentDetails")}</h2>
+          <button onClick={() => modelOpen(false)} aria-label="Close">
+            <img src={cross} alt="close" className="h-6 w-6" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div ref={captureRef} className="p-6 flex flex-col lg:flex-row gap-6">
+          <div className="flex-1">
+            <section>
+              <h3 className="text-lg font-semibold mb-2">
+                {t("titles.personalDetails")}
+              </h3>
+              <div className="space-y-2">
                 {personalDetails.map(([label, value], index) => (
-                  <div className="flex pb-2" key={index}>
-                    <p className="w-1/3">{label}</p>
-                    <p className="w-1/5">-</p>
-                    <p className="w-1/3 font-medium">{value}</p>
+                  <div
+                    key={index}
+                    className="flex justify-between border-b pb-1"
+                  >
+                    <span className="font-medium text-gray-700">{label}</span>
+                    <span className="text-gray-900">{value}</span>
                   </div>
                 ))}
               </div>
-              <h3 className="pb-2 font-bold">{t("titles.guardianDetails")}</h3>
-              <div className="font-medium">
-                {/* parent details */}
+            </section>
+
+            <section className="mt-6">
+              <h3 className="text-lg font-semibold mb-2">
+                {t("titles.guardianDetails")}
+              </h3>
+              <div className="space-y-2">
                 {guardianDetails.map(([label, value], index) => (
-                  <div className="flex pb-2" key={index}>
-                    <p className="w-1/3">{label}</p>
-                    <p className="w-1/5">-</p>
-                    <p className="w-1/3 font-medium">{value}</p>
+                  <div
+                    key={index}
+                    className="flex justify-between border-b pb-1"
+                  >
+                    <span className="font-medium text-gray-700">{label}</span>
+                    <span className="text-gray-900">{value}</span>
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="flex justify-end items-center w-full mr-6">
-              <img
-                id="StudentInfoImage"
-                className="h-[150px] w-[150px] object-center"
-                src={
-                  currStudent?.photo
-                    ? `data:image/jpeg;base64,${currStudent?.photo}`
-                    : profileEmpty
-                }
-                alt={t("titles.student")}
-              />
-            </div>
+            </section>
           </div>
-          {/* screenshot button */}
-          <div className="flex justify-end mt-5 mr-8 mb-4 space-x-5">
-            <button
-              className="px-4 py-2 bg-[#0f4189] text-white text-sm font-medium rounded-md"
-              onClick={handleScreenshot}
-            >
-              {t("buttons.screenshot")}
-            </button>
+
+          {/* Student Photo */}
+          <div className="flex-shrink-0 flex items-center justify-center">
+            <img
+              id="StudentInfoImage"
+              className="h-40 w-40 object-cover rounded-full border border-gray-300"
+              src={
+                currStudent?.photo
+                  ? `data:image/jpeg;base64,${currStudent?.photo}`
+                  : profileEmpty
+              }
+              alt={t("titles.student")}
+            />
           </div>
         </div>
+
+        {/* Footer */}
+        <div className="flex justify-end border-t px-4 py-3">
+          <button
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 transition text-white text-sm font-medium rounded-md"
+            onClick={handleScreenshot}
+          >
+            {t("buttons.screenshot")}
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

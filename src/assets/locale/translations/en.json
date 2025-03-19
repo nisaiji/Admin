@@ -80,8 +80,10 @@
     "classTeacher": "Class Teacher"
   },
   "validationError": {
+    "fillAll": "Please fill all the fields",
     "username": "Username is required",
     "usernameLength": "Username should be atleast 5 char long",
+    "fullnameLength": "Full Name should be atleast 5 char long",
     "firstName": "First Name is required",
     "lastName": "Last Name is required",
     "email": "Email is required",
@@ -182,6 +184,7 @@
     "phone": "Phone",
     "action": "Action",
     "assignTeacher": "Assign Teacher",
+    "teacherName": "Teacher Name",
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "classTeacher": "Class Teacher",
@@ -245,7 +248,7 @@
   },
   "toasts": {
     "sectionLimit": "Reached maximum section limit",
-    "selectTeacher": "Please select class teacher",
+    "selectTeacher": "Please select Class Teacher",
     "classroomFull": "Classroom is full of classes.",
     "classExists": "Class already exists.",
     "titleRequired": "Title is required",
@@ -387,7 +390,7 @@
   "event": "Calendar",
   "createSection": "Create Sections",
   "sections": "Sections",
-  "startTime": "Start Time",
+  "startTime": "Start Date",
   "ClassTeacher": "Class Teacher",
   "Actions": "Actions",
   "profile": "Profile",

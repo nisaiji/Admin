@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 // import Countries from "../utils/Countries.json";
 import StateAndDistricts from "../utils/StatesAndDistricts.json";
 import CustomDropdown from "./CustomDropdown";
+import { FormControl, MenuItem, Select } from "@mui/material";
 
 /**
  * Step2 Component - Handles the second step of a multi-step form.
@@ -27,7 +28,6 @@ const Step2 = ({ formik, goback }) => {
   const handleCountryChange = (e) => {
     const country = e.target.value;
     setSelectedCountry(country);
-    formik.setFieldValue("country", country);
 
     // Reset fields when changing the country
     formik.setFieldValue("state", "");
@@ -36,6 +36,7 @@ const Step2 = ({ formik, goback }) => {
     formik.setFieldValue("city", "");
     formik.setFieldValue("address", "");
 
+    formik.setFieldValue("country", country);
     setStates(country === "India" ? StateAndDistricts.states : []);
     setDistricts([]);
   };
@@ -73,26 +74,53 @@ const Step2 = ({ formik, goback }) => {
             <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
               {t("adminProfile.country")}
             </p>
-            <select
-              className={`text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full ${
-                formik.values.country ? "text-black" : "text-gray-400"
-              }`}
-              name="country"
-              value={formik.values.country}
-              onChange={handleCountryChange}
-              data-testid="countrylist"
-            >
-              <option
-                value=""
-                label={t("placeholders.selectCountry")}
-                disabled
-              />
-              {Countries.map((country) => (
-                <option key={country.code} value={country.name}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
+            <FormControl fullWidth>
+              <Select
+                name="country"
+                value={formik.values.country}
+                onChange={handleCountryChange}
+                data-testid="countrylist"
+                displayEmpty
+                renderValue={(selected) => {
+                  if (!selected) {
+                    return (
+                      <span style={{ color: "gray" }}>
+                        {t("placeholders.selectCountry")}
+                      </span>
+                    );
+                  }
+                  return selected;
+                }}
+                sx={{
+                  color: formik.values.country ? "black" : "gray",
+                  border: "1px solid #D1D5DB",
+                  borderRadius: "0.5rem",
+                  mt: "8px",
+                  width: "100%",
+                  height: "40px",
+                  textAlign: "start",
+                  "& .MuiSelect-icon": {
+                    color: formik.values.country ? "black" : "gray",
+                  },
+                  "&.MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      border: "none",
+                    },
+                  },
+                }}
+                variant="outlined"
+              >
+                <MenuItem value="" disabled>
+                  {t("placeholders.selectCountry")}
+                </MenuItem>
+                {Countries.map((country) => (
+                  <MenuItem key={country.code} value={country.name}>
+                    {country.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             {formik.touched.country && formik.errors.country && (
               <div className="text-red-500 text-sm text-left pl-3">
                 {formik.errors.country}
@@ -107,7 +135,7 @@ const Step2 = ({ formik, goback }) => {
               {t("adminProfile.state")}
             </p>
 
-            <select
+            {/* <select
               className={`text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full ${
                 formik.values.state ? "text-black" : "text-gray-400"
               }`}
@@ -123,20 +151,50 @@ const Step2 = ({ formik, goback }) => {
                   {state.state}
                 </option>
               ))}
-            </select>
-            {/* {selectedCountry === "India" ? (
-              <></>
-            ) : (
-              <input
-                className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
-                type="text"
+            </select> */}
+            <FormControl fullWidth disabled={!formik.values.country}>
+              <Select
                 name="state"
-                placeholder={t("placeholders.state")}
-                onChange={formik.handleChange}
                 value={formik.values.state}
-                disabled={!formik.values.country}
-              />
-            )} */}
+                onChange={handleStateChange}
+                data-testid="statelist"
+                displayEmpty
+                renderValue={(selected) =>
+                  !selected ? (
+                    <span style={{ color: "gray" }}>
+                      {t("placeholders.selectState")}
+                    </span>
+                  ) : (
+                    selected
+                  )
+                }
+                sx={{
+                  color: formik.values.state ? "black" : "gray",
+                  border: "1px solid #D1D5DB",
+                  borderRadius: "0.5rem",
+                  mt: "8px",
+                  width: "100%",
+                  height: "40px",
+                  textAlign: "start",
+                  "& .MuiSelect-icon": {
+                    color: formik.values.state ? "black" : "gray",
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                }}
+                variant="outlined"
+              >
+                <MenuItem value="" disabled>
+                  {t("placeholders.selectState")}
+                </MenuItem>
+                {states.map((state) => (
+                  <MenuItem key={state.state} value={state.state}>
+                    {state.state}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             {formik.touched.state && formik.errors.state && (
               <div className="text-red-500 text-sm text-left pl-3">
                 {formik.errors.state}
@@ -152,7 +210,7 @@ const Step2 = ({ formik, goback }) => {
             <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
               {t("adminProfile.district")}
             </p>
-            <select
+            {/* <select
               className={`text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full ${
                 formik.values.district ? "text-black" : "text-gray-400"
               }`}
@@ -172,20 +230,51 @@ const Step2 = ({ formik, goback }) => {
                   {district}
                 </option>
               ))}
-            </select>
-            {/* {selectedCountry === "India" ? (
-              <></>
-            ) : (
-              <input
-                className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
-                type="text"
+            </select> */}
+            <FormControl fullWidth disabled={!formik.values.state}>
+              <Select
                 name="district"
-                placeholder={t("placeholders.district")}
-                onChange={formik.handleChange}
                 value={formik.values.district}
-                disabled={!formik.values.state}
-              />
-            )} */}
+                onChange={formik.handleChange}
+                data-testid="districtlist"
+                displayEmpty
+                renderValue={(selected) =>
+                  !selected ? (
+                    <span style={{ color: "gray" }}>
+                      {t("placeholders.selectDistrict")}
+                    </span>
+                  ) : (
+                    selected
+                  )
+                }
+                sx={{
+                  color: formik.values.district ? "black" : "gray",
+                  border: "1px solid #D1D5DB",
+                  borderRadius: "0.5rem",
+                  mt: "8px",
+                  width: "100%",
+                  height: "40px",
+                  textAlign: "start",
+                  "& .MuiSelect-icon": {
+                    color: formik.values.district ? "black" : "gray",
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                }}
+                variant="outlined"
+              >
+                <MenuItem value="" disabled>
+                  {t("placeholders.selectDistrict")}
+                </MenuItem>
+                {districts.map((district) => (
+                  <MenuItem key={district} value={district}>
+                    {district}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             {formik.touched.district && formik.errors.district && (
               <div className="text-red-500 text-sm text-left pl-3">
                 {formik.errors.district}

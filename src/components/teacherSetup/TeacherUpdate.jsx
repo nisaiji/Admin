@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useLocation, useNavigate } from "react-router-dom";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
 import { format, parse } from "date-fns";
 import toast, { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
@@ -16,7 +16,9 @@ import India from "../../assets/images/India.png";
 import location from "../../assets/images/location.png";
 import moment from "moment/moment";
 import Breadcrumbs from "../BreadCrumbs";
-
+import { FormControl, Select, MenuItem, TextField } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 /**
  * Capitalizes the first letter of a string and converts the rest to lowercase.
  * @param {string} string - Input string to capitalize.
@@ -188,45 +190,83 @@ const TeacherUpdate = () => {
                     <div className="text-l font-semibold">{label}</div>
                     <div className="relative mt-2">
                       {type === "select" ? (
-                        <select
-                          name={name}
-                          onChange={formik.handleChange}
-                          value={formik.values[name]}
-                          className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
+                        <FormControl
+                          fullWidth
+                          variant="outlined"
+                          sx={{ mb: 2 }}
                         >
-                          <option value="" label={label} />
-                          {options.map((option) => (
-                            <option
-                              key={option}
-                              value={option}
-                              label={option}
-                            />
-                          ))}
-                        </select>
+                          <Select
+                            labelId={`${name}-label`}
+                            id={`${name}-select`}
+                            name={name}
+                            value={formik.values[name]}
+                            label={label}
+                            onChange={formik.handleChange}
+                            displayEmpty
+                            sx={{
+                              border: "2px solid rgba(5, 2, 43, 0.1)",
+                              borderRadius: "0.5rem",
+                              height: "40px",
+                              backgroundColor: "white",
+                              color:
+                                formik.values[name] === "" ? "gray" : "black",
+                              "& .MuiOutlinedInput-notchedOutline": {
+                                border: "none",
+                              },
+                            }}
+                          >
+                            <MenuItem value="" disabled>
+                              {label}
+                            </MenuItem>
+                            {options.map((option) => (
+                              <MenuItem key={option} value={option}>
+                                {option}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       ) : type === "date" ? (
-                        <DatePicker
-                          selected={
-                            formik.values.dob
-                              ? moment(formik.values.dob, "DD/MM/YYYY").toDate()
-                              : null
-                          }
-                          onChange={(date) =>
-                            formik.setFieldValue(
-                              "dob",
-                              moment(date).format("DD/MM/YYYY")
-                            )
-                          }
-                          dateFormat="dd/MM/yyyy"
-                          placeholderText={placeholder}
-                          className="border-2 border-[#05022B]/10 rounded-lg px-2 py-1.5 w-full"
-                          wrapperClassName="w-full"
-                          maxDate={new Date()}
-                          onKeyDown={(e) => e.preventDefault()}
-                          showMonthDropdown
-                          showYearDropdown
-                          scrollableYearDropdown={true}
-                          dropdownMode="scroll"
-                        />
+                        // <DatePicker
+                        <LocalizationProvider dateAdapter={AdapterMoment}>
+                          <DatePicker
+                            views={["day", "month", "year"]}
+                            value={
+                              formik.values.dob
+                                ? moment(formik.values.dob, "DD/MM/YYYY")
+                                : null
+                            }
+                            onChange={(date) => {
+                              if (date) {
+                                formik.setFieldValue(
+                                  "dob",
+                                  moment(date).format("DD/MM/YYYY")
+                                );
+                              }
+                            }}
+                            className="bg-white w-full"
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                placeholder={t("calendar.gotoDatePlaceholder")}
+                                variant="outlined"
+                              />
+                            )}
+                            sx={{
+                              width: "100%",
+                              height: "40px",
+                              "& .MuiOutlinedInput-root": {
+                                padding: 1,
+                                fontSize: "16px",
+                                minHeight: "40px",
+                              },
+                              "& .MuiInputBase-input": {
+                                fontSize: "16px",
+                                padding: 1,
+                                height: "100%",
+                              },
+                            }}
+                          />
+                        </LocalizationProvider>
                       ) : (
                         <input
                           type={type}

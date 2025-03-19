@@ -29,6 +29,18 @@ export default function Requests() {
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
 
+  // Compute the status query based on the selected tab.
+  const getStatusQuery = (tab) => {
+    switch (tab) {
+      case "approved":
+        return "accept,complete";
+      case "rejected":
+        return "reject,expired";
+      default:
+        return "accept,reject,pending,complete,expired,notSet";
+    }
+  };
+
   /**
    * Fetches the requests from the API.
    * It calls the API endpoint with the appropriate query parameters and updates the `requests` state.
@@ -36,8 +48,9 @@ export default function Requests() {
   const getRequest = async () => {
     try {
       setLoading(true);
+      const statusQuery = getStatusQuery(selectedTab);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.REQUESTS}?model=teacher&page=${pageNo}&limit=${limit}&reason=forgetPassword&status=accept,reject,complete,pending,notSet,expired`
+        `${EndPoints.ADMIN.REQUESTS}?model=teacher&page=${pageNo}&limit=${limit}&reason=forgetPassword&status=${statusQuery}`
       );
       if (res?.statusCode === 200) {
         setRequests(res?.result?.requests);
@@ -52,7 +65,7 @@ export default function Requests() {
 
   useEffect(() => {
     getRequest();
-  }, [limit, pageNo]);
+  }, [limit, pageNo, selectedTab]);
 
   /**
    * Returns a label based on the request's status.
@@ -158,7 +171,7 @@ export default function Requests() {
               </div>
             </div>
             {/* tabs */}
-            <div className="flex space-x-4 mt-4 pl-12">
+            <div className="flex space-x-4 mt-4">
               {["all", "approved", "rejected"].map((tab) => (
                 <div
                   key={tab}
