@@ -543,7 +543,7 @@ const Event = () => {
           </div>
           <hr />
           {events.length === 0 ? (
-            <div className="relative w-full h-full">
+            <div className="relative top-40 w-full h-full">
               <img
                 src={noevents}
                 alt="noevents"
