@@ -74,7 +74,7 @@ export default function Leaves() {
       setLoading(false);
     }
   };
-
+  
   /**
    * Effect hook that runs when the component mounts
    * Fetches the leave requests when the component loads.
@@ -451,7 +451,7 @@ export default function Leaves() {
                       </td>
                       <td className="px-4 py-2 text-center space-y-7">
                         <p className="text-sm font-medium">
-                          {req?.pastLeaves || 0}
+                          {req?.teacher?.leaveRequestCount || 0}
                         </p>
                         {expandedRow === index && (
                           <button

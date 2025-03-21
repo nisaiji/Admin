@@ -22,6 +22,7 @@ const Dashboard = () => {
   const [studentPresentCountData, setStudentPresentCountData] = useState(null);
   const [studentAbsentCountData, setStudentAbsentCountData] = useState(null);
   const [calenderEvents, setCalenderEvents] = useState([]);
+  const [workdays, setWorkdays] = useState([]);
   const [chartData, setChartData] = useState(null);
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
@@ -166,12 +167,27 @@ const Dashboard = () => {
       999
     ).getTime();
     setEventLoading(true);
-    const result = await fetchData(EndPoints.COMMON.GET_EVENTS, "post", {
+    let url = isTeacher
+      ? EndPoints.TEACHER.GET_EVENTS
+      : EndPoints.ADMIN.GET_EVENTS;
+    const result = await fetchData(url, "post", {
       startTime,
       endTime,
     });
 
     if (result) setCalenderEvents(result);
+
+    url = isTeacher
+      ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
+      : EndPoints.ADMIN.GET_SUNDAY_HOLIDAY;
+    const res = await axiosClient.post(url, {
+      startTime,
+      endTime,
+    });
+
+    if (res?.statusCode === 200) {
+      setWorkdays(res?.result);
+    }
     setEventLoading(false);
   };
 
@@ -854,6 +870,7 @@ const Dashboard = () => {
                 <div className="w-full h-screen. rounded-lg ">
                   <CalendarComponent
                     events={calenderEvents}
+                    workdays={workdays}
                     updateDate={(newDate) => setDate(newDate)}
                   />
                 </div>
@@ -866,7 +883,7 @@ const Dashboard = () => {
                 {t("dashboard.holidayAndEvents")}
               </h2>
               <hr className="mb-6" />
-              {calenderEvents.length === 0 ? (
+              {calenderEvents.length === 0 && workdays.length === 0 ? (
                 <div className="relative w-full h-full">
                   <img
                     src={noevents}
@@ -884,6 +901,43 @@ const Dashboard = () => {
                   )}
                   {/* event list */}
                   <div className="overflow-y-auto max-h-screen">
+                    {workdays.map((itm, index) => (
+                      <div
+                        key={index}
+                        className="mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-[#0F4189]"
+                      >
+                        <div className="flex h-0 justify-between items-center bg-[#fafafa] text-[#0F4189] font-poppins mt-2 px-2 text-lg">
+                          <div className="font-medium text-sm mt-4 mb-2 ml-2">
+                            {moment(itm?.date).format("DD MMMM YYYY, ddd")}
+                          </div>
+                        </div>
+                        <div className="bg-[#fafafa] mt-4">
+                          <div className="flex py-0 justify-between items-center">
+                            <div
+                              className={`${
+                                false ? "bg-[#102945] text-white" : ""
+                              } py-0 px-2 ml-2 text-xs font-semibold`}
+                            >
+                              {itm.title}
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <div
+                              className={`${
+                                false ? "bg-[#102945] text-white" : ""
+                              } py-0 px-2 ml-2 text-xs font-poppins-regular`}
+                            >
+                              {itm.description}
+                            </div>
+                            <div className="flex">
+                              <div className="py-1 px-3 mr-6 rounded-3xl bg-[#FE4040]/5 text-[#FE4040] text-xs font-bold">
+                                {t("dashboard.workday")}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                     {calenderEvents.map((itm, index) => (
                       <div
                         key={index}
@@ -913,16 +967,9 @@ const Dashboard = () => {
                               {itm.description}
                             </div>
                             <div className="flex">
-                              {itm.holiday && (
-                                <div className="py-1 px-3 mr-6 rounded-3xl bg-[#FE4040]/5 text-[#FE4040] text-xs font-bold">
-                                  {t("dashboard.holiday")}
-                                </div>
-                              )}
-                              {itm.event && (
-                                <div className="py-1 mr-6 text-center text-[14px] font-bold rounded-3xl text-[#0F4189] ">
-                                  {t("dashboard.Event")}
-                                </div>
-                              )}
+                              <div className="py-1 px-3 mr-6 rounded-3xl bg-[#FE4040]/5 text-[#FE4040] text-xs font-bold">
+                                {t("dashboard.holiday")}
+                              </div>
                             </div>
                           </div>
                         </div>

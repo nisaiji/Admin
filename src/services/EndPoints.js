@@ -13,6 +13,8 @@ const EndPoints = {
     STUDENT_COUNT: "admin-dashboard/present-students",
     PARENT_COUNT: "admin-dashboard/parent-count",
     DASHBOARD_ATTENDANCE_STATUS: "admin-dashboard/attendance-status",
+    GET_EVENTS: "holiday-event",
+    GET_SUNDAY_HOLIDAY: "workdays",
 
     // ADMIN TEACHER SETUP
     REGISTER_TEACHER: "teacher",
@@ -47,6 +49,9 @@ const EndPoints = {
     DELETE_SECTION_STUDENT: "student/admin",
 
     // ADMIN EVENT SECTION
+    REMOVE_SUNDAY_HOLIDAY: "workdays/register",
+    UPDATE_SUNDAY_HOLIDAY: "workdays",
+    DELETE_SUNDAY_HOLIDAY: "workdays",
     REGISTER_EVENT: "holiday-event/register",
     UPDATE_EVENT: "holiday-event",
     DELETE_EVENT: "holiday-event",
@@ -66,6 +71,8 @@ const EndPoints = {
 
     // ADMIN DASHBOARD
     DASHBOARD_ATTENDANCE_STATUS: "teacher-dashboard/attendance-status",
+    GET_EVENTS: "holiday-event/teacher",
+    GET_SUNDAY_HOLIDAY: "workdays/teacher",
 
     // TEACHER STUDENT SETUP
     GET_STUDENT_LIST: "student/teacher",
@@ -86,7 +93,6 @@ const EndPoints = {
   },
   COMMON: {
     CLASS_LIST: "class/all",
-    GET_EVENTS: "holiday-event",
   },
 };
 

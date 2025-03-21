@@ -92,34 +92,10 @@ const DaysGrid = ({ days }) => {
 };
 
 // CalendarComponent - Manages the logic of the calendar, events, and month navigation
-const CalendarComponent = ({ updateDate }) => {
+const CalendarComponent = ({ events, workdays, updateDate }) => {
   const [today, setToday] = useState(new Date());
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
-  const [activeDay, setActiveDay] = useState(today.getDate());
-  const [eventsArr, setEventsArr] = useState([]);
-
-  useEffect(() => {
-    fetchEvents();
-  }, [month]);
-
-  // Fetch events for the selected month
-  const fetchEvents = async () => {
-    try {
-      const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
-        startTime: new Date(year, month, 1).getTime(),
-        endTime: new Date(year, month + 1, 0, 23, 59, 59, 999).getTime(),
-      });
-      if (response?.statusCode === 200) {
-        const sortedEvents = response.result.sort(
-          (a, b) => new Date(a.date) - new Date(b.date)
-        );
-        setEventsArr(sortedEvents);
-      }
-    } catch (e) {
-      toast.error(e);
-    }
-  };
 
   // Handle month navigation (previous/next month)
   const updateCalendar = (newMonth, newYear) => {
@@ -156,14 +132,18 @@ const CalendarComponent = ({ updateDate }) => {
     }
     // Add day cells for each day in the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const isActive = day === activeDay;
-      const isSunday = new Date(year, month, day).getDay() === 0;
+      const targetDate = moment({ year, month, day }).format("YYYY-MM-DD");
+      const isSunday =
+        new Date(year, month, day).getDay() === 0 &&
+        !workdays.some(
+          (w) => moment(w.date).format("YYYY-MM-DD") === targetDate
+        );
       const isToday =
         day === today.getDate() &&
         month === today.getMonth() &&
         year === today.getFullYear();
 
-      const isHoliday = eventsArr.some(
+      const isHoliday = events.some(
         (event) =>
           event.title &&
           new Date(event.date).toDateString() ===
@@ -174,7 +154,6 @@ const CalendarComponent = ({ updateDate }) => {
         <Day
           key={day}
           day={day}
-          isActive={isActive}
           isHoliday={isHoliday}
           isSunday={isSunday}
           isToday={isToday}
