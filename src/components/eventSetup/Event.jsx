@@ -5,6 +5,9 @@ import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 // import "tailwindcss/tailwind.css";
 import deleteEvent from "../../assets/images/deleteEvent.png";
 import Search from "../../assets/images/Search.png";
+import close from "../../assets/images/close.png";
+import calendar from "../../assets/images/calendar.png";
+import notes from "../../assets/images/notes.png";
 import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
@@ -110,9 +113,10 @@ const Event = () => {
   const [year, setYear] = useState(today.getFullYear());
   const [activeDay, setActiveDay] = useState(today.getDate());
   const [events, setEvents] = useState([]);
+  const [workdays, setWorkdays] = useState([]);
   const [showAddEvent, setShowAddEvent] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState(null);
+  const [eventToDelete, setEventToDelete] = useState({});
   const [eventLoading, setEventLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
@@ -129,133 +133,132 @@ const Event = () => {
       title: prevData?.editData?.title || "",
       description: prevData?.editData?.description || "",
       holiday: prevData?.editData?.holiday || false,
+      workday: moment(prevData?.date).day() === 0,
       date: prevData?.date ? moment(prevData.date).format("YYYY-MM-DD") : "",
     });
+    // console.log(prevData);
+
+    const [errors, setErrors] = useState({});
+
     const handleChange = (e) => {
       const { name, value, type, checked } = e.target;
-      setNewEventForm({
-        ...newEventForm,
+      setNewEventForm((prev) => ({
+        ...prev,
         [name]: type === "checkbox" ? checked : value,
-      });
+      }));
     };
+
+    const validateForm = () => {
+      let newErrors = {};
+
+      if (!newEventForm.title.trim()) {
+        newErrors.title = t("toasts.titleRequired");
+      }
+
+      if (newEventForm.workday && !newEventForm.description.trim()) {
+        newErrors.description = t("toasts.descRequired");
+      }
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
+
     if (!isOpen) return null;
 
-    const isFormValid = newEventForm.title.trim() !== "";
-
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-[#fafafa] p-6 rounded-lg w-80">
-          <h2 className="text-lg font-bold mb-4">
-            {prevData?.editData?.eventId
-              ? t("eventForm.title.edit")
-              : t("eventForm.title.add")}
-          </h2>
-          <div className="mb-4">
-            <input
-              type="text"
-              name="date"
-              value={moment(newEventForm.date).format("YYYY-MM-DD")}
-              readOnly
-              className="w-full p-2 mb-2 border border-gray-300 rounded-lg"
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="bg-white rounded-2xl px-[30px] py-[20px] w-[400px] h-[430px] shadow-lg">
+          <div className="flex justify-end">
+            <img
+              src={close}
+              onClick={() => {
+                isClose(false);
+                setErrors({});
+              }}
+              alt="close"
+              className="size-5 cursor-pointer"
             />
           </div>
-          <div className="mb-4">
-            <input
-              type="text"
-              name="title"
-              placeholder={t("eventForm.form.title")}
-              value={newEventForm.title}
-              onChange={handleChange}
-              className="w-full p-2 mb-2 border border-gray-300 rounded-lg"
-            />
+          <input
+            className="w-full text-lg font-medium border-b py-3 outline-none "
+            type="text"
+            name="title"
+            value={newEventForm.title}
+            onChange={handleChange}
+            onBlur={validateForm}
+            placeholder={
+              prevData?.editData?.id
+                ? newEventForm?.workday
+                  ? t("eventForm.title.updateWorkday")
+                  : t("eventForm.title.edit")
+                : newEventForm?.workday
+                ? t("eventForm.title.addWorkday")
+                : t("eventForm.title.add")
+            }
+          />
+          {errors.title && (
+            <p className="text-red-500 text-sm">{errors.title}</p>
+          )}
+          <div className="mt-5">
+            <label className="flex items-center space-x-5 rounded-lg">
+              <img src={calendar} alt="close" className="size-5" />
+              <span className="bg-gray-100 text-gray-700 p-3 rounded-lg w-full">
+                {moment(prevData.date).format("dddd, MMMM D")}
+              </span>
+            </label>
           </div>
-          <div className="mb-4">
-            <textarea
-              name="description"
-              placeholder={t("eventForm.form.description")}
-              value={newEventForm.description}
-              onChange={handleChange}
-              className="w-full p-2 mb-2 border border-gray-300 rounded-lg"
-            />
+
+          <div className="mt-5">
+            <label className="flex items-center space-x-5 rounded-lg">
+              <img src={notes} alt="close" className="size-5" />
+              <textarea
+                type="text"
+                name="description"
+                placeholder="Add Description"
+                value={newEventForm.description}
+                onChange={handleChange}
+                onBlur={validateForm}
+                className="w-full bg-gray-100 p-3 outline-none rounded-lg text-gray-700 max-h-32 h-32"
+              />
+            </label>
+            {errors.description && (
+              <p className="text-red-500 text-sm">{errors.description}</p>
+            )}
           </div>
-          <div className="flex justify-between mt-4">
+          {/* {prevData?.editData?.workday && (
+            <div className="mt-5 flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="working-day"
+                onClick={handleChange}
+                className="w-5 h-5 border border-blue-800 rounded-lg"
+              />
+              <label for="working-day" className="text-gray-700">
+                Mark As Working Day
+              </label>
+            </div>
+          )} */}
+
+          <div className="mt-5 text-right">
             <button
-              className="px-4 py-2 bg-[#6E6F81]/15 rounded-lg"
-              onClick={() => isClose(false)}
+              className="bg-[#0F4189] text-white px-6 py-2 rounded-[10px] text-sm"
+              disabled={loading}
+              onClick={() => {
+                if (validateForm()) {
+                  isSubmit(newEventForm, prevData?.editData?.id);
+                }
+              }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  isClose(false);
+                if (e.key === "Enter" || validateForm()) {
+                  isSubmit(newEventForm, prevData?.editData?.id);
                 }
               }}
             >
-              {t("buttons.cancel")}
-            </button>
-            <button
-              className={`px-4 py-2 bg-[#0F4189] text-white rounded-lg ${
-                isFormValid ? "cursor-pointer" : "cursor-not-allowed"
-              }`}
-              disabled={loading || !isFormValid}
-              onClick={() =>
-                isSubmit(newEventForm, prevData?.editData?.eventId)
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  isSubmit(newEventForm, prevData?.editData?.eventId);
-                }
-              }}
-            >
-              {prevData?.editData?.eventId
-                ? t("buttons.update")
-                : t("buttons.submit")}
+              {prevData?.editData?.id ? t("buttons.update") : t("buttons.done")}
             </button>
           </div>
         </div>
       </div>
-      // <div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-      //   <div class="bg-white rounded-2xl p-6 w-96 shadow-lg">
-      //     <div class="flex justify-between items-center border-b pb-2">
-      //       <h2 class="text-lg font-semibold text-gray-700">
-      //         Remove Sunday Holiday Title
-      //       </h2>
-      //       <button class="text-gray-500 hover:text-gray-700">&times;</button>
-      //     </div>
-
-      //     <div class="mt-4">
-      //       <label class="flex items-center space-x-2 bg-gray-100 p-3 rounded-lg">
-      //         <span class="text-gray-500">📅</span>
-      //         <span class="text-gray-700">Sunday, March 16</span>
-      //       </label>
-      //     </div>
-
-      //     <div class="mt-4">
-      //       <label class="flex items-center space-x-2 bg-gray-100 p-3 rounded-lg">
-      //         <span class="text-gray-500">☰</span>
-      //         <input
-      //           type="text"
-      //           placeholder="Add Description"
-      //           class="w-full bg-transparent outline-none text-gray-700"
-      //         />
-      //       </label>
-      //     </div>
-
-      //     <div class="mt-4 flex items-center space-x-2">
-      //       <input
-      //         type="checkbox"
-      //         id="working-day"
-      //         class="w-5 h-5 border border-gray-400 rounded"
-      //       />
-      //       <label for="working-day" class="text-gray-700">
-      //         Mark As Working Day
-      //       </label>
-      //     </div>
-
-      //     <div class="mt-6 text-right">
-      //       <button class="bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-800">
-      //         Done
-      //       </button>
-      //     </div>
-      //   </div>
-      // </div>
     );
   };
 
@@ -263,14 +266,26 @@ const Event = () => {
   const fetchEvents = async () => {
     setEventLoading(true);
     try {
-      const response = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
+      const response = await axiosClient.post(EndPoints.ADMIN.GET_EVENTS, {
         startTime: new Date(year, month, 1).getTime(),
         endTime: new Date(year, month + 1, 0, 23, 59, 59, 999).getTime(),
       });
+      const response2 = await axiosClient.post(
+        EndPoints.ADMIN.GET_SUNDAY_HOLIDAY,
+        {
+          startTime: new Date(year, month, 1).getTime(),
+          endTime: new Date(year, month + 1, 0, 23, 59, 59, 999).getTime(),
+        }
+      );
 
       if (response?.statusCode === 200) {
         setEvents(
           response?.result?.sort((a, b) => new Date(a.date) - new Date(b.date))
+        );
+      }
+      if (response2?.statusCode === 200) {
+        setWorkdays(
+          response2?.result?.sort((a, b) => new Date(a.date) - new Date(b.date))
         );
       }
     } catch (e) {
@@ -294,19 +309,9 @@ const Event = () => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
-  // check validations
-  const validateForm = (form) => {
-    if (!form.title.trim()) {
-      toast.error(t("toasts.titleRequired"));
-      return false;
-    }
-    return true;
-  };
-
   // api for handeling register and update event
-  const handleAddEvent = async (newEvent, eventId) => {
+  const handleAddEvent = async (newEvent, Id) => {
     if (disableButton) return;
-    if (!validateForm(newEvent)) return;
 
     setDisableButton(true);
     setTimeout(() => setDisableButton(false), 3000);
@@ -317,18 +322,19 @@ const Event = () => {
         description: capitalizeFirstLetter(newEvent?.description?.trim()),
         date: moment(newEvent.date).format("yyyy-MM-DD"),
       };
+
       let res;
-      if (eventId) {
+      if (Id) {
         delete formattedEvent.date;
-        res = await axiosClient.put(
-          `${EndPoints.ADMIN.UPDATE_EVENT}/${eventId}`,
-          formattedEvent
-        );
+        let url = newEvent?.workday
+          ? EndPoints.ADMIN.UPDATE_SUNDAY_HOLIDAY
+          : EndPoints.ADMIN.UPDATE_EVENT;
+        res = await axiosClient.put(`${url}/${Id}`, formattedEvent);
       } else {
-        res = await axiosClient.post(
-          EndPoints.ADMIN.REGISTER_EVENT,
-          formattedEvent
-        );
+        let url = newEvent?.workday
+          ? EndPoints.ADMIN.REMOVE_SUNDAY_HOLIDAY
+          : EndPoints.ADMIN.REGISTER_EVENT;
+        res = await axiosClient.post(url, formattedEvent);
       }
       if (res?.statusCode === 200) {
         setShowAddEvent(false);
@@ -390,41 +396,53 @@ const Event = () => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDayOffset = new Date(year, month, 1).getDay();
     const days = [];
+
     // Add empty divs for the days before the 1st of the month
     for (let i = 0; i < firstDayOffset; i++)
       days.push(<div key={`empty-${i}`} className="empty" />);
+
     // Add day cells for each day in the month
     for (let day = 1; day <= daysInMonth; day++) {
+      const targetDate = moment({ year, month, day }).format("YYYY-MM-DD");
       const isActive = day === activeDay;
-      const targetDate = moment(new Date(year, month, day)).format(
-        "YYYY-MM-DD"
-      );
-
-      const isSunday = new Date(year, month, day).getDay() === 0;
       const isToday =
         day === today.getDate() &&
         month === today.getMonth() &&
         year === today.getFullYear();
-      const checkEventProperty = (events, property, returnValue = false) => {
-        for (let event of events) {
-          if (moment(event.date).format("YYYY-MM-DD") === targetDate) {
-            if (event[property]) {
-              return returnValue ? event[property] : true;
-            }
-          }
-        }
-        return returnValue ? null : false;
-      };
 
-      const title = checkEventProperty(events, "title", true);
-      const description = checkEventProperty(events, "description", true);
-      const eventId = checkEventProperty(events, "_id", true);
-      const isHoliday = title ? true : false;
+      // Check if it's a Sunday and not in workdays
+      const isSunday =
+        moment(targetDate).day() === 0 &&
+        !workdays.some(
+          (w) => moment(w.date).format("YYYY-MM-DD") === targetDate
+        );
+
+      // Find event or workday data
+      const findEventByDate = (key) =>
+        events.find((item) => moment(item.date).isSame(targetDate, "day"))?.[
+          key
+        ];
+
+      const title = findEventByDate("title");
+      const description = findEventByDate("description");
+      const eventId = findEventByDate("_id");
+      const isHoliday = !!title;
+
+      const workdayData = workdays.find((w) =>
+        moment(w.date).isSame(targetDate, "day")
+      );
 
       const handleClick = () => {
-        if (eventId) {
+        if (workdayData) {
           handleDayClick(day, "edit", {
-            eventId,
+            id: workdayData?._id,
+            title: workdayData?.title,
+            description: workdayData?.description,
+            workday: true,
+          });
+        } else if (eventId) {
+          handleDayClick(day, "edit", {
+            id: eventId,
             title,
             description,
             holiday: isHoliday,
@@ -450,18 +468,25 @@ const Event = () => {
   // delete event api
   const confirmDeleteEvent = async () => {
     try {
+      if (disableButton) return;
+
+      setDisableButton(true);
+      setTimeout(() => setDisableButton(false), 3000);
       setLoading(true);
-      const response = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_EVENT}/${eventToDelete}`
-      );
+      let url =
+        eventToDelete.day === "Sunday"
+          ? EndPoints.ADMIN.DELETE_SUNDAY_HOLIDAY
+          : EndPoints.ADMIN.DELETE_EVENT;
+      const response = await axiosClient.delete(`${url}/${eventToDelete._id}`);
       if (response?.statusCode === 200) {
         toast.success(response.result);
         setShowDeleteConfirmation(false);
-        setLoading(false);
-        setEvents(events.filter((event) => event._id !== eventToDelete));
+        fetchEvents();
       }
     } catch (e) {
       toast.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -542,7 +567,7 @@ const Event = () => {
             {t("events.title")}
           </div>
           <hr />
-          {events.length === 0 ? (
+          {events.length === 0 && workdays.length === 0 ? (
             <div className="relative top-40 w-full h-full">
               <img
                 src={noevents}
@@ -553,6 +578,54 @@ const Event = () => {
           ) : (
             <ul className="overflow-y-auto max-h-[450px] mt-4">
               {/* list of events */}
+              {workdays.map((itm, index) => (
+                <div
+                  key={index}
+                  className="mb-4 rounded-lg overflow-hidden border-l-8 border-[#0F4189]"
+                >
+                  <div className="flex h-0 justify-between items-center bg-[#fafafa] text-[#0F4189] font-poppins mt-4 px-1">
+                    <div className="font-medium text-sm mt-2 mb-4 ml-4">
+                      {moment(itm?.date).format("DD MMMM YYYY, ddd")}
+                    </div>
+                    {/* delete icon for admin */}
+                    {isAdmin && (
+                      <img
+                        src={deleteEvent}
+                        onClick={() => {
+                          setEventToDelete(itm);
+                          setShowDeleteConfirmation(true);
+                        }}
+                        className="size-[25px] cursor-pointer"
+                      />
+                    )}
+                  </div>
+                  <div className="bg-[#fafafa] mt-2">
+                    <div className="flex py-1 justify-between items-center">
+                      <div
+                        className={`${
+                          false ? "bg-[#102945] text-white" : ""
+                        } py-0 px-1 ml-4 text-xs font-bold`}
+                      >
+                        {itm.title}
+                      </div>
+                    </div>
+                    <div className="flex pb-2 justify-between items-center">
+                      <div
+                        className={`${
+                          false ? "bg-[#102945] text-white" : ""
+                        } py-0 px-1 ml-4 text-xs font-poppins-regular`}
+                      >
+                        {itm.description}
+                      </div>
+                      <div className="flex">
+                        <div className="py-0.5 px-3 rounded-3xl text-[#FE4040] bg-[#FE4040]/5 text-[12px] font-bold">
+                          {t("dashboard.workday")}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
               {events.map((itm, index) => (
                 <div
                   key={index}
@@ -567,7 +640,7 @@ const Event = () => {
                       <img
                         src={deleteEvent}
                         onClick={() => {
-                          setEventToDelete(itm._id);
+                          setEventToDelete(itm);
                           setShowDeleteConfirmation(true);
                         }}
                         className="size-[25px] cursor-pointer"

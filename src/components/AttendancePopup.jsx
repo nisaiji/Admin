@@ -45,6 +45,7 @@ export default function AttendancePopup({
   const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [holidays, setHolidays] = useState({});
+  const [workdays, setWorkdays] = useState({});
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const [totalAttendanceDays, setTotalAttendanceDays] = useState(0);
   // Start time based on role
@@ -68,13 +69,8 @@ export default function AttendancePopup({
    * @returns {boolean} - True if the date is a Sunday or a holiday
    */
   const isSunday = (dateIndex) => {
-    const date = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      dateIndex + 1
-    );
-    const isSunday = date.getDay() === 0;
-    return isSunday;
+    const date = moment({ day: dateIndex + 1 }).format("YYYY-MM-DD");
+    return moment(date).day() === 0 && !(date in workdays);
   };
 
   const isHoliday = (dateIndex) => {
@@ -329,13 +325,18 @@ export default function AttendancePopup({
             const dateKey = moment(
               new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
             ).format("YYYY-MM-DD");
+            // console.log(
+            //   dateKey,
+            //   new Date(dateKey).getDay() === 0,
+            //   !(dateKey in workdays)
+            // );
 
             return {
               date: dateKey,
               attendance:
                 dateKey in holidays
                   ? "H"
-                  : new Date(dateKey).getDay() === 0
+                  : new Date(dateKey).getDay() === 0 && !(dateKey in workdays)
                   ? "S"
                   : attendanceByDate[dateKey] || "",
             };
@@ -377,22 +378,24 @@ export default function AttendancePopup({
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const res = await axiosClient.post(EndPoints.COMMON.GET_EVENTS, {
-        startTime: new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          1
-        ).getTime(),
-        endTime: new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth() + 1,
-          0,
-          23,
-          59,
-          59,
-          999
-        ).getTime(),
-      });
+      const startTime = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+      ).getTime();
+      const endTime = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0,
+        23,
+        59,
+        59,
+        999
+      ).getTime();
+      let url = isTeacher
+        ? EndPoints.TEACHER.GET_EVENTS
+        : EndPoints.ADMIN.GET_EVENTS;
+      const res = await axiosClient.post(url, { startTime, endTime });
 
       if (res?.statusCode === 200) {
         const holidayMap = res?.result?.reduce((acc, item) => {
@@ -400,6 +403,22 @@ export default function AttendancePopup({
           return acc;
         }, {});
         setHolidays(holidayMap);
+      }
+
+      url = isTeacher
+        ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
+        : EndPoints.ADMIN.GET_SUNDAY_HOLIDAY;
+      const res2 = await axiosClient.post(url, {
+        startTime,
+        endTime,
+      });
+
+      if (res2?.statusCode === 200) {
+        const workdayMap = res2?.result?.reduce((acc, item) => {
+          acc[moment(item.date).format("YYYY-MM-DD")] = true;
+          return acc;
+        }, {});
+        setWorkdays(workdayMap);
       }
     } catch (e) {
       toast.error(e);
@@ -411,7 +430,7 @@ export default function AttendancePopup({
   // Trigger fetchMonthlyAttendance when holidays update
   useEffect(() => {
     fetchMonthlyAttendance();
-  }, [holidays]);
+  }, [holidays, workdays]);
 
   useEffect(() => {
     fetchEvents();
