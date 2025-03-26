@@ -18,6 +18,9 @@ import moment from "moment";
 import { useTranslation } from "react-i18next";
 import CONSTANT from "../../utils/constants";
 import Breadcrumbs from "../BreadCrumbs";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import { TextField } from "@mui/material";
 
 // Calendar Component - Displays a calendar with month navigation and event handling
 const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
@@ -129,36 +132,36 @@ const Event = () => {
 
   // edit or update event form
   const EventForm = ({ isOpen, isClose, isSubmit, prevData }) => {
+    const isEditMode = Boolean(prevData?.editData?.id);
+    const isWorkday = moment(prevData?.date).day() === 0;
+
     const [newEventForm, setNewEventForm] = useState({
       title: prevData?.editData?.title || "",
       description: prevData?.editData?.description || "",
       holiday: prevData?.editData?.holiday || false,
-      workday: moment(prevData?.date).day() === 0,
-      date: prevData?.date ? moment(prevData.date).format("YYYY-MM-DD") : "",
+      workday: isWorkday,
+      date: prevData?.date ? moment(prevData.date).format("MM/DD/YYYY") : "",
+      startDate: moment(prevData?.date).format("MM/DD/YYYY"),
+      endDate: moment(prevData?.date).format("MM/DD/YYYY"),
     });
-    // console.log(prevData);
 
     const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
-      const { name, value, type, checked } = e.target;
+      const { name, value } = e.target;
       setNewEventForm((prev) => ({
         ...prev,
-        [name]: type === "checkbox" ? checked : value,
+        [name]: value,
       }));
     };
 
     const validateForm = () => {
       let newErrors = {};
-
-      if (!newEventForm.title.trim()) {
+      if (!newEventForm?.title?.trim())
         newErrors.title = t("toasts.titleRequired");
-      }
-
-      if (newEventForm.workday && !newEventForm.description.trim()) {
+      if (newEventForm?.workday && !newEventForm?.description?.trim()) {
         newErrors.description = t("toasts.descRequired");
       }
-
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
@@ -167,7 +170,7 @@ const Event = () => {
 
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-        <div className="bg-white rounded-2xl px-[30px] py-[20px] w-[400px] h-[430px] shadow-lg">
+        <div className="bg-white rounded-2xl px-[30px] py-[20px] w-[450px] h-[430px] shadow-lg">
           <div className="flex justify-end">
             <img
               src={close}
@@ -187,11 +190,11 @@ const Event = () => {
             onChange={handleChange}
             onBlur={validateForm}
             placeholder={
-              prevData?.editData?.id
-                ? newEventForm?.workday
+              isEditMode
+                ? isWorkday
                   ? t("eventForm.title.updateWorkday")
                   : t("eventForm.title.edit")
-                : newEventForm?.workday
+                : isWorkday
                 ? t("eventForm.title.addWorkday")
                 : t("eventForm.title.add")
             }
@@ -202,9 +205,96 @@ const Event = () => {
           <div className="mt-5">
             <label className="flex items-center space-x-5 rounded-lg">
               <img src={calendar} alt="close" className="size-5" />
-              <span className="bg-gray-100 text-gray-700 p-3 rounded-lg w-full">
-                {moment(prevData.date).format("dddd, MMMM D")}
-              </span>
+              <LocalizationProvider dateAdapter={AdapterMoment}>
+                {isWorkday || isEditMode ? (
+                  <DatePicker
+                    views={["day", "month", "year"]}
+                    value={moment(prevData.date, "MM/DD/YYYY")}
+                    disabled
+                    className="w-full"
+                    textField={(params) => (
+                      <TextField {...params} variant="outlined" />
+                    )}
+                  />
+                ) : (
+                  <>
+                    <DatePicker
+                      views={["day", "month", "year"]}
+                      inputFormat="MM/DD/YYYY"
+                      minDate={moment().startOf("day")}
+                      value={moment(newEventForm.startDate, "MM/DD/YYYY")}
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedDate = date
+                            .startOf("day")
+                            .format("MM/DD/YYYY");
+                          setNewEventForm((prev) => ({
+                            ...prev,
+                            startDate: formattedDate,
+                            endDate:
+                              prev.endDate &&
+                              moment(prev.endDate, "MM/DD/YYYY").isBefore(date)
+                                ? formattedDate
+                                : prev.endDate,
+                          }));
+                        }
+                      }}
+                      textField={(params) => (
+                        <TextField {...params} variant="outlined" />
+                      )}
+                      sx={{
+                        width: "100%",
+                        height: "40px",
+                        "& .MuiOutlinedInput-root": {
+                          padding: 1,
+                          fontSize: "14px",
+                          minHeight: "40px",
+                        },
+                        "& .MuiInputBase-input": {
+                          fontSize: "14px",
+                          padding: 1,
+                          height: "100%",
+                        },
+                      }}
+                    />
+                    <DatePicker
+                      views={["day", "month", "year"]}
+                      inputFormat="MM/DD/YYYY"
+                      minDate={
+                        newEventForm.startDate
+                          ? moment(newEventForm.startDate, "MM/DD/YYYY")
+                          : moment().startOf("day")
+                      }
+                      value={moment(newEventForm.endDate, "MM/DD/YYYY")}
+                      onChange={(date) => {
+                        if (date) {
+                          setNewEventForm((prev) => ({
+                            ...prev,
+                            endDate: date.endOf("day").format("MM/DD/YYYY"),
+                          }));
+                        }
+                      }}
+                      textField={(params) => (
+                        <TextField {...params} variant="outlined" />
+                      )}
+                      sx={{
+                        width: "100%",
+                        height: "40px",
+                        "& .MuiOutlinedInput-root": {
+                          padding: 1,
+                          fontSize: "14px",
+                          minHeight: "40px",
+                        },
+                        "& .MuiInputBase-input": {
+                          fontSize: "14px",
+                          padding: 1,
+                          height: "100%",
+                        },
+                      }}
+                    />
+                  </>
+                )}
+              </LocalizationProvider>
             </label>
           </div>
 
@@ -225,19 +315,6 @@ const Event = () => {
               <p className="text-red-500 text-sm">{errors.description}</p>
             )}
           </div>
-          {/* {prevData?.editData?.workday && (
-            <div className="mt-5 flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="working-day"
-                onClick={handleChange}
-                className="w-5 h-5 border border-blue-800 rounded-lg"
-              />
-              <label for="working-day" className="text-gray-700">
-                Mark As Working Day
-              </label>
-            </div>
-          )} */}
 
           <div className="mt-5 text-right">
             <button
@@ -317,20 +394,34 @@ const Event = () => {
     setTimeout(() => setDisableButton(false), 3000);
     try {
       setLoading(true);
-      const formattedEvent = {
-        title: capitalizeFirstLetter(newEvent?.title?.trim()),
-        description: capitalizeFirstLetter(newEvent?.description?.trim()),
-        date: moment(newEvent.date).format("yyyy-MM-DD"),
-      };
 
       let res;
+      let formattedEvent;
       if (Id) {
-        delete formattedEvent.date;
+        formattedEvent = {
+          title: capitalizeFirstLetter(newEvent?.title?.trim()),
+          description: capitalizeFirstLetter(newEvent?.description?.trim()),
+        };
         let url = newEvent?.workday
           ? EndPoints.ADMIN.UPDATE_SUNDAY_HOLIDAY
           : EndPoints.ADMIN.UPDATE_EVENT;
         res = await axiosClient.put(`${url}/${Id}`, formattedEvent);
       } else {
+        if (newEvent?.workday) {
+          formattedEvent = {
+            title: capitalizeFirstLetter(newEvent?.title?.trim()),
+            description: capitalizeFirstLetter(newEvent?.description?.trim()),
+            date: moment(newEvent.date).format("yyyy-MM-DD"),
+          };
+        } else {
+          formattedEvent = {
+            title: capitalizeFirstLetter(newEvent?.title?.trim()),
+            description: capitalizeFirstLetter(newEvent?.description?.trim()),
+            startTime: moment(newEvent.startDate).valueOf(),
+            endTime: moment(newEvent.endDate).valueOf(),
+          };
+        }
+
         let url = newEvent?.workday
           ? EndPoints.ADMIN.REMOVE_SUNDAY_HOLIDAY
           : EndPoints.ADMIN.REGISTER_EVENT;

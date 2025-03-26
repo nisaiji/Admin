@@ -126,7 +126,9 @@
     "validationPhoneCount": "Phone Number must be 10 digits and start with a number between 6 and 9"
   },
   "placeholders": {
-    "rollNumber": "Enter Roll Number",
+    "rollNumber": "Enter Roll number",
+    "replacementTeacherName": "Replacement teacher name",
+    "username": "Enter Username",
     "firstName": "Enter First Name",
     "lastName": "Enter Last Name",
     "dob": "Enter Date of Birth",
@@ -191,6 +193,7 @@
     "classTeacher": "Class Teacher",
     "reasonToReset": "Reason to Reset",
     "class": "Class",
+    "noleave": "No Leave request at ths time",
     "reasonForLeave": "Reason for leave",
     "pastLeaves": "Past Leaves",
     "description": "Description",
