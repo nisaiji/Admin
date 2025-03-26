@@ -235,6 +235,7 @@ const TeacherUpdate = () => {
                                 ? moment(formik.values.dob, "DD/MM/YYYY")
                                 : null
                             }
+                            maxDate={moment().startOf("day")}
                             onChange={(date) => {
                               if (date) {
                                 formik.setFieldValue(

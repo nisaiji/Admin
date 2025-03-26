@@ -26,47 +26,23 @@ export default function StudentInfo({ currStudent, modelOpen }) {
 
   // Print student information in pdf format.
   const handleScreenshot = () => {
+    // Create an off-screen container to hold the cloned content
     const hiddenContainer = document.createElement("div");
     hiddenContainer.style.position = "fixed";
-    hiddenContainer.style.width = "500px";
+    hiddenContainer.style.width = "768px";
     hiddenContainer.style.backgroundColor = "white";
-    hiddenContainer.style.zIndex = "-1";
 
+    // Clone the content in captureRef without changing its layout
     const clonedNode = captureRef.current.cloneNode(true);
-
-    const imageContainer = document.createElement("div");
-    imageContainer.style.position = "absolute";
-    imageContainer.style.top = "100px";
-    imageContainer.style.right = "50px";
-    imageContainer.style.width = "100px";
-    imageContainer.style.height = "130px";
-    imageContainer.style.border = "1px solid #ccc";
-    imageContainer.style.overflow = "hidden";
-    imageContainer.style.backgroundColor = "white";
-
-    const imageElement = document.createElement("img");
-    imageElement.src = currStudent?.photo
-      ? `data:image/jpeg;base64,${currStudent?.photo}`
-      : profileEmpty;
-    imageElement.style.width = "100%";
-    imageElement.style.height = "100%";
-    imageElement.style.objectFit = "cover";
-
-    imageContainer.appendChild(imageElement);
-    clonedNode.style.position = "relative";
-    clonedNode.appendChild(imageContainer);
+    // Append the cloned node to the hidden container
     hiddenContainer.appendChild(clonedNode);
+    // Append the container to the body
     document.body.appendChild(hiddenContainer);
 
-    const largeImage = clonedNode.querySelector('img[id="StudentInfoImage"]');
-    if (largeImage) {
-      largeImage.style.display = "none";
-    }
-
+    // Use html2canvas to capture the hidden container
     html2canvas(clonedNode, {
       scrollY: -window.scrollY,
       useCORS: true,
-      scale: 2,
     }).then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
       const link = document.createElement("a");
@@ -157,7 +133,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
           <div className="flex-shrink-0 flex items-center justify-center">
             <img
               id="StudentInfoImage"
-              className="h-40 w-40 object-cover rounded-full border border-gray-300"
+              className="h-60 w-40 object-cover border border-gray-300"
               src={
                 currStudent?.photo
                   ? `data:image/jpeg;base64,${currStudent?.photo}`

@@ -52,7 +52,7 @@ const EndPoints = {
     REMOVE_SUNDAY_HOLIDAY: "workdays/register",
     UPDATE_SUNDAY_HOLIDAY: "workdays",
     DELETE_SUNDAY_HOLIDAY: "workdays",
-    REGISTER_EVENT: "holiday-event/register",
+    REGISTER_EVENT: "holiday-event/v2/register",
     UPDATE_EVENT: "holiday-event",
     DELETE_EVENT: "holiday-event",
     GET_LEAVES: "leave/admin",

@@ -4,6 +4,9 @@ import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
+import noleave from "../../assets/images/noleave.png";
+import profileEmpty from "../../assets/images/profileEmpty.png";
+import refresh from "../../assets/images/refresh.png";
 import dropdown from "../../assets/images/dropdown.png";
 import hide from "../../assets/images/hide.png";
 import show from "../../assets/images/show.png";
@@ -20,13 +23,13 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import Breadcrumbs from "../BreadCrumbs";
+import CONSTANT from "../../utils/constants";
 
 export default function Leaves() {
   const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [selectedTab, setSelectedTab] = useState("all");
   const [loading, setLoading] = useState(false);
-  const [expandedRow, setExpandedRow] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConformationPopup, setshowConformationPopup] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -35,6 +38,11 @@ export default function Leaves() {
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
   const [toastDisplayed, setToastDisplayed] = useState(false);
+
+  const generateUsername = () => {
+    return `GT${Math.floor(100000 + Math.random() * 900000)}`; // GT + 6 random digits
+  };
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -74,7 +82,7 @@ export default function Leaves() {
       setLoading(false);
     }
   };
-  
+
   /**
    * Effect hook that runs when the component mounts
    * Fetches the leave requests when the component loads.
@@ -130,7 +138,6 @@ export default function Leaves() {
       const res = await axiosClient.put(EndPoints.ADMIN.UPDATE_LEAVE, data);
       if (res?.statusCode === 200) {
         toast.success(res?.result);
-        setExpandedRow(null);
         setFormData({ username: "", password: "", fullname: "" });
         setCurrentReq([]);
         fetchLeaves();
@@ -171,7 +178,7 @@ export default function Leaves() {
       case "complete":
         return "Completed";
       default:
-        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+        return status?.charAt(0).toUpperCase() + status?.slice(1).toLowerCase();
     }
   };
 
@@ -215,7 +222,7 @@ export default function Leaves() {
             </div>
           </div>
           {/* tabs */}
-          <div className="flex space-x-4 mt-4 pl-12">
+          <div className="flex space-x-4 mt-4 px-10">
             {["all", "approved", "rejected"].map((tab) => (
               <div
                 key={tab}
@@ -235,290 +242,278 @@ export default function Leaves() {
           </div>
           <hr className="border-[#9391A5]/25 mx-10 -translate-y-[1px]" />
           {filteredRequests.length === 0 ? (
-            <div className="w-full h-48 flex justify-center items-center">
-              <p className="text-[#0F4189]/75 text-3xl font-poppins-bold">
-                No request right now
+            <div className="flex flex-col justify-center items-center h-[400px]">
+              <img
+                src={noleave}
+                alt="noleave"
+                className="w-[300px] h-[200px]"
+              />
+              <p className="text-[28px] font-poppins-bold mt-10">
+                {t("labels.noleave")}
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto mt-6">
-              <table className="w-full shadow-sm overflow-hidden">
-                {/* table heading */}
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
-                      {t(`labels.classTeacher`)}
-                    </th>
-                    <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
-                      {t(`labels.reasonForLeave`)}
-                    </th>
-                    <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
-                      {t(`labels.class`)}
-                    </th>
-                    <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
-                      {t(`labels.pastLeaves`)}
-                    </th>
-                    <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
+            <div className="overflow-x-auto">
+              <div className="flex px-10 items-start">
+                <div
+                  className="flex-1 overflow-auto"
+                  style={{ maxHeight: "100vh" }}
+                >
+                  <table className="w-full shadow-sm table-fixed">
+                    {/* table heading */}
+                    <thead>
+                      <tr>
+                        <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                          {t(`labels.classTeacher`)}
+                        </th>
+                        <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                          {t(`labels.phone`)}
+                        </th>
+                        <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                          {t(`labels.class`)}
+                        </th>
+                        <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
+                          {t(`labels.pastLeaves`)}
+                        </th>
+                        <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                          {t(`labels.reasonForLeave`)}
+                        </th>
+                      </tr>
+                    </thead>
+                    {/* table body */}
+                    <tbody>
+                      {filteredRequests.map((req, index) => (
+                        <tr
+                          key={index}
+                          className={`${
+                            currentReq?._id === req._id
+                              ? "bg-blue-100"
+                              : index % 2 === 0
+                              ? "bg-[#4645900D]"
+                              : ""
+                          } border-t`}
+                          onClick={() => setCurrentReq(req)}
+                        >
+                          <td className="px-4 py-2.5">
+                            <p className="text-sm font-medium">
+                              {req?.teacher?.firstname || ""}{" "}
+                              {req?.teacher?.lastname || ""}
+                            </p>
+                          </td>
+                          <td className="px-4 py-2.5">
+                            <p className="text-sm font-medium">
+                              {req?.teacher?.phone || "NA"}
+                            </p>
+                          </td>
+                          <td className="px-4 py-2.5">
+                            <p className="text-sm font-medium">
+                              {req?.teacher?.class || ""}{" "}
+                              {req?.teacher?.section || ""}
+                            </p>
+                          </td>
+                          <td className="px-4 py-2.5 text-center">
+                            <p className="text-sm font-medium">
+                              {req?.teacher?.leaveRequestCount || 0}
+                            </p>
+                          </td>
+                          <td className="px-4 py-2.5">
+                            <p className="text-sm font-medium">
+                              {reasonStatus(req?.reason || "")}
+                            </p>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <section className="w-[350px] p-5 rounded-2xl bg-slate-200 overflow-y-auto sticky top-4 flex flex-col">
+                  <img
+                    src={
+                      currentReq?.teacher?.photo
+                        ? `data:image/jpeg;base64,${currentReq?.teacher?.photo}`
+                        : profileEmpty
+                    }
+                    className="self-center w-[120px] aspect-square object-contain rounded-full"
+                    alt="Profile picture"
+                  />
+                  <header className="flex flex-col items-center mt-3">
+                    <h1 className="text-base font-bold text-zinc-900">
+                      {currentReq?.teacher?.firstname || ""}
+                      {currentReq?.teacher?.lastname || CONSTANT.NA}
+                    </h1>
+                    <p className="text-sm text-stone-500">
+                      {currentReq?.teacher?.class || ""}{" "}
+                      {currentReq?.teacher?.section || CONSTANT.NA}
+                    </p>
+                  </header>
+
+                  <section className="mt-4">
+                    <label className="text-xs font-semibold text-zinc-900">
+                      Leave Data
+                    </label>
+                    <div className="flex items-center gap-1.5 mt-1.5 text-sm bg-slate-200 text-stone-900">
+                      <img
+                        src="https://cdn.builder.io/api/v1/image/assets/TEMP/2697c956f2650260c1e6c6c65f7f3b4c5a2a1948?placeholderIfAbsent=true&apiKey=a8cc6c1bf626485c842deb8f5c2a2105"
+                        className="w-6 aspect-square object-contain"
+                        alt="Calendar icon"
+                      />
+                      <time className="px-2 py-2 rounded-lg bg-slate-200">
+                        {moment(currentReq?.startTime).format("DD/MM/YYYY")} -{" "}
+                        {moment(currentReq?.endTime).format("DD/MM/YYYY")}
+                      </time>
+                    </div>
+                  </section>
+
+                  <section className="mt-[10px]">
+                    <label className="text-xs font-semibold text-zinc-900">
                       {t(`labels.description`)}
-                    </th>
-                    <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
-                      {t(`labels.action`)}
-                    </th>
-                  </tr>
-                </thead>
-                {/* table body */}
-                <tbody>
-                  {filteredRequests.map((req, index) => (
-                    <tr
-                      key={index}
-                      className={`${
-                        index % 2 === 0 ? "bg-[#4645900D]" : ""
-                      } border-t `}
-                    >
-                      {/* row expand button */}
-                      <td className="px-4 py-2 align-top">
+                    </label>
+                    <p className="p-2 text-sm leading-5 text-stone-500 overflow-hidden">
+                      {currentReq?.description || ""}
+                    </p>
+                  </section>
+
+                  <section className="mt-[10px]">
+                    <label className="text-xs font-semibold text-zinc-900">
+                      {t(`labels.username`)}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={t(`placeholders.username`)}
+                      value={
+                        currentReq?.status === "accept" ||
+                        currentReq?.status === "complete"
+                          ? currentReq?.guestTeacher?.username || ""
+                          : formData.username
+                      }
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          username: e.target.value,
+                        }))
+                      }
+                      disabled
+                      className="w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500"
+                    />
+                    {currentReq?.status === "pending" && (
+                      // <button
+
+                      //   className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                      //   title="Generate New Username"
+                      // >
+                      //   🔄
+                      // </button>
+                      <div
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            username: generateUsername(),
+                          }))
+                        }
+                        className="relative"
+                      >
                         <img
-                          src={dropdown}
-                          onClick={() =>
-                            (req?.status === "accept" ||
-                              req?.status === "complete") &&
-                            setExpandedRow((prev) =>
-                              prev === index ? null : index
-                            )
-                          }
-                          alt=""
-                          className={`size-4 ml-8 ${
-                            expandedRow === index ? "rotate-180" : ""
-                          } ${
-                            req?.status === "accept" ||
-                            req?.status === "complete"
-                              ? "cursor-pointer"
-                              : "opacity-50"
-                          }`}
-                        />
-                      </td>
-                      <td className="px-4 py-2 align-top">
-                        <p className="text-sm font-medium">
-                          {req?.teacher?.firstname || ""}{" "}
-                          {req?.teacher?.lastname || ""}
-                        </p>
-                        {expandedRow === index && (
-                          <>
-                            <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
-                              {t(`labels.username`)}
-                            </p>
-                            <input
-                              autocomplete="off"
-                              autocapitalize="none"
-                              autoCorrect="off"
-                              spellcheck="false"
-                              type="text"
-                              placeholder="Enter Username"
-                              value={
-                                req?.status === "accept" ||
-                                req?.status === "complete"
-                                  ? req?.guestTeacher?.username || ""
-                                  : formData.username
-                              }
-                              onChange={(e) =>
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  username: e.target.value,
-                                }))
-                              }
-                              disabled={
-                                req?.status === "accept" ||
-                                req?.status === "complete"
-                              }
-                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
-                                req?.status === "accept" ||
-                                req?.status === "complete"
-                                  ? "bg-gray-200 cursor-not-allowed"
-                                  : ""
-                              }`}
-                            />
-                          </>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 align-top">
-                        <p className="text-sm font-medium">
-                          {reasonStatus(req?.reason || "")}
-                        </p>
-                        {expandedRow === index && (
-                          <>
-                            <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
-                              {t(`labels.teacherName`)}
-                            </p>
-                            <input
-                              autocomplete="off"
-                              autocapitalize="none"
-                              autoCorrect="off"
-                              spellcheck="false"
-                              type="fullname"
-                              placeholder="Substitute Teacher"
-                              value={
-                                req?.status === "accept" ||
-                                req?.status === "complete"
-                                  ? req?.guestTeacher?.tagline || ""
-                                  : formData.fullname
-                              }
-                              onChange={(e) =>
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  fullname: e.target.value,
-                                }))
-                              }
-                              disabled={
-                                req?.status === "accept" ||
-                                req?.status === "complete"
-                              }
-                              className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
-                                req?.status === "accept" ||
-                                req?.status === "complete"
-                                  ? "bg-gray-200 cursor-not-allowed"
-                                  : ""
-                              }`}
-                            />
-                          </>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 align-top">
-                        <p className="text-sm font-medium">
-                          {req?.teacher?.class || ""}{" "}
-                          {req?.teacher?.section || ""}
-                        </p>
-                        {expandedRow === index && (
-                          <>
-                            <p className="text-[#686868BF] text-xs font-poppins font-normal pt-2">
-                              {t(`labels.password`)}
-                            </p>
-                            <div className="relative">
-                              <input
-                                autocomplete="off"
-                                autocapitalize="none"
-                                autoCorrect="off"
-                                spellcheck="false"
-                                type={showPassword ? "password" : "text"}
-                                placeholder="Password"
-                                value={
-                                  req?.status === "accept" ||
-                                  req?.status === "complete"
-                                    ? req?.guestTeacher?.secretKey || ""
-                                    : formData.password
-                                }
-                                onChange={(e) =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    password: e.target.value,
-                                  }))
-                                }
-                                disabled={
-                                  req?.status === "accept" ||
-                                  req?.status === "complete"
-                                }
-                                className={`mt-1 p-2 border rounded w-full text-sm font-poppins font-normal focus:outline-none ${
-                                  req?.status === "accept" ||
-                                  req?.status === "complete"
-                                    ? "bg-gray-200 cursor-not-allowed"
-                                    : ""
-                                }`}
-                              />
-                              {req?.status === "accept" ||
-                              req?.status === "complete" ? (
-                                <></>
-                              ) : (
-                                <div
-                                  onClick={() =>
-                                    setShowPassword((prev) => !prev)
-                                  }
-                                  className="absolute right-2 top-3 cursor-pointer text-gray-600"
-                                >
-                                  <img
-                                    src={showPassword ? hide : show}
-                                    alt="passwordIcon"
-                                    className="relative right-1 top-0 transform w-6 h-6 cursor-pointer"
-                                    style={{
-                                      filter:
-                                        "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
-                                    }}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          </>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 text-center space-y-7">
-                        <p className="text-sm font-medium">
-                          {req?.teacher?.leaveRequestCount || 0}
-                        </p>
-                        {expandedRow === index && (
-                          <button
-                            onClick={() => handleSave(req._id, "accept")}
-                            disabled={
-                              req?.status === "accept" ||
-                              req?.status === "complete"
-                            }
-                            className={`${
-                              req?.status === "accept" ||
-                              req?.status === "complete"
-                                ? "opacity-0"
-                                : "bg-[#0F4189] text-white"
-                            } text-xs font-poppins-bold px-4 py-2 rounded-md`}
-                          >
-                            Save
-                          </button>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 flex justify-center">
-                        <img
-                          src={approve}
-                          alt="description"
-                          className="w-[70px] h-[32px] cursor-pointer"
-                          onClick={() => {
-                            setCurrentReq(req);
-                            setIsPopupOpen(true);
+                          src={refresh}
+                          alt="passwordIcon"
+                          className="transform size-6 absolute right-2 bottom-4 cursor-pointer text-gray-600"
+                          style={{
+                            filter:
+                              "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
                           }}
                         />
-                      </td>
-                      {/* action buttons */}
-                      <td className="px-4 py-2 w-[200px] align-top text-sm font-medium text-center">
-                        {req.status === "pending" ? (
-                          <div className="flex justify-center gap-3">
-                            <button
-                              onClick={() => setExpandedRow(index)}
-                              className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => {
-                                setCurrentReq(req);
-                                setshowConformationPopup(true);
-                              }}
-                              className="text-[#FE4040] font-poppins-bold border-2 border-[#FE4040] p-1 px-3 rounded-md"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            className={`text-white text-sm font-poppins-regular py-1 px-3 rounded-md cursor-not-allowed ${
-                              req?.status === "accept" ||
-                              req?.status === "complete"
-                                ? "bg-[#4CBC9A]"
-                                : "bg-[#FE4040]"
-                            }`}
-                          >
-                            {requestsStatus(req?.status)}
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    )}
+                    <label className="text-xs font-semibold text-zinc-900">
+                      {t(`labels.teacherName`)}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={t(`placeholders.replacementTeacherName`)}
+                      value={
+                        currentReq?.status === "accept" ||
+                        currentReq?.status === "complete"
+                          ? currentReq?.guestTeacher?.tagline || ""
+                          : formData.fullname
+                      }
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          fullname: e.target.value,
+                        }))
+                      }
+                      disabled={currentReq?.status !== "pending"}
+                      className="w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500"
+                    />
+                    <label className="text-xs font-semibold text-zinc-900">
+                      {t(`labels.password`)}
+                    </label>
+                    <input
+                      placeholder={t(`placeholders.password`)}
+                      type={showPassword ? "password" : "text"}
+                      value={
+                        currentReq?.status === "accept" ||
+                        currentReq?.status === "complete"
+                          ? currentReq?.guestTeacher?.secretKey || ""
+                          : formData.password
+                      }
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          password: e.target.value,
+                        }))
+                      }
+                      disabled={currentReq?.status !== "pending"}
+                      className="w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500"
+                    />
+                    {currentReq?.status === "pending" && (
+                      <div
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="relative"
+                      >
+                        <img
+                          src={showPassword ? hide : show}
+                          alt="passwordIcon"
+                          className="transform size-6 absolute right-2 bottom-4 cursor-pointer text-gray-600"
+                          style={{
+                            filter:
+                              "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </section>
+
+                  {currentReq?.status === "pending" ? (
+                    <div className="flex justify-between mt-5 text-sm font-bold text-white">
+                      <button
+                        onClick={() => setshowConformationPopup(true)}
+                        className="font-poppins-bold bg-[#FE4040] p-1 rounded-md px-5 py-2"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        onClick={() => handleSave(currentReq?._id, "accept")}
+                        className="font-poppins-bold bg-[#4CBC9A] p-1 rounded-md px-5 py-2"
+                      >
+                        Approve
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-center">
+                      <div
+                        className={`text-sm text-center font-poppins-regular py-1 px-3 rounded-md border-2 ${
+                          currentReq?.status === "accept" ||
+                          currentReq?.status === "complete"
+                            ? "border-[#4CBC9A] text-[#4CBC9A] bg-[#4CBC9A26]"
+                            : "border-[#FE4040] text-[#FE4040] bg-[#FE404026]"
+                        }`}
+                      >
+                        {requestsStatus(currentReq?.status) || "NA"}
+                      </div>
+                    </div>
+                  )}
+                </section>
+              </div>
               {/* pagination logic */}
               <div className="flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
                 <div className="text-[#9391a5] text-base leading-5">
@@ -603,64 +598,6 @@ export default function Leaves() {
         }}
         message={t("confirm.leave")}
       />
-
-      {/* Leave Description Popup */}
-      {isPopupOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="p-6 bg-white rounded-2xl shadow-lg max-w-md w-full relative">
-            {/* Popup Header */}
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">
-                {currentReq?.reason || ""}
-              </h3>
-              <img
-                className="h-10 w-10"
-                src={cross}
-                alt="Close"
-                onClick={() => {
-                  setCurrentReq([]);
-                  setIsPopupOpen(false);
-                }}
-              />
-            </div>
-
-            {/* Dates */}
-            <div className="flex flex-row gap-3 mb-4">
-              <div className="flex flex-col bg-gray-100 rounded-xl w-full border border-stone-500 border-opacity-30 p-3">
-                <span className="text-xs text-stone-500">Start Date</span>
-                <span className="text-sm text-slate-950">
-                  {moment(currentReq.startTime).format("DD/MM/YYYY") || ""}
-                </span>
-              </div>
-              <div className="flex flex-col bg-gray-100 rounded-xl w-full border border-stone-500 border-opacity-30 p-3">
-                <span className="text-xs text-stone-500">End Date</span>
-                <span className="text-sm text-slate-950">
-                  {moment(currentReq.endTime).format("DD/MM/YYYY") || ""}
-                </span>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Description
-              </label>
-              <textarea
-                id="description"
-                className="w-full h-[150px] px-4 py-2 mt-2 bg-gray-100 rounded-xl border border-stone-500 border-opacity-30"
-                placeholder="Description in 160 characters"
-                maxLength={160}
-                aria-label="Leave request description"
-                value={currentReq?.description || ""}
-                disabled={true}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
