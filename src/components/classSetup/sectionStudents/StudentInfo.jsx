@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import profileEmpty from "../../../assets/images/profileEmpty.png";
-import cross from "../../../assets/images/cross.png";
+import cross from "../../../assets/images/darkmode/cross.png";
+import crossw from "../../../assets/images/cross.png";
 import html2canvas from "html2canvas";
 import { useTranslation } from "react-i18next";
 import CONSTANT from "../../../utils/constants";
+import { useSelector } from "react-redux";
 
 /**
  * A modal component to display detailed information about a student.
@@ -16,7 +18,7 @@ import CONSTANT from "../../../utils/constants";
 export default function StudentInfo({ currStudent, modelOpen }) {
   const [t] = useTranslation();
   const captureRef = useRef(null);
-
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   useEffect(() => {
     document.body.style.overflow = modelOpen ? "hidden" : "auto";
     return () => {
@@ -81,48 +83,98 @@ export default function StudentInfo({ currStudent, modelOpen }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4 ${
+        isDarkMode ? "bg-whiteBackground3" : "bg-background"
+      }`}
+    >
+      <div
+        className={`relative ${
+          isDarkMode ? "bg-background" : "bg-whiteBackground"
+        } rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto`}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b px-4 py-3">
-          <h2 className="text-xl font-bold">{t("titles.studentDetails")}</h2>
+        <div className={`flex items-center justify-between border-b px-4 py-3`}>
+          <h2
+            className={`text-xl font-bold  ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
+            {t("titles.studentDetails")}
+          </h2>
           <button onClick={() => modelOpen(false)} aria-label="Close">
-            <img src={cross} alt="close" className="h-6 w-6" />
+            <img
+              src={isDarkMode ? cross : crossw}
+              alt="close"
+              className={`${isDarkMode ? "h-4 w-4" : "h-7 w-7"}`}
+            />
           </button>
         </div>
 
         {/* Content */}
-        <div ref={captureRef} className="p-6 flex flex-col lg:flex-row gap-6">
-          <div className="flex-1">
+        <div ref={captureRef} className={`p-6 flex flex-col lg:flex-row gap-6`}>
+          <div className={`flex-1`}>
             <section>
-              <h3 className="text-lg font-semibold mb-2">
+              <h3
+                className={`text-lg font-semibold mb-2 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("titles.personalDetails")}
               </h3>
-              <div className="space-y-2">
+              <div className={`space-y-2`}>
                 {personalDetails.map(([label, value], index) => (
                   <div
                     key={index}
-                    className="flex justify-between border-b pb-1"
+                    className={`flex justify-between border-b pb-1`}
                   >
-                    <span className="font-medium text-gray-700">{label}</span>
-                    <span className="text-gray-900">{value}</span>
+                    <span
+                      className={`font-medium ${
+                        isDarkMode ? "text-textPrimary" : "text-textGray"
+                      }`}
+                    >
+                      {label}
+                    </span>
+                    <span
+                      className={`${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
+                      {value}
+                    </span>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="mt-6">
-              <h3 className="text-lg font-semibold mb-2">
+            <section className={`mt-6`}>
+              <h3
+                className={`text-lg font-semibold mb-2  ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("titles.guardianDetails")}
               </h3>
-              <div className="space-y-2">
+              <div className={`space-y-2`}>
                 {guardianDetails.map(([label, value], index) => (
                   <div
                     key={index}
-                    className="flex justify-between border-b pb-1"
+                    className={`flex justify-between border-b pb-1`}
                   >
-                    <span className="font-medium text-gray-700">{label}</span>
-                    <span className="text-gray-900">{value}</span>
+                    <span
+                      className={`font-medium ${
+                        isDarkMode ? "text-textPrimary" : "text-textGray"
+                      }`}
+                    >
+                      {label}
+                    </span>
+                    <span
+                      className={`${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
+                      {value}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -130,10 +182,10 @@ export default function StudentInfo({ currStudent, modelOpen }) {
           </div>
 
           {/* Student Photo */}
-          <div className="flex-shrink-0 flex items-center justify-center">
+          <div className={`flex-shrink-0 flex items-center justify-center`}>
             <img
               id="StudentInfoImage"
-              className="h-60 w-40 object-cover border border-gray-300"
+              className={`h-60 w-40 object-cover border border-gray-300`}
               src={
                 currStudent?.photo
                   ? `data:image/jpeg;base64,${currStudent?.photo}`
@@ -145,9 +197,9 @@ export default function StudentInfo({ currStudent, modelOpen }) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end border-t px-4 py-3">
+        <div className={`flex justify-end border-t px-4 py-3`}>
           <button
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 transition text-white text-sm font-medium rounded-md"
+            className={`px-4 py-2 bg-backgroundBlue transition text-white text-sm font-medium rounded-md`}
             onClick={handleScreenshot}
           >
             {t("buttons.screenshot")}

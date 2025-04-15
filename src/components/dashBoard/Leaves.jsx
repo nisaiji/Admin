@@ -7,11 +7,8 @@ import { axiosClient } from "../../services/axiosClient";
 import noleave from "../../assets/images/noleave.png";
 import profileEmpty from "../../assets/images/profileEmpty.png";
 import refresh from "../../assets/images/refresh.png";
-import dropdown from "../../assets/images/dropdown.png";
 import hide from "../../assets/images/hide.png";
 import show from "../../assets/images/show.png";
-import cross from "../../assets/images/cross.png";
-import approve from "../../assets/images/approve.png";
 import ConformationPopup from "../ConformationPopup";
 import moment from "moment";
 import {
@@ -24,6 +21,7 @@ import {
 import { Stack } from "@mui/system";
 import Breadcrumbs from "../BreadCrumbs";
 import CONSTANT from "../../utils/constants";
+import { useSelector } from "react-redux";
 
 export default function Leaves() {
   const { t } = useTranslation();
@@ -33,11 +31,12 @@ export default function Leaves() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConformationPopup, setshowConformationPopup] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [currentReq, setCurrentReq] = useState([]);
+  const [currentReq, setCurrentReq] = useState({});
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
   const [toastDisplayed, setToastDisplayed] = useState(false);
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   const generateUsername = () => {
     return `GT${Math.floor(100000 + Math.random() * 900000)}`; // GT + 6 random digits
@@ -75,6 +74,7 @@ export default function Leaves() {
       if (res?.statusCode === 200) {
         setRequests(res?.result?.leaveRequests[0]?.teachers || []);
         setTotalRequestCount(res?.result?.totalLeaveRequests);
+        setCurrentReq(res?.result?.leaveRequests[0]?.teachers[0]);
       }
     } catch (e) {
       toast.error(e);
@@ -92,7 +92,11 @@ export default function Leaves() {
   }, [pageNo, limit, selectedTab]);
 
   const validateData = () => {
-    if (!formData.username || !formData.password || !formData.fullname) {
+    if (
+      !formData.username.trim() ||
+      !formData.password.trim() ||
+      !formData.fullname.trim()
+    ) {
       return t("validationError.fillAll");
     } else if (formData.username.length < 5) {
       return t("validationError.usernameLength");
@@ -139,7 +143,7 @@ export default function Leaves() {
       if (res?.statusCode === 200) {
         toast.success(res?.result);
         setFormData({ username: "", password: "", fullname: "" });
-        setCurrentReq([]);
+        setCurrentReq({});
         fetchLeaves();
       }
     } catch (e) {
@@ -208,25 +212,41 @@ export default function Leaves() {
     <>
       {/* loader */}
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30">
+        <div
+          className={`fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30`}
+        >
           <Spinner />
         </div>
       )}
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="bg-[#93a3b6]/25 px-6 py-[25px] select-none">
-        <div className="bg-[#fafafa] min-h-screen rounded-[16px]">
-          <div className="pl-12 py-6">
+      <div
+        className={`${
+          isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+        } px-6 py-[25px] select-none`}
+      >
+        <div
+          className={`${
+            isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          } min-h-[calc(100vh-110px)] rounded-[16px]`}
+        >
+          <div className={`pl-12 py-6`}>
             <Breadcrumbs />
-            <div className="text-2xl font-poppins-bold">
+            <div
+              className={`text-2xl ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } font-poppins-bold`}
+            >
               {t("titles.leave")}
             </div>
           </div>
           {/* tabs */}
-          <div className="flex space-x-4 mt-4 px-10">
+          <div className={`flex space-x-4 mt-4 px-10`}>
             {["all", "approved", "rejected"].map((tab) => (
               <div
                 key={tab}
-                className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
+                className={`cursor-pointer ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } text-xs font-poppins font-semibold w-[75px] text-center ${
                   selectedTab === tab
                     ? "pb-3 border-b-[3px] border-[#FF793F]"
                     : ""
@@ -240,42 +260,56 @@ export default function Leaves() {
               </div>
             ))}
           </div>
-          <hr className="border-[#9391A5]/25 mx-10 -translate-y-[1px]" />
+          <hr className={`border-[#9391A5]/25 mx-10 -translate-y-[1px]`} />
           {filteredRequests.length === 0 ? (
-            <div className="flex flex-col justify-center items-center h-[400px]">
+            <div className={`flex flex-col justify-center items-center`}>
               <img
                 src={noleave}
                 alt="noleave"
-                className="w-[300px] h-[200px]"
+                className={`w-[300px] h-[200px] object-contain`}
               />
-              <p className="text-[28px] font-poppins-bold mt-10">
+              <p
+                className={`text-[28px] ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } font-poppins-bold mt-5`}
+              >
                 {t("labels.noleave")}
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <div className="flex px-10 items-start">
+            <div className={`overflow-x-auto`}>
+              <div className={`flex px-10 items-start`}>
                 <div
-                  className="flex-1 overflow-auto"
+                  className={`flex-1 overflow-auto`}
                   style={{ maxHeight: "100vh" }}
                 >
-                  <table className="w-full shadow-sm table-fixed">
+                  <table className={`w-full shadow-sm table-fixed`}>
                     {/* table heading */}
                     <thead>
                       <tr>
-                        <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                        <th
+                          className={`p-4 text-base text-left font-poppins-bold text-textBlue`}
+                        >
                           {t(`labels.classTeacher`)}
                         </th>
-                        <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                        <th
+                          className={`p-4 text-base text-left font-poppins-bold text-textBlue`}
+                        >
                           {t(`labels.phone`)}
                         </th>
-                        <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                        <th
+                          className={`p-4 text-base text-left font-poppins-bold text-textBlue`}
+                        >
                           {t(`labels.class`)}
                         </th>
-                        <th className="p-4 text-base font-poppins-bold text-[#0F4189]/75">
+                        <th
+                          className={`p-4 text-base font-poppins-bold text-textBlue`}
+                        >
                           {t(`labels.pastLeaves`)}
                         </th>
-                        <th className="p-4 text-base text-left font-poppins-bold text-[#0F4189]/75">
+                        <th
+                          className={`p-4 text-base text-left font-poppins-bold text-textBlue`}
+                        >
                           {t(`labels.reasonForLeave`)}
                         </th>
                       </tr>
@@ -287,37 +321,69 @@ export default function Leaves() {
                           key={index}
                           className={`${
                             currentReq?._id === req._id
-                              ? "bg-blue-100"
+                              ? isDarkMode
+                                ? "bg-background2"
+                                : "bg-blue-100"
                               : index % 2 === 0
                               ? "bg-[#4645900D]"
                               : ""
                           } border-t`}
                           onClick={() => setCurrentReq(req)}
                         >
-                          <td className="px-4 py-2.5">
-                            <p className="text-sm font-medium">
+                          <td className={`px-4 py-2.5`}>
+                            <p
+                              className={`text-sm ${
+                                isDarkMode
+                                  ? "text-textPrimary"
+                                  : "text-textBlack"
+                              } font-medium`}
+                            >
                               {req?.teacher?.firstname || ""}{" "}
                               {req?.teacher?.lastname || ""}
                             </p>
                           </td>
-                          <td className="px-4 py-2.5">
-                            <p className="text-sm font-medium">
+                          <td className={`px-4 py-2.5`}>
+                            <p
+                              className={`text-sm ${
+                                isDarkMode
+                                  ? "text-textPrimary"
+                                  : "text-textBlack"
+                              } font-medium`}
+                            >
                               {req?.teacher?.phone || "NA"}
                             </p>
                           </td>
-                          <td className="px-4 py-2.5">
-                            <p className="text-sm font-medium">
+                          <td className={`px-4 py-2.5`}>
+                            <p
+                              className={`text-sm ${
+                                isDarkMode
+                                  ? "text-textPrimary"
+                                  : "text-textBlack"
+                              } font-medium`}
+                            >
                               {req?.teacher?.class || ""}{" "}
                               {req?.teacher?.section || ""}
                             </p>
                           </td>
-                          <td className="px-4 py-2.5 text-center">
-                            <p className="text-sm font-medium">
+                          <td className={`px-4 py-2.5 text-center`}>
+                            <p
+                              className={`text-sm ${
+                                isDarkMode
+                                  ? "text-textPrimary"
+                                  : "text-textBlack"
+                              } font-medium`}
+                            >
                               {req?.teacher?.leaveRequestCount || 0}
                             </p>
                           </td>
-                          <td className="px-4 py-2.5">
-                            <p className="text-sm font-medium">
+                          <td className={`px-4 py-2.5`}>
+                            <p
+                              className={`text-sm ${
+                                isDarkMode
+                                  ? "text-textPrimary"
+                                  : "text-textBlack"
+                              } font-medium`}
+                            >
                               {reasonStatus(req?.reason || "")}
                             </p>
                           </td>
@@ -326,60 +392,66 @@ export default function Leaves() {
                     </tbody>
                   </table>
                 </div>
-                <section className="w-[350px] p-5 rounded-2xl bg-slate-200 overflow-y-auto sticky top-4 flex flex-col">
+                <section
+                  className={`w-[350px] p-5 rounded-2xl bg-slate-200 overflow-y-auto sticky top-4 flex flex-col`}
+                >
                   <img
                     src={
                       currentReq?.teacher?.photo
                         ? `data:image/jpeg;base64,${currentReq?.teacher?.photo}`
                         : profileEmpty
                     }
-                    className="self-center w-[120px] aspect-square object-contain rounded-full"
+                    className={`self-center w-[120px] aspect-square object-contain rounded-full`}
                     alt="Profile picture"
                   />
-                  <header className="flex flex-col items-center mt-3">
-                    <h1 className="text-base font-bold text-zinc-900">
+                  <header className={`flex flex-col items-center mt-3`}>
+                    <h1 className={`text-base font-bold text-zinc-900`}>
                       {currentReq?.teacher?.firstname || ""}
                       {currentReq?.teacher?.lastname || CONSTANT.NA}
                     </h1>
-                    <p className="text-sm text-stone-500">
+                    <p className={`text-sm text-stone-500`}>
                       {currentReq?.teacher?.class || ""}{" "}
                       {currentReq?.teacher?.section || CONSTANT.NA}
                     </p>
                   </header>
 
-                  <section className="mt-4">
-                    <label className="text-xs font-semibold text-zinc-900">
+                  <section className={`mt-4`}>
+                    <label className={`text-xs font-semibold text-zinc-900`}>
                       Leave Data
                     </label>
-                    <div className="flex items-center gap-1.5 mt-1.5 text-sm bg-slate-200 text-stone-900">
+                    <div
+                      className={`flex items-center gap-1.5 mt-1.5 text-sm bg-slate-200 text-stone-900`}
+                    >
                       <img
                         src="https://cdn.builder.io/api/v1/image/assets/TEMP/2697c956f2650260c1e6c6c65f7f3b4c5a2a1948?placeholderIfAbsent=true&apiKey=a8cc6c1bf626485c842deb8f5c2a2105"
-                        className="w-6 aspect-square object-contain"
+                        className={`w-6 aspect-square object-contain`}
                         alt="Calendar icon"
                       />
-                      <time className="px-2 py-2 rounded-lg bg-slate-200">
+                      <time className={`px-2 py-2 rounded-lg bg-slate-200`}>
                         {moment(currentReq?.startTime).format("DD/MM/YYYY")} -{" "}
                         {moment(currentReq?.endTime).format("DD/MM/YYYY")}
                       </time>
                     </div>
                   </section>
 
-                  <section className="mt-[10px]">
-                    <label className="text-xs font-semibold text-zinc-900">
+                  <section className={`mt-[10px]`}>
+                    <label className={`text-xs font-semibold text-zinc-900`}>
                       {t(`labels.description`)}
                     </label>
-                    <p className="p-2 text-sm leading-5 text-stone-500 overflow-hidden">
+                    <p
+                      className={`p-2 text-sm text-justify leading-5 text-stone-500 overflow-hidden`}
+                    >
                       {currentReq?.description || ""}
                     </p>
                   </section>
 
-                  <section className="mt-[10px]">
-                    <label className="text-xs font-semibold text-zinc-900">
+                  <section className={`mt-[10px]`}>
+                    <label className={`text-xs font-semibold text-zinc-900`}>
                       {t(`labels.username`)}
                     </label>
                     <input
                       type="text"
-                      placeholder={t(`placeholders.username`)}
+                      placeholder={t(`placeholders.generateUsername`)}
                       value={
                         currentReq?.status === "accept" ||
                         currentReq?.status === "complete"
@@ -393,16 +465,9 @@ export default function Leaves() {
                         }))
                       }
                       disabled
-                      className="w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500"
+                      className={`w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500`}
                     />
                     {currentReq?.status === "pending" && (
-                      // <button
-
-                      //   className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-                      //   title="Generate New Username"
-                      // >
-                      //   🔄
-                      // </button>
                       <div
                         onClick={() =>
                           setFormData((prev) => ({
@@ -410,12 +475,12 @@ export default function Leaves() {
                             username: generateUsername(),
                           }))
                         }
-                        className="relative"
+                        className={`relative`}
                       >
                         <img
                           src={refresh}
                           alt="passwordIcon"
-                          className="transform size-6 absolute right-2 bottom-4 cursor-pointer text-gray-600"
+                          className={`transform size-6 absolute right-2 bottom-4 cursor-pointer text-gray-600`}
                           style={{
                             filter:
                               "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
@@ -423,7 +488,7 @@ export default function Leaves() {
                         />
                       </div>
                     )}
-                    <label className="text-xs font-semibold text-zinc-900">
+                    <label className={`text-xs font-semibold text-zinc-900`}>
                       {t(`labels.teacherName`)}
                     </label>
                     <input
@@ -442,9 +507,9 @@ export default function Leaves() {
                         }))
                       }
                       disabled={currentReq?.status !== "pending"}
-                      className="w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500"
+                      className={`w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500`}
                     />
-                    <label className="text-xs font-semibold text-zinc-900">
+                    <label className={`text-xs font-semibold text-zinc-900`}>
                       {t(`labels.password`)}
                     </label>
                     <input
@@ -463,17 +528,17 @@ export default function Leaves() {
                         }))
                       }
                       disabled={currentReq?.status !== "pending"}
-                      className="w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500"
+                      className={`w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500`}
                     />
                     {currentReq?.status === "pending" && (
                       <div
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="relative"
+                        className={`relative`}
                       >
                         <img
                           src={showPassword ? hide : show}
                           alt="passwordIcon"
-                          className="transform size-6 absolute right-2 bottom-4 cursor-pointer text-gray-600"
+                          className={`transform size-6 absolute right-2 bottom-4 cursor-pointer text-gray-600`}
                           style={{
                             filter:
                               "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
@@ -484,22 +549,24 @@ export default function Leaves() {
                   </section>
 
                   {currentReq?.status === "pending" ? (
-                    <div className="flex justify-between mt-5 text-sm font-bold text-white">
+                    <div
+                      className={`flex justify-between mt-5 text-sm font-bold text-white`}
+                    >
                       <button
                         onClick={() => setshowConformationPopup(true)}
-                        className="font-poppins-bold bg-[#FE4040] p-1 rounded-md px-5 py-2"
+                        className={`font-poppins-bold bg-[#FE4040] p-1 rounded-md px-5 py-2`}
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => handleSave(currentReq?._id, "accept")}
-                        className="font-poppins-bold bg-[#4CBC9A] p-1 rounded-md px-5 py-2"
+                        className={`font-poppins-bold bg-[#4CBC9A] p-1 rounded-md px-5 py-2`}
                       >
                         Approve
                       </button>
                     </div>
                   ) : (
-                    <div className="flex justify-center">
+                    <div className={`flex justify-center`}>
                       <div
                         className={`text-sm text-center font-poppins-regular py-1 px-3 rounded-md border-2 ${
                           currentReq?.status === "accept" ||
@@ -515,43 +582,74 @@ export default function Leaves() {
                 </section>
               </div>
               {/* pagination logic */}
-              <div className="flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
-                <div className="text-[#9391a5] text-base leading-5">
+              <div
+                className={`flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full`}
+              >
+                <div className={`text-[#9391a5] text-base leading-5`}>
                   {t("titles.showing")}
-                  <span className="text-[#152259]">
+                  <span className={`text-[#152259]`}>
                     {" "}
                     {pageNo * limit - (limit - 1)} -{" "}
                     {Math.min(totalRequestCount, pageNo * limit)}{" "}
                   </span>
                   {t("titles.from")}
-                  <span className="text-[#152259]"> {totalRequestCount} </span>
+                  <span className={`text-[#152259]`}>
+                    {" "}
+                    {totalRequestCount}{" "}
+                  </span>
                   {t("titles.data")}
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className={`flex items-center gap-4`}>
                   {/* Dropdown to select how many data per page */}
-                  <FormControl variant="outlined" size="small">
+                  <FormControl
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      border: "1px solid #d1d5db",
+                      borderRadius: "6px",
+                      minWidth: "80px",
+                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "none",
+                      },
+                      "& .MuiInputBase-root, & .MuiSvgIcon-root": {
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                      },
+                    }}
+                  >
                     <Select
                       value={limit}
                       onChange={(e) => {
                         setLimit(e.target.value);
                         setPageNo(1);
                       }}
-                      sx={{
-                        border: "1px solid #d1d5db",
-                        borderRadius: "6px",
-                        minWidth: "80px",
-                        backgroundColor: "#fafafa",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                            color: isDarkMode ? "#E3E8F3" : "black",
+                          },
                         },
                       }}
                     >
-                      <MenuItem value={10}>10</MenuItem>
-                      <MenuItem value={20}>20</MenuItem>
-                      <MenuItem value={25}>25</MenuItem>
-                      <MenuItem value={50}>50</MenuItem>
-                      <MenuItem value={100}>100</MenuItem>
+                      {[10, 20, 25, 50, 100].map((itm, i) => (
+                        <MenuItem
+                          key={i}
+                          value={itm}
+                          sx={{
+                            backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                            color: isDarkMode ? "#E3E8F3" : "black",
+                            "&:hover": {
+                              backgroundColor: isDarkMode
+                                ? "#2a2a2a"
+                                : "#E9EEF2",
+                            },
+                          }}
+                        >
+                          {itm}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
 
@@ -565,12 +663,13 @@ export default function Leaves() {
                         <PaginationItem
                           {...item}
                           sx={{
-                            color: "#0F4189",
+                            color: isDarkMode ? "white" : "black",
                             borderColor:
                               item.type === "previous" || item.type === "next"
                                 ? "transparent"
                                 : "#0F4189",
                             borderWidth: "2px",
+                            borderRadius: "20px",
                             borderStyle: "solid",
                             "&.Mui-selected": {
                               color: "white",

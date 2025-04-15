@@ -3,7 +3,10 @@ import { Bar, Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 import noevents from "../../assets/images/noevents.png";
-import DownIcon from "../../assets/images/Down.png";
+import DownIconw from "../../assets/images/dropdown.png";
+import DownIcon from "../../assets/images/darkmode/downArrow.png";
+import school from "../../assets/images/darkmode/school.png";
+import edit from "../../assets/images/darkmode/editimg.png";
 import CalendarComponent from "./CalendarComponent.jsx";
 import { useSelector } from "react-redux";
 import EndPoints from "../../services/EndPoints.js";
@@ -13,11 +16,13 @@ import Spinner from "../Spinner.jsx";
 import { useTranslation } from "react-i18next";
 import toast, { Toaster } from "react-hot-toast";
 import CONSTANT from "../../utils/constants.js";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 const Dashboard = () => {
   const [t] = useTranslation();
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const schoolName = useSelector((state) => state.appAuth.schoolName);
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [selectedOption, setSelectedOption] = useState("Monthly");
   const [studentPresentCountData, setStudentPresentCountData] = useState(null);
   const [studentAbsentCountData, setStudentAbsentCountData] = useState(null);
@@ -374,15 +379,15 @@ const Dashboard = () => {
       labels: CONSTANT.WEEKDAYS,
       datasets: [
         {
-          label: "Absent",
-          data: absentData,
+          label: "Present",
+          data: presentData,
           backgroundColor: "#FF793F",
           barThickness: 50,
           borderRadius: 14,
         },
         {
-          label: "Present",
-          data: presentData,
+          label: "Absent",
+          data: absentData,
           backgroundColor: "#D9E2E9",
           barThickness: 50,
           borderRadius: 14,
@@ -404,14 +409,14 @@ const Dashboard = () => {
     labels: CONSTANT.WEEKDAYS,
     datasets: [
       {
-        label: "Absent",
+        label: "Present",
         data: [],
         backgroundColor: "#FF793F",
         barThickness: 50,
         borderRadius: 14,
       },
       {
-        label: "Present",
+        label: "Absent",
         data: [],
         backgroundColor: "#E9EEF2",
         barThickness: 50,
@@ -425,13 +430,13 @@ const Dashboard = () => {
     labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
     datasets: [
       {
-        label: "Absent",
+        label: "Present",
         data: [],
         backgroundColor: "#FF793F",
         barThickness: 20,
       },
       {
-        label: "Present",
+        label: "Absent",
         data: [],
         backgroundColor: "#E9EEF2",
         barThickness: 20,
@@ -452,14 +457,14 @@ const Dashboard = () => {
       labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
       datasets: [
         {
-          label: "Absent",
-          data: absentData,
+          label: "Present",
+          data: presentData,
           backgroundColor: "#FF793F",
           barThickness: 20,
         },
         {
-          label: "Present",
-          data: presentData,
+          label: "Absent",
+          data: absentData,
           backgroundColor: "#D9E2E9",
           barThickness: 20,
         },
@@ -545,7 +550,7 @@ const Dashboard = () => {
               ]
             : [1],
           backgroundColor: hasAttendance
-            ? ["#D9E2E9", "#FF793F", "#E9EEF2"]
+            ? ["#FF793F", "#D9E2E9", "#E9EEF2"]
             : ["gray"],
           borderWidth: 2,
         },
@@ -672,314 +677,520 @@ const Dashboard = () => {
   // Function to render the clock with current time
   const Clock = () => {
     const [currentTime, setCurrentTime] = useState(
-      moment().format("DD-MM-YYYY hh:mm:ss A")
+      moment().format("hh:mm:ss A")
     );
 
     useEffect(() => {
       const timer = setInterval(() => {
-        setCurrentTime(moment().format("DD-MM-YYYY hh:mm:ss A"));
+        setCurrentTime(moment().format("hh:mm:ss A"));
       }, 1000); // Update every second
 
       return () => clearInterval(timer); // Cleanup on unmount
     }, []);
 
-    return <div className="text-xl font-poppins-regular">{currentTime}</div>;
+    return (
+      <div
+        className={`flex items-center justify-between  rounded-full px-6 py-2 shadow-md w-fit ${
+          isDarkMode
+            ? "bg-gradient-to-l from-fromColor1 to-toColor1 text-textPrimary"
+            : "bg-whiteBackground"
+        }`}
+      >
+        {/* Date Section */}
+        <div
+          className={`flex flex-col items-start pr-6 border-r border-gray-500`}
+        >
+          <span className={`text-xs text-gray-400`}>Date</span>
+          <span className={`text-lg font-medium`}>
+            {moment().format("DD-MM-YYYY")}
+          </span>
+        </div>
+
+        {/* Time Section */}
+        <div className={`flex flex-col items-start px-6`}>
+          <span className={`text-xs text-gray-400`}>Time</span>
+          <span className={`text-lg font-medium`}>{currentTime}</span>
+        </div>
+
+        {/* Edit Icon */}
+        <img src={edit} alt="Edit" className={`w-10 h-10 ml-4`} />
+      </div>
+    );
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-[#93a3b6]/25 select-none">
+    <div
+      className={`relative w-full ${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      } select-none`}
+    >
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="container mx-[20px] py-[15px] justify-center">
-        <div className="grid grid-rows-1 lg:grid-rows-1 gap-3">
-          <div className="bg-[#fafafa] flex justify-between rounded-[16px] w-full mx-8 px-8 p-5">
-            <h1 className="text-xl font-semibold">
-              {localStorage.getItem("schoolName") || schoolName}
-            </h1>
-            <Clock />
+
+      {/* section 1 */}
+      <div
+        className={`${
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
+        } flex items-center w-full p-4 shadow-lg`}
+      >
+        <img
+          src={school}
+          alt="School Logo"
+          className={`w-[230px] h-auto rounded-lg`}
+        />
+
+        <div className={`flex flex-col justify-center flex-grow px-4`}>
+          <h1
+            className={`text-3xl font-bold ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
+            {localStorage.getItem("schoolName") || schoolName}
+          </h1>
+          <span className={`text-textGray`}>Welcome to School Dashboard!</span>
+        </div>
+
+        <Clock />
+      </div>
+
+      {/* section 2 Attendance */}
+      <div
+        className={`${
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
+        } justify-center m-5 rounded-[16px] relative`}
+      >
+        <div className={`flex justify-between items-center py-3 px-5`}>
+          <h2
+            className={`text-2xl ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            } font-semibold pl-5`}
+          >
+            {t("dashboard.attendance")}
+          </h2>
+          {/* Graph toggle button */}
+          <div
+            className={`flex justify-evenly bg-[#68686826] p-2 rounded-[20px]`}
+          >
+            <button
+              className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
+                selectedOption === "Daily"
+                  ? "bg-[#0F4189] text-textPrimary"
+                  : isDarkMode
+                  ? "text-textPrimary"
+                  : "text-textBlack"
+              }`}
+              onClick={() => handleOptionChange({ target: { value: "Daily" } })}
+            >
+              {t("dashboard.daily")}
+            </button>
+            <button
+              className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
+                selectedOption === "Weekly"
+                  ? "bg-[#0F4189] text-textPrimary"
+                  : isDarkMode
+                  ? "text-textPrimary"
+                  : "text-textBlack"
+              }`}
+              onClick={() =>
+                handleOptionChange({ target: { value: "Weekly" } })
+              }
+            >
+              {t("dashboard.weekly")}
+            </button>
+            <button
+              className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
+                selectedOption === "Monthly"
+                  ? "bg-[#0F4189] text-textPrimary"
+                  : isDarkMode
+                  ? "text-textPrimary"
+                  : "text-textBlack"
+              }`}
+              onClick={() =>
+                handleOptionChange({ target: { value: "Monthly" } })
+              }
+            >
+              {t("dashboard.monthly")}
+            </button>
           </div>
-          <hr className="mx-5" />
-          <div className="bg-[#fafafa] justify-center p-6 w-full rounded-[16px] relative mx-8">
-            <div className="flex justify-between mb-2">
-              <h2 className="text-xl font-semibold pl-5">
-                {t("dashboard.attendance")}
-              </h2>
-              {/* Graph toggle button */}
-              <div className="flex justify-evenly bg-[#E9EEF2] w-64 p-1 rounded-[12px] h-8">
-                <button
-                  className={`px-5 py-1 rounded-[8px] font-medium text-[12px] ${
-                    selectedOption === "Daily"
-                      ? "bg-[#0F4189] h-6 text-[#fafafa]"
-                      : " text-[#040320]"
-                  }`}
-                  onClick={() =>
-                    handleOptionChange({ target: { value: "Daily" } })
-                  }
-                >
-                  {t("dashboard.daily")}
-                </button>
-                <button
-                  className={`px-5 py-1 rounded-[8px] font-medium text-[12px] ${
-                    selectedOption === "Weekly"
-                      ? "bg-[#0F4189] h-6 text-[#fafafa]"
-                      : " text-[#040320]"
-                  }`}
-                  onClick={() =>
-                    handleOptionChange({ target: { value: "Weekly" } })
-                  }
-                >
-                  {t("dashboard.weekly")}
-                </button>
-                <button
-                  className={`px-5 py-1 rounded-[8px] font-medium text-[12px] ${
-                    selectedOption === "Monthly"
-                      ? "bg-[#0F4189] h-6 text-[#fafafa]"
-                      : " text-[#040320]"
-                  }`}
-                  onClick={() =>
-                    handleOptionChange({ target: { value: "Monthly" } })
-                  }
-                >
-                  {t("dashboard.monthly")}
-                </button>
-              </div>
-              {/* date change buttons */}
-              <div className="flex justify-between items-center space-x-2 w-[270px]">
-                <img
-                  src={DownIcon}
-                  onClick={() => handleChangeDate("previous")}
-                  alt=""
-                  className="h-3 w-5 rotate-90 object-contain cursor-pointer"
-                />
-                <div className="text-base font-poppins-regular">
-                  {selectedOption === "Daily"
-                    ? moment(attendanceTime.day.startTime).format(
-                        "dddd, DD MMM YYYY"
-                      )
-                    : selectedOption === "Weekly"
-                    ? `${moment(attendanceTime.week.startTime).format(
-                        "D MMM YYYY"
-                      )} - ${moment(attendanceTime.week.endTime).format(
-                        "D MMM YYYY"
-                      )}`
-                    : moment(attendanceTime.month.startTime).format(
-                        "MMMM YYYY"
-                      )}
-                </div>
-                {!(
-                  selectedOption === "Daily" &&
-                  attendanceTime.day.startTime ===
-                    moment().startOf("day").valueOf()
-                ) &&
-                !(
-                  selectedOption === "Weekly" &&
-                  attendanceTime.week.startTime ===
-                    moment().startOf("week").valueOf()
-                ) &&
-                !(
-                  selectedOption === "Monthly" &&
-                  attendanceTime.month.startTime ===
-                    moment().startOf("month").valueOf()
-                ) ? (
-                  <img
-                    src={DownIcon}
-                    onClick={() => handleChangeDate("next")}
-                    alt=""
-                    className="h-3 w-5 -rotate-90 object-contain cursor-pointer"
-                  />
-                ) : (
-                  <img
-                    src={DownIcon}
-                    alt=""
-                    className="h-3 w-5 -rotate-90 object-contain opacity-5 cursor-not-allowed"
-                  />
-                )}
-              </div>
+          {/* date change buttons */}
+          <div
+            className={`flex justify-between items-center space-x-2 w-[270px]`}
+          >
+            <img
+              src={isDarkMode ? DownIcon : DownIconw}
+              onClick={() => handleChangeDate("previous")}
+              alt=""
+              className={`h-7 w-7 rotate-90 object-contain cursor-pointer`}
+            />
+            <div
+              className={`text-base ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } font-poppins-regular`}
+            >
+              {selectedOption === "Daily"
+                ? moment(attendanceTime.day.startTime).format(
+                    "dddd, DD MMM YYYY"
+                  )
+                : selectedOption === "Weekly"
+                ? `${moment(attendanceTime.week.startTime).format(
+                    "D MMM YYYY"
+                  )} - ${moment(attendanceTime.week.endTime).format(
+                    "D MMM YYYY"
+                  )}`
+                : moment(attendanceTime.month.startTime).format("MMMM YYYY")}
             </div>
-            <hr />
-            {/* Bar Graph */}
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 mx-8 w-full">
-                <Spinner />
-              </div>
+            {!(
+              selectedOption === "Daily" &&
+              attendanceTime.day.startTime === moment().startOf("day").valueOf()
+            ) &&
+            !(
+              selectedOption === "Weekly" &&
+              attendanceTime.week.startTime ===
+                moment().startOf("week").valueOf()
+            ) &&
+            !(
+              selectedOption === "Monthly" &&
+              attendanceTime.month.startTime ===
+                moment().startOf("month").valueOf()
+            ) ? (
+              <img
+                src={isDarkMode ? DownIcon : DownIconw}
+                onClick={() => handleChangeDate("next")}
+                alt=""
+                className={`h-7 w-7 -rotate-90 object-contain cursor-pointer`}
+              />
+            ) : (
+              <img
+                src={isDarkMode ? DownIcon : DownIconw}
+                alt=""
+                className={`h-7 w-7 -rotate-90 object-contain opacity-30 cursor-not-allowed`}
+              />
             )}
-            <div className="flex justify-end items-center py-3">
-              {/* class and section dropdoown */}
-              {!isTeacher && (
-                <div className="flex space-x-2 p-1 ">
-                  <select
-                    className="px-4 w-25 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] text-[14px] bg-[#E9EEF2]/50 hover:bg-[#E9EEF2] font-medium rounded-[8px] justify-center items-center"
-                    value={selectedClass}
-                    onChange={(e) => {
-                      setSelectedClass(e.target.value);
-                      const classData = classList.filter(
-                        (itm) => itm["_id"] == e.target.value
-                      );
-                      setSectionList(classData[0]?.section);
-                      setSelectedSection(classData[0]?.section[0]?._id || "");
-                      setStartTime(classData[0]?.section[0]?.startTime || "");
-                    }}
-                  >
-                    <option value="">{t("dashboard.selectClass")}</option>
-                    {classList.map((itm) => {
-                      return (
-                        <option key={itm["_id"]} value={itm["_id"]}>
-                          {itm.name}
-                        </option>
-                      );
-                    })}
-                  </select>
-
-                  <select
-                    className="px-4 w-26 h-[28px] border-2 border-[rgba(196, 196, 196, 0.40)] bg-[#E9EEF2]/50 hover:bg-[#E9EEF2] text-[14px] font-medium rounded-[8px] justify-center items-center"
-                    value={selectedSection}
-                    onChange={(e) => setSelectedSection(e?.target?.value)}
-                  >
-                    <option value="">{t("dashboard.selectSection")}</option>
-                    {sectionList &&
-                      sectionList.map((itm) => {
-                        return (
-                          <option key={itm["_id"]} value={itm["_id"]}>
-                            {itm.name}
-                          </option>
-                        );
-                      })}
-                  </select>
-                </div>
-              )}
-            </div>
-            {/* Pie/Bar charts */}
-            <div className="flex justify-center mb-4">
-              <div
-                className={`h-96 flex justify-center ${
-                  selectedOption === "Weekly" ? "w-8/12" : "w-11/12"
-                }`}
+          </div>
+        </div>
+        <hr />
+        {/* Bar Graph */}
+        {loading && (
+          <div
+            className={`absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 mx-8 w-full`}
+          >
+            <Spinner />
+          </div>
+        )}
+        <div className={`flex justify-end items-center py-3`}>
+          {/* class and section dropdoown */}
+          {!isTeacher && (
+            <div className={`flex space-x-2 p-1`}>
+              {/* Class dropdown */}
+              <FormControl
+                size="small"
+                sx={{
+                  width: "150px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "14px",
+                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "white !important",
+                  },
+                  "& .MuiInputBase-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                  "& .MuiSvgIcon-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                }}
               >
-                {selectedOption === "Daily" ? renderPieChart() : renderChart()}
-              </div>
+                <InputLabel
+                  id="class-select-label"
+                  sx={{
+                    zIndex: 1,
+                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                    fontSize: 14,
+                    px: 0.5,
+                  }}
+                >
+                  {t("dashboard.selectClass")}
+                </InputLabel>
+                <Select
+                  labelId="class-select-label"
+                  id="class-select"
+                  value={selectedClass}
+                  onChange={(e) => {
+                    setSelectedClass(e.target.value);
+                    const classData = classList.filter(
+                      (itm) => itm["_id"] === e.target.value
+                    );
+                    setSectionList(classData[0]?.section);
+                    setSelectedSection(classData[0]?.section[0]?._id || "");
+                    setStartTime(classData[0]?.section[0]?.startTime || "");
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="">{t("dashboard.selectClass")}</MenuItem>
+                  {classList.map((itm) => (
+                    <MenuItem
+                      key={itm["_id"]}
+                      value={itm["_id"]}
+                      sx={{
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        "&:hover": {
+                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                        },
+                      }}
+                    >
+                      {itm.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Section dropdown */}
+              <FormControl
+                size="small"
+                sx={{
+                  width: "150px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "14px",
+                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "white !important",
+                  },
+                  "& .MuiInputBase-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                  "& .MuiSvgIcon-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                }}
+              >
+                <InputLabel
+                  id="section-select-label"
+                  sx={{
+                    zIndex: 1,
+                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                    fontSize: 14,
+                    px: 0.5,
+                  }}
+                >
+                  {t("dashboard.selectSection")}
+                </InputLabel>
+                <Select
+                  labelId="section-select-label"
+                  id="section-select"
+                  value={selectedSection}
+                  disabled={!selectedClass}
+                  onChange={(e) => setSelectedSection(e.target.value)}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        cursor: selectedClass ? "pointer" : "none",
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="">{t("dashboard.selectSection")}</MenuItem>
+                  {sectionList?.map((itm) => (
+                    <MenuItem
+                      key={itm["_id"]}
+                      value={itm["_id"]}
+                      sx={{
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        "&:hover": {
+                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                        },
+                      }}
+                    >
+                      {itm.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+          )}
+        </div>
+        {/* Pie/Bar charts */}
+        <div className={`flex justify-center pb-5`}>
+          <div
+            className={`h-96 flex justify-center ${
+              selectedOption === "Weekly" ? "w-8/12" : "w-11/12"
+            }`}
+          >
+            {selectedOption === "Daily" ? renderPieChart() : renderChart()}
+          </div>
+        </div>
+      </div>
+
+      {/* Calender component */}
+      <div className={`flex flex-row mx-5 pb-5 space-x-5`}>
+        <div
+          className={`${
+            isDarkMode
+              ? "bg-gradient-to-l from-fromColor1 to-toColor1"
+              : "bg-whiteBackground"
+          }  p-6 w-[60%] rounded-[16px]`}
+        >
+          <h2
+            className={`text-xl font-semibold pl-6 ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
+            {t("dashboard.calendar")}
+          </h2>
+          <hr className={`mt-2 border-t border-bordergray`} />
+          <div className={`flex justify-center mt-2`}>
+            <div className={`w-full h-screen `}>
+              <CalendarComponent
+                events={calenderEvents}
+                workdays={workdays}
+                updateDate={(newDate) => setDate(newDate)}
+              />
             </div>
           </div>
+        </div>
 
-          {/* Calender component */}
-          <div className="flex flex-row w-full mx-8 space-x-8">
-            <div className="bg-[#fafafa] p-6 w-7/12 rounded-[16px]">
-              <h2 className="text-xl font-semibold pl-6">
-                {t("dashboard.calendar")}
-              </h2>
-              <hr className="mt-2" />
-              <div className="flex justify-center mt-2">
-                <div className="w-full h-screen. rounded-lg ">
-                  <CalendarComponent
-                    events={calenderEvents}
-                    workdays={workdays}
-                    updateDate={(newDate) => setDate(newDate)}
-                  />
-                </div>
-              </div>
+        {/* event list */}
+        <div
+          className={`${
+            isDarkMode
+              ? "bg-gradient-to-l from-fromColor1 to-toColor1"
+              : "bg-whiteBackground"
+          } w-[40%] py-2 px-8 rounded-[16px]`}
+        >
+          <h2
+            className={`text-xl font-semibold my-2 pl-6 mt-4 ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
+            {t("dashboard.holidayAndEvents")}
+          </h2>
+          <hr className={`mb-6 border-t border-bordergray`} />
+          {calenderEvents.length === 0 && workdays.length === 0 ? (
+            <div className={`relative w-full`}>
+              <img
+                src={noevents}
+                alt="Event Background"
+                className={`absolute inset-0 w-auto h-auto object-cover`}
+              />
             </div>
-
-            {/* event list */}
-            <div className="bg-[#fafafa] w-5/12 py-2 px-8 rounded-[16px]">
-              <h2 className="text-xl font-semibold my-2 pl-6 mt-4">
-                {t("dashboard.holidayAndEvents")}
-              </h2>
-              <hr className="mb-6" />
-              {calenderEvents.length === 0 && workdays.length === 0 ? (
-                <div className="relative w-full h-full">
-                  <img
-                    src={noevents}
-                    alt="Event Background"
-                    className="absolute inset-0 w-auto h-auto object-cover"
-                  />
-                </div>
-              ) : (
-                <div>
-                  {/* event loading */}
-                  {eventLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
-                      <Spinner />
-                    </div>
-                  )}
-                  {/* event list */}
-                  <div className="overflow-y-auto max-h-screen">
-                    {workdays.map((itm, index) => (
-                      <div
-                        key={index}
-                        className="mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-[#0F4189]"
-                      >
-                        <div className="flex h-0 justify-between items-center bg-[#fafafa] text-[#0F4189] font-poppins mt-2 px-2 text-lg">
-                          <div className="font-medium text-sm mt-4 mb-2 ml-2">
-                            {moment(itm?.date).format("DD MMMM YYYY, ddd")}
-                          </div>
-                        </div>
-                        <div className="bg-[#fafafa] mt-4">
-                          <div className="flex py-0 justify-between items-center">
-                            <div
-                              className={`${
-                                false ? "bg-[#102945] text-white" : ""
-                              } py-0 px-2 ml-2 text-xs font-semibold`}
-                            >
-                              {itm.title}
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <div
-                              className={`${
-                                false ? "bg-[#102945] text-white" : ""
-                              } py-0 px-2 ml-2 text-xs font-poppins-regular`}
-                            >
-                              {itm.description}
-                            </div>
-                            <div className="flex">
-                              <div className="py-1 px-3 mr-6 rounded-3xl bg-[#FE4040]/5 text-[#FE4040] text-xs font-bold">
-                                {t("dashboard.workday")}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {calenderEvents.map((itm, index) => (
-                      <div
-                        key={index}
-                        className="mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-[#0F4189]"
-                      >
-                        <div className="flex h-0 justify-between items-center bg-[#fafafa] text-[#0F4189] font-poppins mt-2 px-2 text-lg">
-                          <div className="font-medium text-sm mt-4 mb-2 ml-2">
-                            {moment(itm?.date).format("DD MMMM YYYY, ddd")}
-                          </div>
-                        </div>
-                        <div className="bg-[#fafafa] mt-4">
-                          <div className="flex py-0 justify-between items-center">
-                            <div
-                              className={`${
-                                false ? "bg-[#102945] text-white" : ""
-                              } py-0 px-2 ml-2 text-xs font-semibold`}
-                            >
-                              {itm.title}
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <div
-                              className={`${
-                                false ? "bg-[#102945] text-white" : ""
-                              } py-0 px-2 ml-2 text-xs font-poppins-regular`}
-                            >
-                              {itm.description}
-                            </div>
-                            <div className="flex">
-                              <div className="py-1 px-3 mr-6 rounded-3xl bg-[#FE4040]/5 text-[#FE4040] text-xs font-bold">
-                                {t("dashboard.holiday")}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+          ) : (
+            <div>
+              {/* event loading */}
+              {eventLoading && (
+                <div
+                  className={`absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30`}
+                >
+                  <Spinner />
                 </div>
               )}
+              {/* event list */}
+              <div className={`overflow-y-auto max-h-screen`}>
+                {workdays.map((itm, index) => (
+                  <div
+                    key={index}
+                    className={`mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-borderBlue`}
+                  >
+                    <div
+                      className={`flex h-0 justify-between items-center bg-transparent text-textBlue font-poppins mt-2 px-2 text-lg`}
+                    >
+                      <div className={`font-medium text-sm mt-4 mb-2 ml-2`}>
+                        {moment(itm?.date).format("DD MMMM YYYY, ddd")}
+                      </div>
+                    </div>
+                    <div className={`bg-transparent mt-4`}>
+                      <div className={`flex py-0 justify-between items-center`}>
+                        <div
+                          className={`${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } py-0 px-2 ml-2 text-base font-semibold`}
+                        >
+                          {itm.title}
+                        </div>
+                      </div>
+                      <div className={`flex justify-between items-center`}>
+                        <div
+                          className={`${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } py-0 px-2 ml-2 text-xs font-poppins-regular`}
+                        >
+                          {itm.description}
+                        </div>
+                        <div className={`flex`}>
+                          <div
+                            className={`py-1 mr-6 rounded-3xl text-textRed text-xs font-bold`}
+                          >
+                            {t("dashboard.workday")}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {calenderEvents.map((itm, index) => (
+                  <div
+                    key={index}
+                    className={`mb-4 ml-6 rounded-lg overflow-hidden border-l-8 border-borderBlue`}
+                  >
+                    <div
+                      className={`flex h-0 justify-between items-center bg-transparent text-textBlue font-poppins mt-2 px-2 text-lg`}
+                    >
+                      <div className={`font-medium text-sm mt-4 mb-2 ml-2`}>
+                        {moment(itm?.date).format("DD MMMM YYYY, ddd")}
+                      </div>
+                    </div>
+                    <div className={`bg-transparent mt-4`}>
+                      <div className={`flex py-0 justify-between items-center`}>
+                        <div
+                          className={`${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } py-0 px-2 ml-2 text-base font-semibold`}
+                        >
+                          {itm.title}
+                        </div>
+                      </div>
+                      <div className={`flex justify-between items-center`}>
+                        <div
+                          className={`${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } py-0 px-2 ml-2 text-xs font-poppins-regular`}
+                        >
+                          {itm.description}
+                        </div>
+                        <div className={`flex`}>
+                          <div
+                            className={`py-1 mr-6 text-textRed text-xs font-bold`}
+                          >
+                            {t("dashboard.holiday")}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

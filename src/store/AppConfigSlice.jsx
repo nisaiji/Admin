@@ -4,7 +4,8 @@ const appConfigSlice = createSlice({
   name: "auth",
   initialState: {
     isLoggedin: false,
-    isDarkMode: false,
+    // isDarkMode: false,
+    isDarkMode: true,
     isLoading: false,
     toastData: {},
   },

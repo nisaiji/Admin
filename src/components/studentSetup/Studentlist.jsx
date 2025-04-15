@@ -2,12 +2,18 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import PaginationItem from "@mui/material/PaginationItem";
-import info from "../../assets/images/info.png";
-import cross from "../../assets/images/cross.png";
-import edit2 from "../../assets/images/edit2.png";
-import delete2 from "../../assets/images/delete2.png";
-import Search from "../../assets/images/Search.png";
-import clear from "../../assets/images/clear.png";
+import infow from "../../assets/images/info.png";
+import crossw from "../../assets/images/cross.png";
+import edit2w from "../../assets/images/edit2.png";
+import delete2w from "../../assets/images/delete2.png";
+import Searchw from "../../assets/images/Search.png";
+import clearw from "../../assets/images/clear.png";
+import info from "../../assets/images/darkmode/info.png";
+import cross from "../../assets/images/darkmode/cross.png";
+import edit2 from "../../assets/images/darkmode/edit.png";
+import delete2 from "../../assets/images/darkmode/delete.png";
+import Search from "../../assets/images/darkmode/Search.png";
+import clear from "../../assets/images/darkmode/clear.png";
 import {
   FormControl,
   InputLabel,
@@ -120,12 +126,15 @@ export default function Studentlist() {
     const url = isTeacher
       ? EndPoints.TEACHER.GET_STUDENT_LIST
       : EndPoints.ADMIN.GET_STUDENT_LIST;
+    // : EndPoints.ADMIN.SEARCH_STUDENT;
 
     let query = `?admin=${id}&page=${pageNo}&limit=${limit}&include=parent,class,section`;
+    // let query = `?page=${pageNo}&limit=${limit}`;
 
     // Determine the query parameters based on the inputs
     if (searchName) {
       query += `&firstname=${searchName}`;
+      // query += `&search=${searchName}`;
     }
     if (searchSection) {
       query += `&section=${searchSection}`;
@@ -155,7 +164,7 @@ export default function Studentlist() {
       const res = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
 
       // Filter out classes without sections and then sort them.
-      const filteredSortedClasses = res.result
+      const filteredSortedClasses = res?.result
         .filter((cls) => cls?.section?.length > 0)
         .sort((a, b) => {
           const aIndex = classOptions.indexOf(a.name);
@@ -229,7 +238,7 @@ export default function Studentlist() {
       const res = await axiosClient.delete(`${url}/${idForDelete}`);
       if (res?.statusCode === 200) {
         fetchStudents({});
-        toast.success(res.result);
+        toast.success(res?.result);
       }
     } catch (e) {
       toast.error(e);
@@ -243,51 +252,66 @@ export default function Studentlist() {
   return (
     <div
       className={`${
-        isDarkMode ? "bg-[#112138]" : "bg-[#93a3b6]/25"
-      } flex px-6 flex-col`}
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      } px-6 flex-col`}
     >
       <Toaster />
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] opacity-50 z-30">
+        <div
+          className={`fixed inset-0 flex items-center justify-center ${
+            isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          } opacity-50 z-30`}
+        >
           <Spinner />
         </div>
       )}
       <div
         className={`${
-          isDarkMode ? "bg-blue-950" : " bg-sky-950"
-        } flex flex-col justify-center w-full max-md:max-w-full`}
-      />
-      <div
-        className={`${
-          isDarkMode ? "bg-[#112138]" : "bg-[#fafafa]"
-        } flex flex-col self-center w-full max-w-[100%] my-4 rounded-[16px] max-md:max-w-full min-h-screen`}
+          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+        } flex flex-col self-center w-full max-w-[100%] rounded-[16px] max-md:max-w-full min-h-[calc(100vh-72px)]`}
       >
-        <div className="px-14 py-6">
+        <div className={`px-14 py-6`}>
           <Breadcrumbs />
-          <h1 className="text-2xl font-poppins-bold ">
+          <h1
+            className={`text-2xl font-poppins-bold ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
             {t("titles.students")}
           </h1>
         </div>
-        <div className="flex flex-col self-center w-full font-medium max-w-full max-md:max-w-full">
+        <div
+          className={`flex flex-col self-center w-full font-medium max-w-full max-md:max-w-full`}
+        >
           {/* Search Bar*/}
-          <div className="flex gap-5 max-md:flex-wrap mb-5">
-            <div className="flex flex-auto justify-around gap-3 text-md text-[#686868]/75 max-md:flex-wrap max-md:max-w-full">
+          <div className={`flex gap-5 max-md:flex-wrap mb-5`}>
+            <div
+              className={`flex flex-auto justify-around gap-3 text-md max-md:flex-wrap max-md:max-w-full`}
+            >
               <div
-                className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px] basis-0 w-fit max-md:max-w-full max-md:hidden`}
+                className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px] w-fit max-md:max-w-full max-md:hidden`}
               >
-                <div className="flex gap-2 px-10 rounded-3xl w-full">
-                  <div className="flex justify-between w-full">
+                <div className={`flex gap-2 px-10 rounded-3xl w-full`}>
+                  <div className={`flex justify-between w-full`}>
                     {/* Class select dropdown */}
                     <FormControl
                       size="medium"
                       sx={{
                         width: "150px",
-                        border: "1px solid #d1d5db", // Tailwind's border-gray-300 equivalent
+                        border: "1px solid #d1d5db",
                         borderRadius: "14px",
-                        backgroundColor: "#fafafa",
-                        // Remove the default outline
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
+                        },
+                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "white !important",
+                        },
+                        "& .MuiInputBase-root": {
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          color: isDarkMode ? "#E3E8F3" : "black",
                         },
                       }}
                     >
@@ -295,7 +319,8 @@ export default function Studentlist() {
                         id="class-select-label"
                         sx={{
                           zIndex: 1,
-                          backgroundColor: "#fafafa",
+                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          color: isDarkMode ? "#E3E8F3" : "black",
                           fontSize: 16,
                           px: 0.5,
                         }}
@@ -308,15 +333,23 @@ export default function Studentlist() {
                         value={searchClass}
                         onChange={(e) => {
                           setSearchClass(e.target.value);
-                          const classData = classList.filter(
+                          const classData = classList?.filter(
                             (itm) => itm["_id"] === e.target.value
                           );
                           setSectionList(classData[0]["section"]);
                         }}
                         data-testid="classlist"
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                              color: isDarkMode ? "#E3E8F3" : "black",
+                            },
+                          },
+                        }}
                       >
                         {classList
-                          .sort((a, b) => {
+                          ?.sort((a, b) => {
                             const classA = parseInt(
                               a.name.replace(/\D/g, ""),
                               10
@@ -328,8 +361,22 @@ export default function Studentlist() {
                             return classA - classB;
                           })
                           .map((itm) => (
-                            <MenuItem key={itm["_id"]} value={itm["_id"]}>
-                              {itm.name}
+                            <MenuItem
+                              key={itm["_id"]}
+                              value={itm["_id"]}
+                              sx={{
+                                backgroundColor: isDarkMode
+                                  ? "#1a1a1a"
+                                  : "white",
+                                color: isDarkMode ? "#E3E8F3" : "black",
+                                "&:hover": {
+                                  backgroundColor: isDarkMode
+                                    ? "#2a2a2a"
+                                    : "#E9EEF2",
+                                },
+                              }}
+                            >
+                              {itm?.name}
                             </MenuItem>
                           ))}
                       </Select>
@@ -342,16 +389,26 @@ export default function Studentlist() {
                         width: "150px",
                         border: "1px solid #d1d5db",
                         borderRadius: "14px",
-                        backgroundColor: "#fafafa",
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
+                        },
+                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "white !important",
+                        },
+                        "& .MuiInputBase-root": {
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          color: isDarkMode ? "#E3E8F3" : "black",
                         },
                       }}
                     >
                       <InputLabel
                         id="section-select-label"
                         sx={{
-                          backgroundColor: "#fafafa",
+                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          color: isDarkMode ? "#E3E8F3" : "black",
                           fontSize: 16,
                           px: 0.5,
                         }}
@@ -362,16 +419,39 @@ export default function Studentlist() {
                         labelId="section-select-label"
                         id="section-select"
                         value={searchSection}
+                        disabled={!searchClass}
                         onChange={(e) => {
                           setSearchSection(e.target.value);
                           setPageNo(1);
                         }}
                         data-testid="sectionlist"
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                              color: isDarkMode ? "#E3E8F3" : "black",
+                            },
+                          },
+                        }}
                       >
                         {sectionList.map((itm) => {
                           return (
-                            <MenuItem key={itm["_id"]} value={itm["_id"]}>
-                              {itm.name}
+                            <MenuItem
+                              key={itm["_id"]}
+                              value={itm["_id"]}
+                              sx={{
+                                backgroundColor: isDarkMode
+                                  ? "#1a1a1a"
+                                  : "white",
+                                color: isDarkMode ? "#E3E8F3" : "black",
+                                "&:hover": {
+                                  backgroundColor: isDarkMode
+                                    ? "#2a2a2a"
+                                    : "#E9EEF2",
+                                },
+                              }}
+                            >
+                              {itm?.name}
                             </MenuItem>
                           );
                         })}
@@ -379,14 +459,24 @@ export default function Studentlist() {
                     </FormControl>
 
                     {/* Search Bar */}
-                    <div className="flex px-3 rounded-[14px] w-full max-w-[800px] shadow-sm border border-gray-300">
-                      <div className="flex items-center pl-3 pointer-events-none">
-                        <img src={Search} alt="" className="w-5 h-5" />
+                    <div
+                      className={`flex px-3 rounded-[14px] w-full max-w-[800px] shadow-sm border border-gray-300`}
+                    >
+                      <div
+                        className={`flex items-center pl-3 pointer-events-none`}
+                      >
+                        <img
+                          src={isDarkMode ? Search : Searchw}
+                          alt=""
+                          className={`w-7 h-7`}
+                        />
                       </div>
                       <input
                         type="text"
                         placeholder={t("placeholders.search")}
-                        className="focus:outline-none pl-3 w-full bg-[#fafafa]"
+                        className={`focus:outline-none pl-3 w-full bg-transparent ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        }`}
                         onChange={(e) => {
                           setName(e.target.value);
                         }}
@@ -396,19 +486,33 @@ export default function Studentlist() {
                         <button
                           type="button"
                           onClick={() => setName("")}
-                          className="flex items-center"
+                          className={`flex items-center`}
                         >
-                          <img src={cross} alt="" className="size-8" />
+                          <img
+                            src={isDarkMode ? cross : crossw}
+                            alt=""
+                            className={`${
+                              isDarkMode ? "size-4 mr-2" : "size-8"
+                            }`}
+                          />
                         </button>
                       )}
                     </div>
 
                     {/* Clear button */}
                     <button
-                      className="hover:bg-[#E9EEF2]/50 hover:bg-white border-[#E9EEF2] border-2 w-20 text-lg rounded-[14px] flex items-center justify-center"
+                      className={`${
+                        isDarkMode
+                          ? "hover:bg-background4 border-borderwhite"
+                          : "hover:bg-whiteBackground1 border-borderWhite2"
+                      } border-2 w-20 text-lg rounded-[14px] flex items-center justify-center`}
                       onClick={handleClear}
                     >
-                      <img src={clear} alt="Clear" className="w-6 h-6" />
+                      <img
+                        src={isDarkMode ? clear : clearw}
+                        alt="Clear"
+                        className={`w-6 h-6`}
+                      />
                     </button>
                   </div>
                 </div>
@@ -417,54 +521,46 @@ export default function Studentlist() {
           </div>
           {studentList?.length > 0 ? (
             <>
-              <div className="overflow-x-auto relative h-[400px]">
+              <div className={`overflow-x-auto relative h-[400px] mx-10`}>
                 <table
                   className={`${
-                    isDarkMode ? "bg-[#0D192F]" : "bg-[#fafafa]"
-                  } min-w-full px-10 border-separate border-spacing-0`}
+                    isDarkMode ? "bg-background1" : "bg-whiteBackground"
+                  } min-w-full border-separate border-spacing-0`}
                 >
                   {/* table headings */}
-                  <thead className="bg-[#fafafa] text-[#0F4189]/75 text-base font-medium sticky top-0 z-10">
-                    <tr className="text-base text-[#0F4189]/75">
+                  <thead
+                    className={`${
+                      isDarkMode ? "bg-background1" : "bg-whiteBackground"
+                    } text-base font-bold sticky top-0 z-10`}
+                  >
+                    <tr className={`text-base text-bold text-textBlue`}>
                       <th
-                        className={`${
-                          isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-sm:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-sm:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.fullName")}
                       </th>
                       <th
-                        className={`${
-                          isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-xl:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-xl:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.gender")}
                       </th>
                       <th
-                        className={`${
-                          isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-md:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-md:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.phoneNumber")}
                       </th>
                       <th
-                        className={`${
-                          isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-lg:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-lg:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.email")}
                       </th>
                       <th
-                        className={`${
-                          isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 max-lg:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-lg:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
-                        {t("labels.bloodGroup")}
+                        {t("labels.guardianName")}
                       </th>
                       <th
-                        className={`${
-                          isDarkMode ? "text-white" : ""
-                        } text-center px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
                       >
                         {t("labels.action")}
                       </th>
@@ -477,54 +573,54 @@ export default function Studentlist() {
                         className={`${
                           i % 2 === 0
                             ? isDarkMode
-                              ? "bg-[#0D2137]"
-                              : "bg-[#E9EEF2]/50"
+                              ? "bg-background3"
+                              : "bg-whiteBackground3"
                             : ""
                         } border-t `}
                         key={i}
                       >
                         <td
-                          className={`${
-                            isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-sm:hidden`}
+                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } max-sm:hidden`}
                         >
                           {student?.firstname} {student?.lastname}
                         </td>
                         <td
-                          className={`${
-                            isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-xl:hidden`}
+                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } max-xl:hidden`}
                         >
                           {student?.gender}
                         </td>
                         <td
-                          className={`${
-                            isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-md:hidden`}
+                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } max-md:hidden`}
                         >
                           {student?.parentDetails?.phone}
                         </td>
                         <td
-                          className={`${
-                            isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-lg:hidden`}
+                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } max-lg:hidden`}
                         >
                           {student?.parentDetails?.email || CONSTANT.NA}
                         </td>
                         <td
-                          className={`${
-                            isDarkMode ? "text-white" : "text-[#1E1E1E]"
-                          } p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 text-[#040320] max-lg:hidden`}
+                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } max-lg:hidden`}
                         >
-                          {student?.bloodGroup || CONSTANT.NA}
+                          {student?.parentDetails?.fullname || CONSTANT.NA}
                         </td>
                         {/* Action Buttons */}
                         <td
-                          className={`${
-                            isDarkMode ? "text-white" : ""
-                          } p-4 text-center font-medium border border-[#2b2e4a]/25 text-[#040320]`}
+                          className={`p-4 text-center font-medium border border-[#2b2e4a]/25 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          }`}
                         >
-                          <div className="flex justify-around">
+                          <div className={`flex justify-around`}>
                             <button
                               onClick={() =>
                                 navigate("/students-list/student-update", {
@@ -533,23 +629,23 @@ export default function Studentlist() {
                               }
                             >
                               <img
-                                src={edit2}
+                                src={isDarkMode ? edit2 : edit2w}
                                 alt="editStudent"
-                                className="size-5"
+                                className={`size-5`}
                               />
                             </button>
                             <button onClick={() => handleShowInfo(student)}>
                               <img
-                                src={info}
+                                src={isDarkMode ? info : infow}
                                 alt="infoStudent"
-                                className="size-5"
+                                className={`size-5`}
                               />
                             </button>
-                            <button onClick={() => handleDelete(student._id)}>
+                            <button onClick={() => handleDelete(student?._id)}>
                               <img
-                                src={delete2}
+                                src={isDarkMode ? delete2 : delete2w}
                                 alt="deleteStudent"
-                                className="size-5"
+                                className={`size-5`}
                               />
                             </button>
                           </div>
@@ -559,46 +655,74 @@ export default function Studentlist() {
                   </tbody>
                 </table>
                 {/* pagination logic */}
-                <div className="flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
-                  <div className="text-[#9391a5] text-base leading-5">
+                <div
+                  className={`flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full`}
+                >
+                  <div className={`text-[#9391a5] text-base leading-5`}>
                     {t("titles.showing")}
-                    <span className="text-[#152259]">
+                    <span className={`text-textBlue`}>
                       {" "}
                       {pageNo * limit - (limit - 1)} -{" "}
                       {Math.min(totalStudentCount, pageNo * limit)}{" "}
                     </span>
                     {t("titles.from")}
-                    <span className="text-[#152259]">
+                    <span className={`text-textBlue`}>
                       {" "}
                       {totalStudentCount}{" "}
                     </span>
                     {t("titles.data")}
                   </div>
 
-                  <div className="flex items-center gap-4">
+                  <div className={`flex items-center gap-4`}>
                     {/* Dropdown to select how many data per page */}
-                    <FormControl variant="outlined" size="small">
+                    <FormControl
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        border: "1px solid #d1d5db",
+                        borderRadius: "6px",
+                        minWidth: "80px",
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          border: "none",
+                        },
+                        "& .MuiInputBase-root, & .MuiSvgIcon-root": {
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                      }}
+                    >
                       <Select
                         value={limit}
                         onChange={(e) => {
                           setLimit(e.target.value);
                           setPageNo(1);
                         }}
-                        sx={{
-                          border: "1px solid #d1d5db",
-                          borderRadius: "6px",
-                          minWidth: "80px",
-                          backgroundColor: "#fafafa",
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            border: "none",
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                              color: isDarkMode ? "#E3E8F3" : "black",
+                            },
                           },
                         }}
                       >
-                        <MenuItem value={10}>10</MenuItem>
-                        <MenuItem value={20}>20</MenuItem>
-                        <MenuItem value={25}>25</MenuItem>
-                        <MenuItem value={50}>50</MenuItem>
-                        <MenuItem value={100}>100</MenuItem>
+                        {[10, 20, 25, 50, 100].map((itm, i) => (
+                          <MenuItem
+                            key={i}
+                            value={itm}
+                            sx={{
+                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                              color: isDarkMode ? "#E3E8F3" : "black",
+                              "&:hover": {
+                                backgroundColor: isDarkMode
+                                  ? "#2a2a2a"
+                                  : "#E9EEF2",
+                              },
+                            }}
+                          >
+                            {itm}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
 
@@ -612,12 +736,13 @@ export default function Studentlist() {
                           <PaginationItem
                             {...item}
                             sx={{
-                              color: isDarkMode ? "white" : "#0F4189",
+                              color: isDarkMode ? "white" : "black",
                               borderColor:
                                 item.type === "previous" || item.type === "next"
                                   ? "transparent"
                                   : "#0F4189",
                               borderWidth: "2px",
+                              borderRadius: "20px",
                               borderStyle: "solid",
                               "&.Mui-selected": {
                                 color: "white",
@@ -635,22 +760,24 @@ export default function Studentlist() {
           ) : (
             <>
               {/* no student */}
-              <div className="flex flex-col items-center justify-center text-center pb-6">
+              <div
+                className={`flex flex-col items-center justify-center text-center pb-6`}
+              >
                 <img
                   src={nostudent}
-                  className="mb-4 h-[200px] w-[250px] object-contain"
+                  className={`mb-4 h-[200px] w-[250px] object-contain`}
                 />
                 <p
                   className={`${
-                    isDarkMode ? "text-white" : "text-blue-950"
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
                   } text-2xl font-bold `}
                 >
                   {t("titles.message")}
                 </p>
                 <p
                   className={`${
-                    isDarkMode ? "text-white" : "text-blue-950"
-                  }  text-sm`}
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  } text-sm`}
                 >
                   {t("titles.subMessage")}
                 </p>

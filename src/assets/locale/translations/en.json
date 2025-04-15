@@ -77,7 +77,7 @@
   "roles": {
     "admin": "Admin",
     "teacher": "Teacher",
-    "student": "Student",
+    "student": "SIS",
     "classTeacher": "Class Teacher"
   },
   "validationError": {
@@ -120,7 +120,7 @@
     "validationPhone": "Please enter Phone number ",
     "message": "All fields must be filled out before adding a new row.",
     "emailAddress": "Invalid Email Address",
-    "passwordLength": "Password must be at least 8 characters",
+    "passwordLength": "Password length must be at least 8 characters long",
     "phoneNumber": "Phone number should be 10 digits",
     "phoneStart": "Phone number must start with a digit between 6 to 9",
     "validationPhoneCount": "Phone number must be 10 digits and start with a number between 6 and 9"
@@ -129,6 +129,7 @@
     "rollNumber": "Enter Roll number",
     "replacementTeacherName": "Replacement teacher name",
     "username": "Enter Username",
+    "generateUsername": "Generate Username",
     "firstName": "Enter First Name",
     "lastName": "Enter Last Name",
     "dob": "Enter Date of Birth",

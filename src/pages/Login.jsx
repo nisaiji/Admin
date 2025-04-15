@@ -65,7 +65,9 @@ function Login() {
             (value) =>
               isAdmin ? Yup.string().email().isValidSync(value) : true
           ),
-        password: Yup.string().required(t("validationError.password")),
+        password: Yup.string()
+          .required(t("validationError.password"))
+          .min(8, t("validationError.passwordLength")),
       }),
     [isAdmin, t]
   );

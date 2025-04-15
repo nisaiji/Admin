@@ -19,6 +19,7 @@ import Breadcrumbs from "../BreadCrumbs";
 import { FormControl, Select, MenuItem, TextField } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import { useSelector } from "react-redux";
 /**
  * Capitalizes the first letter of a string and converts the rest to lowercase.
  * @param {string} string - Input string to capitalize.
@@ -36,6 +37,7 @@ const TeacherUpdate = () => {
   const teacher = useLocation().state;
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   // Validation schema using Yup
   const validationSchema = Yup.object({
@@ -166,34 +168,76 @@ const TeacherUpdate = () => {
   ];
 
   return (
-    <div className="flex justify-center items-center w-full h-full bg-[#93a3b6]/25 pt-[25px]">
+    <div
+      className={`flex justify-center items-center w-full h-full pt-[25px] ${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      }`}
+    >
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
+        <div
+          className={`fixed inset-0 flex items-center justify-center bg-opacity-50 bg-whiteBackground1 z-30`}
+        >
           <Spinner />
         </div>
       )}
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="bg-[#fafafa] rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border">
+      <div
+        className={`${
+          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+        } rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border`}
+      >
         <Breadcrumbs />
-        <h1 className="text-2xl font-poppins-bold mt-3">
+        <h1
+          className={`text-2xl font-poppins-bold mt-3 ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
+        >
           {t("titles.teacherDetails")}
         </h1>
-        <h2 className="text-l font-poppins-regular mt-2 text-left">
+        <h2
+          className={`text-l font-poppins-regular mt-2 text-left ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
+        >
           {t("titles.teacherPersonalDetails")}
         </h2>
-        <div className="bg-[#E9EEF2]/50 w-full p-5 box-border flex flex-col items-center my-5">
-          <form onSubmit={formik.handleSubmit} className="w-full">
-            <div className="grid grid-cols-2 gap-4">
+        <div
+          className={`w-full p-5 box-border flex flex-col items-center my-5`}
+        >
+          <form onSubmit={formik.handleSubmit} className={`w-full`}>
+            <div className={`grid grid-cols-2 gap-4`}>
               {fields.map(
                 ({ name, label, placeholder, type, options, icon }) => (
-                  <div key={name} className="flex flex-col mx-4 mt-3">
-                    <div className="text-l font-semibold">{label}</div>
-                    <div className="relative mt-2">
+                  <div key={name} className={`flex flex-col mx-4 mt-3`}>
+                    <div
+                      className={`text-l font-semibold ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
+                    >
+                      {label}
+                    </div>
+                    <div className={`relative mt-2`}>
                       {type === "select" ? (
                         <FormControl
                           fullWidth
                           variant="outlined"
-                          sx={{ mb: 2 }}
+                          sx={{
+                            border: "2px solid gray",
+                            borderRadius: "8px",
+                            backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              border: "none",
+                            },
+                            "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                              borderColor: isDarkMode ? "#E3E8F3" : "black",
+                            },
+                            "& .MuiInputBase-root": {
+                              color: isDarkMode ? "#E3E8F3" : "black",
+                            },
+                            "& .MuiSvgIcon-root": {
+                              color: isDarkMode ? "#E3E8F3" : "black",
+                            },
+                          }}
                         >
                           <Select
                             labelId={`${name}-label`}
@@ -207,11 +251,25 @@ const TeacherUpdate = () => {
                               border: "2px solid rgba(5, 2, 43, 0.1)",
                               borderRadius: "0.5rem",
                               height: "40px",
-                              backgroundColor: "white",
+                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
                               color:
-                                formik.values[name] === "" ? "gray" : "black",
+                                formik.values[name] === ""
+                                  ? "gray"
+                                  : isDarkMode
+                                  ? "#E3E8F3"
+                                  : "black",
                               "& .MuiOutlinedInput-notchedOutline": {
                                 border: "none",
+                              },
+                            }}
+                            MenuProps={{
+                              PaperProps: {
+                                sx: {
+                                  backgroundColor: isDarkMode
+                                    ? "#1a1a1a"
+                                    : "white",
+                                  color: isDarkMode ? "#E3E8F3" : "black",
+                                },
                               },
                             }}
                           >
@@ -219,7 +277,21 @@ const TeacherUpdate = () => {
                               {label}
                             </MenuItem>
                             {options.map((option) => (
-                              <MenuItem key={option} value={option}>
+                              <MenuItem
+                                key={option}
+                                value={option}
+                                sx={{
+                                  backgroundColor: isDarkMode
+                                    ? "#1a1a1a"
+                                    : "white",
+                                  color: isDarkMode ? "#E3E8F3" : "black",
+                                  "&:hover": {
+                                    backgroundColor: isDarkMode
+                                      ? "#2a2a2a"
+                                      : "#E9EEF2",
+                                  },
+                                }}
+                              >
                                 {option}
                               </MenuItem>
                             ))}
@@ -244,7 +316,7 @@ const TeacherUpdate = () => {
                                 );
                               }
                             }}
-                            className="bg-white w-full"
+                            className={`w-full`}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
@@ -255,15 +327,24 @@ const TeacherUpdate = () => {
                             sx={{
                               width: "100%",
                               height: "40px",
+                              border: "2px solid gray",
+                              borderRadius: "8px",
+                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                              color: isDarkMode ? "#E3E8F3" : "black",
                               "& .MuiOutlinedInput-root": {
                                 padding: 1,
                                 fontSize: "16px",
                                 minHeight: "40px",
+                                color: isDarkMode ? "#E3E8F3" : "black",
                               },
                               "& .MuiInputBase-input": {
                                 fontSize: "16px",
                                 padding: 1,
                                 height: "100%",
+                                color: isDarkMode ? "#E3E8F3" : "black",
+                              },
+                              "& .MuiSvgIcon-root": {
+                                color: isDarkMode ? "#E3E8F3" : "black",
                               },
                             }}
                           />
@@ -300,18 +381,20 @@ const TeacherUpdate = () => {
                               ? 15
                               : ""
                           }
-                          className="border-2 border-[#05022B]/10 rounded-lg pl-2 pr-10 py-1.5 w-full"
+                          className={`border-2 border-borderGray bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          }`}
                         />
                       )}
                       {formik.touched[name] && formik.errors[name] && (
-                        <div className="text-red-600 text-sm mt-1">
+                        <div className={`text-red-600 text-sm mt-1`}>
                           {formik.errors[name]}
                         </div>
                       )}
                       {icon && (
                         <img
                           src={icon}
-                          className="absolute right-2"
+                          className={`absolute right-2`}
                           style={{ top: 10, width: 22, height: 20 }}
                           alt=""
                         />
@@ -322,17 +405,19 @@ const TeacherUpdate = () => {
               )}
             </div>
             {/* submit and cancel buttons */}
-            <div className="flex justify-end gap-4 mt-10 w-full">
+            <div className={`flex justify-end gap-4 mt-10 w-full`}>
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="border-2 border-[#686868]/75 text-[#040320] py-2 px-4 rounded-xl w-36 transition-all duration-200 ease-in-out active:scale-90"
+                className={`border-2 border-borderGray ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } py-2 px-4 rounded-xl w-36 transition-all duration-200 ease-in-out active:scale-90`}
               >
                 {t("buttons.cancel")}
               </button>
               <button
                 type="submit"
-                className="bg-[#0F4189] text-white py-2 px-4 rounded-xl w-36 transition-all duration-200 ease-in-out active:scale-90"
+                className={`bg-backgroundDarkBlue text-textPrimary py-2 px-4 rounded-xl w-36 transition-all duration-200 ease-in-out active:scale-90`}
                 data-testid="updateTeacherInfo"
               >
                 {t("buttons.save")}

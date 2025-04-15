@@ -1,11 +1,14 @@
 import React, { useEffect } from "react";
 import profileEmpty from "../../assets/images/profileEmpty.png";
-import cross from "../../assets/images/cross.png";
+import cross from "../../assets/images/darkmode/cross.png";
+import crossw from "../../assets/images/cross.png";
 import CONSTANT from "../../utils/constants";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 
 export default function TeacherInfo({ currTeacher, modelOpen }) {
   const [t] = useTranslation();
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   useEffect(() => {
     document.body.style.overflow = modelOpen ? "hidden" : "auto";
@@ -40,48 +43,98 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4 ${
+        isDarkMode ? "bg-whiteBackground3" : "bg-background"
+      }`}
+    >
+      <div
+        className={`relative rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto ${
+          isDarkMode ? "bg-background" : "bg-whiteBackground"
+        }`}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b px-4 py-3">
-          <h2 className="text-xl font-bold">{t("titles.teacherDetails")}</h2>
+        <div className={`flex items-center justify-between border-b px-4 py-3`}>
+          <h2
+            className={`text-xl font-bold  ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
+            {t("titles.teacherDetails")}
+          </h2>
           <button onClick={() => modelOpen(false)} aria-label="Close">
-            <img src={cross} alt="Close" className="h-6 w-6" />
+            <img
+              src={isDarkMode ? cross : crossw}
+              alt="Close"
+              className={`${isDarkMode ? "h-4 w-4" : "h-7 w-7"}`}
+            />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 flex flex-col lg:flex-row gap-6">
-          <div className="flex-1">
+        <div className={`p-5 flex flex-col lg:flex-row gap-6`}>
+          <div className={`flex-1`}>
             <section>
-              <h3 className="text-lg font-semibold mb-2">
+              <h3
+                className={`text-lg font-semibold mb-2 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("titles.teacherPersonalDetails")}
               </h3>
-              <div className="space-y-2">
+              <div className={`space-y-2`}>
                 {personalDetails.map(([label, value], index) => (
                   <div
                     key={index}
-                    className="flex justify-between border-b pb-1"
+                    className={`flex justify-between border-b pb-1`}
                   >
-                    <span className="font-medium text-gray-700">{label}</span>
-                    <span className="text-gray-900">{value}</span>
+                    <span
+                      className={`font-medium ${
+                        isDarkMode ? "text-textPrimary" : "text-textGray"
+                      }`}
+                    >
+                      {label}
+                    </span>
+                    <span
+                      className={`${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
+                      {value}
+                    </span>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="mt-5">
-              <h3 className="text-lg font-semibold mb-2">
+            <section className={`mt-5`}>
+              <h3
+                className={`text-lg font-semibold mb-2 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("titles.educationDetails")}
               </h3>
-              <div className="space-y-2">
+              <div className={`space-y-2`}>
                 {educationDetails.map(([label, value], index) => (
                   <div
                     key={index}
-                    className="flex justify-between border-b pb-1"
+                    className={`flex justify-between border-b pb-1`}
                   >
-                    <span className="font-medium text-gray-700">{label}</span>
-                    <span className="text-gray-900">{value}</span>
+                    <span
+                      className={`font-medium  ${
+                        isDarkMode ? "text-textPrimary" : "text-textGray"
+                      }`}
+                    >
+                      {label}
+                    </span>
+                    <span
+                      className={`${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
+                      {value}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -89,9 +142,9 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
           </div>
 
           {/* Teacher Photo */}
-          <div className="flex-shrink-0 flex items-center justify-center">
+          <div className={`flex-shrink-0 flex items-center justify-center`}>
             <img
-              className="h-40 w-40 object-cover rounded-full border border-gray-300"
+              className={`h-60 w-40 object-cover border border-gray-300`}
               src={
                 currTeacher?.photo
                   ? `data:image/jpeg;base64,${currTeacher?.photo}`

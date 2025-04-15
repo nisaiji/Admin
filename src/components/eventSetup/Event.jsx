@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import noevents from "../../assets/images/noevents.png";
-import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
-// import "tailwindcss/tailwind.css";
-import deleteEvent from "../../assets/images/deleteEvent.png";
-import Search from "../../assets/images/Search.png";
+import deleteEventw from "../../assets/images/delete2.png";
+import DownArroww from "../../assets/images/dropdown.png";
+import Searchw from "../../assets/images/Search.png";
+import deleteEvent from "../../assets/images/darkmode/delete.png";
+import Search from "../../assets/images/darkmode/Search.png";
+import DownArrow from "../../assets/images/darkmode/downArrow.png";
 import close from "../../assets/images/close.png";
 import calendar from "../../assets/images/calendar.png";
 import notes from "../../assets/images/notes.png";
@@ -22,95 +23,10 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { TextField } from "@mui/material";
 
-// Calendar Component - Displays a calendar with month navigation and event handling
-const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
-  const isDarkMode = false;
-
-  return (
-    <div
-      className={`${
-        isDarkMode ? "bg-[#102945] " : "bg-[#fafafa]  "
-      } calendar pl-16 rounded-lg w-full `}
-    >
-      {/* Month Navigation */}
-      <div className="month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]">
-        <FontAwesomeIcon
-          icon={faAngleLeft}
-          className={`${
-            isDarkMode
-              ? "text-white"
-              : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
-          } cursor-pointer size-5`}
-          onClick={onPrevMonth}
-          data-testid="prev"
-        />
-        <div className={`${isDarkMode ? "text-white" : ""} date`}>
-          {moment({ year, month }).format("MMMM YYYY")}
-        </div>
-        <FontAwesomeIcon
-          icon={faAngleRight}
-          className={`${
-            isDarkMode
-              ? "text-white"
-              : "text-[#686868] hover:bg-[#E9EEF2] rounded-2xl p-1"
-          } cursor-pointer size-5`}
-          onClick={onNextMonth}
-          data-testid="next"
-        />
-      </div>
-      {/* Weekdays header */}
-      <div
-        className={`${
-          isDarkMode ? "text-white" : "text-[#6E6F81]/75"
-        } weekdays grid grid-cols-7 pl-6 text-sm font-medium capitalize pt-3`}
-      >
-        {CONSTANT.WEEKDAYS.map((day) => (
-          <div key={day} className="text-left">
-            {day}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Day Component - Displays each day in the calendar with appropriate styling
-const Day = ({ day, isHoliday, onClick, isSunday, isToday }) => {
-  const renderCss = () => {
-    if (isHoliday) {
-      return `text-white bg-[#FE4040] border-[#FE4040]`;
-    } else if (isSunday) {
-      return `text-[#F29E38] bg-[#F29E38]/5 border-[#F29E38]/25`;
-    } else if (isToday) {
-      return `text-[#0F4189] bg-[#E9EEF2] border-4 border-[#0F4189]`;
-    } else {
-      return `text-black border-[#6E6F81]/15 bg-[#E9EEF2]`;
-    }
-  };
-
-  return (
-    <div
-      className={`day cursor-pointer rounded-[12px] flex font-bold text-[14px] p-2 w-[60px] h-[70px] border-2  ${renderCss()}`}
-      onClick={onClick}
-    >
-      {day}
-    </div>
-  );
-};
-
-// Days Grid Component - Displays all the days of the month in a grid layout
-const DaysGrid = ({ days }) => {
-  return (
-    <div className="days grid grid-cols-7 ml-10 gap-[10px] px-8 py-3">
-      {days}
-    </div>
-  );
-};
-
 // Event - Manages the logic of the calendar, events, and month navigation
 const Event = () => {
   const isAdmin = useSelector((state) => state.appAuth.role) === "admin";
-  const isDarkMode = false;
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [today, setToday] = useState(new Date());
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
@@ -169,9 +85,13 @@ const Event = () => {
     if (!isOpen) return null;
 
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-        <div className="bg-white rounded-2xl px-[30px] py-[20px] w-[450px] h-[430px] shadow-lg">
-          <div className="flex justify-end">
+      <div
+        className={`fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50`}
+      >
+        <div
+          className={`bg-white rounded-2xl px-[30px] py-[20px] w-[450px] h-[430px] shadow-lg`}
+        >
+          <div className={`flex justify-end`}>
             <img
               src={close}
               onClick={() => {
@@ -179,11 +99,11 @@ const Event = () => {
                 setErrors({});
               }}
               alt="close"
-              className="size-5 cursor-pointer"
+              className={`size-5 cursor-pointer`}
             />
           </div>
           <input
-            className="w-full text-lg font-medium border-b py-3 outline-none "
+            className={`w-full text-lg font-medium border-b py-3 outline-none `}
             type="text"
             name="title"
             value={newEventForm.title}
@@ -200,18 +120,18 @@ const Event = () => {
             }
           />
           {errors.title && (
-            <p className="text-red-500 text-sm">{errors.title}</p>
+            <p className={`text-textRed text-sm`}>{errors.title}</p>
           )}
-          <div className="mt-5">
-            <label className="flex items-center space-x-5 rounded-lg">
-              <img src={calendar} alt="close" className="size-5" />
+          <div className={`mt-5`}>
+            <label className={`flex items-center space-x-5 rounded-lg`}>
+              <img src={calendar} alt="close" className={`size-5`} />
               <LocalizationProvider dateAdapter={AdapterMoment}>
                 {isWorkday || isEditMode ? (
                   <DatePicker
                     views={["day", "month", "year"]}
                     value={moment(prevData.date, "MM/DD/YYYY")}
                     disabled
-                    className="w-full"
+                    className={`w-full`}
                     textField={(params) => (
                       <TextField {...params} variant="outlined" />
                     )}
@@ -298,9 +218,9 @@ const Event = () => {
             </label>
           </div>
 
-          <div className="mt-5">
-            <label className="flex items-center space-x-5 rounded-lg">
-              <img src={notes} alt="close" className="size-5" />
+          <div className={`mt-5`}>
+            <label className={`flex items-center space-x-5 rounded-lg`}>
+              <img src={notes} alt="close" className={`size-5`} />
               <textarea
                 type="text"
                 name="description"
@@ -308,17 +228,19 @@ const Event = () => {
                 value={newEventForm.description}
                 onChange={handleChange}
                 onBlur={validateForm}
-                className="w-full bg-gray-100 p-3 outline-none rounded-lg text-gray-700 max-h-32 h-32"
+                className={`w-full bg-backgroundGray ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } p-3 outline-none rounded-lg max-h-32 h-32`}
               />
             </label>
             {errors.description && (
-              <p className="text-red-500 text-sm">{errors.description}</p>
+              <p className={`text-textRed text-sm`}>{errors.description}</p>
             )}
           </div>
 
-          <div className="mt-5 text-right">
+          <div className={`mt-5 text-right`}>
             <button
-              className="bg-[#0F4189] text-white px-6 py-2 rounded-[10px] text-sm"
+              className={`bg-backgroundBlue text-white px-6 py-2 rounded-[10px] text-sm`}
               disabled={loading}
               onClick={() => {
                 if (validateForm()) {
@@ -490,7 +412,7 @@ const Event = () => {
 
     // Add empty divs for the days before the 1st of the month
     for (let i = 0; i < firstDayOffset; i++)
-      days.push(<div key={`empty-${i}`} className="empty" />);
+      days.push(<div key={`empty-${i}`} className={`empty`} />);
 
     // Add day cells for each day in the month
     for (let day = 1; day <= daysInMonth; day++) {
@@ -581,50 +503,149 @@ const Event = () => {
     }
   };
 
+  // Calendar Component - Displays a calendar with month navigation and event handling
+  const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
+    return (
+      <div className={`bg-transparent pl-16 rounded-lg w-full`}>
+        {/* Month Navigation */}
+        <div
+          className={`month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]`}
+        >
+          <img
+            src={isDarkMode ? DownArrow : DownArroww}
+            alt=""
+            className={`size-5 rotate-90 cursor-pointer`}
+            onClick={onPrevMonth}
+          />
+          <div
+            className={`${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}
+          >
+            {moment({ year, month }).format("MMMM YYYY")}
+          </div>
+          <img
+            src={isDarkMode ? DownArrow : DownArroww}
+            alt=""
+            className={`size-5 -rotate-90 cursor-pointer`}
+            onClick={onNextMonth}
+          />
+        </div>
+        {/* Weekdays header */}
+        <div className={`grid grid-cols-7 font-medium capitalize pt-4`}>
+          {CONSTANT.WEEKDAYS.map((day) => (
+            <div
+              key={day}
+              className={`text-center text-md ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Day Component - Displays each day in the calendar with appropriate styling
+  const Day = ({ day, isHoliday, onClick, isSunday, isToday }) => {
+    const renderCss = () => {
+      if (isHoliday) {
+        return `text-textPrimary bg-backgroundRed border-borderRed`;
+      } else if (isSunday) {
+        return `${
+          isDarkMode
+            ? "bg-backgroundOrange"
+            : "bg-backgroundOrange2 border-borderOrange"
+        } text-textOrange2`;
+      } else if (isToday) {
+        return `${
+          isDarkMode
+            ? "text-textBlue bg-background border-borderBlue"
+            : "text-textDarkBlue bg-whiteBackground2 border-borderDarkBlue"
+        }`;
+      } else {
+        return `${
+          isDarkMode
+            ? "text-textPrimary bg-background"
+            : "text-textBlack bg-whiteBackground2 border-borderWhite3"
+        }`;
+      }
+    };
+
+    return (
+      <div
+        className={`day cursor-pointer rounded-[12px] flex font-bold text-[14px] p-2 w-[60px] h-[70px] border-[3px]  ${renderCss()}`}
+        onClick={onClick}
+      >
+        {day}
+      </div>
+    );
+  };
+
+  // Days Grid Component - Displays all the days of the month in a grid layout
+  const DaysGrid = ({ days }) => {
+    return (
+      <div className={`days grid grid-cols-7 ml-10 gap-[10px] px-8 py-3`}>
+        {days}
+      </div>
+    );
+  };
+
   return (
-    <div className="grid grid-cols-6 gap-6 px-6 bg-[#93a3b6]/25">
+    <div
+      className={`grid grid-cols-6 gap-6 p-6 ${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      }`}
+    >
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#F4F5F6] bg-opacity-50 z-30">
+        <div
+          className={`fixed inset-0 flex items-center justify-center bg-whiteBackground bg-opacity-50 z-30`}
+        >
           <Spinner />
         </div>
       )}
       {/* left view */}
-      <div className="col-span-4 px-10 bg-[#fafafa] rounded-[16px] p-4 mt-4">
+      <div
+        className={`col-span-4 px-10 ${
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
+        } rounded-[16px] p-4`}
+      >
         <Breadcrumbs />
-        <div className="flex justify-between items-center mb-3">
-          <p className="text-2xl font-poppins-bold">
+        <div className={`flex justify-between items-center mb-3`}>
+          <p
+            className={`text-2xl ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            } font-poppins-bold`}
+          >
             {t("dashboard.calendar")}
           </p>
           <div
-            className={`flex justify-around w-32 h-[36px] bg-[#E9EEF2]/50 border-2 border-[rgba(196, 196, 196, 0.40)] rounded-[8px] overflow-hidden`}
+            className={`flex justify-around w-32 h-[36px] bg-transparent border-2 border-bordergray rounded-[8px] overflow-hidden`}
           >
             {/* search input */}
-            <button className={`goto-mobnbtn py-1  text-white`}>
-              <img src={Search} alt="" className="h-[18px] w-[18px]" />
+            <button className={`py-1`}>
+              <img
+                src={isDarkMode ? Search : Searchw}
+                alt=""
+                className={`h-[18px] w-[18px]`}
+              />
             </button>
             <input
               type="text"
               placeholder={t("calendar.gotoDatePlaceholder")}
-              className={`date-input outline-none text-[14px] w-20 text-black bg-[#E9EEF2]/25`}
+              className={`date-input outline-none text-[14px] w-20 ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } bg-transparent`}
               onBlur={handleGotoDate}
               maxLength={7}
               onChange={(e) => {
-                let value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-
+                let value = e.target.value.replace(/\D/g, "");
                 if (value.length > 4) {
                   value = value.slice(0, 4) + "/" + value.slice(4, 6);
                 }
-
                 let [year, month] = value.split("/");
-
-                // if (year && (year < "2000" || year > "2050")) {
-                //   year = year.slice(0, 3); // Prevent invalid year entry
-                // }
-
-                // if (month && (month < "01" || month > "12")) {
-                //   month = month.slice(0, 1); // Prevent invalid month entry
-                // }
-
                 e.target.value = [year, month].filter(Boolean).join("/");
               }}
               onKeyDown={(e) => {
@@ -635,9 +656,9 @@ const Event = () => {
             />
           </div>
         </div>
-        <hr className="mb-4" />
+        <hr className={`mb-4`} />
         <Calendar
-          className="px-10"
+          className={`px-10`}
           month={month}
           year={year}
           onPrevMonth={handlePrevMonth}
@@ -647,69 +668,87 @@ const Event = () => {
         <DaysGrid days={renderDays()} />
       </div>
       {/* right view */}
-      <div className="col-span-2 events-container relative bg-[#fafafa] rounded-[16px] py-3 px-10 mt-4 ">
+      <div
+        className={`col-span-2 relative ${
+          isDarkMode
+            ? "bg-gradient-to-l from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
+        } rounded-[16px] py-3 px-4`}
+      >
         {eventLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+          <div
+            className={`absolute inset-0 flex items-center justify-center bg-whiteBackground bg-opacity-50 z-30`}
+          >
             <Spinner />
           </div>
         )}
         <div>
-          <div className="text-2xl text-center font-bold my-2 pb-1 text-[#040320]">
+          <div
+            className={`text-2xl text-center font-bold my-2 pb-1 ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
             {t("events.title")}
           </div>
-          <hr />
+          <hr className={`mb-6 border-t border-bordergray`} />
           {events.length === 0 && workdays.length === 0 ? (
-            <div className="relative top-40 w-full h-full">
+            <div className={`relative top-40 w-full h-full`}>
               <img
                 src={noevents}
                 alt="noevents"
-                className="absolute inset-0 w-auto h-auto object-cover"
+                className={`absolute inset-0 w-auto h-auto object-cover`}
               />
             </div>
           ) : (
-            <ul className="overflow-y-auto max-h-[450px] mt-4">
+            <ul className={`overflow-y-auto max-h-[450px] mt-4`}>
               {/* list of events */}
               {workdays.map((itm, index) => (
                 <div
                   key={index}
-                  className="mb-4 rounded-lg overflow-hidden border-l-8 border-[#0F4189]"
+                  className={`mb-4 rounded-lg overflow-hidden border-l-8 border-borderBlue`}
                 >
-                  <div className="flex h-0 justify-between items-center bg-[#fafafa] text-[#0F4189] font-poppins mt-4 px-1">
-                    <div className="font-medium text-sm mt-2 mb-4 ml-4">
+                  <div
+                    className={`flex h-0 justify-between items-center mt-4 px-1`}
+                  >
+                    <div
+                      className={`font-medium text-sm mt-2 mb-4 ml-4 font-poppins text-textBlue`}
+                    >
                       {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                     </div>
                     {/* delete icon for admin */}
                     {isAdmin && (
                       <img
-                        src={deleteEvent}
+                        src={isDarkMode ? deleteEvent : deleteEventw}
                         onClick={() => {
                           setEventToDelete(itm);
                           setShowDeleteConfirmation(true);
                         }}
-                        className="size-[25px] cursor-pointer"
+                        className={`size-[25px] cursor-pointer`}
                       />
                     )}
                   </div>
-                  <div className="bg-[#fafafa] mt-2">
-                    <div className="flex py-1 justify-between items-center">
+                  <div className={`bg-transparent mt-2`}>
+                    <div className={`flex py-1 justify-between items-center`}>
                       <div
-                        className={`${
-                          false ? "bg-[#102945] text-white" : ""
-                        } py-0 px-1 ml-4 text-xs font-bold`}
+                        className={`py-0 px-1 ml-4 ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } text-xs font-bold`}
                       >
                         {itm.title}
                       </div>
                     </div>
-                    <div className="flex pb-2 justify-between items-center">
+                    <div className={`flex pb-2 justify-between items-center`}>
                       <div
-                        className={`${
-                          false ? "bg-[#102945] text-white" : ""
-                        } py-0 px-1 ml-4 text-xs font-poppins-regular`}
+                        className={`py-0 px-1 ml-4 ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } text-xs font-poppins-regular`}
                       >
                         {itm.description}
                       </div>
-                      <div className="flex">
-                        <div className="py-0.5 px-3 rounded-3xl text-[#FE4040] bg-[#FE4040]/5 text-[12px] font-bold">
+                      <div className={`flex`}>
+                        <div
+                          className={`py-0.5 px-3 rounded-3xl text-textRed text-[12px] font-bold`}
+                        >
                           {t("dashboard.workday")}
                         </div>
                       </div>
@@ -720,44 +759,48 @@ const Event = () => {
               {events.map((itm, index) => (
                 <div
                   key={index}
-                  className="mb-4 rounded-lg overflow-hidden border-l-8 border-[#0F4189]"
+                  className={`mb-4 rounded-lg overflow-hidden border-l-8 border-borderBlue`}
                 >
-                  <div className="flex h-0 justify-between items-center bg-[#fafafa] text-[#0F4189] font-poppins mt-4 px-1">
-                    <div className="font-medium text-sm mt-2 mb-4 ml-4">
+                  <div
+                    className={`flex h-0 justify-between items-center bg-[#fafafa] text-textBlue font-poppins mt-4 px-1`}
+                  >
+                    <div className={`font-medium text-sm mt-2 mb-4 ml-4`}>
                       {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                     </div>
                     {/* delete icon for admin */}
                     {isAdmin && (
                       <img
-                        src={deleteEvent}
+                        src={isDarkMode ? deleteEvent : deleteEventw}
                         onClick={() => {
                           setEventToDelete(itm);
                           setShowDeleteConfirmation(true);
                         }}
-                        className="size-[25px] cursor-pointer"
+                        className={`size-[25px] cursor-pointer`}
                       />
                     )}
                   </div>
-                  <div className="bg-[#fafafa] mt-2">
-                    <div className="flex py-1 justify-between items-center">
+                  <div className={`bg-transparent mt-2`}>
+                    <div className={`flex py-1 justify-between items-center`}>
                       <div
-                        className={`${
-                          false ? "bg-[#102945] text-white" : ""
-                        } py-0 px-1 ml-4 text-xs font-bold`}
+                        className={`py-0 px-1 ml-4 ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } text-xs font-bold`}
                       >
                         {itm.title}
                       </div>
                     </div>
-                    <div className="flex pb-2 justify-between items-center">
+                    <div className={`flex pb-2 justify-between items-center`}>
                       <div
-                        className={`${
-                          false ? "bg-[#102945] text-white" : ""
-                        } py-0 px-1 ml-4 text-xs font-poppins-regular`}
+                        className={`py-0 px-1 ml-4 ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } text-xs font-poppins-regular`}
                       >
                         {itm.description}
                       </div>
-                      <div className="flex">
-                        <div className="py-0.5 px-3 rounded-3xl text-[#FE4040] bg-[#FE4040]/5 text-[12px] font-bold">
+                      <div className={`flex`}>
+                        <div
+                          className={`py-0.5 px-3 rounded-3xl text-textRed text-[12px] font-bold`}
+                        >
                           {t("dashboard.holiday")}
                         </div>
                       </div>

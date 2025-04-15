@@ -2,15 +2,18 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
-import delete2 from "../../assets/images/delete2.png";
-import edit2 from "../../assets/images/edit2.png";
+import delete2 from "../../assets/images/darkmode/delete.png";
+import delete2w from "../../assets/images/delete2.png";
+import edit2 from "../../assets/images/darkmode/edit.png";
+import edit2w from "../../assets/images/edit2.png";
 import DeletePopup from "../DeleteMessagePopup";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import cross from "../../assets/images/cross.png";
+import cross from "../../assets/images/darkmode/cross.png";
+import crossw from "../../assets/images/cross.png";
 import ConformationPopup from "../ConformationPopup";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
@@ -249,21 +252,25 @@ function Addsection({
 
   return (
     <>
-      <div className="fixed inset-0 flex justify-center items-end pb-10 bg-[#686868] bg-opacity-50 z-20">
+      <div
+        className={`fixed inset-0 flex justify-center items-end pb-10 bg-[#686868] bg-opacity-50 z-20`}
+      >
         {loading && (
-          <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
+          <div
+            className={`fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30`}
+          >
             <Spinner />
           </div>
         )}
         <div
           className={`${
-            isDarkMode ? "bg-blue-950" : "bg-[#fafafa]"
+            isDarkMode ? "bg-background3" : "bg-whiteBackground"
           } w-full max-w-3xl h-4/5 py-5 px-12 rounded-2xl shadow-lg overflow-y-auto`}
         >
-          <div className="flex justify-between items-center mb-4">
+          <div className={`flex justify-between items-center mb-4`}>
             <div
               className={`text-2xl font-bold ${
-                isDarkMode ? "text-white" : "text-black"
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
               } `}
             >
               {t("createSection")}
@@ -273,80 +280,44 @@ function Addsection({
                 setAddSectionModelOpen(false);
                 await getAllClass();
               }}
-              className="h-10 w-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
-              src={cross}
+              className={`cursor-pointer transition-all duration-200 ease-in-out active:scale-90 ${
+                isDarkMode ? "h-5 w-5" : "h-10 w-10"
+              }`}
+              src={isDarkMode ? cross : crossw}
               alt="Close"
             />
           </div>
-          <div className="mx-auto grid grid-cols-[140px_250px_164px_78px] items-start mt-8 mb-2">
-            <div className="font-medium text-[16px]">{t("sections")}</div>
-            <div className="font-medium text-[16px]">{t("ClassTeacher")}</div>
-            <div className="font-medium text-[16px]">{t("startTime")}</div>
-            <div className="font-medium text-[16px]">{t("Actions")}</div>
+          <div
+            className={`mx-auto grid grid-cols-[140px_250px_164px_78px] items-start mt-8 mb-2 font-medium text-[16px] ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
+            <div>{t("sections")}</div>
+            <div>{t("ClassTeacher")}</div>
+            <div>{t("startTime")}</div>
+            <div>{t("Actions")}</div>
           </div>
           <hr />
-          <div className="my-6 max-h-72 overflow-y-auto">
+          <div className={`my-6 max-h-72 overflow-y-auto`}>
             {sections.map((section, index) => (
               <div
                 key={section._id}
-                className={`flex items-center justify-between mb-2 p-4 ${
-                  isDarkMode ? "bg-blue-800" : ""
-                } rounded-lg shadow-sm`}
+                className={`flex items-center justify-between mb-2 p-4 rounded-lg shadow-sm`}
               >
-                <div className="flex justify-center items-center bg-[#DD1B10] size-7 rounded-full ">
-                  <div className={`text-lg font-medium text-white`}>
+                <div
+                  className={`flex justify-center items-center bg-backgroundDarkRed size-7 rounded-full `}
+                >
+                  <div className={`text-lg font-medium text-textPrimary`}>
                     {section.name}
                   </div>
                 </div>
                 {selectedSection && selectedSection?._id === section?._id ? (
-                  // <select
-                  //   name="teacherId"
-                  //   value={selectedSection?.teacherId}
-                  //   onChange={(e) => handleChange(e, "update")}
-                  //   className={` bg-[#fafafa] border border-[#686868] rounded-xl py-1 px-8 ${
-                  //     isDarkMode ? "bg-gray-300" : "text-black bg-[#686868]"
-                  //   } w-[250px]`}
-                  //   ref={selectRef}
-                  // >
-                  //   <option value="">{t("labels.assignTeacher")}</option>
-                  //   {selectedTeachersList.map((teacher) => (
-                  //     <option key={teacher._id} value={teacher._id}>
-                  //       {teacher.firstname} {teacher.lastname}
-                  //     </option>
-                  //   ))}
-                  // </select>
                   <FormControl
-                  fullWidth
-                  sx={{
-                    width: "250px",
-                  }}
-                  >
-                  <Select
-                    labelId="teacher-select-label"
-                    name="teacherId"
-                    value={selectedSection?.teacherId}
-                    onChange={(e) => handleChange(e, "update")}
-                    inputProps={{
-                      "data-testid": "selectTeacher",
-                      ref: selectRef,
-                    }}
-                    displayEmpty
-                    renderValue={(selected) => {
-                      if (!selected) {
-                        return (
-                          <span style={{ color: "gray" }}>
-                            {t("labels.assignTeacher")}
-                          </span>
-                        );
-                      }
-                      const teacherObj = selectedTeachersList.find(
-                        (teacher) => teacher._id === selected
-                      );
-                      return teacherObj
-                        ? `${teacherObj.firstname} ${teacherObj.lastname}`
-                        : selected;
-                    }}
+                    fullWidth
                     sx={{
+                      width: "250px",
+                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      borderRadius: "0.75rem",
                       "& .MuiOutlinedInput-notchedOutline": {
                         border: "2px solid rgba(104,104,104,0.25)",
                         borderRadius: "0.75rem",
@@ -354,21 +325,80 @@ function Addsection({
                       "& .MuiSelect-select": {
                         py: "0.25rem",
                         px: "2rem",
-                        backgroundColor: "rgba(147,163,182,0.1)",
-                        color: newSection?.teacherId === "" ? "gray" : "black",
+                        color:
+                          newSection?.teacherId === ""
+                            ? "gray"
+                            : isDarkMode
+                            ? "#E3E8F3"
+                            : "black",
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        borderRadius: "0.75rem",
+                      },
+                      "& .MuiSvgIcon-root": {
+                        color: isDarkMode ? "#E3E8F3" : "black",
                       },
                     }}
                   >
-                    <MenuItem value="" disabled>
-                      <em>{t("labels.assignTeacher")}</em>
-                    </MenuItem>
-                    {selectedTeachersList.map((teacher) => (
-                      <MenuItem key={teacher._id} value={teacher._id}>
-                        {teacher.firstname} {teacher.lastname}
+                    <Select
+                      labelId="teacher-select-label"
+                      name="teacherId"
+                      value={selectedSection?.teacherId}
+                      onChange={(e) => handleChange(e, "update")}
+                      inputProps={{
+                        "data-testid": "selectTeacher",
+                        ref: selectRef,
+                      }}
+                      displayEmpty
+                      renderValue={(selected) => {
+                        if (!selected) {
+                          return (
+                            <span
+                              style={{
+                                color: "gray",
+                              }}
+                            >
+                              {t("labels.assignTeacher")}
+                            </span>
+                          );
+                        }
+                        const teacherObj = selectedTeachersList.find(
+                          (teacher) => teacher._id === selected
+                        );
+                        return teacherObj
+                          ? `${teacherObj.firstname} ${teacherObj.lastname}`
+                          : selected;
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                            color: isDarkMode ? "#E3E8F3" : "black",
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="" disabled>
+                        <em>{t("labels.assignTeacher")}</em>
                       </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                      {selectedTeachersList.map((teacher) => (
+                        <MenuItem
+                          key={teacher._id}
+                          value={teacher._id}
+                          sx={{
+                            backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                            color: isDarkMode ? "#E3E8F3" : "black",
+                            "&:hover": {
+                              backgroundColor: isDarkMode
+                                ? "#2a2a2a"
+                                : "#E9EEF2",
+                            },
+                          }}
+                        >
+                          {teacher.firstname} {teacher.lastname}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 ) : (
                   <div
                     className={`border border-[#686868]/25 rounded-xl py-1 px-8 ${
@@ -388,20 +418,16 @@ function Addsection({
                       : section?.startTime) || new Date()
                   }
                   dateFormat="dd/MM/YYYY"
-                  // maxDate={new Date()}
-                  // onKeyDown={(e) => e.preventDefault()}
-                  // showMonthDropdown
-                  // showYearDropdown
-                  // dropdownMode="select"
-                  // disabled={selectedSection !== section._id}
                   readOnly={true}
-                  className="border-2 rounded-xl py-1 px-4 w-36 z-50 cursor-not-allowed opacity-50 focus:outline-none"
+                  className={`border-2 rounded-xl py-1 px-4 w-36 z-50 cursor-not-allowed opacity-50 focus:outline-none ${
+                    isDarkMode ? "bg-background1 text-textPrimary" : ""
+                  }`}
                 />
-                <div className="flex items-center">
+                <div className={`flex items-center`}>
                   {selectedSection?._id === section._id ? (
                     <button
                       onClick={() => handleUpdateTeacherSection(section)}
-                      className={`mr-2 w-[75px] h-[32px] border border-[#4834D4] text-[#4834D4] rounded-xl transition-all duration-200 ease-in-out active:scale-90`}
+                      className={`mr-2 w-[75px] h-[32px] border border-borderBlue text-textBlue rounded-xl transition-all duration-200 ease-in-out active:scale-90`}
                     >
                       {selectedSection?.teacher?._id ===
                       selectedSection.teacherId
@@ -414,7 +440,11 @@ function Addsection({
                         onClick={() => handleUpdateClick(section)}
                         style={{ marginRight: 10, cursor: "pointer" }}
                       >
-                        <img src={edit2} alt="" className="size-7" />
+                        <img
+                          src={isDarkMode ? edit2 : edit2w}
+                          alt=""
+                          className={`size-7`}
+                        />
                       </div>
                       <button
                         onClick={() => {
@@ -428,9 +458,9 @@ function Addsection({
                         disabled={index !== sections.length - 1}
                       >
                         <img
-                          src={delete2}
+                          src={isDarkMode ? delete2 : delete2w}
                           alt="deleteSection"
-                          className="size-7 mr-3"
+                          className={`size-7 mr-3`}
                         />
                       </button>
                     </>
@@ -441,40 +471,38 @@ function Addsection({
             {/* add section */}
             {showForm && (
               <div
-                className={`flex items-center justify-between mb-2 p-4 rounded-lg shadow-sm ${
-                  isDarkMode ? "bg-blue-800" : ""
-                }`}
+                className={`flex items-center justify-between mb-2 p-4 rounded-lg shadow-sm`}
               >
-                <div className="flex items-center">
-                  <div className="flex justify-center items-center bg-[#DD1B10] size-7 rounded-full ">
-                    <div className={`text-lg font-medium text-white`}>
+                <div className={`flex items-center`}>
+                  <div
+                    className={`flex justify-center items-center bg-backgroundDarkRed size-7 rounded-full `}
+                  >
+                    <div className={`text-lg font-medium text-textPrimary`}>
                       {getNextSectionName(sections)}
                     </div>
                   </div>
                 </div>
-                {/* <select
-                  name="teacherId"
-                  value={newSection.teacherId}
-                  onChange={(e) => handleChange(e, "add")}
-                  className={`border-2 border-[#686868]/25 rounded-xl py-1 px-8 ${
-                    isDarkMode ? "bg-gray-300" : "text-black bg-[#93a3b6]/10"
-                  } w-[250px]`}
-                  ref={selectRef}
-                  disabled={selectedSection}
-                  data-testid="selectTeacher"
-                >
-                  <option value="">{t("labels.assignTeacher")}</option>
-                  {teachers.map((teacher) => (
-                    <option key={teacher._id} value={teacher._id}>
-                      {teacher.firstname} {teacher.lastname}
-                    </option>
-                  ))}
-                </select> */}
                 <FormControl
                   fullWidth
                   disabled={selectedSection}
                   sx={{
                     width: "250px",
+                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    borderRadius: "0.75rem",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "2px solid rgba(104,104,104,0.25)",
+                      borderRadius: "0.75rem",
+                    },
+                    "& .MuiSelect-select": {
+                      py: "0.25rem",
+                      px: "2rem",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      borderRadius: "0.75rem",
+                    },
+                    "& .MuiSvgIcon-root": {
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                    },
                   }}
                 >
                   <Select
@@ -490,7 +518,11 @@ function Addsection({
                     renderValue={(selected) => {
                       if (!selected) {
                         return (
-                          <span style={{ color: "gray" }}>
+                          <span
+                            style={{
+                              color: "gray",
+                            }}
+                          >
                             {t("labels.assignTeacher")}
                           </span>
                         );
@@ -502,6 +534,14 @@ function Addsection({
                         ? `${teacherObj.firstname} ${teacherObj.lastname}`
                         : selected;
                     }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                      },
+                    }}
                     sx={{
                       "& .MuiOutlinedInput-notchedOutline": {
                         border: "2px solid rgba(104,104,104,0.25)",
@@ -510,8 +550,13 @@ function Addsection({
                       "& .MuiSelect-select": {
                         py: "0.25rem",
                         px: "2rem",
-                        backgroundColor: "rgba(147,163,182,0.1)",
-                        color: newSection?.teacherId === "" ? "gray" : "black",
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color:
+                          newSection?.teacherId === ""
+                            ? "gray"
+                            : isDarkMode
+                            ? "#E3E8F3"
+                            : "black",
                       },
                     }}
                   >
@@ -519,12 +564,23 @@ function Addsection({
                       <em>{t("labels.assignTeacher")}</em>
                     </MenuItem>
                     {teachers.map((teacher) => (
-                      <MenuItem key={teacher._id} value={teacher._id}>
+                      <MenuItem
+                        key={teacher._id}
+                        value={teacher._id}
+                        sx={{
+                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                          "&:hover": {
+                            backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                          },
+                        }}
+                      >
                         {teacher.firstname} {teacher.lastname}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
+
                 <DatePicker
                   selected={newSection.startTime}
                   onChange={(date) => {
@@ -544,7 +600,9 @@ function Addsection({
                   scrollableYearDropdown={true}
                   dropdownMode="scroll"
                   disabled={selectedSection}
-                  className="border-2 rounded-xl py-1 px-4 w-36 z-50"
+                  className={`border-2 rounded-xl py-1 px-4 w-36 z-50 ${
+                    isDarkMode ? "bg-background1 text-textPrimary" : ""
+                  }`}
                 />
                 <button
                   onClick={checkValidation}

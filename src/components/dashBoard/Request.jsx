@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import Breadcrumbs from "../../components/BreadCrumbs";
+import { useSelector } from "react-redux";
 
 /**
  * `Requests` component displays a list of requests made by users.
@@ -28,6 +29,7 @@ export default function Requests() {
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   // Compute the status query based on the selected tab.
   const getStatusQuery = (tab) => {
@@ -149,33 +151,51 @@ export default function Requests() {
           (req) => req.status === "accept" || req.status === "complete"
         )
       : selectedTab === "rejected"
-      ? requests.filter((req) => req.status === "reject")
+      ? requests.filter(
+          (req) => req.status === "reject" || req.status === "expired"
+        )
       : requests;
 
   return (
     <>
       {/* loader */}
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30">
+        <div
+          className={`fixed inset-0 flex items-center justify-center bg-[#93a3b6] bg-opacity-50 z-30`}
+        >
           <Spinner />
         </div>
       )}
-      <div className="bg-[#93a3b6]/25 px-6 py-4">
-        <div className="bg-[#fafafa] min-h-screen rounded-[16px]">
+      <div
+        className={`${
+          isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+        } px-6 py-4`}
+      >
+        <div
+          className={`${
+            isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          } min-h-[calc(100vh-100px)] rounded-[16px]`}
+        >
           <Toaster position="top-center" reverseOrder={false} />
-          <div className="pl-12 py-6">
+          <div className={`px-10 py-6`}>
             <Breadcrumbs />
             <div>
-              <div className="text-2xl font-poppins-bold">
+              <div
+                className={`text-2xl ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } font-poppins-bold`}
+              >
                 {t("titles.passwordReset")}
               </div>
             </div>
             {/* tabs */}
-            <div className="flex space-x-4 mt-4">
+            <div className={`flex space-x-4 mt-4`}>
               {["all", "approved", "rejected"].map((tab) => (
                 <div
                   key={tab}
-                  className={`cursor-pointer text-xs font-poppins font-semibold w-[75px] text-center ${
+                  className={`cursor-pointer text-xs font-poppins font-semibold ${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  } w-[75px] text-center ${
                     selectedTab === tab
                       ? "pb-3 border-b-[3px] border-[#FF793F]"
                       : ""
@@ -186,19 +206,29 @@ export default function Requests() {
                 </div>
               ))}
             </div>
-            <hr className="border-[#9391A5]/25 mx-10 -translate-y-[1px]" />
+            <hr className={`border-[#9391A5]/25 px-10 -translate-y-[1px]`} />
             {filteredRequests.length === 0 ? (
-              <div className="w-full h-48 flex justify-center items-center">
-                <p className="text-[#0F4189]/75 text-3xl font-poppins-bold">
+              <div className={`w-full h-48 flex justify-center items-center`}>
+                <p
+                  className={`${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  } text-3xl font-poppins-bold`}
+                >
                   No request right now
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto mt-6">
-                <table className="w-full shadow-sm overflow-hidden">
+              <div className={`overflow-x-auto relative h-[400px]`}>
+                <table
+                  className={`min-w-full border-separate border-spacing-0`}
+                >
                   {/* table heading */}
-                  <thead>
-                    <tr>
+                  <thead
+                    className={`${
+                      isDarkMode ? "bg-background2" : "bg-whiteBackground"
+                    } text-textBlue text-base font-medium sticky top-0 z-10`}
+                  >
+                    <tr className={`text-base text-textBlue`}>
                       {[
                         "classTeacher",
                         "reasonToReset",
@@ -209,7 +239,7 @@ export default function Requests() {
                       ].map((label) => (
                         <th
                           key={label}
-                          className="p-4 text-base font-poppins-bold text-[#0F4189]/75"
+                          className={`text-center px-4 py-2 max-sm:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
                         >
                           {t(`labels.${label}`)}
                         </th>
@@ -217,33 +247,59 @@ export default function Requests() {
                     </tr>
                   </thead>
                   {/* table body */}
-                  <tbody className="text-sm font-normal text-black">
-                    {filteredRequests.map((req, index) => (
+                  <tbody>
+                    {filteredRequests.map((req, i) => (
                       <tr
-                        key={index}
-                        className={index % 2 === 0 ? "bg-[#4645900D]" : ""}
+                        key={i}
+                        className={`${
+                          i % 2 === 0
+                            ? isDarkMode
+                              ? "bg-background3"
+                              : "bg-whiteBackground3"
+                            : ""
+                        } border-t`}
                       >
-                        <td className="p-4 text-sm font-medium text-center">
+                        <td
+                          className={`py-2 px-4 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-sm font-medium text-center border border-[#2b2e4a]/25`}
+                        >
                           {req?.teacher?.firstname} {req?.teacher?.lastname}
                         </td>
-                        <td className="p-4 text-sm font-medium text-center">
+                        <td
+                          className={`py-2 px-4 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-sm font-medium text-center border border-[#2b2e4a]/25`}
+                        >
                           {reasonToChange(req?.reason)}
                         </td>
-                        <td className="p-4 text-sm font-medium text-center">
+                        <td
+                          className={`py-2 px-4 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-sm font-medium text-center border border-[#2b2e4a]/25`}
+                        >
                           {req?.teacher?.class}-{req?.teacher?.section}
                         </td>
-                        <td className="p-4 text-sm font-medium text-center">
+                        <td
+                          className={`py-2 px-4 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-sm font-medium text-center border border-[#2b2e4a]/25`}
+                        >
                           {req?.teacher?.forgetPasswordCount}
                         </td>
                         {/* action buttons */}
-                        <td className="py-2 px-4 w-[200px] text-sm font-poppins-bold text-center">
+                        <td
+                          className={`py-2 px-4 w-[200px] ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-sm font-poppins-bold text-center border border-[#2b2e4a]/25`}
+                        >
                           {req.status === "pending" ? (
-                            <div className="flex justify-center gap-3">
+                            <div className={`flex justify-center gap-3`}>
                               <button
                                 onClick={() =>
                                   handleRequestAction(req?._id, "accept")
                                 }
-                                className="text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md"
+                                className={`text-[#4CBC9A] font-poppins-bold border-2 border-[#4CBC9A] p-1 rounded-md`}
                               >
                                 Approve
                               </button>
@@ -251,7 +307,7 @@ export default function Requests() {
                                 onClick={() =>
                                   handleRequestAction(req?._id, "reject")
                                 }
-                                className="text-[#FE4040] font-poppins-bold border-2 border-[#FE4040] p-1 px-3 rounded-md"
+                                className={`text-[#FE4040] font-poppins-bold border-2 border-[#FE4040] p-1 px-3 rounded-md`}
                               >
                                 Reject
                               </button>
@@ -260,9 +316,17 @@ export default function Requests() {
                             requestsStatus(req.status)
                           )}
                         </td>
-                        <td className="p-4 text-center">
-                          <div className="h-[35px] border border-[rgba(104, 104, 104, 0.25)] bg-[#fafafa] rounded-[10px] flex items-center justify-center">
-                            <div className=" w-18 text-sm font-medium text-center">
+                        <td
+                          className={`py-2 px-4 text-center border border-[#2b2e4a]/25`}
+                        >
+                          <div
+                            className={`h-[35px] border border-bordergray ${
+                              isDarkMode ? "text-textPrimary" : "text-textBlack"
+                            } rounded-[10px] flex items-center justify-center`}
+                          >
+                            <div
+                              className={` w-18 text-sm font-medium text-center`}
+                            >
                               {req?.otp || "-"}
                             </div>
                           </div>
@@ -272,46 +336,74 @@ export default function Requests() {
                   </tbody>
                 </table>
                 {/* pagination logic */}
-                <div className="flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full">
-                  <div className="text-[#9391a5] text-base leading-5">
+                <div
+                  className={`flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full`}
+                >
+                  <div className={`text-[#9391a5] text-base leading-5`}>
                     {t("titles.showing")}
-                    <span className="text-[#152259]">
+                    <span className={`text-[#152259]`}>
                       {" "}
                       {pageNo * limit - (limit - 1)} -{" "}
                       {Math.min(totalRequestCount, pageNo * limit)}{" "}
                     </span>
                     {t("titles.from")}
-                    <span className="text-[#152259]">
+                    <span className={`text-[#152259]`}>
                       {" "}
                       {totalRequestCount}{" "}
                     </span>
                     {t("titles.data")}
                   </div>
 
-                  <div className="flex items-center gap-4">
+                  <div className={`flex items-center gap-4`}>
                     {/* Dropdown to select how many data per page */}
-                    <FormControl variant="outlined" size="small">
+                    <FormControl
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        border: "1px solid #d1d5db",
+                        borderRadius: "6px",
+                        minWidth: "80px",
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          border: "none",
+                        },
+                        "& .MuiInputBase-root, & .MuiSvgIcon-root": {
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                      }}
+                    >
                       <Select
                         value={limit}
                         onChange={(e) => {
                           setLimit(e.target.value);
                           setPageNo(1);
                         }}
-                        sx={{
-                          border: "1px solid #d1d5db",
-                          borderRadius: "6px",
-                          minWidth: "80px",
-                          backgroundColor: "#fafafa",
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            border: "none",
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                              color: isDarkMode ? "#E3E8F3" : "black",
+                            },
                           },
                         }}
                       >
-                        <MenuItem value={10}>10</MenuItem>
-                        <MenuItem value={20}>20</MenuItem>
-                        <MenuItem value={25}>25</MenuItem>
-                        <MenuItem value={50}>50</MenuItem>
-                        <MenuItem value={100}>100</MenuItem>
+                        {[10, 20, 25, 50, 100].map((itm, i) => (
+                          <MenuItem
+                            key={i}
+                            value={itm}
+                            sx={{
+                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                              color: isDarkMode ? "#E3E8F3" : "black",
+                              "&:hover": {
+                                backgroundColor: isDarkMode
+                                  ? "#2a2a2a"
+                                  : "#E9EEF2",
+                              },
+                            }}
+                          >
+                            {itm}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
 
@@ -325,12 +417,13 @@ export default function Requests() {
                           <PaginationItem
                             {...item}
                             sx={{
-                              color: "#0F4189",
+                              color: isDarkMode ? "white" : "black",
                               borderColor:
                                 item.type === "previous" || item.type === "next"
                                   ? "transparent"
                                   : "#0F4189",
                               borderWidth: "2px",
+                              borderRadius: "20px",
                               borderStyle: "solid",
                               "&.Mui-selected": {
                                 color: "white",

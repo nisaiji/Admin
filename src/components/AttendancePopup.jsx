@@ -39,6 +39,7 @@ export default function AttendancePopup({
   );
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const teacherSectionId = useSelector((state) => state.appAuth.section);
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   // Component state variables
   const [isEditable, setIsEditable] = useState(false);
   const [attendanceData, setAttendanceData] = useState([]);
@@ -148,20 +149,9 @@ export default function AttendancePopup({
 
     // Ensure the date is within the valid range
     if (
-      moment(attendanceDate).format("DD/MM/YYYY") <
-        moment(startTime).format("DD/MM/YYYY") ||
-      moment(attendanceDate).format("DD/MM/YYYY") >
-        moment().startOf("days").format("DD/MM/YYYY")
+      moment(attendanceDate).isBefore(moment(startTime), "day") ||
+      moment(attendanceDate).isAfter(moment().startOf("day"))
     ) {
-      // console.log(
-      //   moment(attendanceDate).format("DD/MM/YYYY"),
-      //   moment(startTime).format("DD/MM/YYYY")
-      // );
-      // console.log(
-      //   moment(attendanceDate).format("DD/MM/YYYY"),
-      //   moment().startOf("days").format("DD/MM/YYYY")
-      // );
-
       if (!toastDisplayed) {
         setToastDisplayed(true);
         toast.error(
@@ -539,15 +529,19 @@ export default function AttendancePopup({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-40 select-none">
-      <div className="bg-black bg-opacity-50 h-screen p-4 shadow flex flex-col">
+    <div className={`fixed inset-0 z-40 select-none`}>
+      <div
+        className={`h-screen p-4 shadow flex flex-col bg-opacity-80 bg-background`}
+      >
         {/* Header */}
-        <div className="flex flex-row justify-between items-center mb-4">
-          <div className="flex flex-row justify-between items-center w-[260px]">
+        <div className={`flex flex-row justify-between items-center mb-4`}>
+          <div
+            className={`flex flex-row justify-between items-center w-[260px]`}
+          >
             <img
               src={backIcon}
               alt="Previous Month"
-              className="w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
+              className={`w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
               onClick={() =>
                 isEditable
                   ? toast.error(
@@ -556,14 +550,14 @@ export default function AttendancePopup({
                   : changeMonth(-1)
               }
             />
-            <div className="text-white text-xl mx-4">
+            <div className={`text-white text-xl mx-4`}>
               {currentDate.toLocaleString("default", { month: "long" })}{" "}
               {currentDate.getFullYear()}
             </div>
             <img
               src={backIcon}
               alt="Next Month"
-              className="w-10 h-10 rotate-180 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
+              className={`w-10 h-10 rotate-180 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
               onClick={() =>
                 isEditable
                   ? toast.error(
@@ -573,11 +567,11 @@ export default function AttendancePopup({
               }
             />
           </div>
-          <div className="text-white text-xl">Monthly Attendance</div>
-          <div className="flex flex-row w-[270px] justify-end">
+          <div className={`text-white text-xl`}>Monthly Attendance</div>
+          <div className={`flex flex-row w-[270px] justify-end`}>
             {isEditable ? (
               <button
-                className="px-4 py-2 text-base font-poppins-regular rounded-full bg-white transition-all duration-200 ease-in-out active:scale-90"
+                className={`px-4 py-2 text-base font-poppins-regular rounded-full bg-white transition-all duration-200 ease-in-out active:scale-90`}
                 onClick={handleSaveAttendance}
               >
                 Save
@@ -587,52 +581,68 @@ export default function AttendancePopup({
                 <img
                   src={editw}
                   alt=""
-                  className="w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
+                  className={`w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
                   onClick={() => setIsEditable(true)}
                 />
                 <img
                   onClick={downloadAttendance}
                   src={downloadw}
                   alt=""
-                  className="w-10 h-10 mx-4 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
+                  className={`w-10 h-10 mx-4 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
                 />
               </>
             )}
             <img
               src={closew}
               alt=""
-              className="w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90"
+              className={`w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
               onClick={onClose}
             />
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto bg-white p-4 h-[550px] overflow-y-auto">
-          <div className="text-2xl font-poppins-regular text-center w-full">
+        <div
+          className={`overflow-x-auto p-4 h-[550px] overflow-y-auto ${
+            isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          }`}
+        >
+          <div
+            className={`text-2xl font-poppins-regular text-center w-full ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
             Monthly Attendance Sheet
           </div>
-          <div className="text-xl font-poppins-regular text-[#686868] text-center w-full my-2">
+          <div
+            className={`text-xl font-poppins-regular text-textGray text-center w-full my-2`}
+          >
             {currentDate.toLocaleString("default", { month: "long" })}{" "}
             {currentDate.getFullYear()}
           </div>
-          <table className="w-full text-center border border-gray-300">
-            <thead className="sticky -top-4 bg-white z-10">
+          <table className={`w-full text-center border border-borderGray`}>
+            <thead className={`sticky -top-4 bg-white z-10`}>
               <tr>
-                <th className="border border-gray-300 w-[30px] p-1 font-poppins-bold">
+                <th
+                  className={`border border-borderGray w-[30px] p-1 font-poppins-bold`}
+                >
                   S.No
                 </th>
-                <th className="border border-gray-300 p-1 w-[150px] font-poppins-bold">
+                <th
+                  className={`border border-borderGray p-1 w-[150px] font-poppins-bold`}
+                >
                   Student Name
                 </th>
                 {Array.from({ length: totalDays }, (_, i) => (
-                  <th key={i} className="relative border border-gray-300">
+                  <th key={i} className={`relative border border-borderGray`}>
                     <div className={`flex flex-col items-center`}>
                       <span>{i + 1}</span>
                     </div>
                   </th>
                 ))}
-                <th className="border border-gray-300 p-1 w-[50px] font-poppins-bold">
+                <th
+                  className={`border border-borderGray p-1 w-[50px] font-poppins-bold`}
+                >
                   Total Attendance
                 </th>
               </tr>
@@ -647,8 +657,18 @@ export default function AttendancePopup({
                 ).length;
                 return (
                   <tr key={index}>
-                    <td className="border border-gray-300 p-1">{index + 1}</td>
-                    <td className="border border-gray-300 p-1">
+                    <td
+                      className={`border border-borderGray p-1  ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
+                    >
+                      {index + 1}
+                    </td>
+                    <td
+                      className={`border border-borderGray p-1  ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
+                    >
                       {data?.firstname || ""} {data?.lastname || ""}
                     </td>
                     {data.attendances.map((value, idx) => {
@@ -658,7 +678,12 @@ export default function AttendancePopup({
                         ? "H"
                         : value.attendance;
                       return (
-                        <td key={idx} className="border border-gray-300">
+                        <td
+                          key={idx}
+                          className={`border border-borderGray  ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          }`}
+                        >
                           {isEditable &&
                           attendance !== "S" &&
                           attendance !== "H" ? (
@@ -671,22 +696,22 @@ export default function AttendancePopup({
                               }}
                               className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring focus:ring-black ${
                                 value?.attendance === "P"
-                                  ? "text-[#0F4189]"
+                                  ? "text-textBlue"
                                   : value?.attendance === "A"
-                                  ? "text-[#D91111]"
-                                  : "text-black"
+                                  ? "text-textDarkRed"
+                                  : "text-textBlack"
                               }`}
                             >
                               <option value="" label="" />
                               <option
                                 value="P"
                                 label="P"
-                                className="text-[#0F4189]"
+                                className={`text-textBlue`}
                               />
                               <option
                                 value="A"
                                 label="A"
-                                className="text-[#D91111]"
+                                className={`text-textDarkRed`}
                               />
                             </select>
                           ) : (
@@ -698,8 +723,8 @@ export default function AttendancePopup({
                                   : attendance === "A" ||
                                     attendance === "S" ||
                                     attendance === "H"
-                                  ? "text-[#D91111]"
-                                  : "text-black"
+                                  ? "text-textDarkRed"
+                                  : "text-textBlack"
                               }
                               `}
                             >
@@ -710,7 +735,11 @@ export default function AttendancePopup({
                       );
                     })}
                     {/* Horizontal totals */}
-                    <td className="border border-gray-300 p-1 font-poppins-regular">
+                    <td
+                      className={`border border-borderGray p-1 font-poppins-regular  ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
+                    >
                       {totalPresent}/{totalAttendanceDays}
                     </td>
                   </tr>
@@ -720,7 +749,9 @@ export default function AttendancePopup({
               <tr>
                 <td
                   colSpan="2"
-                  className="border border-gray-300 font-poppins-regular p-1"
+                  className={`border border-borderGray font-poppins-regular p-1  ${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
                 >
                   Total
                 </td>
@@ -737,7 +768,9 @@ export default function AttendancePopup({
                   return (
                     <td
                       key={dayIndex}
-                      className="border border-gray-300 font-poppins-regular p-1"
+                      className={`border border-borderGray font-poppins-regular p-1  ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
                     >
                       {totalPresentForDay}/{attendanceData?.length || 0}
                     </td>
@@ -745,7 +778,7 @@ export default function AttendancePopup({
                 })}
                 <td
                   colSpan="2"
-                  className="border border-gray-300 font-bold p-1"
+                  className={`border border-borderGray`}
                 ></td>
               </tr>
             </tbody>

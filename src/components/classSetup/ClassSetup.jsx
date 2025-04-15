@@ -152,30 +152,32 @@ function ClassSetup() {
     <>
       <Toaster />
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
+        <div
+          className={`fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30`}
+        >
           <Spinner />
         </div>
       )}
       <div
         className={`${
-          isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-[#93a3b6]/25"
-        } w-full max-w-[1600px]`}
+          isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+        } w-full`}
       >
-        <div className="px-6 py-3">
+        <div className={`px-6 py-3`}>
           <div
             className={`${
-              isDarkMode ? "bg-[#0d192f]" : "bg-[#fafafa]"
-            } w-full my-1 px-10 py-6 min-h-[600px] rounded-[16px]`}
+              isDarkMode ? "bg-background1" : "bg-whiteBackground"
+            } w-full my-1 px-10 py-6 min-h-[500px] rounded-[16px]`}
           >
             <Breadcrumbs />
             <h3
               className={`${
-                isDarkMode ? "text-white" : "text-black"
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
               } font-poppins-bold text-2xl md:text-2xl`}
             >
               {t("titles.classRoom")}
             </h3>
-            <div className="py-3 flex flex-wrap justify-start">
+            <div className={`py-3 flex flex-wrap justify-start`}>
               {/* class cards */}
               {classes.map((data, index) => (
                 <ReactCardFlip
@@ -185,11 +187,9 @@ function ClassSetup() {
                 >
                   {/* frontside */}
                   <div
-                    className={`${
-                      isDarkMode ? "bg-[#152f54] bg-opacity-70" : ""
-                    } m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 rounded-3xl cursor-pointer`}
+                    className={`m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 rounded-3xl cursor-pointer`}
                   >
-                    <div className="relative rounded-full h-[40] w-[40] z-10">
+                    <div className={`relative rounded-full h-[40] w-[40] z-10`}>
                       <img
                         src={trash}
                         onClick={() => {
@@ -197,13 +197,18 @@ function ClassSetup() {
                           setModalIsOpen(true);
                         }}
                         alt="deleteClass"
-                        className="absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 bg-[#fafafa] p-1"
+                        className={`absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 p-1 ${
+                          isDarkMode ? "bg-background4" : "bg-whiteBackground"
+                        }`}
                       />
                     </div>
-                    <div onClick={() => toggleFlip(index)} className="relative">
+                    <div
+                      onClick={() => toggleFlip(index)}
+                      className={`relative`}
+                    >
                       <img
                         src={students}
-                        className="h-full w-full"
+                        className={`h-full w-full`}
                         alt="students"
                       />
                       <p
@@ -216,14 +221,16 @@ function ClassSetup() {
                   {/* backside */}
                   <div
                     className={`${
-                      isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
-                    } mt-3 mx-3 md:mt-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border border-[#0F4189] font-bold rounded-3xl cursor-pointer`}
+                      isDarkMode
+                        ? "border-borderWhite"
+                        : "bg-white border-borderBlue"
+                    } mt-3 mx-3 md:mt-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border font-bold rounded-3xl cursor-pointer`}
                   >
                     <div
-                      className="flex flex-col justify-between h-full"
+                      className={`flex flex-col justify-between h-full`}
                       onClick={() => toggleFlip(index)}
                     >
-                      <div className="px-4 py-3 flex flex-row flex-wrap">
+                      <div className={`px-4 py-3 flex flex-row flex-wrap`}>
                         {/* section data */}
                         {data.section.map((section, j) => (
                           <div
@@ -239,8 +246,8 @@ function ClassSetup() {
                             }
                             className={`${
                               isDarkMode
-                                ? "border-white"
-                                : "border-[#FF793F] text-[#FF793F] hover:bg-[#FF793F] hover:text-white"
+                                ? "border-borderWhite text-textPrimary"
+                                : "border-borderOrange1 text-textOrange hover:bg-backgroundOrange1 hover:text-white"
                             } w-4 h-4 md:w-6 md:h-6 m-2 border rounded-2xl flex justify-center items-center text-sm`}
                             key={j}
                           >
@@ -251,13 +258,15 @@ function ClassSetup() {
                     </div>
                     {/* update section button */}
                     <Link
-                      className=" relative -top-8 flex justify-center items-center"
+                      className={` relative -top-8 flex justify-center items-center`}
                       onClick={() => {
                         setClickedClassId(data["_id"]);
                         setAddSectionModelOpen(true);
                       }}
                     >
-                      <div className="bg-[#0F4189] text-white text-center text-xs md:text-sm py-1 px-6 rounded-full transition-all duration-200 ease-in-out active:scale-90">
+                      <div
+                        className={`bg-backgroundBlue text-white text-center text-xs md:text-sm py-1 px-6 rounded-full transition-all duration-200 ease-in-out active:scale-90`}
+                      >
                         {t("buttons.update")}
                       </div>
                     </Link>
@@ -267,16 +276,18 @@ function ClassSetup() {
 
               {classes.length < 16 && (
                 <div
-                  className={`${
-                    isDarkMode ? "bg-[#152f54] bg-opacity-70" : "bg-white"
-                  } m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border border-[#0F4189] rounded-3xl flex justify-center items-center`}
+                  className={`m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border rounded-3xl flex justify-center items-center ${
+                    isDarkMode
+                      ? "border-borderWhite"
+                      : "bg-white border-borderBlue"
+                  } `}
                 >
                   {/* available class dropdown */}
                   {!showDropdowns[classes.length] ? (
                     <img
                       src={addclass}
                       alt="addClass"
-                      className="size-[48px] cursor-pointer"
+                      className={`size-[48px] cursor-pointer`}
                       onClick={() =>
                         setShowDropdowns({
                           ...showDropdowns,
@@ -285,17 +296,27 @@ function ClassSetup() {
                       }
                     />
                   ) : (
-                    <div className="relative w-10/12" ref={dropdownRef}>
+                    <div className={`relative w-10/12`} ref={dropdownRef}>
                       <button
                         onClick={() => setIsOpen((prev) => !prev)}
-                        className="cursor-pointer shadow appearance-none border border-[#0F4189] leading-tight focus:outline-none focus:shadow-outline text-[#0F4189] text-center text-sm font-poppins-bold rounded-lg w-full py-1 px-2 max-h-[150px] mt-0.5"
+                        className={`cursor-pointer shadow appearance-none border leading-tight focus:outline-none focus:shadow-outline text-center text-sm font-poppins-bold rounded-lg w-full py-1 px-2 max-h-[150px] mt-0.5 ${
+                          isDarkMode
+                            ? "border-borderWhite text-textPrimary"
+                            : "bg-white border-borderBlue text-textBlue"
+                        }`}
                         data-testid="classlist"
                       >
                         {t("buttons.addClass")}
                       </button>
 
                       {isOpen && (
-                        <ul className="absolute left-0 w-full border border-[#0F4189] bg-white rounded-lg shadow-lg max-h-[150px] overflow-y-auto mt-0.5">
+                        <ul
+                          className={`absolute left-0 w-full border rounded-lg shadow-lg max-h-[150px] overflow-y-auto mt-0.5 ${
+                            isDarkMode
+                              ? "bg-background1 border-borderWhite"
+                              : "bg-white border-borderBlue"
+                          }`}
+                        >
                           {availableClassOptions.map((item, index) => (
                             <li
                               key={index}
@@ -303,7 +324,11 @@ function ClassSetup() {
                                 handleNewClassSubmit(item);
                                 setIsOpen(false);
                               }}
-                              className="py-1 px-2 cursor-pointer hover:bg-blue-100 text-[#0F4189] text-center text-sm font-poppins-bold"
+                              className={`py-1 px-2 cursor-pointer text-center text-sm font-poppins-bold ${
+                                isDarkMode
+                                  ? "text-textPrimary hover:bg-background"
+                                  : "text-textBlue hover:bg-backgroundLightBlue"
+                              }`}
                             >
                               {item}
                             </li>
@@ -317,17 +342,19 @@ function ClassSetup() {
             </div>
             {/* No class */}
             {classes.length < 1 && !loading && (
-              <div className="flex flex-col justify-center relative top-24 items-center">
+              <div
+                className={`flex flex-col justify-center relative items-center`}
+              >
                 <p
                   className={`${
-                    isDarkMode ? "text-white" : "text-[#01345B]"
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
                   } text-xl md:text-3xl font-bold`}
                 >
                   {t("titles.noClassroom")}
                 </p>
                 <p
                   className={`${
-                    isDarkMode ? "text-white" : "text-[#01345b]"
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
                   } text-sm md:text-lg`}
                 >
                   {t("titles.noClassroomDesc")}

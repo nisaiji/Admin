@@ -19,6 +19,7 @@ import Breadcrumbs from "../BreadCrumbs";
 import { FormControl, MenuItem, Select, TextField } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import { useSelector } from "react-redux";
 
 /**
  * Capitalizes the first letter of a string and converts the rest to lowercase.
@@ -33,6 +34,7 @@ export default function StudentUpdate() {
   const student = useLocation().state;
   const [t] = useTranslation();
   const [loading, setLoading] = useState(false);
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   /**
    * Validation schema for the student update form.
@@ -42,22 +44,22 @@ export default function StudentUpdate() {
     firstname: Yup.string().required(t("validationError.firstName")),
     lastname: Yup.string().required(t("validationError.lastName")),
     gender: Yup.string().required(t("validationError.gender")),
-    bloodGroup: Yup.string().required(t("validationError.bloodGroup")),
-    dob: Yup.date()
-      .nullable()
-      .required(t("validationError.dob"))
-      .transform((value, originalValue) =>
-        moment(originalValue, "DD/MM/YYYY").isValid()
-          ? moment(originalValue, "DD/MM/YYYY").toDate()
-          : null
-      ),
-    address: Yup.string().required(t("validationError.address")),
+    // bloodGroup: Yup.string().required(t("validationError.bloodGroup")),
+    // dob: Yup.date()
+    //   .nullable()
+    //   .required(t("validationError.dob"))
+    //   .transform((value, originalValue) =>
+    //     moment(originalValue, "DD/MM/YYYY").isValid()
+    //       ? moment(originalValue, "DD/MM/YYYY").toDate()
+    //       : null
+    //   ),
+    // address: Yup.string().required(t("validationError.address")),
     parentName: Yup.string().required(t("validationError.parentName")),
-    parentGender: Yup.string().required(t("validationError.gender")),
-    parentAge: Yup.string(t("validationError.age")).required(),
-    parentEmail: Yup.string()
-      .email(t("validationError.emailAddress"))
-      .required(t("validationError.email")),
+    // parentGender: Yup.string().required(t("validationError.gender")),
+    // parentAge: Yup.string().required(t("validationError.age")),
+    // parentEmail: Yup.string()
+    //   .email(t("validationError.emailAddress"))
+    //   .required(t("validationError.email")),
     phone: Yup.string()
       .required(t("validationError.phone"))
       .matches(REGEX.PHONE, t("validationError.phoneNumber"))
@@ -66,11 +68,11 @@ export default function StudentUpdate() {
         t("validationError.phoneStart"),
         (value) => value && REGEX.PHONE_TEST.test(value)
       ),
-    parentQualification: Yup.string().required(
-      t("validationError.qualification")
-    ),
-    parentOccupation: Yup.string().required(t("validationError.occupation")),
-    parentAddress: Yup.string().required(t("validationError.address")),
+    // parentQualification: Yup.string().required(
+    //   t("validationError.qualification")
+    // ),
+    // parentOccupation: Yup.string().required(t("validationError.occupation")),
+    // parentAddress: Yup.string().required(t("validationError.address")),
   });
   // console.log(student);
 
@@ -229,13 +231,39 @@ export default function StudentUpdate() {
    * @returns {JSX.Element} The rendered input fields.
    */
   const renderFields = (fields) => (
-    <div className="grid grid-cols-2 gap-4">
+    <div className={`grid grid-cols-2 gap-4`}>
       {fields.map(({ label, name, type, placeholder, options, icon }) => (
-        <div key={name} className="flex flex-col mx-4 mt-3">
-          <label className="text-l font-semibold">{label}</label>
-          <div className="relative mt-2">
+        <div key={name} className={`flex flex-col mx-4 mt-3`}>
+          <label
+            className={`text-l font-semibold ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
+            {label}
+          </label>
+          <div className={`relative mt-2`}>
             {type === "select" ? (
-              <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+              <FormControl
+                fullWidth
+                variant="outlined"
+                sx={{
+                  border: "2px solid gray",
+                  borderRadius: "8px",
+                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                  "& .MuiInputBase-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                  "& .MuiSvgIcon-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                }}
+              >
                 <Select
                   labelId={`${name}-label`}
                   id={`${name}-select`}
@@ -248,10 +276,23 @@ export default function StudentUpdate() {
                     border: "2px solid rgba(5, 2, 43, 0.1)",
                     borderRadius: "0.5rem",
                     height: "40px",
-                    backgroundColor: "white",
-                    color: formik.values[name] === "" ? "gray" : "black",
+                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    color:
+                      formik.values[name] === ""
+                        ? "gray"
+                        : isDarkMode
+                        ? "#E3E8F3"
+                        : "black",
                     "& .MuiOutlinedInput-notchedOutline": {
                       border: "none",
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                      },
                     },
                   }}
                 >
@@ -259,7 +300,17 @@ export default function StudentUpdate() {
                     {label}
                   </MenuItem>
                   {options.map((option) => (
-                    <MenuItem key={option} value={option}>
+                    <MenuItem
+                      key={option}
+                      value={option}
+                      sx={{
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        "&:hover": {
+                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                        },
+                      }}
+                    >
                       {option}
                     </MenuItem>
                   ))}
@@ -283,7 +334,7 @@ export default function StudentUpdate() {
                       );
                     }
                   }}
-                  className="bg-white w-full"
+                  className={`w-full`}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -294,15 +345,24 @@ export default function StudentUpdate() {
                   sx={{
                     width: "100%",
                     height: "40px",
+                    border: "2px solid gray",
+                    borderRadius: "8px",
+                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    color: isDarkMode ? "#E3E8F3" : "black",
                     "& .MuiOutlinedInput-root": {
                       padding: 1,
                       fontSize: "16px",
                       minHeight: "40px",
+                      color: isDarkMode ? "#E3E8F3" : "black",
                     },
                     "& .MuiInputBase-input": {
                       fontSize: "16px",
                       padding: 1,
                       height: "100%",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                    },
+                    "& .MuiSvgIcon-root": {
+                      color: isDarkMode ? "#E3E8F3" : "black",
                     },
                   }}
                 />
@@ -324,13 +384,15 @@ export default function StudentUpdate() {
                     : ""
                 }
                 value={formik.values[name]}
-                className="border-2 border-[#05022B]/10 rounded-lg pl-2 pr-10 py-1.5 w-full"
+                className={` ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } border-2 border-borderGray bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full`}
               />
             )}
             {icon && (
               <img
                 src={icon.src}
-                className="absolute right-2"
+                className={`absolute right-2`}
                 style={{
                   top: icon.top,
                   width: icon.width,
@@ -340,7 +402,9 @@ export default function StudentUpdate() {
               />
             )}
             {formik.touched[name] && formik.errors[name] && (
-              <div className="text-red-500 text-sm">{formik.errors[name]}</div>
+              <div className={`text-red-500 text-sm`}>
+                {formik.errors[name]}
+              </div>
             )}
           </div>
         </div>
@@ -349,48 +413,80 @@ export default function StudentUpdate() {
   );
 
   return (
-    <div className="flex justify-center items-center w-full h-full bg-[#93a3b6]/25 pt-[25px]">
+    <div
+      className={`flex justify-center items-center w-full h-full pt-[25px] ${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      }`}
+    >
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div
+          className={`fixed inset-0 flex items-center justify-center bg-whiteBackground bg-opacity-50 z-30`}
+        >
           <Spinner />
         </div>
       )}
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="bg-white rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border">
+      <div
+        className={`${
+          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+        } rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border`}
+      >
         <Breadcrumbs />
-        <h1 className="text-2xl font-poppins-bold mt-3">
+        <h1
+          className={`text-2xl font-poppins-bold mt-3  ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
+        >
           {t("titles.studentDetails")}
         </h1>
-        <div className="w-full">
-          <h2 className="text-lg font-poppins-regular mt-6 text-left">
+        <div className={`w-full`}>
+          <h2
+            className={`text-lg font-poppins-regular mt-6 text-left  ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
             {t("titles.personalDetails")}
           </h2>
           {/* student input fields */}
-          <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
-            <form onSubmit={formik.handleSubmit} className="w-full">
+          <div
+            className={`${
+              isDarkMode ? "" : "bg-[rgba(70,69,144,0.05)]"
+            } w-full p-5 box-border flex flex-col items-center my-5`}
+          >
+            <form onSubmit={formik.handleSubmit} className={`w-full`}>
               {renderFields(studentFields)}
             </form>
           </div>
 
-          <h2 className="text-xl font-poppins-regular mt-6 text-left">
+          <h2
+            className={`text-xl font-poppins-regular mt-6 text-left  ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
             {t("titles.guardianDetails")}
           </h2>
-          <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
+          <div
+            className={`${
+              isDarkMode ? "" : "bg-[rgba(70,69,144,0.05)]"
+            } w-full p-5 box-border flex flex-col items-center my-5`}
+          >
             {/* Parent input fields */}
-            <form onSubmit={formik.handleSubmit} className="w-full">
+            <form onSubmit={formik.handleSubmit} className={`w-full`}>
               {renderFields(guardianFields)}
               {/* save and cancel buttons */}
-              <div className="flex justify-end gap-4 mt-10 w-full">
+              <div className={`flex justify-end gap-4 mt-10 w-full`}>
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="border-2  border-[#686868]/75 text-[#040320] py-2 px-4 rounded-xl w-36"
+                  className={`border-2 border-borderGray ${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  } py-2 px-4 rounded-xl w-36`}
                 >
                   {t("buttons.cancel")}
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#0F4189] text-white py-2 px-4 rounded-xl w-36"
+                  className={`bg-backgroundDarkBlue text-textPrimary py-2 px-4 rounded-xl w-36`}
                 >
                   {t("buttons.save")}
                 </button>

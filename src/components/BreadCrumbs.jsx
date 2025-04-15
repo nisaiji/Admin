@@ -1,8 +1,10 @@
+import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 
 const Breadcrumbs = () => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   // Function to format breadcrumb labels
   const formatLabel = (label) => {
@@ -16,7 +18,10 @@ const Breadcrumbs = () => {
     <nav aria-label="breadcrumb" className="mb-2">
       <ol className="breadcrumb flex">
         <li className="breadcrumb-item">
-          <Link to="/" className="text-gray-500">
+          <Link
+            to="/"
+            className={`${isDarkMode ? "text-textPrimary" : "text-textGray"}`}
+          >
             Dashboard
           </Link>
         </li>
@@ -26,11 +31,22 @@ const Breadcrumbs = () => {
 
           return (
             <li key={to} className="breadcrumb-item flex items-center">
-              <span className="mx-2">/</span>
+              <span
+                className={`mx-2 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
+                /
+              </span>
               {isLast ? (
-                <span className="text-blue-500">{formatLabel(value)}</span>
+                <span className={`text-textBlue`}>{formatLabel(value)}</span>
               ) : (
-                <Link to={to} className="text-gray-500">
+                <Link
+                  to={to}
+                  className={`${
+                    isDarkMode ? "text-textPrimary" : "text-textGray"
+                  }`}
+                >
                   {formatLabel(value)}
                 </Link>
               )}

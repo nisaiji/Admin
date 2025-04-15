@@ -25,6 +25,7 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
+import { useSelector } from "react-redux";
 
 export default function AdminProfile() {
   const [admin, setAdmin] = useState([]);
@@ -35,6 +36,8 @@ export default function AdminProfile() {
   const [districts, setDistricts] = useState([]);
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const { t } = useTranslation();
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+
   const Countries = [{ name: "India", code: "IN" }];
 
   // vaidation schema for the form using Yup
@@ -260,28 +263,44 @@ export default function AdminProfile() {
   return (
     <form
       onSubmit={formik.handleSubmit}
-      className="flex flex-col items-center bg-[#93a3b6]/25 p-6"
+      className={`flex flex-col items-center ${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      } p-6`}
     >
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30">
+        <div
+          className={`fixed inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30`}
+        >
           <Spinner />
         </div>
       )}
       {/* Account Setting */}
-      <div className="flex flex-col p-10 w-full rounded-2xl bg-[#fafafa] max-md:px-5 max-md:m-10 max-md:max-w-full">
+      <div
+        className={`flex flex-col p-10 w-full rounded-2xl ${
+          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+        } max-md:px-5 max-md:m-10 max-md:max-w-full`}
+      >
         <Toaster position="top-center" reverseOrder={false} />
         <Breadcrumbs />
-        <div className="text-2xl font-bold tracking-tight leading-8 text-neutral-800">
+        <div
+          className={`text-2xl font-bold tracking-tight leading-8 ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
+        >
           {t("adminProfile.accountSettings")}
         </div>
 
-        <div className="flex flex-wrap gap-5 mt-5 w-full">
+        <div className={`flex flex-wrap gap-5 mt-5 w-full`}>
           {/* School Name */}
-          <div className="flex flex-row w-full space-x-5">
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+          <div className={`flex flex-row w-full space-x-5`}>
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.schoolName")}
-                <span className="text-red-500">*</span>
+                <span className={`text-textRed`}>*</span>
               </label>
               <input
                 name="schoolName"
@@ -292,21 +311,27 @@ export default function AdminProfile() {
                 data-testid="schoolName"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.schoolName && formik.touched.schoolName
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+                    ? "border-borderRed"
+                    : "border-borderGray"
+                } ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent border`}
               />
               {formik.errors.schoolName && formik.touched.schoolName && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.schoolName}
                 </div>
               )}
             </div>
             {/* Email */}
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.Email")}
-                <span className="text-red-500">*</span>
+                <span className={`text-textRed`}>*</span>
               </label>
               <input
                 name="email"
@@ -317,12 +342,14 @@ export default function AdminProfile() {
                 data-testid="email"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.email && formik.touched.email
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+                    ? "border-borderRed"
+                    : "border-borderGray"
+                } ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent border`}
               />
               {formik.errors.email && formik.touched.email && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.email}
                 </div>
               )}
@@ -330,11 +357,15 @@ export default function AdminProfile() {
           </div>
 
           {/* Principal */}
-          <div className="flex flex-row w-full space-x-5">
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+          <div className={`flex flex-row w-full space-x-5`}>
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.principal")}
-                <span className="text-red-500">*</span>
+                <span className={`text-textRed`}>*</span>
               </label>
               <input
                 name="principal"
@@ -345,21 +376,27 @@ export default function AdminProfile() {
                 data-testid="principal"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.principal && formik.touched.principal
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+                    ? "border-borderRed"
+                    : "border-borderGray"
+                } ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent border`}
               />
               {formik.errors.principal && formik.touched.principal && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.principal}
                 </div>
               )}
             </div>
             {/* Admin name */}
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.adminName")}
-                <span className="text-red-500">*</span>
+                <span className={`text-textRed`}>*</span>
               </label>
               <input
                 name="username"
@@ -370,12 +407,14 @@ export default function AdminProfile() {
                 data-testid="username"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.username && formik.touched.username
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+                    ? "border-borderRed"
+                    : "border-borderGray"
+                } ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent border`}
               />
               {formik.errors.username && formik.touched.username && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.username}
                 </div>
               )}
@@ -383,11 +422,15 @@ export default function AdminProfile() {
           </div>
 
           {/* Affiliation No */}
-          <div className="flex flex-row w-full space-x-5">
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+          <div className={`flex flex-row w-full space-x-5`}>
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.affiliationNumber")}
-                <span className="text-red-500">*</span>
+                <span className={`text-textRed`}>*</span>
               </label>
               <input
                 name="affiliationNo"
@@ -398,19 +441,25 @@ export default function AdminProfile() {
                 data-testid="affiliationNo"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.affiliationNo && formik.touched.affiliationNo
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+                    ? "border-borderRed"
+                    : "border-borderGray"
+                } ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent border`}
               />
               {formik.errors.affiliationNo && formik.touched.affiliationNo && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.affiliationNo}
                 </div>
               )}
             </div>
             {/* School No */}
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.schoolNumber")}
               </label>
               <input
@@ -422,12 +471,14 @@ export default function AdminProfile() {
                 data-testid="schoolNumber"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.schoolNumber && formik.touched.schoolNumber
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+                    ? "border-borderRed"
+                    : "border-borderGray"
+                } ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent border`}
               />
               {formik.errors.schoolNumber && formik.touched.schoolNumber && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.schoolNumber}
                 </div>
               )}
@@ -435,11 +486,15 @@ export default function AdminProfile() {
           </div>
 
           {/* Address */}
-          <div className="flex flex-row w-full space-x-5">
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+          <div className={`flex flex-row w-full space-x-5`}>
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.schoolAddress")}
-                <span className="text-red-500">*</span>
+                <span className={`text-textRed`}>*</span>
               </label>
               <input
                 name="address"
@@ -450,26 +505,42 @@ export default function AdminProfile() {
                 data-testid="address"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.address && formik.touched.address
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+                    ? "border-borderRed"
+                    : "border-borderGray"
+                } ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent border`}
               />
               {formik.errors.address && formik.touched.address && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.address}
                 </div>
               )}
             </div>
             {/* School Board */}
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.schoolBoard")}
-                <span className="text-red-500">*</span>
+                <span className={`text-textRed`}>*</span>
               </label>
               <FormControl
                 fullWidth
                 variant="outlined"
                 error={formik.errors.schoolBoard && formik.touched.schoolBoard}
+                sx={{
+                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  borderRadius: "0.5rem",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  "& .MuiInputBase-root, & .MuiSvgIcon-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                }}
               >
                 <Select
                   name="schoolBoard"
@@ -480,11 +551,7 @@ export default function AdminProfile() {
                   displayEmpty
                   renderValue={(selected) => {
                     if (!selected) {
-                      return (
-                        <span style={{ color: "gray" }}>
-                          {t("adminProfile.selectSchoolBoard")}
-                        </span>
-                      );
+                      return <span>{t("adminProfile.selectSchoolBoard")}</span>;
                     }
                     return selected;
                   }}
@@ -492,34 +559,63 @@ export default function AdminProfile() {
                     mt: 0.5,
                     width: "100%",
                     fontSize: "1rem",
-                    color: formik.values.schoolBoard ? "black" : "gray",
-                    backgroundColor: "white",
+                    borderRadius: "0.5rem",
+                    color: formik.values.schoolBoard
+                      ? isDarkMode
+                        ? "#E3E8F3"
+                        : "black"
+                      : "gray",
+                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
                     border:
                       formik.errors.schoolBoard && formik.touched.schoolBoard
                         ? "1px solid red"
-                        : "1px solid #E5E7EB",
-                    borderRadius: "0.5rem",
+                        : "1px solid gray",
                     "& .MuiSelect-select": {
                       fontSize: "1rem",
                       lineHeight: "1.5rem",
                       p: 1,
                     },
                   }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        borderRadius: "0.5rem",
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="" disabled>
                     {t("adminProfile.selectSchoolBoard")}
                   </MenuItem>
-                  <MenuItem value="CBSE">CBSE</MenuItem>
-                  <MenuItem value="ICSE">ICSE</MenuItem>
-                  <MenuItem value="StateBoard">State Board</MenuItem>
-                  <MenuItem value="IB">IB</MenuItem>
-                  <MenuItem value="Other">{t("options.other")}</MenuItem>
+                  {[
+                    "CBSE",
+                    "ICSE",
+                    "State Board",
+                    "IB",
+                    t("options.other"),
+                  ].map((val, i) => (
+                    <MenuItem
+                      key={i}
+                      value={val}
+                      sx={{
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        borderRadius: "0.5rem",
+                        "&:hover": {
+                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                        },
+                      }}
+                    >
+                      {val}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
-
               {formik.errors.schoolBoard && formik.touched.schoolBoard && (
                 <div
-                  className="text-red-500 text-sm mt-1"
+                  className={`text-textRed text-sm mt-1`}
                   data-testid="schoolBoardError"
                 >
                   {formik.errors.schoolBoard}
@@ -540,12 +636,24 @@ export default function AdminProfile() {
             {/* Country Dropdown */}
             <FormControl
               fullWidth
-              sx={{ width: { xs: "100%", md: "33%" } }}
               error={formik.errors.country && formik.touched.country}
+              sx={{
+                width: { xs: "100%", md: "33%" },
+                backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                borderRadius: "0.5rem",
+                "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                "& .MuiInputBase-root, & .MuiSvgIcon-root": {
+                  color: isDarkMode ? "#E3E8F3" : "black",
+                },
+              }}
             >
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.country")}
-                <span className="text-red-500">*</span>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
+                {t("adminProfile.country")}{" "}
+                <span className="text-textRed">*</span>
               </label>
               <Select
                 labelId="country-label"
@@ -557,16 +665,26 @@ export default function AdminProfile() {
                 displayEmpty
                 sx={{
                   mt: 1,
-                  backgroundColor: "white",
-                  border: (theme) =>
+                  border:
                     formik.errors.country && formik.touched.country
                       ? "1px solid red"
-                      : "1px solid #E5E7EB",
-                  color: "black",
+                      : "1px solid gray",
+                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  borderRadius: "0.5rem",
+                  color: isDarkMode ? "#E3E8F3" : "black",
                   "& .MuiSelect-select": {
                     fontSize: "1rem",
                     lineHeight: "1.5rem",
                     p: 1,
+                  },
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      borderRadius: "0.5rem",
+                    },
                   },
                 }}
               >
@@ -574,13 +692,24 @@ export default function AdminProfile() {
                   {t("placeholders.selectCountry")}
                 </MenuItem>
                 {Countries.map((country) => (
-                  <MenuItem key={country.code} value={country.name}>
+                  <MenuItem
+                    key={country.code}
+                    value={country.name}
+                    sx={{
+                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      borderRadius: "0.5rem",
+                      "&:hover": {
+                        backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                      },
+                    }}
+                  >
                     {country.name}
                   </MenuItem>
                 ))}
               </Select>
               {formik.errors.country && formik.touched.country && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className="text-textRed text-sm mt-1">
                   {formik.errors.country}
                 </div>
               )}
@@ -589,12 +718,24 @@ export default function AdminProfile() {
             {/* State Dropdown */}
             <FormControl
               fullWidth
-              sx={{ width: { xs: "100%", md: "33%" } }}
               error={formik.errors.state && formik.touched.state}
+              sx={{
+                width: { xs: "100%", md: "33%" },
+                backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                borderRadius: "0.5rem",
+                "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                "& .MuiInputBase-root, & .MuiSvgIcon-root": {
+                  color: isDarkMode ? "#E3E8F3" : "black",
+                },
+              }}
             >
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.state")}
-                <span className="text-red-500">*</span>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
+                {t("adminProfile.state")}{" "}
+                <span className="text-textRed">*</span>
               </label>
               <Select
                 labelId="state-label"
@@ -606,16 +747,26 @@ export default function AdminProfile() {
                 displayEmpty
                 sx={{
                   mt: 1,
-                  backgroundColor: "white",
-                  border: (theme) =>
+                  border:
                     formik.errors.state && formik.touched.state
                       ? "1px solid red"
-                      : "1px solid #E5E7EB",
-                  color: "black",
+                      : "1px solid gray",
+                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  borderRadius: "0.5rem",
+                  color: isDarkMode ? "#E3E8F3" : "black",
                   "& .MuiSelect-select": {
                     fontSize: "1rem",
                     lineHeight: "1.5rem",
                     p: 1,
+                  },
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      borderRadius: "0.5rem",
+                    },
                   },
                 }}
               >
@@ -623,13 +774,24 @@ export default function AdminProfile() {
                   {t("placeholders.selectState")}
                 </MenuItem>
                 {states.map((state) => (
-                  <MenuItem key={state.state} value={state.state}>
+                  <MenuItem
+                    key={state.state}
+                    value={state.state}
+                    sx={{
+                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      borderRadius: "0.5rem",
+                      "&:hover": {
+                        backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                      },
+                    }}
+                  >
                     {state.state}
                   </MenuItem>
                 ))}
               </Select>
               {formik.errors.state && formik.touched.state && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className="text-textRed text-sm mt-1">
                   {formik.errors.state}
                 </div>
               )}
@@ -638,12 +800,24 @@ export default function AdminProfile() {
             {/* District Dropdown */}
             <FormControl
               fullWidth
-              sx={{ width: { xs: "100%", md: "33%" } }}
               error={formik.errors.district && formik.touched.district}
+              sx={{
+                width: { xs: "100%", md: "33%" },
+                backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                borderRadius: "0.5rem",
+                "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                "& .MuiInputBase-root, & .MuiSvgIcon-root": {
+                  color: isDarkMode ? "#E3E8F3" : "black",
+                },
+              }}
             >
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("adminProfile.district")}
-                <span className="text-red-500">*</span>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
+                {t("adminProfile.district")}{" "}
+                <span className="text-textRed">*</span>
               </label>
               <Select
                 labelId="district-label"
@@ -655,16 +829,26 @@ export default function AdminProfile() {
                 displayEmpty
                 sx={{
                   mt: 1,
-                  backgroundColor: "white",
-                  border: (theme) =>
+                  border:
                     formik.errors.district && formik.touched.district
                       ? "1px solid red"
-                      : "1px solid #E5E7EB",
-                  color: "black",
+                      : "1px solid gray",
+                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  borderRadius: "0.5rem",
+                  color: isDarkMode ? "#E3E8F3" : "black",
                   "& .MuiSelect-select": {
                     fontSize: "1rem",
                     lineHeight: "1.5rem",
                     p: 1,
+                  },
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      borderRadius: "0.5rem",
+                    },
                   },
                 }}
               >
@@ -672,25 +856,40 @@ export default function AdminProfile() {
                   {t("placeholders.selectDistrict")}
                 </MenuItem>
                 {districts.map((district) => (
-                  <MenuItem key={district} value={district}>
+                  <MenuItem
+                    key={district}
+                    value={district}
+                    sx={{
+                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      borderRadius: "0.5rem",
+                      "&:hover": {
+                        backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                      },
+                    }}
+                  >
                     {district}
                   </MenuItem>
                 ))}
               </Select>
               {formik.errors.district && formik.touched.district && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className="text-textRed text-sm mt-1">
                   {formik.errors.district}
                 </div>
               )}
             </FormControl>
           </Box>
 
-          <div className="flex flex-row w-full space-x-5">
+          <div className={`flex flex-row w-full space-x-5`}>
             {/* city */}
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.city")}
-                <span className="text-red-500">*</span>
+                <span className={`text-textRed`}>*</span>
               </label>
               <input
                 name="city"
@@ -701,21 +900,27 @@ export default function AdminProfile() {
                 data-testid="city"
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.city && formik.touched.city
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+                    ? "border-borderRed"
+                    : "border-borderGray"
+                } ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent border`}
               />
               {formik.errors.city && formik.touched.city && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.city}
                 </div>
               )}
             </div>
             {/* pincode */}
-            <div className="w-full md:w-4/5">
-              <label className="text-sm font-semibold leading-5 text-neutral-800">
+            <div className={`w-full md:w-4/5`}>
+              <label
+                className={`text-sm font-semibold leading-5 ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
+              >
                 {t("adminProfile.pincode")}
-                <span className="text-red-500">*</span>
+                <span className={`text-textRed`}>*</span>
               </label>
               <input
                 name="pincode"
@@ -727,24 +932,26 @@ export default function AdminProfile() {
                 maxLength={6}
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.pincode && formik.touched.pincode
-                    ? "border-red-500"
-                    : "border-gray-200"
-                } text-black bg-white border`}
+                    ? "border-borderRed"
+                    : "border-borderGray"
+                } ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent border`}
               />
               {formik.errors.pincode && formik.touched.pincode && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.pincode}
                 </div>
               )}
             </div>
           </div>
           {/* save button */}
-          <div className="flex gap-5 mt-7">
+          <div className={`flex gap-5 mt-7`}>
             <button
               onClick={handleProfileUpdate}
               type="button"
               data-testid="account-submit"
-              className="px-6 py-2 text-white bg-[#0F4189] rounded-lg"
+              className={`px-6 py-2 text-textPrimary bg-backgroundBlue rounded-lg`}
             >
               {t("buttons.saveChanges")}
             </button>
@@ -753,29 +960,43 @@ export default function AdminProfile() {
       </div>
 
       {/* Social Profile */}
-      <div className="flex flex-col p-10 mx-10 mt-6 rounded-2xl w-full bg-white max-w-[1320px] max-md:px-5">
-        <div className="text-4xl font-bold tracking-tight leading-6 text-neutral-800">
+      <div
+        className={`flex flex-col p-10 mx-10 mt-6 rounded-2xl w-full ${
+          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+        } max-w-[1320px] max-md:px-5`}
+      >
+        <div
+          className={`text-4xl font-bold tracking-tight leading-6 ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
+        >
           {t("adminProfile.socialProfile")}
         </div>
         {/* phone */}
-        <div className="mt-7 w-full">
-          <div className="text-sm font-semibold leading-6 text-neutral-800">
-            {t("adminProfile.phoneNumber")}
-            <span className="text-red-500">*</span>
-          </div>
+        <div className={`mt-7 w-full`}>
           <div
-            className={`flex gap-5 px-5 py-2 mt-1 bg-white border ${
-              formik.errors.phone && formik.touched.phone
-                ? "border-red-500"
-                : "border-gray-200"
+            className={`text-sm font-semibold leading-6 ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
             }`}
           >
-            <div className="flex items-center gap-1.5 font-medium text-[#0F4189]">
+            {t("adminProfile.phoneNumber")}
+            <span className={`text-textRed`}>*</span>
+          </div>
+          <div
+            className={`flex gap-5 px-5 py-2 mt-1 bg-transparent border ${
+              formik.errors.phone && formik.touched.phone
+                ? "border-borderRed"
+                : "border-borderGray"
+            }`}
+          >
+            <div
+              className={`flex items-center gap-1.5 font-medium text-textBlue`}
+            >
               <div>+91</div>
               <img
                 loading="lazy"
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/16ca314b6e5de1ff873da6c3d07ade79f8cd3b3ad3f24ffbb3eae32553811ebf?"
-                className="w-3 aspect-square"
+                className={`w-3 aspect-square`}
               />
             </div>
             <input
@@ -786,11 +1007,13 @@ export default function AdminProfile() {
               onBlur={formik.handleBlur}
               data-testid="phone"
               maxLength={10}
-              className="flex-auto text-black bg-transparent outline-none"
+              className={`flex-auto ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } bg-transparent outline-none`}
             />
             {formik.errors.phone && formik.touched.phone && (
               <div
-                className="text-red-500 text-sm mt-1"
+                className={`text-textRed text-sm mt-1`}
                 data-testid={"phone-error"}
               >
                 {formik.errors.phone}
@@ -799,12 +1022,22 @@ export default function AdminProfile() {
           </div>
         </div>
         {/* website */}
-        <div className="mt-7 w-full">
-          <div className="text-sm font-semibold leading-5 text-neutral-800">
+        <div className={`mt-7 w-full`}>
+          <div
+            className={`text-sm font-semibold leading-5 ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
             {t("adminProfile.personalWebsite")}
           </div>
-          <div className="flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-white border border-gray-200">
-            <img loading="lazy" src={Globe} className="w-5 h-5 aspect-square" />
+          <div
+            className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+          >
+            <img
+              loading="lazy"
+              src={Globe}
+              className={`w-5 h-5 aspect-square`}
+            />
             <input
               name="website"
               placeholder={t("adminProfile.personalWebsitePlaceholder")}
@@ -812,26 +1045,34 @@ export default function AdminProfile() {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               data-testid="website"
-              className="flex-auto bg-transparent text-black outline-none"
+              className={`flex-auto bg-transparent ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } outline-none`}
             />
             {formik.errors.website && formik.touched.website && (
-              <div className="text-red-500 text-sm mt-1">
+              <div className={`text-textRed text-sm mt-1`}>
                 {formik.errors.website}
               </div>
             )}
           </div>
         </div>
         {/* facebook */}
-        <div className="flex flex-col md:flex-row gap-5">
-          <div className="mt-7 w-full">
-            <div className="text-sm font-semibold leading-5 text-neutral-800">
+        <div className={`flex flex-col md:flex-row gap-5`}>
+          <div className={`mt-7 w-full`}>
+            <div
+              className={`text-sm font-semibold leading-5 ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
+            >
               {t("adminProfile.facebook")}
             </div>
-            <div className="flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-white border border-gray-200">
+            <div
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+            >
               <img
                 loading="lazy"
                 src={facebook}
-                className="w-5 h-5 aspect-square"
+                className={`w-5 h-5 aspect-square`}
               />
               <input
                 name="facebook"
@@ -840,25 +1081,33 @@ export default function AdminProfile() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid="facebook"
-                className="flex-auto bg-transparent text-black outline-none"
+                className={`flex-auto bg-transparent ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } outline-none`}
               />
               {formik.errors.facebook && formik.touched.facebook && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.facebook}
                 </div>
               )}
             </div>
           </div>
           {/* instagram */}
-          <div className="mt-7 w-full">
-            <div className="text-sm font-semibold leading-5 text-neutral-800">
+          <div className={`mt-7 w-full`}>
+            <div
+              className={`text-sm font-semibold leading-5 ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
+            >
               {t("adminProfile.instagram")}
             </div>
-            <div className="flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-white border border-gray-200">
+            <div
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+            >
               <img
                 loading="lazy"
                 src={instagram}
-                className="w-5 h-5 aspect-square"
+                className={`w-5 h-5 aspect-square`}
               />
               <input
                 name="instagram"
@@ -867,25 +1116,33 @@ export default function AdminProfile() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid="instagram"
-                className="flex-auto bg-transparent text-black outline-none"
+                className={`flex-auto bg-transparent ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } outline-none`}
               />
               {formik.errors.instagram && formik.touched.instagram && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.instagram}
                 </div>
               )}
             </div>
           </div>
           {/* linkedin */}
-          <div className="mt-7 w-full">
-            <div className="text-sm font-semibold leading-5 text-neutral-800">
+          <div className={`mt-7 w-full`}>
+            <div
+              className={`text-sm font-semibold leading-5 ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
+            >
               {t("adminProfile.linkedin")}
             </div>
-            <div className="flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-white border border-gray-200">
+            <div
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+            >
               <img
                 loading="lazy"
                 src={linkedin}
-                className="w-5 h-5 aspect-square"
+                className={`w-5 h-5 aspect-square`}
               />
               <input
                 name="linkedin"
@@ -894,10 +1151,12 @@ export default function AdminProfile() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid="linkedin"
-                className="flex-auto bg-transparent text-black outline-none"
+                className={`flex-auto bg-transparent ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } outline-none`}
               />
               {formik.errors.linkedin && formik.touched.linkedin && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.linkedin}
                 </div>
               )}
@@ -905,16 +1164,22 @@ export default function AdminProfile() {
           </div>
         </div>
         {/* twitter */}
-        <div className="flex flex-col md:flex-row gap-5">
-          <div className="mt-7 w-full">
-            <div className="text-sm font-semibold leading-5 text-neutral-800">
+        <div className={`flex flex-col md:flex-row gap-5`}>
+          <div className={`mt-7 w-full`}>
+            <div
+              className={`text-sm font-semibold leading-5 ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
+            >
               {t("adminProfile.twitter")}
             </div>
-            <div className="flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-white border border-gray-200">
+            <div
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+            >
               <img
                 loading="lazy"
                 src={twitter}
-                className="w-5 h-5 aspect-square"
+                className={`w-5 h-5 aspect-square`}
               />
               <input
                 name="twitter"
@@ -923,25 +1188,33 @@ export default function AdminProfile() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid="twitter"
-                className="flex-auto bg-transparent text-black outline-none"
+                className={`flex-auto bg-transparent ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } outline-none`}
               />
               {formik.errors.twitter && formik.touched.twitter && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.twitter}
                 </div>
               )}
             </div>
           </div>
           {/* whatsapp */}
-          <div className="mt-7 w-full">
-            <div className="text-sm font-semibold leading-5 text-neutral-800">
+          <div className={`mt-7 w-full`}>
+            <div
+              className={`text-sm font-semibold leading-5 ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
+            >
               {t("adminProfile.whatsapp")}
             </div>
-            <div className="flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-white border border-gray-200">
+            <div
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+            >
               <img
                 loading="lazy"
                 src={whatsapp}
-                className="w-5 h-5 aspect-square"
+                className={`w-5 h-5 aspect-square`}
               />
               <input
                 name="whatsapp"
@@ -950,25 +1223,33 @@ export default function AdminProfile() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid="whatsapp"
-                className="flex-auto bg-transparent text-black outline-none"
+                className={`flex-auto bg-transparent ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } outline-none`}
               />
               {formik.errors.whatsapp && formik.touched.whatsapp && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.whatsapp}
                 </div>
               )}
             </div>
           </div>
           {/* youtube */}
-          <div className="mt-7 w-full">
-            <div className="text-sm font-semibold leading-5 text-neutral-800">
+          <div className={`mt-7 w-full`}>
+            <div
+              className={`text-sm font-semibold leading-5 ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
+            >
               {t("adminProfile.youtube")}
             </div>
-            <div className="flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-white border border-gray-200">
+            <div
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+            >
               <img
                 loading="lazy"
                 src={youtube}
-                className="w-5 h-5 aspect-square"
+                className={`w-5 h-5 aspect-square`}
               />
               <input
                 name="youtube"
@@ -977,10 +1258,12 @@ export default function AdminProfile() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid="youtube"
-                className="flex-auto bg-transparent text-black outline-none"
+                className={`flex-auto bg-transparent ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } outline-none`}
               />
               {formik.errors.youtube && formik.touched.youtube && (
-                <div className="text-red-500 text-sm mt-1">
+                <div className={`text-textRed text-sm mt-1`}>
                   {formik.errors.youtube}
                 </div>
               )}
@@ -988,12 +1271,12 @@ export default function AdminProfile() {
           </div>
         </div>
         {/* save button */}
-        <div className="flex gap-5 mt-10">
+        <div className={`flex gap-5 mt-10`}>
           <button
             onClick={handleSocialProfileUpdate}
             type="button"
             data-testid="social-submit"
-            className="px-6 py-2 text-white bg-[#0F4189] rounded-lg"
+            className={`px-6 py-2 text-textPrimary bg-backgroundBlue rounded-lg`}
           >
             {t("buttons.saveChanges")}
           </button>

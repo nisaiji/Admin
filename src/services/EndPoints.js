@@ -26,6 +26,7 @@ const EndPoints = {
     GET_STUDENT_LIST: "student/admin",
     DELETE_STUDENT: "student/admin",
     STUDENT_UPDATE: "student/admin",
+    SEARCH_STUDENT: "v2/student/admin",
 
     // ADMIN CLASS AND SECTION SETUP
     REGISTER_CLASS: "class",
