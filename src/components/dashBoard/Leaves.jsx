@@ -4,7 +4,8 @@ import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
-import noleave from "../../assets/images/noleave.png";
+import calendar from "../../assets/images/darkmode/calendar.png";
+import noDataFound from "../../assets/images/darkmode/noDataFound.png";
 import profileEmpty from "../../assets/images/profileEmpty.png";
 import refresh from "../../assets/images/refresh.png";
 import hide from "../../assets/images/hide.png";
@@ -26,7 +27,7 @@ import { useSelector } from "react-redux";
 export default function Leaves() {
   const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
-  const [selectedTab, setSelectedTab] = useState("all");
+  const [selectedTab, setSelectedTab] = useState("pending");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConformationPopup, setshowConformationPopup] = useState(false);
@@ -51,6 +52,8 @@ export default function Leaves() {
   // Compute the status query based on the selected tab.
   const getStatusQuery = (tab) => {
     switch (tab) {
+      case "pending":
+        return "pending";
       case "approved":
         return "accept,complete";
       case "rejected":
@@ -156,8 +159,8 @@ export default function Leaves() {
    * @returns {Array} - The filtered list of leave requests based on the selected tab
    */
   const filteredRequests =
-    selectedTab === "all"
-      ? requests
+    selectedTab === "pending"
+      ? requests.filter((req) => req.status === "pending")
       : selectedTab === "approved"
       ? requests.filter(
           (req) => req.status === "accept" || req.status === "complete"
@@ -167,7 +170,6 @@ export default function Leaves() {
           (req) => req.status === "reject" || req.status === "expired"
         )
       : requests;
-
   /**
    * @param {string} status - The status code (accept, reject, complete, etc.)
    * @returns {string} - The translated status string
@@ -175,6 +177,8 @@ export default function Leaves() {
   const requestsStatus = (status) => {
     //accept,reject,complete,pending
     switch (status) {
+      case "pending":
+        return "Pending";
       case "accept":
         return "Approved";
       case "reject":
@@ -226,7 +230,9 @@ export default function Leaves() {
       >
         <div
           className={`${
-            isDarkMode ? "bg-background1" : "bg-whiteBackground"
+            isDarkMode
+              ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+              : "bg-whiteBackground"
           } min-h-[calc(100vh-110px)] rounded-[16px]`}
         >
           <div className={`pl-12 py-6`}>
@@ -241,7 +247,7 @@ export default function Leaves() {
           </div>
           {/* tabs */}
           <div className={`flex space-x-4 mt-4 px-10`}>
-            {["all", "approved", "rejected"].map((tab) => (
+            {["pending", "approved", "rejected", "all"].map((tab) => (
               <div
                 key={tab}
                 className={`cursor-pointer ${
@@ -264,7 +270,7 @@ export default function Leaves() {
           {filteredRequests.length === 0 ? (
             <div className={`flex flex-col justify-center items-center`}>
               <img
-                src={noleave}
+                src={noDataFound}
                 alt="noleave"
                 className={`w-[300px] h-[200px] object-contain`}
               />
@@ -286,7 +292,13 @@ export default function Leaves() {
                   <table className={`w-full shadow-sm table-fixed`}>
                     {/* table heading */}
                     <thead>
-                      <tr>
+                      <tr
+                        className={`${
+                          isDarkMode
+                            ? "bg-backgroundTableCell"
+                            : "bg-whiteBackground"
+                        }`}
+                      >
                         <th
                           className={`p-4 text-base text-left font-poppins-bold text-textBlue`}
                         >
@@ -301,6 +313,11 @@ export default function Leaves() {
                           className={`p-4 text-base text-left font-poppins-bold text-textBlue`}
                         >
                           {t(`labels.class`)}
+                        </th>
+                        <th
+                          className={`p-4 text-base font-poppins-bold text-textBlue`}
+                        >
+                          {t(`labels.dateOfRequest`)}
                         </th>
                         <th
                           className={`p-4 text-base font-poppins-bold text-textBlue`}
@@ -322,10 +339,8 @@ export default function Leaves() {
                           className={`${
                             currentReq?._id === req._id
                               ? isDarkMode
-                                ? "bg-background2"
-                                : "bg-blue-100"
-                              : index % 2 === 0
-                              ? "bg-[#4645900D]"
+                                ? "bg-background4"
+                                : "bg-whiteBackground1"
                               : ""
                           } border-t`}
                           onClick={() => setCurrentReq(req)}
@@ -373,6 +388,17 @@ export default function Leaves() {
                                   : "text-textBlack"
                               } font-medium`}
                             >
+                              {moment(req?.createdAt).format("DD/MM/YYYY")}
+                            </p>
+                          </td>
+                          <td className={`px-4 py-2.5 text-center`}>
+                            <p
+                              className={`text-sm ${
+                                isDarkMode
+                                  ? "text-textPrimary"
+                                  : "text-textBlack"
+                              } font-medium`}
+                            >
                               {req?.teacher?.leaveRequestCount || 0}
                             </p>
                           </td>
@@ -393,7 +419,9 @@ export default function Leaves() {
                   </table>
                 </div>
                 <section
-                  className={`w-[350px] p-5 rounded-2xl bg-slate-200 overflow-y-auto sticky top-4 flex flex-col`}
+                  className={`w-[350px] p-5 rounded-2xl overflow-y-auto sticky top-4 flex flex-col ${
+                    isDarkMode ? "bg-[#6868684D]" : "bg-whiteBackground2"
+                  }`}
                 >
                   <img
                     src={
@@ -405,29 +433,48 @@ export default function Leaves() {
                     alt="Profile picture"
                   />
                   <header className={`flex flex-col items-center mt-3`}>
-                    <h1 className={`text-base font-bold text-zinc-900`}>
+                    <h1
+                      className={`text-base font-bold ${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
                       {currentReq?.teacher?.firstname || ""}
                       {currentReq?.teacher?.lastname || CONSTANT.NA}
                     </h1>
-                    <p className={`text-sm text-stone-500`}>
+                    <p
+                      className={`text-sm ${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
                       {currentReq?.teacher?.class || ""}{" "}
                       {currentReq?.teacher?.section || CONSTANT.NA}
                     </p>
                   </header>
 
                   <section className={`mt-4`}>
-                    <label className={`text-xs font-semibold text-zinc-900`}>
+                    <label
+                      className={`text-xs font-semibold ${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
                       Leave Data
                     </label>
                     <div
-                      className={`flex items-center gap-1.5 mt-1.5 text-sm bg-slate-200 text-stone-900`}
+                      className={`flex items-center gap-1.5 mt-1.5 text-sm ${
+                        isDarkMode
+                          ? "text-textPrimary bg-transparent"
+                          : "text-textBlack bg-whiteBackground1"
+                      }`}
                     >
                       <img
-                        src="https://cdn.builder.io/api/v1/image/assets/TEMP/2697c956f2650260c1e6c6c65f7f3b4c5a2a1948?placeholderIfAbsent=true&apiKey=a8cc6c1bf626485c842deb8f5c2a2105"
+                        src={calendar}
                         className={`w-6 aspect-square object-contain`}
                         alt="Calendar icon"
+                        style={{
+                          filter: isDarkMode ? "invert(0%)" : "invert(50%)",
+                        }}
                       />
-                      <time className={`px-2 py-2 rounded-lg bg-slate-200`}>
+                      <time className={`px-2 py-2 rounded-lg`}>
                         {moment(currentReq?.startTime).format("DD/MM/YYYY")} -{" "}
                         {moment(currentReq?.endTime).format("DD/MM/YYYY")}
                       </time>
@@ -435,18 +482,28 @@ export default function Leaves() {
                   </section>
 
                   <section className={`mt-[10px]`}>
-                    <label className={`text-xs font-semibold text-zinc-900`}>
+                    <label
+                      className={`text-xs font-semibold ${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
                       {t(`labels.description`)}
                     </label>
                     <p
-                      className={`p-2 text-sm text-justify leading-5 text-stone-500 overflow-hidden`}
+                      className={`p-2 text-sm text-justify leading-5 overflow-hidden ${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
                     >
                       {currentReq?.description || ""}
                     </p>
                   </section>
 
                   <section className={`mt-[10px]`}>
-                    <label className={`text-xs font-semibold text-zinc-900`}>
+                    <label
+                      className={`text-xs font-semibold ${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
                       {t(`labels.username`)}
                     </label>
                     <input
@@ -465,7 +522,11 @@ export default function Leaves() {
                         }))
                       }
                       disabled
-                      className={`w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500`}
+                      className={`w-full p-2 mb-[10px] text-sm bg-transparent rounded-lg border ${
+                        isDarkMode
+                          ? "text-textPrimary border-borderWhite"
+                          : "text-textBlack border-borderGray"
+                      }`}
                     />
                     {currentReq?.status === "pending" && (
                       <div
@@ -482,13 +543,16 @@ export default function Leaves() {
                           alt="passwordIcon"
                           className={`transform size-6 absolute right-2 bottom-4 cursor-pointer text-gray-600`}
                           style={{
-                            filter:
-                              "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
+                            filter: isDarkMode ? "invert(100%)" : "invert(0%)",
                           }}
                         />
                       </div>
                     )}
-                    <label className={`text-xs font-semibold text-zinc-900`}>
+                    <label
+                      className={`text-xs font-semibold ${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
                       {t(`labels.teacherName`)}
                     </label>
                     <input
@@ -507,9 +571,17 @@ export default function Leaves() {
                         }))
                       }
                       disabled={currentReq?.status !== "pending"}
-                      className={`w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500`}
+                      className={`w-full p-2 mb-[10px] text-sm bg-transparent rounded-lg border ${
+                        isDarkMode
+                          ? "text-textPrimary border-borderWhite"
+                          : "text-textBlack border-borderGray"
+                      }`}
                     />
-                    <label className={`text-xs font-semibold text-zinc-900`}>
+                    <label
+                      className={`text-xs font-semibold ${
+                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                      }`}
+                    >
                       {t(`labels.password`)}
                     </label>
                     <input
@@ -528,7 +600,11 @@ export default function Leaves() {
                         }))
                       }
                       disabled={currentReq?.status !== "pending"}
-                      className={`w-full p-2 mb-[10px] text-sm bg-gray-100 rounded-lg text-stone-500`}
+                      className={`w-full p-2 mb-[10px] text-sm bg-transparent rounded-lg border ${
+                        isDarkMode
+                          ? "text-textPrimary border-borderWhite"
+                          : "text-textBlack border-borderGray"
+                      }`}
                     />
                     {currentReq?.status === "pending" && (
                       <div
@@ -538,10 +614,9 @@ export default function Leaves() {
                         <img
                           src={showPassword ? hide : show}
                           alt="passwordIcon"
-                          className={`transform size-6 absolute right-2 bottom-4 cursor-pointer text-gray-600`}
+                          className={`transform size-6 absolute right-2 bottom-4 cursor-pointer`}
                           style={{
-                            filter:
-                              "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
+                            filter: isDarkMode ? "invert(0%)" : "invert(100%)",
                           }}
                         />
                       </div>
@@ -554,13 +629,19 @@ export default function Leaves() {
                     >
                       <button
                         onClick={() => setshowConformationPopup(true)}
-                        className={`font-poppins-bold bg-[#FE4040] p-1 rounded-md px-5 py-2`}
+                        className={`font-poppins-bold p-1 rounded-md px-5 py-2 ${
+                          isDarkMode ? "bg-backgroundRed text-textPrimary" : ""
+                        }`}
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => handleSave(currentReq?._id, "accept")}
-                        className={`font-poppins-bold bg-[#4CBC9A] p-1 rounded-md px-5 py-2`}
+                        className={`font-poppins-bold p-1 rounded-md px-5 py-2 ${
+                          isDarkMode
+                            ? "bg-backgroundGreen text-textPrimary"
+                            : ""
+                        }`}
                       >
                         Approve
                       </button>
@@ -571,8 +652,15 @@ export default function Leaves() {
                         className={`text-sm text-center font-poppins-regular py-1 px-3 rounded-md border-2 ${
                           currentReq?.status === "accept" ||
                           currentReq?.status === "complete"
-                            ? "border-[#4CBC9A] text-[#4CBC9A] bg-[#4CBC9A26]"
-                            : "border-[#FE4040] text-[#FE4040] bg-[#FE404026]"
+                            ? isDarkMode
+                              ? "bg-backgroundGreen text-textPrimary"
+                              : "border-borderGreen text-textGreen bg-backgroundDarkGreen"
+                            : currentReq?.status === "reject" ||
+                              currentReq?.status === "expired"
+                            ? isDarkMode
+                              ? " bg-backgroundRed text-textPrimary"
+                              : "border-borderRed text-textRed bg-backgroundDarkRed2"
+                            : ""
                         }`}
                       >
                         {requestsStatus(currentReq?.status) || "NA"}
@@ -587,16 +675,13 @@ export default function Leaves() {
               >
                 <div className={`text-[#9391a5] text-base leading-5`}>
                   {t("titles.showing")}
-                  <span className={`text-[#152259]`}>
+                  <span className={`text-textBlue`}>
                     {" "}
                     {pageNo * limit - (limit - 1)} -{" "}
                     {Math.min(totalRequestCount, pageNo * limit)}{" "}
                   </span>
                   {t("titles.from")}
-                  <span className={`text-[#152259]`}>
-                    {" "}
-                    {totalRequestCount}{" "}
-                  </span>
+                  <span className={`text-textBlue`}> {totalRequestCount} </span>
                   {t("titles.data")}
                 </div>
 
@@ -609,7 +694,7 @@ export default function Leaves() {
                       border: "1px solid #d1d5db",
                       borderRadius: "6px",
                       minWidth: "80px",
-                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                      backgroundColor: isDarkMode ? "" : "white",
                       "& .MuiOutlinedInput-notchedOutline": {
                         border: "none",
                       },

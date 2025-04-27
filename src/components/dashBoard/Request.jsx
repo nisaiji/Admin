@@ -13,7 +13,10 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import Breadcrumbs from "../../components/BreadCrumbs";
+import noDataFound from "../../assets/images/darkmode/noDataFound.png";
 import { useSelector } from "react-redux";
+import moment from "moment";
+import CONSTANT from "../../utils/constants";
 
 /**
  * `Requests` component displays a list of requests made by users.
@@ -24,7 +27,7 @@ export default function Requests() {
   const { t } = useTranslation();
   const currentDate = new Date();
   const [requests, setRequests] = useState([]);
-  const [selectedTab, setSelectedTab] = useState("all");
+  const [selectedTab, setSelectedTab] = useState("pending");
   const [loading, setLoading] = useState(false);
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -34,6 +37,8 @@ export default function Requests() {
   // Compute the status query based on the selected tab.
   const getStatusQuery = (tab) => {
     switch (tab) {
+      case "pending":
+        return "pending";
       case "approved":
         return "accept,complete";
       case "rejected":
@@ -77,6 +82,8 @@ export default function Requests() {
   const requestsStatus = (status) => {
     //accept,reject,complete,pending,notSet,expired
     switch (status) {
+      case "pending":
+        return "Pending";
       case "accept":
         return "Approved";
       case "reject":
@@ -143,9 +150,10 @@ export default function Requests() {
    * Filters the requests based on the selected tab (e.g., "approved", "rejected", etc.).
    * @returns {Array} - The filtered list of requests
    */
+
   const filteredRequests =
-    selectedTab === "all"
-      ? requests
+    selectedTab === "pending"
+      ? requests.filter((req) => req.status === "pending")
       : selectedTab === "approved"
       ? requests.filter(
           (req) => req.status === "accept" || req.status === "complete"
@@ -173,7 +181,7 @@ export default function Requests() {
       >
         <div
           className={`${
-            isDarkMode ? "bg-background1" : "bg-whiteBackground"
+            isDarkMode ? "bg-gradient-to-r from-fromColor1 to-toColor1" : "bg-whiteBackground"
           } min-h-[calc(100vh-100px)] rounded-[16px]`}
         >
           <Toaster position="top-center" reverseOrder={false} />
@@ -190,7 +198,7 @@ export default function Requests() {
             </div>
             {/* tabs */}
             <div className={`flex space-x-4 mt-4`}>
-              {["all", "approved", "rejected"].map((tab) => (
+              {["pending", "approved", "rejected", "all"].map((tab) => (
                 <div
                   key={tab}
                   className={`cursor-pointer text-xs font-poppins font-semibold ${
@@ -208,13 +216,18 @@ export default function Requests() {
             </div>
             <hr className={`border-[#9391A5]/25 px-10 -translate-y-[1px]`} />
             {filteredRequests.length === 0 ? (
-              <div className={`w-full h-48 flex justify-center items-center`}>
+              <div className={`flex flex-col justify-center items-center`}>
+                <img
+                  src={noDataFound}
+                  alt="noleave"
+                  className={`w-[300px] h-[200px] object-contain`}
+                />
                 <p
-                  className={`${
+                  className={`text-[28px] ${
                     isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  } text-3xl font-poppins-bold`}
+                  } font-poppins-bold mt-5`}
                 >
-                  No request right now
+                  {t("labels.noleave")}
                 </p>
               </div>
             ) : (
@@ -225,7 +238,7 @@ export default function Requests() {
                   {/* table heading */}
                   <thead
                     className={`${
-                      isDarkMode ? "bg-background2" : "bg-whiteBackground"
+                      isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
                     } text-textBlue text-base font-medium sticky top-0 z-10`}
                   >
                     <tr className={`text-base text-textBlue`}>
@@ -233,6 +246,7 @@ export default function Requests() {
                         "classTeacher",
                         "reasonToReset",
                         "class",
+                        "dateOfRequest",
                         "resetBefore",
                         "action",
                         "otp",
@@ -254,7 +268,7 @@ export default function Requests() {
                         className={`${
                           i % 2 === 0
                             ? isDarkMode
-                              ? "bg-background3"
+                              ? "bg-transparent"
                               : "bg-whiteBackground3"
                             : ""
                         } border-t`}
@@ -279,6 +293,13 @@ export default function Requests() {
                           } text-sm font-medium text-center border border-[#2b2e4a]/25`}
                         >
                           {req?.teacher?.class}-{req?.teacher?.section}
+                        </td>
+                        <td
+                          className={`py-2 px-4 ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-sm font-medium text-center border border-[#2b2e4a]/25`}
+                        >
+                          {moment(req?.createdAt).format("DD/MM/YYYY")}
                         </td>
                         <td
                           className={`py-2 px-4 ${
@@ -341,13 +362,13 @@ export default function Requests() {
                 >
                   <div className={`text-[#9391a5] text-base leading-5`}>
                     {t("titles.showing")}
-                    <span className={`text-[#152259]`}>
+                    <span className={`text-textBlue`}>
                       {" "}
                       {pageNo * limit - (limit - 1)} -{" "}
                       {Math.min(totalRequestCount, pageNo * limit)}{" "}
                     </span>
                     {t("titles.from")}
-                    <span className={`text-[#152259]`}>
+                    <span className={`text-textBlue`}>
                       {" "}
                       {totalRequestCount}{" "}
                     </span>
@@ -363,7 +384,7 @@ export default function Requests() {
                         border: "1px solid #d1d5db",
                         borderRadius: "6px",
                         minWidth: "80px",
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        backgroundColor: isDarkMode ? "" : "white",
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
                         },

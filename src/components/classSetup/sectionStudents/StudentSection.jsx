@@ -132,6 +132,8 @@ export default function StudentSection() {
       setLoading(false);
     }
   };
+  // console.log(students);
+  
 
   // check same entry in registration
   const checkIsStudentExistForSameParent = () => {
@@ -406,7 +408,9 @@ export default function StudentSection() {
       )}
       <div
         className={`${
-          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
         } p-4 rounded-[16px]`}
       >
         <Toaster position="top-center" reverseOrder={false} />
@@ -476,8 +480,10 @@ export default function StudentSection() {
                   onChange={handleSearchInputChange}
                   ref={searchInputRef}
                   className={`bg-transparent ${
-                    isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  } border border-gray-300
+                    isDarkMode
+                      ? "text-textPrimary border-borderLine"
+                      : "text-textBlack border-borderWhite2"
+                  } border
                     px-14 py-2 rounded-xl focus:outline-[#05022B]/10 w-full`}
                   onFocus={() => searchInputRef.current.focus()}
                 />
@@ -531,48 +537,48 @@ export default function StudentSection() {
           >
             <table
               className={`${
-                isDarkMode ? "bg-background1" : "bg-whiteBackground"
+                isDarkMode ? "" : "bg-whiteBackground"
               } min-w-full border-separate border-spacing-0`}
             >
               <thead
                 className={`${
-                  isDarkMode ? "bg-background1" : "bg-whiteBackground"
+                  isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
                 } text-textBlue text-base font-medium sticky top-0 z-10`}
               >
                 {/* table headings */}
                 <tr>
                   <th
-                    className={`px-2 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                    className={`px-2 py-2 border border-borderLine2 bg-clip-padding`}
                   >
                     {t("labels.sNo")}
                   </th>
                   <th
-                    className={` py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                    className={` py-2 border border-borderLine2 bg-clip-padding`}
                   >
                     {t("labels.firstName")}
                   </th>
                   <th
-                    className={` py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                    className={` py-2 border border-borderLine2 bg-clip-padding`}
                   >
                     {t("labels.lastName")}
                   </th>
                   <th
-                    className={` w-36 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                    className={` w-36 py-2 border border-borderLine2 bg-clip-padding`}
                   >
                     {t("labels.gender")}
                   </th>
                   <th
-                    className={` py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                    className={` py-2 border border-borderLine2 bg-clip-padding`}
                   >
                     {t("labels.guardianName")}
                   </th>
                   <th
-                    className={` py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                    className={` py-2 border border-borderLine2 bg-clip-padding`}
                   >
                     {t("labels.phone")}
                   </th>
                   <th
-                    className={`w-36 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                    className={`w-36 py-2 border border-borderLine2 bg-clip-padding`}
                   >
                     {t("labels.action")}
                   </th>
@@ -583,12 +589,18 @@ export default function StudentSection() {
                 <tr>
                   <td
                     className={`px-2 py-0 text-center ${
-                      isDarkMode ? "text-textPrimary" : "text-textBlack"
-                    } font-poppins font-medium border border-[#c1c0ca]`}
+                      isDarkMode
+                        ? "text-textPrimary border-borderLine"
+                        : "text-textBlack border-borderGray2"
+                    } font-poppins font-medium border`}
                   >
                     -
                   </td>
-                  <td className={`py-1 px-2 border border-[#c1c0ca]`}>
+                  <td
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
+                  >
                     <input
                       type="text"
                       value={newStudent.firstname}
@@ -603,7 +615,11 @@ export default function StudentSection() {
                       ref={newStudentFirstNameRef}
                     />
                   </td>
-                  <td className={`py-1 px-2 border border-[#c1c0ca]`}>
+                  <td
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
+                  >
                     <input
                       type="text"
                       value={newStudent.lastname}
@@ -617,7 +633,11 @@ export default function StudentSection() {
                       } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                     />
                   </td>
-                  <td className={`py-1 px-1 border border-[#c1c0ca]`}>
+                  <td
+                    className={`py-1 px-1 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
+                  >
                     <select
                       data-testid="gender"
                       value={newStudent.gender}
@@ -658,7 +678,11 @@ export default function StudentSection() {
                       ))}
                     </select>
                   </td>
-                  <td className={`py-1 px-2 border border-[#c1c0ca]`}>
+                  <td
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
+                  >
                     <input
                       type="text"
                       value={newStudent.parentName}
@@ -672,7 +696,11 @@ export default function StudentSection() {
                       } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                     />
                   </td>
-                  <td className={`py-1 px-2 border border-[#c1c0ca]`}>
+                  <td
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
+                  >
                     <input
                       type="text"
                       value={newStudent.phone}
@@ -687,7 +715,11 @@ export default function StudentSection() {
                     />
                   </td>
                   {/* add student button */}
-                  <td className={`px-2 py-2 border border-[#c1c0ca]`}>
+                  <td
+                    className={`px-2 py-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
+                  >
                     <button
                       disabled={loading}
                       onClick={() => registerStudent()}
@@ -701,13 +733,19 @@ export default function StudentSection() {
                 {filteredStudents.map((student) => (
                   <tr key={student.SNo}>
                     <td
-                      className={`px-2 py-2 font-medium text-center border text-sm border-[#c1c0ca] ${
-                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      className={`px-2 py-2 font-medium text-center border text-sm ${
+                        isDarkMode
+                          ? "text-textPrimary border-borderLine2"
+                          : "text-textBlack border-borderGray2"
                       }`}
                     >
                       {student.SNo}
                     </td>
-                    <td className={`px-2 py-1 border text-sm border-[#c1c0ca]`}>
+                    <td
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
+                    >
                       <input
                         data-testid="firstname"
                         type="text"
@@ -730,7 +768,11 @@ export default function StudentSection() {
                         }
                       />
                     </td>
-                    <td className={`px-2 py-1 border text-sm border-[#c1c0ca]`}>
+                    <td
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
+                    >
                       <input
                         type="text"
                         value={student.lastname}
@@ -749,7 +791,11 @@ export default function StudentSection() {
                         disabled={editSNo !== student.SNo}
                       />
                     </td>
-                    <td className={`px-2 py-1 border text-sm border-[#c1c0ca]`}>
+                    <td
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
+                    >
                       <select
                         value={student.gender}
                         onChange={(e) =>
@@ -779,7 +825,11 @@ export default function StudentSection() {
                         ))}
                       </select>
                     </td>
-                    <td className={`px-2 py-1 border text-sm border-[#c1c0ca]`}>
+                    <td
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
+                    >
                       <input
                         type="text"
                         value={student.parentName}
@@ -798,7 +848,11 @@ export default function StudentSection() {
                         disabled={editSNo !== student.SNo}
                       />
                     </td>
-                    <td className={`px-2 py-1 border text-sm border-[#c1c0ca]`}>
+                    <td
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
+                    >
                       <input
                         type="text"
                         value={student.phone}
@@ -821,7 +875,9 @@ export default function StudentSection() {
                     <td
                       className={`${
                         isDarkMode ? "text-white" : ""
-                      } pl-3 pr-5 py-2 border border-gray-400`}
+                      } pl-3 pr-5 py-2 border ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
                     >
                       {editSNo === student.SNo ? (
                         <button

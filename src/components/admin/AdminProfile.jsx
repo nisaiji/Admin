@@ -277,7 +277,9 @@ export default function AdminProfile() {
       {/* Account Setting */}
       <div
         className={`flex flex-col p-10 w-full rounded-2xl ${
-          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
         } max-md:px-5 max-md:m-10 max-md:max-w-full`}
       >
         <Toaster position="top-center" reverseOrder={false} />
@@ -312,7 +314,7 @@ export default function AdminProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.schoolName && formik.touched.schoolName
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -343,7 +345,7 @@ export default function AdminProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.email && formik.touched.email
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -377,7 +379,7 @@ export default function AdminProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.principal && formik.touched.principal
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -408,7 +410,7 @@ export default function AdminProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.username && formik.touched.username
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -442,7 +444,7 @@ export default function AdminProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.affiliationNo && formik.touched.affiliationNo
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -472,7 +474,7 @@ export default function AdminProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.schoolNumber && formik.touched.schoolNumber
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -506,7 +508,7 @@ export default function AdminProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.address && formik.touched.address
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -532,8 +534,7 @@ export default function AdminProfile() {
                 variant="outlined"
                 error={formik.errors.schoolBoard && formik.touched.schoolBoard}
                 sx={{
-                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                  borderRadius: "0.5rem",
+                  backgroundColor: isDarkMode ? "" : "white",
                   "& .MuiOutlinedInput-notchedOutline": {
                     border: "none",
                   },
@@ -559,17 +560,16 @@ export default function AdminProfile() {
                     mt: 0.5,
                     width: "100%",
                     fontSize: "1rem",
-                    borderRadius: "0.5rem",
                     color: formik.values.schoolBoard
                       ? isDarkMode
                         ? "#E3E8F3"
                         : "black"
                       : "gray",
-                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    backgroundColor: isDarkMode ? "" : "white",
                     border:
                       formik.errors.schoolBoard && formik.touched.schoolBoard
                         ? "1px solid red"
-                        : "1px solid gray",
+                        : "1px solid #2b2e4a40",
                     "& .MuiSelect-select": {
                       fontSize: "1rem",
                       lineHeight: "1.5rem",
@@ -639,8 +639,7 @@ export default function AdminProfile() {
               error={formik.errors.country && formik.touched.country}
               sx={{
                 width: { xs: "100%", md: "33%" },
-                backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                borderRadius: "0.5rem",
+                backgroundColor: isDarkMode ? "" : "white",
                 "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                 "& .MuiInputBase-root, & .MuiSvgIcon-root": {
                   color: isDarkMode ? "#E3E8F3" : "black",
@@ -668,9 +667,8 @@ export default function AdminProfile() {
                   border:
                     formik.errors.country && formik.touched.country
                       ? "1px solid red"
-                      : "1px solid gray",
-                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                  borderRadius: "0.5rem",
+                      : "1px solid #2b2e4a40",
+                  backgroundColor: isDarkMode ? "" : "white",
                   color: isDarkMode ? "#E3E8F3" : "black",
                   "& .MuiSelect-select": {
                     fontSize: "1rem",
@@ -721,8 +719,7 @@ export default function AdminProfile() {
               error={formik.errors.state && formik.touched.state}
               sx={{
                 width: { xs: "100%", md: "33%" },
-                backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                borderRadius: "0.5rem",
+                backgroundColor: isDarkMode ? "" : "white",
                 "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                 "& .MuiInputBase-root, & .MuiSvgIcon-root": {
                   color: isDarkMode ? "#E3E8F3" : "black",
@@ -750,9 +747,8 @@ export default function AdminProfile() {
                   border:
                     formik.errors.state && formik.touched.state
                       ? "1px solid red"
-                      : "1px solid gray",
-                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                  borderRadius: "0.5rem",
+                      : "1px solid #2b2e4a40",
+                  backgroundColor: isDarkMode ? "" : "white",
                   color: isDarkMode ? "#E3E8F3" : "black",
                   "& .MuiSelect-select": {
                     fontSize: "1rem",
@@ -803,8 +799,7 @@ export default function AdminProfile() {
               error={formik.errors.district && formik.touched.district}
               sx={{
                 width: { xs: "100%", md: "33%" },
-                backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                borderRadius: "0.5rem",
+                backgroundColor: isDarkMode ? "" : "white",
                 "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                 "& .MuiInputBase-root, & .MuiSvgIcon-root": {
                   color: isDarkMode ? "#E3E8F3" : "black",
@@ -832,9 +827,8 @@ export default function AdminProfile() {
                   border:
                     formik.errors.district && formik.touched.district
                       ? "1px solid red"
-                      : "1px solid gray",
-                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                  borderRadius: "0.5rem",
+                      : "1px solid #2b2e4a40",
+                  backgroundColor: isDarkMode ? "" : "white",
                   color: isDarkMode ? "#E3E8F3" : "black",
                   "& .MuiSelect-select": {
                     fontSize: "1rem",
@@ -901,7 +895,7 @@ export default function AdminProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.city && formik.touched.city
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -933,7 +927,7 @@ export default function AdminProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.pincode && formik.touched.pincode
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -962,7 +956,9 @@ export default function AdminProfile() {
       {/* Social Profile */}
       <div
         className={`flex flex-col p-10 mx-10 mt-6 rounded-2xl w-full ${
-          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
         } max-w-[1320px] max-md:px-5`}
       >
         <div
@@ -986,7 +982,7 @@ export default function AdminProfile() {
             className={`flex gap-5 px-5 py-2 mt-1 bg-transparent border ${
               formik.errors.phone && formik.touched.phone
                 ? "border-borderRed"
-                : "border-borderGray"
+                : "border-borderLine2"
             }`}
           >
             <div
@@ -1031,7 +1027,7 @@ export default function AdminProfile() {
             {t("adminProfile.personalWebsite")}
           </div>
           <div
-            className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+            className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderLine2`}
           >
             <img
               loading="lazy"
@@ -1067,7 +1063,7 @@ export default function AdminProfile() {
               {t("adminProfile.facebook")}
             </div>
             <div
-              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderLine2`}
             >
               <img
                 loading="lazy"
@@ -1102,7 +1098,7 @@ export default function AdminProfile() {
               {t("adminProfile.instagram")}
             </div>
             <div
-              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderLine2`}
             >
               <img
                 loading="lazy"
@@ -1137,7 +1133,7 @@ export default function AdminProfile() {
               {t("adminProfile.linkedin")}
             </div>
             <div
-              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderLine2`}
             >
               <img
                 loading="lazy"
@@ -1174,7 +1170,7 @@ export default function AdminProfile() {
               {t("adminProfile.twitter")}
             </div>
             <div
-              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderLine2`}
             >
               <img
                 loading="lazy"
@@ -1209,7 +1205,7 @@ export default function AdminProfile() {
               {t("adminProfile.whatsapp")}
             </div>
             <div
-              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderLine2`}
             >
               <img
                 loading="lazy"
@@ -1244,7 +1240,7 @@ export default function AdminProfile() {
               {t("adminProfile.youtube")}
             </div>
             <div
-              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderGray`}
+              className={`flex gap-3 px-5 py-2 mt-1 w-full text-base leading-6 text-gray-400 bg-transparent border border-borderLine2`}
             >
               <img
                 loading="lazy"

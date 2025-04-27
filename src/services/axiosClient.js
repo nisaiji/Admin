@@ -1,9 +1,9 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-// const baseURL = "http://localhost:4000/";
+const baseURL = "http://localhost:4000/";
 // const baseURL = "https://api.sharedri.com";
-const baseURL = "https://development-api.nisaiji.com";
+// const baseURL = "https://development-api.nisaiji.com";
 
 export const axiosClient = axios.create({ baseURL });
 

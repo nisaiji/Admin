@@ -78,7 +78,7 @@ const Navbar = () => {
     <div
       className={`${
         isDarkMode ? "bg-background2" : "bg-whiteBackground"
-      } border-b border-gray-100 px-10 py-4 h-[72px] sticky top-0 z-40 shadow-sm`}
+      } px-10 py-4 h-[72px] sticky top-0 z-40 shadow-[0px_4px_10px_rgba(102,_116,_204,_0.15)] `}
     >
       <div className={`flex items-center justify-between`}>
         <div className={`flex items-center ml-3`}>

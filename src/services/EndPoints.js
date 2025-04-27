@@ -44,9 +44,9 @@ const EndPoints = {
     UPDATE_ATTENDANCE: "attendance/admin/bulk-mark",
 
     // ADMIN SECTION STUDENTS
-    GET_SECTION_STUDENTS: "student/admin",
-    REGISTER_SECTION_STUDENT: "student/admin",
-    UPDATE_SECTION_STUDENT: "student/admin",
+    GET_SECTION_STUDENTS: "v2/student/admin-get",
+    REGISTER_SECTION_STUDENT: "v2/student/admin",//v2
+    UPDATE_SECTION_STUDENT: "v2/student/admin",
     DELETE_SECTION_STUDENT: "student/admin",
 
     // ADMIN EVENT SECTION
@@ -80,9 +80,10 @@ const EndPoints = {
     DELETE_STUDENT: "dashboard/parent-count",
 
     // TEACHER SECTION STUDENTS
-    GET_SECTION_STUDENTS: "student/teacher",
-    REGISTER_SECTION_STUDENT: "student/teacher",
-    UPDATE_SECTION_STUDENT: "student/teacher",
+    GET_SECTION_STUDENTS: "v2/student/teacher-get",
+    // GET_SECTION_STUDENTS: "student/teacher",
+    REGISTER_SECTION_STUDENT: "v2/student/teacher",
+    UPDATE_SECTION_STUDENT: "v2/student/teacher",
     DELETE_SECTION_STUDENT: "student/teacher",
     GET_ATTENDANCE: "attendance/teacher",
     UPDATE_ATTENDANCE: "attendance/teacher/bulk-mark",

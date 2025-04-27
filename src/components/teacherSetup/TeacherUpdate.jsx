@@ -63,7 +63,7 @@ const TeacherUpdate = () => {
       university: teacher?.university || "",
       gender: teacher?.gender || "",
       bloodGroup: teacher?.bloodGroup || "",
-      dob: teacher?.dob || "",
+      dob: teacher?.dob ? moment(teacher?.dob).format("DD/MM/YYYY") : "",
       phone: teacher?.phone || "",
       degree: teacher?.degree || "",
     },
@@ -183,7 +183,7 @@ const TeacherUpdate = () => {
       <Toaster position="top-center" reverseOrder={false} />
       <div
         className={`${
-          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          isDarkMode ? "bg-gradient-to-r from-fromColor1 to-toColor1" : "bg-whiteBackground"
         } rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border`}
       >
         <Breadcrumbs />
@@ -222,14 +222,14 @@ const TeacherUpdate = () => {
                           fullWidth
                           variant="outlined"
                           sx={{
-                            border: "2px solid gray",
+                            border: "1px solid #2b2e4a80",
                             borderRadius: "8px",
-                            backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                            backgroundColor: isDarkMode ? "" : "white",
                             "& .MuiOutlinedInput-notchedOutline": {
                               border: "none",
                             },
                             "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: isDarkMode ? "#E3E8F3" : "black",
+                              borderColor: isDarkMode ? "#2b2e4a80" : "black",
                             },
                             "& .MuiInputBase-root": {
                               color: isDarkMode ? "#E3E8F3" : "black",
@@ -248,10 +248,10 @@ const TeacherUpdate = () => {
                             onChange={formik.handleChange}
                             displayEmpty
                             sx={{
-                              border: "2px solid rgba(5, 2, 43, 0.1)",
+                              border: "1px solid #2b2e4a80",
                               borderRadius: "0.5rem",
                               height: "40px",
-                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                              backgroundColor: isDarkMode ? "" : "white",
                               color:
                                 formik.values[name] === ""
                                   ? "gray"
@@ -302,6 +302,7 @@ const TeacherUpdate = () => {
                         <LocalizationProvider dateAdapter={AdapterMoment}>
                           <DatePicker
                             views={["day", "month", "year"]}
+                            format="DD/MM/YYYY"
                             value={
                               formik.values.dob
                                 ? moment(formik.values.dob, "DD/MM/YYYY")
@@ -320,16 +321,16 @@ const TeacherUpdate = () => {
                             renderInput={(params) => (
                               <TextField
                                 {...params}
-                                placeholder={t("calendar.gotoDatePlaceholder")}
+                                placeholder={t("placeholders.date")}
                                 variant="outlined"
                               />
                             )}
                             sx={{
                               width: "100%",
                               height: "40px",
-                              border: "2px solid gray",
+                              border: "2px solid #2b2e4a80",
                               borderRadius: "8px",
-                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                              backgroundColor: isDarkMode ? "" : "white",
                               color: isDarkMode ? "#E3E8F3" : "black",
                               "& .MuiOutlinedInput-root": {
                                 padding: 1,
@@ -345,6 +346,9 @@ const TeacherUpdate = () => {
                               },
                               "& .MuiSvgIcon-root": {
                                 color: isDarkMode ? "#E3E8F3" : "black",
+                              },
+                              "& .MuiOutlinedInput-notchedOutline": {
+                                border: "none",
                               },
                             }}
                           />
@@ -381,7 +385,7 @@ const TeacherUpdate = () => {
                               ? 15
                               : ""
                           }
-                          className={`border-2 border-borderGray bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
+                          className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           }`}
                         />

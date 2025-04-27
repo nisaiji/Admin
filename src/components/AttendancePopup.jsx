@@ -509,12 +509,10 @@ export default function AttendancePopup({
           const cellValue = data.cell.raw; // Get cell value
           if (cellValue === "P") {
             data.cell.styles.textColor = "#0F4189"; // Blue for "P"
-          } else if (
-            cellValue === "A" ||
-            cellValue === "H" ||
-            cellValue === "S"
-          ) {
-            data.cell.styles.textColor = "#D91111"; // Red for "A"
+          } else if (cellValue === "A") {
+            data.cell.styles.textColor = "#FE4040"; // Red for "A"
+          } else if (cellValue === "S" || cellValue === "H") {
+            data.cell.styles.textColor = "#FF9933";
           }
         }
       },
@@ -604,7 +602,9 @@ export default function AttendancePopup({
         {/* Table */}
         <div
           className={`overflow-x-auto p-4 h-[550px] overflow-y-auto ${
-            isDarkMode ? "bg-background1" : "bg-whiteBackground"
+            isDarkMode
+              ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+              : "bg-whiteBackground"
           }`}
         >
           <div
@@ -620,28 +620,34 @@ export default function AttendancePopup({
             {currentDate.toLocaleString("default", { month: "long" })}{" "}
             {currentDate.getFullYear()}
           </div>
-          <table className={`w-full text-center border border-borderGray`}>
-            <thead className={`sticky -top-4 bg-white z-10`}>
+          <table className={`w-full text-center border border-borderLine`}>
+            <thead
+              className={`sticky -top-4 z-10 ${
+                isDarkMode
+                  ? "bg-backgroundTableCell text-textPrimary"
+                  : "bg-whiteBackground text-textBlack"
+              }`}
+            >
               <tr>
                 <th
-                  className={`border border-borderGray w-[30px] p-1 font-poppins-bold`}
+                  className={`border border-borderLine w-[30px] p-1 font-poppins-bold`}
                 >
                   S.No
                 </th>
                 <th
-                  className={`border border-borderGray p-1 w-[150px] font-poppins-bold`}
+                  className={`border border-borderLine p-1 w-[150px] font-poppins-bold`}
                 >
                   Student Name
                 </th>
                 {Array.from({ length: totalDays }, (_, i) => (
-                  <th key={i} className={`relative border border-borderGray`}>
+                  <th key={i} className={`relative border border-borderLine`}>
                     <div className={`flex flex-col items-center`}>
                       <span>{i + 1}</span>
                     </div>
                   </th>
                 ))}
                 <th
-                  className={`border border-borderGray p-1 w-[50px] font-poppins-bold`}
+                  className={`border border-borderLine p-1 w-[50px] font-poppins-bold`}
                 >
                   Total Attendance
                 </th>
@@ -658,14 +664,14 @@ export default function AttendancePopup({
                 return (
                   <tr key={index}>
                     <td
-                      className={`border border-borderGray p-1  ${
+                      className={`border border-borderLine p-1  ${
                         isDarkMode ? "text-textPrimary" : "text-textBlack"
                       }`}
                     >
                       {index + 1}
                     </td>
                     <td
-                      className={`border border-borderGray p-1  ${
+                      className={`border border-borderLine p-1  ${
                         isDarkMode ? "text-textPrimary" : "text-textBlack"
                       }`}
                     >
@@ -680,7 +686,7 @@ export default function AttendancePopup({
                       return (
                         <td
                           key={idx}
-                          className={`border border-borderGray  ${
+                          className={`border border-borderLine  ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           }`}
                         >
@@ -694,7 +700,11 @@ export default function AttendancePopup({
                               onChange={(e) => {
                                 handleInputChange(index, idx, e.target.value);
                               }}
-                              className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring focus:ring-black ${
+                              className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring ${
+                                isDarkMode
+                                  ? "focus:ring-gray"
+                                  : "focus:ring-black"
+                              } ${
                                 value?.attendance === "P"
                                   ? "text-textBlue"
                                   : value?.attendance === "A"
@@ -719,11 +729,11 @@ export default function AttendancePopup({
                               className={`w-full text-center focus:outline-none bg-transparent uppercase
                               ${
                                 attendance === "P"
-                                  ? "text-[#0F4189]"
-                                  : attendance === "A" ||
-                                    attendance === "S" ||
-                                    attendance === "H"
-                                  ? "text-textDarkRed"
+                                  ? "text-textBlue"
+                                  : attendance === "A"
+                                  ? "text-textRed"
+                                  : attendance === "S" || attendance === "H"
+                                  ? "text-textHoliday"
                                   : "text-textBlack"
                               }
                               `}
@@ -736,7 +746,7 @@ export default function AttendancePopup({
                     })}
                     {/* Horizontal totals */}
                     <td
-                      className={`border border-borderGray p-1 font-poppins-regular  ${
+                      className={`border border-borderLine p-1 font-poppins-regular  ${
                         isDarkMode ? "text-textPrimary" : "text-textBlack"
                       }`}
                     >
@@ -749,7 +759,7 @@ export default function AttendancePopup({
               <tr>
                 <td
                   colSpan="2"
-                  className={`border border-borderGray font-poppins-regular p-1  ${
+                  className={`border border-borderLine font-poppins-regular p-1  ${
                     isDarkMode ? "text-textPrimary" : "text-textBlack"
                   }`}
                 >
@@ -768,7 +778,7 @@ export default function AttendancePopup({
                   return (
                     <td
                       key={dayIndex}
-                      className={`border border-borderGray font-poppins-regular p-1  ${
+                      className={`border border-borderLine font-poppins-regular p-1  ${
                         isDarkMode ? "text-textPrimary" : "text-textBlack"
                       }`}
                     >
@@ -776,10 +786,7 @@ export default function AttendancePopup({
                     </td>
                   );
                 })}
-                <td
-                  colSpan="2"
-                  className={`border border-borderGray`}
-                ></td>
+                <td colSpan="2" className={`border border-borderLine`}></td>
               </tr>
             </tbody>
           </table>

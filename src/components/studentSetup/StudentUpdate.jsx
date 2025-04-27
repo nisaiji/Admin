@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useLocation, useNavigate } from "react-router-dom";
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
-import { format, parse } from "date-fns";
 import toast, { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
 import Spinner from "../Spinner";
@@ -86,7 +83,7 @@ export default function StudentUpdate() {
       lastname: student?.lastname || "",
       gender: student?.gender || "",
       bloodGroup: student?.bloodGroup || "",
-      dob: student?.dob || "",
+      dob: student?.dob ? moment(student?.dob).format("DD/MM/YYYY") : "",
       address: student?.address || "",
       parentName: student?.parentDetails?.fullname || "",
       parentGender: student?.parentDetails?.gender || "",
@@ -102,20 +99,25 @@ export default function StudentUpdate() {
     onSubmit: async (values) => {
       try {
         setLoading(true);
-
+        // Capitalize and clean fields
+        const cleanedValues = {
+          ...values,
+          firstname: capitalize(values.firstname),
+          lastname: capitalize(values.lastname),
+          address: capitalize(values.address),
+          parentName: capitalize(values.parentName),
+          parentEmail: values.parentEmail?.toLowerCase(),
+          parentQualification: capitalize(values.parentQualification),
+          parentOccupation: capitalize(values.parentOccupation),
+          parentAddress: capitalize(values.parentAddress),
+        };
+        // Remove keys with empty string values
+        const filteredValues = Object.fromEntries(
+          Object.entries(cleanedValues).filter(([_, value]) => value !== "")
+        );
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.STUDENT_UPDATE}/${student._id}`,
-          {
-            ...values,
-            firstname: capitalize(values.firstname),
-            lastname: capitalize(values.lastname),
-            address: capitalize(values.address),
-            parentName: capitalize(values.parentName),
-            parentEmail: values.parentEmail.toLowerCase(),
-            parentQualification: capitalize(values.parentQualification),
-            parentOccupation: capitalize(values.parentOccupation),
-            parentAddress: capitalize(values.parentAddress),
-          }
+          filteredValues
         );
 
         if (response?.statusCode === 200) {
@@ -160,7 +162,7 @@ export default function StudentUpdate() {
       label: t("labels.dob"),
       name: "dob",
       type: "date",
-      placeholder: t("placeholders.dob"),
+      placeholder: t("placeholders.date"),
     },
     {
       label: t("labels.address"),
@@ -247,9 +249,9 @@ export default function StudentUpdate() {
                 fullWidth
                 variant="outlined"
                 sx={{
-                  border: "2px solid gray",
+                  border: "1px solid #2b2e4a80",
                   borderRadius: "8px",
-                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  backgroundColor: isDarkMode ? "" : "white",
                   "& .MuiOutlinedInput-notchedOutline": {
                     border: "none",
                   },
@@ -273,10 +275,10 @@ export default function StudentUpdate() {
                   onChange={formik.handleChange}
                   displayEmpty
                   sx={{
-                    border: "2px solid rgba(5, 2, 43, 0.1)",
+                    border: "1px solid #2b2e4a80",
                     borderRadius: "0.5rem",
                     height: "40px",
-                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    backgroundColor: isDarkMode ? "" : "white",
                     color:
                       formik.values[name] === ""
                         ? "gray"
@@ -320,6 +322,7 @@ export default function StudentUpdate() {
               <LocalizationProvider dateAdapter={AdapterMoment}>
                 <DatePicker
                   views={["day", "month", "year"]}
+                  format="DD/MM/YYYY"
                   value={
                     formik.values.dob
                       ? moment(formik.values.dob, "DD/MM/YYYY")
@@ -338,16 +341,16 @@ export default function StudentUpdate() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      placeholder={t("calendar.gotoDatePlaceholder")}
+                      placeholder={t("placeholders.date")}
                       variant="outlined"
                     />
                   )}
                   sx={{
                     width: "100%",
                     height: "40px",
-                    border: "2px solid gray",
+                    border: "2px solid #2b2e4a80",
                     borderRadius: "8px",
-                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    backgroundColor: isDarkMode ? "" : "white",
                     color: isDarkMode ? "#E3E8F3" : "black",
                     "& .MuiOutlinedInput-root": {
                       padding: 1,
@@ -363,6 +366,9 @@ export default function StudentUpdate() {
                     },
                     "& .MuiSvgIcon-root": {
                       color: isDarkMode ? "#E3E8F3" : "black",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "none",
                     },
                   }}
                 />
@@ -386,7 +392,7 @@ export default function StudentUpdate() {
                 value={formik.values[name]}
                 className={` ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
-                } border-2 border-borderGray bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full`}
+                } border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full`}
               />
             )}
             {icon && (

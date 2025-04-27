@@ -167,7 +167,7 @@ function ClassSetup() {
           <div
             className={`${
               isDarkMode ? "bg-background1" : "bg-whiteBackground"
-            } w-full my-1 px-10 py-6 min-h-[500px] rounded-[16px]`}
+            } w-full my-1 px-10 py-6 min-h-[calc(100vh-100px)] rounded-[16px]`}
           >
             <Breadcrumbs />
             <h3

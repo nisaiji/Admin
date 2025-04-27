@@ -85,7 +85,9 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
       <div className={`bg-transparent rounded-lg w-full`}>
         {/* Month Navigation */}
         <div
-          className={`month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]`}
+          className={`month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 ${
+            isDarkMode ? "border-borderLine" : "border-borderWhite3"
+          }`}
         >
           <img
             src={isDarkMode ? DownArrow : DownArroww}
@@ -107,11 +109,11 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
         </div>
         {/* Weekdays header */}
         <div className={`grid grid-cols-7 font-medium capitalize pt-4`}>
-          {CONSTANT.WEEKDAYS.map((day) => (
+          {CONSTANT.WEEKDAYS1.map((day) => (
             <div
               key={day}
               className={`text-center text-md ${
-                isDarkMode ? "text-textPrimary" : "text-textBlack"
+                isDarkMode ? "text-textBlue" : "text-textBlack"
               }`}
             >
               {day}
@@ -130,19 +132,19 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
       } else if (isSunday) {
         return `${
           isDarkMode
-            ? "bg-backgroundOrange"
+            ? "bg-backgroundOrange border-borderHoliday"
             : "bg-backgroundOrange2 border-borderOrange"
-        } text-textOrange2`;
+        } text-textHoliday`;
       } else if (isToday) {
         return `${
           isDarkMode
-            ? "text-textBlue bg-background border-borderBlue"
+            ? "text-textBlue bg-backgroundGrayDays border-borderBlue"
             : "text-textDarkBlue bg-whiteBackground2 border-borderDarkBlue"
         }`;
       } else {
         return `${
           isDarkMode
-            ? "text-textPrimary bg-background"
+            ? "text-textPrimary bg-backgroundGrayDays"
             : "text-textBlack bg-whiteBackground2 border-borderWhite3"
         }`;
       }

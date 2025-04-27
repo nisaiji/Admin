@@ -45,7 +45,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4 ${
-        isDarkMode ? "bg-whiteBackground3" : "bg-background"
+        isDarkMode ? "bg-backgroundTableCell" : "bg-background"
       }`}
     >
       <div
@@ -54,7 +54,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
         }`}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between border-b px-4 py-3`}>
+        <div className={`flex items-center justify-between border-b border-borderLine px-8 py-3`}>
           <h2
             className={`text-xl font-bold  ${
               isDarkMode ? "text-textPrimary" : "text-textBlack"
@@ -72,7 +72,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
         </div>
 
         {/* Content */}
-        <div className={`p-5 flex flex-col lg:flex-row gap-6`}>
+        <div className={`py-5 px-12 flex flex-col lg:flex-row gap-6`}>
           <div className={`flex-1`}>
             <section>
               <h3
@@ -86,17 +86,17 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
                 {personalDetails.map(([label, value], index) => (
                   <div
                     key={index}
-                    className={`flex justify-between border-b pb-1`}
+                    className={`flex justify-between border-b border-borderLine pb-1`}
                   >
                     <span
-                      className={`font-medium ${
+                      className={`font-medium text-sm ${
                         isDarkMode ? "text-textPrimary" : "text-textGray"
                       }`}
                     >
                       {label}
                     </span>
                     <span
-                      className={`${
+                      className={`text-sm ${
                         isDarkMode ? "text-textPrimary" : "text-textDarkGray"
                       }`}
                     >
@@ -119,17 +119,17 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
                 {educationDetails.map(([label, value], index) => (
                   <div
                     key={index}
-                    className={`flex justify-between border-b pb-1`}
+                    className={`flex justify-between border-b border-borderLine pb-1`}
                   >
                     <span
-                      className={`font-medium  ${
+                      className={`font-medium text-sm  ${
                         isDarkMode ? "text-textPrimary" : "text-textGray"
                       }`}
                     >
                       {label}
                     </span>
                     <span
-                      className={`${
+                      className={`text-sm ${
                         isDarkMode ? "text-textPrimary" : "text-textDarkGray"
                       }`}
                     >

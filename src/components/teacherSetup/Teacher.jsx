@@ -237,7 +237,9 @@ export default function Teacher() {
       >
         <div
           className={`${
-            isDarkMode ? "bg-background1" : "bg-whiteBackground"
+            isDarkMode
+              ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+              : "bg-whiteBackground"
           } p-4 rounded-[16px]`}
         >
           {/* Toast notifications */}
@@ -271,8 +273,10 @@ export default function Teacher() {
                     onChange={handleSearchInputChange}
                     ref={searchInputRef}
                     className={`bg-transparent ${
-                      isDarkMode ? "text-textPrimary" : "text-textBlack"
-                    } border border-gray-300
+                      isDarkMode
+                        ? "text-textPrimary border-borderLine"
+                        : "text-textBlack border-borderGray2"
+                    } border
                     px-14 py-2 rounded-xl focus:outline-[#05022B]/10 w-full`}
                     onFocus={() => searchInputRef.current.focus()}
                   />
@@ -299,43 +303,43 @@ export default function Teacher() {
             >
               <table
                 className={`${
-                  isDarkMode ? "bg-background1" : "bg-whiteBackground"
+                  isDarkMode ? "bg-transparent" : "bg-whiteBackground"
                 } min-w-full border-separate border-spacing-0`}
               >
                 <thead
                   className={`${
-                    isDarkMode ? "bg-background1" : "bg-whiteBackground"
+                    isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
                   } text-textBlue text-base font-medium sticky top-0 z-10`}
                 >
                   {/* Table headings */}
                   <tr>
                     <th
-                      className={`px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                      className={`px-4 py-2 border border-borderLine2 bg-clip-padding`}
                     >
                       {t("labels.sNo")}
                     </th>
                     <th
-                      className={`px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                      className={`px-4 py-2 border border-borderLine2 bg-clip-padding`}
                     >
                       {t("labels.firstName")}
                     </th>
                     <th
-                      className={`px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                      className={`px-4 py-2 border border-borderLine2 bg-clip-padding`}
                     >
                       {t("labels.lastName")}
                     </th>
                     <th
-                      className={`px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                      className={`px-4 py-2 border border-borderLine2 bg-clip-padding`}
                     >
                       {t("labels.phoneNumber")}
                     </th>
                     <th
-                      className={`px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                      className={`px-4 py-2 border border-borderLine2 bg-clip-padding`}
                     >
                       {t("labels.class")}
                     </th>
                     <th
-                      className={`px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                      className={`px-4 py-2 border border-borderLine2 bg-clip-padding`}
                     >
                       {t("labels.action")}
                     </th>
@@ -347,12 +351,12 @@ export default function Teacher() {
                     <td
                       className={`px-4 py-2 text-center ${
                         isDarkMode ? "text-textPrimary" : "text-textBlack"
-                      } font-medium border border-[#2b2e4a]/25`}
+                      } font-medium border border-borderLine2`}
                     >
                       -
                     </td>
                     {/* First Name */}
-                    <td className={`py-1 px-3 border border-[#2b2e4a]/25`}>
+                    <td className={`py-1 px-3 border border-borderLine2`}>
                       <input
                         data-testid="firstnameInput"
                         type="text"
@@ -370,7 +374,7 @@ export default function Teacher() {
                       />
                     </td>
                     {/* Last Name */}
-                    <td className={`py-1 px-3 border border-[#2b2e4a]/25`}>
+                    <td className={`py-1 px-3 border border-borderLine2`}>
                       <input
                         data-testid="lastnameInput"
                         type="text"
@@ -387,7 +391,7 @@ export default function Teacher() {
                       />
                     </td>
                     {/* Phone */}
-                    <td className={`py-1 px-3 border border-[#2b2e4a]/25`}>
+                    <td className={`py-1 px-3 border border-borderLine2`}>
                       <input
                         data-testid="phoneInput"
                         type="text"
@@ -407,12 +411,12 @@ export default function Teacher() {
                     <td
                       className={`py-1 px-3 text-center ${
                         isDarkMode ? "text-textPrimary" : "text-textBlack"
-                      } border border-[#2b2e4a]/25`}
+                      } border border-borderLine2`}
                     >
                       {CONSTANT.NA}
                     </td>
                     {/* Actions */}
-                    <td className={`px-4 py-2 border border-[#2b2e4a]/25`}>
+                    <td className={`px-4 py-2 border border-borderLine2`}>
                       <button
                         className={`bg-backgroundBlue text-textPrimary font-poppins-regular text-[16] py-1.5 px-3 rounded-xl w-full h-full transition-all duration-200 ease-in-out active:scale-90`}
                         onClick={registerTeacher}
@@ -424,10 +428,10 @@ export default function Teacher() {
                     </td>
                   </tr>
                   {filteredTeachers.map((teacher) => (
-                    <tr key={teacher.SNo}>
+                    <tr key={teacher.SNo} className="bg-transparent">
                       {/* SNo */}
                       <td
-                        className={`px-4 py-2 font-medium text-center border text-sm border-[#2b2e4a]/25 ${
+                        className={`px-4 py-2 font-medium text-center border text-sm border-borderLine2 ${
                           isDarkMode ? "text-textPrimary" : "text-textBlack"
                         }`}
                       >
@@ -435,7 +439,7 @@ export default function Teacher() {
                       </td>
                       {/* First Name */}
                       <td
-                        className={`px-4 py-2 border text-sm border-[#2b2e4a]/25 `}
+                        className={`px-4 py-2 border text-sm border-borderLine2 `}
                       >
                         <input
                           data-testid="savedFirstname"
@@ -459,7 +463,7 @@ export default function Teacher() {
                       </td>
                       {/* Last Name */}
                       <td
-                        className={`px-4 py-2 text-sm  border border-[#2b2e4a]/25`}
+                        className={`px-4 py-2 text-sm  border border-borderLine2`}
                       >
                         <input
                           data-testid="savedLastname"
@@ -482,7 +486,7 @@ export default function Teacher() {
                       </td>
                       {/* Phone */}
                       <td
-                        className={`px-4 py-2 text-sm border border-[#2b2e4a]/25`}
+                        className={`px-4 py-2 text-sm border border-borderLine2`}
                       >
                         <input
                           data-testid="savedPhone"
@@ -505,7 +509,7 @@ export default function Teacher() {
                       </td>
                       {/* class */}
                       <td
-                        className={`px-4 py-2 text-sm border border-[#2b2e4a]/25`}
+                        className={`px-4 py-2 text-sm border border-borderLine2`}
                       >
                         <div
                           className={`w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none bg-transparent ${
@@ -519,7 +523,7 @@ export default function Teacher() {
                       </td>
                       {/* Actions */}
                       <td
-                        className={`pl-3 pr-5 py-2 text-sm font-poppins-bold border border-[#2b2e4a]/25`}
+                        className={`pl-3 pr-5 py-2 text-sm font-poppins-bold border border-borderLine2`}
                       >
                         <div className={`flex justify-evenly`}>
                           <button

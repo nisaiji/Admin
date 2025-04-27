@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import noevents from "../../assets/images/noevents.png";
+import noeventsw from "../../assets/images/noevents.png";
+import noevents from "../../assets/images/darkmode/noevents.png";
 import deleteEventw from "../../assets/images/delete2.png";
 import DownArroww from "../../assets/images/dropdown.png";
 import Searchw from "../../assets/images/Search.png";
@@ -56,9 +57,9 @@ const Event = () => {
       description: prevData?.editData?.description || "",
       holiday: prevData?.editData?.holiday || false,
       workday: isWorkday,
-      date: prevData?.date ? moment(prevData.date).format("MM/DD/YYYY") : "",
-      startDate: moment(prevData?.date).format("MM/DD/YYYY"),
-      endDate: moment(prevData?.date).format("MM/DD/YYYY"),
+      date: prevData?.date ? moment(prevData.date).format("DD/MM/YYYY") : "",
+      startDate: moment(prevData?.date).format("DD/MM/YYYY"),
+      endDate: moment(prevData?.date).format("DD/MM/YYYY"),
     });
 
     const [errors, setErrors] = useState({});
@@ -84,12 +85,23 @@ const Event = () => {
 
     if (!isOpen) return null;
 
+    useEffect(() => {
+      document.body.style.overflow = isOpen ? "hidden" : "auto";
+      return () => {
+        document.body.style.overflow = "auto";
+      };
+    }, [isOpen]);
+
     return (
       <div
-        className={`fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50`}
+        className={`fixed inset-0 flex items-center justify-center bg-opacity-50 ${
+          isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
+        }`}
       >
         <div
-          className={`bg-white rounded-2xl px-[30px] py-[20px] w-[450px] h-[430px] shadow-lg`}
+          className={`rounded-2xl px-[30px] py-[20px] w-[450px] h-[430px] shadow-lg ${
+            isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          }`}
         >
           <div className={`flex justify-end`}>
             <img
@@ -103,7 +115,11 @@ const Event = () => {
             />
           </div>
           <input
-            className={`w-full text-lg font-medium border-b py-3 outline-none `}
+            className={`w-full text-lg font-medium border-b py-3 outline-none bg-transparent ${
+              isDarkMode
+                ? "text-textPrimary border-borderLine"
+                : "text-textBlack border-borderGray2"
+            }`}
             type="text"
             name="title"
             value={newEventForm.title}
@@ -129,7 +145,7 @@ const Event = () => {
                 {isWorkday || isEditMode ? (
                   <DatePicker
                     views={["day", "month", "year"]}
-                    value={moment(prevData.date, "MM/DD/YYYY")}
+                    value={moment(prevData.date, "DD/MM/YYYY")}
                     disabled
                     className={`w-full`}
                     textField={(params) => (
@@ -140,57 +156,76 @@ const Event = () => {
                   <>
                     <DatePicker
                       views={["day", "month", "year"]}
-                      inputFormat="MM/DD/YYYY"
+                      format="DD/MM/YYYY"
                       minDate={moment().startOf("day")}
-                      value={moment(newEventForm.startDate, "MM/DD/YYYY")}
+                      value={moment(newEventForm.startDate, "DD/MM/YYYY")}
                       onChange={(date) => {
                         if (date) {
                           const formattedDate = date
                             .startOf("day")
-                            .format("MM/DD/YYYY");
+                            .format("DD/MM/YYYY");
                           setNewEventForm((prev) => ({
                             ...prev,
                             startDate: formattedDate,
                             endDate:
                               prev.endDate &&
-                              moment(prev.endDate, "MM/DD/YYYY").isBefore(date)
+                              moment(prev.endDate, "DD/MM/YYYY").isBefore(date)
                                 ? formattedDate
                                 : prev.endDate,
                           }));
                         }
                       }}
                       textField={(params) => (
-                        <TextField {...params} variant="outlined" />
+                        <TextField
+                          {...params}
+                          placeholder={t("placeholders.date")}
+                          variant="outlined"
+                        />
                       )}
                       sx={{
                         width: "100%",
                         height: "40px",
+                        border: `1px solid ${
+                          isDarkMode ? "#2b2e4a80" : "gray"
+                        }`,
+                        borderRadius: "8px",
+                        backgroundColor: isDarkMode ? "" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
                         "& .MuiOutlinedInput-root": {
                           padding: 1,
-                          fontSize: "14px",
+                          fontSize: "16px",
                           minHeight: "40px",
+                          color: isDarkMode ? "#E3E8F3" : "black",
                         },
                         "& .MuiInputBase-input": {
                           fontSize: "14px",
                           padding: 1,
                           height: "100%",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          border: "none",
                         },
                       }}
                     />
+
                     <DatePicker
                       views={["day", "month", "year"]}
-                      inputFormat="MM/DD/YYYY"
+                      inputFormat="DD/MM/YYYY"
                       minDate={
                         newEventForm.startDate
-                          ? moment(newEventForm.startDate, "MM/DD/YYYY")
+                          ? moment(newEventForm.startDate, "DD/MM/YYYY")
                           : moment().startOf("day")
                       }
-                      value={moment(newEventForm.endDate, "MM/DD/YYYY")}
+                      value={moment(newEventForm.endDate, "DD/MM/YYYY")}
                       onChange={(date) => {
                         if (date) {
                           setNewEventForm((prev) => ({
                             ...prev,
-                            endDate: date.endOf("day").format("MM/DD/YYYY"),
+                            endDate: date.endOf("day").format("DD/MM/YYYY"),
                           }));
                         }
                       }}
@@ -200,15 +235,29 @@ const Event = () => {
                       sx={{
                         width: "100%",
                         height: "40px",
+                        border: `1px solid ${
+                          isDarkMode ? "#2b2e4a80" : "gray"
+                        }`,
+                        borderRadius: "8px",
+                        backgroundColor: isDarkMode ? "" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
                         "& .MuiOutlinedInput-root": {
                           padding: 1,
-                          fontSize: "14px",
+                          fontSize: "16px",
                           minHeight: "40px",
+                          color: isDarkMode ? "#E3E8F3" : "black",
                         },
                         "& .MuiInputBase-input": {
                           fontSize: "14px",
                           padding: 1,
                           height: "100%",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          border: "none",
                         },
                       }}
                     />
@@ -228,8 +277,10 @@ const Event = () => {
                 value={newEventForm.description}
                 onChange={handleChange}
                 onBlur={validateForm}
-                className={`w-full bg-backgroundGray ${
-                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                className={`w-full bg-transparent border ${
+                  isDarkMode
+                    ? "text-textPrimary border-borderLine"
+                    : "text-textBlack border-borderGray2"
                 } p-3 outline-none rounded-lg max-h-32 h-32`}
               />
             </label>
@@ -506,10 +557,12 @@ const Event = () => {
   // Calendar Component - Displays a calendar with month navigation and event handling
   const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
     return (
-      <div className={`bg-transparent pl-16 rounded-lg w-full`}>
+      <div className={`bg-transparent rounded-lg w-full`}>
         {/* Month Navigation */}
         <div
-          className={`month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 w-11/12 capitalize border-2 border-[rgba(196, 196, 196, 0.50)]`}
+          className={`month flex items-center justify-between py-4 px-10 mx-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 ${
+            isDarkMode ? "border-borderLine" : "border-borderWhite3"
+          }`}
         >
           <img
             src={isDarkMode ? DownArrow : DownArroww}
@@ -530,12 +583,12 @@ const Event = () => {
           />
         </div>
         {/* Weekdays header */}
-        <div className={`grid grid-cols-7 font-medium capitalize pt-4`}>
-          {CONSTANT.WEEKDAYS.map((day) => (
+        <div className={`pt-4 grid grid-cols-7 gap-[10px] mx-10`}>
+          {CONSTANT.WEEKDAYS1.map((day) => (
             <div
               key={day}
-              className={`text-center text-md ${
-                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              className={`text-center font-medium capitalize text-md ${
+                isDarkMode ? "text-textBlue" : "text-textBlack"
               }`}
             >
               {day}
@@ -554,19 +607,19 @@ const Event = () => {
       } else if (isSunday) {
         return `${
           isDarkMode
-            ? "bg-backgroundOrange"
+            ? "bg-backgroundOrange border-borderHoliday"
             : "bg-backgroundOrange2 border-borderOrange"
-        } text-textOrange2`;
+        } text-textHoliday`;
       } else if (isToday) {
         return `${
           isDarkMode
-            ? "text-textBlue bg-background border-borderBlue"
+            ? "text-textBlue bg-backgroundGrayDays border-borderBlue"
             : "text-textDarkBlue bg-whiteBackground2 border-borderDarkBlue"
         }`;
       } else {
         return `${
           isDarkMode
-            ? "text-textPrimary bg-background"
+            ? "text-textPrimary bg-backgroundGrayDays"
             : "text-textBlack bg-whiteBackground2 border-borderWhite3"
         }`;
       }
@@ -574,7 +627,7 @@ const Event = () => {
 
     return (
       <div
-        className={`day cursor-pointer rounded-[12px] flex font-bold text-[14px] p-2 w-[60px] h-[70px] border-[3px]  ${renderCss()}`}
+        className={`day cursor-pointer rounded-[12px] flex font-bold text-[14px] p-2 w-[60px] h-[70px] border-[3px] ${renderCss()}`}
         onClick={onClick}
       >
         {day}
@@ -585,7 +638,7 @@ const Event = () => {
   // Days Grid Component - Displays all the days of the month in a grid layout
   const DaysGrid = ({ days }) => {
     return (
-      <div className={`days grid grid-cols-7 ml-10 gap-[10px] px-8 py-3`}>
+      <div className={`days grid grid-cols-7 ml-8 gap-[10px] px-8 py-3`}>
         {days}
       </div>
     );
@@ -622,7 +675,7 @@ const Event = () => {
             {t("dashboard.calendar")}
           </p>
           <div
-            className={`flex justify-around w-32 h-[36px] bg-transparent border-2 border-bordergray rounded-[8px] overflow-hidden`}
+            className={`flex justify-around w-32 h-[36px] bg-transparent border-2 border-borderGray rounded-[8px] overflow-hidden`}
           >
             {/* search input */}
             <button className={`py-1`}>
@@ -656,7 +709,11 @@ const Event = () => {
             />
           </div>
         </div>
-        <hr className={`mb-4`} />
+        <hr
+          className={`mb-4 border ${
+            isDarkMode ? "border-borderLine" : "border-borderWhite3"
+          }`}
+        />
         <Calendar
           className={`px-10`}
           month={month}
@@ -690,11 +747,15 @@ const Event = () => {
           >
             {t("events.title")}
           </div>
-          <hr className={`mb-6 border-t border-bordergray`} />
+          <hr
+            className={`mb-6 border-t ${
+              isDarkMode ? "border-borderLine" : "border-borderWhite3"
+            }`}
+          />
           {events.length === 0 && workdays.length === 0 ? (
             <div className={`relative top-40 w-full h-full`}>
               <img
-                src={noevents}
+                src={isDarkMode ? noevents : noeventsw}
                 alt="noevents"
                 className={`absolute inset-0 w-auto h-auto object-cover`}
               />

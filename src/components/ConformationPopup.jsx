@@ -58,7 +58,7 @@ export default function ConformationPopup({
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className={`px-4 py-2 rounded-lg border border-borderGray transition-all duration-200 ease-in-out active:scale-90 { isDarkMode ? "text-textPrimary" : "bg-whiteBackground"}`}
+            className={`px-4 py-2 rounded-lg border border-borderGray transition-all duration-200 ease-in-out active:scale-90 ${ isDarkMode ? "text-textPrimary" : "bg-whiteBackground"}`}
           >
             {t("buttons.cancel")}
           </button>

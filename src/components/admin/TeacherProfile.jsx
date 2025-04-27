@@ -10,6 +10,7 @@ import moment from "moment";
 import DatePicker from "react-datepicker";
 import Breadcrumbs from "../BreadCrumbs";
 import { useSelector } from "react-redux";
+import { FormControl, MenuItem, Select } from "@mui/material";
 
 export default function TeacherProfile() {
   const [teacher, setTeacher] = useState([]);
@@ -146,7 +147,7 @@ export default function TeacherProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.firstname && formik.touched.firstname
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -180,7 +181,7 @@ export default function TeacherProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.lastname && formik.touched.lastname
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -217,7 +218,7 @@ export default function TeacherProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 rounded-md ${
                   formik.errors.dob && formik.touched.dob
                     ? "border border-borderRed"
-                    : "border border-borderGray"
+                    : "border border-borderLine2"
                 } ${
                   isDarkMode
                     ? "bg-[#1a1a1a] text-textPrimary"
@@ -246,29 +247,84 @@ export default function TeacherProfile() {
               >
                 {t("labels.gender")} <span className="text-textRed">*</span>
               </label>
-              <select
-                name="gender"
-                value={formik.values.gender}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                data-testid="gender"
-                className={`p-2 mt-1 w-full text-base leading-6 rounded-md ${
-                  formik.errors.gender && formik.touched.gender
-                    ? "border border-borderRed"
-                    : "border border-borderGray"
-                } ${
-                  isDarkMode
-                    ? "bg-[#1a1a1a] text-textPrimary"
-                    : "bg-white text-textBlack"
-                } focus:outline-none`}
+              <FormControl
+                fullWidth
+                variant="outlined"
+                error={formik.errors.gender && formik.touched.gender}
+                sx={{
+                  backgroundColor: isDarkMode ? "" : "white",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  "& .MuiInputBase-root, & .MuiSvgIcon-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                }}
               >
-                <option value="" disabled>
-                  {t("placeholders.selectGender")}
-                </option>
-                <option value="Male">{t("options.male")}</option>
-                <option value="Female">{t("options.female")}</option>
-                <option value="Other">{t("options.other")}</option>
-              </select>
+                <Select
+                  name="gender"
+                  value={formik.values.gender}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  data-testid="gender"
+                  displayEmpty
+                  renderValue={(selected) => {
+                    if (!selected) {
+                      return <span>{t("placeholders.selectGender")}</span>;
+                    }
+                    return selected;
+                  }}
+                  sx={{
+                    mt: 0.5,
+                    width: "100%",
+                    fontSize: "1rem",
+                    color: formik.values.gender
+                      ? isDarkMode
+                        ? "#E3E8F3"
+                        : "black"
+                      : "gray",
+                    backgroundColor: isDarkMode ? "" : "white",
+                    border:
+                      formik.errors.gender && formik.touched.gender
+                        ? "1px solid red"
+                        : "1px solid #2b2e4a40",
+                    "& .MuiSelect-select": {
+                      fontSize: "1rem",
+                      lineHeight: "1.5rem",
+                      p: 1,
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        borderRadius: "0.5rem",
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    {t("placeholders.selectGender")}
+                  </MenuItem>
+                  {["Male", "Female", "Other"].map((val, i) => (
+                    <MenuItem
+                      key={i}
+                      value={val}
+                      sx={{
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        borderRadius: "0.5rem",
+                        "&:hover": {
+                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                        },
+                      }}
+                    >
+                      {val}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               {formik.errors.gender && formik.touched.gender && (
                 <div className="text-textRed text-sm mt-1">
                   {formik.errors.gender}
@@ -287,34 +343,86 @@ export default function TeacherProfile() {
               >
                 {t("labels.bloodGroup")} <span className="text-textRed">*</span>
               </label>
-              <select
-                name="bloodGroup"
-                value={formik.values.bloodGroup}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                data-testid="bloodGroup"
-                className={`p-2 mt-1 w-full text-base leading-6 rounded-md ${
-                  formik.errors.bloodGroup && formik.touched.bloodGroup
-                    ? "border border-borderRed"
-                    : "border border-borderGray"
-                } ${
-                  isDarkMode
-                    ? "bg-[#1a1a1a] text-textPrimary"
-                    : "bg-white text-textBlack"
-                } focus:outline-none`}
+              <FormControl
+                fullWidth
+                variant="outlined"
+                error={formik.errors.bloodGroup && formik.touched.bloodGroup}
+                sx={{
+                  backgroundColor: isDarkMode ? "" : "white",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  "& .MuiInputBase-root, & .MuiSvgIcon-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                }}
               >
-                <option value="" disabled>
-                  {t("placeholders.bloodGroup")}
-                </option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
+                <Select
+                  name="bloodGroup"
+                  value={formik.values.bloodGroup}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  data-testid="bloodGroup"
+                  displayEmpty
+                  renderValue={(selected) => {
+                    if (!selected) {
+                      return <span>{t("placeholders.bloodGroup")}</span>;
+                    }
+                    return selected;
+                  }}
+                  sx={{
+                    mt: 0.5,
+                    width: "100%",
+                    fontSize: "1rem",
+                    color: formik.values.bloodGroup
+                      ? isDarkMode
+                        ? "#E3E8F3"
+                        : "black"
+                      : "gray",
+                    backgroundColor: isDarkMode ? "" : "white",
+                    border:
+                      formik.errors.bloodGroup && formik.touched.bloodGroup
+                        ? "1px solid red"
+                        : "1px solid #2b2e4a40",
+                    "& .MuiSelect-select": {
+                      fontSize: "1rem",
+                      lineHeight: "1.5rem",
+                      p: 1,
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        borderRadius: "0.5rem",
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    {t("placeholders.bloodGroup")}
+                  </MenuItem>
+                  {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(
+                    (val, i) => (
+                      <MenuItem
+                        key={i}
+                        value={val}
+                        sx={{
+                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                          borderRadius: "0.5rem",
+                          "&:hover": {
+                            backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                          },
+                        }}
+                      >
+                        {val}
+                      </MenuItem>
+                    )
+                  )}
+                </Select>
+              </FormControl>
               {formik.errors.bloodGroup && formik.touched.bloodGroup && (
                 <div className="text-textRed text-sm mt-1">
                   {formik.errors.bloodGroup}
@@ -341,7 +449,7 @@ export default function TeacherProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.phone && formik.touched.phone
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -375,7 +483,7 @@ export default function TeacherProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.university && formik.touched.university
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}
@@ -406,7 +514,7 @@ export default function TeacherProfile() {
                 className={`p-2 mt-1 w-full text-base leading-6 ${
                   formik.errors.degree && formik.touched.degree
                     ? "border-borderRed"
-                    : "border-borderGray"
+                    : "border-borderLine2"
                 } ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } bg-transparent border`}

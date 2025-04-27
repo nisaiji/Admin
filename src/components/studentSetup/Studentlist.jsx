@@ -23,7 +23,7 @@ import {
   Pagination,
 } from "@mui/material";
 import { axiosClient } from "../../services/axiosClient";
-import nostudent from "../../assets/images/nostudent.png";
+import noDataFound from "../../assets/images/darkmode/noDataFound.png";
 import EndPoints from "../../services/EndPoints";
 import StudentInfo from "../classSetup/sectionStudents/StudentInfo";
 import { useNavigate } from "react-router-dom";
@@ -125,16 +125,16 @@ export default function Studentlist() {
 
     const url = isTeacher
       ? EndPoints.TEACHER.GET_STUDENT_LIST
-      : EndPoints.ADMIN.GET_STUDENT_LIST;
-    // : EndPoints.ADMIN.SEARCH_STUDENT;
+      // : EndPoints.ADMIN.GET_STUDENT_LIST;
+    : EndPoints.ADMIN.SEARCH_STUDENT;
 
-    let query = `?admin=${id}&page=${pageNo}&limit=${limit}&include=parent,class,section`;
-    // let query = `?page=${pageNo}&limit=${limit}`;
+    // let query = `?admin=${id}&page=${pageNo}&limit=${limit}&include=parent,class,section`;
+    let query = `?page=${pageNo}&limit=${limit}`;
 
     // Determine the query parameters based on the inputs
     if (searchName) {
-      query += `&firstname=${searchName}`;
-      // query += `&search=${searchName}`;
+      // query += `&firstname=${searchName}`;
+      query += `&search=${searchName}`;
     }
     if (searchSection) {
       query += `&section=${searchSection}`;
@@ -267,7 +267,9 @@ export default function Studentlist() {
       )}
       <div
         className={`${
-          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
         } flex flex-col self-center w-full max-w-[100%] rounded-[16px] max-md:max-w-full min-h-[calc(100vh-72px)]`}
       >
         <div className={`px-14 py-6`}>
@@ -298,9 +300,9 @@ export default function Studentlist() {
                       size="medium"
                       sx={{
                         width: "150px",
-                        border: "1px solid #d1d5db",
+                        border: "1px solid #2b2e4a40",
                         borderRadius: "14px",
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        backgroundColor: isDarkMode ? "" : "white",
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
                         },
@@ -319,7 +321,7 @@ export default function Studentlist() {
                         id="class-select-label"
                         sx={{
                           zIndex: 1,
-                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          backgroundColor: isDarkMode ? "" : "white",
                           color: isDarkMode ? "#E3E8F3" : "black",
                           fontSize: 16,
                           px: 0.5,
@@ -387,9 +389,9 @@ export default function Studentlist() {
                       size="medium"
                       sx={{
                         width: "150px",
-                        border: "1px solid #d1d5db",
+                        border: "1px solid #2b2e4a40",
                         borderRadius: "14px",
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        backgroundColor: isDarkMode ? "" : "white",
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
                         },
@@ -407,7 +409,7 @@ export default function Studentlist() {
                       <InputLabel
                         id="section-select-label"
                         sx={{
-                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          backgroundColor: isDarkMode ? "" : "white",
                           color: isDarkMode ? "#E3E8F3" : "black",
                           fontSize: 16,
                           px: 0.5,
@@ -460,7 +462,9 @@ export default function Studentlist() {
 
                     {/* Search Bar */}
                     <div
-                      className={`flex px-3 rounded-[14px] w-full max-w-[800px] shadow-sm border border-gray-300`}
+                      className={`flex px-3 rounded-[14px] w-full max-w-[800px] shadow-sm border ${
+                        isDarkMode ? "border-borderLine" : "border-borderGray2"
+                      }`}
                     >
                       <div
                         className={`flex items-center pl-3 pointer-events-none`}
@@ -503,9 +507,9 @@ export default function Studentlist() {
                     <button
                       className={`${
                         isDarkMode
-                          ? "hover:bg-background4 border-borderwhite"
-                          : "hover:bg-whiteBackground1 border-borderWhite2"
-                      } border-2 w-20 text-lg rounded-[14px] flex items-center justify-center`}
+                          ? "hover:bg-background4 border-borderLine"
+                          : "hover:bg-whiteBackground1 border-borderGray2"
+                      } border w-20 text-lg rounded-[14px] flex items-center justify-center`}
                       onClick={handleClear}
                     >
                       <img
@@ -524,43 +528,43 @@ export default function Studentlist() {
               <div className={`overflow-x-auto relative h-[400px] mx-10`}>
                 <table
                   className={`${
-                    isDarkMode ? "bg-background1" : "bg-whiteBackground"
+                    isDarkMode ? "" : "bg-whiteBackground"
                   } min-w-full border-separate border-spacing-0`}
                 >
                   {/* table headings */}
                   <thead
                     className={`${
-                      isDarkMode ? "bg-background1" : "bg-whiteBackground"
+                      isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
                     } text-base font-bold sticky top-0 z-10`}
                   >
                     <tr className={`text-base text-bold text-textBlue`}>
                       <th
-                        className={`text-center px-4 py-2 max-sm:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-sm:hidden border border-borderLine2 bg-clip-padding`}
                       >
                         {t("labels.fullName")}
                       </th>
                       <th
-                        className={`text-center px-4 py-2 max-xl:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-xl:hidden border border-borderLine2 bg-clip-padding`}
                       >
                         {t("labels.gender")}
                       </th>
                       <th
-                        className={`text-center px-4 py-2 max-md:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-md:hidden border border-borderLine2 bg-clip-padding`}
                       >
                         {t("labels.phoneNumber")}
                       </th>
                       <th
-                        className={`text-center px-4 py-2 max-lg:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-lg:hidden border border-borderLine2 bg-clip-padding`}
                       >
                         {t("labels.email")}
                       </th>
                       <th
-                        className={`text-center px-4 py-2 max-lg:hidden border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 max-lg:hidden border border-borderLine2 bg-clip-padding`}
                       >
                         {t("labels.guardianName")}
                       </th>
                       <th
-                        className={`text-center px-4 py-2 border border-[#2b2e4a]/25 bg-clip-padding`}
+                        className={`text-center px-4 py-2 border border-borderLine2 bg-clip-padding`}
                       >
                         {t("labels.action")}
                       </th>
@@ -573,42 +577,42 @@ export default function Studentlist() {
                         className={`${
                           i % 2 === 0
                             ? isDarkMode
-                              ? "bg-background3"
+                              ? ""
                               : "bg-whiteBackground3"
                             : ""
                         } border-t `}
                         key={i}
                       >
                         <td
-                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } max-sm:hidden`}
                         >
                           {student?.firstname} {student?.lastname}
                         </td>
                         <td
-                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } max-xl:hidden`}
                         >
                           {student?.gender}
                         </td>
                         <td
-                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } max-md:hidden`}
                         >
                           {student?.parentDetails?.phone}
                         </td>
                         <td
-                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } max-lg:hidden`}
                         >
                           {student?.parentDetails?.email || CONSTANT.NA}
                         </td>
                         <td
-                          className={`p-4 text-center text-sm font-medium border border-[#2b2e4a]/25 ${
+                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } max-lg:hidden`}
                         >
@@ -616,7 +620,7 @@ export default function Studentlist() {
                         </td>
                         {/* Action Buttons */}
                         <td
-                          className={`p-4 text-center font-medium border border-[#2b2e4a]/25 ${
+                          className={`p-4 text-center font-medium border border-borderLine2 ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           }`}
                         >
@@ -679,10 +683,10 @@ export default function Studentlist() {
                       variant="outlined"
                       size="small"
                       sx={{
-                        border: "1px solid #d1d5db",
+                        border: "1px solid #2b2e4a40",
                         borderRadius: "6px",
                         minWidth: "80px",
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        backgroundColor: isDarkMode ? "" : "white",
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
                         },
@@ -764,7 +768,7 @@ export default function Studentlist() {
                 className={`flex flex-col items-center justify-center text-center pb-6`}
               >
                 <img
-                  src={nostudent}
+                  src={noDataFound}
                   className={`mb-4 h-[200px] w-[250px] object-contain`}
                 />
                 <p

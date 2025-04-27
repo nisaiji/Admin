@@ -199,8 +199,10 @@
     "pastLeaves": "Past Leaves",
     "description": "Description",
     "username": "Username",
+    "dateOfRequest": "Date of Request",
     "resetBefore": "Past Resets",
     "otp": "OTP",
+    "pending": "Pending",
     "all": "All",
     "approved": "Approved",
     "rejected": "Rejected"

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
-import noevents from "../../assets/images/noevents.png";
+import noeventsw from "../../assets/images/noevents.png";
+import noevents from "../../assets/images/darkmode/noevents.png";
 import DownIconw from "../../assets/images/dropdown.png";
 import DownIcon from "../../assets/images/darkmode/downArrow.png";
 import school from "../../assets/images/darkmode/school.png";
@@ -691,9 +692,7 @@ const Dashboard = () => {
     return (
       <div
         className={`flex items-center justify-between  rounded-full px-6 py-2 shadow-md w-fit ${
-          isDarkMode
-            ? "bg-gradient-to-l from-fromColor1 to-toColor1 text-textPrimary"
-            : "bg-whiteBackground"
+          isDarkMode ? "bg-[#68686826] text-textPrimary" : "bg-whiteBackground"
         }`}
       >
         {/* Date Section */}
@@ -871,11 +870,11 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        <hr />
+        <hr className="border border-[#2b2e4a]/50" />
         {/* Bar Graph */}
         {loading && (
           <div
-            className={`absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 mx-8 w-full`}
+            className={`absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 w-full`}
           >
             <Spinner />
           </div>
@@ -889,9 +888,9 @@ const Dashboard = () => {
                 size="small"
                 sx={{
                   width: "150px",
-                  border: "1px solid #d1d5db",
+                  border: "1px solid #2b2e4a40",
                   borderRadius: "14px",
-                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  backgroundColor: isDarkMode ? "" : "white",
                   "& .MuiOutlinedInput-notchedOutline": {
                     border: "none",
                   },
@@ -910,7 +909,7 @@ const Dashboard = () => {
                   id="class-select-label"
                   sx={{
                     zIndex: 1,
-                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    backgroundColor: isDarkMode ? "" : "white",
                     color: isDarkMode ? "#E3E8F3" : "black",
                     fontSize: 14,
                     px: 0.5,
@@ -964,9 +963,9 @@ const Dashboard = () => {
                 size="small"
                 sx={{
                   width: "150px",
-                  border: "1px solid #d1d5db",
+                  border: "1px solid #2b2e4a40",
                   borderRadius: "14px",
-                  backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                  backgroundColor: isDarkMode ? "" : "white",
                   "& .MuiOutlinedInput-notchedOutline": {
                     border: "none",
                   },
@@ -985,7 +984,7 @@ const Dashboard = () => {
                   id="section-select-label"
                   sx={{
                     zIndex: 1,
-                    backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                    backgroundColor: isDarkMode ? "" : "white",
                     color: isDarkMode ? "#E3E8F3" : "black",
                     fontSize: 14,
                     px: 0.5,
@@ -1058,7 +1057,11 @@ const Dashboard = () => {
           >
             {t("dashboard.calendar")}
           </h2>
-          <hr className={`mt-2 border-t border-bordergray`} />
+          <hr
+            className={`mt-2 border-t ${
+              isDarkMode ? "border-borderLine" : "border-borderWhite3"
+            }`}
+          />
           <div className={`flex justify-center mt-2`}>
             <div className={`w-full h-screen `}>
               <CalendarComponent
@@ -1085,11 +1088,15 @@ const Dashboard = () => {
           >
             {t("dashboard.holidayAndEvents")}
           </h2>
-          <hr className={`mb-6 border-t border-bordergray`} />
+          <hr
+            className={`mb-6 border-t ${
+              isDarkMode ? "border-borderLine" : "border-borderWhite3"
+            }`}
+          />
           {calenderEvents.length === 0 && workdays.length === 0 ? (
             <div className={`relative w-full`}>
               <img
-                src={noevents}
+                src={isDarkMode ? noevents : noeventsw}
                 alt="Event Background"
                 className={`absolute inset-0 w-auto h-auto object-cover`}
               />

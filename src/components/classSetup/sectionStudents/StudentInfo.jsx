@@ -85,7 +85,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4 ${
-        isDarkMode ? "bg-whiteBackground3" : "bg-background"
+        isDarkMode ? "bg-backgroundTableCell" : "bg-background"
       }`}
     >
       <div
@@ -94,7 +94,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
         } rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto`}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between border-b px-4 py-3`}>
+        <div className={`flex items-center justify-between border-b border-borderLine px-4 py-3`}>
           <h2
             className={`text-xl font-bold  ${
               isDarkMode ? "text-textPrimary" : "text-textBlack"
@@ -126,17 +126,17 @@ export default function StudentInfo({ currStudent, modelOpen }) {
                 {personalDetails.map(([label, value], index) => (
                   <div
                     key={index}
-                    className={`flex justify-between border-b pb-1`}
+                    className={`flex justify-between border-b border-borderLine pb-1`}
                   >
                     <span
-                      className={`font-medium ${
+                      className={`text-sm font-medium ${
                         isDarkMode ? "text-textPrimary" : "text-textGray"
                       }`}
                     >
                       {label}
                     </span>
                     <span
-                      className={`${
+                      className={` text-sm ${
                         isDarkMode ? "text-textPrimary" : "text-textDarkGray"
                       }`}
                     >
@@ -159,17 +159,17 @@ export default function StudentInfo({ currStudent, modelOpen }) {
                 {guardianDetails.map(([label, value], index) => (
                   <div
                     key={index}
-                    className={`flex justify-between border-b pb-1`}
+                    className={`flex justify-between border-b border-borderLine pb-1`}
                   >
                     <span
-                      className={`font-medium ${
+                      className={`text-sm font-medium ${
                         isDarkMode ? "text-textPrimary" : "text-textGray"
                       }`}
                     >
                       {label}
                     </span>
                     <span
-                      className={`${
+                      className={`text-sm ${
                         isDarkMode ? "text-textPrimary" : "text-textDarkGray"
                       }`}
                     >
@@ -197,9 +197,9 @@ export default function StudentInfo({ currStudent, modelOpen }) {
         </div>
 
         {/* Footer */}
-        <div className={`flex justify-end border-t px-4 py-3`}>
+        <div className={`flex justify-end border-t border-borderLine px-4 py-3`}>
           <button
-            className={`px-4 py-2 bg-backgroundBlue transition text-white text-sm font-medium rounded-md`}
+            className={`px-4 py-2 bg-backgroundBlue transition text-textPrimary text-sm font-medium rounded-md`}
             onClick={handleScreenshot}
           >
             {t("buttons.screenshot")}
