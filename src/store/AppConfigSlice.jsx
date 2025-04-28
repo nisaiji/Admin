@@ -4,8 +4,7 @@ const appConfigSlice = createSlice({
   name: "auth",
   initialState: {
     isLoggedin: false,
-    // isDarkMode: false,
-    isDarkMode: true,
+    isDarkMode: JSON.parse(localStorage.getItem("isDarkMode")) ?? true,
     isLoading: false,
     toastData: {},
   },
@@ -18,6 +17,7 @@ const appConfigSlice = createSlice({
     },
     toggleDarkMode(state) {
       state.isDarkMode = !state.isDarkMode;
+      localStorage.setItem("isDarkMode", JSON.stringify(state.isDarkMode));
     },
     setLoading(state, action) {
       state.isLoading = action.payload;

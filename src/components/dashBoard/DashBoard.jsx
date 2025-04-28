@@ -382,21 +382,21 @@ const Dashboard = () => {
         {
           label: "Present",
           data: presentData,
-          backgroundColor: "#FF793F",
+          backgroundColor: isDarkMode ? "#4CBC9A" : "#FF793F",
           barThickness: 50,
           borderRadius: 14,
         },
         {
           label: "Absent",
           data: absentData,
-          backgroundColor: "#D9E2E9",
+          backgroundColor: isDarkMode ? "#FE404026" : "#D9E2E9",
           barThickness: 50,
           borderRadius: 14,
         },
         {
           label: "NA",
           data: NAData,
-          backgroundColor: "#E9EEF2",
+          backgroundColor: isDarkMode ? "#384A714D" : "#E9EEF2",
           barThickness: 50,
           borderRadius: 14,
         },
@@ -412,14 +412,14 @@ const Dashboard = () => {
       {
         label: "Present",
         data: [],
-        backgroundColor: "#FF793F",
+        backgroundColor: isDarkMode ? "#4CBC9A" : "#FF793F",
         barThickness: 50,
         borderRadius: 14,
       },
       {
         label: "Absent",
         data: [],
-        backgroundColor: "#E9EEF2",
+        backgroundColor: isDarkMode ? "#FE404026" : "#D9E2E9",
         barThickness: 50,
         borderRadius: 14,
       },
@@ -433,13 +433,13 @@ const Dashboard = () => {
       {
         label: "Present",
         data: [],
-        backgroundColor: "#FF793F",
+        backgroundColor: isDarkMode ? "#4CBC9A" : "#FF793F",
         barThickness: 20,
       },
       {
         label: "Absent",
         data: [],
-        backgroundColor: "#E9EEF2",
+        backgroundColor: isDarkMode ? "#FE404026" : "#D9E2E9",
         barThickness: 20,
       },
     ],
@@ -453,26 +453,25 @@ const Dashboard = () => {
     const absentData = transformedData.map((day) => day.absent);
     const presentData = transformedData.map((day) => day.present);
     const NAData = transformedData.map((day) => day.na);
-
     const data = {
       labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
       datasets: [
         {
           label: "Present",
           data: presentData,
-          backgroundColor: "#FF793F",
+          backgroundColor: isDarkMode ? "#4CBC9A" : "#FF793F",
           barThickness: 20,
         },
         {
           label: "Absent",
           data: absentData,
-          backgroundColor: "#D9E2E9",
+          backgroundColor: isDarkMode ? "#FE404026" : "#D9E2E9",
           barThickness: 20,
         },
         {
           label: "NA",
           data: NAData,
-          backgroundColor: "#E9EEF2",
+          backgroundColor: isDarkMode ? "#384A714D" : "#E9EEF2",
           barThickness: 20,
         },
       ],
@@ -551,7 +550,9 @@ const Dashboard = () => {
               ]
             : [1],
           backgroundColor: hasAttendance
-            ? ["#FF793F", "#D9E2E9", "#E9EEF2"]
+            ? isDarkMode
+              ? ["#4CBC9A", "#FE404026", "#384A714D"]
+              : ["#FF793F", "#D9E2E9", "#E9EEF2"]
             : ["gray"],
           borderWidth: 2,
         },
@@ -870,7 +871,11 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        <hr className="border border-[#2b2e4a]/50" />
+        <hr
+          className={`border ${
+            isDarkMode ? "border-borderLine" : "border-borderWhite3"
+          }`}
+        />
         {/* Bar Graph */}
         {loading && (
           <div

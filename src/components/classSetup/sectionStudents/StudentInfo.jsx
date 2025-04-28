@@ -32,7 +32,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     const hiddenContainer = document.createElement("div");
     hiddenContainer.style.position = "fixed";
     hiddenContainer.style.width = "768px";
-    hiddenContainer.style.backgroundColor = "white";
+    hiddenContainer.style.backgroundColor = isDarkMode ? "#1E1E1E" : "#FFFFFF";
 
     // Clone the content in captureRef without changing its layout
     const clonedNode = captureRef.current.cloneNode(true);
@@ -44,6 +44,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     // Use html2canvas to capture the hidden container
     html2canvas(clonedNode, {
       scrollY: -window.scrollY,
+      backgroundColor: null,
       useCORS: true,
     }).then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
@@ -94,7 +95,9 @@ export default function StudentInfo({ currStudent, modelOpen }) {
         } rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto`}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between border-b border-borderLine px-4 py-3`}>
+        <div
+          className={`flex items-center justify-between border-b border-borderLine px-4 py-3`}
+        >
           <h2
             className={`text-xl font-bold  ${
               isDarkMode ? "text-textPrimary" : "text-textBlack"
@@ -197,7 +200,9 @@ export default function StudentInfo({ currStudent, modelOpen }) {
         </div>
 
         {/* Footer */}
-        <div className={`flex justify-end border-t border-borderLine px-4 py-3`}>
+        <div
+          className={`flex justify-end border-t border-borderLine px-4 py-3`}
+        >
           <button
             className={`px-4 py-2 bg-backgroundBlue transition text-textPrimary text-sm font-medium rounded-md`}
             onClick={handleScreenshot}

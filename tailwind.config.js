@@ -20,6 +20,7 @@ export default {
         background2: "#0F0F0F",
         background3: "#262626",
         background4: "#3e3e3e",
+        background5: "#4a4a52",
 
         // white shades
         whiteBackground: "#FFFFFF",

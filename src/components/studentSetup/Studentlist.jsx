@@ -294,7 +294,7 @@ export default function Studentlist() {
                 className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px] w-fit max-md:max-w-full max-md:hidden`}
               >
                 <div className={`flex gap-2 px-10 rounded-3xl w-full`}>
-                  <div className={`flex justify-between w-full`}>
+                  <div className={`flex justify-between w-full space-x-2`}>
                     {/* Class select dropdown */}
                     <FormControl
                       size="medium"
@@ -462,7 +462,7 @@ export default function Studentlist() {
 
                     {/* Search Bar */}
                     <div
-                      className={`flex px-3 rounded-[14px] w-full max-w-[800px] shadow-sm border ${
+                      className={`flex px-3 rounded-[14px] w-full shadow-sm border ${
                         isDarkMode ? "border-borderLine" : "border-borderGray2"
                       }`}
                     >

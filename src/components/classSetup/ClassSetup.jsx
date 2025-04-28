@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import addclass from "../../assets/images/addclass.png";
-import students from "../../assets/images/students.png";
-import trash from "../../assets/images/trash.png";
+// import students from "../../assets/images/students.png";
+import studentsPto2 from "../../assets/images/darkmode/n-2.png";
+import students3to8 from "../../assets/images/darkmode/3-8.png";
+import students9to12 from "../../assets/images/darkmode/9-12.png";
+import trash from "../../assets/images/darkmode/delete2.png";
+import trashw from "../../assets/images/trash.png";
 import ReactCardFlip from "react-card-flip";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -187,32 +191,57 @@ function ClassSetup() {
                 >
                   {/* frontside */}
                   <div
-                    className={`m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 rounded-3xl cursor-pointer`}
+                    className={`m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 rounded-3xl border cursor-pointer ${
+                      isDarkMode ? "bg-background5 border-borderGray" : "border-borderLine"
+                    }`}
                   >
                     <div className={`relative rounded-full h-[40] w-[40] z-10`}>
                       <img
-                        src={trash}
+                        src={isDarkMode ? trash : trashw}
                         onClick={() => {
                           setClickedClassId(data._id);
                           setModalIsOpen(true);
                         }}
                         alt="deleteClass"
                         className={`absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 p-1 ${
-                          isDarkMode ? "bg-background4" : "bg-whiteBackground"
+                          isDarkMode ? "" : "bg-whiteBackground"
                         }`}
                       />
                     </div>
                     <div
                       onClick={() => toggleFlip(index)}
-                      className={`relative`}
+                      className={`relative flex flex-col h-full w-full`}
                     >
                       <img
-                        src={students}
-                        className={`h-full w-full`}
+                        // src={students}
+                        src={
+                          [
+                            "Pre-Nursery",
+                            "Nursery",
+                            "LKG",
+                            "UKG",
+                            "1st",
+                            "2nd",
+                          ].includes(data.name)
+                            ? studentsPto2
+                            : [
+                                "3rd",
+                                "4th",
+                                "5th",
+                                "6th",
+                                "7th",
+                                "8th",
+                              ].includes(data.name)
+                            ? students3to8
+                            : students9to12
+                        }
+                        className={` object-contain h-[120px] ${
+                          ["9th", "10th", "11th", "12th"].includes(data.name) ? "w-[120px]" : "w-full"
+                        }`}
                         alt="students"
                       />
                       <p
-                        className={`text-white text-center font-semibold text-xs md:text-base absolute -bottom-2 right-0 left-0 mb-2 bg-opacity-70 bg-black rounded-b-3xl py-1`}
+                        className={`h-[40px] text-white text-center font-semibold text-xs md:text-base absolute -bottom-2 right-0 left-0 mb-2 bg-black rounded-b-3xl py-1 flex items-center justify-center`}
                       >
                         {data.name}
                       </p>

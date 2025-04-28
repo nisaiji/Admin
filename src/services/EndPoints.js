@@ -47,7 +47,7 @@ const EndPoints = {
     GET_SECTION_STUDENTS: "v2/student/admin-get",
     REGISTER_SECTION_STUDENT: "v2/student/admin",//v2
     UPDATE_SECTION_STUDENT: "v2/student/admin",
-    DELETE_SECTION_STUDENT: "student/admin",
+    DELETE_SECTION_STUDENT: "v2/student/admin",
 
     // ADMIN EVENT SECTION
     REMOVE_SUNDAY_HOLIDAY: "workdays/register",
@@ -84,7 +84,7 @@ const EndPoints = {
     // GET_SECTION_STUDENTS: "student/teacher",
     REGISTER_SECTION_STUDENT: "v2/student/teacher",
     UPDATE_SECTION_STUDENT: "v2/student/teacher",
-    DELETE_SECTION_STUDENT: "student/teacher",
+    DELETE_SECTION_STUDENT: "v2/student/teacher",
     GET_ATTENDANCE: "attendance/teacher",
     UPDATE_ATTENDANCE: "attendance/teacher/bulk-mark",
 

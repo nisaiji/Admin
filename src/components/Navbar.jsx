@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import teachericon from "../assets/images/teachericon.png";
 import classroomicon from "../assets/images/classroomicon.png";
 import calendaricon from "../assets/images/calendaricon.png";
@@ -12,9 +12,12 @@ import downArrow from "../assets/images/darkmode/downArrow.png";
 import user from "../assets/images/darkmode/user.png";
 import logo from "../assets/images/deer logo.png";
 import { useTranslation } from "react-i18next";
+import { appConfigAction } from "../store/AppConfigSlice";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const sectionId = useSelector((state) => state.appAuth.section);
@@ -74,6 +77,10 @@ const Navbar = () => {
     };
   }, []);
 
+  const toggleDarkMode = () => {
+    dispatch(appConfigAction.toggleDarkMode());
+  };
+
   return (
     <div
       className={`${
@@ -88,6 +95,14 @@ const Navbar = () => {
         </div>
 
         <div className={`flex space-x-12`}>
+          <button
+            onClick={toggleDarkMode}
+            className={`${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            } hover:text-textBlue py-2 text-sm font-bold`}
+          >
+            {isDarkMode ? "Light Mode" : "Dark Mode"}
+          </button>
           {isTeacher ? (
             <div
               onClick={() =>

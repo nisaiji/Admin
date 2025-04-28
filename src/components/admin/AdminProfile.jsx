@@ -959,7 +959,7 @@ export default function AdminProfile() {
           isDarkMode
             ? "bg-gradient-to-r from-fromColor1 to-toColor1"
             : "bg-whiteBackground"
-        } max-w-[1320px] max-md:px-5`}
+        } max-md:px-5`}
       >
         <div
           className={`text-4xl font-bold tracking-tight leading-6 ${
