@@ -16,6 +16,7 @@ import cross from "../../assets/images/darkmode/cross.png";
 import crossw from "../../assets/images/cross.png";
 import ConformationPopup from "../ConformationPopup";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import moment from "moment";
 
 function Addsection({
   isVisible,
@@ -42,7 +43,7 @@ function Addsection({
   const [newSection, setNewSection] = useState({
     name: "",
     teacherId: "",
-    startTime: new Date().getTime(),
+    startTime: moment().startOf("day").valueOf(),
   });
   const [sections, setSections] = useState([]);
   const [selectedTeachersList, setSelectedTeachersList] = useState([]);
@@ -132,6 +133,7 @@ function Addsection({
         classId: clickedClassId,
         startTime: newSection.startTime,
       };
+
       const res = await axiosClient.post(
         EndPoints.ADMIN.REGISTER_SECTION,
         sectionData
@@ -148,7 +150,7 @@ function Addsection({
       setNewSection({
         name: "",
         teacherId: "",
-        startTime: new Date().getTime(),
+        startTime: moment().startOf("day").valueOf(),
       });
       setShowForm(true);
     }
@@ -198,7 +200,7 @@ function Addsection({
     setNewSection({
       name: "",
       teacherId: "",
-      startTime: new Date().getTime(),
+      startTime: moment().startOf("day").valueOf(),
     });
   };
 
@@ -415,7 +417,7 @@ function Addsection({
                   selected={
                     (selectedSection?._id === section?._id
                       ? selectedSection?.startTime
-                      : section?.startTime) || new Date()
+                      : section?.startTime) || moment()
                   }
                   dateFormat="dd/MM/YYYY"
                   readOnly={true}
@@ -584,9 +586,7 @@ function Addsection({
                 <DatePicker
                   selected={newSection.startTime}
                   onChange={(date) => {
-                    const startOfDay = new Date(date);
-                    startOfDay.setHours(0, 0, 0, 0);
-                    const timestamp = startOfDay.getTime();
+                    const timestamp = moment(date).startOf('day').valueOf();
                     setNewSection((prev) => ({
                       ...prev,
                       startTime: timestamp,

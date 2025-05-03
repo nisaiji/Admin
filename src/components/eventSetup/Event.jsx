@@ -146,11 +146,44 @@ const Event = () => {
                   <DatePicker
                     views={["day", "month", "year"]}
                     value={moment(prevData.date, "DD/MM/YYYY")}
+                    format="DD/MM/YYYY"
                     disabled
                     className={`w-full`}
                     textField={(params) => (
-                      <TextField {...params} variant="outlined" />
+                      <TextField
+                        {...params}
+                        placeholder={t("placeholders.date")}
+                        variant="outlined"
+                      />
                     )}
+                    sx={{
+                      border: `1px solid ${isDarkMode ? "#2b2e4a80" : "gray"}`,
+                      borderRadius: "8px",
+                      backgroundColor: isDarkMode ? "" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      "& .MuiOutlinedInput-root": {
+                        padding: 1,
+                        fontSize: "16px",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                      },
+                      "& .Mui-disabled": {
+                        color: isDarkMode ? "#E3E8F3 !important" : "black",
+                        WebkitTextFillColor: isDarkMode
+                          ? "#E3E8F3 !important"
+                          : "black", // Critical for disabled input text
+                      },
+                      "& .MuiInputBase-input": {
+                        fontSize: "14px",
+                        padding: 1,
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                      },
+                      "& .MuiSvgIcon-root": {
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "none",
+                      },
+                    }}
                   />
                 ) : (
                   <>
@@ -214,7 +247,7 @@ const Event = () => {
 
                     <DatePicker
                       views={["day", "month", "year"]}
-                      inputFormat="DD/MM/YYYY"
+                      format="DD/MM/YYYY"
                       minDate={
                         newEventForm.startDate
                           ? moment(newEventForm.startDate, "DD/MM/YYYY")
@@ -384,14 +417,14 @@ const Event = () => {
           formattedEvent = {
             title: capitalizeFirstLetter(newEvent?.title?.trim()),
             description: capitalizeFirstLetter(newEvent?.description?.trim()),
-            date: moment(newEvent.date).format("yyyy-MM-DD"),
+            date: moment(newEvent.date, "DD/MM/YYYY").valueOf(),
           };
         } else {
           formattedEvent = {
             title: capitalizeFirstLetter(newEvent?.title?.trim()),
             description: capitalizeFirstLetter(newEvent?.description?.trim()),
-            startTime: moment(newEvent.startDate).valueOf(),
-            endTime: moment(newEvent.endDate).valueOf(),
+            startTime: moment(newEvent.startDate, "DD/MM/YYYY").valueOf(),
+            endTime: moment(newEvent.endDate, "DD/MM/YYYY").valueOf(),
           };
         }
 

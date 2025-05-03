@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import backIcon from "../assets/images/backIcon.png";
 import editw from "../assets/images/editw.png";
 import downloadw from "../assets/images/downloadw.png";
@@ -49,19 +49,26 @@ export default function AttendancePopup({
   const [workdays, setWorkdays] = useState({});
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const [totalAttendanceDays, setTotalAttendanceDays] = useState(0);
-  // Start time based on role
-  const startTime = isTeacher ? sectionStartTime : startTimeForAdmin;
-  // console.log({sectionStartTime});
+  const isFetchingRef = useRef(false);
+  const formatDate = (date) => moment(date).format("YYYY-MM-DD");
 
   // Return null if the popup is not visible
   if (!isVisible) return null;
 
-  // Total days in the current month
-  const totalDays = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth() + 1,
-    0
-  ).getDate();
+  const totalDays = useMemo(
+    () =>
+      new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0
+      ).getDate(),
+    [currentDate]
+  );
+
+  const startTime = useMemo(
+    () => (isTeacher ? sectionStartTime : startTimeForAdmin),
+    [isTeacher, sectionStartTime, startTimeForAdmin]
+  );
 
   /**
    * Check if a specific date is a Sunday or a holiday.
@@ -70,8 +77,13 @@ export default function AttendancePopup({
    * @returns {boolean} - True if the date is a Sunday or a holiday
    */
   const isSunday = (dateIndex) => {
-    const date = moment({ day: dateIndex + 1 }).format("YYYY-MM-DD");
-    return moment(date).day() === 0 && !(date in workdays);
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      dateIndex + 1
+    );
+    const formattedDate = formatDate(date);
+    return date.getDay() === 0 && !(formattedDate in workdays);
   };
 
   const isHoliday = (dateIndex) => {
@@ -80,7 +92,7 @@ export default function AttendancePopup({
       currentDate.getMonth(),
       dateIndex + 1
     );
-    const formattedDate = moment(date).format("YYYY-MM-DD");
+    const formattedDate = formatDate(date);
     return holidays[formattedDate];
   };
 
@@ -272,6 +284,8 @@ export default function AttendancePopup({
    * Fetch monthly attendance data for the current month.
    */
   const fetchMonthlyAttendance = async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     try {
       setLoading(true);
       const startTime = new Date(
@@ -312,9 +326,9 @@ export default function AttendancePopup({
 
           // Generate an array for all days in the month
           const monthDates = Array.from({ length: totalDays }, (_, i) => {
-            const dateKey = moment(
+            const dateKey = formatDate(
               new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
-            ).format("YYYY-MM-DD");
+            );
             // console.log(
             //   dateKey,
             //   new Date(dateKey).getDay() === 0,
@@ -331,6 +345,7 @@ export default function AttendancePopup({
                   : attendanceByDate[dateKey] || "",
             };
           });
+          // console.log(monthDates);
 
           return {
             ...student,
@@ -348,21 +363,66 @@ export default function AttendancePopup({
         });
 
         const totalHolidays = Array.from({ length: totalDays }, (_, i) => {
-          const dateKey = moment(
+          const dateKey = formatDate(
             new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
-          ).format("YYYY-MM-DD");
+          );
           return dateKey in holidays || new Date(dateKey).getDay() === 0;
         }).filter(Boolean).length;
 
         setAttendanceData(updatedAttendanceData);
-        setTotalAttendanceDays(totalDays - totalHolidays);
+
+        // setTotalAttendanceDays(totalDays - totalHolidays);
       }
     } catch (e) {
       toast.error(e);
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
   };
+
+  useEffect(() => {
+    if (!startTime || !currentDate || !Object.keys(holidays).length) return;
+
+    const currentMonth = moment(currentDate).format("MM-YYYY");
+    const startMonth = moment(startTime).format("MM-YYYY");
+    const todayMonth = moment().format("MM-YYYY");
+
+    const startDate =
+      currentMonth === startMonth
+        ? moment(startTime)
+        : moment(currentDate).startOf("month");
+
+    const effectiveEnd =
+      currentMonth === todayMonth
+        ? moment().endOf("day")
+        : moment(currentDate).endOf("month");
+
+    const allDatesInRange = [];
+    let day = moment(startDate);
+
+    while (day.isSameOrBefore(effectiveEnd, "day")) {
+      allDatesInRange.push(day.clone());
+      day.add(1, "day");
+    }
+
+    const totalDaysInRange = allDatesInRange.length;
+
+    const totalHolidays = allDatesInRange.filter((date) => {
+      const dateStr = date.format("YYYY-MM-DD");
+      const isSunday = date.day() === 0 && !(dateStr in workdays);
+      const isHoliday = dateStr in holidays;
+      return isSunday || isHoliday;
+    }).length;
+
+    setTotalAttendanceDays(totalDaysInRange - totalHolidays);
+
+    // console.log("Start:", startDate.format("YYYY-MM-DD"));
+    // console.log("End:", effectiveEnd.format("YYYY-MM-DD"));
+    // console.log("Days:", totalDaysInRange);
+    // console.log("Holidays:", totalHolidays);
+    // console.log("Attendance Days:", totalDaysInRange - totalHolidays);
+  }, [startTime, currentDate, holidays, workdays]);
 
   // get events api
   const fetchEvents = async () => {
@@ -389,7 +449,7 @@ export default function AttendancePopup({
 
       if (res?.statusCode === 200) {
         const holidayMap = res?.result?.reduce((acc, item) => {
-          acc[moment(item.date).format("YYYY-MM-DD")] = true;
+          acc[formatDate(item.date)] = true;
           return acc;
         }, {});
         setHolidays(holidayMap);
@@ -405,7 +465,7 @@ export default function AttendancePopup({
 
       if (res2?.statusCode === 200) {
         const workdayMap = res2?.result?.reduce((acc, item) => {
-          acc[moment(item.date).format("YYYY-MM-DD")] = true;
+          acc[formatDate(item.date)] = true;
           return acc;
         }, {});
         setWorkdays(workdayMap);
@@ -417,13 +477,17 @@ export default function AttendancePopup({
     }
   };
 
-  // Trigger fetchMonthlyAttendance when holidays update
-  useEffect(() => {
-    fetchMonthlyAttendance();
-  }, [holidays, workdays]);
+  // // Trigger fetchMonthlyAttendance when holidays update
+  // useEffect(() => {
+  //   fetchMonthlyAttendance();
+  // }, [holidays, workdays]);
+
+  // useEffect(() => {
+  //   fetchEvents();
+  // }, [currentDate]);
 
   useEffect(() => {
-    fetchEvents();
+    fetchEvents().then(fetchMonthlyAttendance);
   }, [currentDate]);
 
   // attendance download in pdf format
@@ -654,6 +718,7 @@ export default function AttendancePopup({
               </tr>
             </thead>
             <tbody>
+              {/* {console.log(attendanceData)} */}
               {attendanceData.map((data, index) => {
                 const totalPresent = data.attendances.filter(
                   (a) => a.attendance === "P"
@@ -683,6 +748,8 @@ export default function AttendancePopup({
                         : isHoliday(idx)
                         ? "H"
                         : value.attendance;
+                      // console.log(value);
+
                       return (
                         <td
                           key={idx}
