@@ -82,8 +82,7 @@ export default function AttendancePopup({
       currentDate.getMonth(),
       dateIndex + 1
     );
-    const formattedDate = formatDate(date);
-    return date.getDay() === 0 && !(formattedDate in workdays);
+    return date.getDay() === 0 && !workdays?.[formatDate(date)];
   };
 
   const isHoliday = (dateIndex) => {
@@ -382,8 +381,6 @@ export default function AttendancePopup({
   };
 
   useEffect(() => {
-    if (!startTime || !currentDate || !Object.keys(holidays).length) return;
-
     const currentMonth = moment(currentDate).format("MM-YYYY");
     const startMonth = moment(startTime).format("MM-YYYY");
     const todayMonth = moment().format("MM-YYYY");
@@ -423,7 +420,6 @@ export default function AttendancePopup({
     // console.log("Holidays:", totalHolidays);
     // console.log("Attendance Days:", totalDaysInRange - totalHolidays);
   }, [startTime, currentDate, holidays, workdays]);
-
   // get events api
   const fetchEvents = async () => {
     setLoading(true);
@@ -476,6 +472,51 @@ export default function AttendancePopup({
       setLoading(false);
     }
   };
+
+  // const fetchEvents = async () => {
+  //   setLoading(true);
+
+  //   try {
+  //     const startOfMonth = moment(currentDate).startOf("month").startOf("day"); // First day of the current month
+  //     const endOfMonth = moment(currentDate).endOf("month").endOf("day"); // Last day of the current month
+
+  //     const payload = {
+  //       startTime: startOfMonth.valueOf(),
+  //       endTime: endOfMonth.valueOf(),
+  //     };
+
+  //     const [eventsRes, sundaysRes] = await Promise.all([
+  //       axiosClient.post(
+  //         isTeacher ? EndPoints.TEACHER.GET_EVENTS : EndPoints.ADMIN.GET_EVENTS,
+  //         payload
+  //       ),
+  //       axiosClient.post(
+  //         isTeacher
+  //           ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
+  //           : EndPoints.ADMIN.GET_SUNDAY_HOLIDAY,
+  //         payload
+  //       ),
+  //     ]);
+
+  //     if (eventsRes?.statusCode === 200) {
+  //       const holidayMap = Object.fromEntries(
+  //         eventsRes.result.map((item) => [formatDate(moment(item.date)), true])
+  //       );
+  //       setHolidays(holidayMap);
+  //     }
+
+  //     if (sundaysRes?.statusCode === 200) {
+  //       const workdayMap = Object.fromEntries(
+  //         sundaysRes.result.map((item) => [formatDate(moment(item.date)), true])
+  //       );
+  //       setWorkdays(workdayMap);
+  //     }
+  //   } catch (error) {
+  //     toast.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // // Trigger fetchMonthlyAttendance when holidays update
   // useEffect(() => {
@@ -748,8 +789,6 @@ export default function AttendancePopup({
                         : isHoliday(idx)
                         ? "H"
                         : value.attendance;
-                      // console.log(value);
-
                       return (
                         <td
                           key={idx}
