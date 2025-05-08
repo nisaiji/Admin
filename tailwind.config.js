@@ -21,7 +21,8 @@ export default {
         background3: "#262626",
         background4: "#3e3e3e",
         background5: "#4a4a52",
-
+        backgroundGray50: "#6868681A",
+        backgroundGray15: "#68686826",
         // white shades
         whiteBackground: "#FFFFFF",
         whiteBackground1: "#FAFAFA",
@@ -55,6 +56,7 @@ export default {
         textRed: "#FE4040",
         textDarkRed: "#D91111",
         textGray: "#6b7280",
+        textGray1: "#A9ACB2",
         textDarkGray: "#111827",
         textHoliday: " #FF9933",
 

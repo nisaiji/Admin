@@ -24,6 +24,7 @@ import Requests from "./components/dashBoard/Request";
 import Leaves from "./components/dashBoard/Leaves";
 import TeacherProfile from "./components/admin/TeacherProfile";
 import desktop from "./assets/images/desktop.png";
+import Register from "./pages/Register";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -110,6 +111,7 @@ function App() {
           <Route element={<NotRequireUser />}>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SchoolDetailSignup />} />
+            {/* <Route path="/signup" element={<Register />} /> */}
           </Route>
         </Routes>
       </I18nextProvider>

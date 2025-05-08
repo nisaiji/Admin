@@ -1,5 +1,27 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { jwtDecode } from "jwt-decode";
+import { axiosClient } from "../services/axiosClient";
+import EndPoints from "../services/EndPoints";
+
+export const setAuth = createAsyncThunk("auth/setAuth", async (data) => {
+  const existing = localStorage.getItem("status");
+  const parsed = existing ? JSON.parse(existing) : {};
+  const mergedData = { ...parsed, ...data };
+  localStorage.setItem("status", JSON.stringify(mergedData));
+  return mergedData;
+});
+
+// Thunk to fetch admin data
+export const fetchAdmin = createAsyncThunk("admin/fetchAdmin", async (_) => {
+  try {
+    const res = await axiosClient.get(EndPoints.ADMIN.GET_ADMIN);
+    if (res?.statusCode === 200) {
+      return res?.result;
+    }
+  } catch (e) {
+    console.log({ e });
+  }
+});
 
 /**
  * Initial state for the authentication slice.
@@ -21,6 +43,8 @@ const initialState = {
   id: null,
   schoolName: null,
   sectionStartTime: null,
+  data: {},
+  status: {},
 };
 
 /**
@@ -60,8 +84,20 @@ const appAuthSlice = createSlice({
       }
       state.schoolName = decodeToken.schoolName;
     },
+    updateAdminData(state, action) {
+      state.data = { ...state.data, ...action.payload };
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchAdmin.fulfilled, (state, action) => {
+        state.data = action.payload;
+      })
+      .addCase(setAuth.fulfilled, (state, action) => {
+        state.status = action.payload;
+      });
   },
 });
 
-export const { getRole, setAuthData } = appAuthSlice.actions;
+export const { getRole, setAuthData, updateAdminData } = appAuthSlice.actions;
 export default appAuthSlice;

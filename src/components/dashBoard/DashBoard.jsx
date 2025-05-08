@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
@@ -9,7 +9,7 @@ import DownIcon from "../../assets/images/darkmode/downArrow.png";
 import school from "../../assets/images/darkmode/school.png";
 import edit from "../../assets/images/darkmode/editimg.png";
 import CalendarComponent from "./CalendarComponent.jsx";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import EndPoints from "../../services/EndPoints.js";
 import moment from "moment";
 import { axiosClient } from "../../services/axiosClient";
@@ -18,11 +18,14 @@ import { useTranslation } from "react-i18next";
 import toast, { Toaster } from "react-hot-toast";
 import CONSTANT from "../../utils/constants.js";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { fetchAdmin, updateAdminData } from "../../store/AppAuthSlice.jsx";
 
 const Dashboard = () => {
   const [t] = useTranslation();
+  const dispatch = useDispatch();
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const schoolName = useSelector((state) => state.appAuth.schoolName);
+  const { data } = useSelector((state) => state.appAuth);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [selectedOption, setSelectedOption] = useState("Monthly");
   const [studentPresentCountData, setStudentPresentCountData] = useState(null);
@@ -37,6 +40,7 @@ const Dashboard = () => {
   const [startTime, setStartTime] = useState("");
   const [eventLoading, setEventLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
   const [totalStudentClassSectionWise, setTotalStudentClassSectionWise] =
     useState(1);
   const [date, setDate] = useState({
@@ -157,6 +161,39 @@ const Dashboard = () => {
   useEffect(() => {
     getClassList();
   }, []);
+
+  useEffect(() => {
+    dispatch(fetchAdmin());
+  }, [dispatch]);
+
+  const uploadPhoto = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Convert image file to Base64
+    const toBase64 = (file) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result); // Base64 string
+        reader.onerror = (error) => reject(error);
+      });
+
+    try {
+      const base64Image = await toBase64(file);
+      // Optionally send base64 to the server
+      const res = await axiosClient.put(
+        EndPoints.ADMIN.PHOTO_UPLOAD,
+        { photo: base64Image, method: "POST" } // Adjust key as needed by your backend
+      );
+      if (res?.statusCode === 200) {
+        dispatch(updateAdminData({ photo: base64Image }));
+        toast.success(res?.result);
+      }
+    } catch (e) {
+      // console.log({e});
+    }
+  };
 
   /**
    * Fetches calendar events based on the selected month.
@@ -735,11 +772,18 @@ const Dashboard = () => {
         } flex items-center w-full p-4 shadow-lg`}
       >
         <img
-          src={school}
+          src={data?.photo || school}
           alt="School Logo"
-          className={`w-[230px] h-auto rounded-lg`}
+          className="w-[300px] h-[200px] rounded-lg cursor-pointer object-cover"
+          onClick={() => fileInputRef?.current?.click()}
         />
-
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={uploadPhoto}
+        />
         <div className={`flex flex-col justify-center flex-grow px-4`}>
           <h1
             className={`text-3xl font-bold ${

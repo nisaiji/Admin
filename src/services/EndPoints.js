@@ -1,5 +1,15 @@
 const EndPoints = {
   ADMIN: {
+    // ADMIN AUTH v2
+    STATUS: "v2/admin/status",
+    PHONE_VERIFY: "v2/admin/phoneVerify",
+    RESEND_OTP: "v2/admin/phoneVerify/resend-otp",
+    PHONE_OTP_VERIFY: "v2/admin/phoneVerify",
+    EMAIL_VERIFY: "v2/admin/emailVerify",
+    EMAIL_OTP_VERIFY: "v2/admin/emailVerify",
+    PASSWORD_UPDATE: "v2/admin/password",
+    LOGIN: "v2/admin/login",
+
     // ADMIN AUTH
     ADMIN_REGISTER: "admin",
     GET_DEACTIVATE_ADMIN: "admin/deactivate",
@@ -15,6 +25,7 @@ const EndPoints = {
     DASHBOARD_ATTENDANCE_STATUS: "admin-dashboard/attendance-status",
     GET_EVENTS: "holiday-event",
     GET_SUNDAY_HOLIDAY: "workdays",
+    PHOTO_UPLOAD: "admin/photo-upload",
 
     // ADMIN TEACHER SETUP
     REGISTER_TEACHER: "teacher",
@@ -25,7 +36,7 @@ const EndPoints = {
     // ADMIN STUDENT SETUP
     GET_STUDENT_LIST: "student/admin",
     DELETE_STUDENT: "student/admin",
-    STUDENT_UPDATE: "student/admin",
+    STUDENT_UPDATE: "v2/student/admin",
     SEARCH_STUDENT: "v2/student/admin",
 
     // ADMIN CLASS AND SECTION SETUP
@@ -45,7 +56,7 @@ const EndPoints = {
 
     // ADMIN SECTION STUDENTS
     GET_SECTION_STUDENTS: "v2/student/admin-get",
-    REGISTER_SECTION_STUDENT: "v2/student/admin",//v2
+    REGISTER_SECTION_STUDENT: "v2/student/admin", //v2
     UPDATE_SECTION_STUDENT: "v2/student/admin",
     DELETE_SECTION_STUDENT: "v2/student/admin",
 
