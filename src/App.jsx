@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import ClassSetup from "./components/classSetup/ClassSetup";
 import TeacherPage from "./components/teacherSetup/Teacher";
 import Event from "./components/eventSetup/Event";
+import TransferCertificate from "./components/transferCertificate/TransferCertificate";
 import Addsection from "./components/classSetup/Addsection";
 import Studentlist from "./components/studentSetup/Studentlist";
 import StudentSection from "./components/classSetup/sectionStudents/StudentSection";
@@ -25,6 +26,7 @@ import Leaves from "./components/dashBoard/Leaves";
 import TeacherProfile from "./components/admin/TeacherProfile";
 import desktop from "./assets/images/desktop.png";
 import Register from "./pages/Register";
+import TransferCertificateApply from "./components/transferCertificate/TransferCertificateApply";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -94,6 +96,8 @@ function App() {
                   <Route path="teacher/edit-teacher" element={<TeacherUpdate />} />
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
+                  <Route path="transfer-certificate" element={<TransferCertificate />} />
+                  <Route path="transfer-certificate-apply" element={<TransferCertificateApply />} />
                   <Route path="add-section" element={<Addsection />} />
                   <Route
                     path="class-setup/student-section"

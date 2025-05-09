@@ -193,6 +193,21 @@ const Navbar = () => {
                       />
                       {t("event")}
                     </Link>
+                    <Link
+                      to="/transfer-certificate"
+                      className={`flex justify-start items-start gap-3 px-4 py-3 ${
+                        isDarkMode
+                          ? "text-textPrimary hover:bg-background4"
+                          : "text-textBlack hover:bg-whiteBackground"
+                      } text-sm hover:text-textOrange`}
+                    >
+                      <img
+                        src={calendaricon}
+                        alt="calendaricon"
+                        className={`w-4 h-4 relative`}
+                      />
+                      {t("transferCertificate")}
+                    </Link>
                   </div>
                 </div>
               )}

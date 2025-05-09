@@ -230,7 +230,8 @@
     "data": "data",
     "requests": "Request",
     "passwordReset": "Password Reset",
-    "leave": "Leave"
+    "leave": "Leave",
+    "transferStudent": "Transfer student"
   },
   "buttons": {
     "print": "Print",
@@ -251,7 +252,8 @@
     "addClass": "Add Class",
     "today": "Today",
     "saveChanges": "Save Changes",
-    "checkProgress": "Check Progress"
+    "checkProgress": "Check Progress",
+    "applyTC":"Apply TC"
   },
   "toasts": {
     "sectionLimit": "Reached maximum section limit",
@@ -397,6 +399,7 @@
   "A": "A",
   "setup": "Setup",
   "event": "Calendar",
+  "transferCertificate": "TC",
   "createSection": "Create Sections",
   "sections": "Sections",
   "startTime": "Start Date",
