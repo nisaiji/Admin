@@ -8,6 +8,8 @@ import DownIconw from "../../assets/images/dropdown.png";
 import DownIcon from "../../assets/images/darkmode/downArrow.png";
 import school from "../../assets/images/darkmode/school.png";
 import edit from "../../assets/images/darkmode/editimg.png";
+import editPhotow from "../../assets/images/darkmode/editPhotow.png";
+import editPhoto from "../../assets/images/darkmode/editPhoto.png";
 import CalendarComponent from "./CalendarComponent.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import EndPoints from "../../services/EndPoints.js";
@@ -786,12 +788,19 @@ const Dashboard = () => {
             className="w-[300px] h-[200px] rounded-lg object-cover"
           />
         ) : (
-          <img
-            src={data?.photo || school}
-            alt="School Logo"
-            className="w-[300px] h-[200px] rounded-lg cursor-pointer object-cover"
-            onClick={() => fileInputRef?.current?.click()}
-          />
+          <div className="relative inline-block">
+            <img
+              src={data?.photo || school}
+              alt="School Logo"
+              className="w-[300px] h-[200px] rounded-xl  object-cover border-2 border-borderLine"
+            />
+            <img
+              src={isDarkMode ? editPhotow : editPhoto}
+              alt="Edit"
+              className={`absolute size-10 bottom-0 right-0 cursor-pointer`}
+              onClick={() => fileInputRef?.current?.click()}
+            />
+          </div>
         )}
         <input
           type="file"

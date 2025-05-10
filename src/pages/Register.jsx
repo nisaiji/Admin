@@ -79,9 +79,9 @@ function Register() {
 
   const steps = [1, 2, 3, 4, 5, 6];
   const labels = [
-    "Phone Verification",
-    "Email Verification",
-    "Password Update",
+    "Verify Phone",
+    "Verify Email",
+    "Update Password",
     t("register.basicInfo"),
     t("register.addressInfo"),
     t("register.finish"),
@@ -90,7 +90,7 @@ function Register() {
   const Progress = useMemo(
     () => (
       <div>
-        <div className="bg-backgroundOrange1 h-1 w-[700px] mx-auto mt-6 translate-y-6" />
+        <div className="bg-backgroundOrange1 h-1 w-[850px] mx-auto mt-6 translate-y-6" />
         <div className="flex justify-around mb-2">
           {steps.map((step, i) => (
             <div
@@ -110,16 +110,20 @@ function Register() {
           ))}
         </div>
         <div className="flex">
-          {labels.map((label, i) => (
-            <div
-              key={i}
-              className={`text-sm w-1/6 text-center font-semibold ${
-                currentStep === i + 1 ? "text-textOrange" : "text-textPrimary"
-              }`}
-            >
-              {label}
-            </div>
-          ))}
+          {labels.map((label, i) =>
+            currentStep >= i + 1 ? (
+              <div
+                key={i}
+                className={`text-sm w-1/6 text-center font-medium ${
+                  currentStep === i + 1 ? "text-textOrange" : "text-textGray1"
+                }`}
+              >
+                {label}
+              </div>
+            ) : (
+              <div key={i} className="w-1/6" />
+            )
+          )}
         </div>
       </div>
     ),
@@ -139,143 +143,6 @@ function Register() {
     />,
   ];
 
-  // const Progress = () => (
-  //   <div>
-  //     <div className="bg-backgroundOrange1 h-1 w-[700px] mx-auto mt-6 translate-y-6" />
-  //     <div className="flex justify-around mb-2">
-  //       <div
-  //         className={`size-12 rounded-full flex items-center justify-center z-10 ${
-  //           currentStep === 1
-  //             ? "bg-backgroundOrange1 text-textPrimary"
-  //             : "bg-whiteBackground text-textBlack"
-  //         }`}
-  //       >
-  //         {currentStep === 1 ? (
-  //           1
-  //         ) : (
-  //           <img src={Tick} alt="Tick" className="size-6" />
-  //         )}
-  //       </div>
-  //       <div
-  //         className={`size-12 rounded-full flex items-center justify-center z-10 ${
-  //           currentStep === 2
-  //             ? "bg-backgroundOrange1 text-textPrimary"
-  //             : "bg-whiteBackground text-textBlack"
-  //         }`}
-  //       >
-  //         {currentStep <= 2 ? (
-  //           2
-  //         ) : (
-  //           <img src={Tick} alt="Tick" className="size-6" />
-  //         )}
-  //       </div>
-  //       <div
-  //         className={`size-12 rounded-full flex items-center justify-center z-10 ${
-  //           currentStep === 3
-  //             ? "bg-backgroundOrange1 text-textPrimary"
-  //             : "bg-whiteBackground text-textBlack"
-  //         }`}
-  //       >
-  //         {currentStep <= 3 ? (
-  //           3
-  //         ) : (
-  //           <img src={Tick} alt="Tick" className="size-6" />
-  //         )}
-  //       </div>
-  //       <div
-  //         className={`size-12 rounded-full flex items-center justify-center z-10 ${
-  //           currentStep === 4
-  //             ? "bg-backgroundOrange1 text-textPrimary"
-  //             : "bg-whiteBackground text-textBlack"
-  //         }`}
-  //       >
-  //         {currentStep <= 4 ? (
-  //           4
-  //         ) : (
-  //           <img src={Tick} alt="Tick" className="size-6" />
-  //         )}
-  //       </div>
-  //       <div
-  //         className={`size-12 rounded-full flex items-center justify-center z-10 ${
-  //           currentStep === 5
-  //             ? "bg-backgroundOrange1 text-textPrimary"
-  //             : "bg-whiteBackground text-textBlack"
-  //         }`}
-  //       >
-  //         {currentStep <= 5 ? (
-  //           5
-  //         ) : (
-  //           <img src={Tick} alt="Tick" className="size-6" />
-  //         )}
-  //       </div>
-  //       <div
-  //         className={`size-12 rounded-full flex items-center justify-center z-10 ${
-  //           currentStep === 6
-  //             ? "bg-backgroundOrange1 text-textPrimary"
-  //             : "bg-whiteBackground text-textBlack"
-  //         }`}
-  //       >
-  //         6
-  //       </div>
-  //     </div>
-  //     <div className="flex">
-  //       <div
-  //         className={`text-sm w-1/6 text-center font-semibold ${
-  //           currentStep === 1 ? "text-backgroundOrange1" : "text-textPrimary"
-  //         }`}
-  //       >
-  //         Phone Verification
-  //       </div>
-  //       {currentStep > 1 && (
-  //         <div
-  //           className={`text-sm w-1/6 text-center font-semibold ${
-  //             currentStep === 2 ? "text-textOrange" : "text-textPrimary"
-  //           }`}
-  //         >
-  //           Email Verification
-  //         </div>
-  //       )}
-  //       {currentStep > 2 && (
-  //         <div
-  //           className={`text-sm w-1/6 text-center font-semibold ${
-  //             currentStep === 3 ? "text-textOrange" : "text-textPrimary"
-  //           }`}
-  //         >
-  //           Password Update
-  //         </div>
-  //       )}
-  //       {currentStep > 3 && (
-  //         <div
-  //           className={`text-sm w-1/6 text-center font-semibold ${
-  //             currentStep === 4 ? "text-textOrange" : "text-textPrimary"
-  //           }`}
-  //         >
-  //           {t("register.basicInfo")}
-  //         </div>
-  //       )}
-  //       {currentStep > 4 && (
-  //         <div
-  //           className={`text-sm w-1/6 text-center font-semibold ${
-  //             currentStep === 5 ? "text-textOrange" : "text-textPrimary"
-  //           }`}
-  //         >
-  //           {t("register.addressInfo")}
-  //         </div>
-  //       )}
-
-  //       {currentStep > 5 && (
-  //         <div
-  //           className={`text-sm w-1/6 text-center font-semibold ${
-  //             currentStep === 6 ? "text-textOrange" : "text-textPrimary"
-  //           }`}
-  //         >
-  //           {t("register.finish")}
-  //         </div>
-  //       )}
-  //     </div>
-  //   </div>
-  // );
-
   return (
     <>
       <div className="min-h-screen h-svh bg-background2">
@@ -286,40 +153,13 @@ function Register() {
         )}
         <Toaster position="top-center" reverseOrder={false} />
         <div className="flex items-center justify-center h-full w-full">
-          <div className="bg-gradient-to-t from-fromColor1 to-toColor1 rounded-2xl backdrop-blur-lg w-[800px] mx-auto my-3 flex flex-col py-6">
+          <div className="bg-gradient-to-t from-fromColor1 to-toColor1 rounded-2xl backdrop-blur-lg w-[1000px] mx-auto my-3 flex flex-col py-6">
             <div className="text-center text-black">
               <h2 className="font-bold text-2xl mt-3 text-textPrimary">
                 {t("register.setupAccount")}
               </h2>
-              {/* <Progress /> */}
               {Progress}
               <div className="px-20">{stepComponents[currentStep - 1]}</div>
-              {/* <div className="px-20">
-                {currentStep === 1 && (
-                  <Step1 goback={goBack} setStep={(step) => setStep(step)} />
-                )}
-                {currentStep === 2 && (
-                  <Step2 goback={goBack} setStep={(step) => setStep(step)} />
-                )}
-                {currentStep === 3 && (
-                  <Step3 goback={goBack} setStep={(step) => setStep(step)} />
-                )}
-                {currentStep === 4 && (
-                  <Step4 goback={goBack} setStep={(step) => setStep(step)} />
-                )}
-                {currentStep === 5 && (
-                  <Step5 goback={goBack} setStep={(step) => setStep(step)} />
-                )}
-                {currentStep === 6 && (
-                  <Step6
-                    checkProgress={() => {
-                      getadmin(true);
-                    }}
-                    isDisable={toastDisplayed}
-                    goback={goBack}
-                  />
-                )}
-              </div> */}
             </div>
           </div>
         </div>

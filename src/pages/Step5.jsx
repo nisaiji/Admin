@@ -191,7 +191,7 @@ const Step5 = ({ goback, setStep }) => {
                 selected ? (
                   selected
                 ) : (
-                  <span style={{ color: "#aaa" }}>
+                  <span style={{ color: "gray" }}>
                     {t("adminProfile.state")}
                   </span>
                 )
@@ -207,6 +207,13 @@ const Step5 = ({ goback, setStep }) => {
                 },
                 "& .MuiSelect-icon": {
                   color: formData.state ? "#E3E8F3" : "gray",
+                },
+                "&.Mui-disabled .MuiSelect-select": {
+                  color: "gray !important",
+                  WebkitTextFillColor: "gray !important",
+                },
+                "&.Mui-disabled .MuiSelect-icon": {
+                  color: "gray !important",
                 },
               }}
               MenuProps={{
@@ -277,6 +284,13 @@ const Step5 = ({ goback, setStep }) => {
                 "& .MuiSelect-icon": {
                   color: formData.district ? "#E3E8F3" : "gray",
                 },
+                "&.Mui-disabled .MuiSelect-select": {
+                  color: "gray !important",
+                  WebkitTextFillColor: "gray !important",
+                },
+                "&.Mui-disabled .MuiSelect-icon": {
+                  color: "gray !important",
+                },
               }}
               MenuProps={{
                 PaperProps: {
@@ -316,7 +330,7 @@ const Step5 = ({ goback, setStep }) => {
             {t("adminProfile.city")}
           </p>
           <input
-            className="text-textPrimary rounded-lg border h-[39px] border-borderGray2 bg-backgroundGray15 py-2 px-5 mt-2 w-full"
+            className="text-textPrimary rounded-lg h-[39px] bg-backgroundGray15 py-2 px-5 mt-2 w-full"
             type="text"
             name="city"
             placeholder={t("placeholders.city")}
@@ -338,7 +352,7 @@ const Step5 = ({ goback, setStep }) => {
           {t("adminProfile.pincode")}
         </p>
         <input
-          className="text-textPrimary rounded-lg border h-[39px] border-borderGray2 bg-backgroundGray15 py-2 px-5 mt-2 w-full"
+          className="text-textPrimary rounded-lg h-[39px] bg-backgroundGray15 py-2 px-5 mt-2 w-full"
           type="text"
           name="pincode"
           placeholder={t("placeholders.pincode")}
@@ -360,7 +374,7 @@ const Step5 = ({ goback, setStep }) => {
           {t("adminProfile.schoolAddress")}
         </p>
         <input
-          className="text-textPrimary rounded-lg border border-borderGray2 bg-backgroundGray15 h-[39px] py-2 px-5 mt-2 w-full"
+          className="text-textPrimary rounded-lg bg-backgroundGray15 h-[39px] py-2 px-5 mt-2 w-full"
           type="text"
           name="address"
           placeholder={t("placeholders.schoolAdress")}
@@ -388,32 +402,11 @@ const Step5 = ({ goback, setStep }) => {
           type="submit"
           className="rounded-lg px-4 h-8 bg-backgroundBlue text-white font-medium flex items-center justify-center active:scale-90"
         >
-          {t("buttons.submit")}
+          {t("buttons.continue")}
         </button>
       </div>
     </form>
   );
 };
-
-// Style helper
-const dropdownStyles = () => ({
-  backgroundColor: "#68686826",
-  color: "#E3E8F3",
-  border: "1px solid #D1D5DB",
-  borderRadius: "0.5rem",
-  mt: "8px",
-  width: "100%",
-  height: "40px",
-  textAlign: "start",
-  "& .MuiSelect-icon": {
-    color: "#E3E8F3",
-  },
-  "& .MuiOutlinedInput-notchedOutline": {
-    border: "none",
-  },
-  "&.Mui-disabled": {
-    color: "gray",
-  },
-});
 
 export default Step5;

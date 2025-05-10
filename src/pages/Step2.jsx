@@ -66,6 +66,9 @@ const Step2 = ({ goback, setStep }) => {
         dispatch(setAuth({ email }));
         toast.success(res?.result);
         setOtpVisible(true);
+        document.getElementById("otp-0")?.focus();
+        setTimer(30);
+        setIsResendDisabled(true);
       }
     } catch (e) {
       toast.error(e);
@@ -98,7 +101,7 @@ const Step2 = ({ goback, setStep }) => {
       const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_VERIFY, {
         email,
       });
-      if (res?.data?.statusCode === 200) {
+      if (res?.statusCode === 200) {
         toast.success(res?.result);
         setOtp(["", "", "", "", ""]);
         inputRefs.current[0]?.focus();
@@ -120,7 +123,7 @@ const Step2 = ({ goback, setStep }) => {
           {t("adminProfile.Email")}
         </p>
         <input
-          className="text-textPrimary rounded-xl border border-borderWhite2 py-2 pl-5 mt-2 w-full bg-backgroundGray15"
+          className="text-textPrimary rounded-xl py-2 pl-5 mt-2 w-full bg-backgroundGray15"
           type="text"
           name="email"
           placeholder={t("placeholders.emailAddress")}
@@ -148,6 +151,22 @@ const Step2 = ({ goback, setStep }) => {
                 maxLength={1}
                 inputMode="numeric"
                 autoComplete="one-time-code"
+                onKeyDown={(e) => {
+                  if (e.key === "Backspace") {
+                    if (otp[idx]) {
+                      const newOtp = [...otp];
+                      newOtp[idx] = "";
+                      setOtp(newOtp);
+                    } else if (idx > 0) {
+                      const newOtp = [...otp];
+                      newOtp[idx - 1] = "";
+                      setOtp(newOtp);
+                      setTimeout(() => {
+                        inputRefs.current[idx - 1]?.focus();
+                      }, 10);
+                    }
+                  }
+                }}
                 className="w-14 h-14 text-center text-xl rounded-xl bg-backgroundGray15 text-textPrimary border border-gray-300 mx-1 focus:outline-none"
               />
             ))}
@@ -155,7 +174,7 @@ const Step2 = ({ goback, setStep }) => {
               <img
                 src={refresh}
                 alt="refresh"
-                className="size-9 invert top-10 cursor-pointer ml-3"
+                className="size-6 invert top-10 cursor-pointer ml-3"
               />
             </button>
           </div>
@@ -197,7 +216,7 @@ const Step2 = ({ goback, setStep }) => {
             onClick={handleSubmit}
             className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           >
-            <p className="text-base">{t("buttons.submit")}</p>
+            <p className="text-base">{t("buttons.continue")}</p>
           </button>
         )}
       </div>

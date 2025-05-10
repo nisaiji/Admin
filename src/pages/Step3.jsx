@@ -68,20 +68,22 @@ const Step3 = ({ goback, setStep }) => {
           <p className="text-textPrimary text-sm text-left p-1 font-semibold">
             {t("labels.password")}
           </p>
-          <input
-            className="text-textPrimary rounded-lg border border-borderGray2 bg-backgroundGray15 py-2 px-5 mt-2 w-full"
-            type={showPassword ? "text" : "password"}
-            name="password"
-            placeholder={t("placeholders.password")}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <img
-            src={showPassword ? hide : show}
-            alt="Toggle Password Visibility"
-            className="absolute right-3 bottom-2 cursor-pointer size-6 object-contain"
-            onClick={togglePasswordVisibility}
-          />
+          <div className="relative w-full">
+            <input
+              className="text-textPrimary rounded-lg bg-backgroundGray15 py-2 px-5 mt-2 w-full"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder={t("placeholders.password")}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <img
+              src={showPassword ? hide : show}
+              alt="Toggle Password Visibility"
+              className="absolute right-3 -bottom-1 transform -translate-y-1/2 cursor-pointer size-6 object-contain"
+              onClick={togglePasswordVisibility}
+            />
+          </div>
           {errors.password && (
             <div className="text-textRed text-sm text-left p-1">
               {errors.password}
@@ -94,20 +96,22 @@ const Step3 = ({ goback, setStep }) => {
           <p className="text-textPrimary text-sm text-left p-1 font-semibold">
             {t("labels.confirmPassword")}
           </p>
-          <input
-            className="text-textPrimary rounded-lg border border-borderGray2 bg-backgroundGray15 py-2 px-5 mt-2 w-full"
-            type={showConfirmPassword ? "text" : "password"}
-            name="confirmPassword"
-            placeholder={t("placeholders.confirmPassword")}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-          <img
-            src={showConfirmPassword ? hide : show}
-            alt="Toggle Confirm Password Visibility"
-            className="absolute right-3 bottom-2 cursor-pointer size-6 object-contain"
-            onClick={toggleConfirmPasswordVisibility}
-          />
+          <div className="relative w-full">
+            <input
+              className="text-textPrimary rounded-lg bg-backgroundGray15 py-2 px-5 mt-2 w-full pr-10"
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              placeholder={t("placeholders.confirmPassword")}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <img
+              src={showConfirmPassword ? hide : show}
+              alt="Toggle Confirm Password Visibility"
+              className="absolute right-3 -bottom-1 transform -translate-y-1/2 cursor-pointer size-6 object-contain"
+              onClick={toggleConfirmPasswordVisibility}
+            />
+          </div>
           {errors.confirmPassword && (
             <div className="text-textRed text-sm text-left p-1">
               {errors.confirmPassword}
@@ -131,7 +135,7 @@ const Step3 = ({ goback, setStep }) => {
           data-testid="submitPage3"
         >
           <div className="flex items-center gap-2">
-            <p className="text-base">{t("buttons.submit")}</p>
+            <p className="text-base">{t("buttons.continue")}</p>
           </div>
         </button>
       </div>

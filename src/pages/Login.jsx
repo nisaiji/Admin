@@ -6,8 +6,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { axiosClient } from "../services/axiosClient";
 import LoginVideo from "../assets/videos/LoginVideo.mp4";
-import hide from "../assets/images/hide.png";
-import show from "../assets/images/show.png";
+import hide from "../assets/images/darkmode/hide.png";
+import show from "../assets/images/darkmode/show.png";
 import logo from "../assets/images/deer logo.png";
 import EndPoints from "../services/EndPoints";
 import Spinner from "../components/Spinner";
@@ -105,6 +105,8 @@ function Login() {
 
         if (res?.statusCode === 200) {
           const decodedToken = jwtDecode(res?.result?.accessToken);
+          console.log(decodedToken);
+
           if (decodedToken?.role === "admin") {
             if (decodedToken?.active) {
               localStorage.setItem("access_token", res?.result?.accessToken);
@@ -149,10 +151,10 @@ function Login() {
   });
 
   return (
-    <div className="min-h-screen py-20 bg-[#fafafa] relative">
+    <div className="min-h-screen py-20 bg-background2 relative">
       {/* Background video */}
       <video
-        className="fixed top-0 left-0 h-full w-[55%] bg-[#fafafa] bg-blend-multiply object-cover"
+        className="fixed top-0 left-0 h-full w-[55%] bg-background1 bg-blend-multiply object-cover"
         autoPlay
         loop
         muted
@@ -161,7 +163,7 @@ function Login() {
       />
 
       {/* Form container */}
-      <div className="flex flex-col lg:flex-row mx-auto overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[460px] bg-[#93a3b6]/15 backdrop-filter: blur(25px) rounded-3xl">
+      <div className="flex flex-col lg:flex-row mx-auto overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[460px] bg-gradient-to-r from-fromColor1 to-toColor1 backdrop-filter: blur(25px) rounded-3xl">
         <form onSubmit={formik.handleSubmit} className="w-full h-full">
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-[#93a3b6]/10 bg-opacity-50 z-30">
@@ -170,18 +172,20 @@ function Login() {
           )}
 
           {/* Logo and header */}
-          <div className="text-[#0F4189] w-full px-[42px] py-4 justify-center">
+          <div className="text-textDarkBlue w-full px-[42px] py-4 justify-center">
             <h2 className="flex text-3xl mb-4 justify-center">
               <Link to="/" className="flex items-center">
                 <img src={logo} alt="logo" className="size-12" />
               </Link>
             </h2>
-            <h2 className="font-bold text-[24px]">{t("login.login")}</h2>
+            <h2 className="font-bold text-[24px] text-textBlue">
+              {t("login.login")}
+            </h2>
 
             {/* Email/username input */}
             <div className="mt-6 border-b border-[#686868]/60 w-full">
               <input
-                className="py-1 px-2 w-full bg-transparent text-[#040320] placeholder-[#686868]/50 focus:outline-none"
+                className="py-1 px-2 w-full bg-transparent text-textPrimary placeholder-[#686868]/50 focus:outline-none"
                 type="text"
                 name="userInput"
                 placeholder={
@@ -196,7 +200,7 @@ function Login() {
               />
             </div>
             {formik.touched.userInput && formik.errors.userInput && (
-              <div className="text-red-500 text-xs">
+              <div className="text-textRed text-xs">
                 {formik.errors.userInput}
               </div>
             )}
@@ -204,7 +208,7 @@ function Login() {
             {/* Password input with visibility toggle */}
             <div className="mt-6 relative border-b border-[#686868]/60 w-full">
               <input
-                className="py-1 px-2 w-full bg-transparent text-[#040320] placeholder-[#686868]/50 focus:outline-none"
+                className="py-1 px-2 w-full bg-transparent text-textPrimary placeholder-[#686868]/50 focus:outline-none"
                 type={ishide ? "password" : "text"}
                 name="password"
                 placeholder={t("login.placeholders.password")}
@@ -216,15 +220,11 @@ function Login() {
                 src={ishide ? hide : show}
                 onClick={() => setIsHide(!ishide)}
                 alt={ishide ? "Show Password" : "Hide Password"}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 cursor-pointer"
-                style={{
-                  filter:
-                    "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
-                }}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 cursor-pointer object-contain"
               />
             </div>
             {formik.touched.password && formik.errors.password && (
-              <div className="text-red-500 text-xs">
+              <div className="text-textRed text-xs">
                 {formik.errors.password}
               </div>
             )}
@@ -240,7 +240,7 @@ function Login() {
               <button
                 name="submit"
                 data-testid="submit"
-                className="w-full py-1.5 text-center bg-[#0F4189] text-white font-poppins-bold rounded-lg disabled:opacity-50 transition-all duration-200 ease-in-out active:scale-90"
+                className="w-full py-1.5 text-center bg-backgroundBlue text-textPrimary font-poppins-bold rounded-lg disabled:opacity-50 transition-all duration-200 ease-in-out active:scale-90"
                 type="submit"
                 disabled={formik.isSubmitting}
               >
@@ -252,7 +252,7 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setIsAdmin(!isAdmin)}
-                className="w-full py-1 border border-[#0F4189] text-[#0F4189] rounded-lg font-bold transition-all duration-200 ease-in-out active:scale-90"
+                className="w-full py-1 border border-borderBlue text-textBlue rounded-lg font-bold transition-all duration-200 ease-in-out active:scale-90"
               >
                 {t("login.toggleButton")} {isAdmin ? "Teacher" : "Admin"}
               </button>
@@ -260,10 +260,10 @@ function Login() {
 
             {isAdmin && (
               <div className="flex justify-center text-white text-xs mt-6">
-                <div className="text-[#040320]/70 pr-1">
+                <div className="text-textPrimary pr-1">
                   {t("login.notHaveAccount")}
                 </div>
-                <Link to="/signup" className="text-[#0F4189] font-bold">
+                <Link to="/signup" className="text-textBlue font-bold">
                   {t("login.register")}
                 </Link>
               </div>

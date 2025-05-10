@@ -68,6 +68,7 @@ export default {
         borderLine2: "#2b2e4a40",
         borderGray: "#E3E8F380",
         borderGray2: "#C1C0CA",
+        borderGray3: " #676565",
         borderBlue: "#0A81D1",
         borderGreen: "#4CBC9A",
         borderRed: "#FE4040",

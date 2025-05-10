@@ -144,7 +144,7 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
       } else {
         return `${
           isDarkMode
-            ? "text-textPrimary bg-backgroundGrayDays"
+            ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
             : "text-textBlack bg-whiteBackground2 border-borderWhite3"
         }`;
       }

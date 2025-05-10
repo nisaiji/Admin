@@ -7,12 +7,13 @@ import { setAuth } from "../store/AppAuthSlice";
 import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
+import { trackOrSetValue } from "@testing-library/user-event/dist/cjs/document/trackValue.js";
 
 const Step1 = ({ goback, setStep }) => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
   const { status } = useSelector((state) => state.appAuth);
-  const [phone, setPhone] = useState("7771872012");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [otpVisible, setOtpVisible] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", ""]);
@@ -92,6 +93,9 @@ const Step1 = ({ goback, setStep }) => {
           if (response?.statusCode === 200) {
             toast.success(response?.result);
             setOtpVisible(true);
+            document.getElementById("otp-0")?.focus();
+            setTimer(30);
+            setIsResendDisabled(true);
           }
         } catch (e) {
           console.log({ e });
@@ -108,7 +112,11 @@ const Step1 = ({ goback, setStep }) => {
         });
         if (response?.statusCode === 200) {
           toast.success(response?.result);
+          setOtp(["", "", "", "", ""]);
           setOtpVisible(true);
+          document.getElementById("otp-0")?.focus();
+          setTimer(30);
+          setIsResendDisabled(true);
         }
       }
     } catch (err) {
@@ -119,7 +127,11 @@ const Step1 = ({ goback, setStep }) => {
           phone,
         });
         if (response.statusCode === 200) {
+          toast.success(response?.result);
           setOtpVisible(true);
+          document.getElementById("otp-0")?.focus();
+          setTimer(30);
+          setIsResendDisabled(true);
         }
       }
     } finally {
@@ -153,7 +165,8 @@ const Step1 = ({ goback, setStep }) => {
       const res = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
         phone,
       });
-      if (res?.data?.statusCode === 200) {
+
+      if (res?.statusCode === 200) {
         toast.success(res?.result);
         setOtp(["", "", "", "", ""]);
         inputRefs.current[0]?.focus();
@@ -176,7 +189,7 @@ const Step1 = ({ goback, setStep }) => {
         </p>
         <p className="absolute mt-[17px] ml-6 text-textPrimary">+91</p>
         <input
-          className="text-textPrimary rounded-xl border border-borderWhite2 py-2 pl-[55px] mt-2 w-full bg-backgroundGray15"
+          className="text-textPrimary rounded-xl py-2 pl-[55px] mt-2 w-full bg-backgroundGray15"
           type="text"
           name="phone"
           placeholder={t("placeholders.phoneNumber")}
@@ -207,6 +220,22 @@ const Step1 = ({ goback, setStep }) => {
                 maxLength={1}
                 inputMode="numeric"
                 autoComplete="one-time-code"
+                onKeyDown={(e) => {
+                  if (e.key === "Backspace") {
+                    if (otp[idx]) {
+                      const newOtp = [...otp];
+                      newOtp[idx] = "";
+                      setOtp(newOtp);
+                    } else if (idx > 0) {
+                      const newOtp = [...otp];
+                      newOtp[idx - 1] = "";
+                      setOtp(newOtp);
+                      setTimeout(() => {
+                        inputRefs.current[idx - 1]?.focus();
+                      }, 10);
+                    }
+                  }
+                }}
                 className="w-14 h-14 text-center text-xl rounded-xl bg-backgroundGray15 text-textPrimary border border-gray-300 mx-1 focus:outline-none"
               />
             ))}
@@ -214,7 +243,7 @@ const Step1 = ({ goback, setStep }) => {
               <img
                 src={refresh}
                 alt="refresh"
-                className="size-9 invert top-10 cursor-pointer ml-3"
+                className="size-6 invert top-10 cursor-pointer ml-3"
               />
             </button>
           </div>
@@ -256,7 +285,7 @@ const Step1 = ({ goback, setStep }) => {
             onClick={handleSubmit}
             className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           >
-            <p className="text-base">{t("buttons.submit")}</p>
+            <p className="text-base">{t("buttons.continue")}</p>
           </button>
         )}
       </div>

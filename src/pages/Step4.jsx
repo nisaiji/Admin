@@ -70,7 +70,7 @@ const Step4 = ({ goback, setStep }) => {
           {t("adminProfile.schoolName")}
         </p>
         <input
-          className=" rounded-xl border border-borderGray2 bg-backgroundGray15 text-textPrimary py-2 px-5 mt-2 w-full"
+          className=" rounded-xl bg-backgroundGray15 text-textPrimary py-2 px-5 mt-2 w-full"
           type="text"
           name="schoolName"
           placeholder={t("placeholders.schoolName")}
@@ -90,7 +90,7 @@ const Step4 = ({ goback, setStep }) => {
           {t("adminProfile.affiliationNumber")}
         </p>
         <input
-          className="rounded-xl border border-borderGray2 bg-backgroundGray15 text-textPrimary py-2 px-5 mt-2 w-full"
+          className="rounded-xl bg-backgroundGray15 text-textPrimary py-2 px-5 mt-2 w-full"
           type="text"
           name="affiliationNo"
           placeholder={t("placeholders.affiliationNo")}
@@ -111,7 +111,7 @@ const Step4 = ({ goback, setStep }) => {
           {t("adminProfile.userName")}
         </p>
         <input
-          className="rounded-xl border border-borderGray2 bg-backgroundGray15 text-textPrimary py-2 px-5 mt-2 w-full"
+          className="rounded-xl bg-backgroundGray15 text-textPrimary py-2 px-5 mt-2 w-full"
           type="text"
           name="username"
           placeholder={t("placeholders.username")}
@@ -139,7 +139,7 @@ const Step4 = ({ goback, setStep }) => {
           className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
         >
           <div className="flex items-center gap-2">
-            <p className="text-base">{t("buttons.submit")}</p>
+            <p className="text-base">{t("buttons.continue")}</p>
           </div>
         </button>
       </div>

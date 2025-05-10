@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import ClassSetup from "./components/classSetup/ClassSetup";
 import TeacherPage from "./components/teacherSetup/Teacher";
 import Event from "./components/eventSetup/Event";
+import TransferCertificate from "./components/transferCertificate/TransferCertificate";
 import Addsection from "./components/classSetup/Addsection";
 import Studentlist from "./components/studentSetup/Studentlist";
 import StudentSection from "./components/classSetup/sectionStudents/StudentSection";
@@ -25,6 +26,7 @@ import Leaves from "./components/dashBoard/Leaves";
 import TeacherProfile from "./components/admin/TeacherProfile";
 import desktop from "./assets/images/desktop.png";
 import Register from "./pages/Register";
+import TransferCertificateApply from "./components/transferCertificate/TransferCertificateApply";
 import AddStudentForm from "./components/studentSetup/AddStudentForm";
 
 /**
@@ -90,7 +92,7 @@ function App() {
                 <>
                   {/* Routes available for admin users */}
                   <Route path="" element={<DashBoard />} />
-                  <Route path="students-list" element={<Studentlist />} />
+                  <Route path="student-information-system" element={<Studentlist />} />
                   <Route path="teacher" element={<TeacherPage />} />
                   <Route
                     path="teacher/edit-teacher"
@@ -98,13 +100,15 @@ function App() {
                   />
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
+                  <Route path="transfer-certificate" element={<TransferCertificate />} />
+                  <Route path="transfer-certificate-apply" element={<TransferCertificateApply />} />
                   <Route path="add-section" element={<Addsection />} />
                   <Route
                     path="class-setup/student-section"
                     element={<StudentSection />}
                   />
                   <Route
-                    path="students-list/student-update"
+                    path="student-information-system/student-update"
                     element={<StudentUpdate />}
                   />
                   <Route path="admin-profile" element={<AdminProfile />} />
@@ -112,7 +116,7 @@ function App() {
                     path="password-reset-requests"
                     element={<Requests />}
                   />
-                  <Route path="teacher-leaves" element={<Leaves />} />
+                  <Route path="teacher-leave-requests" element={<Leaves />} />
                   <Route path="add-student" element={<AddStudentForm />} />
                 </>
               )}
