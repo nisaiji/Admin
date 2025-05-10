@@ -213,7 +213,7 @@
     "personalDetails": "Personal Details",
     "guardianDetails": "Guardian Details",
     "student": "Student",
-    "students": "Students",
+    "students": "Student Information System",
     "teacherDetails": "Teacher Details",
     "teacherPersonalDetails": "Personal",
     "educationDetails": "Education Details",
@@ -230,8 +230,8 @@
     "from": "from",
     "data": "data",
     "requests": "Request",
-    "passwordReset": "Password Reset",
-    "leave": "Leave",
+    "passwordReset": "Password Reset Request",
+    "leave": "Teacher Leave Request",
     "transferStudent": "Transfer student"
   },
   "buttons": {
