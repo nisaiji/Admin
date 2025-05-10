@@ -20,7 +20,7 @@ export const fetchAdmin = createAsyncThunk("admin/fetchAdmin", async (_) => {
       return res?.result;
     }
   } catch (e) {
-    console.log({ e });
+    // console.log({ e });
   }
 });
 
@@ -35,7 +35,7 @@ export const fetchTeacher = createAsyncThunk(
         return res?.result;
       }
     } catch (e) {
-      console.log({ e });
+      // console.log({ e });
     }
   }
 );

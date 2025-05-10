@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
 
-const Step3 = ({ goback, setStep }) => {
+const Step3 = ({ goback, setStep, setLoading }) => {
   const dispatch = useDispatch();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -47,6 +47,7 @@ const Step3 = ({ goback, setStep }) => {
 
     try {
       // Replace with your actual API call
+      setLoading(true);
       const res = await axiosClient.put(EndPoints.ADMIN.PASSWORD_UPDATE, {
         password,
       });
@@ -57,6 +58,8 @@ const Step3 = ({ goback, setStep }) => {
       }
     } catch (e) {
       toast.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 

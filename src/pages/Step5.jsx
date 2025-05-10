@@ -9,7 +9,7 @@ import REGEX from "../utils/regix";
 import { setAuth } from "../store/AppAuthSlice";
 import { useDispatch } from "react-redux";
 
-const Step5 = ({ goback, setStep }) => {
+const Step5 = ({ goback, setStep, setLoading }) => {
   const dispatch = useDispatch();
   const [t] = useTranslation();
   const Countries = [{ name: "India", code: "IN" }];
@@ -88,6 +88,7 @@ const Step5 = ({ goback, setStep }) => {
     e.preventDefault();
     if (!validate()) return;
     try {
+      setLoading(true);
       const res = await axiosClient.put(
         EndPoints.ADMIN.ADMIN_UPDATE_ADDRESS,
         formData
@@ -98,7 +99,10 @@ const Step5 = ({ goback, setStep }) => {
         setStep(6);
       }
     } catch (e) {
-      console.error("Submission error:", e);
+      toast.error(e);
+      // console.error("Submission error:", e);
+    } finally {
+      setLoading(false);
     }
   };
 

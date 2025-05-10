@@ -69,7 +69,7 @@ function Register() {
           }
         }
       } catch (e) {
-        console.error("Error fetching admin data:", e);
+        // console.error("Error fetching admin data:", e);
       } finally {
         setLoading(false);
       }
@@ -131,11 +131,31 @@ function Register() {
   );
 
   const stepComponents = [
-    <Step1 goback={goBack} setStep={setStep} />,
-    <Step2 goback={goBack} setStep={setStep} />,
-    <Step3 goback={goBack} setStep={setStep} />,
-    <Step4 goback={goBack} setStep={setStep} />,
-    <Step5 goback={goBack} setStep={setStep} />,
+    <Step1
+      goback={goBack}
+      setStep={setStep}
+      setLoading={(bool) => setLoading(bool)}
+    />,
+    <Step2
+      goback={goBack}
+      setStep={setStep}
+      setLoading={(bool) => setLoading(bool)}
+    />,
+    <Step3
+      goback={goBack}
+      setStep={setStep}
+      setLoading={(bool) => setLoading(bool)}
+    />,
+    <Step4
+      goback={goBack}
+      setStep={setStep}
+      setLoading={(bool) => setLoading(bool)}
+    />,
+    <Step5
+      goback={goBack}
+      setStep={setStep}
+      setLoading={(bool) => setLoading(bool)}
+    />,
     <Step6
       checkProgress={() => getadmin(true)}
       isDisable={toastDisplayed}

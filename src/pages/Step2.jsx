@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
 
-const Step2 = ({ goback, setStep }) => {
+const Step2 = ({ goback, setStep, setLoading }) => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
 
@@ -18,7 +18,6 @@ const Step2 = ({ goback, setStep }) => {
   const [otp, setOtp] = useState(["", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
-  const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -35,6 +34,7 @@ const Step2 = ({ goback, setStep }) => {
 
   const verifyOtp = async () => {
     try {
+      setLoading(true);
       const res = await axiosClient.put(EndPoints.ADMIN.EMAIL_OTP_VERIFY, {
         otp: Number(otp.join("")),
       });
@@ -46,6 +46,8 @@ const Step2 = ({ goback, setStep }) => {
       }
     } catch (e) {
       toast.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,6 +61,7 @@ const Step2 = ({ goback, setStep }) => {
     }
 
     try {
+      setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_VERIFY, {
         email,
       });
@@ -72,6 +75,8 @@ const Step2 = ({ goback, setStep }) => {
       }
     } catch (e) {
       toast.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,8 +113,9 @@ const Step2 = ({ goback, setStep }) => {
         setTimer(30);
         setIsResendDisabled(true);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      toast.error(e);
+      // console.error(e);
     } finally {
       setLoading(false);
     }

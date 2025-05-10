@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
 
-const Step4 = ({ goback, setStep }) => {
+const Step4 = ({ goback, setStep, setLoading }) => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -48,6 +48,7 @@ const Step4 = ({ goback, setStep }) => {
     if (!validate()) return;
 
     try {
+      setLoading(true);
       const res = await axiosClient.put(
         EndPoints.ADMIN.BASIC_INFO_UPDATE,
         formData
@@ -59,6 +60,8 @@ const Step4 = ({ goback, setStep }) => {
       }
     } catch (e) {
       toast.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 

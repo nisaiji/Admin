@@ -7,10 +7,11 @@ import { setAuth } from "../store/AppAuthSlice";
 import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
-import { trackOrSetValue } from "@testing-library/user-event/dist/cjs/document/trackValue.js";
+import { useNavigate } from "react-router-dom";
 
-const Step1 = ({ goback, setStep }) => {
+const Step1 = ({ goback, setStep, setLoading }) => {
   const [t] = useTranslation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { status } = useSelector((state) => state.appAuth);
   const [phone, setPhone] = useState("");
@@ -19,7 +20,6 @@ const Step1 = ({ goback, setStep }) => {
   const [otp, setOtp] = useState(["", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
-  const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const Step1 = ({ goback, setStep }) => {
         phone,
         otp: Number(otp.join("")),
       });
-      console.log({ status });
+      // console.log({ status });
 
       if (res.statusCode === 200) {
         dispatch(setAuth({ phoneVerified: true }));
@@ -80,7 +80,7 @@ const Step1 = ({ goback, setStep }) => {
       setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.STATUS, { phone });
       const data = res?.result;
-      console.log({ data });
+      // console.log({ data });
 
       dispatch(setAuth({ ...data, phone }));
       if (!data.phoneVerified) {
@@ -88,7 +88,7 @@ const Step1 = ({ goback, setStep }) => {
           const response = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
             phone,
           });
-          console.log({ response });
+          // console.log({ response });
 
           if (response?.statusCode === 200) {
             toast.success(response?.result);
@@ -98,7 +98,7 @@ const Step1 = ({ goback, setStep }) => {
             setIsResendDisabled(true);
           }
         } catch (e) {
-          console.log({ e });
+          // console.log({ e });
         }
       } else if (
         !data.emailVerified ||
@@ -118,10 +118,12 @@ const Step1 = ({ goback, setStep }) => {
           setTimer(30);
           setIsResendDisabled(true);
         }
+      } else if (data?.isActive) {
+        toast.success("Already verified");
+        navigate("/signup");
       }
     } catch (err) {
-      console.log(err);
-
+      // console.log(err);
       if (err === "Admin not found") {
         const response = await axiosClient.post(EndPoints.ADMIN.PHONE_VERIFY, {
           phone,
