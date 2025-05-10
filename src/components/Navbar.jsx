@@ -13,11 +13,12 @@ import user from "../assets/images/darkmode/user.png";
 import logo from "../assets/images/deer logo.png";
 import { useTranslation } from "react-i18next";
 import { appConfigAction } from "../store/AppConfigSlice";
+import { Switch } from "@mui/material";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const { data, teacherData } = useSelector((state) => state.appAuth);
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const sectionId = useSelector((state) => state.appAuth.section);
@@ -95,14 +96,6 @@ const Navbar = () => {
         </div>
 
         <div className={`flex space-x-12`}>
-          <button
-            onClick={toggleDarkMode}
-            className={`${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            } hover:text-textBlue py-2 text-sm font-bold`}
-          >
-            {isDarkMode ? "Light Mode" : "Dark Mode"}
-          </button>
           {isTeacher ? (
             <div
               onClick={() =>
@@ -289,16 +282,20 @@ const Navbar = () => {
               className={`flex items-center justify-center px-3 py-2 cursor-pointer`}
             >
               <img
-                src={isDarkMode ? user : userw}
+                src={
+                  isTeacher
+                    ? teacherData?.photo || (isDarkMode ? user : userw)
+                    : data?.photo || (isDarkMode ? user : userw)
+                }
                 alt="user"
-                className={`size-6`}
+                className={`size-6 rounded-full border border-borderGray2`}
               />
             </div>
             {/* profile menu */}
             {profileMenuOpen && (
               <div
                 ref={profileMenuRef}
-                className={`absolute top-full right-0 w-[120px] ${
+                className={`absolute top-full right-0 w-[180px] ${
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 } text-sm ${
                   isDarkMode ? "bg-background3" : "bg-whiteBackground"
@@ -316,6 +313,38 @@ const Navbar = () => {
                   >
                     {t("profile")}
                   </Link>
+                  <div
+                    className={`group flex items-center justify-between px-4 py-3 ${
+                      isDarkMode
+                        ? "hover:bg-background4"
+                        : "hover:bg-whiteBackground"
+                    }`}
+                  >
+                    <span
+                      className={`text-sm group-hover:text-textOrange ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
+                    >
+                      {isDarkMode ? "Dark Mode" : "Light Mode"}
+                    </span>
+                    <Switch
+                      checked={isDarkMode}
+                      onChange={toggleDarkMode}
+                      sx={{
+                        "& .MuiSwitch-switchBase.Mui-checked": {
+                          color: "#fff",
+                        },
+                        "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                          {
+                            backgroundColor: "#fff",
+                          },
+                        "& .MuiSwitch-track": {
+                          backgroundColor: "#888",
+                        },
+                      }}
+                    />
+                  </div>
+
                   <Link
                     onClick={handleLogout}
                     to="/login"

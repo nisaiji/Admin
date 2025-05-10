@@ -18,14 +18,18 @@ import { useTranslation } from "react-i18next";
 import toast, { Toaster } from "react-hot-toast";
 import CONSTANT from "../../utils/constants.js";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { fetchAdmin, updateAdminData } from "../../store/AppAuthSlice.jsx";
+import {
+  fetchAdmin,
+  fetchTeacher,
+  updateAdminData,
+} from "../../store/AppAuthSlice.jsx";
 
 const Dashboard = () => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const schoolName = useSelector((state) => state.appAuth.schoolName);
-  const { data } = useSelector((state) => state.appAuth);
+  const { data, teacherData } = useSelector((state) => state.appAuth);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [selectedOption, setSelectedOption] = useState("Monthly");
   const [studentPresentCountData, setStudentPresentCountData] = useState(null);
@@ -163,7 +167,11 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    dispatch(fetchAdmin());
+    if (isTeacher) {
+      dispatch(fetchTeacher());
+    } else {
+      dispatch(fetchAdmin());
+    }
   }, [dispatch]);
 
   const uploadPhoto = async (e) => {
@@ -771,12 +779,20 @@ const Dashboard = () => {
             : "bg-whiteBackground"
         } flex items-center w-full p-4 shadow-lg`}
       >
-        <img
-          src={data?.photo || school}
-          alt="School Logo"
-          className="w-[300px] h-[200px] rounded-lg cursor-pointer object-cover"
-          onClick={() => fileInputRef?.current?.click()}
-        />
+        {isTeacher ? (
+          <img
+            src={teacherData?.photo || school}
+            alt="School Logo"
+            className="w-[300px] h-[200px] rounded-lg object-cover"
+          />
+        ) : (
+          <img
+            src={data?.photo || school}
+            alt="School Logo"
+            className="w-[300px] h-[200px] rounded-lg cursor-pointer object-cover"
+            onClick={() => fileInputRef?.current?.click()}
+          />
+        )}
         <input
           type="file"
           ref={fileInputRef}

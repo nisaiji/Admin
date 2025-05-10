@@ -1,173 +1,150 @@
-// import React, { useState } from "react";
-// import hide from "../assets/images/hide.png";
-// import show from "../assets/images/show.png";
-// import { useTranslation } from "react-i18next";
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { axiosClient } from "../services/axiosClient";
+import EndPoints from "../services/EndPoints";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { setAuth } from "../store/AppAuthSlice";
 
-// /**
-//  * Reusable Input Component
-//  * @param {string} label - The label for the input field.
-//  * @param {string} name - The name attribute of the input field.
-//  * @param {string} type - The type of the input field (e.g., text, email, password).
-//  * @param {string} placeholder - Placeholder text for the input field.
-//  * @param {object} formik - Formik object for form handling.
-//  * @param {string} className - Additional classes for custom styling.
-//  */
-// const InputField = ({ label, name, type, placeholder, formik, className }) => (
-//   <div className={`mt-5 ${className}`}>
-//     <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
-//       {label}
-//     </p>
-//     <input
-//       className="text-black rounded-xl border border-[#E9EAF0] py-2 px-5 mt-2 w-full"
-//       type={type}
-//       name={name}
-//       placeholder={placeholder}
-//       onChange={formik.handleChange}
-//       value={formik.values[name]}
-//       maxLength={name === "affiliationNo" ? 8 : ""}
-//     />
-//     {formik.touched[name] && formik.errors[name] && (
-//       <div className="text-[#FE4040] text-sm text-left pl-3">
-//         {formik.errors[name]}
-//       </div>
-//     )}
-//   </div>
-// );
+const Step4 = ({ goback, setStep }) => {
+  const dispatch = useDispatch();
+  const [formData, setFormData] = useState({
+    schoolName: "",
+    affiliationNo: "",
+    username: "",
+  });
 
-// /**
-//  * Step1 Component - First step of a multi-step form.
-//  * Handles user inputs for school name, phone, email, and password fields.
-//  * @param {object} formik - Formik object for managing form state and validation.
-//  */
-// const Step4 = ({ formik, goback }) => {
-//   const [showPassword, setShowPassword] = useState(false);
-//   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [t] = useTranslation();
 
-//   const togglePasswordVisibility = () => setShowPassword(!showPassword);
-//   const toggleConfirmPasswordVisibility = () =>
-//     setShowConfirmPassword(!showConfirmPassword);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-//   const [t] = useTranslation();
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.schoolName.trim()) {
+      newErrors.schoolName = t("validationError.schoolName");
+    } else if (formData.schoolName.length < 8) {
+      newErrors.schoolName = t("validationError.schoolNameLength");
+    }
+    if (!formData.affiliationNo.trim()) {
+      newErrors.affiliationNo = t("validationError.affiliationNumber");
+    } else if (formData.affiliationNo.length < 6) {
+      newErrors.affiliationNo = t("validationError.affiliationNumberLength");
+    }
+    if (!formData.username.trim()) {
+      newErrors.username = t("validationError.username");
+    } else if (formData.username.length < 6) {
+      newErrors.affiliationNo = t("validationError.usernameLength");
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-//   return (
-//     <form onSubmit={formik.handleSubmit}>
-//       <InputField
-//         label={t("adminProfile.schoolName")}
-//         name="schoolName"
-//         type="text"
-//         placeholder={t("placeholders.schoolName")}
-//         formik={formik}
-//       />
-//       <div className={`mt-5`}>
-//         <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
-//           {t("adminProfile.Phone")}
-//         </p>
-//         <p className="absolute mt-[17px] ml-6">+91</p>
-//         <input
-//           className="text-black rounded-xl border border-[#E9EAF0] py-2 pl-[55px] mt-2 w-full"
-//           type="text"
-//           name="phone"
-//           placeholder={t("placeholders.phoneNumber")}
-//           onChange={formik.handleChange}
-//           value={formik.values["phone"]}
-//           maxLength={10}
-//         />
-//         {formik.touched["phone"] && formik.errors["phone"] && (
-//           <div className="text-[#FE4040] text-sm text-left pl-3">
-//             {formik.errors["phone"]}
-//           </div>
-//         )}
-//       </div>
-//       <InputField
-//         label={t("adminProfile.Email")}
-//         name="email"
-//         type="email"
-//         placeholder={t("placeholders.emailAddress")}
-//         formik={formik}
-//       />
-//       <div className="flex gap-5">
-//         {/* Password Field */}
-//         <div className="mt-5 relative w-1/2">
-//           <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
-//             {t("labels.password")}
-//           </p>
-//           <input
-//             className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
-//             type={showPassword ? "text" : "password"}
-//             name="password"
-//             placeholder={t("placeholders.password")}
-//             onChange={formik.handleChange}
-//             value={formik.values.password}
-//           />
-//           <img
-//             src={showPassword ? hide : show}
-//             alt="Toggle Password Visibility"
-//             className="absolute right-3 top-9 cursor-pointer size-6"
-//             style={{
-//               filter:
-//                 "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
-//             }}
-//             onClick={togglePasswordVisibility}
-//           />
-//           {formik.touched.password && formik.errors.password && (
-//             <div className="text-red-500 text-sm text-left pl-3">
-//               {formik.errors.password}
-//             </div>
-//           )}
-//         </div>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-//         {/* Confirm Password Field */}
-//         <div className="mt-5 relative w-1/2">
-//           <p className="text-gray-900 text-sm text-left pl-3 font-semibold">
-//             {t("labels.confirmPassword")}
-//           </p>
-//           <input
-//             className="text-black rounded-lg border border-gray-300 py-2 px-5 mt-2 w-full"
-//             type={showConfirmPassword ? "text" : "password"}
-//             name="confirmPassword"
-//             placeholder={t("placeholders.confirmPassword")}
-//             onChange={formik.handleChange}
-//             value={formik.values.confirmPassword}
-//           />
-//           <img
-//             src={showConfirmPassword ? hide : show}
-//             alt="Toggle Confirm Password Visibility"
-//             className="absolute right-3 top-9 cursor-pointer size-6"
-//             style={{
-//               filter:
-//                 "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
-//             }}
-//             onClick={toggleConfirmPasswordVisibility}
-//           />
-//           {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-//             <div className="text-red-500 text-sm text-left pl-3">
-//               {formik.errors.confirmPassword}
-//             </div>
-//           )}
-//         </div>
-//       </div>
+    try {
+      const res = await axiosClient.put(
+        EndPoints.ADMIN.BASIC_INFO_UPDATE,
+        formData
+      );
+      if (res?.statusCode === 200) {
+        toast.success(res?.result);
+        dispatch(setAuth({ affiliationExists: true }));
+        setStep(5);
+      }
+    } catch (e) {
+      toast.error(e);
+    }
+  };
 
-//       <div className="flex justify-between w-full mt-5">
-//         <button
-//           type="button"
-//           className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
-//           data-testid="back"
-//           onClick={goback}
-//         >
-//           <p className="text-base">{t("buttons.back")}</p>
-//         </button>
-//         <button
-//           type="submit"
-//           className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
-//           data-testid="submitPage1"
-//         >
-//           <div className="flex items-center gap-2">
-//             <p className="text-base">{t("buttons.submit")}</p>
-//           </div>
-//         </button>
-//       </div>
-//     </form>
-//   );
-// };
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* School Name */}
+      <div className="mt-5">
+        <p className="text-textPrimary text-sm text-left p-1 font-semibold">
+          {t("adminProfile.schoolName")}
+        </p>
+        <input
+          className=" rounded-xl border border-borderGray2 bg-backgroundGray15 text-textPrimary py-2 px-5 mt-2 w-full"
+          type="text"
+          name="schoolName"
+          placeholder={t("placeholders.schoolName")}
+          value={formData.schoolName}
+          onChange={handleChange}
+        />
+        {errors.schoolName && (
+          <div className="text-textRed text-sm text-left p-1">
+            {errors.schoolName}
+          </div>
+        )}
+      </div>
 
-// export default Step4;
+      {/* Affiliation No */}
+      <div className="mt-5">
+        <p className="text-textPrimary text-sm text-left p-1 font-semibold">
+          {t("adminProfile.affiliationNumber")}
+        </p>
+        <input
+          className="rounded-xl border border-borderGray2 bg-backgroundGray15 text-textPrimary py-2 px-5 mt-2 w-full"
+          type="text"
+          name="affiliationNo"
+          placeholder={t("placeholders.affiliationNo")}
+          value={formData.affiliationNo}
+          onChange={handleChange}
+          maxLength={8}
+        />
+        {errors.affiliationNo && (
+          <div className="text-textRed text-sm text-left p-1">
+            {errors.affiliationNo}
+          </div>
+        )}
+      </div>
+
+      {/* Username */}
+      <div className="mt-5">
+        <p className="text-textPrimary text-sm text-left p-1 font-semibold">
+          {t("adminProfile.userName")}
+        </p>
+        <input
+          className="rounded-xl border border-borderGray2 bg-backgroundGray15 text-textPrimary py-2 px-5 mt-2 w-full"
+          type="text"
+          name="username"
+          placeholder={t("placeholders.username")}
+          value={formData.username}
+          onChange={handleChange}
+        />
+        {errors.username && (
+          <div className="text-textRed text-sm text-left p-1">
+            {errors.username}
+          </div>
+        )}
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-between w-full mt-5">
+        <button
+          type="button"
+          className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+          onClick={goback}
+        >
+          <p className="text-base">{t("buttons.back")}</p>
+        </button>
+        <button
+          type="submit"
+          className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+        >
+          <div className="flex items-center gap-2">
+            <p className="text-base">{t("buttons.submit")}</p>
+          </div>
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default Step4;

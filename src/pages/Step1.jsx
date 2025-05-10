@@ -5,6 +5,8 @@ import { axiosClient } from "../services/axiosClient";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
 import toast from "react-hot-toast";
+import REGEX from "../utils/regix";
+import refresh from "../assets/images/refresh.png";
 
 const Step1 = ({ goback, setStep }) => {
   const [t] = useTranslation();
@@ -38,20 +40,22 @@ const Step1 = ({ goback, setStep }) => {
         phone,
         otp: Number(otp.join("")),
       });
+      console.log({ status });
+
       if (res.statusCode === 200) {
         dispatch(setAuth({ phoneVerified: true }));
         toast.success(res?.result?.msg);
         localStorage.setItem("temp_access_token", res?.result?.token);
-        if (status?.addressUpdated && !status?.isActive) {
-          setStep(6);
-        } else if (!status?.addressUpdated) {
-          setStep(5);
-        } else if (!status?.affiliationExists) {
-          setStep(4);
+        if (!status?.emailVerified) {
+          setStep(2);
         } else if (!status?.passwordUpdated) {
           setStep(3);
-        } else {
-          setStep(2);
+        } else if (!status?.affiliationExists) {
+          setStep(4);
+        } else if (!status?.addressUpdated) {
+          setStep(5);
+        } else if (!status?.isActive) {
+          setStep(6);
         }
       }
     } catch (e) {
@@ -64,9 +68,10 @@ const Step1 = ({ goback, setStep }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (!/^[0-9]{10}$/.test(phone)) {
-      setError("Phone number must be 10 digits");
+    if (!phone.trim()) {
+      setError(t("validationError.phone"));
+    } else if (!REGEX.PHONE_LENGTH.test(phone)) {
+      setError(t("validationError.validationPhoneCount"));
       return;
     }
 
@@ -74,29 +79,29 @@ const Step1 = ({ goback, setStep }) => {
       setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.STATUS, { phone });
       const data = res?.result;
-      console.log(data);
+      console.log({ data });
 
       dispatch(setAuth({ ...data, phone }));
       if (!data.phoneVerified) {
-        const response = await axiosClient.post(EndPoints.ADMIN.PHONE_VERIFY, {
-          phone,
-        });
-        if (response?.statusCode === 200) {
-          toast.success(response?.result);
-          setOtpVisible(true);
-        }
-      } else if (data?.phoneVerified && !data.emailVerified) {
-        const response = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
-          phone,
-        });
-        if (response?.statusCode === 200) {
-          toast.success(response?.result);
-          setOtpVisible(true);
+        try {
+          const response = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
+            phone,
+          });
+          console.log({ response });
+
+          if (response?.statusCode === 200) {
+            toast.success(response?.result);
+            setOtpVisible(true);
+          }
+        } catch (e) {
+          console.log({ e });
         }
       } else if (
-        data?.phoneVerified &&
-        data.emailVerified &&
-        !data?.passwordUpdated
+        !data.emailVerified ||
+        !data?.passwordUpdated ||
+        !data?.affiliationExists ||
+        !data?.addressUpdated ||
+        !data?.isActive
       ) {
         const response = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
           phone,
@@ -105,14 +110,10 @@ const Step1 = ({ goback, setStep }) => {
           toast.success(response?.result);
           setOtpVisible(true);
         }
-      } else if (!data?.affiliationExists) {
-        setStep(4);
-      } else if (!data?.addressUpdated) {
-        setStep(5);
-      } else if (data?.addressUpdated && !data?.isActive) {
-        setStep(6);
       }
     } catch (err) {
+      console.log(err);
+
       if (err === "Admin not found") {
         const response = await axiosClient.post(EndPoints.ADMIN.PHONE_VERIFY, {
           phone,
@@ -169,7 +170,7 @@ const Step1 = ({ goback, setStep }) => {
   return (
     <form>
       {/* Phone Input */}
-      <div className="mt-5">
+      <div className="mt-10">
         <p className="text-textPrimary text-sm text-left font-semibold">
           {t("adminProfile.Phone")}
         </p>
@@ -191,17 +192,10 @@ const Step1 = ({ goback, setStep }) => {
 
       {/* OTP Section */}
       {otpVisible && (
-        <div className="mt-3">
+        <div className="mt-10">
           <div className="flex justify-between items-center mb-2">
             <p className="text-textPrimary text-sm font-semibold">OTP</p>
             {/* Reset Image/Icon */}
-            <span
-              className="cursor-pointer text-gray-500 hover:text-gray-700 text-sm"
-              onClick={handleOtpReset}
-              title="Reset OTP"
-            >
-              🔄 {/* Replace this with an <img src="..."/> if desired */}
-            </span>
           </div>
           <div className="flex mt-2">
             {otp.map((digit, idx) => (
@@ -216,11 +210,18 @@ const Step1 = ({ goback, setStep }) => {
                 className="w-14 h-14 text-center text-xl rounded-xl bg-backgroundGray15 text-textPrimary border border-gray-300 mx-1 focus:outline-none"
               />
             ))}
+            <button type="button" onClick={handleOtpReset}>
+              <img
+                src={refresh}
+                alt="refresh"
+                className="size-9 invert top-10 cursor-pointer ml-3"
+              />
+            </button>
           </div>
           <p className="text-gray-400 text-sm mt-3 text-left">
             Didn't receive the code?{" "}
-            {isResendDisabled ? "resend OTP in" + timer + "s" : ""}
-            {isResendDisabled && (
+            {isResendDisabled ? "resend OTP in " + timer + "s" : ""}
+            {!isResendDisabled && (
               <span
                 className="text-white font-semibold cursor-pointer"
                 onClick={resendOtp}
@@ -233,10 +234,10 @@ const Step1 = ({ goback, setStep }) => {
       )}
 
       {/* Buttons */}
-      <div className="flex justify-between w-full mt-6">
+      <div className="flex justify-between w-full mt-10">
         <button
           type="button"
-          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+          className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           onClick={goback}
         >
           <p className="text-base">{t("buttons.back")}</p>
@@ -245,7 +246,7 @@ const Step1 = ({ goback, setStep }) => {
           <button
             type="button"
             onClick={verifyOtp}
-            className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+            className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           >
             <p className="text-base">{t("buttons.verify")}</p>
           </button>
@@ -253,7 +254,7 @@ const Step1 = ({ goback, setStep }) => {
           <button
             type="button"
             onClick={handleSubmit}
-            className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+            className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           >
             <p className="text-base">{t("buttons.submit")}</p>
           </button>

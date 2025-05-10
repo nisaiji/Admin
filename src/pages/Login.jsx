@@ -90,10 +90,10 @@ function Login() {
 
         // Define API endpoint and payload based on login role
         const endpoint = isAdmin
-          ? EndPoints.ADMIN.ADMIN_LOGIN
+          ? EndPoints.ADMIN.LOGIN
           : EndPoints.TEACHER.TEACHER_LOGIN;
         const payload = isAdmin
-          ? { email: values.userInput, password: values.password }
+          ? { user: values.userInput, password: values.password }
           : {
               user: values.userInput,
               password: values.password,
@@ -120,15 +120,15 @@ function Login() {
                 res?.result?.accessToken
               );
               let page;
-              if (!decodedToken?.pincode) {
-                page = 2;
-              } else if (!decodedToken?.username) {
-                page = 3;
-              } else {
+              if (!decodedToken?.username) {
                 page = 4;
+              } else if (!decodedToken?.pincode) {
+                page = 5;
+              } else {
+                page = 6;
               }
-              navigate("/signup");
               localStorage.setItem("page", page);
+              navigate("/signup");
             }
           } else {
             localStorage.setItem("access_token", res?.result?.accessToken);

@@ -8,12 +8,13 @@ const EndPoints = {
     EMAIL_VERIFY: "v2/admin/emailVerify",
     EMAIL_OTP_VERIFY: "v2/admin/emailVerify",
     PASSWORD_UPDATE: "v2/admin/password",
+    BASIC_INFO_UPDATE: "v2/admin/details",
+    ADMIN_UPDATE_ADDRESS: "admin/address",
     LOGIN: "v2/admin/login",
 
     // ADMIN AUTH
     ADMIN_REGISTER: "admin",
     GET_DEACTIVATE_ADMIN: "admin/deactivate",
-    ADMIN_UPDATE_ADDRESS: "admin/address",
     ADMIN_UPDATE_DETAILS: "admin/details",
     ADMIN_LOGIN: "admin/login",
     REQUESTS: "change-password/admin",

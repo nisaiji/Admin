@@ -12,10 +12,10 @@ export default function Step6({ checkProgress, isDisable, goback }) {
     <>
       <div className="flex flex-col justify-center items-center">
         <img src={pending} alt="" className="size-[200px]" />
-        <p className="text-base font-poppins-bold text-center">
+        <p className="text-base font-poppins-bold text-center text-textPrimary">
           {t("register.verificationPending")}
         </p>
-        <p className="w-[310px] text-sm font-poppins-regular text-center">
+        <p className="w-[310px] text-sm font-poppins-regular text-center text-textPrimary">
           {t("register.pendingMessage")}
         </p>
         {/* Navigation buttons */}

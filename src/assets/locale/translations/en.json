@@ -65,6 +65,7 @@
     "LOGO": "LOGO",
     "placeholders": {
       "email": "Email",
+      "phone": "Phone",
       "username": "Username, Email or Phone",
       "password": "Password"
     },
@@ -212,7 +213,7 @@
     "personalDetails": "Personal Details",
     "guardianDetails": "Guardian Details",
     "student": "Student",
-    "students": "Student",
+    "students": "Students",
     "teacherDetails": "Teacher Details",
     "teacherPersonalDetails": "Personal",
     "educationDetails": "Education Details",
@@ -237,6 +238,7 @@
     "screenshot": "Download",
     "cancel": "Cancel",
     "submit": "Submit",
+    "verify": "Verify",
     "update": "Add",
     "edit": "Edit",
     "save": "Save",

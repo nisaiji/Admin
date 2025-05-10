@@ -26,7 +26,7 @@ import { axiosClient } from "../../services/axiosClient";
 import noDataFound from "../../assets/images/darkmode/noDataFound.png";
 import EndPoints from "../../services/EndPoints";
 import StudentInfo from "../classSetup/sectionStudents/StudentInfo";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DeletePopup from "../DeleteMessagePopup";
 import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
@@ -125,8 +125,8 @@ export default function Studentlist() {
 
     const url = isTeacher
       ? EndPoints.TEACHER.GET_STUDENT_LIST
-      // : EndPoints.ADMIN.GET_STUDENT_LIST;
-    : EndPoints.ADMIN.SEARCH_STUDENT;
+      : // : EndPoints.ADMIN.GET_STUDENT_LIST;
+        EndPoints.ADMIN.SEARCH_STUDENT;
 
     // let query = `?admin=${id}&page=${pageNo}&limit=${limit}&include=parent,class,section`;
     let query = `?page=${pageNo}&limit=${limit}`;
@@ -274,13 +274,23 @@ export default function Studentlist() {
       >
         <div className={`px-14 py-6`}>
           <Breadcrumbs />
-          <h1
-            className={`text-2xl font-poppins-bold ${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
-          >
-            {t("titles.students")}
-          </h1>
+          <div className="flex justify-between items-center">
+            <h1
+              className={`text-2xl font-poppins-bold ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
+            >
+              {t("titles.students")}
+            </h1>
+            {/* <Link
+              to="/add-student"
+              className={`flex flex-row justify-center items-center px-2 py-1 space-x-2 cursor-pointer rounded border border-[#FF793F]/10 bg-[#FF793F]/10 transition-all duration-200 ease-in-out active:scale-90`}
+            >
+              <span className={`text-xs font-poppins-bold text-textOrange`}>
+                Add Student
+              </span>
+            </Link> */}
+          </div>
         </div>
         <div
           className={`flex flex-col self-center w-full font-medium max-w-full max-md:max-w-full`}
@@ -534,7 +544,9 @@ export default function Studentlist() {
                   {/* table headings */}
                   <thead
                     className={`${
-                      isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
+                      isDarkMode
+                        ? "bg-backgroundTableCell"
+                        : "bg-whiteBackground"
                     } text-base font-bold sticky top-0 z-10`}
                   >
                     <tr className={`text-base text-bold text-textBlue`}>

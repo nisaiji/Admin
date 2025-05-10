@@ -25,6 +25,7 @@ import Leaves from "./components/dashBoard/Leaves";
 import TeacherProfile from "./components/admin/TeacherProfile";
 import desktop from "./assets/images/desktop.png";
 import Register from "./pages/Register";
+import AddStudentForm from "./components/studentSetup/AddStudentForm";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -91,7 +92,10 @@ function App() {
                   <Route path="" element={<DashBoard />} />
                   <Route path="students-list" element={<Studentlist />} />
                   <Route path="teacher" element={<TeacherPage />} />
-                  <Route path="teacher/edit-teacher" element={<TeacherUpdate />} />
+                  <Route
+                    path="teacher/edit-teacher"
+                    element={<TeacherUpdate />}
+                  />
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
                   <Route path="add-section" element={<Addsection />} />
@@ -99,10 +103,17 @@ function App() {
                     path="class-setup/student-section"
                     element={<StudentSection />}
                   />
-                  <Route path="students-list/student-update" element={<StudentUpdate />} />
+                  <Route
+                    path="students-list/student-update"
+                    element={<StudentUpdate />}
+                  />
                   <Route path="admin-profile" element={<AdminProfile />} />
-                  <Route path="password-reset-requests" element={<Requests />} />
+                  <Route
+                    path="password-reset-requests"
+                    element={<Requests />}
+                  />
                   <Route path="teacher-leaves" element={<Leaves />} />
+                  <Route path="add-student" element={<AddStudentForm />} />
                 </>
               )}
             </Route>
@@ -110,8 +121,8 @@ function App() {
           {/* Routes that do not require user authentication */}
           <Route element={<NotRequireUser />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SchoolDetailSignup />} />
-            {/* <Route path="/signup" element={<Register />} /> */}
+            {/* <Route path="/signup" element={<SchoolDetailSignup />} /> */}
+            <Route path="/signup" element={<Register />} />
           </Route>
         </Routes>
       </I18nextProvider>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EndPoints from "../services/EndPoints";
 import { axiosClient } from "../services/axiosClient";
@@ -6,42 +6,46 @@ import { useDispatch } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
 import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
+import refresh from "../assets/images/refresh.png";
 
 const Step2 = ({ goback, setStep }) => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
 
-  const [email, setEmail] = useState("nikhilesh24052002@gmail.com");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [otpVisible, setOtpVisible] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", ""]);
+  const [timer, setTimer] = useState(30);
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const inputRefs = useRef([]);
 
-  const OTPInput = ({ id, value, onChange }) => (
-    <input
-      id={id}
-      value={value}
-      onChange={onChange}
-      maxLength={1}
-      inputMode="numeric"
-      autoComplete="one-time-code"
-      className="w-14 h-14 text-center text-xl rounded-xl bg-backgroundGray15 text-textPrimary border border-gray-300 mx-1 focus:outline-none"
-    />
-  );
+  useEffect(() => {
+    let interval = null;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setIsResendDisabled(false);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const verifyOtp = async () => {
     try {
       const res = await axiosClient.put(EndPoints.ADMIN.EMAIL_OTP_VERIFY, {
-        email,
         otp: Number(otp.join("")),
       });
       if (res.statusCode === 200) {
         dispatch(setAuth({ emailVerified: true }));
-        toast.success(res?.result?.msg);
+        toast.success(res?.result?.message);
         localStorage.setItem("temp_access_token", res?.result?.token);
         setStep(3);
       }
-    } catch (err) {
-      console.error("OTP verification failed:", err);
+    } catch (e) {
+      toast.error(e);
     }
   };
 
@@ -58,10 +62,13 @@ const Step2 = ({ goback, setStep }) => {
       const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_VERIFY, {
         email,
       });
-      console.log({ res });
-      // dispatch(setAuth({ ...data, email }));
-    } catch (err) {
-      console.log(err);
+      if (res?.statusCode === 200) {
+        dispatch(setAuth({ email }));
+        toast.success(res?.result);
+        setOtpVisible(true);
+      }
+    } catch (e) {
+      toast.error(e);
     }
   };
 
@@ -85,6 +92,26 @@ const Step2 = ({ goback, setStep }) => {
     document.getElementById("otp-0")?.focus();
   };
 
+  const resendOtp = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_VERIFY, {
+        email,
+      });
+      if (res?.data?.statusCode === 200) {
+        toast.success(res?.result);
+        setOtp(["", "", "", "", ""]);
+        inputRefs.current[0]?.focus();
+        setTimer(30);
+        setIsResendDisabled(true);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       {/* Phone Input */}
@@ -93,10 +120,10 @@ const Step2 = ({ goback, setStep }) => {
           {t("adminProfile.Email")}
         </p>
         <input
-          className="text-textPrimary rounded-xl border border-borderWhite2 py-2 pl-[55px] mt-2 w-full bg-backgroundGray15"
+          className="text-textPrimary rounded-xl border border-borderWhite2 py-2 pl-5 mt-2 w-full bg-backgroundGray15"
           type="text"
           name="email"
-          placeholder={t("placeholders.email")}
+          placeholder={t("placeholders.emailAddress")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -110,30 +137,39 @@ const Step2 = ({ goback, setStep }) => {
         <div className="mt-3">
           <div className="flex justify-between items-center mb-2">
             <p className="text-textPrimary text-sm font-semibold">OTP</p>
-            {/* Reset Image/Icon */}
-            <span
-              className="cursor-pointer text-gray-500 hover:text-gray-700 text-sm"
-              onClick={handleOtpReset}
-              title="Reset OTP"
-            >
-              🔄 {/* Replace this with an <img src="..."/> if desired */}
-            </span>
           </div>
           <div className="flex mt-2">
             {otp.map((digit, idx) => (
-              <OTPInput
-                key={idx}
+              <input
+                ref={(ref) => (inputRefs.current[idx] = ref)}
                 id={`otp-${idx}`}
                 value={digit}
                 onChange={handleOtpChange(idx)}
+                maxLength={1}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                className="w-14 h-14 text-center text-xl rounded-xl bg-backgroundGray15 text-textPrimary border border-gray-300 mx-1 focus:outline-none"
               />
             ))}
+            <button type="button" onClick={handleOtpReset}>
+              <img
+                src={refresh}
+                alt="refresh"
+                className="size-9 invert top-10 cursor-pointer ml-3"
+              />
+            </button>
           </div>
           <p className="text-gray-400 text-sm mt-3 text-left">
             Didn't receive the code?{" "}
-            <span className="text-white font-semibold cursor-pointer">
-              Resend code
-            </span>
+            {isResendDisabled ? "resend OTP in " + timer + "s" : ""}
+            {!isResendDisabled && (
+              <span
+                className="text-white font-semibold cursor-pointer"
+                onClick={resendOtp}
+              >
+                Resend code
+              </span>
+            )}
           </p>
         </div>
       )}
@@ -142,18 +178,28 @@ const Step2 = ({ goback, setStep }) => {
       <div className="flex justify-between w-full mt-6">
         <button
           type="button"
-          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+          className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           onClick={goback}
         >
           <p className="text-base">{t("buttons.back")}</p>
         </button>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className="rounded-lg px-4 h-8 bg-[#0F4189] font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
-        >
-          <p className="text-base">{t("buttons.submit")}</p>
-        </button>
+        {otpVisible ? (
+          <button
+            type="button"
+            onClick={verifyOtp}
+            className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+          >
+            <p className="text-base">{t("buttons.verify")}</p>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
+          >
+            <p className="text-base">{t("buttons.submit")}</p>
+          </button>
+        )}
       </div>
     </form>
   );

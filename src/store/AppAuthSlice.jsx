@@ -16,12 +16,29 @@ export const fetchAdmin = createAsyncThunk("admin/fetchAdmin", async (_) => {
   try {
     const res = await axiosClient.get(EndPoints.ADMIN.GET_ADMIN);
     if (res?.statusCode === 200) {
+      localStorage.setItem("adminData", JSON.stringify(res?.result));
       return res?.result;
     }
   } catch (e) {
     console.log({ e });
   }
 });
+
+// Thunk to fetch teacher data
+export const fetchTeacher = createAsyncThunk(
+  "teacher/fetchTeacher",
+  async (_) => {
+    try {
+      const res = await axiosClient.get(EndPoints.TEACHER.GET_TEACHER);
+      if (res?.statusCode === 200) {
+        localStorage.setItem("teacherData", JSON.stringify(res?.result));
+        return res?.result;
+      }
+    } catch (e) {
+      console.log({ e });
+    }
+  }
+);
 
 /**
  * Initial state for the authentication slice.
@@ -43,8 +60,9 @@ const initialState = {
   id: null,
   schoolName: null,
   sectionStartTime: null,
-  data: {},
-  status: {},
+  data: JSON.parse(localStorage.getItem("adminData")) || {},
+  teacherData: JSON.parse(localStorage.getItem("teacherData")) || {},
+  status: JSON.parse(localStorage.getItem("status")) || {},
 };
 
 /**
@@ -92,6 +110,9 @@ const appAuthSlice = createSlice({
     builder
       .addCase(fetchAdmin.fulfilled, (state, action) => {
         state.data = action.payload;
+      })
+      .addCase(fetchTeacher.fulfilled, (state, action) => {
+        state.teacherData = action.payload;
       })
       .addCase(setAuth.fulfilled, (state, action) => {
         state.status = action.payload;
