@@ -122,7 +122,7 @@ const Step2 = ({ goback, setStep, setLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       {/* Phone Input */}
       <div className="mt-5">
         <p className="text-textPrimary text-sm text-left font-semibold">
@@ -226,7 +226,7 @@ const Step2 = ({ goback, setStep, setLoading }) => {
           </button>
         )}
       </div>
-    </form>
+    </div>
   );
 };
 

@@ -66,7 +66,7 @@ const Step4 = ({ goback, setStep, setLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       {/* School Name */}
       <div className="mt-5">
         <p className="text-textPrimary text-sm text-left p-1 font-semibold">
@@ -138,7 +138,8 @@ const Step4 = ({ goback, setStep, setLoading }) => {
           <p className="text-base">{t("buttons.back")}</p>
         </button>
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
         >
           <div className="flex items-center gap-2">
@@ -146,7 +147,7 @@ const Step4 = ({ goback, setStep, setLoading }) => {
           </div>
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 

@@ -5,11 +5,11 @@ import toast, { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
-import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import { TextField, FormControl, MenuItem, Select } from "@mui/material";
+import { FormControl, MenuItem, Select } from "@mui/material";
 import Breadcrumbs from "../BreadCrumbs";
+import REGEX from "../../utils/regix";
 
 const AddStudent = () => {
   const navigate = useNavigate();
@@ -17,8 +17,8 @@ const AddStudent = () => {
   const { t } = useTranslation();
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
+  const [toastDisplayed, setToastDisplayed] = useState(false);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-
   const classOptions = [
     "preNursery",
     "nursery",
@@ -38,42 +38,80 @@ const AddStudent = () => {
     "twelve",
   ].map((key) => t(`options.${key}`));
 
-  const validationSchema = Yup.object({
-    firstname: Yup.string().required("First name is required"),
-    lastname: Yup.string().required("Last name is required"),
-    gender: Yup.string().required("Gender is required"),
-    parentname: Yup.string().required("Parent name is required"),
-    phone: Yup.string()
-      .required("Phone number is required")
-      .matches(/^[6-9]\d{9}$/, "Invalid Indian phone number"),
-    class: Yup.string().required("Class is required"),
-    section: Yup.string().required("Section is required"),
-  });
+  // Custom validation function
+  const validateData = (student) => {
+    if (
+      !student.firstname.trim() ||
+      student.firstname.length < 3 ||
+      REGEX.NUMBER.test(student.firstname)
+    ) {
+      return t("validationError.enterFirstName");
+    }
+    if (
+      !student.lastname.trim() ||
+      student.lastname.length < 3 ||
+      REGEX.NUMBER.test(student.lastname)
+    ) {
+      return t("validationError.enterLastName");
+    }
+    if (
+      !student.parentName.trim() ||
+      student.parentName.length < 3 ||
+      REGEX.NUMBER.test(student.parentName)
+    ) {
+      return t("validationError.parentName");
+    }
+    if (!student.phone.trim()) return t("validationError.phone");
+    if (!REGEX.PHONE_LENGTH.test(student.phone))
+      return t("validationError.validationPhoneCount");
+    if (!student.gender) return t("validationError.gender");
+    if (!student.class) return t("validationError.class");
+    if (!student.section) return t("validationError.section");
+    return "";
+  };
 
   const formik = useFormik({
     initialValues: {
       firstname: "",
       lastname: "",
       gender: "",
-      parentname: "",
+      parentName: "",
       phone: "",
       class: "",
       section: "",
     },
-    validationSchema,
     onSubmit: async (values) => {
+      const e = validateData(values);
+      if (e) {
+        if (!toastDisplayed) {
+          setToastDisplayed(true);
+          toast.error(e);
+          setTimeout(() => setToastDisplayed(false), 3000);
+        }
+        return;
+      }
+
       try {
         setLoading(true);
-        const response = await axiosClient.post(
-          EndPoints.ADMIN.ADD_STUDENT,
-          values
+        const payload = {
+          firstname: capitalize(values.firstname.trim()),
+          lastname: capitalize(values.lastname.trim()),
+          gender: values.gender,
+          parentName: capitalize(values.parentName.trim()),
+          phone: values.phone,
+          sectionId: values.section,
+        };
+        const res = await axiosClient.post(
+          EndPoints.ADMIN.REGISTER_SECTION_STUDENT,
+          payload
         );
-        if (response?.statusCode === 201) {
-          toast.success("Student added successfully");
+
+        if (res?.statusCode === 201) {
+          toast.success(res?.result);
           navigate(-1);
         }
-      } catch (error) {
-        toast.error("Failed to add student");
+      } catch (e) {
+        toast.error(e);
       } finally {
         setLoading(false);
       }
@@ -106,22 +144,293 @@ const AddStudent = () => {
     getClassList();
   }, []);
 
+  const options = [t("options.male"), t("options.female"), t("options.other")];
+
   const fields = [
     { name: "firstname", label: "First Name", type: "text" },
     { name: "lastname", label: "Last Name", type: "text" },
-    {
-      name: "gender",
-      label: t("labels.gender"),
-      type: "select",
-      options: [t("options.male"), t("options.female"), t("options.other")],
-    },
-    { name: "parentname", label: "Parent Name", type: "text" },
+    { name: "parentName", label: "Parent Name", type: "text" },
     { name: "phone", label: "Phone Number", type: "text" },
   ];
 
+  const renderField = (name) => {
+    const field = fields.find((f) => f.name === name);
+    if (!field) return null;
+
+    const preventInvalidInput = (e) => {
+      if (
+        (name === "firstname" ||
+          name === "lastname" ||
+          name === "parentName") &&
+        /\d/.test(e.key)
+      ) {
+        e.preventDefault();
+      }
+
+      if (name === "phone" && !/[0-9]/.test(e.key)) {
+        e.preventDefault();
+      }
+    };
+
+    return (
+      <div key={name} className="flex flex-col flex-1 mt-3">
+        <label
+          className={`font-semibold mb-2 ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
+        >
+          {field.label}
+        </label>
+        <input
+          type={field.type}
+          name={name}
+          placeholder={field.label}
+          onKeyPress={preventInvalidInput}
+          onChange={formik.handleChange}
+          value={formik.values[name]}
+          maxLength={
+            name === "firstname" || name === "lastname"
+              ? 15
+              : name === "parentName"
+              ? 20
+              : name === "phone"
+              ? 10
+              : ""
+          }
+          className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
+        />
+        {formik.touched[name] && formik.errors[name] && (
+          <div className="text-textRed text-sm mt-1">{formik.errors[name]}</div>
+        )}
+      </div>
+    );
+  };
+
+  const renderGenderDropdown = () => (
+    <div className="flex flex-col w-full mt-3">
+      <label
+        className={`font-semibold mb-2 ${
+          isDarkMode ? "text-textPrimary" : "text-textBlack"
+        }`}
+      >
+        Gender
+      </label>
+      <FormControl
+        fullWidth
+        variant="outlined"
+        sx={{
+          border: "1px solid #2b2e4a80",
+          borderRadius: "8px",
+          backgroundColor: isDarkMode ? "" : "white",
+          "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+          },
+          "& .MuiInputBase-root": {
+            color: isDarkMode ? "#E3E8F3" : "black",
+          },
+          "& .MuiSvgIcon-root": {
+            color: isDarkMode ? "#E3E8F3" : "black",
+          },
+        }}
+      >
+        <Select
+          name="gender"
+          value={formik.values.gender}
+          onChange={formik.handleChange}
+          displayEmpty
+          sx={{
+            height: "40px",
+            color:
+              formik.values.gender === ""
+                ? "gray"
+                : isDarkMode
+                ? "#E3E8F3"
+                : "black",
+          }}
+          MenuProps={{
+            PaperProps: {
+              sx: {
+                backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                color: isDarkMode ? "#E3E8F3" : "black",
+              },
+            },
+          }}
+        >
+          <MenuItem value="" disabled>
+            {t("placeholders.selectGender")}
+          </MenuItem>
+          {options.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+        {formik.touched.gender && formik.errors.gender && (
+          <div className="text-red-600 text-sm mt-1 ml-2">
+            {formik.errors.gender}
+          </div>
+        )}
+      </FormControl>
+    </div>
+  );
+
+  const renderClassDropdown = () => (
+    <div className="flex flex-col w-full mt-3">
+      <label
+        className={`font-semibold mb-2 ${
+          isDarkMode ? "text-textPrimary" : "text-textBlack"
+        }`}
+      >
+        Class
+      </label>
+      <FormControl
+        fullWidth
+        variant="outlined"
+        sx={{
+          border: "1px solid #2b2e4a80",
+          borderRadius: "8px",
+          backgroundColor: isDarkMode ? "" : "white",
+          "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+          },
+          "& .MuiInputBase-root": {
+            color: isDarkMode ? "#E3E8F3" : "black",
+          },
+          "& .MuiSvgIcon-root": {
+            color: isDarkMode ? "#E3E8F3" : "black",
+          },
+        }}
+      >
+        <Select
+          value={formik.values.class}
+          name="class"
+          onChange={(e) => {
+            const selectedClassId = e.target.value;
+            formik.setFieldValue("class", selectedClassId);
+            formik.setFieldValue("section", "");
+            const foundClass = classList.find(
+              (cls) => cls._id === selectedClassId
+            );
+            setSectionList(foundClass?.section || []);
+          }}
+          displayEmpty
+          sx={{
+            height: "40px",
+            color:
+              formik.values.class === ""
+                ? "gray"
+                : isDarkMode
+                ? "#E3E8F3"
+                : "black",
+          }}
+          MenuProps={{
+            PaperProps: {
+              sx: {
+                backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                color: isDarkMode ? "#E3E8F3" : "black",
+              },
+            },
+          }}
+        >
+          <MenuItem value="" disabled>
+            Select Class
+          </MenuItem>
+          {classList.map((cls) => (
+            <MenuItem key={cls._id} value={cls._id}>
+              {cls.name}
+            </MenuItem>
+          ))}
+        </Select>
+        {formik.touched.class && formik.errors.class && (
+          <div className="text-red-600 text-sm mt-1 ml-2">
+            {formik.errors.class}
+          </div>
+        )}
+      </FormControl>
+    </div>
+  );
+
+  const renderSectionDropdown = () => (
+    <div className="flex flex-col w-full mt-3">
+      <label
+        className={`font-semibold mb-2 ${
+          isDarkMode ? "text-textPrimary" : "text-textBlack"
+        }`}
+      >
+        Section
+      </label>
+      <FormControl
+        fullWidth
+        variant="outlined"
+        disabled={!formik.values.class}
+        sx={{
+          border: "1px solid #2b2e4a80",
+          borderRadius: "8px",
+          backgroundColor: isDarkMode ? "" : "white",
+          "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+          },
+          "& .MuiInputBase-root": {
+            color: isDarkMode ? "#E3E8F3" : "black",
+          },
+          "& .MuiSvgIcon-root": {
+            color: isDarkMode ? "#E3E8F3" : "black",
+          },
+        }}
+      >
+        <Select
+          value={formik.values.section}
+          name="section"
+          onChange={formik.handleChange}
+          displayEmpty
+          sx={{
+            height: "40px",
+            color:
+              formik.values.section === ""
+                ? "gray"
+                : isDarkMode
+                ? "#E3E8F3"
+                : "black",
+            "&.Mui-disabled .MuiSelect-select": {
+              color: "gray !important",
+              WebkitTextFillColor: "gray !important",
+            },
+            "&.Mui-disabled .MuiSelect-icon": {
+              color: "gray !important",
+            },
+          }}
+          MenuProps={{
+            PaperProps: {
+              sx: {
+                backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                color: isDarkMode ? "#E3E8F3" : "black",
+              },
+            },
+          }}
+        >
+          <MenuItem value="" disabled>
+            Select Section
+          </MenuItem>
+          {sectionList.map((sec) => (
+            <MenuItem key={sec._id} value={sec._id}>
+              {sec.name}
+            </MenuItem>
+          ))}
+        </Select>
+        {formik.touched.section && formik.errors.section && (
+          <div className="text-red-600 text-sm mt-1 ml-2">
+            {formik.errors.section}
+          </div>
+        )}
+      </FormControl>
+    </div>
+  );
+
   return (
     <div
-      className={`flex justify-center items-center w-full h-full pt-[25px] ${
+      className={`flex w-full min-h-[calc(100vh-72px)] p-6 ${
         isDarkMode ? "bg-background2" : "bg-whiteBackground2"
       }`}
     >
@@ -136,7 +445,7 @@ const AddStudent = () => {
           isDarkMode
             ? "bg-gradient-to-r from-fromColor1 to-toColor1"
             : "bg-white"
-        } rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10`}
+        } rounded-2xl w-full h-full flex flex-col items-start py-5 px-10`}
       >
         <Breadcrumbs />
         <h1
@@ -148,276 +457,23 @@ const AddStudent = () => {
         </h1>
 
         <form onSubmit={formik.handleSubmit} className="w-full mt-5">
-          <div className="grid grid-cols-2 gap-4">
-            {fields.map(({ name, label, type, options }) => (
-              <div key={name} className="flex flex-col mx-4 mt-3">
-                <label
-                  className={`font-semibold mb-2 ${
-                    isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  }`}
-                >
-                  {label}
-                </label>
-                {type === "select" ? (
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      border: "1px solid #2b2e4a40",
-                      borderRadius: "8px",
-                      backgroundColor: isDarkMode ? "" : "white",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        border: "none",
-                      },
-                      "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: isDarkMode ? "#2b2e4a80" : "black",
-                      },
-                      "& .MuiInputBase-root": {
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                      },
-                      "& .MuiSvgIcon-root": {
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                      },
-                    }}
-                  >
-                    <Select
-                      value={formik.values[name]}
-                      name={name}
-                      onChange={formik.handleChange}
-                      displayEmpty
-                      sx={{
-                        border: "1px solid #2b2e4a80",
-                        borderRadius: "0.5rem",
-                        height: "40px",
-                        backgroundColor: isDarkMode ? "" : "white",
-                        color:
-                          formik.values[name] === ""
-                            ? "gray"
-                            : isDarkMode
-                            ? "#E3E8F3"
-                            : "black",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
-                        },
-                      }}
-                      MenuProps={{
-                        PaperProps: {
-                          sx: {
-                            backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                            color: isDarkMode ? "#E3E8F3" : "black",
-                          },
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        {label}
-                      </MenuItem>
-                      {options.map((option) => (
-                        <MenuItem
-                          key={option}
-                          value={option}
-                          sx={{
-                            backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                            color: isDarkMode ? "#E3E8F3" : "black",
-                            "&:hover": {
-                              backgroundColor: isDarkMode
-                                ? "#2a2a2a"
-                                : "#E9EEF2",
-                            },
-                          }}
-                        >
-                          {option}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                ) : (
-                  <TextField
-                    fullWidth
-                    name={name}
-                    type={type}
-                    value={formik.values[name]}
-                    onChange={formik.handleChange}
-                    placeholder={label}
-                    InputProps={{
-                      sx: {
-                        height: "50px",
-                        backgroundColor: isDarkMode ? "transparent" : "#fff",
-                        color: isDarkMode ? "#E3E8F3" : "#000",
-                        borderRadius: "4px",
-                      },
-                    }}
-                    InputLabelProps={{ shrink: false }}
-                    sx={{
-                      input: {
-                        color: isDarkMode ? "#E3E8F3" : "#000",
-                        padding: "0 14px",
-                      },
-                      "& .MuiOutlinedInput-root": {
-                        height: "50px",
-                      },
-                      "& fieldset": {
-                        border: "1px solid #2b2e4a40",
-                      },
-                    }}
-                  />
-                )}
-                {formik.touched[name] && formik.errors[name] && (
-                  <div className="text-textRed text-sm mt-1">
-                    {formik.errors[name]}
-                  </div>
-                )}
-              </div>
-            ))}
-            {/* Class Dropdown */}
-            <div className="flex flex-col mx-4 mt-3">
-              <label
-                className={`font-semibold mb-2 ${
-                  isDarkMode ? "text-white" : "text-black"
-                }`}
-              >
-                Class
-              </label>
-              <FormControl
-                fullWidth
-                sx={{
-                  border: "1px solid #2b2e4a40",
-                  backgroundColor: isDarkMode ? "" : "white",
-                  height: "50px",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    border: "none",
-                  },
-                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "white !important",
-                  },
-                  "& .MuiInputBase-root": {
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                  },
-                  "& .MuiSvgIcon-root": {
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                  },
-                }}
-              >
-                <Select
-                  value={formik.values.class}
-                  name="class"
-                  onChange={(e) => {
-                    const selectedClassId = e.target.value;
-                    formik.setFieldValue("class", selectedClassId);
-                    formik.setFieldValue("section", ""); // reset section
-                    const foundClass = classList.find(
-                      (cls) => cls._id === selectedClassId
-                    );
-                    setSectionList(foundClass?.section || []);
-                  }}
-                  displayEmpty
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="" disabled>
-                    Select Class
-                  </MenuItem>
-                  {classList.map((cls) => (
-                    <MenuItem
-                      key={cls._id}
-                      value={cls._id}
-                      sx={{
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                        "&:hover": {
-                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
-                        },
-                      }}
-                    >
-                      {cls.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {formik.touched.class && formik.errors.class && (
-                <div className="text-red-600 text-sm mt-1">
-                  {formik.errors.class}
-                </div>
-              )}
-            </div>
-
-            {/* Section Dropdown */}
-            <div className="flex flex-col mx-4 mt-3">
-              <label
-                className={`font-semibold mb-2 ${
-                  isDarkMode ? "text-white" : "text-black"
-                }`}
-              >
-                Section
-              </label>
-              <FormControl
-                fullWidth
-                disabled={!formik.values.class}
-                sx={{
-                  border: "1px solid #2b2e4a40",
-                  backgroundColor: isDarkMode ? "" : "white",
-                  height: "50px",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    border: "none",
-                  },
-                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "white !important",
-                  },
-                  "& .MuiInputBase-root": {
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                  },
-                  "& .MuiSvgIcon-root": {
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                  },
-                }}
-              >
-                <Select
-                  value={formik.values.section}
-                  name="section"
-                  onChange={formik.handleChange}
-                  displayEmpty
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="" disabled>
-                    Select Section
-                  </MenuItem>
-                  {sectionList.map((sec) => (
-                    <MenuItem
-                      key={sec._id}
-                      value={sec._id}
-                      sx={{
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                        "&:hover": {
-                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
-                        },
-                      }}
-                    >
-                      {sec.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {formik.touched.section && formik.errors.section && (
-                <div className="text-red-600 text-sm mt-1">
-                  {formik.errors.section}
-                </div>
-              )}
-            </div>
+          {/* Row 1: First Name, Last Name */}
+          <div className="flex gap-4">
+            {["firstname", "lastname"].map((name) => renderField(name))}
           </div>
+
+          {/* Row 2: Parent Name, Phone */}
+          <div className="flex gap-4 mt-4">
+            {["parentName", "phone"].map((name) => renderField(name))}
+          </div>
+
+          {/* Row 3: Gender, Class, Section */}
+          <div className="flex gap-4 mt-4">
+            {renderGenderDropdown()}
+            {renderClassDropdown()}
+            {renderSectionDropdown()}
+          </div>
+
           <div className="flex justify-end gap-4 mt-10 w-full">
             <button
               type="button"

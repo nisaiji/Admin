@@ -64,7 +64,7 @@ const Step3 = ({ goback, setStep, setLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <div className="">
         {/* Password Field */}
         <div className="mt-5 relative w-full">
@@ -133,7 +133,8 @@ const Step3 = ({ goback, setStep, setLoading }) => {
           <p className="text-base">{t("buttons.back")}</p>
         </button>
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           data-testid="submitPage3"
         >
@@ -142,7 +143,7 @@ const Step3 = ({ goback, setStep, setLoading }) => {
           </div>
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 

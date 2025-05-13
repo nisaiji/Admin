@@ -116,6 +116,8 @@
     "enterLastName": "Last Name should be atleast 3 character long and can not contain numbers",
     "validationParentFullNameLength": "Parent Full Name should be atleast 3 character long and can not contain numbers",
     "gender": "Please select Gender",
+    "class": "Please select Class",
+    "section": "Please select Section",
     "bloodGroup": "Please select Blood Group",
     "parentName": "Please enter Parent Full Name",
     "validationPhone": "Please enter Phone Number ",

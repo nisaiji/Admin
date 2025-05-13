@@ -107,7 +107,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       {/* Country & State */}
       <div className="flex">
         <div className="w-1/2 mt-2">
@@ -403,13 +403,14 @@ const Step5 = ({ goback, setStep, setLoading }) => {
           {t("buttons.back")}
         </button>
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           className="rounded-lg px-4 h-8 bg-backgroundBlue text-white font-medium flex items-center justify-center active:scale-90"
         >
           {t("buttons.continue")}
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 

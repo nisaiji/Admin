@@ -183,7 +183,7 @@ const Step1 = ({ goback, setStep, setLoading }) => {
   };
 
   return (
-    <form>
+    <div>
       {/* Phone Input */}
       <div className="mt-10">
         <p className="text-textPrimary text-sm text-left font-semibold">
@@ -291,7 +291,7 @@ const Step1 = ({ goback, setStep, setLoading }) => {
           </button>
         )}
       </div>
-    </form>
+    </div>
   );
 };
 
