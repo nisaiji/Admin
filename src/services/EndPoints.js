@@ -51,7 +51,7 @@ const EndPoints = {
     REPLACE_TEACHER: "section/replace-teacher",
     SECTION_INFO: "section",
     GET_DEMO_EXCEL: "admin/students-excelsheet",
-    UPLOAD_EXCEL: "student/excel",
+    UPLOAD_EXCEL: "v2/student/bulk",
     GET_ATTENDANCE: "attendance/admin",
     UPDATE_ATTENDANCE: "attendance/admin/bulk-mark",
 
