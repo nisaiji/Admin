@@ -176,32 +176,102 @@ const Dashboard = () => {
     }
   }, [dispatch]);
 
+  const resizeImage = (
+    file,
+    maxSizeMB = 1,
+    maxWidth = 1000,
+    maxHeight = 1000
+  ) => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        image.src = e.target.result;
+      };
+
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = image.width;
+        let height = image.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          } else {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            const reader2 = new FileReader();
+            reader2.readAsDataURL(blob);
+            reader2.onloadend = () => resolve(reader2.result);
+          },
+          "image/jpeg",
+          0.8 // adjust quality (0.0 - 1.0)
+        );
+      };
+
+      reader.onerror = reject;
+      image.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const uploadPhoto = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    // console.log(
+    //   `Original file size: ${(file.size / 1024 / 1024).toFixed(2)} MB`
+    // );
+    try {
+      let base64Image;
 
-    // Convert image file to Base64
-    const toBase64 = (file) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result); // Base64 string
-        reader.onerror = (error) => reject(error);
+      if (file.size > 1024 * 1024) {
+        // Resize if greater than 1MB
+        base64Image = await resizeImage(file);
+        // const sizeInBytes =
+        //   base64Image.length * (3 / 4) -
+        //   (base64Image.endsWith("==") ? 2 : base64Image.endsWith("=") ? 1 : 0);
+        // console.log(
+        //   `Resized image size: ${(sizeInBytes / 1024 / 1024).toFixed(2)} MB`
+        // );
+      } else {
+        // Convert to Base64
+        const toBase64 = (file) =>
+          new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+          });
+
+        base64Image = await toBase64(file);
+      }
+
+      // Upload the image
+      const res = await axiosClient.put(EndPoints.ADMIN.PHOTO_UPLOAD, {
+        photo: base64Image,
+        method: "POST",
       });
 
-    try {
-      const base64Image = await toBase64(file);
-      // Optionally send base64 to the server
-      const res = await axiosClient.put(
-        EndPoints.ADMIN.PHOTO_UPLOAD,
-        { photo: base64Image, method: "POST" } // Adjust key as needed by your backend
-      );
       if (res?.statusCode === 200) {
         dispatch(updateAdminData({ photo: base64Image }));
         toast.success(res?.result);
       }
-    } catch (e) {
-      // console.log({e});
+    } catch (error) {
+      console.error("Photo upload failed", error);
+      toast.error("Photo upload failed.");
     }
   };
 

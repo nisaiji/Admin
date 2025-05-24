@@ -215,7 +215,8 @@
     "personalDetails": "Personal Details",
     "guardianDetails": "Guardian Details",
     "student": "Student",
-    "students": "Student Information System",
+    "students": "Students",
+    "sis": "Student Information System",
     "teacherDetails": "Teacher Details",
     "teacherPersonalDetails": "Personal",
     "educationDetails": "Education Details",
@@ -258,7 +259,7 @@
     "today": "Today",
     "saveChanges": "Save Changes",
     "checkProgress": "Check Progress",
-    "applyTC":"Apply TC"
+    "applyTC": "Apply TC"
   },
   "toasts": {
     "sectionLimit": "Reached maximum section limit",

@@ -427,8 +427,8 @@ export default function Teacher() {
                       </button>
                     </td>
                   </tr>
-                  {filteredTeachers.map((teacher) => (
-                    <tr key={teacher.SNo} className="bg-transparent">
+                  {filteredTeachers.map((teacher,i) => (
+                    <tr key={i} className="bg-transparent">
                       {/* SNo */}
                       <td
                         className={`px-4 py-2 font-medium text-center border text-sm border-borderLine2 ${

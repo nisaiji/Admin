@@ -42,6 +42,7 @@ export default {
         backgroundDarkBlue: "#0F4189",
         backgroundLightBlue: "#DBEAFE",
         backgroundDarkGray: "#2F3035",
+        backgroundGray2: "#6868684D",
         backgroundTableCell: "#1F2123",
         backgroundGrayDays: "#E9EEF226",
 

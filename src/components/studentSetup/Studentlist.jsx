@@ -280,7 +280,7 @@ export default function Studentlist() {
                 isDarkMode ? "text-textPrimary" : "text-textBlack"
               }`}
             >
-              {t("titles.students")}
+              {t("titles.sis")}
             </h1>
             {/* <Link
               to="/add-student"
@@ -639,7 +639,7 @@ export default function Studentlist() {
                           <div className={`flex justify-around`}>
                             <button
                               onClick={() =>
-                                navigate("/students-list/student-update", {
+                                navigate("/student-information-system/student-update", {
                                   state: student,
                                 })
                               }
