@@ -70,6 +70,9 @@ const AddStudent = () => {
     return "";
   };
 
+  const capitalize = (str) =>
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
   const formik = useFormik({
     initialValues: {
       firstname: "",
@@ -79,6 +82,15 @@ const AddStudent = () => {
       phone: "",
       class: "",
       section: "",
+      // bloodGroup: "",
+      // dob: "",
+      // address: "",
+      // parentGender: "",
+      // parentAge: "",
+      // parentEmail: "",
+      // parentQualification: "",
+      // parentOccupation: "",
+      // parentAddress: "",
     },
     onSubmit: async (values) => {
       const e = validateData(values);

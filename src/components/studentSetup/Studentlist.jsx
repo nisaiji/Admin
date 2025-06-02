@@ -282,14 +282,14 @@ export default function Studentlist() {
             >
               {t("titles.sis")}
             </h1>
-            {/* <Link
+            <Link
               to="/add-student"
               className={`flex flex-row justify-center items-center px-2 py-1 space-x-2 cursor-pointer rounded border border-[#FF793F]/10 bg-[#FF793F]/10 transition-all duration-200 ease-in-out active:scale-90`}
             >
               <span className={`text-xs font-poppins-bold text-textOrange`}>
                 Add Student
               </span>
-            </Link> */}
+            </Link>
           </div>
         </div>
         <div
@@ -639,9 +639,12 @@ export default function Studentlist() {
                           <div className={`flex justify-around`}>
                             <button
                               onClick={() =>
-                                navigate("/student-information-system/student-update", {
-                                  state: student,
-                                })
+                                navigate(
+                                  "/student-information-system/student-update",
+                                  {
+                                    state: student,
+                                  }
+                                )
                               }
                             >
                               <img

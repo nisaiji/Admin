@@ -220,14 +220,18 @@ export default function Notice() {
                 <textarea
                   type="text"
                   value={formData.description}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       description: e.target.value,
-                    }))
-                  }
+                    }));
+                    e.target.style.height = "auto";
+                    const newHeight = Math.min(e.target.scrollHeight, 200);
+                    e.target.style.height = `${newHeight}px`;
+                  }}
+                  rows={1}
                   placeholder={t(`placeholders.WriteNotice`)}
-                  className={`w-full h-28 p-3 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-gray-500 ${
+                  className={`w-full p-3 max-h-[200px] rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-gray-500 ${
                     isDarkMode
                       ? "bg-[#68686826] text-textPrimary"
                       : "text-textBlack border border-borderWhite2"
@@ -387,7 +391,7 @@ export default function Notice() {
                           );
                           e.target.style.height = `${newHeight}px`;
                         }}
-                        className="w-full p-2 border rounded-md text-sm bg-transparent text-textPrimary resize-none overflow-auto max-h-[200px]"
+                        className="w-full p-2 border rounded-md text-sm bg-transparent text-textPrimary resize-none max-h-[200px]"
                         rows={1}
                       />
 
