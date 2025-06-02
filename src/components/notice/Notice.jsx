@@ -7,6 +7,7 @@ import profile from "../../assets/images/profileEmpty.png";
 import userIcon from "../../assets/images/darkmode/userIcon.png";
 import adminIcon from "../../assets/images/darkmode/admin.png";
 import teacher from "../../assets/images/darkmode/teacher.png";
+import check from "../../assets/images/darkmode/check.png";
 import menu from "../../assets/images/darkmode/menu.png";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
@@ -284,7 +285,7 @@ export default function Notice() {
               </div>
             </div>
 
-            <hr />
+            <hr className="border border-[#6E6F8173]" />
             {/* filter */}
             <div className="relative w-[150px] my-3 select-none">
               <div
@@ -328,7 +329,7 @@ export default function Notice() {
             {requests.map((req, index) => (
               <div
                 key={req._id}
-                className="relative flex space-x-4 p-4 border-b"
+                className="relative flex space-x-4 p-4 border-b border-[#6E6F8173]"
               >
                 <img
                   src={
@@ -352,8 +353,25 @@ export default function Notice() {
                       {req?.createdByRole === "admin"
                         ? "School Admin "
                         : "Class Coordinator "}
-                      {`send to ${req?.targetAudience?.join(",")} `}
-                      {moment(req?.updatedAt).format("DD MMM YYYY hh:mm A")}
+                      {moment(req?.updatedAt).format("DD MMM YYYY hh:mm A ")}
+                      {req?.targetAudience?.map((audience, index) => {
+                        const capitalized =
+                          audience.charAt(0).toUpperCase() + audience.slice(1);
+                        return (
+                          <span
+                            key={index}
+                            className="inline-flex items-center mr-1"
+                          >
+                            {capitalized}
+                            <img
+                              src={check}
+                              alt="tick"
+                              className="w-4 h-4 ml-1"
+                            />
+                            {index < req.targetAudience.length - 1 && ""}
+                          </span>
+                        );
+                      })}
                     </span>
                   </p>
                   {editingNoticeId === req._id ? (
