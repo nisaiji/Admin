@@ -37,7 +37,7 @@ const Step4 = ({ goback, setStep, setLoading }) => {
     if (!formData.username.trim()) {
       newErrors.username = t("validationError.username");
     } else if (formData.username.length < 6) {
-      newErrors.affiliationNo = t("validationError.usernameLength");
+      newErrors.username = t("validationError.usernameLength");
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

@@ -9,6 +9,7 @@ import passwordReset from "../assets/images/passwordReset.png";
 import downArroww from "../assets/images/dropdown.png";
 import userw from "../assets/images/user profile.png";
 import downArrow from "../assets/images/darkmode/downArrow.png";
+import notice from "../assets/images/darkmode/notice.png";
 import user from "../assets/images/darkmode/user.png";
 import logo from "../assets/images/deer logo.png";
 import { useTranslation } from "react-i18next";
@@ -341,6 +342,27 @@ const Navbar = () => {
               )}
             </div>
           )}
+          {/* notice */}
+          {!isTeacher && (
+            <Link
+              to="/notice"
+              className={`flex justify-center items-center cursor-pointer mx-6`}
+            >
+              <button
+                className={`${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } hover:text-textBlue flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group`}
+              >
+                {t("titles.notice")}
+                <img
+                  src={notice}
+                  alt="notice"
+                  className={`w-4 h-4 object-contain`}
+                />
+              </button>
+            </Link>
+          )}
+
           <FormControlLabel
             control={
               <MaterialUISwitch

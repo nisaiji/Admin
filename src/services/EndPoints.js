@@ -28,6 +28,12 @@ const EndPoints = {
     GET_SUNDAY_HOLIDAY: "workdays",
     PHOTO_UPLOAD: "admin/photo-upload",
 
+    // NOTICE
+    ADD_NOTICE:"announcement/admin",
+    GET_NOTICE:"announcement/admin",
+    UPDATE_NOTICE:"announcement/admin",
+    DELETE_NOTICE:"announcement/admin",
+
     // ADMIN TEACHER SETUP
     REGISTER_TEACHER: "teacher",
     TEACHER_LIST: "teacher/all",

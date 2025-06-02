@@ -28,6 +28,7 @@ import desktop from "./assets/images/desktop.png";
 import Register from "./pages/Register";
 import TransferCertificateApply from "./components/transferCertificate/TransferCertificateApply";
 import AddStudentForm from "./components/studentSetup/AddStudentForm";
+import Notice from "./components/notice/Notice";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -118,6 +119,7 @@ function App() {
                   />
                   <Route path="teacher-leave-requests" element={<Leaves />} />
                   <Route path="add-student" element={<AddStudentForm />} />
+                  <Route path="notice" element={<Notice />} />
                 </>
               )}
             </Route>

@@ -84,7 +84,7 @@
   "validationError": {
     "fillAll": "Please fill all the fields",
     "username": "Username is required",
-    "usernameLength": "Username should be atleast 5 char long",
+    "usernameLength": "Username should be atleast 6 char long",
     "fullnameLength": "Full Name should be atleast 5 char long",
     "firstName": "First Name is required",
     "lastName": "Last Name is required",
@@ -126,7 +126,10 @@
     "passwordLength": "Password must be at least 8 characters",
     "phoneNumber": "Phone Number should be 10 digits",
     "phoneStart": "Phone Number must start with a digit between 6 to 9",
-    "validationPhoneCount": "Phone Number must be 10 digits and start with a number between 6 and 9"
+    "validationPhoneCount": "Phone Number must be 10 digits and start with a number between 6 and 9",
+    "title": "Title is required",
+    "description": "Description is required",
+    "selectTeacherOrParent": "Select atleast one Teacher or Parent"
   },
   "placeholders": {
     "rollNumber": "Enter Roll number",
@@ -167,7 +170,9 @@
     "search": "Search here",
     "principal": "Enter Principal Name",
     "affiliationNumber": "Enter Affiliation Number",
-    "schoolAdress": "Enter School Address"
+    "schoolAdress": "Enter School Address",
+    "titleOfNotice": "Title Of Notice",
+    "WriteNotice": "Write notice here..."
   },
   "labels": {
     "sNo": "S.No.",
@@ -198,6 +203,7 @@
     "reasonToReset": "Reason to Reset",
     "class": "Class",
     "noleave": "No Leave request at ths time",
+    "noNotice": "No Notice at ths time",
     "reasonForLeave": "Reason for leave",
     "pastLeaves": "Past Leaves",
     "description": "Description",
@@ -208,7 +214,11 @@
     "pending": "Pending",
     "all": "All",
     "approved": "Approved",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "title": "Title",
+    "notice": "Notice",
+    "to": "To",
+    "dateOfNotice": "Date of Notice"
   },
   "titles": {
     "studentDetails": "Student Details",
@@ -233,6 +243,9 @@
     "from": "from",
     "data": "data",
     "requests": "Request",
+    "notice": "Notice",
+    "noticeBoard": "Notice Board",
+    "issueNotice": "Issue notice",
     "passwordReset": "Password Reset Request",
     "leave": "Teacher Leave Request",
     "transferStudent": "Transfer student"
