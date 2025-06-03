@@ -339,7 +339,9 @@ export default function Notice() {
                   src={
                     req?.createdByRole === "admin"
                       ? data?.photo || profile
-                      : req?.photo || profile
+                      : req?.createdByRole === "teacher"
+                      ? req?.createdByDetails?.photo || profile
+                      : profile
                   }
                   alt="Profile"
                   className="w-10 h-10 rounded-full object-cover"
@@ -356,7 +358,7 @@ export default function Notice() {
                     <span className="text-[#939292]">
                       {req?.createdByRole === "admin"
                         ? "School Admin "
-                        : "Class Coordinator "}
+                        : `${req?.createdByDetails?.firstname} ${req?.createdByDetails?.lastname} `}
                       {moment(req?.updatedAt).format("DD MMM YYYY hh:mm A ")}
                       {req?.targetAudience?.map((audience, index) => {
                         const capitalized =
