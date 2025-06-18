@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import Spinner from "../components/Spinner";
 import { setAuthData } from "../store/AppAuthSlice";
 import { useDispatch } from "react-redux";
+import { generateToken } from "../notifications/firebaseConfig";
 
 function Register() {
   const navigate = useNavigate();
@@ -50,6 +51,14 @@ function Register() {
 
           if (shouldCheckProgress) {
             if (data?.isActive) {
+              const fcmToken = await generateToken();
+              const result = await axiosClient.put(
+                EndPoints.ADMIN.UPDATE_FCM_TOKEN,
+                {
+                  fcmToken,
+                }
+              );
+              // console.log({ result });
               localStorage.setItem(
                 "access_token",
                 localStorage.getItem("temp_access_token")

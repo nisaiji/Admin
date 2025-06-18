@@ -15,6 +15,7 @@ import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { setAuthData } from "../store/AppAuthSlice";
+import { generateToken } from "../notifications/firebaseConfig";
 
 /**
  * Login Component
@@ -105,8 +106,18 @@ function Login() {
 
         if (res?.statusCode === 200) {
           const decodedToken = jwtDecode(res?.result?.accessToken);
-          console.log(decodedToken);
+          // console.log(decodedToken);
 
+          const fcmToken = await generateToken();
+          const result = await axiosClient.put(
+            decodedToken?.role === "admin"
+              ? EndPoints.ADMIN.UPDATE_FCM_TOKEN
+              : EndPoints.TEACHER.UPDATE_FCM_TOKEN,
+            {
+              fcmToken,
+            }
+          );
+          // console.log({ result });
           if (decodedToken?.role === "admin") {
             if (decodedToken?.active) {
               localStorage.setItem("access_token", res?.result?.accessToken);

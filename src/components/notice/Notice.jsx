@@ -145,7 +145,7 @@ export default function Notice() {
           targetAudience: notice.targetAudience,
         }
       );
-      console.log(res);
+      // console.log(res);
 
       if (res?.statusCode === 200) {
         toast.success("Notice updated");
@@ -340,7 +340,8 @@ export default function Notice() {
                     req?.createdByRole === "admin"
                       ? data?.photo || profile
                       : req?.createdByRole === "teacher"
-                      ? req?.createdByDetails?.photo || profile
+                      ? `data:image/jpeg;base64,${req?.createdByDetails?.photo}` ||
+                        profile
                       : profile
                   }
                   alt="Profile"

@@ -93,7 +93,10 @@ function App() {
                 <>
                   {/* Routes available for admin users */}
                   <Route path="" element={<DashBoard />} />
-                  <Route path="student-information-system" element={<Studentlist />} />
+                  <Route
+                    path="student-information-system"
+                    element={<Studentlist />}
+                  />
                   <Route path="teacher" element={<TeacherPage />} />
                   <Route
                     path="teacher/edit-teacher"
@@ -101,8 +104,14 @@ function App() {
                   />
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
-                  <Route path="transfer-certificate" element={<TransferCertificate />} />
-                  <Route path="transfer-certificate-apply" element={<TransferCertificateApply />} />
+                  <Route
+                    path="transfer-certificate"
+                    element={<TransferCertificate />}
+                  />
+                  <Route
+                    path="transfer-certificate-apply"
+                    element={<TransferCertificateApply />}
+                  />
                   <Route path="add-section" element={<Addsection />} />
                   <Route
                     path="class-setup/student-section"
