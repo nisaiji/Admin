@@ -11,6 +11,7 @@ const EndPoints = {
     BASIC_INFO_UPDATE: "v2/admin/details",
     ADMIN_UPDATE_ADDRESS: "admin/address",
     LOGIN: "v2/admin/login",
+    UPDATE_FCM_TOKEN: "admin/fcm-token",
 
     // ADMIN AUTH
     ADMIN_REGISTER: "admin",
@@ -29,10 +30,10 @@ const EndPoints = {
     PHOTO_UPLOAD: "admin/photo-upload",
 
     // NOTICE
-    ADD_NOTICE:"announcement/admin",
-    GET_NOTICE:"announcement/admin",
-    UPDATE_NOTICE:"announcement/admin",
-    DELETE_NOTICE:"announcement/admin",
+    ADD_NOTICE: "announcement/admin",
+    GET_NOTICE: "announcement/admin",
+    UPDATE_NOTICE: "announcement/admin",
+    DELETE_NOTICE: "announcement/admin",
 
     // ADMIN TEACHER SETUP
     REGISTER_TEACHER: "teacher",
@@ -83,6 +84,8 @@ const EndPoints = {
     SOCIAL_PROFILE_UPDATE: "admin/social",
   },
   TEACHER: {
+    // LOGIN
+    UPDATE_FCM_TOKEN: "teacher/fcm-token",
     // TEACHER DASHBOARD
     DASHBOARD_CALENDER_EVENTS: "dashboard/holiday-events",
     DASHBOARD_WEEKLY_ATTENDANCE: "dashboard/weekly-attendance",
