@@ -108,15 +108,15 @@ function Login() {
           const decodedToken = jwtDecode(res?.result?.accessToken);
           // console.log(decodedToken);
 
-          const fcmToken = await generateToken();
-          const result = await axiosClient.put(
-            decodedToken?.role === "admin"
-              ? EndPoints.ADMIN.UPDATE_FCM_TOKEN
-              : EndPoints.TEACHER.UPDATE_FCM_TOKEN,
-            {
-              fcmToken,
-            }
-          );
+          // const fcmToken = await generateToken();
+          // const result = await axiosClient.put(
+          //   decodedToken?.role === "admin"
+          //     ? EndPoints.ADMIN.UPDATE_FCM_TOKEN
+          //     : EndPoints.TEACHER.UPDATE_FCM_TOKEN,
+          //   {
+          //     fcmToken,
+          //   }
+          // );
           // console.log({ result });
           if (decodedToken?.role === "admin") {
             if (decodedToken?.active) {
@@ -125,6 +125,11 @@ function Login() {
               localStorage.removeItem("temp_access_token");
               dispatch(setAuthData(res?.result?.accessToken));
               toast.success(t("messages.login.success"));
+              const fcmToken = await generateToken();
+              const result = await axiosClient.put(
+                EndPoints.ADMIN.UPDATE_FCM_TOKEN,
+                { fcmToken }
+              );
               resetForm();
               navigate("/", { replace: true });
             } else {
@@ -148,6 +153,11 @@ function Login() {
             localStorage.setItem("refresh_token", res?.result?.refreshToken);
             dispatch(setAuthData(res?.result?.accessToken));
             toast.success(t("messages.login.success"));
+            const fcmToken = await generateToken();
+            const result = await axiosClient.put(
+              EndPoints.TEACHER.UPDATE_FCM_TOKEN,
+              { fcmToken }
+            );
             resetForm();
             navigate("/", { replace: true });
           }
