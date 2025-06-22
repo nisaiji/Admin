@@ -17,10 +17,19 @@ const Step1 = ({ goback, setStep, setLoading }) => {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [otpVisible, setOtpVisible] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const inputRefs = useRef([]);
+
+  // Initialize MSG91 Widget
+  useEffect(() => {
+    if (window?.initSendOTP) {
+      window.configuration.widgetId = import.meta.env.VITE_PHONE_WIDGET_ID;
+      window.configuration.tokenAuth = import.meta.env.VITE_PHONE_AUTH_TOKEN;
+      window.initSendOTP(window.configuration);
+    }
+  }, []);
 
   useEffect(() => {
     let interval = null;
@@ -34,31 +43,44 @@ const Step1 = ({ goback, setStep, setLoading }) => {
     return () => clearInterval(interval);
   }, [timer]);
 
+  const phoneVerifiedApi = async (otpSuccessToken) => {
+    const res = await axiosClient.post(EndPoints.ADMIN.PHONE_TOKEN_VERIFY, {
+      phone,
+      token: otpSuccessToken,
+    });
+    if (res?.statusCode === 200) {
+      dispatch(setAuth({ phoneVerified: true }));
+      localStorage.setItem("temp_access_token", res?.result?.token);
+      if (!status?.emailVerified) {
+        setStep(2);
+      } else if (!status?.passwordUpdated) {
+        setStep(3);
+      } else if (!status?.affiliationExists) {
+        setStep(4);
+      } else if (!status?.addressUpdated) {
+        setStep(5);
+      } else if (!status?.isActive) {
+        setStep(6);
+      }
+    }
+  };
+
   const verifyOtp = async () => {
     try {
       setLoading(true);
-      const res = await axiosClient.put(EndPoints.ADMIN.PHONE_OTP_VERIFY, {
-        phone,
-        otp: Number(otp.join("")),
-      });
-      // console.log({ status });
-
-      if (res.statusCode === 200) {
-        dispatch(setAuth({ phoneVerified: true }));
-        toast.success(res?.result?.msg);
-        localStorage.setItem("temp_access_token", res?.result?.token);
-        if (!status?.emailVerified) {
-          setStep(2);
-        } else if (!status?.passwordUpdated) {
-          setStep(3);
-        } else if (!status?.affiliationExists) {
-          setStep(4);
-        } else if (!status?.addressUpdated) {
-          setStep(5);
-        } else if (!status?.isActive) {
-          setStep(6);
-        }
-      }
+      window?.verifyOtp(
+        Number(otp.join("")),
+        async (res) => {
+          // console.log({ res });
+          toast.success("Phone verified successfully");
+          await phoneVerifiedApi(res?.message);
+        },
+        (err) => {
+          // console.error("Verification failed", err);
+          toast.error("Invalid OTP");
+        },
+        status?.phoneOtpReqId
+      );
     } catch (e) {
       toast.error(e);
     } finally {
@@ -80,61 +102,82 @@ const Step1 = ({ goback, setStep, setLoading }) => {
       setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.STATUS, { phone });
       const data = res?.result;
-      // console.log({ data });
 
       dispatch(setAuth({ ...data, phone }));
-      if (!data.phoneVerified) {
+      if (
+        !data?.phoneVerified ||
+        (data?.phoneVerified &&
+          (!data.emailVerified ||
+            !data?.passwordUpdated ||
+            !data?.affiliationExists ||
+            !data?.addressUpdated ||
+            !data?.isActive))
+      ) {
         try {
-          const response = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
-            phone,
-          });
-          // console.log({ response });
-
-          if (response?.statusCode === 200) {
-            toast.success(response?.result);
+          window?.sendOtp(
+            `91${phone}`,
+            (res) => {
+              // console.log({ res });
+              dispatch(setAuth({ phoneOtpReqId: res?.message }));
+              toast.success("OTP sent successfully");
+              setOtpVisible(true);
+              document.getElementById("otp-0")?.focus();
+              setTimer(30);
+              setIsResendDisabled(true);
+            },
+            (err) => {
+              toast.error("Failed to send OTP");
+              // console.log("SendOTP error", err);
+            }
+          );
+        } catch (e) {
+          // console.log({ e });
+          toast.error(e);
+        }
+      }
+      // else if (
+      //   !data.emailVerified ||
+      //   !data?.passwordUpdated ||
+      //   !data?.affiliationExists ||
+      //   !data?.addressUpdated ||
+      //   !data?.isActive
+      // ) {
+      //   const response = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
+      //     phone,
+      //   });
+      //   if (response?.statusCode === 200) {
+      //     toast.success(response?.result);
+      //     setOtp(["", "", "", "", ""]);
+      //     setOtpVisible(true);
+      //     document.getElementById("otp-0")?.focus();
+      //     setTimer(30);
+      //     setIsResendDisabled(true);
+      //   }
+      // }
+      else if (data?.isActive) {
+        toast.success("Already verified");
+        navigate("/signup");
+      }
+    } catch (e) {
+      // console.log(e);
+      toast.error(e);
+      if (err === "Admin not found") {
+        window?.sendOtp(
+          `91${phone}`,
+          (res) => {
+            // console.log({ res });
+            dispatch(setAuth({ phoneOtpReqId: res?.message }));
+            toast.success("OTP sent successfully");
             setOtpVisible(true);
             document.getElementById("otp-0")?.focus();
             setTimer(30);
             setIsResendDisabled(true);
+          },
+          (err) => {
+            toast.error("Failed to send OTP");
+            // console.log("SendOTP error", err);
           }
-        } catch (e) {
-          // console.log({ e });
-        }
-      } else if (
-        !data.emailVerified ||
-        !data?.passwordUpdated ||
-        !data?.affiliationExists ||
-        !data?.addressUpdated ||
-        !data?.isActive
-      ) {
-        const response = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
-          phone,
-        });
-        if (response?.statusCode === 200) {
-          toast.success(response?.result);
-          setOtp(["", "", "", "", ""]);
-          setOtpVisible(true);
-          document.getElementById("otp-0")?.focus();
-          setTimer(30);
-          setIsResendDisabled(true);
-        }
-      } else if (data?.isActive) {
-        toast.success("Already verified");
-        navigate("/signup");
-      }
-    } catch (err) {
-      // console.log(err);
-      if (err === "Admin not found") {
-        const response = await axiosClient.post(EndPoints.ADMIN.PHONE_VERIFY, {
-          phone,
-        });
-        if (response.statusCode === 200) {
-          toast.success(response?.result);
-          setOtpVisible(true);
-          document.getElementById("otp-0")?.focus();
-          setTimer(30);
-          setIsResendDisabled(true);
-        }
+        );
       }
     } finally {
       setLoading(false);
@@ -157,26 +200,31 @@ const Step1 = ({ goback, setStep, setLoading }) => {
   };
 
   const handleOtpReset = () => {
-    setOtp(["", "", "", "", ""]);
+    setOtp(["", "", "", "", "", ""]);
     document.getElementById("otp-0")?.focus();
   };
 
   const resendOtp = async () => {
     try {
       setLoading(true);
-      const res = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
-        phone,
-      });
-
-      if (res?.statusCode === 200) {
-        toast.success(res?.result);
-        setOtp(["", "", "", "", ""]);
-        inputRefs.current[0]?.focus();
-        setTimer(30);
-        setIsResendDisabled(true);
-      }
-    } catch (err) {
-      console.error(err);
+      window?.retryOtp(
+        "11", // '11' = SMS
+        (res) => {
+          dispatch(setAuth({ phoneOtpReqId: res?.message }));
+          toast.success("OTP resent successfully");
+          setOtp(["", "", "", "", "", ""]);
+          inputRefs.current[0]?.focus();
+          setTimer(30);
+          setIsResendDisabled(true);
+        },
+        (err) => {
+          toast.error("Failed to resend OTP");
+          // console.error("Retry OTP Error", err);
+        },
+        status?.phoneOtpReqId
+      );
+    } catch (e) {
+      toast.error(e);
     } finally {
       setLoading(false);
     }

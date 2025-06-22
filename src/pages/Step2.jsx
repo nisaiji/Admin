@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EndPoints from "../services/EndPoints";
 import { axiosClient } from "../services/axiosClient";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
 import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
@@ -11,14 +11,23 @@ import refresh from "../assets/images/refresh.png";
 const Step2 = ({ goback, setStep, setLoading }) => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
-
+  const { status } = useSelector((state) => state.appAuth);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [otpVisible, setOtpVisible] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const inputRefs = useRef([]);
+
+  // Initialize MSG91 Widget
+  useEffect(() => {
+    if (window?.initSendOTP) {
+      window.configuration.widgetId = import.meta.env.VITE_EMAIL_WIDGET_ID;
+      window.configuration.tokenAuth = import.meta.env.VITE_EMAIL_AUTH_TOKEN;
+      window.initSendOTP(window.configuration);
+    }
+  }, []);
 
   useEffect(() => {
     let interval = null;
@@ -32,18 +41,34 @@ const Step2 = ({ goback, setStep, setLoading }) => {
     return () => clearInterval(interval);
   }, [timer]);
 
+  const emailVerifiedApi = async (otpSuccessToken) => {
+    const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_TOKEN_VERIFY, {
+      email,
+      token: otpSuccessToken,
+    });
+    if (res?.statusCode === 200) {
+      dispatch(setAuth({ emailVerified: true }));
+      localStorage.setItem("temp_access_token", res?.result?.token);
+      setStep(3);
+    }
+  };
+
   const verifyOtp = async () => {
     try {
       setLoading(true);
-      const res = await axiosClient.put(EndPoints.ADMIN.EMAIL_OTP_VERIFY, {
-        otp: Number(otp.join("")),
-      });
-      if (res.statusCode === 200) {
-        dispatch(setAuth({ emailVerified: true }));
-        toast.success(res?.result?.message);
-        localStorage.setItem("temp_access_token", res?.result?.token);
-        setStep(3);
-      }
+      window?.verifyOtp(
+        Number(otp.join("")),
+        async (res) => {
+          // console.log({ res });
+          toast.success("Email verified successfully");
+          await emailVerifiedApi(res?.message);
+        },
+        (err) => {
+          // console.error("Verification failed", err);
+          toast.error("Invalid OTP");
+        },
+        status?.emailOtpReqId
+      );
     } catch (e) {
       toast.error(e);
     } finally {
@@ -62,17 +87,22 @@ const Step2 = ({ goback, setStep, setLoading }) => {
 
     try {
       setLoading(true);
-      const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_VERIFY, {
+      window?.sendOtp(
         email,
-      });
-      if (res?.statusCode === 200) {
-        dispatch(setAuth({ email }));
-        toast.success(res?.result);
-        setOtpVisible(true);
-        document.getElementById("otp-0")?.focus();
-        setTimer(30);
-        setIsResendDisabled(true);
-      }
+        (res) => {
+          // console.log({ res });
+          dispatch(setAuth({ email, emailOtpReqId: res?.message }));
+          toast.success("OTP sent successfully");
+          setOtpVisible(true);
+          document.getElementById("otp-0")?.focus();
+          setTimer(30);
+          setIsResendDisabled(true);
+        },
+        (err) => {
+          toast.error("Failed to send OTP");
+          // console.log("SendOTP error", err);
+        }
+      );
     } catch (e) {
       toast.error(e);
     } finally {
@@ -96,23 +126,29 @@ const Step2 = ({ goback, setStep, setLoading }) => {
   };
 
   const handleOtpReset = () => {
-    setOtp(["", "", "", "", ""]);
+    setOtp(["", "", "", "", "", ""]);
     document.getElementById("otp-0")?.focus();
   };
 
   const resendOtp = async () => {
     try {
       setLoading(true);
-      const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_VERIFY, {
-        email,
-      });
-      if (res?.statusCode === 200) {
-        toast.success(res?.result);
-        setOtp(["", "", "", "", ""]);
-        inputRefs.current[0]?.focus();
-        setTimer(30);
-        setIsResendDisabled(true);
-      }
+      window?.retryOtp(
+        "3", // '3' = EMAIL
+        (res) => {
+          dispatch(setAuth({ emailOtpReqId: res?.message }));
+          toast.success("OTP resent successfully");
+          setOtp(["", "", "", "", "", ""]);
+          inputRefs.current[0]?.focus();
+          setTimer(30);
+          setIsResendDisabled(true);
+        },
+        (err) => {
+          toast.error("Failed to resend OTP");
+          // console.error("Retry OTP Error", err);
+        },
+        status?.emailOtpReqId
+      );
     } catch (e) {
       toast.error(e);
       // console.error(e);
@@ -123,7 +159,7 @@ const Step2 = ({ goback, setStep, setLoading }) => {
 
   return (
     <div>
-      {/* Phone Input */}
+      {/* Email Input */}
       <div className="mt-5">
         <p className="text-textPrimary text-sm text-left font-semibold">
           {t("adminProfile.Email")}

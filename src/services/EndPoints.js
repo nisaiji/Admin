@@ -12,6 +12,8 @@ const EndPoints = {
     ADMIN_UPDATE_ADDRESS: "admin/address",
     LOGIN: "v2/admin/login",
     UPDATE_FCM_TOKEN: "admin/fcm-token",
+    PHONE_TOKEN_VERIFY: "v2/admin/phone/verify",
+    EMAIL_TOKEN_VERIFY: "v2/admin/email/verify",
 
     // ADMIN AUTH
     ADMIN_REGISTER: "admin",
