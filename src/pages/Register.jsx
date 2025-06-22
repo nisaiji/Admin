@@ -144,11 +144,13 @@ function Register() {
       goback={goBack}
       setStep={setStep}
       setLoading={(bool) => setLoading(bool)}
+      currentStep={currentStep}
     />,
     <Step2
       goback={goBack}
       setStep={setStep}
       setLoading={(bool) => setLoading(bool)}
+      currentStep={currentStep}
     />,
     <Step3
       goback={goBack}
@@ -174,6 +176,7 @@ function Register() {
 
   return (
     <>
+      {/* <div id="otp_input_container"></div> */}
       <div className="min-h-screen h-svh bg-background2">
         {loading && (
           <div className="fixed inset-0 flex items-center justify-center bg-background3 bg-opacity-50 z-30">

@@ -9,7 +9,7 @@ import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
 import { useNavigate } from "react-router-dom";
 
-const Step1 = ({ goback, setStep, setLoading }) => {
+const Step1 = ({ goback, setStep, setLoading, currentStep }) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -21,15 +21,6 @@ const Step1 = ({ goback, setStep, setLoading }) => {
   const [timer, setTimer] = useState(30);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const inputRefs = useRef([]);
-
-  // Initialize MSG91 Widget
-  useEffect(() => {
-    if (window?.initSendOTP) {
-      window.configuration.widgetId = import.meta.env.VITE_PHONE_WIDGET_ID;
-      window.configuration.tokenAuth = import.meta.env.VITE_PHONE_AUTH_TOKEN;
-      window.initSendOTP(window.configuration);
-    }
-  }, []);
 
   useEffect(() => {
     let interval = null;
@@ -43,49 +34,135 @@ const Step1 = ({ goback, setStep, setLoading }) => {
     return () => clearInterval(interval);
   }, [timer]);
 
-  const phoneVerifiedApi = async (otpSuccessToken) => {
-    const res = await axiosClient.post(EndPoints.ADMIN.PHONE_TOKEN_VERIFY, {
-      phone,
-      token: otpSuccessToken,
-    });
-    if (res?.statusCode === 200) {
-      dispatch(setAuth({ phoneVerified: true }));
-      localStorage.setItem("temp_access_token", res?.result?.token);
-      if (!status?.emailVerified) {
-        setStep(2);
-      } else if (!status?.passwordUpdated) {
-        setStep(3);
-      } else if (!status?.affiliationExists) {
-        setStep(4);
-      } else if (!status?.addressUpdated) {
-        setStep(5);
-      } else if (!status?.isActive) {
-        setStep(6);
+  useEffect(() => {
+    if (window?.initSendOTP) {
+      if (currentStep === 1) {
+        window.configuration.widgetId = import.meta.env.VITE_PHONE_WIDGET_ID;
+        window.configuration.tokenAuth = import.meta.env.VITE_PHONE_AUTH_TOKEN;
+        window.initSendOTP(window.configuration);
       }
     }
-  };
+  }, [currentStep]);
 
-  const verifyOtp = async () => {
+  // useEffect(() => {
+  //   const loadOTPWidget = (widgetId, tokenAuth) => {
+  //     const oldScript = document.getElementById("otp-script");
+  //     if (oldScript) oldScript.remove();
+  //     const otpContainer = document.getElementById("otp_input_container");
+  //     if (otpContainer) otpContainer.innerHTML = "";
+  //     window.configuration = {
+  //       widgetId,
+  //       tokenAuth,
+  //       exposeMethods: true,
+  //       success: (data) => {
+  //         // console.log("OTP verified", data);
+  //       },
+  //       failure: (error) => {
+  //         // console.error("OTP failed", error);
+  //       },
+  //     };
+  //     const script = document.createElement("script");
+  //     script.id = "otp-script";
+  //     script.src = "https://verify.msg91.com/otp-provider.js";
+  //     script.type = "text/javascript";
+  //     script.onload = () => {
+  //       if (window.initSendOTP) {
+  //         window.initSendOTP(window.configuration);
+  //       }
+  //     };
+  //     document.body.appendChild(script);
+  //   };
+
+  //   let widgetId = "";
+  //   let tokenAuth = "";
+  //   if (currentStep === 1) {
+  //     widgetId = import.meta.env.VITE_PHONE_WIDGET_ID;
+  //     tokenAuth = import.meta.env.VITE_PHONE_AUTH_TOKEN;
+  //     console.log("Setting up PHONE widget");
+  //     loadOTPWidget(widgetId, tokenAuth);
+  //   }
+  // }, [currentStep]);
+
+  // useEffect(() => {
+  //   // Step 1: Clean up old script
+  //   const oldScript = document.getElementById("otp-script");
+  //   if (oldScript) oldScript.remove();
+
+  //   // Step 2: Clear the container
+  //   const container = document.getElementById("otp_input_container");
+  //   if (container) container.innerHTML = "";
+
+  //   // Step 3: Set new config
+  //   let widgetId;
+  //   let tokenAuth;
+  //   if (currentStep === 1) {
+  //     widgetId = import.meta.env.VITE_PHONE_WIDGET_ID;
+  //     tokenAuth = import.meta.env.VITE_PHONE_AUTH_TOKEN;
+  //   }
+
+  //   window.configuration = {
+  //     widgetId,
+  //     tokenAuth,
+  //     exposeMethods: true,
+  //     success: (data) => {
+  //       console.log("OTP verified", data);
+  //     },
+  //     failure: (error) => {
+  //       console.error("OTP failed", error);
+  //     },
+  //   };
+
+  //   // Step 4: Re-inject the script
+  //   const script = document.createElement("script");
+  //   script.id = "otp-script";
+  //   script.type = "text/javascript";
+  //   script.src = "https://verify.msg91.com/otp-provider.js";
+  //   script.async = true;
+  //   document.body.appendChild(script);
+  // }, [currentStep]);
+
+  const phoneVerifiedApi = async (otpSuccessToken) => {
     try {
-      setLoading(true);
-      window?.verifyOtp(
-        Number(otp.join("")),
-        async (res) => {
-          // console.log({ res });
-          toast.success("Phone verified successfully");
-          await phoneVerifiedApi(res?.message);
-        },
-        (err) => {
-          // console.error("Verification failed", err);
-          toast.error("Invalid OTP");
-        },
-        status?.phoneOtpReqId
-      );
+      const res = await axiosClient.post(EndPoints.ADMIN.PHONE_TOKEN_VERIFY, {
+        phone,
+        token: otpSuccessToken,
+      });
+      if (res?.statusCode === 200) {
+        dispatch(setAuth({ phoneVerified: true }));
+        localStorage.setItem("temp_access_token", res?.result?.token);
+        if (!status?.emailVerified) {
+          setStep(2);
+          window.location.reload();
+        } else if (!status?.passwordUpdated) {
+          setStep(3);
+        } else if (!status?.affiliationExists) {
+          setStep(4);
+        } else if (!status?.addressUpdated) {
+          setStep(5);
+        } else if (!status?.isActive) {
+          setStep(6);
+        }
+      }
     } catch (e) {
       toast.error(e);
     } finally {
       setLoading(false);
     }
+  };
+
+  const verifyOtp = async () => {
+    setLoading(true);
+    await window?.verifyOtp(
+      Number(otp.join("")),
+      async (res) => {
+        toast.success("Phone verified successfully");
+        await phoneVerifiedApi(res?.message);
+      },
+      (err) => {
+        toast.error(err?.message);
+      },
+      status?.phoneOtpReqId
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -113,59 +190,9 @@ const Step1 = ({ goback, setStep, setLoading }) => {
             !data?.addressUpdated ||
             !data?.isActive))
       ) {
-        try {
-          window?.sendOtp(
-            `91${phone}`,
-            (res) => {
-              // console.log({ res });
-              dispatch(setAuth({ phoneOtpReqId: res?.message }));
-              toast.success("OTP sent successfully");
-              setOtpVisible(true);
-              document.getElementById("otp-0")?.focus();
-              setTimer(30);
-              setIsResendDisabled(true);
-            },
-            (err) => {
-              toast.error("Failed to send OTP");
-              // console.log("SendOTP error", err);
-            }
-          );
-        } catch (e) {
-          // console.log({ e });
-          toast.error(e);
-        }
-      }
-      // else if (
-      //   !data.emailVerified ||
-      //   !data?.passwordUpdated ||
-      //   !data?.affiliationExists ||
-      //   !data?.addressUpdated ||
-      //   !data?.isActive
-      // ) {
-      //   const response = await axiosClient.post(EndPoints.ADMIN.RESEND_OTP, {
-      //     phone,
-      //   });
-      //   if (response?.statusCode === 200) {
-      //     toast.success(response?.result);
-      //     setOtp(["", "", "", "", ""]);
-      //     setOtpVisible(true);
-      //     document.getElementById("otp-0")?.focus();
-      //     setTimer(30);
-      //     setIsResendDisabled(true);
-      //   }
-      // }
-      else if (data?.isActive) {
-        toast.success("Already verified");
-        navigate("/signup");
-      }
-    } catch (e) {
-      // console.log(e);
-      toast.error(e);
-      if (err === "Admin not found") {
-        window?.sendOtp(
+        await window?.sendOtp(
           `91${phone}`,
           (res) => {
-            // console.log({ res });
             dispatch(setAuth({ phoneOtpReqId: res?.message }));
             toast.success("OTP sent successfully");
             setOtpVisible(true);
@@ -174,8 +201,29 @@ const Step1 = ({ goback, setStep, setLoading }) => {
             setIsResendDisabled(true);
           },
           (err) => {
-            toast.error("Failed to send OTP");
-            // console.log("SendOTP error", err);
+            toast.error(err?.message);
+          }
+        );
+      } else if (data?.isActive) {
+        toast.success("Already verified");
+        navigate("/signup");
+      }
+    } catch (e) {
+      console.log({ e });
+
+      if (e === "Admin not found") {
+        await window?.sendOtp(
+          `91${phone}`,
+          (res) => {
+            dispatch(setAuth({ phoneOtpReqId: res?.message }));
+            toast.success("OTP sent successfully");
+            setOtpVisible(true);
+            document.getElementById("otp-0")?.focus();
+            setTimer(30);
+            setIsResendDisabled(true);
+          },
+          (err) => {
+            toast.error(err?.message);
           }
         );
       }
@@ -207,7 +255,7 @@ const Step1 = ({ goback, setStep, setLoading }) => {
   const resendOtp = async () => {
     try {
       setLoading(true);
-      window?.retryOtp(
+      await window?.retryOtp(
         "11", // '11' = SMS
         (res) => {
           dispatch(setAuth({ phoneOtpReqId: res?.message }));
@@ -218,13 +266,12 @@ const Step1 = ({ goback, setStep, setLoading }) => {
           setIsResendDisabled(true);
         },
         (err) => {
-          toast.error("Failed to resend OTP");
-          // console.error("Retry OTP Error", err);
+          toast.error(err?.message);
         },
         status?.phoneOtpReqId
       );
     } catch (e) {
-      toast.error(e);
+      // toast.error(e);
     } finally {
       setLoading(false);
     }

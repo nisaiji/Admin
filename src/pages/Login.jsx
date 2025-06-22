@@ -284,9 +284,9 @@ function Login() {
                 <div className="text-textPrimary pr-1">
                   {t("login.notHaveAccount")}
                 </div>
-                <Link to="/signup" className="text-textBlue font-bold">
+                <a href="/signup" className="text-textBlue font-bold">
                   {t("login.register")}
-                </Link>
+                </a>
               </div>
             )}
           </div>

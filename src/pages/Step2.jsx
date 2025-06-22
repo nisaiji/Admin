@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
 
-const Step2 = ({ goback, setStep, setLoading }) => {
+const Step2 = ({ goback, setStep, setLoading, currentStep }) => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
   const { status } = useSelector((state) => state.appAuth);
@@ -19,15 +19,6 @@ const Step2 = ({ goback, setStep, setLoading }) => {
   const [timer, setTimer] = useState(30);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const inputRefs = useRef([]);
-
-  // Initialize MSG91 Widget
-  useEffect(() => {
-    if (window?.initSendOTP) {
-      window.configuration.widgetId = import.meta.env.VITE_EMAIL_WIDGET_ID;
-      window.configuration.tokenAuth = import.meta.env.VITE_EMAIL_AUTH_TOKEN;
-      window.initSendOTP(window.configuration);
-    }
-  }, []);
 
   useEffect(() => {
     let interval = null;
@@ -41,39 +32,124 @@ const Step2 = ({ goback, setStep, setLoading }) => {
     return () => clearInterval(interval);
   }, [timer]);
 
-  const emailVerifiedApi = async (otpSuccessToken) => {
-    const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_TOKEN_VERIFY, {
-      email,
-      token: otpSuccessToken,
-    });
-    if (res?.statusCode === 200) {
-      dispatch(setAuth({ emailVerified: true }));
-      localStorage.setItem("temp_access_token", res?.result?.token);
-      setStep(3);
+  useEffect(() => {
+    if (window?.initSendOTP) {
+      if (currentStep === 2) {
+        window.configuration.widgetId = import.meta.env.VITE_EMAIL_WIDGET_ID;
+        window.configuration.tokenAuth = import.meta.env.VITE_EMAIL_AUTH_TOKEN;
+        window.initSendOTP(window.configuration);
+      }
     }
-  };
+  }, [currentStep]);
 
-  const verifyOtp = async () => {
+  // useEffect(() => {
+  //   const loadOTPWidget = (widgetId, tokenAuth) => {
+  //     const oldScript = document.getElementById("otp-script");
+  //     if (oldScript) oldScript.remove();
+  //     const otpContainer = document.getElementById("otp_input_container");
+  //     if (otpContainer) otpContainer.innerHTML = "";
+  //     window.configuration = {
+  //       widgetId,
+  //       tokenAuth,
+  //       exposeMethods: true,
+  //       success: (data) => {
+  //         // console.log("OTP verified", data);
+  //       },
+  //       failure: (error) => {
+  //         // console.error("OTP failed", error);
+  //       },
+  //     };
+  //     const script = document.createElement("script");
+  //     script.id = "otp-script";
+  //     script.src = "https://verify.msg91.com/otp-provider.js";
+  //     script.type = "text/javascript";
+  //     script.onload = () => {
+  //       if (window.initSendOTP) {
+  //         window.initSendOTP(window.configuration);
+  //       }
+  //     };
+  //     document.body.appendChild(script);
+  //   };
+
+  //   let widgetId = "";
+  //   let tokenAuth = "";
+  //   if (currentStep === 2) {
+  //     widgetId = import.meta.env.VITE_EMAIL_WIDGET_ID;
+  //     tokenAuth = import.meta.env.VITE_EMAIL_AUTH_TOKEN;
+  //     console.log("Setting up EMAIL widget");
+  //     loadOTPWidget(widgetId, tokenAuth);
+  //   }
+  // }, [currentStep]);
+
+  // useEffect(() => {
+  //   // Step 1: Clean up old script
+  //   const oldScript = document.getElementById("otp-script");
+  //   if (oldScript) oldScript.remove();
+
+  //   // Step 2: Clear the container
+  //   const container = document.getElementById("otp_input_container");
+  //   if (container) container.innerHTML = "";
+
+  //   // Step 3: Set new config
+  //   let widgetId;
+  //   let tokenAuth;
+  //   if (currentStep === 1) {
+  //     widgetId = import.meta.env.VITE_EMAIL_WIDGET_ID;
+  //     tokenAuth = import.meta.env.VITE_EMAIL_AUTH_TOKEN;
+  //   }
+
+  //   window.configuration = {
+  //     widgetId,
+  //     tokenAuth,
+  //     exposeMethods: true,
+  //     success: (data) => {
+  //       console.log("OTP verified", data);
+  //     },
+  //     failure: (error) => {
+  //       console.error("OTP failed", error);
+  //     },
+  //   };
+
+  //   // Step 4: Re-inject the script
+  //   const script = document.createElement("script");
+  //   script.id = "otp-script";
+  //   script.type = "text/javascript";
+  //   script.src = "https://verify.msg91.com/otp-provider.js";
+  //   script.async = true;
+  //   document.body.appendChild(script);
+  // }, [currentStep]);
+
+  const emailVerifiedApi = async (otpSuccessToken) => {
     try {
-      setLoading(true);
-      window?.verifyOtp(
-        Number(otp.join("")),
-        async (res) => {
-          // console.log({ res });
-          toast.success("Email verified successfully");
-          await emailVerifiedApi(res?.message);
-        },
-        (err) => {
-          // console.error("Verification failed", err);
-          toast.error("Invalid OTP");
-        },
-        status?.emailOtpReqId
-      );
+      const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_TOKEN_VERIFY, {
+        email,
+        token: otpSuccessToken,
+      });
+      if (res?.statusCode === 200) {
+        dispatch(setAuth({ emailVerified: true }));
+        localStorage.setItem("temp_access_token", res?.result?.token);
+        setStep(3);
+      }
     } catch (e) {
       toast.error(e);
     } finally {
       setLoading(false);
     }
+  };
+
+  const verifyOtp = async () => {
+    setLoading(true);
+    await window?.verifyOtp(
+      Number(otp.join("")),
+      async (res) => {
+        toast.success("Email verified successfully");
+        await emailVerifiedApi(res?.message);
+      },
+      (err) => {
+        toast.error(err?.message);
+      },
+      status?.emailOtpReqId
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -84,13 +160,16 @@ const Step2 = ({ goback, setStep, setLoading }) => {
       setError("invalid email");
       return;
     }
-
     try {
       setLoading(true);
+      console.log(
+        email,
+        window.configuration.widgetId,
+        window.configuration.tokenAuth
+      );
       window?.sendOtp(
         email,
         (res) => {
-          // console.log({ res });
           dispatch(setAuth({ email, emailOtpReqId: res?.message }));
           toast.success("OTP sent successfully");
           setOtpVisible(true);
@@ -99,12 +178,12 @@ const Step2 = ({ goback, setStep, setLoading }) => {
           setIsResendDisabled(true);
         },
         (err) => {
-          toast.error("Failed to send OTP");
-          // console.log("SendOTP error", err);
+          console.log({ err });
+          toast.error(err?.message);
         }
       );
     } catch (e) {
-      toast.error(e);
+      // console.log(e);
     } finally {
       setLoading(false);
     }
@@ -133,7 +212,7 @@ const Step2 = ({ goback, setStep, setLoading }) => {
   const resendOtp = async () => {
     try {
       setLoading(true);
-      window?.retryOtp(
+      await window?.retryOtp(
         "3", // '3' = EMAIL
         (res) => {
           dispatch(setAuth({ emailOtpReqId: res?.message }));
@@ -144,14 +223,12 @@ const Step2 = ({ goback, setStep, setLoading }) => {
           setIsResendDisabled(true);
         },
         (err) => {
-          toast.error("Failed to resend OTP");
-          // console.error("Retry OTP Error", err);
+          toast.error(err?.message);
         },
         status?.emailOtpReqId
       );
     } catch (e) {
-      toast.error(e);
-      // console.error(e);
+      // toast.error(e);
     } finally {
       setLoading(false);
     }
