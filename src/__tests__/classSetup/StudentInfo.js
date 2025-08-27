@@ -1,73 +1,74 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import StudentInfo from "../../components/classSetup/sectionStudents/StudentInfo"; // Adjust path accordingly
-import profileEmpty from "../../assets/images/profileEmpty.png";
+import StudentInfo from "../../components/classSetup/sectionStudents/StudentInfo";
+import { useSelector } from "react-redux";
 import html2canvas from "html2canvas";
 
-jest.mock("html2canvas", () => jest.fn().mockResolvedValue({ toDataURL: () => "mocked-image-url" }));
+jest.mock("react-redux", () => ({
+  useSelector: jest.fn(),
+}));
+jest.mock("react-i18next", () => ({
+  useTranslation: () => [key => key],
+}));
+jest.mock("html2canvas");
 
-const mockModelOpen = jest.fn();
-const mockStudent = {
-  firstname: "John",
-  lastname: "Doe",
-  classDetails: { name: "10th" },
-  sectionDetails: { name: "A" },
-  gender: "Male",
-  bloodGroup: "O+",
-  dob: "2005-06-15",
-  address: "123 Main St",
-  photo: "mocked-base64-image",
-  parentDetails: {
-    fullname: "Jane Doe",
-    gender: "Female",
-    age: "40",
-    email: "jane.doe@example.com",
-    phone: "1234567890",
-    qualification: "MBA",
-    occupation: "Teacher",
-    address: "123 Main St",
-  },
-};
+describe("StudentInfo", () => {
+  const mockModelOpen = jest.fn();
+  const student = {
+    firstname: "John",
+    lastname: "Doe",
+    className: "10",
+    sectionName: "A",
+    gender: "Male",
+    bloodGroup: "O+",
+    dob: "2005-01-01",
+    address: "123 Street",
+    parentFullName: "Jane Doe",
+    parentPhone: "9876543210",
+    photo: "base64string",
+  };
 
-describe("StudentInfo Component", () => {
-  test("renders student details correctly", () => {
-    render(<StudentInfo currStudent={mockStudent} modelOpen={mockModelOpen} />);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useSelector.mockReturnValue(false); // default light mode
+  });
+
+  it("renders student details correctly", () => {
+    render(<StudentInfo currStudent={student} modelOpen={mockModelOpen} />);
+    expect(screen.getByText("titles.studentDetails")).toBeInTheDocument();
+    expect(screen.getByText("labels.fullName")).toBeInTheDocument();
     expect(screen.getByText("John Doe")).toBeInTheDocument();
-    expect(screen.getByText("10th A")).toBeInTheDocument();
-    expect(screen.getByText("Male")).toBeInTheDocument();
+    expect(screen.getByAltText("titles.student")).toBeInTheDocument();
   });
 
-  test("renders guardian details correctly", () => {
-    render(<StudentInfo currStudent={mockStudent} modelOpen={mockModelOpen} />);
-    expect(screen.getByText("Jane Doe")).toBeInTheDocument();
-    expect(screen.getByText("Female")).toBeInTheDocument();
-    expect(screen.getByText("MBA")).toBeInTheDocument();
-  });
-
-  test("calls modelOpen when close button is clicked", () => {
-    render(<StudentInfo currStudent={mockStudent} modelOpen={mockModelOpen} />);
-    fireEvent.click(screen.getByAltText("close"));
+  it("calls modelOpen(false) when close button is clicked", () => {
+    render(<StudentInfo currStudent={student} modelOpen={mockModelOpen} />);
+    const closeButton = screen.getByRole("button", { name: /close/i });
+    fireEvent.click(closeButton);
     expect(mockModelOpen).toHaveBeenCalledWith(false);
   });
 
-  test("renders profile image correctly", () => {
-    render(<StudentInfo currStudent={mockStudent} modelOpen={mockModelOpen} />);
-    const image = screen.getByAltText("titles.student");
-    expect(image.src).toContain("data:image/jpeg;base64,mocked-base64-image");
+  it("shows NA when fields are missing", () => {
+    render(<StudentInfo currStudent={{}} modelOpen={mockModelOpen} />);
+    expect(screen.getAllByText("NA").length).toBeGreaterThan(0);
   });
 
-  test("renders default profile image when no photo is provided", () => {
-    render(
-      <StudentInfo currStudent={{ ...mockStudent, photo: null }} modelOpen={mockModelOpen} />
+  it("switches styles in dark mode", () => {
+    useSelector.mockReturnValue(true);
+    render(<StudentInfo currStudent={student} modelOpen={mockModelOpen} />);
+    expect(screen.getByText("titles.studentDetails").className).toContain(
+      "text-textPrimary"
     );
-    const image = screen.getByAltText("titles.student");
-    expect(image.src).toContain(profileEmpty);
   });
 
-  test("triggers handleScreenshot when screenshot button is clicked", async () => {
-    render(<StudentInfo currStudent={mockStudent} modelOpen={mockModelOpen} />);
-    const button = screen.getByText("buttons.screenshot");
-    fireEvent.click(button);
+  it("handles screenshot capture", async () => {
+    const mockCanvas = { toDataURL: jest.fn(() => "data:image/png;base64,xyz") };
+    html2canvas.mockResolvedValue(mockCanvas);
+
+    render(<StudentInfo currStudent={student} modelOpen={mockModelOpen} />);
+    const screenshotBtn = screen.getByText("buttons.screenshot");
+    fireEvent.click(screenshotBtn);
+
     expect(html2canvas).toHaveBeenCalled();
   });
 });

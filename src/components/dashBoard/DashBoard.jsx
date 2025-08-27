@@ -19,16 +19,28 @@ import Spinner from "../Spinner.jsx";
 import { useTranslation } from "react-i18next";
 import toast, { Toaster } from "react-hot-toast";
 import CONSTANT from "../../utils/constants.js";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  Chip,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 import {
   fetchAdmin,
   fetchTeacher,
+  setClassAndSectionData,
   updateAdminData,
 } from "../../store/AppAuthSlice.jsx";
+import { Box } from "@mui/system";
 
 const Dashboard = () => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
+  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+    (state) => state.appAuth
+  );
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const schoolName = useSelector((state) => state.appAuth.schoolName);
   const { data, teacherData } = useSelector((state) => state.appAuth);
@@ -43,6 +55,7 @@ const Dashboard = () => {
   const [sectionList, setSectionList] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
+  const [session, setSession] = useState([]);
   const [startTime, setStartTime] = useState("");
   const [eventLoading, setEventLoading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -102,6 +115,19 @@ const Dashboard = () => {
   const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
 
   /**
+   * Fetches calendar events based on the selected month.
+   */
+  const getSession = async () => {
+    let url = isTeacher
+      ? EndPoints.TEACHER.GET_EVENTS
+      : EndPoints.ADMIN.GET_SESSION;
+    const result = await fetchData(url, "get");
+    if (result) {
+      dispatch(setClassAndSectionData({ session: result }));
+    }
+  };
+
+  /**
    * Helper function to fetch data from an API.
    *
    * @param {string} url - The API endpoint.
@@ -136,6 +162,9 @@ const Dashboard = () => {
     const result = await fetchData(`${url}`, "post", {
       startTime: attendanceTime.day.startTime,
       endTime: attendanceTime.day.endTime,
+      sessionId: isTeacher
+        ? classAndSectionDataOfTeacher?.sessionId
+        : classAndSectionData?.session[0]?._id,
     });
     setStudentAbsentCountData(result?.absentCount || 0);
     setStudentPresentCountData(result?.presentCount || 0);
@@ -146,7 +175,9 @@ const Dashboard = () => {
    * Fetches and sets the list of available classes and their corresponding sections.
    */
   const getClassList = async () => {
-    const result = await fetchData(EndPoints.COMMON.CLASS_LIST);
+    const result = await fetchData(
+      `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session[0]?._id}`
+    );
 
     if (result) {
       // Filter out classes without sections and then sort them.
@@ -165,7 +196,10 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    getClassList();
+    if (!isTeacher) {
+      getClassList();
+      getSession();
+    }
   }, []);
 
   useEffect(() => {
@@ -276,6 +310,19 @@ const Dashboard = () => {
   };
 
   /**
+   * Fetches all session.
+   */
+  // const getSessions = async () => {
+  //   let url = isTeacher
+  //     ? EndPoints.TEACHER.GET_EVENTS
+  //     : EndPoints.ADMIN.GET_ALL_SESSION;
+  //   const res = await axiosClient.get(url);
+  //   if (res?.statusCode === 200) {
+  //     setSession(res?.result);
+  //   }
+  // };
+
+  /**
    * Fetches calendar events based on the selected month.
    */
   const getCalenderEvents = async () => {
@@ -296,6 +343,9 @@ const Dashboard = () => {
     const result = await fetchData(url, "post", {
       startTime,
       endTime,
+      sessionId: isTeacher
+        ? classAndSectionDataOfTeacher?.sessionId
+        : classAndSectionData?.session[0]?._id,
     });
 
     if (result) setCalenderEvents(result);
@@ -306,6 +356,9 @@ const Dashboard = () => {
     const res = await axiosClient.post(url, {
       startTime,
       endTime,
+      sessionId: isTeacher
+        ? classAndSectionDataOfTeacher?.sessionId
+        : classAndSectionData?.session[0]?._id,
     });
 
     if (res?.statusCode === 200) {
@@ -315,6 +368,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    // getSessions();
     getCalenderEvents();
   }, [date]);
 
@@ -379,6 +433,7 @@ const Dashboard = () => {
       const response = await axiosClient.post(url, {
         startTime: attendanceTime.day.startTime,
         endTime: attendanceTime.day.endTime,
+        // sessionId: classAndSectionData?.session[0]?._id,
       });
       const result = response?.result;
       if (response?.statusCode === 200) {
@@ -842,7 +897,87 @@ const Dashboard = () => {
       } select-none`}
     >
       <Toaster position="top-center" reverseOrder={false} />
-
+      {/* <FormControl sx={{ bgcolor: "#1e1e1e", borderRadius: 3 }}>
+          <Select
+            value={session}
+            onChange={(e) =>
+              dispatch(
+                setClassAndSectionData({ selectedSession: e?.target?.value })
+              )
+            }
+            displayEmpty
+            sx={{
+              color: "#fff",
+              fontSize: 16,
+              fontWeight: "bold",
+              borderRadius: 14,
+              ".MuiSelect-select": {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                border: "none",
+              },
+              ".MuiSelect-icon": {
+                color: isDarkMode ? "#fff" : "#000",
+              },
+              bgcolor: "#1e1e1e",
+            }}
+            renderValue={(selected) => (
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                gap={1}
+                width="100%"
+              >
+                <Typography fontWeight="bold">{selected}</Typography>
+                {selected && (
+                  <Chip
+                    label="Active"
+                    size="small"
+                    sx={{
+                      bgcolor: "#4CBC9A26",
+                      color: "#4CBC9A",
+                      fontWeight: "bold",
+                      fontSize: 14,
+                      p: 2,
+                    }}
+                  />
+                )}
+              </Box>
+            )}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  bgcolor: "#1e1e1e",
+                  color: "#fff",
+                  borderRadius: 3,
+                  mt: 1,
+                },
+              },
+            }}
+          >
+            {session?.map((data, index) => (
+              <MenuItem
+                key={index}
+                value={`TY-${data?.academicStartYear}-${String(
+                  data?.academicEndYear
+                ).slice(-2)}`}
+                sx={{
+                  fontWeight: "bold",
+                  "&:hover": {
+                    bgcolor: "#333",
+                  },
+                }}
+              >
+                TY-{data?.academicStartYear}-
+                {String(data?.academicEndYear).slice(-2)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl> */}
       {/* section 1 */}
       <div
         className={`${

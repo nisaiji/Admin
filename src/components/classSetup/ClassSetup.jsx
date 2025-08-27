@@ -1,15 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import addclass from "../../assets/images/addclass.png";
-// import students from "../../assets/images/students.png";
 import studentsPto2 from "../../assets/images/darkmode/n-2.png";
 import students3to8 from "../../assets/images/darkmode/3-8.png";
 import students9to12 from "../../assets/images/darkmode/9-12.png";
 import trash from "../../assets/images/darkmode/delete2.png";
 import trashw from "../../assets/images/trash.png";
 import ReactCardFlip from "react-card-flip";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import Modal from "react-modal";
 import toast, { Toaster } from "react-hot-toast";
 import Addsection from "./Addsection";
 import { axiosClient } from "../../services/axiosClient";
@@ -18,13 +16,13 @@ import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import Breadcrumbs from "../BreadCrumbs";
-import CustomDropdown from "../CustomDropdown";
-
-Modal.setAppElement("#root");
+import { setClassAndSectionData } from "../../store/AppAuthSlice";
 
 function ClassSetup() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [classes, setClasses] = useState([]);
   const [isFlipped, setIsFlipped] = useState([]);
@@ -68,12 +66,15 @@ function ClassSetup() {
       updated[index] = !updated[index];
       return updated;
     });
+  // console.log({ classAndSectionData });
 
   // Function to fetch the list of classes via API
   const getAllClass = async () => {
     try {
       setLoading(true);
-      const res = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
+      const res = await axiosClient.get(
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session[0]?._id}`
+      );
       if (res?.statusCode === 200) {
         const sortedClasses = res?.result?.sort(compareClasses);
         setClasses(sortedClasses);
@@ -97,6 +98,7 @@ function ClassSetup() {
       setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.REGISTER_CLASS, {
         name,
+        sessionId: classAndSectionData?.session[0]?._id,
       });
       if ([200, 201].includes(res?.statusCode)) {
         getAllClass();
@@ -192,7 +194,9 @@ function ClassSetup() {
                   {/* frontside */}
                   <div
                     className={`m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 rounded-3xl border cursor-pointer ${
-                      isDarkMode ? "bg-background5 border-borderGray" : "border-borderLine"
+                      isDarkMode
+                        ? "bg-background5 border-borderGray"
+                        : "border-borderLine"
                     }`}
                   >
                     <div className={`relative rounded-full h-[40] w-[40] z-10`}>
@@ -236,7 +240,9 @@ function ClassSetup() {
                             : students9to12
                         }
                         className={` object-contain h-[120px] ${
-                          ["9th", "10th", "11th", "12th"].includes(data.name) ? "w-[120px]" : "w-full"
+                          ["9th", "10th", "11th", "12th"].includes(data.name)
+                            ? "w-[120px]"
+                            : "w-full"
                         }`}
                         alt="students"
                       />
@@ -263,16 +269,18 @@ function ClassSetup() {
                         {/* section data */}
                         {data.section.map((section, j) => (
                           <div
-                            onClick={() =>
-                              navigate("/class-setup/student-section", {
-                                state: {
+                            onClick={async () => {
+                              await dispatch(
+                                setClassAndSectionData({
                                   sectionId: section._id,
                                   classId: data._id,
                                   className: data.name,
                                   sectionName: section.name,
-                                },
-                              })
-                            }
+                                  startTime: section.startTime,
+                                })
+                              );
+                              navigate("/class-setup/student-menu");
+                            }}
                             className={`${
                               isDarkMode
                                 ? "border-borderWhite text-textPrimary"
@@ -325,7 +333,11 @@ function ClassSetup() {
                       }
                     />
                   ) : (
-                    <div className={`relative w-10/12`} ref={dropdownRef}>
+                    <div
+                      data-testid="classlist"
+                      className={`relative w-10/12`}
+                      ref={dropdownRef}
+                    >
                       <button
                         onClick={() => setIsOpen((prev) => !prev)}
                         className={`cursor-pointer shadow appearance-none border leading-tight focus:outline-none focus:shadow-outline text-center text-sm font-poppins-bold rounded-lg w-full py-1 px-2 max-h-[150px] mt-0.5 ${
@@ -333,7 +345,6 @@ function ClassSetup() {
                             ? "border-borderWhite text-textPrimary"
                             : "bg-white border-borderBlue text-textBlue"
                         }`}
-                        data-testid="classlist"
                       >
                         {t("buttons.addClass")}
                       </button>

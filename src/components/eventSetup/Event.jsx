@@ -26,6 +26,9 @@ import { TextField } from "@mui/material";
 
 // Event - Manages the logic of the calendar, events, and month navigation
 const Event = () => {
+  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+    (state) => state.appAuth
+  );
   const isAdmin = useSelector((state) => state.appAuth.role) === "admin";
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [today, setToday] = useState(new Date());
@@ -352,12 +355,14 @@ const Event = () => {
       const response = await axiosClient.post(EndPoints.ADMIN.GET_EVENTS, {
         startTime: new Date(year, month, 1).getTime(),
         endTime: new Date(year, month + 1, 0, 23, 59, 59, 999).getTime(),
+        sessionId: classAndSectionData?.session[0]?._id,
       });
       const response2 = await axiosClient.post(
         EndPoints.ADMIN.GET_SUNDAY_HOLIDAY,
         {
           startTime: new Date(year, month, 1).getTime(),
           endTime: new Date(year, month + 1, 0, 23, 59, 59, 999).getTime(),
+          sessionId: classAndSectionData?.session[0]?._id,
         }
       );
 
@@ -418,6 +423,7 @@ const Event = () => {
             title: capitalizeFirstLetter(newEvent?.title?.trim()),
             description: capitalizeFirstLetter(newEvent?.description?.trim()),
             date: moment(newEvent.date, "DD/MM/YYYY").valueOf(),
+            sessionId: classAndSectionData?.session[0]?._id,
           };
         } else {
           formattedEvent = {
@@ -425,6 +431,7 @@ const Event = () => {
             description: capitalizeFirstLetter(newEvent?.description?.trim()),
             startTime: moment(newEvent.startDate, "DD/MM/YYYY").valueOf(),
             endTime: moment(newEvent.endDate, "DD/MM/YYYY").valueOf(),
+            sessionId: classAndSectionData?.session[0]?._id,
           };
         }
 

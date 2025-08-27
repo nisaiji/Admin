@@ -1,3 +1,4 @@
+import React from "react";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 
@@ -15,7 +16,7 @@ const Breadcrumbs = () => {
   };
 
   return (
-    <nav aria-label="breadcrumb" className="mb-2">
+    <nav data-testid="breadcrumbs" aria-label="breadcrumb" className="mb-2">
       <ol className="breadcrumb flex">
         <li className="breadcrumb-item">
           <Link

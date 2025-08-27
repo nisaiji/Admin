@@ -65,7 +65,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     ],
     [
       t("labels.classAndSection"),
-      `${currStudent?.classDetails?.name} ${currStudent?.sectionDetails?.name}` ||
+      `${currStudent?.className} ${currStudent?.sectionName}` ||
         CONSTANT.NA,
     ],
     [t("labels.gender"), currStudent?.gender || CONSTANT.NA],
@@ -78,9 +78,9 @@ export default function StudentInfo({ currStudent, modelOpen }) {
   const guardianDetails = [
     [
       t("labels.guardianName"),
-      currStudent?.parentDetails?.fullname || CONSTANT.NA,
+      currStudent?.parentFullName || CONSTANT.NA,
     ],
-    [t("labels.phoneNumber"), currStudent?.parentDetails?.phone || CONSTANT.NA],
+    [t("labels.phoneNumber"), currStudent?.parentPhone || CONSTANT.NA],
   ];
 
   return (

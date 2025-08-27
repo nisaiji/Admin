@@ -11,6 +11,17 @@ export const setAuth = createAsyncThunk("auth/setAuth", async (data) => {
   return mergedData;
 });
 
+export const setClassAndSectionData = createAsyncThunk(
+  "auth/setClassAndSectionData",
+  async (data) => {
+    const existing = localStorage.getItem("classAndSectionData");
+    const parsed = existing ? JSON.parse(existing) : {};
+    const mergedData = { ...parsed, ...data };
+    localStorage.setItem("classAndSectionData", JSON.stringify(mergedData));
+    return mergedData;
+  }
+);
+
 // Thunk to fetch admin data
 export const fetchAdmin = createAsyncThunk("admin/fetchAdmin", async (_) => {
   try {
@@ -59,9 +70,11 @@ const initialState = {
   className: null,
   id: null,
   schoolName: null,
-  sectionStartTime: null,
   data: JSON.parse(localStorage.getItem("adminData")) || {},
   teacherData: JSON.parse(localStorage.getItem("teacherData")) || {},
+  classAndSectionData:
+    JSON.parse(localStorage.getItem("classAndSectionData")) || {},
+  classAndSectionDataOfTeacher: {},
   status: JSON.parse(localStorage.getItem("status")) || {},
 };
 
@@ -91,13 +104,17 @@ const appAuthSlice = createSlice({
 
       if (decodeToken.role === "teacher") {
         state.role = decodeToken.role;
-        state.section = decodeToken.sectionId;
-        state.sectionName = decodeToken.sectionName;
-        state.class = decodeToken.classId;
-        state.className = decodeToken.className;
-        state.sectionStartTime = decodeToken.sectionStart;
+        state.classAndSectionDataOfTeacher.sectionId = decodeToken.sectionId;
+        state.classAndSectionDataOfTeacher.sectionName =
+          decodeToken.sectionName;
+        state.classAndSectionDataOfTeacher.classId = decodeToken.classId;
+        state.classAndSectionDataOfTeacher.className = decodeToken.className;
+        state.classAndSectionDataOfTeacher.startTime = decodeToken.sectionStart;
+        state.classAndSectionDataOfTeacher.school = decodeToken.adminId;
+        state.classAndSectionDataOfTeacher.sessionId = decodeToken.sessionId;
       } else {
         state.role = decodeToken.role;
+        state.classAndSectionData.id = decodeToken.adminId;
         state.id = decodeToken.adminId;
       }
       state.schoolName = decodeToken.schoolName;
@@ -116,6 +133,9 @@ const appAuthSlice = createSlice({
       })
       .addCase(setAuth.fulfilled, (state, action) => {
         state.status = action.payload;
+      })
+      .addCase(setClassAndSectionData.fulfilled, (state, action) => {
+        state.classData = action.payload;
       });
   },
 });

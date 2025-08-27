@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
 import { axiosClient } from "../../../services/axiosClient";
 import toast, { Toaster } from "react-hot-toast";
 import Searchw from "../../../assets/images/Search.png";
@@ -23,14 +22,14 @@ import EndPoints from "../../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import REGEX from "../../../utils/regix";
 import AttendancePopup from "../../AttendancePopup";
-import axios from "axios";
 import Breadcrumbs from "../../BreadCrumbs";
 
 export default function StudentSection() {
   // Importing necessary modules and hooks
   const [t] = useTranslation();
-  const location = useLocation();
-  const { sectionId, classId, className, sectionName } = location.state;
+  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+    (state) => state.appAuth
+  );
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   // References for input and file handling
@@ -55,18 +54,15 @@ export default function StudentSection() {
     firstname: "",
     lastname: "",
     gender: "",
-    parentName: "",
-    phone: "",
-    sectionId,
+    parentFullName: "",
+    parentPhone: "",
+    sectionId: classAndSectionData?.sectionId,
   });
   const genders = [t("options.male"), t("options.female"), t("options.other")];
 
   // User role and section details from Redux state
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
-  const id = useSelector((state) => state.appAuth.id);
-  const teacherSectionId = useSelector((state) => state.appAuth.section);
-  const teacherClassName = useSelector((state) => state.appAuth.className);
-  const teacherSectionName = useSelector((state) => state.appAuth.sectionName);
+  const id = classAndSectionData?.id;
 
   useEffect(() => {
     if (id) {
@@ -76,13 +72,13 @@ export default function StudentSection() {
     if ((id && !isTeacher) || (!id && isTeacher)) {
       fetchStudents();
     }
-  }, [id, isTeacher]);
+  }, [id, isTeacher, classAndSectionData?.sectionId]);
 
   // get class teacher info api
   const getSectionInfo = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.SECTION_INFO}/${sectionId}`
+        `${EndPoints.ADMIN.SECTION_INFO}/${classAndSectionData?.sectionId}`
       );
 
       if (res?.statusCode === 200) setClassData(res?.result);
@@ -103,26 +99,26 @@ export default function StudentSection() {
       ? EndPoints.TEACHER.GET_SECTION_STUDENTS
       : EndPoints.ADMIN.GET_SECTION_STUDENTS;
 
-    let query = `?include=parent,class,section`;
-    if (!isTeacher) {
-      query += `&admin=${id}&section=${sectionId}`;
+    let query = `?`;
+    if (isTeacher) {
+      query += `school=${classAndSectionDataOfTeacher?.school}&section=${classAndSectionDataOfTeacher?.sectionId}&session=${classAndSectionDataOfTeacher?.sessionId}`;
     } else {
-      query += `&section=${teacherSectionId}`;
+      query += `school=${classAndSectionData?.id}&section=${classAndSectionData?.sectionId}&session=${classAndSectionData?.session[0]?._id}`;
     }
+
     try {
       setLoading(true);
 
       const res = await axiosClient.get(`${url}${query}`);
+      // console.log(res);
 
       if (res?.statusCode === 200) {
-        const studentList = res?.result?.students.map(
-          (student, index, array) => ({
-            ...student,
-            SNo: index + 1,
-            parentName: student.parentDetails?.fullname || "",
-            phone: student.parentDetails?.phone || "",
-          })
-        );
+        const studentList = res?.result?.map((student, index, array) => ({
+          ...student,
+          SNo: index + 1,
+          parentFullName: student?.parentFullName || "",
+          parentPhone: student?.parentPhone || "",
+        }));
         // console.table(studentList)
         setStudents(studentList);
       }
@@ -133,12 +129,11 @@ export default function StudentSection() {
     }
   };
   // console.log(students);
-  
 
   // check same entry in registration
   const checkIsStudentExistForSameParent = () => {
     const userExist = students.find(
-      (item) => item?.phone === newStudent?.phone
+      (item) => item?.parentPhone === newStudent?.parentPhone
     );
     if (userExist) {
       const existFullName = `${userExist?.firstname.trim()} ${userExist?.lastname.trim()}`;
@@ -179,14 +174,14 @@ export default function StudentSection() {
     }
     if (!student.gender) return t("validationError.gender");
     if (
-      !student.parentName.trim() ||
-      student.parentName.length < 3 ||
-      REGEX.NUMBER.test(student.parentName)
+      !student.parentFullName.trim() ||
+      student.parentFullName.length < 3 ||
+      REGEX.NUMBER.test(student.parentFullName)
     ) {
       return t("validationError.parentName");
     }
-    if (!student?.phone.trim()) return t("validationError.phone");
-    if (!REGEX.PHONE_LENGTH.test(student.phone))
+    if (!student?.parentPhone.trim()) return t("validationError.phone");
+    if (!REGEX.PHONE_LENGTH.test(student.parentPhone))
       return t("validationError.validationPhoneCount");
     return "";
   };
@@ -199,7 +194,7 @@ export default function StudentSection() {
   const handleInputChange = (sNo, field, value) => {
     let formattedValue = value;
 
-    if (field === "phone") {
+    if (field === "parentPhone") {
       formattedValue = value.replace(/\D/g, "");
     } else {
       formattedValue = value.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ");
@@ -243,17 +238,17 @@ export default function StudentSection() {
     let transformedStudent = {
       firstname: capitalize(student.firstname.trim()),
       lastname: capitalize(student.lastname.trim()),
-      parentName: capitalize(student.parentName.trim()),
+      parentName: capitalize(student.parentFullName.trim()),
       gender: student.gender,
-      phone: student.phone,
-      ...(!isUpdate && { sectionId }),
+      phone: student.parentPhone,
+      ...(!isUpdate && { sectionId: classAndSectionData?.sectionId }),
     };
 
     try {
       setLoading(true);
       // respone based on registered or updated request
       const response = await axiosClient[isUpdate ? "put" : "post"](
-        `${url}${isUpdate ? `/${student._id}` : ""}`,
+        `${url}${isUpdate ? `/${student?.studentId}` : ""}`,
         transformedStudent
       );
       if ([200, 201].includes(response?.statusCode)) {
@@ -265,9 +260,9 @@ export default function StudentSection() {
             firstname: "",
             lastname: "",
             gender: "",
-            parentName: "",
-            phone: "",
-            sectionId,
+            parentFullName: "",
+            parentPhone: "",
+            sectionId: classAndSectionData?.sectionId,
           });
           newStudentFirstNameRef.current?.focus();
         }
@@ -314,8 +309,14 @@ export default function StudentSection() {
       }
 
       const formData = new FormData();
-      formData.append("classId", classId);
-      formData.append("sectionId", sectionId);
+      formData.append("classId", classAndSectionData?.classId);
+      formData.append("sectionId", classAndSectionData?.sectionId);
+      formData.append(
+        "sessionId",
+        isTeacher
+          ? classAndSectionDataOfTeacher?.sessionId
+          : classAndSectionData?.session[0]?._id
+      );
       formData.append("file", file);
       setLoading(true);
       const res = await axiosClient.post(
@@ -445,10 +446,10 @@ export default function StudentSection() {
                   }`}
                 >
                   {isTeacher
-                    ? `${teacherClassName} ${teacherSectionName}`
-                    : `${className}-${sectionName}`}
+                    ? `${classAndSectionDataOfTeacher?.className} ${classAndSectionDataOfTeacher?.sectionName}`
+                    : `${classAndSectionData?.className}-${classAndSectionData?.sectionName}`}
                 </div>
-                <div
+                {/* <div
                   onClick={() => setShowAttendance(true)}
                   className={`flex flex-row justify-center items-center px-2 py-1 space-x-2 cursor-pointer rounded border border-[#FF793F]/10 bg-[#FF793F]/10 transition-all duration-200 ease-in-out active:scale-90`}
                 >
@@ -456,7 +457,7 @@ export default function StudentSection() {
                   <span className={`text-xs font-poppins-bold text-textOrange`}>
                     Attendance
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -685,9 +686,13 @@ export default function StudentSection() {
                   >
                     <input
                       type="text"
-                      value={newStudent.parentName}
+                      value={newStudent.parentFullName}
                       onChange={(e) =>
-                        handleInputChange(null, "parentName", e.target.value)
+                        handleInputChange(
+                          null,
+                          "parentFullName",
+                          e.target.value
+                        )
                       }
                       maxLength={20}
                       placeholder={t("placeholders.parentName")}
@@ -703,10 +708,10 @@ export default function StudentSection() {
                   >
                     <input
                       type="text"
-                      value={newStudent.phone}
+                      value={newStudent.parentPhone}
                       maxLength={10}
                       onChange={(e) =>
-                        handleInputChange(null, "phone", e.target.value)
+                        handleInputChange(null, "parentPhone", e.target.value)
                       }
                       placeholder={t("placeholders.phoneNumber")}
                       className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
@@ -832,11 +837,11 @@ export default function StudentSection() {
                     >
                       <input
                         type="text"
-                        value={student.parentName}
+                        value={student.parentFullName}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "parentName",
+                            "parentFullName",
                             e.target.value
                           )
                         }
@@ -855,12 +860,12 @@ export default function StudentSection() {
                     >
                       <input
                         type="text"
-                        value={student.phone}
+                        value={student.parentPhone}
                         maxLength={10}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "phone",
+                            "parentPhone",
                             e.target.value
                           )
                         }
@@ -939,19 +944,6 @@ export default function StudentSection() {
           isVisible={showDeleteConfirmation}
           onClose={() => setShowDeleteConfirmation(false)}
           onDelete={handleDelete}
-        />
-      )}
-
-      {/* attendance popup */}
-      {showAttendance && (
-        <AttendancePopup
-          isVisible={showAttendance}
-          onClose={() => setShowAttendance(false)}
-          sectionId={sectionId}
-          classId={classId}
-          className={isTeacher ? teacherClassName : className}
-          sectionName={isTeacher ? teacherSectionName : sectionName}
-          startTimeForAdmin={classData?.section?.startTime || new Date()}
         />
       )}
     </div>

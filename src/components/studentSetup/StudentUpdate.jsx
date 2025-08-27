@@ -85,14 +85,14 @@ export default function StudentUpdate() {
       bloodGroup: student?.bloodGroup || "",
       dob: student?.dob ? moment(student?.dob).format("DD/MM/YYYY") : "",
       address: student?.address || "",
-      parentName: student?.parentDetails?.fullname || "",
-      parentGender: student?.parentDetails?.gender || "",
-      parentAge: student?.parentDetails?.age || "",
-      parentEmail: student?.parentDetails?.email || "",
-      phone: student?.parentDetails?.phone || "",
-      parentQualification: student?.parentDetails?.qualification || "",
-      parentOccupation: student?.parentDetails?.occupation || "",
-      parentAddress: student?.parentDetails?.address || "",
+      parentName: student?.parentFullName || "",
+      parentGender: student?.parentGender || "",
+      parentAge: student?.parentAge || "",
+      parentEmail: student?.parentEmail || "",
+      phone: student?.parentPhone || "",
+      parentQualification: student?.parentQualification || "",
+      parentOccupation: student?.parentOccupation || "",
+      parentAddress: student?.parentAddress || "",
     },
     validationSchema,
     // update student api
@@ -116,7 +116,7 @@ export default function StudentUpdate() {
           Object.entries(cleanedValues).filter(([_, value]) => value !== "")
         );
         const response = await axiosClient.put(
-          `${EndPoints.ADMIN.STUDENT_UPDATE}/${student._id}`,
+          `${EndPoints.ADMIN.STUDENT_UPDATE}/${student?.studentId}`,
           filteredValues
         );
 

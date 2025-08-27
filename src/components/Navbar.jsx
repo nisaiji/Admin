@@ -141,7 +141,7 @@ const Navbar = () => {
     <div
       className={`${
         isDarkMode ? "bg-background2" : "bg-whiteBackground"
-      } px-10 py-4 h-[72px] sticky top-0 z-40 shadow-[0px_4px_10px_rgba(102,_116,_204,_0.15)] `}
+      } px-10 py-4 h-[72px] sticky top-0 z-40 shadow-[0px_4px_10px_rgba(102,_116,_204,_0.15)] select-none`}
     >
       <div className={`flex items-center justify-between`}>
         <div className={`flex items-center ml-3`}>
@@ -153,11 +153,7 @@ const Navbar = () => {
         <div className={`flex`}>
           {isTeacher ? (
             <div
-              onClick={() =>
-                navigate("/student-section", {
-                  state: { classId, sectionId },
-                })
-              }
+              onClick={() => navigate("/student-menu")}
               className={`block mx-6 px-4 py-3 ${
                 isDarkMode ? "text-textPrimary" : "text-textBlack"
               } cursor-pointer`}

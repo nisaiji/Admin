@@ -24,6 +24,7 @@ function Addsection({
   clickedClassId,
   getAllClass,
 }) {
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const { t } = useTranslation();
   const [showConformationPopup, setshowConformationPopup] = useState(false);
@@ -132,6 +133,7 @@ function Addsection({
         teacherId: newSection.teacherId,
         classId: clickedClassId,
         startTime: newSection.startTime,
+        sessionId: classAndSectionData?.session[0]?._id,
       };
 
       const res = await axiosClient.post(
@@ -379,7 +381,7 @@ function Addsection({
                         },
                       }}
                     >
-                      <MenuItem value="" disabled>
+                      <MenuItem value="" disabled={true}>
                         <em>{t("labels.assignTeacher")}</em>
                       </MenuItem>
                       {selectedTeachersList.map((teacher) => (
@@ -486,7 +488,7 @@ function Addsection({
                 </div>
                 <FormControl
                   fullWidth
-                  disabled={selectedSection}
+                  disabled={selectedSection?.teacher}
                   sx={{
                     width: "250px",
                     backgroundColor: isDarkMode ? "#1a1a1a" : "white",
@@ -562,7 +564,7 @@ function Addsection({
                       },
                     }}
                   >
-                    <MenuItem value="" disabled>
+                    <MenuItem value="" disabled={true}>
                       <em>{t("labels.assignTeacher")}</em>
                     </MenuItem>
                     {teachers.map((teacher) => (
@@ -582,24 +584,26 @@ function Addsection({
                     ))}
                   </Select>
                 </FormControl>
-
+{console.log(classAndSectionData?.session[0])
+}
                 <DatePicker
                   selected={newSection.startTime}
                   onChange={(date) => {
-                    const timestamp = moment(date).startOf('day').valueOf();
+                    const timestamp = moment(date).startOf("day").valueOf();
                     setNewSection((prev) => ({
                       ...prev,
                       startTime: timestamp,
                     }));
                   }}
                   dateFormat="dd/MM/YYYY"
-                  // maxDate={new Date()}
+                  minDate={classAndSectionData?.session[0]?.startDate}
+                  maxDate={classAndSectionData?.session[0]?.endDate}
                   onKeyDown={(e) => e.preventDefault()}
                   showMonthDropdown
                   showYearDropdown
                   scrollableYearDropdown={true}
                   dropdownMode="scroll"
-                  disabled={selectedSection}
+                  disabled={selectedSection?.teacher}
                   className={`border-2 rounded-xl py-1 px-4 w-36 z-50 ${
                     isDarkMode ? "bg-background1 text-textPrimary" : ""
                   }`}
@@ -613,7 +617,7 @@ function Addsection({
                     borderRadius: 12,
                     color: "white",
                   }}
-                  disabled={selectedSection}
+                  disabled={selectedSection?.teacher}
                   data-testid="addSection"
                 >
                   {t("buttons.save")}

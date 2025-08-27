@@ -231,6 +231,7 @@ const AddStudent = () => {
           }`}
         >
           {field.label}
+          <span className="text-textRed"> *</span>
         </label>
         <input
           type={field.type}
@@ -266,7 +267,7 @@ const AddStudent = () => {
           isDarkMode ? "text-textPrimary" : "text-textBlack"
         }`}
       >
-        Gender
+        Gender<span className="text-textRed"> *</span>
       </label>
       <FormControl
         fullWidth
@@ -334,7 +335,7 @@ const AddStudent = () => {
           isDarkMode ? "text-textPrimary" : "text-textBlack"
         }`}
       >
-        Class
+        Class<span className="text-textRed"> *</span>
       </label>
       <FormControl
         fullWidth
@@ -410,7 +411,7 @@ const AddStudent = () => {
           isDarkMode ? "text-textPrimary" : "text-textBlack"
         }`}
       >
-        Section
+        Section<span className="text-textRed"> *</span>
       </label>
       <FormControl
         fullWidth
@@ -535,10 +536,8 @@ const AddStudent = () => {
                     isDarkMode ? "text-textPrimary" : "text-textBlack"
                   }`}
                 >
-                  {field.label}{" "}
-                  {field?.optional && (
-                    <span className="text-sm text-gray-400">(Optional)</span>
-                  )}
+                  {field.label}
+                  {!field.optional && <span className="text-textRed"> *</span>}
                 </label>
                 {field.name === "bloodGroup" ||
                 field.name === "parentGender" ? (

@@ -7,7 +7,7 @@ import Login from "./pages/Login";
 import ClassSetup from "./components/classSetup/ClassSetup";
 import TeacherPage from "./components/teacherSetup/Teacher";
 import Event from "./components/eventSetup/Event";
-import TransferCertificate from "./components/transferCertificate/TransferCertificate";
+// import TransferCertificate from "./components/transferCertificate/TransferCertificate";
 import Addsection from "./components/classSetup/Addsection";
 import Studentlist from "./components/studentSetup/Studentlist";
 import StudentSection from "./components/classSetup/sectionStudents/StudentSection";
@@ -20,15 +20,16 @@ import { I18nextProvider } from "react-i18next";
 import { getItem } from "./services/LocalStorageManager";
 import { useEffect, useState } from "react";
 import { setAuthData } from "./store/AppAuthSlice";
-import SchoolDetailSignup from "./pages/SchoolDetailSignup";
 import Requests from "./components/dashBoard/Request";
 import Leaves from "./components/dashBoard/Leaves";
 import TeacherProfile from "./components/admin/TeacherProfile";
 import desktop from "./assets/images/desktop.png";
 import Register from "./pages/Register";
-import TransferCertificateApply from "./components/transferCertificate/TransferCertificateApply";
+// import TransferCertificateApply from "./components/transferCertificate/TransferCertificateApply";
 import AddStudentForm from "./components/studentSetup/AddStudentForm";
 import Notice from "./components/notice/Notice";
+import StudentMenu from "./components/classSetup/sectionStudents/StudentMenu";
+import AttendancePopup from "./components/AttendancePopup";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -86,7 +87,15 @@ function App() {
                 <>
                   {/* Routes available for teacher users */}
                   <Route path="" element={<DashBoard />} />
-                  <Route path="student-section" element={<StudentSection />} />
+                  <Route path="student-menu" element={<StudentMenu />} />
+                  <Route
+                    path="student-menu/student-section"
+                    element={<StudentSection />}
+                  />
+                  <Route
+                    path="student-menu/attendance"
+                    element={<AttendancePopup />}
+                  />
                   <Route path="teacher-profile" element={<TeacherProfile />} />
                 </>
               ) : (
@@ -104,18 +113,26 @@ function App() {
                   />
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
-                  <Route
+                  {/* <Route
                     path="transfer-certificate"
                     element={<TransferCertificate />}
                   />
                   <Route
                     path="transfer-certificate-apply"
                     element={<TransferCertificateApply />}
-                  />
+                  /> */}
                   <Route path="add-section" element={<Addsection />} />
                   <Route
-                    path="class-setup/student-section"
+                    path="class-setup/student-menu"
+                    element={<StudentMenu />}
+                  />
+                  <Route
+                    path="class-setup/student-menu/student-section"
                     element={<StudentSection />}
+                  />
+                  <Route
+                    path="class-setup/student-menu/attendance"
+                    element={<AttendancePopup />}
                   />
                   <Route
                     path="student-information-system/student-update"
@@ -136,7 +153,6 @@ function App() {
           {/* Routes that do not require user authentication */}
           <Route element={<NotRequireUser />}>
             <Route path="/login" element={<Login />} />
-            {/* <Route path="/signup" element={<SchoolDetailSignup />} /> */}
             <Route path="/signup" element={<Register />} />
           </Route>
         </Routes>

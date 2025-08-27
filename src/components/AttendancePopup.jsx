@@ -5,41 +5,20 @@ import downloadw from "../assets/images/downloadw.png";
 import closew from "../assets/images/closew.png";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import moment from "moment";
 
-/**
- * AttendancePopup Component
- * Displays a popup to manage monthly attendance data for students.
- *
- * @param {boolean} isVisible - Determines if the popup is visible
- * @param {Function} onClose - Function to close the popup
- * @param {string} sectionId - Section ID of the class
- * @param {string} classId - Class ID
- * @param {string} className - Class name
- * @param {string} sectionName - Section name
- * @param {number} startTimeForAdmin - Section Start time for attendance applicable for admin
- */
-export default function AttendancePopup({
-  isVisible,
-  onClose,
-  sectionId,
-  classId,
-  className,
-  sectionName,
-  startTimeForAdmin,
-}) {
+export default function AttendancePopup() {
   // Redux state selectors
-  const id = useSelector((state) => state.appAuth.id);
-  const sectionStartTime = useSelector(
-    (state) => state.appAuth.sectionStartTime
+  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+    (state) => state.appAuth
   );
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
-  const teacherSectionId = useSelector((state) => state.appAuth.section);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+
   // Component state variables
   const [isEditable, setIsEditable] = useState(false);
   const [attendanceData, setAttendanceData] = useState([]);
@@ -52,9 +31,6 @@ export default function AttendancePopup({
   const isFetchingRef = useRef(false);
   const formatDate = (date) => moment(date).format("YYYY-MM-DD");
 
-  // Return null if the popup is not visible
-  if (!isVisible) return null;
-
   const totalDays = useMemo(
     () =>
       new Date(
@@ -64,10 +40,18 @@ export default function AttendancePopup({
       ).getDate(),
     [currentDate]
   );
+  // console.log(classAndSectionData);
 
   const startTime = useMemo(
-    () => (isTeacher ? sectionStartTime : startTimeForAdmin),
-    [isTeacher, sectionStartTime, startTimeForAdmin]
+    () =>
+      isTeacher
+        ? classAndSectionDataOfTeacher?.startTime
+        : classAndSectionData?.startTime,
+    [
+      isTeacher,
+      classAndSectionDataOfTeacher?.startTime,
+      classAndSectionData?.startTime,
+    ]
   );
 
   /**
@@ -95,15 +79,6 @@ export default function AttendancePopup({
     return holidays[formattedDate];
   };
 
-  // Prevent body scrolling when the popup is visible
-  useEffect(() => {
-    document.body.style.overflow = isVisible ? "hidden" : "";
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isVisible]);
-
   /**
    * Change the displayed month in the popup.
    *
@@ -129,6 +104,8 @@ export default function AttendancePopup({
         (newDate.getFullYear() === currentYear &&
           newDate.getMonth() > currentMonth)
       ) {
+        // console.log({ toastDisplayed });
+
         if (!toastDisplayed) {
           setToastDisplayed(true);
           toast.error(
@@ -249,7 +226,7 @@ export default function AttendancePopup({
           }
 
           studentsAttendances[date].push({
-            student: student._id,
+            sessionStudent: student._id,
             attendance:
               item?.attendance === "P"
                 ? "present"
@@ -262,8 +239,8 @@ export default function AttendancePopup({
 
       // Determine API endpoint based on role
       const url = isTeacher
-        ? `${EndPoints.TEACHER.UPDATE_ATTENDANCE}/${teacherSectionId}`
-        : `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${sectionId}`;
+        ? `${EndPoints.TEACHER.UPDATE_ATTENDANCE}/${classAndSectionDataOfTeacher?.sectionId}`
+        : `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${classAndSectionData?.sectionId}`;
       // API call
       const res = await axiosClient.post(url, { studentsAttendances });
 
@@ -278,11 +255,18 @@ export default function AttendancePopup({
       setLoading(false);
     }
   };
+  // console.log(attendanceData);
 
   /**
    * Fetch monthly attendance data for the current month.
    */
   const fetchMonthlyAttendance = async () => {
+    if (
+      isTeacher
+        ? !classAndSectionDataOfTeacher?.sessionId
+        : !classAndSectionData?.id
+    )
+      return;
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
     try {
@@ -301,12 +285,12 @@ export default function AttendancePopup({
         59,
         999
       ).getTime();
-      // console.log("start");
+      // console.log(classAndSectionDataOfTeacher);
       const url = isTeacher
-        ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${teacherSectionId}&startTime=${startTime}&endTime=${endTime}`
-        : `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${id}&section=${sectionId}&classId=${classId}&startTime=${startTime}&endTime=${endTime}`;
+        ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${classAndSectionDataOfTeacher?.sectionId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionDataOfTeacher?.sessionId}`
+        : `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.id}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.session[0]?._id}`;
+      // console.log(url);
       const res = await axiosClient.get(url);
-      // console.log(res?.result);
 
       if (res?.statusCode === 200) {
         const attendances = res?.result?.attendances || [];
@@ -441,7 +425,13 @@ export default function AttendancePopup({
       let url = isTeacher
         ? EndPoints.TEACHER.GET_EVENTS
         : EndPoints.ADMIN.GET_EVENTS;
-      const res = await axiosClient.post(url, { startTime, endTime });
+      const res = await axiosClient.post(url, {
+        startTime,
+        endTime,
+        sessionId: isTeacher
+          ? classAndSectionDataOfTeacher?.sessionId
+          : classAndSectionData?.session[0]?._id,
+      });
 
       if (res?.statusCode === 200) {
         const holidayMap = res?.result?.reduce((acc, item) => {
@@ -457,6 +447,9 @@ export default function AttendancePopup({
       const res2 = await axiosClient.post(url, {
         startTime,
         endTime,
+        sessionId: isTeacher
+          ? classAndSectionDataOfTeacher?.sessionId
+          : classAndSectionData?.session[0]?._id,
       });
 
       if (res2?.statusCode === 200) {
@@ -473,75 +466,24 @@ export default function AttendancePopup({
     }
   };
 
-  // const fetchEvents = async () => {
-  //   setLoading(true);
-
-  //   try {
-  //     const startOfMonth = moment(currentDate).startOf("month").startOf("day"); // First day of the current month
-  //     const endOfMonth = moment(currentDate).endOf("month").endOf("day"); // Last day of the current month
-
-  //     const payload = {
-  //       startTime: startOfMonth.valueOf(),
-  //       endTime: endOfMonth.valueOf(),
-  //     };
-
-  //     const [eventsRes, sundaysRes] = await Promise.all([
-  //       axiosClient.post(
-  //         isTeacher ? EndPoints.TEACHER.GET_EVENTS : EndPoints.ADMIN.GET_EVENTS,
-  //         payload
-  //       ),
-  //       axiosClient.post(
-  //         isTeacher
-  //           ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
-  //           : EndPoints.ADMIN.GET_SUNDAY_HOLIDAY,
-  //         payload
-  //       ),
-  //     ]);
-
-  //     if (eventsRes?.statusCode === 200) {
-  //       const holidayMap = Object.fromEntries(
-  //         eventsRes.result.map((item) => [formatDate(moment(item.date)), true])
-  //       );
-  //       setHolidays(holidayMap);
-  //     }
-
-  //     if (sundaysRes?.statusCode === 200) {
-  //       const workdayMap = Object.fromEntries(
-  //         sundaysRes.result.map((item) => [formatDate(moment(item.date)), true])
-  //       );
-  //       setWorkdays(workdayMap);
-  //     }
-  //   } catch (error) {
-  //     toast.error(error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // // Trigger fetchMonthlyAttendance when holidays update
-  // useEffect(() => {
-  //   fetchMonthlyAttendance();
-  // }, [holidays, workdays]);
-
-  // useEffect(() => {
-  //   fetchEvents();
-  // }, [currentDate]);
-
   useEffect(() => {
     fetchEvents().then(fetchMonthlyAttendance);
-  }, [currentDate]);
+  }, [
+    currentDate,
+    classAndSectionData?.id,
+    classAndSectionDataOfTeacher?.sessionId,
+  ]);
 
   // attendance download in pdf format
   const downloadAttendance = () => {
     const doc = new jsPDF();
 
     // Title
-    const title = `${className}-${sectionName} Monthly Attendance ${currentDate.toLocaleString(
-      "default",
-      {
-        month: "long",
-      }
-    )} ${currentDate.getFullYear()}`;
+    const title = `${classAndSectionData?.className}-${
+      classAndSectionData?.sectionName
+    } Monthly Attendance ${currentDate.toLocaleString("default", {
+      month: "long",
+    })} ${currentDate.getFullYear()}`;
     doc.setFontSize(16);
     doc.text(title, 14, 20);
 
@@ -625,17 +567,20 @@ export default function AttendancePopup({
 
     // Save PDF
     doc.save(
-      `Attendance_${className}_${sectionName}_${currentDate.getFullYear()}_${
-        currentDate.getMonth() + 1
-      }.pdf`
+      `Attendance_${classAndSectionData?.className}_${
+        classAndSectionData?.sectionName
+      }_${currentDate.getFullYear()}_${currentDate.getMonth() + 1}.pdf`
     );
   };
 
   return (
-    <div className={`fixed inset-0 z-40 select-none`}>
+    <div className={`z-40 select-none`}>
       <div
-        className={`h-screen p-4 shadow flex flex-col bg-opacity-80 bg-background`}
+        className={`min-h-[calc(100vh-72px)] p-4 shadow flex flex-col ${
+          isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+        }`}
       >
+        <Toaster />
         {/* Header */}
         <div className={`flex flex-row justify-between items-center mb-4`}>
           <div
@@ -695,18 +640,12 @@ export default function AttendancePopup({
                 />
               </>
             )}
-            <img
-              src={closew}
-              alt=""
-              className={`w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
-              onClick={onClose}
-            />
           </div>
         </div>
 
         {/* Table */}
         <div
-          className={`overflow-x-auto p-4 h-[550px] overflow-y-auto ${
+          className={`overflow-x-auto p-4 h-[500px] overflow-y-auto ${
             isDarkMode
               ? "bg-gradient-to-r from-fromColor1 to-toColor1"
               : "bg-whiteBackground"

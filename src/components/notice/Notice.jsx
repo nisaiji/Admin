@@ -24,6 +24,9 @@ import { Stack } from "@mui/system";
 
 export default function Notice() {
   const { t } = useTranslation();
+  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+    (state) => state.appAuth
+  );
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const { data } = useSelector((state) => state.appAuth);
@@ -114,6 +117,7 @@ export default function Notice() {
       const res = await axiosClient.post(EndPoints.ADMIN.ADD_NOTICE, {
         description: formData.description,
         targetAudience,
+        sessionId: classAndSectionData?.session[0]?._id,
       });
 
       if (res?.statusCode === 201) {

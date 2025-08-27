@@ -40,7 +40,9 @@ export default function Studentlist() {
 
   // Redux selectors to fetch required state
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
-  const id = useSelector((state) => state.appAuth.id);
+  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+    (state) => state.appAuth
+  );
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   // State variables for pagination, modal visibility, and student data
@@ -91,11 +93,11 @@ export default function Studentlist() {
 
   // Fetch initial data when the component is mounted
   useEffect(() => {
-    if (id) {
+    if (classAndSectionData?.id) {
       getClassList();
       fetchStudents({});
     }
-  }, [id]);
+  }, [classAndSectionData?.id]);
 
   // Update section list when the selected class changes
   useEffect(() => {
@@ -119,17 +121,14 @@ export default function Studentlist() {
    * @param {Object} params - Contains searchName and searchSection.
    */
   const fetchStudents = async ({ searchName = "", searchSection = "" }) => {
-    if (!id) {
+    if (!classAndSectionData?.id) {
       return;
     }
 
-    const url = isTeacher
-      ? EndPoints.TEACHER.GET_STUDENT_LIST
-      : // : EndPoints.ADMIN.GET_STUDENT_LIST;
-        EndPoints.ADMIN.SEARCH_STUDENT;
+    const url = EndPoints.ADMIN.SEARCH_STUDENT;
 
     // let query = `?admin=${id}&page=${pageNo}&limit=${limit}&include=parent,class,section`;
-    let query = `?page=${pageNo}&limit=${limit}`;
+    let query = `?page=${pageNo}&limit=${limit}&session=${classAndSectionData?.session[0]?._id}`;
 
     // Determine the query parameters based on the inputs
     if (searchName) {
@@ -143,6 +142,7 @@ export default function Studentlist() {
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}${query}`);
+      console.log({ response });
 
       if (response?.statusCode === 200) {
         const { totalStudents, students } = response?.result;
@@ -161,7 +161,7 @@ export default function Studentlist() {
    */
   const getClassList = async () => {
     try {
-      const res = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
+      const res = await axiosClient.get(`${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session[0]?._id}`);
 
       // Filter out classes without sections and then sort them.
       const filteredSortedClasses = res?.result
@@ -230,9 +230,7 @@ export default function Studentlist() {
    * Confirm and delete a student from the list.
    */
   const handleConfirmDelete = async () => {
-    const url = isTeacher
-      ? EndPoints.TEACHER.DELETE_STUDENT
-      : EndPoints.ADMIN.DELETE_STUDENT;
+    const url = EndPoints.ADMIN.DELETE_STUDENT;
 
     try {
       const res = await axiosClient.delete(`${url}/${idForDelete}`);
@@ -614,21 +612,21 @@ export default function Studentlist() {
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } max-md:hidden`}
                         >
-                          {student?.parentDetails?.phone}
+                          {student?.parentPhone}
                         </td>
                         <td
                           className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } max-lg:hidden`}
                         >
-                          {student?.parentDetails?.email || CONSTANT.NA}
+                          {student?.parentEmail || CONSTANT.NA}
                         </td>
                         <td
                           className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } max-lg:hidden`}
                         >
-                          {student?.parentDetails?.fullname || CONSTANT.NA}
+                          {student?.parentFullName || CONSTANT.NA}
                         </td>
                         {/* Action Buttons */}
                         <td

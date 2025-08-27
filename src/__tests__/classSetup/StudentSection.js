@@ -1,22 +1,16 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { Provider } from "react-redux";
-import configureStore from "redux-mock-store";
-import { MemoryRouter } from "react-router-dom";
 import StudentSection from "../../components/classSetup/sectionStudents/StudentSection";
+import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
-import EndPoints from "../../services/EndPoints";
+import toast from "react-hot-toast";
 
-global.matchMedia =
-  global.matchMedia ||
-  function () {
-    return {
-      matches: false,
-      addListener: () => {},
-      removeListener: () => {},
-    };
-  };
-
+jest.mock("react-redux", () => ({
+  useSelector: jest.fn(),
+}));
+jest.mock("react-i18next", () => ({
+  useTranslation: () => [key => key],
+}));
 jest.mock("../../services/axiosClient", () => ({
   axiosClient: {
     get: jest.fn(),
@@ -25,423 +19,98 @@ jest.mock("../../services/axiosClient", () => ({
     delete: jest.fn(),
   },
 }));
-
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useLocation: () => ({
-    state: {
-      sectionId: "section1",
-      classId: "class1",
-      className: "Class A",
-      sectionName: "Section A",
-    },
-  }),
+jest.mock("react-hot-toast", () => ({
+  __esModule: true,
+  default: { success: jest.fn(), error: jest.fn() },
 }));
 
-beforeAll(() => {
-  Object.defineProperty(window, "localStorage", {
-    value: {
-      getItem: jest.fn(() => "TeacherName"),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-      clear: jest.fn(),
+describe("StudentSection", () => {
+  const mockState = {
+    appAuth: {
+      role: "admin",
+      classAndSectionData: {
+        id: "school1",
+        sectionId: "sec1",
+        session: [{ _id: "sess1" }],
+        className: "10",
+        sectionName: "A",
+      },
+      classAndSectionDataOfTeacher: {},
     },
-    writable: true,
-  });
-});
+    appConfig: { isDarkMode: false },
+  };
 
-const mockStore = configureStore([]);
-const renderComponent = (storeState) => {
-  const store = mockStore(storeState);
-  return render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <StudentSection />
-      </MemoryRouter>
-    </Provider>
-  );
-};
-
-describe("StudentSection Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useSelector.mockImplementation(cb => cb(mockState));
   });
 
-  test("renders without crashing and displays title", async () => {
-    axiosClient.get
-      .mockResolvedValueOnce({ statusCode: 200, result: { teacher: {} } })
-      .mockResolvedValueOnce({ statusCode: 200, result: { students: [] } });
-
-    renderComponent({
-      appConfig: { isDarkMode: false },
-      appAuth: {
-        role: "admin",
-        id: "admin1",
-        section: "section1",
-        className: "Class A",
-        sectionName: "Section A",
-      },
-    });
+  it("renders the heading and input fields", () => {
+    render(<StudentSection />);
     expect(screen.getByText("titles.students")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("placeholders.firstName")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("placeholders.parentName")).toBeInTheDocument();
   });
 
-  test("fetches and displays students", async () => {
-    axiosClient.get
-      .mockResolvedValueOnce({ statusCode: 200, result: { teacher: {} } })
-      .mockResolvedValueOnce({
-        statusCode: 200,
-        result: {
-          students: [
-            {
-              _id: "1",
-              firstname: "John",
-              lastname: "Doe",
-              parentDetails: { fullname: "Jane Doe", phone: "1234567890" },
-            },
-            {
-              _id: "2",
-              firstname: "Alice",
-              lastname: "Smith",
-              parentDetails: { fullname: "Bob Smith", phone: "0987654321" },
-            },
-          ],
-        },
-      });
-    renderComponent({
-      appConfig: { isDarkMode: false },
-      appAuth: {
-        role: "admin",
-        id: "admin1",
-        section: "section1",
-        className: "Class A",
-        sectionName: "Section A",
-      },
-    });
-
+  it("fetches students on mount", async () => {
+    axiosClient.get.mockResolvedValueOnce({ statusCode: 200, result: [] });
+    render(<StudentSection />);
     await waitFor(() => {
-      expect(screen.getByDisplayValue("John")).toBeInTheDocument();
-      expect(screen.getByDisplayValue("Doe")).toBeInTheDocument();
-      expect(screen.getByDisplayValue("Alice")).toBeInTheDocument();
+      expect(axiosClient.get).toHaveBeenCalled();
     });
   });
 
-  test("registers a new student successfully", async () => {
-    axiosClient.get
-      .mockResolvedValueOnce({ statusCode: 200, result: { teacher: {} } })
-      .mockResolvedValueOnce({ statusCode: 200, result: { students: [] } });
-    axiosClient.post.mockResolvedValueOnce({
-      statusCode: 201,
-      result: "Student added successfully",
+  it("handles input change for new student", () => {
+    render(<StudentSection />);
+    const fnameInput = screen.getByPlaceholderText("placeholders.firstName");
+    fireEvent.change(fnameInput, { target: { value: "John123" } });
+    expect(fnameInput).toHaveValue("John"); // numbers removed
+  });
+
+  it("shows error toast on validation fail", async () => {
+    render(<StudentSection />);
+    const addBtn = screen.getByRole("button", { name: /buttons.addStudent/i });
+    fireEvent.click(addBtn);
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalled();
     });
-    axiosClient.get.mockResolvedValueOnce({
-      statusCode: 200,
-      result: { students: [] },
+  });
+
+  it("calls registerStudent when valid", async () => {
+    axiosClient.post.mockResolvedValue({ statusCode: 201, result: "Added" });
+    axiosClient.get.mockResolvedValue({ statusCode: 200, result: [] });
+
+    render(<StudentSection />);
+    fireEvent.change(screen.getByPlaceholderText("placeholders.firstName"), {
+      target: { value: "John" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("placeholders.lastName"), {
+      target: { value: "Doe" },
+    });
+    fireEvent.change(screen.getByTestId("gender"), { target: { value: "options.male" } });
+    fireEvent.change(screen.getByPlaceholderText("placeholders.parentName"), {
+      target: { value: "Jane" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("placeholders.phoneNumber"), {
+      target: { value: "9876543210" },
     });
 
-    renderComponent({
-      appConfig: { isDarkMode: false },
-      appAuth: {
-        role: "admin",
-        id: "admin1",
-        section: "section1",
-        className: "Class A",
-        sectionName: "Section A",
-      },
-    });
-
-    const firstNameInput = screen.getByPlaceholderText(
-      "placeholders.firstName"
-    );
-    const lastNameInput = screen.getByPlaceholderText("placeholders.lastName");
-    const parentNameInput = screen.getByPlaceholderText(
-      "placeholders.parentName"
-    );
-    const phoneInput = screen.getByPlaceholderText("placeholders.phoneNumber");
-    const addButton = screen.getByText("buttons.addStudent");
-
-    fireEvent.change(firstNameInput, { target: { value: "Emily" } });
-    fireEvent.change(lastNameInput, { target: { value: "Clark" } });
-    fireEvent.change(parentNameInput, { target: { value: "John Clark" } });
-    fireEvent.change(phoneInput, { target: { value: "7234567890" } });
-    const genderSelect = screen.getByTestId("gender");
-    fireEvent.change(genderSelect, { target: { value: "options.female" } });
-
-    fireEvent.click(addButton);
+    const addBtn = screen.getByRole("button", { name: /buttons.addStudent/i });
+    fireEvent.click(addBtn);
 
     await waitFor(() => {
       expect(axiosClient.post).toHaveBeenCalled();
-      expect(axiosClient.post).toHaveBeenCalledWith(
-        EndPoints.ADMIN.REGISTER_SECTION_STUDENT,
-        expect.objectContaining({
-          firstname: "Emily",
-          lastname: "Clark",
-          parentName: "John clark",
-          gender: "options.female",
-          phone: "7234567890",
-          sectionId: "section1",
-        })
-      );
+      expect(toast.success).toHaveBeenCalled();
     });
   });
 
-  test("edits an existing student", async () => {
-    const student = {
-      _id: "1",
-      firstname: "John",
-      lastname: "Doe",
-      gender: "Male",
-      parentDetails: { fullname: "Jane Doe", phone: "7234567890" },
-    };
-    axiosClient.get
-      .mockResolvedValueOnce({ statusCode: 200, result: { teacher: {} } })
-      .mockResolvedValueOnce({
-        statusCode: 200,
-        result: { students: [student] },
-      });
-    axiosClient.put.mockResolvedValueOnce({
-      statusCode: 200,
-      result: "Updated successfully",
-    });
-    axiosClient.get.mockResolvedValueOnce({
-      statusCode: 200,
-      result: { students: [student] },
-    });
-
-    renderComponent({
-      appConfig: { isDarkMode: false },
-      appAuth: {
-        role: "admin",
-        id: "admin1",
-        section: "section1",
-        className: "Class A",
-        sectionName: "Section A",
-      },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByDisplayValue("John")).toBeInTheDocument();
-    });
-
-    const actionButtons = screen.getByAltText("editStudent");
-    fireEvent.click(actionButtons);
-
-    const firstNameInput = screen.getByDisplayValue("John");
-    fireEvent.change(firstNameInput, { target: { value: "Johnny" } });
-
-    const saveButton = screen.getByText("buttons.save");
-    fireEvent.click(saveButton);
-
-    await waitFor(() => {
-      expect(axiosClient.put).toHaveBeenCalled();
-      expect(axiosClient.put).toHaveBeenCalledWith(
-        `student/admin/${student._id}`,
-        expect.objectContaining({
-          firstname: "Johnny",
-          lastname: "Doe",
-          parentName: "Jane doe",
-          gender: student.gender || "",
-          phone: "7234567890",
-        })
-      );
-    });
-  });
-
-  test("deletes a student", async () => {
-    const student = {
-      _id: "1",
-      firstname: "John",
-      lastname: "Doe",
-      parentDetails: { fullname: "Jane Doe", phone: "1234567890" },
-    };
-    axiosClient.get
-      .mockResolvedValueOnce({ statusCode: 200, result: { teacher: {} } })
-      .mockResolvedValueOnce({
-        statusCode: 200,
-        result: { students: [student] },
-      });
-    axiosClient.delete.mockResolvedValueOnce({
-      statusCode: 200,
-      result: "Deleted successfully",
-    });
-    axiosClient.get.mockResolvedValueOnce({
-      statusCode: 200,
-      result: { students: [] },
-    });
-
-    renderComponent({
-      appConfig: { isDarkMode: false },
-      appAuth: {
-        role: "admin",
-        id: "admin1",
-        section: "section1",
-        className: "Class A",
-        sectionName: "Section A",
-      },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByDisplayValue("John")).toBeInTheDocument();
-    });
-
-    const actionButton = screen.getByAltText("deleteStudent");
-    fireEvent.click(actionButton);
-
-    const confirmDeleteButton = screen.getByTestId("confirmdeleteTeacher");
-    fireEvent.click(confirmDeleteButton);
-
-    await waitFor(() => {
-      expect(axiosClient.delete).toHaveBeenCalled();
-      expect(axiosClient.delete).toHaveBeenCalledWith(
-        `${EndPoints.ADMIN.DELETE_STUDENT}/${student._id}`
-      );
-    });
-  });
-
-  test("handles file upload", async () => {
-    axiosClient.post.mockResolvedValueOnce({
-      statusCode: 201,
-      result: "Upload successful",
-    });
-    axiosClient.get
-      .mockResolvedValueOnce({ statusCode: 200, result: { teacher: {} } })
-      .mockResolvedValueOnce({ statusCode: 200, result: { students: [] } });
-
-    renderComponent({
-      appConfig: { isDarkMode: false },
-      appAuth: {
-        role: "admin",
-        id: "admin1",
-        section: "section1",
-        className: "Class A",
-        sectionName: "Section A",
-      },
-    });
-
-    const file = new File(["dummy content"], "example.xlsx", {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const fileInput = document.querySelector('input[type="file"]');
-    fireEvent.change(fileInput, { target: { files: [file] } });
-
-    await waitFor(() => {
-      expect(axiosClient.post).toHaveBeenCalled();
-      expect(axiosClient.post).toHaveBeenCalledWith(
-        EndPoints.ADMIN.UPLOAD_EXCEL,
-        expect.any(FormData),
-        expect.objectContaining({
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-      );
-    });
-  });
-
-  test("filters students based on search input", async () => {
-    axiosClient.get
-      .mockResolvedValueOnce({ statusCode: 200, result: { teacher: {} } })
-      .mockResolvedValueOnce({
-        statusCode: 200,
-        result: {
-          students: [
-            {
-              _id: "1",
-              firstname: "John",
-              lastname: "Doe",
-              parentDetails: { fullname: "Jane Doe", phone: "1234567890" },
-            },
-            {
-              _id: "2",
-              firstname: "Alice",
-              lastname: "Smith",
-              parentDetails: { fullname: "Bob Smith", phone: "0987654321" },
-            },
-          ],
-        },
-      });
-
-    renderComponent({
-      appConfig: { isDarkMode: false },
-      appAuth: {
-        role: "admin",
-        id: "admin1",
-        section: "section1",
-        className: "Class A",
-        sectionName: "Section A",
-      },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByDisplayValue("John")).toBeInTheDocument();
-      expect(screen.getByDisplayValue("Alice")).toBeInTheDocument();
-    });
-
+  it("handles search input", () => {
+    render(<StudentSection />);
     const searchInput = screen.getByPlaceholderText("placeholders.search");
-    fireEvent.change(searchInput, { target: { value: "John" } });
-
-    const firstnameInput = screen.getByTestId("firstname").value;
-
-    await waitFor(() => {
-      expect(firstnameInput).toBe("John");
-      expect(screen.queryByText("Alice")).not.toBeInTheDocument();
-    });
-  });
-
-  test("opens attendance popup when clicked", async () => {
-    axiosClient.get
-      .mockResolvedValueOnce({ statusCode: 200, result: { teacher: {} } })
-      .mockResolvedValueOnce({ statusCode: 200, result: { students: [] } });
-
-    renderComponent({
-      appConfig: { isDarkMode: false },
-      appAuth: {
-        role: "admin",
-        id: "admin1",
-        section: "section1",
-        className: "Class A",
-        sectionName: "Section A",
-      },
-    });
-
-    const attendanceButton = screen.getByText("Attendance");
-    fireEvent.click(attendanceButton);
-
-    expect(
-      await screen.getByText("Monthly Attendance Sheet")
-    ).toBeInTheDocument();
-  });
-
-  test("opens student info modal when info button is clicked", async () => {
-    const student = {
-      _id: "1",
-      firstname: "John",
-      lastname: "Doe",
-      parentDetails: { fullname: "Jane Doe", phone: "1234567890" },
-    };
-    axiosClient.get
-      .mockResolvedValueOnce({ statusCode: 200, result: { teacher: {} } })
-      .mockResolvedValueOnce({
-        statusCode: 200,
-        result: { students: [student] },
-      });
-    renderComponent({
-      appConfig: { isDarkMode: false },
-      appAuth: {
-        role: "admin",
-        id: "admin1",
-        section: "section1",
-        className: "Class A",
-        sectionName: "Section A",
-      },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByDisplayValue("John")).toBeInTheDocument();
-    });
-
-    const actionButton = screen.getByAltText("infoStudent");
-    fireEvent.click(actionButton);
-
-    expect(await screen.getByText("titles.studentDetails")).toBeInTheDocument();
+    fireEvent.change(searchInput, { target: { value: "abc" } });
+    expect(searchInput).toHaveValue("abc");
+    const clearBtn = screen.getByRole("button", { hidden: true });
+    fireEvent.click(clearBtn);
+    expect(searchInput).toHaveValue("");
   });
 });

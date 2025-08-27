@@ -125,7 +125,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
                 selected ? (
                   selected
                 ) : (
-                  <span style={{ color: "#aaa" }}>
+                  <span data-testid="selectCountry" style={{ color: "#aaa" }}>
                     {t("placeholders.selectCountry")}
                   </span>
                 )
@@ -184,6 +184,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
             fullWidth
             disabled={!formData.country}
             sx={{ mt: "8px" }}
+            data-testid="State"
           >
             <Select
               name="state"
@@ -195,7 +196,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
                 selected ? (
                   selected
                 ) : (
-                  <span style={{ color: "gray" }}>
+                  <span data-testid="selectState" style={{ color: "gray" }}>
                     {t("adminProfile.state")}
                   </span>
                 )
@@ -271,7 +272,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
                 selected ? (
                   selected
                 ) : (
-                  <span style={{ color: "#aaa" }}>
+                  <span data-testid="selectDistrict" style={{ color: "#aaa" }}>
                     {t("placeholders.selectDistrict")}
                   </span>
                 )
@@ -328,7 +329,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
             </div>
           )}
         </div>
-
+        {/* city */}
         <div className="w-1/2 pl-5 mt-2">
           <p className="text-textPrimary text-sm text-left font-semibold">
             {t("adminProfile.city")}
@@ -336,6 +337,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
           <input
             className="text-textPrimary rounded-lg h-[39px] bg-backgroundGray15 py-2 px-5 mt-2 w-full"
             type="text"
+            data-testid="city"
             name="city"
             placeholder={t("placeholders.city")}
             onChange={handleChange}
@@ -343,7 +345,10 @@ const Step5 = ({ goback, setStep, setLoading }) => {
             disabled={!formData.district}
           />
           {errors.city && (
-            <div className="text-textRed text-left text-sm p-1 ">
+            <div
+              data-testid="cityError"
+              className="text-textRed text-left text-sm p-1 "
+            >
               {errors.city}
             </div>
           )}
@@ -358,6 +363,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
         <input
           className="text-textPrimary rounded-lg h-[39px] bg-backgroundGray15 py-2 px-5 mt-2 w-full"
           type="text"
+          data-testid="pincode"
           name="pincode"
           placeholder={t("placeholders.pincode")}
           maxLength={6}
@@ -366,7 +372,10 @@ const Step5 = ({ goback, setStep, setLoading }) => {
           disabled={!formData.district}
         />
         {errors.pincode && (
-          <div className="text-textRed text-left text-sm p-1 ">
+          <div
+            data-testid="pincodeError"
+            className="text-textRed text-left text-sm p-1 "
+          >
             {errors.pincode}
           </div>
         )}
@@ -380,6 +389,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
         <input
           className="text-textPrimary rounded-lg bg-backgroundGray15 h-[39px] py-2 px-5 mt-2 w-full"
           type="text"
+          data-testid="address"
           name="address"
           placeholder={t("placeholders.schoolAdress")}
           onChange={handleChange}
@@ -387,7 +397,10 @@ const Step5 = ({ goback, setStep, setLoading }) => {
           disabled={!formData.district}
         />
         {errors.address && (
-          <div className="text-textRed text-left text-sm p-1 ">
+          <div
+            data-testid="addressError"
+            className="text-textRed text-left text-sm p-1 "
+          >
             {errors.address}
           </div>
         )}
@@ -403,6 +416,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
           {t("buttons.back")}
         </button>
         <button
+          data-testid="submit"
           type="button"
           onClick={handleSubmit}
           className="rounded-lg px-4 h-8 bg-backgroundBlue text-white font-medium flex items-center justify-center active:scale-90"
