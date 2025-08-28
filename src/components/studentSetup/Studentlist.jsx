@@ -142,7 +142,7 @@ export default function Studentlist() {
     try {
       setLoading(true);
       const response = await axiosClient.get(`${url}${query}`);
-      console.log({ response });
+      // console.log({ response });
 
       if (response?.statusCode === 200) {
         const { totalStudents, students } = response?.result;

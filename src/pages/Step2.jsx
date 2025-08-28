@@ -162,11 +162,11 @@ const Step2 = ({ goback, setStep, setLoading, currentStep }) => {
     }
     try {
       setLoading(true);
-      console.log(
-        email,
-        window.configuration.widgetId,
-        window.configuration.tokenAuth
-      );
+      // console.log(
+      //   email,
+      //   window.configuration.widgetId,
+      //   window.configuration.tokenAuth
+      // );
       window?.sendOtp(
         email,
         (res) => {
@@ -178,7 +178,7 @@ const Step2 = ({ goback, setStep, setLoading, currentStep }) => {
           setIsResendDisabled(true);
         },
         (err) => {
-          console.log({ err });
+          // console.log({ err });
           toast.error(err?.message);
         }
       );

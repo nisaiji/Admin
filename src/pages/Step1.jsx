@@ -132,7 +132,7 @@ const Step1 = ({ goback, setStep, setLoading, currentStep }) => {
         navigate("/signup");
       }
     } catch (e) {
-      console.log({ e });
+      // console.log({ e });
 
       if (e === "Admin not found") {
         await window?.sendOtp(

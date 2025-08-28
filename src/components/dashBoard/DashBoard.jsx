@@ -118,9 +118,7 @@ const Dashboard = () => {
    * Fetches calendar events based on the selected month.
    */
   const getSession = async () => {
-    let url = isTeacher
-      ? EndPoints.TEACHER.GET_EVENTS
-      : EndPoints.ADMIN.GET_SESSION;
+    let url = isTeacher ? "" : EndPoints.ADMIN.GET_SESSION;
     const result = await fetchData(url, "get");
     if (result) {
       dispatch(setClassAndSectionData({ session: result }));
@@ -164,7 +162,7 @@ const Dashboard = () => {
       endTime: attendanceTime.day.endTime,
       sessionId: isTeacher
         ? classAndSectionDataOfTeacher?.sessionId
-        : classAndSectionData?.session[0]?._id,
+        : classAndSectionData?.session?.[0]?._id,
     });
     setStudentAbsentCountData(result?.absentCount || 0);
     setStudentPresentCountData(result?.presentCount || 0);
@@ -175,32 +173,36 @@ const Dashboard = () => {
    * Fetches and sets the list of available classes and their corresponding sections.
    */
   const getClassList = async () => {
-    const result = await fetchData(
-      `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session[0]?._id}`
-    );
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session?.[0]?._id}`
+      );
 
-    if (result) {
-      // Filter out classes without sections and then sort them.
-      const filteredSortedClasses = result
-        .filter((cls) => cls?.section?.length > 0)
-        .sort((a, b) => {
-          const aIndex = classOptions.indexOf(a.name);
-          const bIndex = classOptions.indexOf(b.name);
-          return aIndex - bIndex;
-        });
+      if (res?.statusCode === 200) {
+        // Filter out classes without sections and then sort them.
+        const filteredSortedClasses = res?.result
+          .filter((cls) => cls?.section?.length > 0)
+          .sort((a, b) => {
+            const aIndex = classOptions.indexOf(a.name);
+            const bIndex = classOptions.indexOf(b.name);
+            return aIndex - bIndex;
+          });
 
-      setClassList(filteredSortedClasses);
-      const [firstClass] = filteredSortedClasses;
-      setSectionList(firstClass?.section || []);
+        setClassList(filteredSortedClasses);
+        const [firstClass] = filteredSortedClasses;
+        setSectionList(firstClass?.section || []);
+      }
+    } catch (e) {
+      // toast.error(e);
     }
   };
 
   useEffect(() => {
     if (!isTeacher) {
-      getClassList();
       getSession();
+      getClassList();
     }
-  }, []);
+  }, [classAndSectionData?.session?.[0]?._id]);
 
   useEffect(() => {
     if (isTeacher) {
@@ -345,7 +347,7 @@ const Dashboard = () => {
       endTime,
       sessionId: isTeacher
         ? classAndSectionDataOfTeacher?.sessionId
-        : classAndSectionData?.session[0]?._id,
+        : classAndSectionData?.session?.[0]?._id,
     });
 
     if (result) setCalenderEvents(result);
@@ -358,7 +360,7 @@ const Dashboard = () => {
       endTime,
       sessionId: isTeacher
         ? classAndSectionDataOfTeacher?.sessionId
-        : classAndSectionData?.session[0]?._id,
+        : classAndSectionData?.session?.[0]?._id,
     });
 
     if (res?.statusCode === 200) {
@@ -370,7 +372,7 @@ const Dashboard = () => {
   useEffect(() => {
     // getSessions();
     getCalenderEvents();
-  }, [date]);
+  }, [date, classAndSectionData?.session?.[0]?._id]);
 
   /**
    * Transforms weekly attendance data into an array of 7 days.
@@ -536,7 +538,12 @@ const Dashboard = () => {
       }
     };
     fetchChartData();
-  }, [selectedSection, selectedOption, attendanceTime]);
+  }, [
+    selectedSection,
+    selectedOption,
+    attendanceTime,
+    classAndSectionData?.session?.[0]?._id,
+  ]);
 
   const handleOptionChange = (event) => setSelectedOption(event.target.value);
 

@@ -584,8 +584,6 @@ function Addsection({
                     ))}
                   </Select>
                 </FormControl>
-{console.log(classAndSectionData?.session[0])
-}
                 <DatePicker
                   selected={newSection.startTime}
                   onChange={(date) => {
