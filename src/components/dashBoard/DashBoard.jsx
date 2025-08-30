@@ -41,6 +41,8 @@ const Dashboard = () => {
   const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
     (state) => state.appAuth
   );
+  // console.log(classAndSectionData);
+  
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const schoolName = useSelector((state) => state.appAuth.schoolName);
   const { data, teacherData } = useSelector((state) => state.appAuth);
@@ -118,10 +120,16 @@ const Dashboard = () => {
    * Fetches calendar events based on the selected month.
    */
   const getSession = async () => {
-    let url = isTeacher ? "" : EndPoints.ADMIN.GET_SESSION;
-    const result = await fetchData(url, "get");
-    if (result) {
-      dispatch(setClassAndSectionData({ session: result }));
+    try {
+      if (!isTeacher) {
+        let url = EndPoints.ADMIN.GET_SESSION;
+        const result = await fetchData(url, "get");
+        if (result) {
+          dispatch(setClassAndSectionData({ session: result }));
+        }
+      }
+    } catch (e) {
+      // console.log(e);
     }
   };
 
@@ -174,6 +182,9 @@ const Dashboard = () => {
    */
   const getClassList = async () => {
     try {
+      if (!classAndSectionData?.session?.[0]?._id) {
+        return;
+      }
       const res = await axiosClient.get(
         `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session?.[0]?._id}`
       );
@@ -312,22 +323,16 @@ const Dashboard = () => {
   };
 
   /**
-   * Fetches all session.
-   */
-  // const getSessions = async () => {
-  //   let url = isTeacher
-  //     ? EndPoints.TEACHER.GET_EVENTS
-  //     : EndPoints.ADMIN.GET_ALL_SESSION;
-  //   const res = await axiosClient.get(url);
-  //   if (res?.statusCode === 200) {
-  //     setSession(res?.result);
-  //   }
-  // };
-
-  /**
    * Fetches calendar events based on the selected month.
    */
   const getCalenderEvents = async () => {
+    if (
+      isTeacher
+        ? !classAndSectionDataOfTeacher?.sessionId
+        : !classAndSectionData?.session?.[0]?._id
+    ) {
+      return;
+    }
     const startTime = new Date(date.year, date.month, 1).getTime();
     const endTime = new Date(
       date.year,

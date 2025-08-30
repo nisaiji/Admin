@@ -65,14 +65,30 @@ export default function StudentSection() {
   const id = classAndSectionData?.id;
 
   useEffect(() => {
-    if (id) {
-      getSectionInfo();
-    }
+    const shouldFetchStudents = isTeacher
+      ? classAndSectionDataOfTeacher?.sectionId &&
+        classAndSectionDataOfTeacher?.sessionId
+      : classAndSectionData?.sectionId &&
+        classAndSectionData?.session?.[0]?._id;
 
-    if ((id && !isTeacher) || (!id && isTeacher)) {
-      fetchStudents();
-    }
-  }, [id, isTeacher, classAndSectionData?.sectionId]);
+    const fetchData = async () => {
+      if (id && classAndSectionData?.sectionId) {
+        await getSectionInfo();
+      }
+      if (shouldFetchStudents) {
+        await fetchStudents();
+      }
+    };
+
+    fetchData();
+  }, [
+    id,
+    isTeacher,
+    classAndSectionData?.sectionId,
+    classAndSectionData?.session?.[0]?._id,
+    classAndSectionDataOfTeacher?.sectionId,
+    classAndSectionDataOfTeacher?.sessionId,
+  ]);
 
   // get class teacher info api
   const getSectionInfo = async () => {
@@ -83,7 +99,7 @@ export default function StudentSection() {
 
       if (res?.statusCode === 200) setClassData(res?.result);
     } catch (e) {
-      toast.error(e);
+      // toast.error(e);
     }
   };
 
@@ -95,6 +111,15 @@ export default function StudentSection() {
 
   // get student api
   const fetchStudents = async () => {
+    if (
+      isTeacher
+        ? !classAndSectionDataOfTeacher?.sessionId ||
+          !classAndSectionDataOfTeacher?.sectionId
+        : !classAndSectionData?.session?.[0]?._id ||
+          !classAndSectionData?.sectionId
+    ) {
+      return;
+    }
     const url = isTeacher
       ? EndPoints.TEACHER.GET_SECTION_STUDENTS
       : EndPoints.ADMIN.GET_SECTION_STUDENTS;
@@ -123,7 +148,7 @@ export default function StudentSection() {
         setStudents(studentList);
       }
     } catch (e) {
-      toast.error(e);
+      // toast.error(e);
     } finally {
       setLoading(false);
     }

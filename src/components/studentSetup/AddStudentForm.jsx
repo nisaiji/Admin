@@ -16,6 +16,7 @@ import moment from "moment";
 
 const AddStudent = () => {
   const navigate = useNavigate();
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
   const [classList, setClassList] = useState([]);
@@ -152,7 +153,12 @@ const AddStudent = () => {
    */
   const getClassList = async () => {
     try {
-      const res = await axiosClient.get(EndPoints.COMMON.CLASS_LIST);
+      if (!classAndSectionData?.session?.[0]?._id) {
+        return;
+      }
+      const res = await axiosClient.get(
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session[0]?._id}`
+      );
 
       // Filter out classes without sections and then sort them.
       const filteredSortedClasses = res?.result
@@ -623,7 +629,7 @@ const AddStudent = () => {
                         }
                       }}
                       className={`w-full`}
-                      renderInput={(params) => (
+                      textField={(params) => (
                         <TextField
                           {...params}
                           placeholder={t("placeholders.date")}

@@ -71,9 +71,12 @@ function ClassSetup() {
   // Function to fetch the list of classes via API
   const getAllClass = async () => {
     try {
+      if (!classAndSectionData?.session?.[0]?._id) {
+        return;
+      }
       setLoading(true);
       const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session[0]?._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session?.[0]?._id}`
       );
       if (res?.statusCode === 200) {
         const sortedClasses = res?.result?.sort(compareClasses);
@@ -98,7 +101,7 @@ function ClassSetup() {
       setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.REGISTER_CLASS, {
         name,
-        sessionId: classAndSectionData?.session[0]?._id,
+        sessionId: classAndSectionData?.session?.[0]?._id,
       });
       if ([200, 201].includes(res?.statusCode)) {
         getAllClass();
@@ -135,7 +138,7 @@ function ClassSetup() {
 
   useEffect(() => {
     getAllClass();
-  }, []);
+  }, [classAndSectionData?.session?.[0]?._id]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -269,8 +272,8 @@ function ClassSetup() {
                         {/* section data */}
                         {data.section.map((section, j) => (
                           <div
-                            onClick={async () => {
-                              await dispatch(
+                            onClick={() => {
+                              dispatch(
                                 setClassAndSectionData({
                                   sectionId: section._id,
                                   classId: data._id,

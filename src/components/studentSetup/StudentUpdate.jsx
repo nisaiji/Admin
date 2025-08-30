@@ -83,7 +83,12 @@ export default function StudentUpdate() {
       lastname: student?.lastname || "",
       gender: student?.gender || "",
       bloodGroup: student?.bloodGroup || "",
-      dob: student?.dob ? moment(student?.dob).format("DD/MM/YYYY") : "",
+      dob: student?.dob
+        ? moment(student?.dob, moment.ISO_8601).isValid()
+          ? moment(student?.dob).format("DD/MM/YYYY")
+          : moment(student?.dob, "DD/MM/YYYY").format("DD/MM/YYYY")
+        : "",
+      // dob: student?.dob ? moment(student?.dob).format("DD/MM/YYYY") : "",
       address: student?.address || "",
       parentName: student?.parentFullName || "",
       parentGender: student?.parentGender || "",
@@ -338,7 +343,7 @@ export default function StudentUpdate() {
                     }
                   }}
                   className={`w-full`}
-                  renderInput={(params) => (
+                  textField={(params) => (
                     <TextField
                       {...params}
                       placeholder={t("placeholders.date")}
