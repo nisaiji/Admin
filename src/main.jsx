@@ -15,6 +15,7 @@ import "./index.css"; // Styles applied across the entire application
 
 // Import the Redux store
 import store from "./store/store.jsx"; // Centralized store for managing application state
+import React from "react";
 
 // Initialize and render the React application
 ReactDOM.createRoot(document.getElementById("root")).render(

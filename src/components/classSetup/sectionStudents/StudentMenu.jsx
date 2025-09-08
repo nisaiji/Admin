@@ -17,11 +17,6 @@ export default function StudentMenu() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [loading, setLoading] = useState(false);
   // const [t] = useTranslation();
-  // const [year, setYear] = useState(
-  //   `TY-${classAndSectionData?.session[0]?.academicStartYear}-${String(
-  //     classAndSectionData?.session[0]?.academicEndYear
-  //   ).slice(-2)}`
-  // );
   // console.log(classAndSectionData);
 
   return (
@@ -60,6 +55,7 @@ export default function StudentMenu() {
             </div>
           </div>
           <div className="flex mt-5 ">
+            {/* student section */}
             <div
               onClick={() => {
                 isTeacher
@@ -77,6 +73,7 @@ export default function StudentMenu() {
                 Classroom
               </p>
             </div>
+            {/* attendnace */}
             <div
               onClick={() => {
                 isTeacher
@@ -94,6 +91,7 @@ export default function StudentMenu() {
                 Attendance
               </p>
             </div>
+            {/* calendar */}
             <div className="size-[162px] bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center  ">
               <img
                 src={calendar}
@@ -101,6 +99,22 @@ export default function StudentMenu() {
                 className="size-16 object-contain"
               />
               <p className="text-base font-normal text-textPrimary">Calendar</p>
+            </div>
+            {/* subjects */}
+            <div
+              onClick={() => {
+                isTeacher
+                  ? navigate("/student-menu/subjects")
+                  : navigate("/class-setup/student-menu/subjects");
+              }}
+              className="size-[162px] bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center  "
+            >
+              <img
+                src={calendar}
+                alt="classroom"
+                className="size-16 object-contain"
+              />
+              <p className="text-base font-normal text-textPrimary">Subjects</p>
             </div>
           </div>
         </div>

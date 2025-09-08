@@ -42,7 +42,7 @@ const Dashboard = () => {
     (state) => state.appAuth
   );
   // console.log(classAndSectionData);
-  
+
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const schoolName = useSelector((state) => state.appAuth.schoolName);
   const { data, teacherData } = useSelector((state) => state.appAuth);
@@ -116,16 +116,85 @@ const Dashboard = () => {
 
   const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
 
+  const handleMarkSessionComplete = async () => {
+    try {
+      if (!classAndSectionData?.selectedSession?._id) {
+        toast.error("No session selected.");
+        return;
+      }
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.MARK_SESSION_COMPLETE}/${classAndSectionData?.selectedSession._id}`
+      );
+      if (res?.statusCode === 200) {
+        toast.success(res?.result);
+        getSession(); // Refresh session list
+      }
+    } catch (e) {
+      // console.log({ e });
+      toast.error("Error marking session complete.");
+    }
+  };
+
+  // Helper to get next session years
+  const getNextSessionYears = () => {
+    // If session already exists for this period, don't create again
+    const nextSessionExists = session.some(
+      (s) =>
+        s.academicStartYear === moment().year() + 1 &&
+        s.academicEndYear === moment().year() + 2
+    );
+    if (!nextSessionExists) {
+      return { start: moment().year() + 1, end: moment().year() + 2 };
+    }
+    return null;
+  };
+
+  // Check if next session exists
+  const nextSession = getNextSessionYears();
+
+  // Handler to create new session
+  const handleCreateSession = async () => {
+    try {
+      // setLoading(true);
+      // console.log(nextSession);
+      const res = await axiosClient.post(EndPoints.ADMIN.CREATE_SESSION, {
+        academicStartYear: nextSession.start,
+        academicEndYear: nextSession.end,
+      });
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        toast.success(res?.result);
+        getSession();
+      }
+    } catch (e) {
+      // toast.error("Error creating session.");
+    } finally {
+      // setLoading(false);
+    }
+  };
+  // console.log(classAndSectionData?.classAndSectionData?.selectedSession);
+
   /**
    * Fetches calendar events based on the selected month.
    */
   const getSession = async () => {
     try {
       if (!isTeacher) {
-        let url = EndPoints.ADMIN.GET_SESSION;
-        const result = await fetchData(url, "get");
-        if (result) {
-          dispatch(setClassAndSectionData({ session: result }));
+        const res = await axiosClient.get(EndPoints.ADMIN.GET_SESSION);
+        // console.log(res?.result);
+        if (res?.statusCode === 200) {
+          const activeSession = res?.result?.find((s) => s.isCurrent === true);
+          // console.log({ activeSession });
+          if (!classAndSectionData?.selectedSession?._id) {
+            dispatch(
+              setClassAndSectionData({
+                selectedSession: activeSession,
+                session: res?.result,
+              })
+            );
+          }
+          setSession(res?.result);
         }
       }
     } catch (e) {
@@ -162,19 +231,23 @@ const Dashboard = () => {
    * based on the selected time range (day).
    */
   const getStudentCount = async () => {
-    const url = isTeacher
-      ? EndPoints.TEACHER.STUDENT_COUNT
-      : EndPoints.ADMIN.STUDENT_COUNT;
-    const result = await fetchData(`${url}`, "post", {
-      startTime: attendanceTime.day.startTime,
-      endTime: attendanceTime.day.endTime,
-      sessionId: isTeacher
-        ? classAndSectionDataOfTeacher?.sessionId
-        : classAndSectionData?.session?.[0]?._id,
-    });
-    setStudentAbsentCountData(result?.absentCount || 0);
-    setStudentPresentCountData(result?.presentCount || 0);
-    setTotalStudentClassSectionWise(result?.totalCount || 0);
+    try {
+      const url = isTeacher
+        ? EndPoints.TEACHER.STUDENT_COUNT
+        : EndPoints.ADMIN.STUDENT_COUNT;
+      const result = await fetchData(`${url}`, "post", {
+        startTime: attendanceTime.day.startTime,
+        endTime: attendanceTime.day.endTime,
+        sessionId: isTeacher
+          ? classAndSectionDataOfTeacher?.sessionId
+          : classAndSectionData?.selectedSession?._id,
+      });
+      setStudentAbsentCountData(result?.absentCount || 0);
+      setStudentPresentCountData(result?.presentCount || 0);
+      setTotalStudentClassSectionWise(result?.totalCount || 0);
+    } catch (e) {
+      // console.log(e);
+    }
   };
 
   /**
@@ -182,11 +255,11 @@ const Dashboard = () => {
    */
   const getClassList = async () => {
     try {
-      if (!classAndSectionData?.session?.[0]?._id) {
+      if (!classAndSectionData?.selectedSession?._id) {
         return;
       }
       const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session?.[0]?._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
       );
 
       if (res?.statusCode === 200) {
@@ -210,10 +283,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!isTeacher) {
-      getSession();
       getClassList();
     }
-  }, [classAndSectionData?.session?.[0]?._id]);
+  }, [classAndSectionData?.selectedSession?._id]);
 
   useEffect(() => {
     if (isTeacher) {
@@ -329,7 +401,7 @@ const Dashboard = () => {
     if (
       isTeacher
         ? !classAndSectionDataOfTeacher?.sessionId
-        : !classAndSectionData?.session?.[0]?._id
+        : !classAndSectionData?.selectedSession?._id
     ) {
       return;
     }
@@ -352,7 +424,7 @@ const Dashboard = () => {
       endTime,
       sessionId: isTeacher
         ? classAndSectionDataOfTeacher?.sessionId
-        : classAndSectionData?.session?.[0]?._id,
+        : classAndSectionData?.selectedSession?._id,
     });
 
     if (result) setCalenderEvents(result);
@@ -365,7 +437,7 @@ const Dashboard = () => {
       endTime,
       sessionId: isTeacher
         ? classAndSectionDataOfTeacher?.sessionId
-        : classAndSectionData?.session?.[0]?._id,
+        : classAndSectionData?.selectedSession?._id,
     });
 
     if (res?.statusCode === 200) {
@@ -375,9 +447,9 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // getSessions();
+    getSession();
     getCalenderEvents();
-  }, [date, classAndSectionData?.session?.[0]?._id]);
+  }, [date, classAndSectionData?.selectedSession?._id]);
 
   /**
    * Transforms weekly attendance data into an array of 7 days.
@@ -440,7 +512,6 @@ const Dashboard = () => {
       const response = await axiosClient.post(url, {
         startTime: attendanceTime.day.startTime,
         endTime: attendanceTime.day.endTime,
-        // sessionId: classAndSectionData?.session[0]?._id,
       });
       const result = response?.result;
       if (response?.statusCode === 200) {
@@ -547,7 +618,7 @@ const Dashboard = () => {
     selectedSection,
     selectedOption,
     attendanceTime,
-    classAndSectionData?.session?.[0]?._id,
+    classAndSectionData?.selectedSession?._id,
   ]);
 
   const handleOptionChange = (event) => setSelectedOption(event.target.value);
@@ -909,87 +980,7 @@ const Dashboard = () => {
       } select-none`}
     >
       <Toaster position="top-center" reverseOrder={false} />
-      {/* <FormControl sx={{ bgcolor: "#1e1e1e", borderRadius: 3 }}>
-          <Select
-            value={session}
-            onChange={(e) =>
-              dispatch(
-                setClassAndSectionData({ selectedSession: e?.target?.value })
-              )
-            }
-            displayEmpty
-            sx={{
-              color: "#fff",
-              fontSize: 16,
-              fontWeight: "bold",
-              borderRadius: 14,
-              ".MuiSelect-select": {
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              },
-              "& .MuiOutlinedInput-notchedOutline": {
-                border: "none",
-              },
-              ".MuiSelect-icon": {
-                color: isDarkMode ? "#fff" : "#000",
-              },
-              bgcolor: "#1e1e1e",
-            }}
-            renderValue={(selected) => (
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                gap={1}
-                width="100%"
-              >
-                <Typography fontWeight="bold">{selected}</Typography>
-                {selected && (
-                  <Chip
-                    label="Active"
-                    size="small"
-                    sx={{
-                      bgcolor: "#4CBC9A26",
-                      color: "#4CBC9A",
-                      fontWeight: "bold",
-                      fontSize: 14,
-                      p: 2,
-                    }}
-                  />
-                )}
-              </Box>
-            )}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  bgcolor: "#1e1e1e",
-                  color: "#fff",
-                  borderRadius: 3,
-                  mt: 1,
-                },
-              },
-            }}
-          >
-            {session?.map((data, index) => (
-              <MenuItem
-                key={index}
-                value={`TY-${data?.academicStartYear}-${String(
-                  data?.academicEndYear
-                ).slice(-2)}`}
-                sx={{
-                  fontWeight: "bold",
-                  "&:hover": {
-                    bgcolor: "#333",
-                  },
-                }}
-              >
-                TY-{data?.academicStartYear}-
-                {String(data?.academicEndYear).slice(-2)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl> */}
+
       {/* section 1 */}
       <div
         className={`${
@@ -1037,7 +1028,137 @@ const Dashboard = () => {
           <span className={`text-textGray`}>Welcome to School Dashboard!</span>
         </div>
 
-        <Clock />
+        <div className={`flex flex-col items-end space-y-4`}>
+          {!isTeacher && (
+            <div className="flex items-center gap-4">
+              {/* Add create session option if next session does not exist */}
+              {/* {console.log(nextSession)} */}
+              {nextSession && (
+                <button
+                  className="font-bold text-white bg-[#4CBC9A] rounded-lg px-4 py-2 cursor-pointer mr-3  focus:outline-none"
+                  onClick={handleCreateSession}
+                >
+                  Create Session {nextSession?.start}-
+                  {String(nextSession?.end).slice(-2)}
+                </button>
+              )}
+              {classAndSectionData?.selectedSession?._id && (
+                <button
+                  className="font-bold text-white bg-[#0F4189] rounded-lg px-4 py-2 cursor-pointer mr-3 focus:outline-none"
+                  onClick={handleMarkSessionComplete}
+                >
+                  Toggle Session{" "}
+                  {classAndSectionData?.selectedSession?.academicStartYear}-
+                  {String(
+                    classAndSectionData?.selectedSession?.academicEndYear
+                  ).slice(-2)}
+                </button>
+              )}
+              {/* session dropdown */}
+              <FormControl sx={{ bgcolor: "#1e1e1e", borderRadius: 3 }}>
+                <Select
+                  value={
+                    session?.some(
+                      (s) => s._id === classAndSectionData?.selectedSession?._id
+                    )
+                      ? classAndSectionData?.selectedSession?._id
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const selected = session?.find(
+                      (s) => s?._id === e?.target?.value
+                    );
+                    dispatch(
+                      setClassAndSectionData({
+                        selectedSession: selected,
+                      })
+                    );
+                  }}
+                  displayEmpty
+                  sx={{
+                    color: "#fff",
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    borderRadius: 14,
+                    ".MuiSelect-select": {
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "none",
+                    },
+                    ".MuiSelect-icon": {
+                      color: isDarkMode ? "#fff" : "#000",
+                    },
+                    bgcolor: "#1e1e1e",
+                  }}
+                  renderValue={(selectedValue) => {
+                    const s = session?.find(
+                      (item) => item._id === selectedValue
+                    );
+                    if (!s) return <Typography>Select Session</Typography>;
+
+                    return (
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        gap={1}
+                        width="100%"
+                      >
+                        <Typography fontWeight="bold">
+                          {s.academicStartYear}-
+                          {String(s.academicEndYear).slice(-2)}
+                        </Typography>
+                        {s._id && (
+                          <Chip
+                            label="Active"
+                            size="small"
+                            sx={{
+                              bgcolor: "#4CBC9A26",
+                              color: "#4CBC9A",
+                              fontWeight: "bold",
+                              fontSize: 14,
+                              p: 2,
+                            }}
+                          />
+                        )}
+                      </Box>
+                    );
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        bgcolor: "#1e1e1e",
+                        color: "#fff",
+                        borderRadius: 3,
+                        mt: 1,
+                      },
+                    },
+                  }}
+                >
+                  {session?.map((data) => (
+                    <MenuItem
+                      key={data._id}
+                      value={data._id} // ✅ only pass id
+                      sx={{
+                        fontWeight: "bold",
+                        "&:hover": {
+                          bgcolor: "#333",
+                        },
+                      }}
+                    >
+                      {data.academicStartYear}-
+                      {String(data.academicEndYear).slice(-2)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+          )}
+          <Clock />
+        </div>
       </div>
 
       {/* section 2 Attendance */}

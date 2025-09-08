@@ -38,6 +38,8 @@ const EndPoints = {
     GET_SUNDAY_HOLIDAY: "workdays",
     PHOTO_UPLOAD: "admin/photo-upload",
     GET_SESSION: "session",
+    CREATE_SESSION: "session",
+    MARK_SESSION_COMPLETE: "session/test/mark-complete",
 
     // NOTICE
     ADD_NOTICE: "announcement/admin",
@@ -86,6 +88,13 @@ const EndPoints = {
     GET_ADMIN: "admin",
     PROFILE_UPDATE: "admin",
     SOCIAL_PROFILE_UPDATE: "admin/social",
+
+    // SUBJECTS
+    GET_SUBJECT: "subject/admin",
+    ASSIGN_SUBJECT_TO_TEACHER: "teacher-subject-section",
+    GET_ASSIGN_SUBJECTS: "teacher-subject-section/admin",
+    UPDATE_ASSIGN_TEACHER_OF_SUBJECT: "teacher-subject-section/admin",
+    DELETE_ASSIGN_TEACHER_OF_SUBJECT: "teacher-subject-section/admin",
   },
   TEACHER: {
     // LOGIN
@@ -103,7 +112,7 @@ const EndPoints = {
     // TEACHER STUDENT SETUP
     GET_STUDENT_LIST: "student/teacher",
     DELETE_STUDENT: "dashboard/parent-count",
-    
+
     // TEACHER SECTION STUDENTS
     REGISTER_SECTION_STUDENT: "v3/student/teacher",
     GET_SECTION_STUDENTS: "v3/student/get/teacher",
@@ -116,6 +125,9 @@ const EndPoints = {
     TEACHER_LOGIN: "teacher/login",
     GET_TEACHER: "teacher",
     PROFILE_UPDATE: "teacher",
+
+    // SUBJECTS
+    GET_ASSIGN_SUBJECTS: "teacher-subject-section/class-teacher",
   },
   COMMON: {
     CLASS_LIST: "class/session",

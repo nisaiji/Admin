@@ -121,7 +121,7 @@ export default function StudentUpdate() {
           Object.entries(cleanedValues).filter(([_, value]) => value !== "")
         );
         const response = await axiosClient.put(
-          `${EndPoints.ADMIN.STUDENT_UPDATE}/${student?.studentId}`,
+          `${EndPoints.ADMIN.STUDENT_UPDATE}/${student?.id}`,
           filteredValues
         );
 

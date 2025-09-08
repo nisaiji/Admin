@@ -18,7 +18,7 @@ import AdminProfile from "./components/admin/AdminProfile";
 import i18n from "./assets/locale/i18n";
 import { I18nextProvider } from "react-i18next";
 import { getItem } from "./services/LocalStorageManager";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { setAuthData } from "./store/AppAuthSlice";
 import Requests from "./components/dashBoard/Request";
 import Leaves from "./components/dashBoard/Leaves";
@@ -30,6 +30,7 @@ import AddStudentForm from "./components/studentSetup/AddStudentForm";
 import Notice from "./components/notice/Notice";
 import StudentMenu from "./components/classSetup/sectionStudents/StudentMenu";
 import AttendancePopup from "./components/AttendancePopup";
+import Subjects from "./components/classSetup/subjects/Subjects";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -96,6 +97,10 @@ function App() {
                     path="student-menu/attendance"
                     element={<AttendancePopup />}
                   />
+                   <Route
+                    path="student-menu/subjects"
+                    element={<Subjects />}
+                  />
                   <Route path="teacher-profile" element={<TeacherProfile />} />
                 </>
               ) : (
@@ -133,6 +138,10 @@ function App() {
                   <Route
                     path="class-setup/student-menu/attendance"
                     element={<AttendancePopup />}
+                  />
+                  <Route
+                    path="class-setup/student-menu/subjects"
+                    element={<Subjects />}
                   />
                   <Route
                     path="student-information-system/student-update"

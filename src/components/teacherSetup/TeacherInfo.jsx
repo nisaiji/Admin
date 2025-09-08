@@ -18,6 +18,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
   }, [modelOpen]);
 
   const personalDetails = [
+    [t("labels.id"), currTeacher?.teacherId || CONSTANT.NA],
     [
       t("labels.fullName"),
       `${currTeacher?.firstname} ${currTeacher?.lastname}`,
@@ -36,6 +37,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
     [t("labels.username"), currTeacher?.username || CONSTANT.NA],
     [t("labels.address"), currTeacher?.address || CONSTANT.NA],
   ];
+  // console.log(currTeacher);
 
   const educationDetails = [
     [t("labels.university"), currTeacher?.university || CONSTANT.NA],
@@ -54,7 +56,9 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
         }`}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between border-b border-borderLine px-8 py-3`}>
+        <div
+          className={`flex items-center justify-between border-b border-borderLine px-8 py-3`}
+        >
           <h2
             className={`text-xl font-bold  ${
               isDarkMode ? "text-textPrimary" : "text-textBlack"
@@ -139,6 +143,42 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
                 ))}
               </div>
             </section>
+
+            {/* Subjects Taught */}
+            {currTeacher?.sectionSubjects?.length > 0 && (
+              <section className="mt-5">
+                <h3
+                  className={`text-lg font-semibold mb-2 ${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
+                >
+                  {"Subjects Taught"}
+                </h3>
+                <div className="space-y-2">
+                  {currTeacher?.sectionSubjects?.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex justify-between border-b border-borderLine pb-1"
+                    >
+                      <span
+                        className={`font-medium text-sm ${
+                          isDarkMode ? "text-textPrimary" : "text-textGray"
+                        }`}
+                      >
+                        {item.subjectName || CONSTANT.NA}
+                      </span>
+                      <span
+                        className={`text-sm ${
+                          isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                        }`}
+                      >
+                        {item.className} {item.sectionName}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Teacher Photo */}

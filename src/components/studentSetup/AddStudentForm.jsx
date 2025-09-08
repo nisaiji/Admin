@@ -153,11 +153,11 @@ const AddStudent = () => {
    */
   const getClassList = async () => {
     try {
-      if (!classAndSectionData?.session?.[0]?._id) {
+      if (!classAndSectionData?.selectedSession?._id) {
         return;
       }
       const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session[0]?._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
       );
 
       // Filter out classes without sections and then sort them.

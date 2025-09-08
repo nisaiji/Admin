@@ -163,7 +163,9 @@ function Login() {
           }
         }
       } catch (e) {
-        toast.error(e); // Show error message
+        console.log({e});
+        
+        // toast.error(e); // Show error message
       } finally {
         setLoading(false); // Hide loading spinner
         setSubmitting(false); // Reset form submission state

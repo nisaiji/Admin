@@ -128,7 +128,7 @@ export default function Studentlist() {
     const url = EndPoints.ADMIN.SEARCH_STUDENT;
 
     // let query = `?admin=${id}&page=${pageNo}&limit=${limit}&include=parent,class,section`;
-    let query = `?page=${pageNo}&limit=${limit}&session=${classAndSectionData?.session[0]?._id}`;
+    let query = `?page=${pageNo}&limit=${limit}&session=${classAndSectionData?.selectedSession?._id}`;
 
     // Determine the query parameters based on the inputs
     if (searchName) {
@@ -161,7 +161,9 @@ export default function Studentlist() {
    */
   const getClassList = async () => {
     try {
-      const res = await axiosClient.get(`${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session[0]?._id}`);
+      const res = await axiosClient.get(
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
+      );
 
       // Filter out classes without sections and then sort them.
       const filteredSortedClasses = res?.result
@@ -658,7 +660,7 @@ export default function Studentlist() {
                                 className={`size-5`}
                               />
                             </button>
-                            <button onClick={() => handleDelete(student?._id)}>
+                            <button onClick={() => handleDelete(student?.id)}>
                               <img
                                 src={isDarkMode ? delete2 : delete2w}
                                 alt="deleteStudent"

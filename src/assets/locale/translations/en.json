@@ -175,6 +175,7 @@
     "WriteNotice": "Write notice here..."
   },
   "labels": {
+    "id": "ID",
     "sNo": "S.No.",
     "gender": "Gender",
     "firstName": "First Name",

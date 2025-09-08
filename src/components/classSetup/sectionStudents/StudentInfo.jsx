@@ -56,9 +56,10 @@ export default function StudentInfo({ currStudent, modelOpen }) {
       document.body.removeChild(hiddenContainer);
     });
   };
-
+  
   // Student details array.
   const personalDetails = [
+    [t("labels.id"), currStudent?.studentId || CONSTANT.NA],
     [
       t("labels.fullName"),
       `${currStudent?.firstname} ${currStudent?.lastname}` || CONSTANT.NA,

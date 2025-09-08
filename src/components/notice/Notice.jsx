@@ -117,7 +117,7 @@ export default function Notice() {
       const res = await axiosClient.post(EndPoints.ADMIN.ADD_NOTICE, {
         description: formData.description,
         targetAudience,
-        sessionId: classAndSectionData?.session[0]?._id,
+        sessionId: classAndSectionData?.selectedSession?._id,
       });
 
       if (res?.statusCode === 201) {

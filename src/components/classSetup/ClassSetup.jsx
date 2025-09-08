@@ -71,12 +71,12 @@ function ClassSetup() {
   // Function to fetch the list of classes via API
   const getAllClass = async () => {
     try {
-      if (!classAndSectionData?.session?.[0]?._id) {
+      if (!classAndSectionData?.selectedSession?._id) {
         return;
       }
       setLoading(true);
       const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.session?.[0]?._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
       );
       if (res?.statusCode === 200) {
         const sortedClasses = res?.result?.sort(compareClasses);
@@ -101,7 +101,7 @@ function ClassSetup() {
       setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.REGISTER_CLASS, {
         name,
-        sessionId: classAndSectionData?.session?.[0]?._id,
+        sessionId: classAndSectionData?.selectedSession?._id,
       });
       if ([200, 201].includes(res?.statusCode)) {
         getAllClass();
@@ -138,7 +138,7 @@ function ClassSetup() {
 
   useEffect(() => {
     getAllClass();
-  }, [classAndSectionData?.session?.[0]?._id]);
+  }, [classAndSectionData?.selectedSession?._id]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -275,14 +275,16 @@ function ClassSetup() {
                             onClick={() => {
                               dispatch(
                                 setClassAndSectionData({
-                                  sectionId: section._id,
-                                  classId: data._id,
-                                  className: data.name,
-                                  sectionName: section.name,
-                                  startTime: section.startTime,
+                                  sectionId: section?._id,
+                                  classId: data?._id,
+                                  className: data?.name,
+                                  sectionName: section?.name,
+                                  startTime: section?.startTime,
                                 })
                               );
-                              navigate("/class-setup/student-menu");
+                              setTimeout(() => {
+                                navigate("/class-setup/student-menu");
+                              }, 100);
                             }}
                             className={`${
                               isDarkMode

@@ -135,7 +135,7 @@ const appAuthSlice = createSlice({
         state.status = action.payload;
       })
       .addCase(setClassAndSectionData.fulfilled, (state, action) => {
-        state.classData = action.payload;
+        state.classAndSectionData = action.payload;
       });
   },
 });

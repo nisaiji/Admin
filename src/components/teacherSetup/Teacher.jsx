@@ -43,6 +43,7 @@ export default function Teacher() {
     lastname: "",
     phone: "",
   });
+// console.log(teachers);
 
   /**
    * Capitalizes the first letter of a string and converts the rest to lowercase.

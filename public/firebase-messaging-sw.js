@@ -13,13 +13,20 @@ importScripts(
 // your app's Firebase config object.
 // https://firebase.google.com/docs/web/setup#config-object
 firebase.initializeApp({
-  apiKey: import.meta.env.VITE_API_KEY,
-  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_APP_ID,
-  measurementId: import.meta.env.VITE_MEASUREMENT_ID,
+  apiKey: "__API_KEY__",
+  authDomain: "__AUTH_DOMAIN__",
+  projectId: "__PROJECT_ID__",
+  storageBucket: "__STORAGE_BUCKET__",
+  messagingSenderId: "__MESSAGING_SENDER_ID__",
+  appId: "__APP_ID__",
+  measurementId: "__MEASUREMENT_ID__",
+  // apiKey: import.meta.env.VITE_API_KEY,
+  // authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  // projectId: import.meta.env.VITE_PROJECT_ID,
+  // storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  // messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  // appId: import.meta.env.VITE_APP_ID,
+  // measurementId: import.meta.env.VITE_MEASUREMENT_ID,
 });
 
 // Retrieve an instance of Firebase Messaging so that it can handle background

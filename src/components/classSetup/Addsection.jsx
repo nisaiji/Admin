@@ -133,7 +133,7 @@ function Addsection({
         teacherId: newSection.teacherId,
         classId: clickedClassId,
         startTime: newSection.startTime,
-        sessionId: classAndSectionData?.session[0]?._id,
+        sessionId: classAndSectionData?.selectedSession?._id,
       };
 
       const res = await axiosClient.post(
@@ -594,8 +594,8 @@ function Addsection({
                     }));
                   }}
                   dateFormat="dd/MM/YYYY"
-                  minDate={classAndSectionData?.session[0]?.startDate}
-                  maxDate={classAndSectionData?.session[0]?.endDate}
+                  minDate={classAndSectionData?.selectedSession?.startDate}
+                  maxDate={classAndSectionData?.selectedSession?.endDate}
                   onKeyDown={(e) => e.preventDefault()}
                   showMonthDropdown
                   showYearDropdown

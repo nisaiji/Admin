@@ -62,17 +62,18 @@ export default function StudentSection() {
 
   // User role and section details from Redux state
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
-  const id = classAndSectionData?.id;
+  console.log(classAndSectionData);
 
   useEffect(() => {
     const shouldFetchStudents = isTeacher
       ? classAndSectionDataOfTeacher?.sectionId &&
         classAndSectionDataOfTeacher?.sessionId
-      : classAndSectionData?.sectionId &&
-        classAndSectionData?.session?.[0]?._id;
+      : classAndSectionData?.id &&
+        classAndSectionData?.sectionId &&
+        classAndSectionData?.selectedSession?._id;
 
     const fetchData = async () => {
-      if (id && classAndSectionData?.sectionId) {
+      if (classAndSectionData?.id && classAndSectionData?.sectionId) {
         await getSectionInfo();
       }
       if (shouldFetchStudents) {
@@ -82,10 +83,10 @@ export default function StudentSection() {
 
     fetchData();
   }, [
-    id,
     isTeacher,
+    classAndSectionData?.id,
     classAndSectionData?.sectionId,
-    classAndSectionData?.session?.[0]?._id,
+    classAndSectionData?.selectedSession?._id,
     classAndSectionDataOfTeacher?.sectionId,
     classAndSectionDataOfTeacher?.sessionId,
   ]);
@@ -115,7 +116,7 @@ export default function StudentSection() {
       isTeacher
         ? !classAndSectionDataOfTeacher?.sessionId ||
           !classAndSectionDataOfTeacher?.sectionId
-        : !classAndSectionData?.session?.[0]?._id ||
+        : !classAndSectionData?.selectedSession?._id ||
           !classAndSectionData?.sectionId
     ) {
       return;
@@ -128,7 +129,7 @@ export default function StudentSection() {
     if (isTeacher) {
       query += `school=${classAndSectionDataOfTeacher?.school}&section=${classAndSectionDataOfTeacher?.sectionId}&session=${classAndSectionDataOfTeacher?.sessionId}`;
     } else {
-      query += `school=${classAndSectionData?.id}&section=${classAndSectionData?.sectionId}&session=${classAndSectionData?.session[0]?._id}`;
+      query += `school=${classAndSectionData?.id}&section=${classAndSectionData?.sectionId}&session=${classAndSectionData?.selectedSession?._id}`;
     }
 
     try {
@@ -273,7 +274,7 @@ export default function StudentSection() {
       setLoading(true);
       // respone based on registered or updated request
       const response = await axiosClient[isUpdate ? "put" : "post"](
-        `${url}${isUpdate ? `/${student?.studentId}` : ""}`,
+        `${url}${isUpdate ? `/${student?.id}` : ""}`,
         transformedStudent
       );
       if ([200, 201].includes(response?.statusCode)) {
@@ -312,7 +313,7 @@ export default function StudentSection() {
       const url = isTeacher
         ? EndPoints.TEACHER.DELETE_SECTION_STUDENT
         : EndPoints.ADMIN.DELETE_SECTION_STUDENT;
-      const res = await axiosClient.delete(`${url}/${currStudent._id}`);
+      const res = await axiosClient.delete(`${url}/${currStudent.id}`);
       if (res?.statusCode === 200) {
         toast.success(res.result);
         fetchStudents();
@@ -340,7 +341,7 @@ export default function StudentSection() {
         "sessionId",
         isTeacher
           ? classAndSectionDataOfTeacher?.sessionId
-          : classAndSectionData?.session[0]?._id
+          : classAndSectionData?.selectedSession?._id
       );
       formData.append("file", file);
       setLoading(true);

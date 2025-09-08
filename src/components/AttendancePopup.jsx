@@ -288,7 +288,7 @@ export default function AttendancePopup() {
       // console.log(classAndSectionDataOfTeacher);
       const url = isTeacher
         ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${classAndSectionDataOfTeacher?.sectionId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionDataOfTeacher?.sessionId}`
-        : `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.id}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.session[0]?._id}`;
+        : `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.id}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.selectedSession?._id}`;
       // console.log(url);
       const res = await axiosClient.get(url);
 
@@ -430,7 +430,7 @@ export default function AttendancePopup() {
         endTime,
         sessionId: isTeacher
           ? classAndSectionDataOfTeacher?.sessionId
-          : classAndSectionData?.session[0]?._id,
+          : classAndSectionData?.selectedSession?._id,
       });
 
       if (res?.statusCode === 200) {
@@ -449,7 +449,7 @@ export default function AttendancePopup() {
         endTime,
         sessionId: isTeacher
           ? classAndSectionDataOfTeacher?.sessionId
-          : classAndSectionData?.session[0]?._id,
+          : classAndSectionData?.selectedSession?._id,
       });
 
       if (res2?.statusCode === 200) {
