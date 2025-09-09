@@ -236,14 +236,15 @@ export default function Subjects() {
               <FormControl fullWidth>
                 <InputLabel>Teacher</InputLabel>
                 <Select
-                  value={newSubject.teacherId}
+                  value={newSubject.teacherId || ""}
                   label="Teacher"
-                  onChange={(e) =>
-                    setNewSubject({ ...newSubject, teacherId: e.target.value })
-                  }
+                  onChange={(e) => {
+                    // console.log(e);
+                    setNewSubject({ ...newSubject, teacherId: e.target.value });
+                  }}
                 >
                   {teachers.map((t, i) => (
-                    <MenuItem key={i} value={t._id}>
+                    <MenuItem key={i} value={t.id}>
                       {t.firstname} {t.lastname}
                     </MenuItem>
                   ))}
@@ -303,6 +304,7 @@ export default function Subjects() {
                       size="small"
                       color="warning"
                       onClick={() => {
+                        console.log({ sub });
                         setNewSubject({
                           isUpdate: true,
                           updateData: sub,
