@@ -1042,7 +1042,7 @@ const Dashboard = () => {
                   {String(nextSession?.end).slice(-2)}
                 </button>
               )}
-              {/* {classAndSectionData?.selectedSession?._id && (
+              {classAndSectionData?.selectedSession?._id && (
                 <button
                   className="font-bold text-white bg-[#0F4189] rounded-lg px-4 py-2 cursor-pointer mr-3 focus:outline-none"
                   onClick={handleMarkSessionComplete}
@@ -1053,7 +1053,7 @@ const Dashboard = () => {
                     classAndSectionData?.selectedSession?.academicEndYear
                   ).slice(-2)}
                 </button>
-              )} */}
+              )}
               {/* session dropdown */}
               <FormControl sx={{ bgcolor: "#1e1e1e", borderRadius: 3 }}>
                 <Select
