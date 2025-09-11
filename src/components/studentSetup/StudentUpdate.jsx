@@ -376,6 +376,16 @@ export default function StudentUpdate() {
                       border: "none",
                     },
                   }}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      sx: {
+                        "& .MuiSvgIcon-root": {
+                          color: isDarkMode ? "#E3E8F3" : "black", // calendar icon
+                        },
+                      },
+                    },
+                  }}
                 />
               </LocalizationProvider>
             ) : (

@@ -183,7 +183,9 @@ const TeacherUpdate = () => {
       <Toaster position="top-center" reverseOrder={false} />
       <div
         className={`${
-          isDarkMode ? "bg-gradient-to-r from-fromColor1 to-toColor1" : "bg-whiteBackground"
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
         } rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border`}
       >
         <Breadcrumbs />
@@ -325,30 +327,14 @@ const TeacherUpdate = () => {
                                 variant="outlined"
                               />
                             )}
-                            sx={{
-                              width: "100%",
-                              height: "40px",
-                              border: "2px solid #2b2e4a80",
-                              borderRadius: "8px",
-                              backgroundColor: isDarkMode ? "" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
-                              "& .MuiOutlinedInput-root": {
-                                padding: 1,
-                                fontSize: "16px",
-                                minHeight: "40px",
-                                color: isDarkMode ? "#E3E8F3" : "black",
-                              },
-                              "& .MuiInputBase-input": {
-                                fontSize: "16px",
-                                padding: 1,
-                                height: "100%",
-                                color: isDarkMode ? "#E3E8F3" : "black",
-                              },
-                              "& .MuiSvgIcon-root": {
-                                color: isDarkMode ? "#E3E8F3" : "black",
-                              },
-                              "& .MuiOutlinedInput-notchedOutline": {
-                                border: "none",
+                            slotProps={{
+                              textField: {
+                                size: "small",
+                                sx: {
+                                  "& .MuiSvgIcon-root": {
+                                    color: isDarkMode ? "#E3E8F3" : "black", // calendar icon
+                                  },
+                                },
                               },
                             }}
                           />

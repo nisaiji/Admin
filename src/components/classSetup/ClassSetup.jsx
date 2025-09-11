@@ -71,7 +71,7 @@ function ClassSetup() {
   // Function to fetch the list of classes via API
   const getAllClass = async () => {
     try {
-      if (!classAndSectionData?.selectedSession?._id) {
+      if (loading) {
         return;
       }
       setLoading(true);
@@ -137,7 +137,9 @@ function ClassSetup() {
   };
 
   useEffect(() => {
-    getAllClass();
+    if (classAndSectionData?.selectedSession?._id) {
+      getAllClass();
+    }
   }, [classAndSectionData?.selectedSession?._id]);
 
   // Close dropdown when clicking outside

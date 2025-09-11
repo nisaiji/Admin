@@ -62,13 +62,13 @@ export default function StudentSection() {
 
   // User role and section details from Redux state
   const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
-  console.log(classAndSectionData);
+  // console.log(classAndSectionData);
 
   useEffect(() => {
     const shouldFetchStudents = isTeacher
       ? classAndSectionDataOfTeacher?.sectionId &&
         classAndSectionDataOfTeacher?.sessionId
-      : classAndSectionData?.id &&
+      : classAndSectionData?.selectedSession?.school &&
         classAndSectionData?.sectionId &&
         classAndSectionData?.selectedSession?._id;
 
@@ -90,7 +90,7 @@ export default function StudentSection() {
     classAndSectionDataOfTeacher?.sectionId,
     classAndSectionDataOfTeacher?.sessionId,
   ]);
-
+  // console.log(classAndSectionData);
   // get class teacher info api
   const getSectionInfo = async () => {
     try {
@@ -112,15 +112,7 @@ export default function StudentSection() {
 
   // get student api
   const fetchStudents = async () => {
-    if (
-      isTeacher
-        ? !classAndSectionDataOfTeacher?.sessionId ||
-          !classAndSectionDataOfTeacher?.sectionId
-        : !classAndSectionData?.selectedSession?._id ||
-          !classAndSectionData?.sectionId
-    ) {
-      return;
-    }
+    // console.log(classAndSectionData);
     const url = isTeacher
       ? EndPoints.TEACHER.GET_SECTION_STUDENTS
       : EndPoints.ADMIN.GET_SECTION_STUDENTS;
@@ -129,10 +121,11 @@ export default function StudentSection() {
     if (isTeacher) {
       query += `school=${classAndSectionDataOfTeacher?.school}&section=${classAndSectionDataOfTeacher?.sectionId}&session=${classAndSectionDataOfTeacher?.sessionId}`;
     } else {
-      query += `school=${classAndSectionData?.id}&section=${classAndSectionData?.sectionId}&session=${classAndSectionData?.selectedSession?._id}`;
+      query += `school=${classAndSectionData?.selectedSession?.school}&section=${classAndSectionData?.sectionId}&session=${classAndSectionData?.selectedSession?._id}`;
     }
 
     try {
+      if (loading) return;
       setLoading(true);
 
       const res = await axiosClient.get(`${url}${query}`);

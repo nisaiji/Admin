@@ -93,6 +93,34 @@ const Event = () => {
       };
     }, [isOpen]);
 
+    const datePickerSx = (isDarkMode) => ({
+      width: "100%",
+      "& .MuiOutlinedInput-root": {
+        fontSize: "14px",
+        minHeight: "40px",
+        borderRadius: "8px",
+        backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
+        border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
+        "& fieldset": { border: "none" },
+        "&:hover fieldset": { border: "none" },
+        "&.Mui-focused fieldset": { border: "2px solid #1976d2" }, // highlight on focus
+      },
+      "& .MuiOutlinedInput-input": {
+        color: isDarkMode ? "#fff" : "#000", // ✅ date text
+        fontSize: "14px",
+        padding: "10px 12px",
+      },
+      "& .MuiInputBase-input": {
+        color: isDarkMode ? "#fff" : "#000", // ✅ fallback
+      },
+      "& .MuiInputLabel-root": {
+        color: isDarkMode ? "#aaa" : "#666", // ✅ label
+      },
+      "& .MuiSvgIcon-root": {
+        color: isDarkMode ? "#fff" : "#000", // calendar icon
+      },
+    });
+
     return (
       <div
         className={`fixed inset-0 flex items-center justify-center bg-opacity-50 ${
@@ -169,9 +197,7 @@ const Event = () => {
                       },
                       "& .Mui-disabled": {
                         color: isDarkMode ? "#E3E8F3 !important" : "black",
-                        WebkitTextFillColor: isDarkMode
-                          ? "#E3E8F3 !important"
-                          : "black", // Critical for disabled input text
+                        WebkitTextFillColor: isDarkMode ? "#E3E8F3" : "black", // Critical for disabled input text
                       },
                       "& .MuiInputBase-input": {
                         fontSize: "14px",
@@ -179,10 +205,26 @@ const Event = () => {
                         color: isDarkMode ? "#E3E8F3" : "black",
                       },
                       "& .MuiSvgIcon-root": {
-                        color: isDarkMode ? "#E3E8F3" : "black",
+                        color: "#FFFFFF", // <- calendar icon white
                       },
                       "& .MuiOutlinedInput-notchedOutline": {
                         border: "none",
+                      },
+                    }}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        sx: {
+                          "& .MuiInputBase-input": {
+                            color: "#FFFFFF", // Text color
+                          },
+                          "& .MuiInputLabel-root": {
+                            color: "#FFFFFF", // Label color
+                          },
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#FFFFFF", // Outline border
+                          },
+                        },
                       },
                     }}
                   />
@@ -209,41 +251,48 @@ const Event = () => {
                           }));
                         }
                       }}
-                      textField={(params) => (
-                        <TextField
-                          {...params}
-                          placeholder={t("placeholders.date")}
-                          variant="outlined"
-                        />
-                      )}
-                      sx={{
-                        width: "100%",
-                        height: "40px",
-                        border: `1px solid ${
-                          isDarkMode ? "#2b2e4a80" : "gray"
-                        }`,
-                        borderRadius: "8px",
-                        backgroundColor: isDarkMode ? "" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                        "& .MuiOutlinedInput-root": {
-                          padding: 1,
-                          fontSize: "16px",
-                          minHeight: "40px",
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiInputBase-input": {
-                          fontSize: "14px",
-                          padding: 1,
-                          height: "100%",
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiSvgIcon-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          placeholder: t("placeholders.date"),
+                          sx: datePickerSx(isDarkMode),
                         },
                       }}
+                      // textField={(params) => (
+                      //   <TextField
+                      //     {...params}
+                      //     placeholder={t("placeholders.date")}
+                      //     variant="outlined"
+                      //   />
+                      // )}
+                      // sx={{
+                      //   width: "100%",
+                      //   height: "40px",
+                      //   border: `1px solid ${
+                      //     isDarkMode ? "#2b2e4a80" : "gray"
+                      //   }`,
+                      //   borderRadius: "8px",
+                      //   backgroundColor: isDarkMode ? "" : "white",
+                      //   color: isDarkMode ? "#E3E8F3" : "black",
+                      //   "& .MuiOutlinedInput-root": {
+                      //     padding: 1,
+                      //     fontSize: "16px",
+                      //     minHeight: "40px",
+                      //     color: isDarkMode ? "#E3E8F3" : "black",
+                      //   },
+                      //   "& .MuiInputBase-input": {
+                      //     fontSize: "14px",
+                      //     padding: 1,
+                      //     height: "100%",
+                      //     color: isDarkMode ? "#E3E8F3" : "black",
+                      //   },
+                      //   "& .MuiSvgIcon-root": {
+                      //     color: isDarkMode ? "#E3E8F3" : "black",
+                      //   },
+                      //   "& .MuiOutlinedInput-notchedOutline": {
+                      //     border: "none",
+                      //   },
+                      // }}
                     />
 
                     <DatePicker
@@ -263,37 +312,44 @@ const Event = () => {
                           }));
                         }
                       }}
-                      textField={(params) => (
-                        <TextField {...params} variant="outlined" />
-                      )}
-                      sx={{
-                        width: "100%",
-                        height: "40px",
-                        border: `1px solid ${
-                          isDarkMode ? "#2b2e4a80" : "gray"
-                        }`,
-                        borderRadius: "8px",
-                        backgroundColor: isDarkMode ? "" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                        "& .MuiOutlinedInput-root": {
-                          padding: 1,
-                          fontSize: "16px",
-                          minHeight: "40px",
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiInputBase-input": {
-                          fontSize: "14px",
-                          padding: 1,
-                          height: "100%",
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiSvgIcon-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          placeholder: t("placeholders.date"),
+                          sx: datePickerSx(isDarkMode),
                         },
                       }}
+                      // textField={(params) => (
+                      //   <TextField {...params} variant="outlined" />
+                      // )}
+                      // sx={{
+                      //   width: "100%",
+                      //   height: "40px",
+                      //   border: `1px solid ${
+                      //     isDarkMode ? "#2b2e4a80" : "gray"
+                      //   }`,
+                      //   borderRadius: "8px",
+                      //   backgroundColor: isDarkMode ? "" : "white",
+                      //   color: isDarkMode ? "#E3E8F3" : "black",
+                      //   "& .MuiOutlinedInput-root": {
+                      //     padding: 1,
+                      //     fontSize: "16px",
+                      //     minHeight: "40px",
+                      //     color: isDarkMode ? "#E3E8F3" : "black",
+                      //   },
+                      //   "& .MuiInputBase-input": {
+                      //     fontSize: "14px",
+                      //     padding: 1,
+                      //     height: "100%",
+                      //     color: isDarkMode ? "#E3E8F3" : "black",
+                      //   },
+                      //   "& .MuiSvgIcon-root": {
+                      //     color: isDarkMode ? "#E3E8F3" : "black",
+                      //   },
+                      //   "& .MuiOutlinedInput-notchedOutline": {
+                      //     border: "none",
+                      //   },
+                      // }}
                     />
                   </>
                 )}
