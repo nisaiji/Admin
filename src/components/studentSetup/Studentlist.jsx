@@ -121,10 +121,6 @@ export default function Studentlist() {
    * @param {Object} params - Contains searchName and searchSection.
    */
   const fetchStudents = async ({ searchName = "", searchSection = "" }) => {
-    if (!classAndSectionData?.id) {
-      return;
-    }
-
     const url = EndPoints.ADMIN.SEARCH_STUDENT;
 
     // let query = `?admin=${id}&page=${pageNo}&limit=${limit}&include=parent,class,section`;
