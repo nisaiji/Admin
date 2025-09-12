@@ -285,12 +285,12 @@ export default function StudentSection() {
           });
           newStudentFirstNameRef.current?.focus();
         }
+        setEditSNo(null);
       }
     } catch (e) {
       toast.error(e);
     } finally {
       setLoading(false);
-      setEditSNo(null);
     }
   };
 
@@ -303,6 +303,7 @@ export default function StudentSection() {
   const handleDelete = async () => {
     try {
       setLoading(true);
+      // console.log({currStudent})
       const url = isTeacher
         ? EndPoints.TEACHER.DELETE_SECTION_STUDENT
         : EndPoints.ADMIN.DELETE_SECTION_STUDENT;

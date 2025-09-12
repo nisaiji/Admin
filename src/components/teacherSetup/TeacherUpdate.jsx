@@ -16,7 +16,14 @@ import India from "../../assets/images/India.png";
 import location from "../../assets/images/location.png";
 import moment from "moment/moment";
 import Breadcrumbs from "../BreadCrumbs";
-import { FormControl, Select, MenuItem, TextField } from "@mui/material";
+import {
+  FormControl,
+  Select,
+  MenuItem,
+  TextField,
+  createTheme,
+  ThemeProvider,
+} from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useSelector } from "react-redux";
@@ -167,6 +174,60 @@ const TeacherUpdate = () => {
     },
   ];
 
+  const theme = (isDarkMode) =>
+    createTheme({
+      palette: {
+        mode: isDarkMode ? "dark" : "light",
+        ...(isDarkMode
+          ? {
+              background: { default: "#121212", paper: "#1e1e1e" },
+              text: { primary: "#fff", secondary: "#aaa" },
+            }
+          : {
+              background: { default: "#f5f5f5", paper: "#fff" },
+              text: { primary: "#000", secondary: "#666" },
+            }),
+      },
+      components: {
+        MuiOutlinedInput: {
+          styleOverrides: {
+            root: {
+              borderRadius: 8,
+              minHeight: 40,
+              fontSize: "14px",
+              backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
+              border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
+              "& fieldset": { border: "none" },
+              "&:hover fieldset": { border: "none" },
+              "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
+            },
+            input: {
+              color: isDarkMode ? "#fff" : "#000",
+              fontSize: "14px",
+              padding: "10px 12px",
+            },
+            inputAdornedEnd: {
+              color: isDarkMode ? "#fff" : "#000",
+            },
+          },
+        },
+        MuiInputLabel: {
+          styleOverrides: {
+            root: {
+              color: isDarkMode ? "#aaa" : "#666",
+            },
+          },
+        },
+        MuiSvgIcon: {
+          styleOverrides: {
+            root: {
+              color: isDarkMode ? "#E3E8F3" : "black",
+            },
+          },
+        },
+      },
+    });
+
   return (
     <div
       className={`flex justify-center items-center w-full h-full pt-[25px] ${
@@ -301,44 +362,35 @@ const TeacherUpdate = () => {
                         </FormControl>
                       ) : type === "date" ? (
                         // <DatePicker
-                        <LocalizationProvider dateAdapter={AdapterMoment}>
-                          <DatePicker
-                            views={["day", "month", "year"]}
-                            format="DD/MM/YYYY"
-                            value={
-                              formik.values.dob
-                                ? moment(formik.values.dob, "DD/MM/YYYY")
-                                : null
-                            }
-                            maxDate={moment().startOf("day")}
-                            onChange={(date) => {
-                              if (date) {
-                                formik.setFieldValue(
-                                  "dob",
-                                  moment(date).format("DD/MM/YYYY")
-                                );
+                        <ThemeProvider theme={theme}>
+                          <LocalizationProvider dateAdapter={AdapterMoment}>
+                            <DatePicker
+                              views={["day", "month", "year"]}
+                              format="DD/MM/YYYY"
+                              value={
+                                formik.values.dob
+                                  ? moment(formik.values.dob, "DD/MM/YYYY")
+                                  : null
                               }
-                            }}
-                            className={`w-full`}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                placeholder={t("placeholders.date")}
-                                variant="outlined"
-                              />
-                            )}
-                            slotProps={{
-                              textField: {
-                                size: "small",
-                                sx: {
-                                  "& .MuiSvgIcon-root": {
-                                    color: isDarkMode ? "#E3E8F3" : "black", // calendar icon
-                                  },
+                              maxDate={moment().startOf("day")}
+                              onChange={(date) => {
+                                if (date) {
+                                  formik.setFieldValue(
+                                    "dob",
+                                    moment(date).format("DD/MM/YYYY")
+                                  );
+                                }
+                              }}
+                              slotProps={{
+                                textField: {
+                                  fullWidth: true,
+                                  size: "small",
+                                  placeholder: t("placeholders.date"),
                                 },
-                              },
-                            }}
-                          />
-                        </LocalizationProvider>
+                              }}
+                            />
+                          </LocalizationProvider>
+                        </ThemeProvider>
                       ) : (
                         <input
                           type={type}

@@ -83,7 +83,7 @@ function ClassSetup() {
         setClasses(sortedClasses);
       }
     } catch (e) {
-      toast.error(e);
+      // toast.error(e);
     } finally {
       setLoading(false);
     }

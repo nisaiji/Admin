@@ -123,7 +123,7 @@ const Dashboard = () => {
         return;
       }
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.MARK_SESSION_COMPLETE}/${classAndSectionData?.selectedSession._id}`
+        `${EndPoints.ADMIN.MARK_SESSION_COMPLETE}/${classAndSectionData?.selectedSession?._id}`
       );
       if (res?.statusCode === 200) {
         toast.success(res?.result);
@@ -221,7 +221,7 @@ const Dashboard = () => {
         return response.result;
       }
     } catch (e) {
-      toast.error(e);
+      // toast.error(e);
     }
     return null;
   };
@@ -282,7 +282,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (!isTeacher) {
+    if (!isTeacher && classAndSectionData?.selectedSession?._id) {
       getClassList();
     }
   }, [classAndSectionData?.selectedSession?._id]);

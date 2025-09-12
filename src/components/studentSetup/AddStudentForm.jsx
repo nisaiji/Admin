@@ -7,7 +7,14 @@ import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import { FormControl, MenuItem, Select, TextField } from "@mui/material";
+import {
+  createTheme,
+  FormControl,
+  MenuItem,
+  Select,
+  TextField,
+  ThemeProvider,
+} from "@mui/material";
 import Breadcrumbs from "../BreadCrumbs";
 import REGEX from "../../utils/regix";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -209,6 +216,60 @@ const AddStudent = () => {
     { name: "parentOccupation", label: "Parent Occupation", optional: true },
     { name: "parentAddress", label: "Parent Address", optional: true },
   ];
+
+  const theme = (isDarkMode) =>
+    createTheme({
+      palette: {
+        mode: isDarkMode ? "dark" : "light",
+        ...(isDarkMode
+          ? {
+              background: { default: "#121212", paper: "#1e1e1e" },
+              text: { primary: "#fff", secondary: "#aaa" },
+            }
+          : {
+              background: { default: "#f5f5f5", paper: "#fff" },
+              text: { primary: "#000", secondary: "#666" },
+            }),
+      },
+      components: {
+        MuiOutlinedInput: {
+          styleOverrides: {
+            root: {
+              borderRadius: 8,
+              minHeight: 40,
+              fontSize: "14px",
+              backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
+              border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
+              "& fieldset": { border: "none" },
+              "&:hover fieldset": { border: "none" },
+              "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
+            },
+            input: {
+              color: isDarkMode ? "#fff" : "#000",
+              fontSize: "14px",
+              padding: "10px 12px",
+            },
+            inputAdornedEnd: {
+              color: isDarkMode ? "#fff" : "#000",
+            },
+          },
+        },
+        MuiInputLabel: {
+          styleOverrides: {
+            root: {
+              color: isDarkMode ? "#aaa" : "#666",
+            },
+          },
+        },
+        MuiSvgIcon: {
+          styleOverrides: {
+            root: {
+              color: isDarkMode ? "#E3E8F3" : "black",
+            },
+          },
+        },
+      },
+    });
 
   const renderField = (name) => {
     const field = fields.find((f) => f.name === name);
@@ -610,60 +671,43 @@ const AddStudent = () => {
                       )}
                   </FormControl>
                 ) : field.name === "dob" ? (
-                  <LocalizationProvider dateAdapter={AdapterMoment}>
-                    <DatePicker
-                      views={["day", "month", "year"]}
-                      format="DD/MM/YYYY"
-                      value={
-                        formik.values[field.name]
-                          ? moment(formik.values[field.name], "DD/MM/YYYY")
-                          : null
-                      }
-                      maxDate={moment().startOf("day")}
-                      onChange={(date) => {
-                        if (date) {
-                          formik.setFieldValue(
-                            field.name,
-                            moment(date).format("DD/MM/YYYY")
-                          );
+                  <ThemeProvider theme={theme}>
+                    <LocalizationProvider dateAdapter={AdapterMoment}>
+                      <DatePicker
+                        views={["day", "month", "year"]}
+                        format="DD/MM/YYYY"
+                        value={
+                          formik.values[field.name]
+                            ? moment(formik.values[field.name], "DD/MM/YYYY")
+                            : null
                         }
-                      }}
-                      className={`w-full`}
-                      textField={(params) => (
-                        <TextField
-                          {...params}
-                          placeholder={t("placeholders.date")}
-                          variant="outlined"
-                        />
-                      )}
-                      sx={{
-                        width: "100%",
-                        height: "40px",
-                        border: "2px solid #2b2e4a80",
-                        borderRadius: "8px",
-                        backgroundColor: isDarkMode ? "" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                        "& .MuiOutlinedInput-root": {
-                          padding: 1,
-                          fontSize: "16px",
-                          minHeight: "40px",
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiInputBase-input": {
-                          fontSize: "16px",
-                          padding: 1,
-                          height: "100%",
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiSvgIcon-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
-                        },
-                      }}
-                    />
-                  </LocalizationProvider>
+                        maxDate={moment().startOf("day")}
+                        onChange={(date) => {
+                          if (date) {
+                            formik.setFieldValue(
+                              field.name,
+                              moment(date).format("DD/MM/YYYY")
+                            );
+                          }
+                        }}
+                        className={`w-full`}
+                        textField={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder={t("placeholders.date")}
+                            variant="outlined"
+                          />
+                        )}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            size: "small",
+                            placeholder: t("placeholders.date"),
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </ThemeProvider>
                 ) : (
                   <input
                     type={field.type || "text"}

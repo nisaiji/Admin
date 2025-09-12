@@ -517,8 +517,8 @@ export default function Teacher() {
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } focus:border-borderBlue`}
                         >
-                          {`${teacher.section?.classId?.name || CONSTANT.NA} ${
-                            teacher.section?.name || ""
+                          {`${teacher?.className || CONSTANT.NA} ${
+                            teacher?.sectionName || ""
                           }`}
                         </div>
                       </td>

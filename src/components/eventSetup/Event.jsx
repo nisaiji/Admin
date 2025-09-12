@@ -23,6 +23,7 @@ import Breadcrumbs from "../BreadCrumbs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { TextField } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 // Event - Manages the logic of the calendar, events, and month navigation
 const Event = () => {
@@ -62,6 +63,7 @@ const Event = () => {
       startDate: moment(prevData?.date).format("DD/MM/YYYY"),
       endDate: moment(prevData?.date).format("DD/MM/YYYY"),
     });
+    // console.log(newEventForm.startDate, newEventForm.endDate);
 
     const [errors, setErrors] = useState({});
 
@@ -103,23 +105,93 @@ const Event = () => {
         border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
         "& fieldset": { border: "none" },
         "&:hover fieldset": { border: "none" },
-        "&.Mui-focused fieldset": { border: "2px solid #1976d2" }, // highlight on focus
+        "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
       },
-      "& .MuiOutlinedInput-input": {
-        color: isDarkMode ? "#fff" : "#000", // ✅ date text
+
+      // 🔑 Text color inside input
+      "& .MuiOutlinedInput-input, & .MuiInputBase-input": {
+        color: isDarkMode ? "#fff" : "#000",
         fontSize: "14px",
         padding: "10px 12px",
       },
-      "& .MuiInputBase-input": {
-        color: isDarkMode ? "#fff" : "#000", // ✅ fallback
+
+      // also cover the case with end adornment (calendar icon)
+      "& .MuiInputBase-inputAdornedEnd": {
+        color: isDarkMode ? "#fff" : "#000",
       },
+
       "& .MuiInputLabel-root": {
-        color: isDarkMode ? "#aaa" : "#666", // ✅ label
+        color: isDarkMode ? "#aaa" : "#666",
       },
+
       "& .MuiSvgIcon-root": {
-        color: isDarkMode ? "#fff" : "#000", // calendar icon
+        color: isDarkMode ? "#fff" : "#000",
       },
     });
+
+    const theme = (isDarkMode) =>
+      createTheme({
+        palette: {
+          mode: isDarkMode ? "dark" : "light",
+          ...(isDarkMode
+            ? {
+                background: { default: "#121212", paper: "#1e1e1e" },
+                text: { primary: "#fff", secondary: "#aaa" },
+              }
+            : {
+                background: { default: "#f5f5f5", paper: "#fff" },
+                text: { primary: "#000", secondary: "#666" },
+              }),
+        },
+        components: {
+          MuiOutlinedInput: {
+            styleOverrides: {
+              root: {
+                borderRadius: 8,
+                minHeight: 40,
+                fontSize: "14px",
+                backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
+                border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
+                "& fieldset": { border: "none" },
+                "&:hover fieldset": { border: "none" },
+                "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
+              },
+              input: {
+                color: isDarkMode ? "#fff" : "#000",
+                fontSize: "14px",
+                padding: "10px 12px",
+              },
+              inputAdornedEnd: {
+                color: isDarkMode ? "#fff" : "#000",
+              },
+            },
+          },
+          MuiInputLabel: {
+            styleOverrides: {
+              root: {
+                color: isDarkMode ? "#aaa" : "#666",
+              },
+            },
+          },
+          MuiSvgIcon: {
+            styleOverrides: {
+              root: {
+                color: isDarkMode ? "#E3E8F3" : "black",
+              },
+            },
+          },
+          MuiInputBase: {
+            styleOverrides: {
+              root: {
+                "&.Mui-disabled": {
+                  color: isDarkMode ? "#E3E8F3 !important" : "#000",
+                  WebkitTextFillColor: isDarkMode ? "#E3E8F3" : "#000", // critical fix
+                },
+              },
+            },
+          },
+        },
+      });
 
     return (
       <div
@@ -170,190 +242,137 @@ const Event = () => {
           <div className={`mt-5`}>
             <label className={`flex items-center space-x-5 rounded-lg`}>
               <img src={calendar} alt="close" className={`size-5`} />
-              <LocalizationProvider dateAdapter={AdapterMoment}>
-                {isWorkday || isEditMode ? (
-                  <DatePicker
-                    views={["day", "month", "year"]}
-                    value={moment(prevData.date, "DD/MM/YYYY")}
-                    format="DD/MM/YYYY"
-                    disabled
-                    className={`w-full`}
-                    textField={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder={t("placeholders.date")}
-                        variant="outlined"
+              <ThemeProvider theme={theme}>
+                <LocalizationProvider dateAdapter={AdapterMoment}>
+                  {isWorkday || isEditMode ? (
+                    <DatePicker
+                      views={["day", "month", "year"]}
+                      value={moment(prevData.date, "DD/MM/YYYY")}
+                      format="DD/MM/YYYY"
+                      disabled
+                      className={`w-full`}
+                      textField={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder={t("placeholders.date")}
+                          variant="outlined"
+                        />
+                      )}
+                      sx={{
+                        border: `1px solid ${
+                          isDarkMode ? "#2b2e4a80" : "gray"
+                        }`,
+                        borderRadius: "8px",
+                        backgroundColor: isDarkMode ? "" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        "& .MuiOutlinedInput-root": {
+                          padding: 1,
+                          fontSize: "16px",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                        "& .Mui-disabled": {
+                          color: isDarkMode ? "#E3E8F3 !important" : "black",
+                          WebkitTextFillColor: isDarkMode ? "#E3E8F3" : "black", // Critical for disabled input text
+                        },
+                        "& .MuiInputBase-input": {
+                          fontSize: "14px",
+                          padding: 1,
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          color: "#FFFFFF", // <- calendar icon white
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          border: "none",
+                        },
+                      }}
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          sx: {
+                            "& .MuiInputBase-input": {
+                              color: "#FFFFFF", // Text color
+                            },
+                            "& .MuiInputLabel-root": {
+                              color: "#FFFFFF", // Label color
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#FFFFFF", // Outline border
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <DatePicker
+                        label="Start Date"
+                        views={["day", "month", "year"]}
+                        format="DD/MM/YYYY"
+                        minDate={moment().startOf("day")}
+                        value={moment(newEventForm.startDate, "DD/MM/YYYY")}
+                        onChange={(date) => {
+                          if (date) {
+                            const formattedDate = date
+                              .startOf("day")
+                              .format("DD/MM/YYYY");
+                            setNewEventForm((prev) => ({
+                              ...prev,
+                              startDate: formattedDate,
+                              endDate:
+                                prev.endDate &&
+                                moment(prev.endDate, "DD/MM/YYYY").isBefore(
+                                  date
+                                )
+                                  ? formattedDate
+                                  : prev.endDate,
+                            }));
+                          }
+                        }}
+                        slotProps={{
+                          textField: {
+                            id: "start-date",
+                            size: "small",
+                            placeholder: t("placeholders.date"),
+                            sx: datePickerSx(isDarkMode),
+                          },
+                        }}
                       />
-                    )}
-                    sx={{
-                      border: `1px solid ${isDarkMode ? "#2b2e4a80" : "gray"}`,
-                      borderRadius: "8px",
-                      backgroundColor: isDarkMode ? "" : "white",
-                      color: isDarkMode ? "#E3E8F3" : "black",
-                      "& .MuiOutlinedInput-root": {
-                        padding: 1,
-                        fontSize: "16px",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                      },
-                      "& .Mui-disabled": {
-                        color: isDarkMode ? "#E3E8F3 !important" : "black",
-                        WebkitTextFillColor: isDarkMode ? "#E3E8F3" : "black", // Critical for disabled input text
-                      },
-                      "& .MuiInputBase-input": {
-                        fontSize: "14px",
-                        padding: 1,
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                      },
-                      "& .MuiSvgIcon-root": {
-                        color: "#FFFFFF", // <- calendar icon white
-                      },
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        border: "none",
-                      },
-                    }}
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        sx: {
-                          "& .MuiInputBase-input": {
-                            color: "#FFFFFF", // Text color
-                          },
-                          "& .MuiInputLabel-root": {
-                            color: "#FFFFFF", // Label color
-                          },
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#FFFFFF", // Outline border
-                          },
-                        },
-                      },
-                    }}
-                  />
-                ) : (
-                  <>
-                    <DatePicker
-                      views={["day", "month", "year"]}
-                      format="DD/MM/YYYY"
-                      minDate={moment().startOf("day")}
-                      value={moment(newEventForm.startDate, "DD/MM/YYYY")}
-                      onChange={(date) => {
-                        if (date) {
-                          const formattedDate = date
-                            .startOf("day")
-                            .format("DD/MM/YYYY");
-                          setNewEventForm((prev) => ({
-                            ...prev,
-                            startDate: formattedDate,
-                            endDate:
-                              prev.endDate &&
-                              moment(prev.endDate, "DD/MM/YYYY").isBefore(date)
-                                ? formattedDate
-                                : prev.endDate,
-                          }));
-                        }
-                      }}
-                      slotProps={{
-                        textField: {
-                          size: "small",
-                          placeholder: t("placeholders.date"),
-                          sx: datePickerSx(isDarkMode),
-                        },
-                      }}
-                      // textField={(params) => (
-                      //   <TextField
-                      //     {...params}
-                      //     placeholder={t("placeholders.date")}
-                      //     variant="outlined"
-                      //   />
-                      // )}
-                      // sx={{
-                      //   width: "100%",
-                      //   height: "40px",
-                      //   border: `1px solid ${
-                      //     isDarkMode ? "#2b2e4a80" : "gray"
-                      //   }`,
-                      //   borderRadius: "8px",
-                      //   backgroundColor: isDarkMode ? "" : "white",
-                      //   color: isDarkMode ? "#E3E8F3" : "black",
-                      //   "& .MuiOutlinedInput-root": {
-                      //     padding: 1,
-                      //     fontSize: "16px",
-                      //     minHeight: "40px",
-                      //     color: isDarkMode ? "#E3E8F3" : "black",
-                      //   },
-                      //   "& .MuiInputBase-input": {
-                      //     fontSize: "14px",
-                      //     padding: 1,
-                      //     height: "100%",
-                      //     color: isDarkMode ? "#E3E8F3" : "black",
-                      //   },
-                      //   "& .MuiSvgIcon-root": {
-                      //     color: isDarkMode ? "#E3E8F3" : "black",
-                      //   },
-                      //   "& .MuiOutlinedInput-notchedOutline": {
-                      //     border: "none",
-                      //   },
-                      // }}
-                    />
 
-                    <DatePicker
-                      views={["day", "month", "year"]}
-                      format="DD/MM/YYYY"
-                      minDate={
-                        newEventForm.startDate
-                          ? moment(newEventForm.startDate, "DD/MM/YYYY")
-                          : moment().startOf("day")
-                      }
-                      value={moment(newEventForm.endDate, "DD/MM/YYYY")}
-                      onChange={(date) => {
-                        if (date) {
-                          setNewEventForm((prev) => ({
-                            ...prev,
-                            endDate: date.endOf("day").format("DD/MM/YYYY"),
-                          }));
+                      <DatePicker
+                        label="End Date"
+                        views={["day", "month", "year"]}
+                        format="DD/MM/YYYY"
+                        minDate={
+                          newEventForm.startDate
+                            ? moment(newEventForm.startDate, "DD/MM/YYYY")
+                            : moment().startOf("day")
                         }
-                      }}
-                      slotProps={{
-                        textField: {
-                          size: "small",
-                          placeholder: t("placeholders.date"),
-                          sx: datePickerSx(isDarkMode),
-                        },
-                      }}
-                      // textField={(params) => (
-                      //   <TextField {...params} variant="outlined" />
-                      // )}
-                      // sx={{
-                      //   width: "100%",
-                      //   height: "40px",
-                      //   border: `1px solid ${
-                      //     isDarkMode ? "#2b2e4a80" : "gray"
-                      //   }`,
-                      //   borderRadius: "8px",
-                      //   backgroundColor: isDarkMode ? "" : "white",
-                      //   color: isDarkMode ? "#E3E8F3" : "black",
-                      //   "& .MuiOutlinedInput-root": {
-                      //     padding: 1,
-                      //     fontSize: "16px",
-                      //     minHeight: "40px",
-                      //     color: isDarkMode ? "#E3E8F3" : "black",
-                      //   },
-                      //   "& .MuiInputBase-input": {
-                      //     fontSize: "14px",
-                      //     padding: 1,
-                      //     height: "100%",
-                      //     color: isDarkMode ? "#E3E8F3" : "black",
-                      //   },
-                      //   "& .MuiSvgIcon-root": {
-                      //     color: isDarkMode ? "#E3E8F3" : "black",
-                      //   },
-                      //   "& .MuiOutlinedInput-notchedOutline": {
-                      //     border: "none",
-                      //   },
-                      // }}
-                    />
-                  </>
-                )}
-              </LocalizationProvider>
+                        value={
+                          newEventForm.endDate
+                            ? moment(newEventForm.endDate, "DD/MM/YYYY")
+                            : moment(newEventForm.startDate, "DD/MM/YYYY")
+                        }
+                        onChange={(date) => {
+                          if (date) {
+                            setNewEventForm((prev) => ({
+                              ...prev,
+                              endDate: date.endOf("day").format("DD/MM/YYYY"),
+                            }));
+                          }
+                        }}
+                        slotProps={{
+                          textField: {
+                            size: "small",
+                            placeholder: t("placeholders.date"),
+                            sx: datePickerSx(isDarkMode),
+                          },
+                        }}
+                      />
+                    </>
+                  )}
+                </LocalizationProvider>
+              </ThemeProvider>
             </label>
           </div>
 
@@ -489,7 +508,7 @@ const Event = () => {
             sessionId: classAndSectionData?.selectedSession?._id,
           };
         }
-
+        // console.log(formattedEvent);
         let url = newEvent?.workday
           ? EndPoints.ADMIN.REMOVE_SUNDAY_HOLIDAY
           : EndPoints.ADMIN.REGISTER_EVENT;
