@@ -307,12 +307,14 @@ export default function StudentSection() {
       const url = isTeacher
         ? EndPoints.TEACHER.DELETE_SECTION_STUDENT
         : EndPoints.ADMIN.DELETE_SECTION_STUDENT;
-      const res = await axiosClient.delete(`${url}/${currStudent.id}`);
+      const res = await axiosClient.delete(`${url}/${currStudent._id}`);
+      // console.log(res)
       if (res?.statusCode === 200) {
         toast.success(res.result);
         fetchStudents();
       }
     } catch (e) {
+      // console.log(e)
       toast.error(e);
     } finally {
       setLoading(false);

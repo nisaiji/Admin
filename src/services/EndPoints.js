@@ -4,7 +4,7 @@ const EndPoints = {
     REGISTER_SECTION_STUDENT: "v3/student/admin", //v3
     GET_SECTION_STUDENTS: "v3/student/get/admin",
     UPDATE_SECTION_STUDENT: "v3/student/admin",
-    DELETE_SECTION_STUDENT: "v2/student/admin",
+    DELETE_SECTION_STUDENT: "v3/student/admin",
 
     // ADMIN AUTH v2
     STATUS: "v2/admin/status",
@@ -117,7 +117,7 @@ const EndPoints = {
     REGISTER_SECTION_STUDENT: "v3/student/teacher",
     GET_SECTION_STUDENTS: "v3/student/get/teacher",
     UPDATE_SECTION_STUDENT: "v3/student/teacher",
-    DELETE_SECTION_STUDENT: "v2/student/teacher",
+    DELETE_SECTION_STUDENT: "v3/student/teacher",
     GET_ATTENDANCE: "attendance/teacher",
     UPDATE_ATTENDANCE: "attendance/teacher/bulk-mark",
 

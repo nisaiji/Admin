@@ -146,6 +146,7 @@ export default function Studentlist() {
         setStudentList(students);
       }
     } catch (e) {
+      console.log({ e });
       toast.error(e);
     } finally {
       setLoading(false);
@@ -228,7 +229,7 @@ export default function Studentlist() {
    * Confirm and delete a student from the list.
    */
   const handleConfirmDelete = async () => {
-    const url = EndPoints.ADMIN.DELETE_STUDENT;
+    const url = EndPoints.ADMIN.DELETE_SECTION_STUDENT;
 
     try {
       const res = await axiosClient.delete(`${url}/${idForDelete}`);
@@ -656,7 +657,11 @@ export default function Studentlist() {
                                 className={`size-5`}
                               />
                             </button>
-                            <button onClick={() => handleDelete(student?.id)}>
+                            <button
+                              onClick={() => {
+                                handleDelete(student?._id);
+                              }}
+                            >
                               <img
                                 src={isDarkMode ? delete2 : delete2w}
                                 alt="deleteStudent"
