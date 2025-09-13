@@ -25,4 +25,7 @@ export default defineConfig({
       ],
     }),
   ],
+  preview: {
+    allowedHosts: ["development-web.nisaiji.com"],
+  },
 });

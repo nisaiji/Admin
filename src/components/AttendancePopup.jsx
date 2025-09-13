@@ -261,12 +261,14 @@ export default function AttendancePopup() {
    * Fetch monthly attendance data for the current month.
    */
   const fetchMonthlyAttendance = async () => {
-    if (
-      isTeacher
-        ? !classAndSectionDataOfTeacher?.sessionId
-        : !classAndSectionData?.id
-    )
-      return;
+    // if (
+    //   isTeacher
+    //     ? !classAndSectionDataOfTeacher?.sessionId
+    //     : !classAndSectionData?.selectedSession?.school
+    // )
+    //   return;
+    console.log(classAndSectionData);
+
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
     try {
@@ -288,7 +290,7 @@ export default function AttendancePopup() {
       // console.log(classAndSectionDataOfTeacher);
       const url = isTeacher
         ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${classAndSectionDataOfTeacher?.sectionId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionDataOfTeacher?.sessionId}`
-        : `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.id}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.selectedSession?._id}`;
+        : `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.selectedSession?.school}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.selectedSession?._id}`;
       // console.log(url);
       const res = await axiosClient.get(url);
 
@@ -425,6 +427,8 @@ export default function AttendancePopup() {
       let url = isTeacher
         ? EndPoints.TEACHER.GET_EVENTS
         : EndPoints.ADMIN.GET_EVENTS;
+      // console.log(classAndSectionData);
+
       const res = await axiosClient.post(url, {
         startTime,
         endTime,
@@ -432,6 +436,7 @@ export default function AttendancePopup() {
           ? classAndSectionDataOfTeacher?.sessionId
           : classAndSectionData?.selectedSession?._id,
       });
+      // console.log(res);
 
       if (res?.statusCode === 200) {
         const holidayMap = res?.result?.reduce((acc, item) => {
@@ -460,18 +465,37 @@ export default function AttendancePopup() {
         setWorkdays(workdayMap);
       }
     } catch (e) {
-      toast.error(e);
+      // console.log({ e });
+
+      // toast.error(e);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchEvents().then(fetchMonthlyAttendance);
+    // console.log(classAndSectionData);
+
+    if (
+      (isTeacher &&
+        classAndSectionDataOfTeacher?.sectionId &&
+        classAndSectionDataOfTeacher?.sessionId) ||
+      (!isTeacher &&
+        classAndSectionData?.selectedSession?.school &&
+        classAndSectionData?.selectedSession?._id &&
+        classAndSectionData?.sectionId &&
+        classAndSectionData?.classId)
+    ) {
+      fetchEvents().then(fetchMonthlyAttendance);
+    }
   }, [
     currentDate,
-    classAndSectionData?.id,
+    classAndSectionData?.selectedSession?._id,
+    classAndSectionData?.selectedSession?.school,
+    classAndSectionData?.sectionId,
+    classAndSectionData?.classId,
     classAndSectionDataOfTeacher?.sessionId,
+    classAndSectionDataOfTeacher?.sectionId,
   ]);
 
   // attendance download in pdf format
