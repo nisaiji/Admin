@@ -42,7 +42,7 @@ export const fetchTeacher = createAsyncThunk(
     try {
       const res = await axiosClient.get(EndPoints.TEACHER.GET_TEACHER);
       if (res?.statusCode === 200) {
-        localStorage.setItem("teacherData", JSON.stringify(res?.result));
+        localStorage.setItem("teacherData", JSON.stringify(res?.result[0]));
         return res?.result;
       }
     } catch (e) {
@@ -102,7 +102,7 @@ const appAuthSlice = createSlice({
       const token = action.payload;
       const decodeToken = jwtDecode(token);
 
-      if (decodeToken.role === "teacher") {
+      if (decodeToken.role === "classTeacher") {
         state.role = decodeToken.role;
         state.classAndSectionDataOfTeacher.sectionId = decodeToken.sectionId;
         state.classAndSectionDataOfTeacher.sectionName =

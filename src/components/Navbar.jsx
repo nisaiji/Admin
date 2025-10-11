@@ -21,7 +21,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { data, teacherData } = useSelector((state) => state.appAuth);
-  const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
+  const role = useSelector((state) => state.appAuth.role);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const sectionId = useSelector((state) => state.appAuth.section);
   const classId = useSelector((state) => state.appAuth.class);
@@ -151,16 +151,16 @@ const Navbar = () => {
         </div>
 
         <div className={`flex`}>
-          {isTeacher ? (
+          {role === "classTeacher" ? (
             <div
-              onClick={() => navigate("/student-menu")}
+              onClick={() => navigate("student-menu")}
               className={`block mx-6 px-4 py-3 ${
                 isDarkMode ? "text-textPrimary" : "text-textBlack"
               } cursor-pointer`}
             >
               {t("titles.classRoom")}
             </div>
-          ) : (
+          ) : role === "admin" ? (
             <div
               className={`relative items-end z-10 mx-6`}
               onMouseEnter={() => setMenuOpen(true)}
@@ -256,10 +256,12 @@ const Navbar = () => {
                 </div>
               )}
             </div>
+          ) : (
+            ""
           )}
 
           {/* students setup*/}
-          {!isTeacher && (
+          {role === "admin" && (
             <>
               <Link to="/student-information-system" className={`py-2 mx-6`}>
                 <span
@@ -274,7 +276,7 @@ const Navbar = () => {
           )}
 
           {/* Requests Menu */}
-          {!isTeacher && (
+          {role === "admin" && (
             <div
               className={`relative`}
               onMouseEnter={() => setRequestsMenuOpen(true)}
@@ -339,7 +341,7 @@ const Navbar = () => {
             </div>
           )}
           {/* notice */}
-          {!isTeacher && (
+          {role === "admin" && (
             <Link
               to="/notice"
               className={`flex justify-center items-center cursor-pointer mx-6`}
@@ -378,9 +380,11 @@ const Navbar = () => {
             >
               <img
                 src={
-                  isTeacher
+                  role === "classTeacher"
                     ? teacherData?.photo || (isDarkMode ? user : userw)
-                    : data?.photo || (isDarkMode ? user : userw)
+                    : role === "admin"
+                    ? data?.photo || (isDarkMode ? user : userw)
+                    : ""
                 }
                 alt="user"
                 className={`size-6 rounded-full border border-borderGray2`}
@@ -399,7 +403,13 @@ const Navbar = () => {
               >
                 <div className={`py-1`}>
                   <Link
-                    to={isTeacher ? "/teacher-profile" : "/admin-profile"}
+                    to={
+                      role === "classTeacher"
+                        ? "/teacher-profile"
+                        : role === "admin"
+                        ? "/admin-profile"
+                        : ""
+                    }
                     className={`block px-4 py-3 ${
                       isDarkMode
                         ? "text-textPrimary hover:bg-background4"

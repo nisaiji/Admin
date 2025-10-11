@@ -376,7 +376,7 @@ export default function Leaves() {
                                   : "text-textBlack"
                               } font-medium`}
                             >
-                              {req?.teacher?.class || ""}{" "}
+                              {req?.teacher?.class || CONSTANT.NA}{" "}
                               {req?.teacher?.section || ""}
                             </p>
                           </td>

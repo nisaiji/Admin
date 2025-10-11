@@ -61,16 +61,19 @@ export default function StudentSection() {
   const genders = [t("options.male"), t("options.female"), t("options.other")];
 
   // User role and section details from Redux state
-  const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
+  const role = useSelector((state) => state.appAuth.role);
   // console.log(classAndSectionData);
 
   useEffect(() => {
-    const shouldFetchStudents = isTeacher
-      ? classAndSectionDataOfTeacher?.sectionId &&
-        classAndSectionDataOfTeacher?.sessionId
-      : classAndSectionData?.selectedSession?.school &&
-        classAndSectionData?.sectionId &&
-        classAndSectionData?.selectedSession?._id;
+    const shouldFetchStudents =
+      role === "classTeacher"
+        ? classAndSectionDataOfTeacher?.sectionId &&
+          classAndSectionDataOfTeacher?.sessionId
+        : role === "admin"
+        ? classAndSectionData?.selectedSession?.school &&
+          classAndSectionData?.sectionId &&
+          classAndSectionData?.selectedSession?._id
+        : "";
 
     const fetchData = async () => {
       if (classAndSectionData?.id && classAndSectionData?.sectionId) {
@@ -83,7 +86,7 @@ export default function StudentSection() {
 
     fetchData();
   }, [
-    isTeacher,
+    role,
     classAndSectionData?.id,
     classAndSectionData?.sectionId,
     classAndSectionData?.selectedSession?._id,
@@ -113,14 +116,17 @@ export default function StudentSection() {
   // get student api
   const fetchStudents = async () => {
     // console.log(classAndSectionData);
-    const url = isTeacher
-      ? EndPoints.TEACHER.GET_SECTION_STUDENTS
-      : EndPoints.ADMIN.GET_SECTION_STUDENTS;
+    const url =
+      role === "classTeacher"
+        ? EndPoints.TEACHER.GET_SECTION_STUDENTS
+        : role === "admin"
+        ? EndPoints.ADMIN.GET_SECTION_STUDENTS
+        : "";
 
     let query = `?`;
-    if (isTeacher) {
+    if (role === "classTeacher") {
       query += `school=${classAndSectionDataOfTeacher?.school}&section=${classAndSectionDataOfTeacher?.sectionId}&session=${classAndSectionDataOfTeacher?.sessionId}`;
-    } else {
+    } else if (role === "admin") {
       query += `school=${classAndSectionData?.selectedSession?.school}&section=${classAndSectionData?.sectionId}&session=${classAndSectionData?.selectedSession?._id}`;
     }
 
@@ -242,15 +248,18 @@ export default function StudentSection() {
       return;
     }
 
-    const url = isTeacher
-      ? isUpdate
-        ? EndPoints.TEACHER.UPDATE_SECTION_STUDENT
-        : EndPoints.TEACHER.REGISTER_SECTION_STUDENT
-      : isUpdate
-      ? EndPoints.ADMIN.UPDATE_SECTION_STUDENT
-      : EndPoints.ADMIN.REGISTER_SECTION_STUDENT;
+    const url =
+      role === "classTeacher"
+        ? isUpdate
+          ? EndPoints.TEACHER.UPDATE_SECTION_STUDENT
+          : EndPoints.TEACHER.REGISTER_SECTION_STUDENT
+        : role === "admin"
+        ? isUpdate
+          ? EndPoints.ADMIN.UPDATE_SECTION_STUDENT
+          : EndPoints.ADMIN.REGISTER_SECTION_STUDENT
+        : "";
 
-    if (!isTeacher && !isUpdate) {
+    if (role === "admin" && !isUpdate) {
       delete student.SNo;
     }
 
@@ -304,9 +313,12 @@ export default function StudentSection() {
     try {
       setLoading(true);
       // console.log({currStudent})
-      const url = isTeacher
-        ? EndPoints.TEACHER.DELETE_SECTION_STUDENT
-        : EndPoints.ADMIN.DELETE_SECTION_STUDENT;
+      const url =
+        role === "classTeacher"
+          ? EndPoints.TEACHER.DELETE_SECTION_STUDENT
+          : role === "admin"
+          ? EndPoints.ADMIN.DELETE_SECTION_STUDENT
+          : "";
       const res = await axiosClient.delete(`${url}/${currStudent._id}`);
       // console.log(res)
       if (res?.statusCode === 200) {
@@ -335,9 +347,11 @@ export default function StudentSection() {
       formData.append("sectionId", classAndSectionData?.sectionId);
       formData.append(
         "sessionId",
-        isTeacher
+        role === "classTeacher"
           ? classAndSectionDataOfTeacher?.sessionId
-          : classAndSectionData?.selectedSession?._id
+          : role === "admin"
+          ? classAndSectionData?.selectedSession?._id
+          : ""
       );
       formData.append("file", file);
       setLoading(true);
@@ -453,11 +467,13 @@ export default function StudentSection() {
                   isDarkMode ? "text-textPrimary" : "text-textBlack"
                 }`}
               >
-                {isTeacher
+                {role === "classTeacher"
                   ? localStorage.getItem("firstname")
-                  : `${classData?.teacher?.firstname || ""} ${
+                  : role === "admin"
+                  ? `${classData?.teacher?.firstname || ""} ${
                       classData?.teacher?.lastname || ""
-                    }`}
+                    }`
+                  : ""}
               </div>
               <div
                 className={`flex flex-row justify-end items-center space-x-2`}
@@ -467,9 +483,11 @@ export default function StudentSection() {
                     isDarkMode ? "text-textPrimary" : "text-textBlack"
                   }`}
                 >
-                  {isTeacher
+                  {role === "classTeacher"
                     ? `${classAndSectionDataOfTeacher?.className} ${classAndSectionDataOfTeacher?.sectionName}`
-                    : `${classAndSectionData?.className}-${classAndSectionData?.sectionName}`}
+                    : role === "admin"
+                    ? `${classAndSectionData?.className}-${classAndSectionData?.sectionName}`
+                    : ""}
                 </div>
                 {/* <div
                   onClick={() => setShowAttendance(true)}

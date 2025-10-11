@@ -39,7 +39,6 @@ export default function Studentlist() {
   const { t } = useTranslation();
 
   // Redux selectors to fetch required state
-  const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
   const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
     (state) => state.appAuth
   );

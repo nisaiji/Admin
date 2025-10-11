@@ -95,6 +95,13 @@ const EndPoints = {
     GET_ASSIGN_SUBJECTS: "teacher-subject-section/admin",
     UPDATE_ASSIGN_TEACHER_OF_SUBJECT: "teacher-subject-section/admin",
     DELETE_ASSIGN_TEACHER_OF_SUBJECT: "teacher-subject-section/admin",
+
+    // exam
+    CREATE_EXAM: "exam",
+    GET_EXAM_OF_SECTION: "exam",
+    GET_STUDENTS_BY_EXAM: "student-exam-result/section-student-marks",
+    UPDATE_STUDENT_MARKS_BULK: "student-exam-result/admin",
+    PUBLISH_RESULT: "exam",
   },
   TEACHER: {
     // LOGIN

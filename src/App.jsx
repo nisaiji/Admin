@@ -31,6 +31,7 @@ import Notice from "./components/notice/Notice";
 import StudentMenu from "./components/classSetup/sectionStudents/StudentMenu";
 import AttendancePopup from "./components/AttendancePopup";
 import Subjects from "./components/classSetup/subjects/Subjects";
+import Marksheet from "./components/classSetup/marksheet/Marksheet";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -84,7 +85,7 @@ function App() {
           {/* Routes that require user authentication */}
           <Route element={<RequireUser />}>
             <Route path="/" element={<Home />}>
-              {role === "teacher" ? (
+              {role === "classTeacher" ? (
                 <>
                   {/* Routes available for teacher users */}
                   <Route path="" element={<DashBoard />} />
@@ -142,6 +143,10 @@ function App() {
                   <Route
                     path="class-setup/student-menu/subjects"
                     element={<Subjects />}
+                  />
+                  <Route
+                    path="class-setup/student-menu/marksheet"
+                    element={<Marksheet />}
                   />
                   <Route
                     path="student-information-system/student-update"

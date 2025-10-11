@@ -43,7 +43,7 @@ const Dashboard = () => {
   );
   // console.log(classAndSectionData);
 
-  const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
+  const role = useSelector((state) => state.appAuth.role);
   const schoolName = useSelector((state) => state.appAuth.schoolName);
   const { data, teacherData } = useSelector((state) => state.appAuth);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
@@ -180,7 +180,7 @@ const Dashboard = () => {
    */
   const getSession = async () => {
     try {
-      if (!isTeacher) {
+      if (role === "admin") {
         const res = await axiosClient.get(EndPoints.ADMIN.GET_SESSION);
         // console.log(res?.result);
         if (res?.statusCode === 200) {
@@ -232,15 +232,21 @@ const Dashboard = () => {
    */
   const getStudentCount = async () => {
     try {
-      const url = isTeacher
-        ? EndPoints.TEACHER.STUDENT_COUNT
-        : EndPoints.ADMIN.STUDENT_COUNT;
+      const url =
+        role === "classTeacher"
+          ? EndPoints.TEACHER.STUDENT_COUNT
+          : role === "admin"
+          ? EndPoints.ADMIN.STUDENT_COUNT
+          : "";
       const result = await fetchData(`${url}`, "post", {
         startTime: attendanceTime.day.startTime,
         endTime: attendanceTime.day.endTime,
-        sessionId: isTeacher
-          ? classAndSectionDataOfTeacher?.sessionId
-          : classAndSectionData?.selectedSession?._id,
+        sessionId:
+          role === "classTeacher"
+            ? classAndSectionDataOfTeacher?.sessionId
+            : role === "admin"
+            ? classAndSectionData?.selectedSession?._id
+            : "",
       });
       setStudentAbsentCountData(result?.absentCount || 0);
       setStudentPresentCountData(result?.presentCount || 0);
@@ -282,15 +288,15 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (!isTeacher && classAndSectionData?.selectedSession?._id) {
+    if (role === "admin" && classAndSectionData?.selectedSession?._id) {
       getClassList();
     }
   }, [classAndSectionData?.selectedSession?._id]);
 
   useEffect(() => {
-    if (isTeacher) {
+    if (role === "classTeacher") {
       dispatch(fetchTeacher());
-    } else {
+    } else if (role === "admin") {
       dispatch(fetchAdmin());
     }
   }, [dispatch]);
@@ -399,9 +405,11 @@ const Dashboard = () => {
    */
   const getCalenderEvents = async () => {
     if (
-      isTeacher
+      role === "classTeacher"
         ? !classAndSectionDataOfTeacher?.sessionId
-        : !classAndSectionData?.selectedSession?._id
+        : role === "admin"
+        ? !classAndSectionData?.selectedSession?._id
+        : ""
     ) {
       return;
     }
@@ -416,28 +424,40 @@ const Dashboard = () => {
       999
     ).getTime();
     setEventLoading(true);
-    let url = isTeacher
-      ? EndPoints.TEACHER.GET_EVENTS
-      : EndPoints.ADMIN.GET_EVENTS;
+    let url =
+      role === "classTeacher"
+        ? EndPoints.TEACHER.GET_EVENTS
+        : role === "admin"
+        ? EndPoints.ADMIN.GET_EVENTS
+        : "";
     const result = await fetchData(url, "post", {
       startTime,
       endTime,
-      sessionId: isTeacher
-        ? classAndSectionDataOfTeacher?.sessionId
-        : classAndSectionData?.selectedSession?._id,
+      sessionId:
+        role === "classTeacher"
+          ? classAndSectionDataOfTeacher?.sessionId
+          : role === "admin"
+          ? classAndSectionData?.selectedSession?._id
+          : "",
     });
 
     if (result) setCalenderEvents(result);
 
-    url = isTeacher
-      ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
-      : EndPoints.ADMIN.GET_SUNDAY_HOLIDAY;
+    url =
+      role === "classTeacher"
+        ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
+        : role === "admin"
+        ? EndPoints.ADMIN.GET_SUNDAY_HOLIDAY
+        : "";
     const res = await axiosClient.post(url, {
       startTime,
       endTime,
-      sessionId: isTeacher
-        ? classAndSectionDataOfTeacher?.sessionId
-        : classAndSectionData?.selectedSession?._id,
+      sessionId:
+        role === "classTeacher"
+          ? classAndSectionDataOfTeacher?.sessionId
+          : role === "admin"
+          ? classAndSectionData?.selectedSession?._id
+          : "",
     });
 
     if (res?.statusCode === 200) {
@@ -505,9 +525,12 @@ const Dashboard = () => {
    */
   const getDailyAttendanceChart = async () => {
     try {
-      const url = isTeacher
-        ? EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS
-        : `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`;
+      const url =
+        role === "classTeacher"
+          ? EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS
+          : role === "admin"
+          ? `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`
+          : "";
       setLoading(true);
       const response = await axiosClient.post(url, {
         startTime: attendanceTime.day.startTime,
@@ -575,9 +598,12 @@ const Dashboard = () => {
               endTime: attendanceTime.month.endTime,
             };
       setLoading(true);
-      const url = isTeacher
-        ? EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS
-        : `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`;
+      const url =
+        role === "classTeacher"
+          ? EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS
+          : role === "admin"
+          ? `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`
+          : "";
 
       const response = await axiosClient.post(url, currentDates);
 
@@ -598,18 +624,20 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchChartData = () => {
       if (selectedOption === "Daily") {
-        if (isTeacher || selectedSection) {
+        if (role === "classTeacher" || selectedSection) {
           getDailyAttendanceChart();
-        } else {
+        } else if (role === "admin") {
           getStudentCount();
         }
       } else {
         if (selectedSection) {
           getAttendanceChart(selectedOption);
         } else {
-          isTeacher
+          role === "classTeacher"
             ? getAttendanceChart(selectedOption)
-            : getSchoolAttendanceChart(selectedOption);
+            : role === "admin"
+            ? getSchoolAttendanceChart(selectedOption)
+            : "";
         }
       }
     };
@@ -989,13 +1017,13 @@ const Dashboard = () => {
             : "bg-whiteBackground"
         } flex items-center w-full p-4 shadow-lg`}
       >
-        {isTeacher ? (
+        {role === "classTeacher" ? (
           <img
             src={teacherData?.photo || school}
             alt="School Logo"
             className="w-[300px] h-[200px] rounded-lg object-cover"
           />
-        ) : (
+        ) : role === "admin" ? (
           <div className="relative inline-block">
             <img
               src={data?.photo || school}
@@ -1009,6 +1037,8 @@ const Dashboard = () => {
               onClick={() => fileInputRef?.current?.click()}
             />
           </div>
+        ) : (
+          ""
         )}
         <input
           type="file"
@@ -1029,7 +1059,7 @@ const Dashboard = () => {
         </div>
 
         <div className={`flex flex-col items-end space-y-4`}>
-          {!isTeacher && (
+          {role === "admin" && (
             <div className="flex items-center gap-4">
               {/* Add create session option if next session does not exist */}
               {/* {console.log(nextSession)} */}
@@ -1293,7 +1323,7 @@ const Dashboard = () => {
         )}
         <div className={`flex justify-end items-center py-3`}>
           {/* class and section dropdoown */}
-          {!isTeacher && (
+          {role === "admin" && (
             <div className={`flex space-x-2 p-1`}>
               {/* Class dropdown */}
               <FormControl

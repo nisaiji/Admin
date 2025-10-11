@@ -35,7 +35,7 @@ export default function TransferCertificate() {
   const { t } = useTranslation();
 
   // Redux selectors to fetch required state
-  const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
+  const isTeacher = useSelector((state) => state.appAuth.role) === "classTeacher";
   const id = useSelector((state) => state.appAuth.id);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 

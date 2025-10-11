@@ -16,7 +16,7 @@ export default function AttendancePopup() {
   const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
     (state) => state.appAuth
   );
-  const isTeacher = useSelector((state) => state.appAuth.role) === "teacher";
+  const role = useSelector((state) => state.appAuth.role);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   // Component state variables
@@ -44,11 +44,13 @@ export default function AttendancePopup() {
 
   const startTime = useMemo(
     () =>
-      isTeacher
+      role === "classTeacher"
         ? classAndSectionDataOfTeacher?.startTime
-        : classAndSectionData?.startTime,
+        : role === "admin"
+        ? classAndSectionData?.startTime
+        : "",
     [
-      isTeacher,
+      role,
       classAndSectionDataOfTeacher?.startTime,
       classAndSectionData?.startTime,
     ]
@@ -238,9 +240,12 @@ export default function AttendancePopup() {
       });
 
       // Determine API endpoint based on role
-      const url = isTeacher
-        ? `${EndPoints.TEACHER.UPDATE_ATTENDANCE}/${classAndSectionDataOfTeacher?.sectionId}`
-        : `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${classAndSectionData?.sectionId}`;
+      const url =
+        role === "classTeacher"
+          ? `${EndPoints.TEACHER.UPDATE_ATTENDANCE}/${classAndSectionDataOfTeacher?.sectionId}`
+          : role === "admin"
+          ? `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${classAndSectionData?.sectionId}`
+          : "";
       // API call
       const res = await axiosClient.post(url, { studentsAttendances });
 
@@ -261,14 +266,6 @@ export default function AttendancePopup() {
    * Fetch monthly attendance data for the current month.
    */
   const fetchMonthlyAttendance = async () => {
-    // if (
-    //   isTeacher
-    //     ? !classAndSectionDataOfTeacher?.sessionId
-    //     : !classAndSectionData?.selectedSession?.school
-    // )
-    //   return;
-    console.log(classAndSectionData);
-
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
     try {
@@ -288,9 +285,12 @@ export default function AttendancePopup() {
         999
       ).getTime();
       // console.log(classAndSectionDataOfTeacher);
-      const url = isTeacher
-        ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${classAndSectionDataOfTeacher?.sectionId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionDataOfTeacher?.sessionId}`
-        : `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.selectedSession?.school}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.selectedSession?._id}`;
+      const url =
+        role === "classTeacher"
+          ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${classAndSectionDataOfTeacher?.sectionId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionDataOfTeacher?.sessionId}`
+          : role === "admin"
+          ? `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.selectedSession?.school}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.selectedSession?._id}`
+          : "";
       // console.log(url);
       const res = await axiosClient.get(url);
 
@@ -424,17 +424,23 @@ export default function AttendancePopup() {
         59,
         999
       ).getTime();
-      let url = isTeacher
-        ? EndPoints.TEACHER.GET_EVENTS
-        : EndPoints.ADMIN.GET_EVENTS;
+      let url =
+        role === "classTeacher"
+          ? EndPoints.TEACHER.GET_EVENTS
+          : role === "admin"
+          ? EndPoints.ADMIN.GET_EVENTS
+          : "";
       // console.log(classAndSectionData);
 
       const res = await axiosClient.post(url, {
         startTime,
         endTime,
-        sessionId: isTeacher
-          ? classAndSectionDataOfTeacher?.sessionId
-          : classAndSectionData?.selectedSession?._id,
+        sessionId:
+          role === "classTeacher"
+            ? classAndSectionDataOfTeacher?.sessionId
+            : role === "admin"
+            ? classAndSectionData?.selectedSession?._id
+            : "",
       });
       // console.log(res);
 
@@ -446,15 +452,21 @@ export default function AttendancePopup() {
         setHolidays(holidayMap);
       }
 
-      url = isTeacher
-        ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
-        : EndPoints.ADMIN.GET_SUNDAY_HOLIDAY;
+      url =
+        role === "classTeacher"
+          ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
+          : role === "admin"
+          ? EndPoints.ADMIN.GET_SUNDAY_HOLIDAY
+          : "";
       const res2 = await axiosClient.post(url, {
         startTime,
         endTime,
-        sessionId: isTeacher
-          ? classAndSectionDataOfTeacher?.sessionId
-          : classAndSectionData?.selectedSession?._id,
+        sessionId:
+          role === "classTeacher"
+            ? classAndSectionDataOfTeacher?.sessionId
+            : role === "admin"
+            ? classAndSectionData?.selectedSession?._id
+            : "",
       });
 
       if (res2?.statusCode === 200) {
@@ -466,7 +478,6 @@ export default function AttendancePopup() {
       }
     } catch (e) {
       // console.log({ e });
-
       // toast.error(e);
     } finally {
       setLoading(false);
@@ -477,10 +488,10 @@ export default function AttendancePopup() {
     // console.log(classAndSectionData);
 
     if (
-      (isTeacher &&
+      (role === "classTeacher" &&
         classAndSectionDataOfTeacher?.sectionId &&
         classAndSectionDataOfTeacher?.sessionId) ||
-      (!isTeacher &&
+      (role === "admin" &&
         classAndSectionData?.selectedSession?.school &&
         classAndSectionData?.selectedSession?._id &&
         classAndSectionData?.sectionId &&
