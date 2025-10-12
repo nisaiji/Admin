@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import Breadcrumbs from "../../BreadCrumbs";
 import email from "../../../assets/images/darkmode/email.png";
-import phone from "../../../assets/images/darkmode/phone.png";
+import phone from "../../../assets/images/darkmode/Phone.png";
 import KingIcon from "../../../assets/images/darkmode/king.png";
 import profileEmpty from "../../../assets/images/profileEmpty.png";
 import {
@@ -17,7 +17,6 @@ import {
   FormControlLabel,
   Button,
 } from "@mui/material";
-
 
 export default function Subjects() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
