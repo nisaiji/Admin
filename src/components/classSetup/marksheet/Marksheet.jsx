@@ -193,8 +193,21 @@ export default function Marksheet() {
   };
 
   // Update grades
-  const handleGradeChange = (studentId, subjectId, examType, grade) => {
+  const handleGradeChange = (
+    studentId,
+    subjectId,
+    examType,
+    grade,
+    maxGrade
+  ) => {
     if (!grade) return;
+    // console.log(grade, maxGrade);
+    // console.log(gradeOrder.indexOf(grade), gradeOrder.indexOf(maxGrade));
+
+    if (gradeOrder.indexOf(grade) < gradeOrder.indexOf(maxGrade)) {
+      toast.error(`Grade cannot be higher than max grade ${maxGrade}`);
+      return;
+    }
 
     setStudentData((prev) =>
       prev.map((student) => {
@@ -550,6 +563,15 @@ export default function Marksheet() {
                                   (c) => c.examType === "practical"
                                 )?.passingGrade ?? "";
 
+                              const maxTheoryGrade =
+                                subj?.components.find(
+                                  (c) => c.examType === "theory"
+                                )?.maxGrade ?? "";
+                              const maxPracticleGrade =
+                                subj?.components.find(
+                                  (c) => c.examType === "practical"
+                                )?.maxGrade ?? "";
+
                               const getGradeColor = (grade, passingGrade) => {
                                 if (!grade) return "text-white";
                                 return gradeOrder.indexOf(grade) <=
@@ -658,7 +680,8 @@ export default function Marksheet() {
                                               student._id,
                                               subj?.subject?._id,
                                               "theory",
-                                              e.target.value
+                                              e.target.value,
+                                              maxTheoryGrade
                                             )
                                           }
                                           disabled={!isEdit}
@@ -784,7 +807,8 @@ export default function Marksheet() {
                                               student._id,
                                               subj?.subject?._id,
                                               "practical",
-                                              e.target.value
+                                              e.target.value,
+                                              maxPracticleGrade
                                             )
                                           }
                                           disabled={!isEdit}
