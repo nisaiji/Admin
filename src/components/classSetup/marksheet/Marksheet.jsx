@@ -66,7 +66,7 @@ export default function Marksheet() {
         setStudentData(res?.result);
       }
     } catch (e) {
-      console.error(e);
+      // console.error(e);
     }
   };
 
