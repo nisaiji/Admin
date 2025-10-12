@@ -465,12 +465,12 @@ export default function Marksheet() {
                             const theoryMarks = Number(
                               result?.components.find(
                                 (c) => c.examType === "theory"
-                              )?.marksObtained || 0
+                              )?.marksObtained ?? 0
                             );
                             const practicalMarks = Number(
                               result?.components.find(
                                 (c) => c.examType === "practical"
-                              )?.marksObtained || 0
+                              )?.marksObtained ?? 0
                             );
 
                             return sum + theoryMarks + practicalMarks;
@@ -483,11 +483,11 @@ export default function Marksheet() {
                           const maxTheoryMarks =
                             subj?.components.find(
                               (c) => c.examType === "theory"
-                            )?.maxMarks || 0;
+                            )?.maxMarks ?? 0;
                           const maxPracticalMarks =
                             subj?.components.find(
                               (c) => c.examType === "practical"
-                            )?.maxMarks || 0;
+                            )?.maxMarks ?? 0;
 
                           return sum + maxTheoryMarks + maxPracticalMarks;
                         }, 0);
@@ -510,20 +510,20 @@ export default function Marksheet() {
                               const theoryMarks =
                                 result?.components.find(
                                   (c) => c.examType === "theory"
-                                )?.marksObtained || "";
+                                )?.marksObtained ?? "";
                               const practicalMarks =
                                 result?.components.find(
                                   (c) => c.examType === "practical"
-                                )?.marksObtained || "";
+                                )?.marksObtained ?? "";
 
                               const theoryMinMarks =
                                 subj?.components.find(
                                   (c) => c.examType === "theory"
-                                )?.passingMarks || "";
+                                )?.passingMarks ?? "";
                               const practicalMinMarks =
                                 subj?.components.find(
                                   (c) => c.examType === "practical"
-                                )?.passingMarks || "";
+                                )?.passingMarks ?? "";
 
                               const maxTheoryMarks = subj?.components.find(
                                 (c) => c.examType === "theory"
@@ -535,20 +535,20 @@ export default function Marksheet() {
                               const theoryGrade =
                                 result?.components.find(
                                   (c) => c.examType === "theory"
-                                )?.gradeObtained || "";
+                                )?.gradeObtained ?? "";
                               const practicalGrade =
                                 result?.components.find(
                                   (c) => c.examType === "practical"
-                                )?.gradeObtained || "";
+                                )?.gradeObtained ?? "";
 
                               const minTheoryGrade =
                                 subj?.components.find(
                                   (c) => c.examType === "theory"
-                                )?.passingGrade || "";
+                                )?.passingGrade ?? "";
                               const minPracticleGrade =
                                 subj?.components.find(
                                   (c) => c.examType === "practical"
-                                )?.passingGrade || "";
+                                )?.passingGrade ?? "";
 
                               const getGradeColor = (grade, passingGrade) => {
                                 if (!grade) return "text-white";
@@ -583,7 +583,7 @@ export default function Marksheet() {
                                             );
                                           }}
                                           className={`font-semibold w-full bg-transparent size-10 text-center ${
-                                            theoryMarks > theoryMinMarks
+                                            theoryMarks >= theoryMinMarks
                                               ? "text-textGreen"
                                               : "text-textRed"
                                           }`}
@@ -611,7 +611,7 @@ export default function Marksheet() {
                                             );
                                           }}
                                           className={`font-semibold w-full bg-transparent size-10 text-center ${
-                                            practicalMarks > practicalMinMarks
+                                            practicalMarks >= practicalMinMarks
                                               ? "text-textGreen"
                                               : "text-textRed"
                                           }`}
@@ -652,7 +652,7 @@ export default function Marksheet() {
                                         }}
                                       >
                                         <Select
-                                          value={theoryGrade || ""}
+                                          value={theoryGrade}
                                           onChange={(e) =>
                                             handleGradeChange(
                                               student._id,
@@ -778,7 +778,7 @@ export default function Marksheet() {
                                         }}
                                       >
                                         <Select
-                                          value={practicalGrade || ""}
+                                          value={practicalGrade}
                                           onChange={(e) =>
                                             handleGradeChange(
                                               student._id,
