@@ -18,6 +18,7 @@ import {
   Button,
 } from "@mui/material";
 
+
 export default function Subjects() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
