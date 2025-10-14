@@ -1,11 +1,13 @@
 import axios from "axios";
 import toast from "react-hot-toast";
+import { sha256 } from "js-sha256";
 
 // const baseURL = "http://localhost:4000/";
 // const baseURL = "https://api.sharedri.com";
 const baseURL = "https://development-api.nisaiji.com/";
 
 export const axiosClient = axios.create({ baseURL });
+const key = sha256(import.meta.env.VITE_SECOND_SECURITY_KEY);
 
 // Function to request a new access token using the refresh token
 async function refreshAccessToken() {
@@ -17,6 +19,7 @@ async function refreshAccessToken() {
     const response = await axios.get(`${baseURL}admin/refresh`, {
       headers: {
         Authorization: `Bearer ${refreshToken}`,
+        SecondSecurityKey: key,
       },
     });
     return response?.data?.result?.accessToken;
@@ -33,6 +36,7 @@ axiosClient.interceptors.request.use(
     // console.log(accessToken);
 
     request.headers["Authorization"] = `Bearer ${accessToken}`;
+    request.headers["SecondSecurityKey"] = key;
     return request;
   },
   (error) => {

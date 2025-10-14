@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
 
-const Step3 = ({ goback, setStep, setLoading }) => {
+const Step3 = ({ goback, setStep, loading, setLoading }) => {
   const dispatch = useDispatch();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -135,6 +135,7 @@ const Step3 = ({ goback, setStep, setLoading }) => {
         <button
           type="button"
           onClick={handleSubmit}
+          disabled={loading}
           className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           data-testid="submitPage3"
         >

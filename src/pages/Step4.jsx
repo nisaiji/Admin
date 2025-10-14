@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
 
-const Step4 = ({ goback, setStep, setLoading }) => {
+const Step4 = ({ goback, setStep, loading, setLoading }) => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -140,6 +140,7 @@ const Step4 = ({ goback, setStep, setLoading }) => {
         <button
           type="button"
           onClick={handleSubmit}
+          disabled={loading}
           className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
         >
           <div className="flex items-center gap-2">

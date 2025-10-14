@@ -68,16 +68,17 @@ export default function TeacherProfile() {
       setLoading(true);
       const res = await axiosClient.get(EndPoints.TEACHER.GET_TEACHER);
       if (res?.statusCode === 200) {
-        setTeacher(res?.result);
+        const data = res?.result?.[0];
+        setTeacher(data);
         formik.setValues({
-          firstname: res?.result?.firstname || "",
-          lastname: res?.result?.lastname || "",
-          dob: res?.result?.dob || "",
-          gender: res?.result?.gender || "",
-          bloodGroup: res?.result?.bloodGroup || "",
-          university: res?.result?.university || "",
-          degree: res?.result?.degree || "",
-          phone: res?.result?.phone || "",
+          firstname: data?.firstname || "",
+          lastname: data?.lastname || "",
+          dob: data?.dob || "",
+          gender: data?.gender || "",
+          bloodGroup: data?.bloodGroup || "",
+          university: data?.university || "",
+          degree: data?.degree || "",
+          phone: data?.phone || "",
         });
       }
     } catch (e) {

@@ -9,7 +9,7 @@ import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
 import { useNavigate } from "react-router-dom";
 
-const Step1 = ({ goback, setStep, setLoading, currentStep }) => {
+const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -46,6 +46,7 @@ const Step1 = ({ goback, setStep, setLoading, currentStep }) => {
 
   const phoneVerifiedApi = async (otpSuccessToken) => {
     try {
+      setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.PHONE_TOKEN_VERIFY, {
         phone,
         token: otpSuccessToken,
@@ -74,18 +75,24 @@ const Step1 = ({ goback, setStep, setLoading, currentStep }) => {
   };
 
   const verifyOtp = async () => {
-    setLoading(true);
-    await window?.verifyOtp(
-      Number(otp.join("")),
-      async (res) => {
-        toast.success("Phone verified successfully");
-        await phoneVerifiedApi(res?.message);
-      },
-      (err) => {
-        toast.error(err?.message);
-      },
-      status?.phoneOtpReqId
-    );
+    try {
+      setLoading(true);
+      await window?.verifyOtp(
+        Number(otp.join("")),
+        async (res) => {
+          toast.success("Phone verified successfully");
+          await phoneVerifiedApi(res?.message);
+        },
+        (err) => {
+          toast.error(err?.message);
+        },
+        status?.phoneOtpReqId
+      );
+    } catch (e) {
+      toast.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -295,6 +302,7 @@ const Step1 = ({ goback, setStep, setLoading, currentStep }) => {
           <button
             type="button"
             onClick={verifyOtp}
+            disabled={loading}
             className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           >
             <p className="text-base">{t("buttons.verify")}</p>
@@ -303,6 +311,7 @@ const Step1 = ({ goback, setStep, setLoading, currentStep }) => {
           <button
             type="button"
             onClick={handleSubmit}
+            disabled={loading}
             className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           >
             <p className="text-base">{t("buttons.continue")}</p>

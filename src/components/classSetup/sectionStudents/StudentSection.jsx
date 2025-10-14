@@ -27,7 +27,7 @@ import Breadcrumbs from "../../BreadCrumbs";
 export default function StudentSection() {
   // Importing necessary modules and hooks
   const [t] = useTranslation();
-  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+  const { classAndSectionData, teacherData } = useSelector(
     (state) => state.appAuth
   );
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
@@ -56,25 +56,30 @@ export default function StudentSection() {
     gender: "",
     parentFullName: "",
     parentPhone: "",
-    sectionId: classAndSectionData?.sectionId,
+    sectionId: "",
   });
   const genders = [t("options.male"), t("options.female"), t("options.other")];
 
   // User role and section details from Redux state
   const role = useSelector((state) => state.appAuth.role);
-  // console.log(classAndSectionData);
+  // console.log(teacherData);
 
   useEffect(() => {
-    const shouldFetchStudents =
-      role === "classTeacher"
-        ? classAndSectionDataOfTeacher?.sectionId &&
-          classAndSectionDataOfTeacher?.sessionId
-        : role === "admin"
-        ? classAndSectionData?.selectedSession?.school &&
-          classAndSectionData?.sectionId &&
-          classAndSectionData?.selectedSession?._id
-        : "";
-
+    let shouldFetchStudents = false;
+    if (
+      role === "admin" &&
+      classAndSectionData?.selectedSession?.school &&
+      classAndSectionData?.sectionId &&
+      classAndSectionData?.selectedSession?._id
+    ) {
+      shouldFetchStudents = true;
+    } else if (
+      role === "classTeacher" &&
+      teacherData?.sectionId &&
+      teacherData?.sessionId
+    ) {
+      shouldFetchStudents = true;
+    }
     const fetchData = async () => {
       if (classAndSectionData?.id && classAndSectionData?.sectionId) {
         await getSectionInfo();
@@ -90,8 +95,8 @@ export default function StudentSection() {
     classAndSectionData?.id,
     classAndSectionData?.sectionId,
     classAndSectionData?.selectedSession?._id,
-    classAndSectionDataOfTeacher?.sectionId,
-    classAndSectionDataOfTeacher?.sessionId,
+    teacherData?.sectionId,
+    teacherData?.sessionId,
   ]);
   // console.log(classAndSectionData);
   // get class teacher info api
@@ -125,7 +130,7 @@ export default function StudentSection() {
 
     let query = `?`;
     if (role === "classTeacher") {
-      query += `school=${classAndSectionDataOfTeacher?.school}&section=${classAndSectionDataOfTeacher?.sectionId}&session=${classAndSectionDataOfTeacher?.sessionId}`;
+      query += `school=${teacherData?.admin}&section=${teacherData?.sectionId}&session=${teacherData?.sessionId}`;
     } else if (role === "admin") {
       query += `school=${classAndSectionData?.selectedSession?.school}&section=${classAndSectionData?.sectionId}&session=${classAndSectionData?.selectedSession?._id}`;
     }
@@ -248,16 +253,21 @@ export default function StudentSection() {
       return;
     }
 
-    const url =
-      role === "classTeacher"
-        ? isUpdate
-          ? EndPoints.TEACHER.UPDATE_SECTION_STUDENT
-          : EndPoints.TEACHER.REGISTER_SECTION_STUDENT
-        : role === "admin"
-        ? isUpdate
-          ? EndPoints.ADMIN.UPDATE_SECTION_STUDENT
-          : EndPoints.ADMIN.REGISTER_SECTION_STUDENT
-        : "";
+    let url;
+
+    if (role === "admin") {
+      if (isUpdate) {
+        url = EndPoints.ADMIN.UPDATE_SECTION_STUDENT;
+      } else {
+        url = EndPoints.ADMIN.REGISTER_SECTION_STUDENT;
+      }
+    } else if (role === "classTeacher") {
+      if (isUpdate) {
+        url = EndPoints.TEACHER.UPDATE_SECTION_STUDENT;
+      } else {
+        url = EndPoints.TEACHER.REGISTER_SECTION_STUDENT;
+      }
+    }
 
     if (role === "admin" && !isUpdate) {
       delete student.SNo;
@@ -269,7 +279,14 @@ export default function StudentSection() {
       parentName: capitalize(student.parentFullName.trim()),
       gender: student.gender,
       phone: student.parentPhone,
-      ...(!isUpdate && { sectionId: classAndSectionData?.sectionId }),
+      ...(!isUpdate && {
+        sectionId:
+          role === "admin"
+            ? classAndSectionData?.sectionId
+            : role === "classTeacher"
+            ? teacherData?.sectionId
+            : "",
+      }),
     };
 
     try {
@@ -290,7 +307,12 @@ export default function StudentSection() {
             gender: "",
             parentFullName: "",
             parentPhone: "",
-            sectionId: classAndSectionData?.sectionId,
+            sectionId:
+              role === "admin"
+                ? classAndSectionData?.sectionId
+                : role === "classTeacher"
+                ? teacherData?.sectionId
+                : "",
           });
           newStudentFirstNameRef.current?.focus();
         }
@@ -343,16 +365,15 @@ export default function StudentSection() {
       }
 
       const formData = new FormData();
-      formData.append("classId", classAndSectionData?.classId);
-      formData.append("sectionId", classAndSectionData?.sectionId);
-      formData.append(
-        "sessionId",
-        role === "classTeacher"
-          ? classAndSectionDataOfTeacher?.sessionId
-          : role === "admin"
-          ? classAndSectionData?.selectedSession?._id
-          : ""
-      );
+      if (role === "admin") {
+        formData.append("classId", classAndSectionData?.classId);
+        formData.append("sectionId", classAndSectionData?.sectionId);
+        formData.append("sessionId", classAndSectionData?.selectedSession?._id);
+      } else if (role === "classTeacher") {
+        formData.append("classId", teacherData?.classId);
+        formData.append("sectionId", teacherData?.sectionId);
+        formData.append("sessionId", teacherData?.sessionId);
+      }
       formData.append("file", file);
       setLoading(true);
       const res = await axiosClient.post(
@@ -484,20 +505,11 @@ export default function StudentSection() {
                   }`}
                 >
                   {role === "classTeacher"
-                    ? `${classAndSectionDataOfTeacher?.className} ${classAndSectionDataOfTeacher?.sectionName}`
+                    ? `${teacherData?.className} ${teacherData?.sectionName}`
                     : role === "admin"
                     ? `${classAndSectionData?.className}-${classAndSectionData?.sectionName}`
                     : ""}
                 </div>
-                {/* <div
-                  onClick={() => setShowAttendance(true)}
-                  className={`flex flex-row justify-center items-center px-2 py-1 space-x-2 cursor-pointer rounded border border-[#FF793F]/10 bg-[#FF793F]/10 transition-all duration-200 ease-in-out active:scale-90`}
-                >
-                  <img src={book} alt="" className={`size-[10px] `} />
-                  <span className={`text-xs font-poppins-bold text-textOrange`}>
-                    Attendance
-                  </span>
-                </div> */}
               </div>
             </div>
           </div>

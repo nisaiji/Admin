@@ -380,7 +380,7 @@ const Navbar = () => {
             >
               <img
                 src={
-                  role === "classTeacher"
+                  role === "classTeacher" || role === "teacher"
                     ? teacherData?.photo || (isDarkMode ? user : userw)
                     : role === "admin"
                     ? data?.photo || (isDarkMode ? user : userw)
@@ -404,7 +404,7 @@ const Navbar = () => {
                 <div className={`py-1`}>
                   <Link
                     to={
-                      role === "classTeacher"
+                      role === "classTeacher" || role === "teacher"
                         ? "/teacher-profile"
                         : role === "admin"
                         ? "/admin-profile"

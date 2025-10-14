@@ -35,7 +35,7 @@ describe("StudentSection", () => {
         className: "10",
         sectionName: "A",
       },
-      classAndSectionDataOfTeacher: {},
+      teacherData: {},
     },
     appConfig: { isDarkMode: false },
   };

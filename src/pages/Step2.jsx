@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
 
-const Step2 = ({ goback, setStep, setLoading, currentStep }) => {
+const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
   const { status } = useSelector((state) => state.appAuth);
@@ -42,85 +42,9 @@ const Step2 = ({ goback, setStep, setLoading, currentStep }) => {
     }
   }, [currentStep]);
 
-  // useEffect(() => {
-  //   const loadOTPWidget = (widgetId, tokenAuth) => {
-  //     const oldScript = document.getElementById("otp-script");
-  //     if (oldScript) oldScript.remove();
-  //     const otpContainer = document.getElementById("otp_input_container");
-  //     if (otpContainer) otpContainer.innerHTML = "";
-  //     window.configuration = {
-  //       widgetId,
-  //       tokenAuth,
-  //       exposeMethods: true,
-  //       success: (data) => {
-  //         // console.log("OTP verified", data);
-  //       },
-  //       failure: (error) => {
-  //         // console.error("OTP failed", error);
-  //       },
-  //     };
-  //     const script = document.createElement("script");
-  //     script.id = "otp-script";
-  //     script.src = "https://verify.msg91.com/otp-provider.js";
-  //     script.type = "text/javascript";
-  //     script.onload = () => {
-  //       if (window.initSendOTP) {
-  //         window.initSendOTP(window.configuration);
-  //       }
-  //     };
-  //     document.body.appendChild(script);
-  //   };
-
-  //   let widgetId = "";
-  //   let tokenAuth = "";
-  //   if (currentStep === 2) {
-  //     widgetId = import.meta.env.VITE_EMAIL_WIDGET_ID;
-  //     tokenAuth = import.meta.env.VITE_EMAIL_AUTH_TOKEN;
-  //     console.log("Setting up EMAIL widget");
-  //     loadOTPWidget(widgetId, tokenAuth);
-  //   }
-  // }, [currentStep]);
-
-  // useEffect(() => {
-  //   // Step 1: Clean up old script
-  //   const oldScript = document.getElementById("otp-script");
-  //   if (oldScript) oldScript.remove();
-
-  //   // Step 2: Clear the container
-  //   const container = document.getElementById("otp_input_container");
-  //   if (container) container.innerHTML = "";
-
-  //   // Step 3: Set new config
-  //   let widgetId;
-  //   let tokenAuth;
-  //   if (currentStep === 1) {
-  //     widgetId = import.meta.env.VITE_EMAIL_WIDGET_ID;
-  //     tokenAuth = import.meta.env.VITE_EMAIL_AUTH_TOKEN;
-  //   }
-
-  //   window.configuration = {
-  //     widgetId,
-  //     tokenAuth,
-  //     exposeMethods: true,
-  //     success: (data) => {
-  //       console.log("OTP verified", data);
-  //     },
-  //     failure: (error) => {
-  //       console.error("OTP failed", error);
-  //     },
-  //   };
-
-  //   // Step 4: Re-inject the script
-  //   const script = document.createElement("script");
-  //   script.id = "otp-script";
-  //   script.type = "text/javascript";
-  //   script.src = "https://verify.msg91.com/otp-provider.js";
-  //   script.async = true;
-  //   document.body.appendChild(script);
-  // }, [currentStep]);
-
   const emailVerifiedApi = async (otpSuccessToken) => {
     try {
+      setLoading(true);
       const res = await axiosClient.post(EndPoints.ADMIN.EMAIL_TOKEN_VERIFY, {
         email,
         token: otpSuccessToken,
@@ -138,18 +62,24 @@ const Step2 = ({ goback, setStep, setLoading, currentStep }) => {
   };
 
   const verifyOtp = async () => {
-    setLoading(true);
-    await window?.verifyOtp(
-      Number(otp.join("")),
-      async (res) => {
-        toast.success("Email verified successfully");
-        await emailVerifiedApi(res?.message);
-      },
-      (err) => {
-        toast.error(err?.message);
-      },
-      status?.emailOtpReqId
-    );
+    try {
+      setLoading(true);
+      await window?.verifyOtp(
+        Number(otp.join("")),
+        async (res) => {
+          toast.success("Email verified successfully");
+          await emailVerifiedApi(res?.message);
+        },
+        (err) => {
+          toast.error(err?.message);
+        },
+        status?.emailOtpReqId
+      );
+    } catch (e) {
+      toast.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -162,11 +92,6 @@ const Step2 = ({ goback, setStep, setLoading, currentStep }) => {
     }
     try {
       setLoading(true);
-      // console.log(
-      //   email,
-      //   window.configuration.widgetId,
-      //   window.configuration.tokenAuth
-      // );
       window?.sendOtp(
         email,
         (res) => {
@@ -325,6 +250,7 @@ const Step2 = ({ goback, setStep, setLoading, currentStep }) => {
           <button
             type="button"
             onClick={verifyOtp}
+            disabled={loading}
             className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           >
             <p className="text-base">{t("buttons.verify")}</p>
@@ -333,6 +259,7 @@ const Step2 = ({ goback, setStep, setLoading, currentStep }) => {
           <button
             type="button"
             onClick={handleSubmit}
+            disabled={loading}
             className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           >
             <p className="text-base">{t("buttons.continue")}</p>

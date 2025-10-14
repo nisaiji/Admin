@@ -38,14 +38,11 @@ import { Box } from "@mui/system";
 const Dashboard = () => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
-  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+  const { classAndSectionData, data, teacherData } = useSelector(
     (state) => state.appAuth
   );
-  // console.log(classAndSectionData);
-
   const role = useSelector((state) => state.appAuth.role);
   const schoolName = useSelector((state) => state.appAuth.schoolName);
-  const { data, teacherData } = useSelector((state) => state.appAuth);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [selectedOption, setSelectedOption] = useState("Monthly");
   const [studentPresentCountData, setStudentPresentCountData] = useState(null);
@@ -130,8 +127,7 @@ const Dashboard = () => {
         getSession(); // Refresh session list
       }
     } catch (e) {
-      // console.log({ e });
-      toast.error("Error marking session complete.");
+      toast.error(e);
     }
   };
 
@@ -173,7 +169,6 @@ const Dashboard = () => {
       // setLoading(false);
     }
   };
-  // console.log(classAndSectionData?.classAndSectionData?.selectedSession);
 
   /**
    * Fetches calendar events based on the selected month.
@@ -182,10 +177,8 @@ const Dashboard = () => {
     try {
       if (role === "admin") {
         const res = await axiosClient.get(EndPoints.ADMIN.GET_SESSION);
-        // console.log(res?.result);
         if (res?.statusCode === 200) {
-          const activeSession = res?.result?.find((s) => s.isCurrent === true);
-          // console.log({ activeSession });
+          const activeSession = res?.result?.find((s) => s?.isCurrent === true);
           if (!classAndSectionData?.selectedSession?._id) {
             dispatch(
               setClassAndSectionData({
@@ -243,7 +236,7 @@ const Dashboard = () => {
         endTime: attendanceTime.day.endTime,
         sessionId:
           role === "classTeacher"
-            ? classAndSectionDataOfTeacher?.sessionId
+            ? teacherData?.sessionId
             : role === "admin"
             ? classAndSectionData?.selectedSession?._id
             : "",
@@ -294,7 +287,7 @@ const Dashboard = () => {
   }, [classAndSectionData?.selectedSession?._id]);
 
   useEffect(() => {
-    if (role === "classTeacher") {
+    if (role === "classTeacher" || role === "teacher") {
       dispatch(fetchTeacher());
     } else if (role === "admin") {
       dispatch(fetchAdmin());
@@ -395,7 +388,7 @@ const Dashboard = () => {
         toast.success(res?.result);
       }
     } catch (error) {
-      console.error("Photo upload failed", error);
+      // console.error("Photo upload failed", error);
       toast.error("Photo upload failed.");
     }
   };
@@ -405,8 +398,8 @@ const Dashboard = () => {
    */
   const getCalenderEvents = async () => {
     if (
-      role === "classTeacher"
-        ? !classAndSectionDataOfTeacher?.sessionId
+      role === "classTeacher" || role === "teacher"
+        ? !teacherData?.sessionId
         : role === "admin"
         ? !classAndSectionData?.selectedSession?._id
         : ""
@@ -425,7 +418,7 @@ const Dashboard = () => {
     ).getTime();
     setEventLoading(true);
     let url =
-      role === "classTeacher"
+      role === "classTeacher" || role === "teacher"
         ? EndPoints.TEACHER.GET_EVENTS
         : role === "admin"
         ? EndPoints.ADMIN.GET_EVENTS
@@ -434,8 +427,8 @@ const Dashboard = () => {
       startTime,
       endTime,
       sessionId:
-        role === "classTeacher"
-          ? classAndSectionDataOfTeacher?.sessionId
+        role === "classTeacher" || role === "teacher"
+          ? teacherData?.sessionId
           : role === "admin"
           ? classAndSectionData?.selectedSession?._id
           : "",
@@ -444,7 +437,7 @@ const Dashboard = () => {
     if (result) setCalenderEvents(result);
 
     url =
-      role === "classTeacher"
+      role === "classTeacher" || role === "teacher"
         ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
         : role === "admin"
         ? EndPoints.ADMIN.GET_SUNDAY_HOLIDAY
@@ -453,8 +446,8 @@ const Dashboard = () => {
       startTime,
       endTime,
       sessionId:
-        role === "classTeacher"
-          ? classAndSectionDataOfTeacher?.sessionId
+        role === "classTeacher" || role === "teacher"
+          ? teacherData?.sessionId
           : role === "admin"
           ? classAndSectionData?.selectedSession?._id
           : "",
@@ -1017,7 +1010,7 @@ const Dashboard = () => {
             : "bg-whiteBackground"
         } flex items-center w-full p-4 shadow-lg`}
       >
-        {role === "classTeacher" ? (
+        {role === "classTeacher" || role === "teacher" ? (
           <img
             src={teacherData?.photo || school}
             alt="School Logo"
@@ -1089,7 +1082,8 @@ const Dashboard = () => {
                 <Select
                   value={
                     session?.some(
-                      (s) => s._id === classAndSectionData?.selectedSession?._id
+                      (s) =>
+                        s?._id === classAndSectionData?.selectedSession?._id
                     )
                       ? classAndSectionData?.selectedSession?._id
                       : ""
@@ -1192,299 +1186,304 @@ const Dashboard = () => {
       </div>
 
       {/* section 2 Attendance */}
-      <div
-        className={`${
-          isDarkMode
-            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-            : "bg-whiteBackground"
-        } justify-center m-5 rounded-[16px] relative`}
-      >
-        <div className={`flex justify-between items-center py-3 px-5`}>
-          <h2
-            className={`text-2xl ${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            } font-semibold pl-5`}
-          >
-            {t("dashboard.attendance")}
-          </h2>
-          {/* Graph toggle button */}
-          <div
-            className={`flex justify-evenly bg-[#68686826] p-2 rounded-[20px]`}
-          >
-            <button
-              className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
-                selectedOption === "Daily"
-                  ? "bg-[#0F4189] text-textPrimary"
-                  : isDarkMode
-                  ? "text-textPrimary"
-                  : "text-textBlack"
-              }`}
-              onClick={() => handleOptionChange({ target: { value: "Daily" } })}
-            >
-              {t("dashboard.daily")}
-            </button>
-            <button
-              className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
-                selectedOption === "Weekly"
-                  ? "bg-[#0F4189] text-textPrimary"
-                  : isDarkMode
-                  ? "text-textPrimary"
-                  : "text-textBlack"
-              }`}
-              onClick={() =>
-                handleOptionChange({ target: { value: "Weekly" } })
-              }
-            >
-              {t("dashboard.weekly")}
-            </button>
-            <button
-              className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
-                selectedOption === "Monthly"
-                  ? "bg-[#0F4189] text-textPrimary"
-                  : isDarkMode
-                  ? "text-textPrimary"
-                  : "text-textBlack"
-              }`}
-              onClick={() =>
-                handleOptionChange({ target: { value: "Monthly" } })
-              }
-            >
-              {t("dashboard.monthly")}
-            </button>
-          </div>
-          {/* date change buttons */}
-          <div
-            className={`flex justify-between items-center space-x-2 w-[270px]`}
-          >
-            <img
-              src={isDarkMode ? DownIcon : DownIconw}
-              onClick={() => handleChangeDate("previous")}
-              alt=""
-              className={`h-7 w-7 rotate-90 object-contain cursor-pointer`}
-            />
-            <div
-              className={`text-base ${
+      {(role === "admin" || role === "classTeacher") && (
+        <div
+          className={`${
+            isDarkMode
+              ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+              : "bg-whiteBackground"
+          } justify-center mx-5 mt-5 rounded-[16px] relative`}
+        >
+          <div className={`flex justify-between items-center py-3 px-5`}>
+            <h2
+              className={`text-2xl ${
                 isDarkMode ? "text-textPrimary" : "text-textBlack"
-              } font-poppins-regular`}
+              } font-semibold pl-5`}
             >
-              {selectedOption === "Daily"
-                ? moment(attendanceTime.day.startTime).format(
-                    "dddd, DD MMM YYYY"
-                  )
-                : selectedOption === "Weekly"
-                ? `${moment(attendanceTime.week.startTime).format(
-                    "D MMM YYYY"
-                  )} - ${moment(attendanceTime.week.endTime).format(
-                    "D MMM YYYY"
-                  )}`
-                : moment(attendanceTime.month.startTime).format("MMMM YYYY")}
+              {t("dashboard.attendance")}
+            </h2>
+            {/* Graph toggle button */}
+            <div
+              className={`flex justify-evenly bg-[#68686826] p-2 rounded-[20px]`}
+            >
+              <button
+                className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
+                  selectedOption === "Daily"
+                    ? "bg-[#0F4189] text-textPrimary"
+                    : isDarkMode
+                    ? "text-textPrimary"
+                    : "text-textBlack"
+                }`}
+                onClick={() =>
+                  handleOptionChange({ target: { value: "Daily" } })
+                }
+              >
+                {t("dashboard.daily")}
+              </button>
+              <button
+                className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
+                  selectedOption === "Weekly"
+                    ? "bg-[#0F4189] text-textPrimary"
+                    : isDarkMode
+                    ? "text-textPrimary"
+                    : "text-textBlack"
+                }`}
+                onClick={() =>
+                  handleOptionChange({ target: { value: "Weekly" } })
+                }
+              >
+                {t("dashboard.weekly")}
+              </button>
+              <button
+                className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
+                  selectedOption === "Monthly"
+                    ? "bg-[#0F4189] text-textPrimary"
+                    : isDarkMode
+                    ? "text-textPrimary"
+                    : "text-textBlack"
+                }`}
+                onClick={() =>
+                  handleOptionChange({ target: { value: "Monthly" } })
+                }
+              >
+                {t("dashboard.monthly")}
+              </button>
             </div>
-            {!(
-              selectedOption === "Daily" &&
-              attendanceTime.day.startTime === moment().startOf("day").valueOf()
-            ) &&
-            !(
-              selectedOption === "Weekly" &&
-              attendanceTime.week.startTime ===
-                moment().startOf("week").valueOf()
-            ) &&
-            !(
-              selectedOption === "Monthly" &&
-              attendanceTime.month.startTime ===
-                moment().startOf("month").valueOf()
-            ) ? (
+            {/* date change buttons */}
+            <div
+              className={`flex justify-between items-center space-x-2 w-[270px]`}
+            >
               <img
                 src={isDarkMode ? DownIcon : DownIconw}
-                onClick={() => handleChangeDate("next")}
+                onClick={() => handleChangeDate("previous")}
                 alt=""
-                className={`h-7 w-7 -rotate-90 object-contain cursor-pointer`}
+                className={`h-7 w-7 rotate-90 object-contain cursor-pointer`}
               />
-            ) : (
-              <img
-                src={isDarkMode ? DownIcon : DownIconw}
-                alt=""
-                className={`h-7 w-7 -rotate-90 object-contain opacity-30 cursor-not-allowed`}
-              />
-            )}
-          </div>
-        </div>
-        <hr
-          className={`border ${
-            isDarkMode ? "border-borderLine" : "border-borderWhite3"
-          }`}
-        />
-        {/* Bar Graph */}
-        {loading && (
-          <div
-            className={`absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 w-full`}
-          >
-            <Spinner />
-          </div>
-        )}
-        <div className={`flex justify-end items-center py-3`}>
-          {/* class and section dropdoown */}
-          {role === "admin" && (
-            <div className={`flex space-x-2 p-1`}>
-              {/* Class dropdown */}
-              <FormControl
-                size="small"
-                sx={{
-                  width: "150px",
-                  border: "1px solid #2b2e4a40",
-                  borderRadius: "14px",
-                  backgroundColor: isDarkMode ? "" : "white",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    border: "none",
-                  },
-                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "white !important",
-                  },
-                  "& .MuiInputBase-root": {
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                  },
-                  "& .MuiSvgIcon-root": {
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                  },
-                }}
+              <div
+                className={`text-base ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } font-poppins-regular`}
               >
-                <InputLabel
-                  id="class-select-label"
-                  sx={{
-                    zIndex: 1,
-                    backgroundColor: isDarkMode ? "" : "white",
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                    fontSize: 14,
-                    px: 0.5,
-                  }}
-                >
-                  {t("dashboard.selectClass")}
-                </InputLabel>
-                <Select
-                  labelId="class-select-label"
-                  id="class-select"
-                  value={selectedClass}
-                  onChange={(e) => {
-                    setSelectedClass(e.target.value);
-                    const classData = classList.filter(
-                      (itm) => itm["_id"] === e.target.value
-                    );
-                    setSectionList(classData[0]?.section);
-                    setSelectedSection(classData[0]?.section[0]?._id || "");
-                    setStartTime(classData[0]?.section[0]?.startTime || "");
-                  }}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="">{t("dashboard.selectClass")}</MenuItem>
-                  {classList.map((itm) => (
-                    <MenuItem
-                      key={itm["_id"]}
-                      value={itm["_id"]}
-                      sx={{
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                        "&:hover": {
-                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
-                        },
-                      }}
-                    >
-                      {itm.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {/* Section dropdown */}
-              <FormControl
-                size="small"
-                sx={{
-                  width: "150px",
-                  border: "1px solid #2b2e4a40",
-                  borderRadius: "14px",
-                  backgroundColor: isDarkMode ? "" : "white",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    border: "none",
-                  },
-                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "white !important",
-                  },
-                  "& .MuiInputBase-root": {
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                  },
-                  "& .MuiSvgIcon-root": {
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                  },
-                }}
-              >
-                <InputLabel
-                  id="section-select-label"
-                  sx={{
-                    zIndex: 1,
-                    backgroundColor: isDarkMode ? "" : "white",
-                    color: isDarkMode ? "#E3E8F3" : "black",
-                    fontSize: 14,
-                    px: 0.5,
-                  }}
-                >
-                  {t("dashboard.selectSection")}
-                </InputLabel>
-                <Select
-                  labelId="section-select-label"
-                  id="section-select"
-                  value={selectedSection}
-                  disabled={!selectedClass}
-                  onChange={(e) => setSelectedSection(e.target.value)}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                        cursor: selectedClass ? "pointer" : "none",
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="">{t("dashboard.selectSection")}</MenuItem>
-                  {sectionList?.map((itm) => (
-                    <MenuItem
-                      key={itm["_id"]}
-                      value={itm["_id"]}
-                      sx={{
-                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                        "&:hover": {
-                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
-                        },
-                      }}
-                    >
-                      {itm.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                {selectedOption === "Daily"
+                  ? moment(attendanceTime.day.startTime).format(
+                      "dddd, DD MMM YYYY"
+                    )
+                  : selectedOption === "Weekly"
+                  ? `${moment(attendanceTime.week.startTime).format(
+                      "D MMM YYYY"
+                    )} - ${moment(attendanceTime.week.endTime).format(
+                      "D MMM YYYY"
+                    )}`
+                  : moment(attendanceTime.month.startTime).format("MMMM YYYY")}
+              </div>
+              {!(
+                selectedOption === "Daily" &&
+                attendanceTime.day.startTime ===
+                  moment().startOf("day").valueOf()
+              ) &&
+              !(
+                selectedOption === "Weekly" &&
+                attendanceTime.week.startTime ===
+                  moment().startOf("week").valueOf()
+              ) &&
+              !(
+                selectedOption === "Monthly" &&
+                attendanceTime.month.startTime ===
+                  moment().startOf("month").valueOf()
+              ) ? (
+                <img
+                  src={isDarkMode ? DownIcon : DownIconw}
+                  onClick={() => handleChangeDate("next")}
+                  alt=""
+                  className={`h-7 w-7 -rotate-90 object-contain cursor-pointer`}
+                />
+              ) : (
+                <img
+                  src={isDarkMode ? DownIcon : DownIconw}
+                  alt=""
+                  className={`h-7 w-7 -rotate-90 object-contain opacity-30 cursor-not-allowed`}
+                />
+              )}
+            </div>
+          </div>
+          <hr
+            className={`border ${
+              isDarkMode ? "border-borderLine" : "border-borderWhite3"
+            }`}
+          />
+          {/* Bar Graph */}
+          {loading && (
+            <div
+              className={`absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 w-full`}
+            >
+              <Spinner />
             </div>
           )}
-        </div>
-        {/* Pie/Bar charts */}
-        <div className={`flex justify-center pb-5`}>
-          <div
-            className={`h-96 flex justify-center ${
-              selectedOption === "Weekly" ? "w-8/12" : "w-11/12"
-            }`}
-          >
-            {selectedOption === "Daily" ? renderPieChart() : renderChart()}
+          <div className={`flex justify-end items-center py-3`}>
+            {/* class and section dropdoown */}
+            {role === "admin" && (
+              <div className={`flex space-x-2 p-1`}>
+                {/* Class dropdown */}
+                <FormControl
+                  size="small"
+                  sx={{
+                    width: "150px",
+                    border: "1px solid #2b2e4a40",
+                    borderRadius: "14px",
+                    backgroundColor: isDarkMode ? "" : "white",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "none",
+                    },
+                    "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "white !important",
+                    },
+                    "& .MuiInputBase-root": {
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                    },
+                    "& .MuiSvgIcon-root": {
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                    },
+                  }}
+                >
+                  <InputLabel
+                    id="class-select-label"
+                    sx={{
+                      zIndex: 1,
+                      backgroundColor: isDarkMode ? "" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      fontSize: 14,
+                      px: 0.5,
+                    }}
+                  >
+                    {t("dashboard.selectClass")}
+                  </InputLabel>
+                  <Select
+                    labelId="class-select-label"
+                    id="class-select"
+                    value={selectedClass}
+                    onChange={(e) => {
+                      setSelectedClass(e.target.value);
+                      const classData = classList.filter(
+                        (itm) => itm["_id"] === e.target.value
+                      );
+                      setSectionList(classData[0]?.section);
+                      setSelectedSection(classData[0]?.section[0]?._id || "");
+                      setStartTime(classData[0]?.section[0]?.startTime || "");
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                        },
+                      },
+                    }}
+                  >
+                    <MenuItem value="">{t("dashboard.selectClass")}</MenuItem>
+                    {classList.map((itm) => (
+                      <MenuItem
+                        key={itm["_id"]}
+                        value={itm["_id"]}
+                        sx={{
+                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                          "&:hover": {
+                            backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                          },
+                        }}
+                      >
+                        {itm.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* Section dropdown */}
+                <FormControl
+                  size="small"
+                  sx={{
+                    width: "150px",
+                    border: "1px solid #2b2e4a40",
+                    borderRadius: "14px",
+                    backgroundColor: isDarkMode ? "" : "white",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "none",
+                    },
+                    "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "white !important",
+                    },
+                    "& .MuiInputBase-root": {
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                    },
+                    "& .MuiSvgIcon-root": {
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                    },
+                  }}
+                >
+                  <InputLabel
+                    id="section-select-label"
+                    sx={{
+                      zIndex: 1,
+                      backgroundColor: isDarkMode ? "" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      fontSize: 14,
+                      px: 0.5,
+                    }}
+                  >
+                    {t("dashboard.selectSection")}
+                  </InputLabel>
+                  <Select
+                    labelId="section-select-label"
+                    id="section-select"
+                    value={selectedSection}
+                    disabled={!selectedClass}
+                    onChange={(e) => setSelectedSection(e.target.value)}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                          cursor: selectedClass ? "pointer" : "none",
+                        },
+                      },
+                    }}
+                  >
+                    <MenuItem value="">{t("dashboard.selectSection")}</MenuItem>
+                    {sectionList?.map((itm) => (
+                      <MenuItem
+                        key={itm["_id"]}
+                        value={itm["_id"]}
+                        sx={{
+                          backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                          color: isDarkMode ? "#E3E8F3" : "black",
+                          "&:hover": {
+                            backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                          },
+                        }}
+                      >
+                        {itm.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
+            )}
+          </div>
+          {/* Pie/Bar charts */}
+          <div className={`flex justify-center pb-5`}>
+            <div
+              className={`h-96 flex justify-center ${
+                selectedOption === "Weekly" ? "w-8/12" : "w-11/12"
+              }`}
+            >
+              {selectedOption === "Daily" ? renderPieChart() : renderChart()}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Calender component */}
-      <div className={`flex flex-row mx-5 pb-5 space-x-5`}>
+      <div className={`flex flex-row mx-5 mt-5 pb-5 space-x-5`}>
         <div
           className={`${
             isDarkMode

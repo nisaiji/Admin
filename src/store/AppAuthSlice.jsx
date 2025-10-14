@@ -41,9 +41,10 @@ export const fetchTeacher = createAsyncThunk(
   async (_) => {
     try {
       const res = await axiosClient.get(EndPoints.TEACHER.GET_TEACHER);
+
       if (res?.statusCode === 200) {
-        localStorage.setItem("teacherData", JSON.stringify(res?.result[0]));
-        return res?.result;
+        localStorage.setItem("teacherData", JSON.stringify(res?.result?.[0]));
+        return res?.result?.[0];
       }
     } catch (e) {
       // console.log({ e });
@@ -70,11 +71,11 @@ const initialState = {
   className: null,
   id: null,
   schoolName: null,
+  isLoading: false,
   data: JSON.parse(localStorage.getItem("adminData")) || {},
   teacherData: JSON.parse(localStorage.getItem("teacherData")) || {},
   classAndSectionData:
     JSON.parse(localStorage.getItem("classAndSectionData")) || {},
-  classAndSectionDataOfTeacher: {},
   status: JSON.parse(localStorage.getItem("status")) || {},
 };
 
@@ -102,22 +103,13 @@ const appAuthSlice = createSlice({
       const token = action.payload;
       const decodeToken = jwtDecode(token);
 
-      if (decodeToken.role === "classTeacher") {
-        state.role = decodeToken.role;
-        state.classAndSectionDataOfTeacher.sectionId = decodeToken.sectionId;
-        state.classAndSectionDataOfTeacher.sectionName =
-          decodeToken.sectionName;
-        state.classAndSectionDataOfTeacher.classId = decodeToken.classId;
-        state.classAndSectionDataOfTeacher.className = decodeToken.className;
-        state.classAndSectionDataOfTeacher.startTime = decodeToken.sectionStart;
-        state.classAndSectionDataOfTeacher.school = decodeToken.adminId;
-        state.classAndSectionDataOfTeacher.sessionId = decodeToken.sessionId;
-      } else {
-        state.role = decodeToken.role;
-        state.classAndSectionData.id = decodeToken.adminId;
-        state.id = decodeToken.adminId;
+      state.role = decodeToken?.role;
+      state.schoolName = decodeToken?.schoolName;
+
+      if (decodeToken?.role === "admin") {
+        state.classAndSectionData.id = decodeToken?.adminId;
+        state.id = decodeToken?.adminId;
       }
-      state.schoolName = decodeToken.schoolName;
     },
     updateAdminData(state, action) {
       state.data = { ...state.data, ...action.payload };

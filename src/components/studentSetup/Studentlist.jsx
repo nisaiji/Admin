@@ -39,7 +39,7 @@ export default function Studentlist() {
   const { t } = useTranslation();
 
   // Redux selectors to fetch required state
-  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+  const { classAndSectionData } = useSelector(
     (state) => state.appAuth
   );
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);

@@ -14,7 +14,7 @@ This component provides a menu interface for admin and teachers, allowing quick 
 ## State and Hooks
 - `loading (useState)`: Controls spinner visibility.
 - `isTeacher (Redux)`: Determines if logged-in user is a teacher.
-- `classAndSectionData / classAndSectionDataOfTeacher (Redux)`: Class and section info.
+- `classAndSectionData / teacherData (Redux)`: Class and section info.
 - `isDarkMode (Redux)`: Theme mode.
 - `useNavigate (react-router)`: Handles route navigation.
 

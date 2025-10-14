@@ -9,7 +9,7 @@ import REGEX from "../utils/regix";
 import { setAuth } from "../store/AppAuthSlice";
 import { useDispatch } from "react-redux";
 
-const Step5 = ({ goback, setStep, setLoading }) => {
+const Step5 = ({ goback, setStep, loading, setLoading }) => {
   const dispatch = useDispatch();
   const [t] = useTranslation();
   const Countries = [{ name: "India", code: "IN" }];
@@ -419,6 +419,7 @@ const Step5 = ({ goback, setStep, setLoading }) => {
           data-testid="submit"
           type="button"
           onClick={handleSubmit}
+          disabled={loading}
           className="rounded-lg px-4 h-8 bg-backgroundBlue text-white font-medium flex items-center justify-center active:scale-90"
         >
           {t("buttons.continue")}

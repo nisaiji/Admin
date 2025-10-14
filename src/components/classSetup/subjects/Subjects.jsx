@@ -20,9 +20,8 @@ import {
 
 export default function Subjects() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
-    (state) => state.appAuth
-  );
+  const { classAndSectionData, teacherData } =
+    useSelector((state) => state.appAuth);
   const role = useSelector((state) => state.appAuth.role);
 
   const [loading, setLoading] = useState(false);
@@ -165,7 +164,7 @@ export default function Subjects() {
 
   return (
     <div
-      className={`min-h-screen p-8 flex gap-5 ${
+      className={`min-h-screen p-8 flex gap-5 select-none ${
         isDarkMode ? "bg-background2 text-textPrimary" : "text-textBlack"
       }`}
     >

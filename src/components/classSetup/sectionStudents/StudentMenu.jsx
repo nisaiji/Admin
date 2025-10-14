@@ -13,13 +13,11 @@ import marksheet from "../../../assets/images/darkmode/marksheet.png";
 export default function StudentMenu() {
   const navigate = useNavigate();
   const role = useSelector((state) => state.appAuth.role);
-  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+  const { classAndSectionData, teacherData } = useSelector(
     (state) => state.appAuth
   );
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [loading, setLoading] = useState(false);
-  // const [t] = useTranslation();
-  // console.log(classAndSectionDataOfTeacher);
 
   return (
     <div
@@ -52,7 +50,7 @@ export default function StudentMenu() {
               } font-semibold px-2 py-3`}
             >
               {role === "classTeacher"
-                ? `${classAndSectionDataOfTeacher?.className} ${classAndSectionDataOfTeacher?.sectionName}`
+                ? `${teacherData?.className} ${teacherData?.sectionName}`
                 : role === "admin"
                 ? `${classAndSectionData?.className} ${classAndSectionData?.sectionName}`
                 : ""}
@@ -60,58 +58,58 @@ export default function StudentMenu() {
           </div>
           <div className="flex mt-5 ">
             {/* student section */}
-            <div
-              onClick={() => {
-                role === "classTeacher"
-                  ? navigate("/student-menu/student-section")
-                  : role === "admin"
-                  ? navigate("/class-setup/student-menu/student-section")
-                  : "";
-              }}
-              className="size-[162px] cursor-pointer bg-[#0A81D11A] rounded-[14px] flex flex-col justify-around items-center "
-            >
-              <img
-                src={student}
-                alt="classroom"
-                className="size-16 object-contain"
-              />
-              <p className="text-base font-normal text-textPrimary">
-                Classroom
-              </p>
-            </div>
-            {/* attendnace */}
-            <div
-              onClick={() => {
-                role === "classTeacher"
-                  ? navigate("/student-menu/attendance")
-                  : role === "admin"
-                  ? navigate("/class-setup/student-menu/attendance")
-                  : "";
-              }}
-              className="size-[162px] cursor-pointer bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center  "
-            >
-              <img
-                src={attendance}
-                alt="classroom"
-                className="size-16 object-contain"
-              />
-              <p className="text-base font-normal text-textPrimary">
-                Attendance
-              </p>
-            </div>
-            {/* calendar */}
-            {role === "admin" && (
-              <div className="size-[162px] cursor-pointer bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center  ">
+            {(role === "admin" || role === "classTeacher") && (
+              <div
+                onClick={() => {
+                  role === "classTeacher"
+                    ? navigate("/student-menu/student-section")
+                    : role === "admin"
+                    ? navigate("/class-setup/student-menu/student-section")
+                    : "";
+                }}
+                className="size-[162px] cursor-pointer bg-[#0A81D11A] rounded-[14px] flex flex-col justify-around items-center "
+              >
                 <img
-                  src={calendar}
+                  src={student}
                   alt="classroom"
                   className="size-16 object-contain"
                 />
                 <p className="text-base font-normal text-textPrimary">
-                  Calendar
+                  Classroom
                 </p>
               </div>
             )}
+            {/* attendnace */}
+            {(role === "admin" || role === "classTeacher") && (
+              <div
+                onClick={() => {
+                  role === "classTeacher"
+                    ? navigate("/student-menu/attendance")
+                    : role === "admin"
+                    ? navigate("/class-setup/student-menu/attendance")
+                    : "";
+                }}
+                className="size-[162px] cursor-pointer bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center  "
+              >
+                <img
+                  src={attendance}
+                  alt="classroom"
+                  className="size-16 object-contain"
+                />
+                <p className="text-base font-normal text-textPrimary">
+                  Attendance
+                </p>
+              </div>
+            )}
+            {/* calendar */}
+            {/* <div className="size-[162px] cursor-pointer bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center  ">
+              <img
+                src={calendar}
+                alt="classroom"
+                className="size-16 object-contain"
+              />
+              <p className="text-base font-normal text-textPrimary">Calendar</p>
+            </div> */}
             {/* subjects */}
             {(role === "classTeacher" || role === "admin") && (
               <div

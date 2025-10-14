@@ -85,26 +85,7 @@ function App() {
           {/* Routes that require user authentication */}
           <Route element={<RequireUser />}>
             <Route path="/" element={<Home />}>
-              {role === "classTeacher" ? (
-                <>
-                  {/* Routes available for teacher users */}
-                  <Route path="" element={<DashBoard />} />
-                  <Route path="student-menu" element={<StudentMenu />} />
-                  <Route
-                    path="student-menu/student-section"
-                    element={<StudentSection />}
-                  />
-                  <Route
-                    path="student-menu/attendance"
-                    element={<AttendancePopup />}
-                  />
-                   <Route
-                    path="student-menu/subjects"
-                    element={<Subjects />}
-                  />
-                  <Route path="teacher-profile" element={<TeacherProfile />} />
-                </>
-              ) : (
+              {role === "admin" ? (
                 <>
                   {/* Routes available for admin users */}
                   <Route path="" element={<DashBoard />} />
@@ -161,6 +142,29 @@ function App() {
                   <Route path="add-student" element={<AddStudentForm />} />
                   <Route path="notice" element={<Notice />} />
                 </>
+              ) : role === "classTeacher" ? (
+                <>
+                  {/* Routes available for teacher users */}
+                  <Route path="" element={<DashBoard />} />
+                  <Route path="student-menu" element={<StudentMenu />} />
+                  <Route
+                    path="student-menu/student-section"
+                    element={<StudentSection />}
+                  />
+                  <Route
+                    path="student-menu/attendance"
+                    element={<AttendancePopup />}
+                  />
+                  <Route path="student-menu/subjects" element={<Subjects />} />
+                  <Route path="teacher-profile" element={<TeacherProfile />} />
+                </>
+              ) : role === "teacher" ? (
+                <>
+                  <Route path="" element={<DashBoard />} />
+                  <Route path="teacher-profile" element={<TeacherProfile />} />
+                </>
+              ) : (
+                <></>
               )}
             </Route>
           </Route>

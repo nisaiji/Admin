@@ -201,7 +201,6 @@ export default function Marksheet() {
     maxGrade
   ) => {
     if (!grade) return;
-    // console.log(grade, maxGrade);
     // console.log(gradeOrder.indexOf(grade), gradeOrder.indexOf(maxGrade));
 
     if (gradeOrder.indexOf(grade) < gradeOrder.indexOf(maxGrade)) {

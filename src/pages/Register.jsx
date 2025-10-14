@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { generateToken } from "../notifications/firebaseConfig";
 
 function Register() {
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -143,28 +144,33 @@ function Register() {
     <Step1
       goback={goBack}
       setStep={setStep}
+      loading={loading}
       setLoading={(bool) => setLoading(bool)}
       currentStep={currentStep}
     />,
     <Step2
       goback={goBack}
       setStep={setStep}
+      loading={loading}
       setLoading={(bool) => setLoading(bool)}
       currentStep={currentStep}
     />,
     <Step3
       goback={goBack}
       setStep={setStep}
+      loading={loading}
       setLoading={(bool) => setLoading(bool)}
     />,
     <Step4
       goback={goBack}
       setStep={setStep}
+      loading={loading}
       setLoading={(bool) => setLoading(bool)}
     />,
     <Step5
       goback={goBack}
       setStep={setStep}
+      loading={loading}
       setLoading={(bool) => setLoading(bool)}
     />,
     <Step6

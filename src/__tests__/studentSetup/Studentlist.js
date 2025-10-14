@@ -178,7 +178,7 @@ const mockState = {
   },
   appAuth: {
     classAndSectionData: [{ id: 1, name: "Class 1 - A" }],
-    classAndSectionDataOfTeacher: [{ id: 1, name: "Class 1 - A" }],
+    teacherData: [{ id: 1, name: "Class 1 - A" }],
   },
 };
 

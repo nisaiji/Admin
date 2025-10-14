@@ -24,7 +24,7 @@ import { Stack } from "@mui/system";
 
 export default function Notice() {
   const { t } = useTranslation();
-  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+  const { classAndSectionData } = useSelector(
     (state) => state.appAuth
   );
   const [requests, setRequests] = useState([]);

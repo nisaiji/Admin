@@ -13,7 +13,7 @@ import moment from "moment";
 
 export default function AttendancePopup() {
   // Redux state selectors
-  const { classAndSectionData, classAndSectionDataOfTeacher } = useSelector(
+  const { classAndSectionData, teacherData } = useSelector(
     (state) => state.appAuth
   );
   const role = useSelector((state) => state.appAuth.role);
@@ -40,20 +40,16 @@ export default function AttendancePopup() {
       ).getDate(),
     [currentDate]
   );
-  // console.log(classAndSectionData);
+  // console.log(teacherData);
 
   const startTime = useMemo(
     () =>
       role === "classTeacher"
-        ? classAndSectionDataOfTeacher?.startTime
+        ? teacherData?.sectionStartTime
         : role === "admin"
         ? classAndSectionData?.startTime
         : "",
-    [
-      role,
-      classAndSectionDataOfTeacher?.startTime,
-      classAndSectionData?.startTime,
-    ]
+    [role, teacherData?.sectionStartTime, classAndSectionData?.startTime]
   );
 
   /**
@@ -242,7 +238,7 @@ export default function AttendancePopup() {
       // Determine API endpoint based on role
       const url =
         role === "classTeacher"
-          ? `${EndPoints.TEACHER.UPDATE_ATTENDANCE}/${classAndSectionDataOfTeacher?.sectionId}`
+          ? `${EndPoints.TEACHER.UPDATE_ATTENDANCE}/${teacherData?.sectionId}`
           : role === "admin"
           ? `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${classAndSectionData?.sectionId}`
           : "";
@@ -284,10 +280,9 @@ export default function AttendancePopup() {
         59,
         999
       ).getTime();
-      // console.log(classAndSectionDataOfTeacher);
       const url =
         role === "classTeacher"
-          ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${classAndSectionDataOfTeacher?.sectionId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionDataOfTeacher?.sessionId}`
+          ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${teacherData?.sectionId}&startTime=${startTime}&endTime=${endTime}&session=${teacherData?.sessionId}`
           : role === "admin"
           ? `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.selectedSession?.school}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.selectedSession?._id}`
           : "";
@@ -437,7 +432,7 @@ export default function AttendancePopup() {
         endTime,
         sessionId:
           role === "classTeacher"
-            ? classAndSectionDataOfTeacher?.sessionId
+            ? teacherData?.sessionId
             : role === "admin"
             ? classAndSectionData?.selectedSession?._id
             : "",
@@ -463,7 +458,7 @@ export default function AttendancePopup() {
         endTime,
         sessionId:
           role === "classTeacher"
-            ? classAndSectionDataOfTeacher?.sessionId
+            ? teacherData?.sessionId
             : role === "admin"
             ? classAndSectionData?.selectedSession?._id
             : "",
@@ -489,8 +484,8 @@ export default function AttendancePopup() {
 
     if (
       (role === "classTeacher" &&
-        classAndSectionDataOfTeacher?.sectionId &&
-        classAndSectionDataOfTeacher?.sessionId) ||
+        teacherData?.sectionId &&
+        teacherData?.sessionId) ||
       (role === "admin" &&
         classAndSectionData?.selectedSession?.school &&
         classAndSectionData?.selectedSession?._id &&
@@ -505,8 +500,8 @@ export default function AttendancePopup() {
     classAndSectionData?.selectedSession?.school,
     classAndSectionData?.sectionId,
     classAndSectionData?.classId,
-    classAndSectionDataOfTeacher?.sessionId,
-    classAndSectionDataOfTeacher?.sectionId,
+    teacherData?.sessionId,
+    teacherData?.sectionId,
   ]);
 
   // attendance download in pdf format
@@ -514,11 +509,20 @@ export default function AttendancePopup() {
     const doc = new jsPDF();
 
     // Title
-    const title = `${classAndSectionData?.className}-${
-      classAndSectionData?.sectionName
-    } Monthly Attendance ${currentDate.toLocaleString("default", {
-      month: "long",
-    })} ${currentDate.getFullYear()}`;
+    let title;
+    if (role === "admin") {
+      title = `${classAndSectionData?.className}-${
+        classAndSectionData?.sectionName
+      } Monthly Attendance ${currentDate.toLocaleString("default", {
+        month: "long",
+      })} ${currentDate.getFullYear()}`;
+    } else if (role === "classTeacher") {
+      title = `${teacherData?.className}-${
+        teacherData?.sectionName
+      } Monthly Attendance ${currentDate.toLocaleString("default", {
+        month: "long",
+      })} ${currentDate.getFullYear()}`;
+    }
     doc.setFontSize(16);
     doc.text(title, 14, 20);
 
@@ -601,11 +605,19 @@ export default function AttendancePopup() {
     });
 
     // Save PDF
-    doc.save(
-      `Attendance_${classAndSectionData?.className}_${
-        classAndSectionData?.sectionName
-      }_${currentDate.getFullYear()}_${currentDate.getMonth() + 1}.pdf`
-    );
+    if (role === "admin") {
+      doc.save(
+        `Attendance_${classAndSectionData?.className}_${
+          classAndSectionData?.sectionName
+        }_${currentDate.getFullYear()}_${currentDate.getMonth() + 1}.pdf`
+      );
+    } else if (role === "classTeacher") {
+      doc.save(
+        `Attendance_${teacherData?.className}_${
+          teacherData?.sectionName
+        }_${currentDate.getFullYear()}_${currentDate.getMonth() + 1}.pdf`
+      );
+    }
   };
 
   return (
