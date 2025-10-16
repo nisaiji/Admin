@@ -17,7 +17,6 @@ import StudentUpdate from "./components/studentSetup/StudentUpdate";
 import AdminProfile from "./components/admin/AdminProfile";
 import i18n from "./assets/locale/i18n";
 import { I18nextProvider } from "react-i18next";
-import { getItem } from "./services/LocalStorageManager";
 import React, { useEffect, useState } from "react";
 import { setAuthData } from "./store/AppAuthSlice";
 import Requests from "./components/dashBoard/Request";
@@ -60,7 +59,7 @@ function App() {
     ) {
       setIsMobile(true);
     }
-    const token = getItem("access_token");
+    const token = localStorage.getItem("access_token");
     if (token) {
       dispatch(setAuthData(token));
     }

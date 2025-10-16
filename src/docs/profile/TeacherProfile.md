@@ -1,6 +1,6 @@
 # TeacherProfile Component Documentation
 
-This component allows teachers to view and update their personal profile information.
+This component allows class teachers and subject teachers to view and update their personal profile information.
 
 ## Features
 

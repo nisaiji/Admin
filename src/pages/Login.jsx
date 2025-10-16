@@ -107,16 +107,6 @@ function Login() {
         if (res?.statusCode === 200) {
           const decodedToken = jwtDecode(res?.result?.accessToken);
           // console.log(decodedToken);
-
-          // const fcmToken = await generateToken();
-          // const result = await axiosClient.put(
-          //   decodedToken?.role === "admin"
-          //     ? EndPoints.ADMIN.UPDATE_FCM_TOKEN
-          //     : EndPoints.TEACHER.UPDATE_FCM_TOKEN,
-          //   {
-          //     fcmToken,
-          //   }
-          // );
           // console.log({ result });
           if (decodedToken?.role === "admin") {
             if (decodedToken?.active) {
@@ -250,13 +240,6 @@ function Login() {
                 {formik.errors.password}
               </div>
             )}
-
-            {/* Forgot password link */}
-            {/* <div className="text-white text-end text-sm mt-6">
-              <Link to="/forgot-password" className="text-[#040320]/70">
-                {t("login.forgotPassword")}
-              </Link>
-            </div> */}
             {/* Submit button */}
             <div className="mt-6">
               <button

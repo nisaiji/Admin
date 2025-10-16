@@ -7,7 +7,7 @@ import confirm1 from "../../../assets/images/darkmode/confirm1.png";
 import confirm2 from "../../../assets/images/darkmode/confirm2.png";
 import cross from "../../../assets/images/darkmode/cross.png";
 import addIcon from "../../../assets/images/darkmode/plus.png";
-import CreateMarksheetPopup from "./MarksheetPopup";
+import CreateExamPopup from "./ExamPopup";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import ConfirmationPopup from "../../ConfirmationPopup2";
@@ -926,7 +926,7 @@ export default function Marksheet() {
 
       {/* Create Marksheet Popup */}
       {showPopup && (
-        <CreateMarksheetPopup
+        <CreateExamPopup
           onClose={() => setShowPopup(false)}
           classAndSectionData={classAndSectionData}
           getExamList={getExamList}

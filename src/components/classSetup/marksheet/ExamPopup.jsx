@@ -9,7 +9,7 @@ import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { FormControl, MenuItem, Select } from "@mui/material";
 
-export default function CreateMarksheetPopup({
+export default function CreateExamPopup({
   onClose,
   classAndSectionData,
   getExamList,

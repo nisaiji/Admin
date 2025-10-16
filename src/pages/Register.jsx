@@ -1,13 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+/**
+ * Register.jsx
+ *
+ * This component manages the multi-step registration process for an admin user.
+ * It handles navigation between steps, progress display, API calls for registration,
+ * and finalization of the registration process. It uses React hooks for state management,
+ * Redux for authentication state, and various UI components for each registration step.
+ */
+import React, { useCallback, useMemo, useState } from "react";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import Step4 from "./Step4";
 import Step5 from "./Step5";
 import Step6 from "./Step6";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Tick from "../assets/images/Tick.png";
-import logo from "../assets/images/deer logo.png";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
@@ -18,7 +25,7 @@ import { useDispatch } from "react-redux";
 import { generateToken } from "../notifications/firebaseConfig";
 
 function Register() {
-  
+  // React hooks and states for navigation, loading, and step tracking
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -28,16 +35,28 @@ function Register() {
   );
   const [t] = useTranslation();
 
+  /**
+   * Handles navigation back to the login page and clears local storage.
+   */
   const goBack = useCallback(() => {
     localStorage.clear();
     navigate("/login");
   }, [navigate]);
 
+  /**
+   * Sets the current registration step and persists it in local storage.
+   * @param {number} step - The step number to set as current.
+   */
   const setStep = useCallback((step) => {
     setCurrentStep(step);
     localStorage.setItem("page", step);
   }, []);
 
+  /**
+   * Fetches admin data and checks registration progress.
+   * If registration is complete, updates FCM token and navigates to home.
+   * @param {boolean} shouldCheckProgress - Whether to check registration progress.
+   */
   const getadmin = useCallback(
     async (shouldCheckProgress = false) => {
       try {
@@ -87,6 +106,7 @@ function Register() {
     [dispatch, navigate, toastDisplayed]
   );
 
+  // Step numbers and labels for the progress bar
   const steps = [1, 2, 3, 4, 5, 6];
   const labels = [
     "Verify Phone",
@@ -97,6 +117,9 @@ function Register() {
     t("register.finish"),
   ];
 
+  /**
+   * Renders the progress bar and step labels.
+   */
   const Progress = useMemo(
     () => (
       <div>
@@ -140,6 +163,7 @@ function Register() {
     [currentStep, t]
   );
 
+  // Array of step components, each representing a registration step
   const stepComponents = [
     <Step1
       goback={goBack}
@@ -180,6 +204,7 @@ function Register() {
     />,
   ];
 
+  // Main render
   return (
     <>
       {/* <div id="otp_input_container"></div> */}

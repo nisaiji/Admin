@@ -22,7 +22,7 @@ This component manages monthly attendance records for Admin and Teacher roles. I
 - `holidays`, `workdays`: mark special days.
 - `totalAttendanceDays`: number of valid working days.
 - `loading`, `toastDisplayed`: UI states.
-- `isTeacher`: determines API endpoints and permissions.
+- `role`: determines API endpoints and permissions.
 - Uses `Redux selectors` to get class/section info.
 - `useEffect` triggers fetch events and attendance on month change.
 

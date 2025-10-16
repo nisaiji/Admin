@@ -1,11 +1,11 @@
 # StudentMenu Component Documentation
 
-This component provides a menu interface for admin and teachers, allowing quick navigation to key sections such as Classroom, Attendance, and Calendar.
+This component provides a menu interface for admin and class teachers, allowing quick navigation to key sections such as Classroom, Attendance, and Calendar.
 
 ## Features
 
 - Displays class and section name dynamically.
-- Different behavior for admin/teacher.
+- Different behavior for admin/class teacher.
 - Quick navigation buttons (Classroom, Attendance, Calendar).
 - Dark mode and light mode support.
 - Loading spinner overlay during data fetch (controlled by local state).
@@ -13,7 +13,7 @@ This component provides a menu interface for admin and teachers, allowing quick 
 
 ## State and Hooks
 - `loading (useState)`: Controls spinner visibility.
-- `isTeacher (Redux)`: Determines if logged-in user is a teacher.
+- `role (Redux)`: Determines if logged-in user is a admin, classTeacher or teacher.
 - `classAndSectionData / teacherData (Redux)`: Class and section info.
 - `isDarkMode (Redux)`: Theme mode.
 - `useNavigate (react-router)`: Handles route navigation.
@@ -39,7 +39,7 @@ This component provides a menu interface for admin and teachers, allowing quick 
 
 - Spinner overlays entire screen when `loading` is true.
 - Adjusts theme styles based on `isDarkMode`.
-- Displays appropriate class info for teacher vs. student.
+- Displays appropriate class info for teacher.
 - Navigation triggered by tile clicks.
 - Placeholder commented-out code for academic year selection (not active).
 

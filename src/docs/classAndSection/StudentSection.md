@@ -1,11 +1,11 @@
 # 🎓 StudentSection
 
 `StudentSection` is a React component that manages **students inside a class section**.  
-It supports viewing, searching, adding, editing, deleting, and bulk importing students, with full support for **Admin** and **Teacher** roles.
+It supports viewing, searching, adding, editing, deleting, and bulk importing students, with full support for **Admin** and **Class Teacher** roles.
 
 ---
 
-## 📌 Features (Shared by Admin & Teacher)
+## 📌 Features (Shared by Admin & Class Teacher)
 - List students by class/section
 - Search students by name
 - Add/register new students with validation
@@ -13,7 +13,7 @@ It supports viewing, searching, adding, editing, deleting, and bulk importing st
 - Delete with confirmation  
 - Import students from Excel  
 - Download sample Excel template  
-- Role-based behavior (Admin vs Teacher)  
+- Role-based behavior (Admin vs Class Teacher)  
 - Dark/Light mode support  
 - i18n/localization ready  
 
@@ -38,7 +38,7 @@ It supports viewing, searching, adding, editing, deleting, and bulk importing st
 
 ## 📌 Main Flows
 
-- Fetch Students → Different API for Admin/Teacher.
+- Fetch Students → Different API for Admin/Class Teacher.
 - Search → Filter by first/last name.
 - Add Student → Validates names + 10-digit phone. Prevents duplicates.
 - Edit Student → Inline edit row → save via API.
@@ -50,7 +50,7 @@ It supports viewing, searching, adding, editing, deleting, and bulk importing st
 
 Admin
 
-- ADMIN.SECTION_INFO /:sectionId → get section/teacher info
+- ADMIN.SECTION_INFO /:sectionId → get section/Class Teacher info
 - ADMIN.GET_SECTION_STUDENTS?school=...&section=...&session=... → get student list
 - ADMIN.REGISTER_SECTION_STUDENT → POST (body: { firstname, lastname, parentName, gender, phone, sectionId })
 - ADMIN.UPDATE_SECTION_STUDENT/:studentId → PUT (body: { firstname, lastname, parentName, gender, phone })
@@ -58,7 +58,7 @@ Admin
 - ADMIN.UPLOAD_EXCEL → POST (FormData: classId, sectionId, file)
 - ADMIN.GET_DEMO_EXCEL → GET (blob download)
 
-Teacher
+Class Teacher
 - TEACHER.GET_SECTION_STUDENTS?school=...&section=...&session=... → get student list
 - TEACHER.REGISTER_SECTION_STUDENT → POST
 - TEACHER.UPDATE_SECTION_STUDENT/:studentId → PUT
