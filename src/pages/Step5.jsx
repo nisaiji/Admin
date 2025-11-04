@@ -1,3 +1,11 @@
+/**
+ * Step5.jsx
+ *
+ * This component handles the fifth step of the admin registration process: entering and validating address information.
+ * It manages country, state, district, city, pincode, and address fields, including dynamic state/district selection,
+ * validation, API submission, and navigation to the next step.
+ * Uses React hooks for state, Redux for authentication state, and utility functions for validation and notifications.
+ */
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FormControl, MenuItem, Select } from "@mui/material";
@@ -27,6 +35,10 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
 
+  /**
+   * Handles input changes for all form fields except country and state.
+   * @param {object} e - The input change event.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -36,6 +48,10 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
     }));
   };
 
+  /**
+   * Handles country selection, resets dependent fields, and loads states.
+   * @param {object} e - The input change event.
+   */
   const handleCountryChange = (e) => {
     const country = e.target.value;
     setFormData({
@@ -50,6 +66,10 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
     setDistricts([]);
   };
 
+  /**
+   * Handles state selection, resets dependent fields, and loads districts.
+   * @param {object} e - The input change event.
+   */
   const handleStateChange = (e) => {
     const stateValue = e.target.value;
     const selectedState = StateAndDistricts.states.find(
@@ -66,6 +86,10 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
     setDistricts(selectedState ? selectedState.districts : []);
   };
 
+  /**
+   * Validates all address fields and returns an error object.
+   * @returns {object} - Errors for each invalid field.
+   */
   const validate = () => {
     const newErrors = {};
     if (!formData.country.trim())
@@ -84,6 +108,10 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
     return newErrors;
   };
 
+  /**
+   * Handles form submission, validates input, updates address via API,
+   * updates Redux state, and navigates to the next step.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -100,7 +128,6 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
       }
     } catch (e) {
       toast.error(e);
-      // console.error("Submission error:", e);
     } finally {
       setLoading(false);
     }
@@ -169,9 +196,9 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
               ))}
             </Select>
           </FormControl>
-          {errors.country && (
+          {errors?.country && (
             <div className="text-textRed text-left text-sm p-1">
-              {errors.country}
+              {errors?.country}
             </div>
           )}
         </div>
@@ -247,9 +274,9 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
               ))}
             </Select>
           </FormControl>
-          {errors.state && (
+          {errors?.state && (
             <div className="text-textRed text-left text-sm p-1">
-              {errors.state}
+              {errors?.state}
             </div>
           )}
         </div>
@@ -323,9 +350,9 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
               ))}
             </Select>
           </FormControl>
-          {errors.district && (
+          {errors?.district && (
             <div className="text-textRed text-left text-sm p-1 ">
-              {errors.district}
+              {errors?.district}
             </div>
           )}
         </div>
@@ -344,12 +371,12 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
             value={formData.city}
             disabled={!formData.district}
           />
-          {errors.city && (
+          {errors?.city && (
             <div
               data-testid="cityError"
               className="text-textRed text-left text-sm p-1 "
             >
-              {errors.city}
+              {errors?.city}
             </div>
           )}
         </div>
@@ -371,12 +398,12 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
           value={formData.pincode}
           disabled={!formData.district}
         />
-        {errors.pincode && (
+        {errors?.pincode && (
           <div
             data-testid="pincodeError"
             className="text-textRed text-left text-sm p-1 "
           >
-            {errors.pincode}
+            {errors?.pincode}
           </div>
         )}
       </div>
@@ -396,17 +423,17 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
           value={formData.address}
           disabled={!formData.district}
         />
-        {errors.address && (
+        {errors?.address && (
           <div
             data-testid="addressError"
             className="text-textRed text-left text-sm p-1 "
           >
-            {errors.address}
+            {errors?.address}
           </div>
         )}
       </div>
 
-      {/* Buttons */}
+      {/* Navigation Buttons */}
       <div className="w-full mt-5 flex justify-between">
         <button
           type="button"

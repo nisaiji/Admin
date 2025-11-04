@@ -37,7 +37,6 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
     [t("labels.username"), currTeacher?.username || CONSTANT.NA],
     [t("labels.address"), currTeacher?.address || CONSTANT.NA],
   ];
-  // console.log(currTeacher);
 
   const educationDetails = [
     [t("labels.university"), currTeacher?.university || CONSTANT.NA],

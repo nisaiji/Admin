@@ -21,12 +21,18 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
     updateDate({ month: newMonth, year: newYear });
   };
 
+  /**
+   * Handle previous month navigation.
+   */
   const handlePrevMonth = () => {
     const newMonth = month === 0 ? 11 : month - 1;
     const newYear = month === 0 ? year - 1 : year;
     updateCalendar(newMonth, newYear);
   };
 
+  /**
+   * Handle next month navigation.
+   */
   const handleNextMonth = () => {
     const newMonth = month === 11 ? 0 : month + 1;
     const newYear = month === 11 ? year + 1 : year;

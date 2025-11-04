@@ -10,6 +10,21 @@ import calendar from "../../../assets/images/darkmode/calendarimg.png";
 import subject from "../../../assets/images/darkmode/subject.png";
 import marksheet from "../../../assets/images/darkmode/marksheet.png";
 
+/**
+ * StudentMenu
+ *
+ * Top-level menu component for student-related features (Classroom, Attendance, Subjects, Marksheet).
+ * Uses redux state to determine user role, class/section info and app theme (dark mode).
+ *
+ * Behavior:
+ * - Renders different navigation routes depending on the user's role:
+ *   - classTeacher: routes are under "/student-menu/*"
+ *   - admin: routes are under "/class-setup/student-menu/*"
+ *
+ * Notes:
+ * - This component reads `role`, `classAndSectionData` and `teacherData` from `state.appAuth`.
+ * - `isDarkMode` (from `state.appConfig`) controls styling classes for light/dark UI.
+ */
 export default function StudentMenu() {
   const navigate = useNavigate();
   const role = useSelector((state) => state.appAuth.role);
@@ -102,14 +117,21 @@ export default function StudentMenu() {
               </div>
             )}
             {/* calendar */}
-            {/* <div className="size-[162px] cursor-pointer bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center  ">
-              <img
-                src={calendar}
-                alt="classroom"
-                className="size-16 object-contain"
-              />
-              <p className="text-base font-normal text-textPrimary">Calendar</p>
-            </div> */}
+            {role === "admin" && (
+              <div
+                onClick={() => navigate("/class-setup/student-menu/tags")}
+                className="size-[162px] cursor-pointer bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center "
+              >
+                <img
+                  src={calendar}
+                  alt="classroom"
+                  className="size-16 object-contain"
+                />
+                <p className="text-base font-normal text-textPrimary">
+                  Tags
+                </p>
+              </div>
+            )}
             {/* subjects */}
             {(role === "classTeacher" || role === "admin") && (
               <div

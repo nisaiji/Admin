@@ -1,3 +1,11 @@
+/**
+ * Step4.jsx
+ *
+ * This component handles the fourth step of the admin registration process: entering basic school information.
+ * It manages input fields for school name, affiliation number, and username, validates the input,
+ * sends the data to the backend, and navigates to the next step upon success.
+ * Uses React hooks for state, Redux for authentication state, and utility functions for validation and notifications.
+ */
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { axiosClient } from "../services/axiosClient";
@@ -17,11 +25,20 @@ const Step4 = ({ goback, setStep, loading, setLoading }) => {
   const [errors, setErrors] = useState({});
   const [t] = useTranslation();
 
+  /**
+   * Handles input changes for all form fields.
+   * @param {object} e - The input change event.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * Validates the form fields for school name, affiliation number, and username.
+   * Sets error messages if validation fails.
+   * @returns {boolean} - True if valid, false otherwise.
+   */
   const validate = () => {
     const newErrors = {};
     if (!formData.schoolName.trim()) {
@@ -43,6 +60,10 @@ const Step4 = ({ goback, setStep, loading, setLoading }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * Handles form submission, validates input, updates basic info via API,
+   * updates Redux state, and navigates to the next step.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -128,7 +149,7 @@ const Step4 = ({ goback, setStep, loading, setLoading }) => {
         )}
       </div>
 
-      {/* Buttons */}
+      {/* Navigation Buttons */}
       <div className="flex justify-between w-full mt-5">
         <button
           type="button"

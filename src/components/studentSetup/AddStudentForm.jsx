@@ -1,3 +1,13 @@
+/**
+ * AddStudentForm.jsx
+ *
+ * This component provides a form for adding a new student to a class section.
+ * It uses Formik for form state management and validation, and Material UI for styled form controls.
+ * The form includes fields for student and parent details, such as name, gender, class, section, phone, address, blood group, date of birth, and more.
+ * The component fetches class and section data from the backend, validates input, and submits the data to the backend API.
+ * It displays loading and toast notifications, and supports dark mode styling.
+ * Uses React hooks for state, Redux for config/auth state, and i18next for translations.
+ */
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +31,9 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment from "moment";
 
+/**
+ * AddStudent component renders the form and handles all logic for adding a student.
+ */
 const AddStudent = () => {
   const navigate = useNavigate();
   const { classAndSectionData } = useSelector((state) => state.appAuth);
@@ -30,6 +43,8 @@ const AddStudent = () => {
   const [sectionList, setSectionList] = useState([]);
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+
+  // Class options for dropdown (translated)
   const classOptions = [
     "preNursery",
     "nursery",
@@ -49,7 +64,11 @@ const AddStudent = () => {
     "twelve",
   ].map((key) => t(`options.${key}`));
 
-  // Custom validation function
+  /**
+   * Custom validation function for student data.
+   * @param {object} student - Student form values.
+   * @returns {string} - Error message if invalid, empty string if valid.
+   */
   const validateData = (student) => {
     if (
       !student.firstname.trim() ||
@@ -82,9 +101,15 @@ const AddStudent = () => {
     return "";
   };
 
+  /**
+   * Capitalizes the first letter of a string and converts the rest to lowercase.
+   * @param {string} str - Input string.
+   * @returns {string} - Capitalized string.
+   */
   const capitalize = (str) =>
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
+  // Formik setup for form state and submission
   const formik = useFormik({
     initialValues: {
       firstname: "",
@@ -182,13 +207,16 @@ const AddStudent = () => {
     }
   };
 
+  // Fetch class list on mount
   useEffect(() => {
     getClassList();
   }, []);
 
+  // Dropdown options
   const options = [t("options.male"), t("options.female"), t("options.other")];
   const bloodGroupOptions = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
+  // Field definitions for rendering
   const fields = [
     { name: "firstname", label: "First Name", type: "text" },
     { name: "lastname", label: "Last Name", type: "text" },
@@ -217,6 +245,7 @@ const AddStudent = () => {
     { name: "parentAddress", label: "Parent Address", optional: true },
   ];
 
+  // Theme configuration for Material UI components
   const theme = (isDarkMode) =>
     createTheme({
       palette: {
@@ -271,6 +300,10 @@ const AddStudent = () => {
       },
     });
 
+  /**
+   * Renders a text input field for the form.
+   * @param {string} name - Field name.
+   */
   const renderField = (name) => {
     const field = fields.find((f) => f.name === name);
     if (!field) return null;
@@ -327,6 +360,9 @@ const AddStudent = () => {
     );
   };
 
+  /**
+   * Renders the gender dropdown field.
+   */
   const renderGenderDropdown = () => (
     <div className="flex flex-col w-full mt-3">
       <label
@@ -395,6 +431,9 @@ const AddStudent = () => {
     </div>
   );
 
+  /**
+   * Renders the class dropdown field.
+   */
   const renderClassDropdown = () => (
     <div className="flex flex-col w-full mt-3">
       <label
@@ -471,6 +510,9 @@ const AddStudent = () => {
     </div>
   );
 
+  /**
+   * Renders the section dropdown field.
+   */
   const renderSectionDropdown = () => (
     <div className="flex flex-col w-full mt-3">
       <label

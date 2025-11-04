@@ -31,6 +31,9 @@ import StudentMenu from "./components/classSetup/sectionStudents/StudentMenu";
 import AttendancePopup from "./components/AttendancePopup";
 import Subjects from "./components/classSetup/subjects/Subjects";
 import Marksheet from "./components/classSetup/marksheet/Marksheet";
+import Tags from "./components/classSetup/tags/Tags";
+import ForgotPassword from "./pages/ForgotPassword";
+import ChangePassword from "./pages/ChangePassword";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -125,6 +128,10 @@ function App() {
                     element={<Subjects />}
                   />
                   <Route
+                    path="class-setup/student-menu/tags"
+                    element={<Tags />}
+                  />
+                  <Route
                     path="class-setup/student-menu/marksheet"
                     element={<Marksheet />}
                   />
@@ -171,6 +178,8 @@ function App() {
           <Route element={<NotRequireUser />}>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/change-password" element={<ChangePassword />} />
           </Route>
         </Routes>
       </I18nextProvider>

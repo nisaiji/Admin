@@ -1,3 +1,11 @@
+/**
+ * Navbar.jsx
+ *
+ * This component renders the main navigation bar for the admin dashboard.
+ * It provides navigation links based on user role, dark mode toggle, and profile/logout menu.
+ * Uses React hooks for state, Redux for authentication/config state, and Material UI for switch styling.
+ * Handles menu open/close logic, click outside detection, and logout functionality.
+ */
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,6 +26,7 @@ import { FormControlLabel, Switch } from "@mui/material";
 import { styled } from "@mui/system";
 
 const Navbar = () => {
+  // Redux and navigation hooks
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { data, teacherData } = useSelector((state) => state.appAuth);
@@ -26,25 +35,29 @@ const Navbar = () => {
   const sectionId = useSelector((state) => state.appAuth.section);
   const classId = useSelector((state) => state.appAuth.class);
 
+  // Local state for menu toggles
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [requestsMenuOpen, setRequestsMenuOpen] = useState(false);
+
+  // Refs for menu elements
   const menuRef = useRef(null);
   const profileMenuRef = useRef(null);
   const requestsMenuRef = useRef(null);
+
   const { t } = useTranslation();
 
-  // Handle the toggle state of the main menu
+  // Toggle main menu
   const handleToggleMenu = () => {
     setMenuOpen((prevState) => !prevState);
   };
 
-  // Handle the toggle state of the profile menu
+  // Toggle profile menu
   const handleToggleProfileMenu = () => {
     setProfileMenuOpen((prevState) => !prevState);
   };
 
-  // Handle the toggle state of the requests menu
+  // Toggle requests menu
   const handleToggleRequestsMenu = () => setRequestsMenuOpen((prev) => !prev);
 
   // Close all menus
@@ -68,11 +81,12 @@ const Navbar = () => {
     }
   };
 
-  // Logout function that clears the user data and tokens
+  // Logout: clear local storage
   const handleLogout = () => {
     localStorage.clear();
   };
 
+  // Attach outside click listener
   useEffect(() => {
     document.addEventListener("mousedown", handleOutsideClick);
     return () => {
@@ -80,10 +94,12 @@ const Navbar = () => {
     };
   }, []);
 
+  // Toggle dark mode
   const toggleDarkMode = () => {
     dispatch(appConfigAction.toggleDarkMode());
   };
 
+  // Custom styled Material UI switch for dark mode
   const MaterialUISwitch = styled(Switch)(({ theme }) => ({
     width: 50,
     height: 28,
@@ -144,6 +160,7 @@ const Navbar = () => {
       } px-10 py-4 h-[72px] sticky top-0 z-40 shadow-[0px_4px_10px_rgba(102,_116,_204,_0.15)] select-none`}
     >
       <div className={`flex items-center justify-between`}>
+        {/* Logo */}
         <div className={`flex items-center ml-3`}>
           <Link to="/" className={`flex items-center`}>
             <img src={logo} alt="logo" className={`size-9`} />
@@ -151,6 +168,7 @@ const Navbar = () => {
         </div>
 
         <div className={`flex`}>
+          {/* Class Teacher Navigation */}
           {role === "classTeacher" ? (
             <div
               onClick={() => navigate("student-menu")}
@@ -166,6 +184,7 @@ const Navbar = () => {
               onMouseEnter={() => setMenuOpen(true)}
               onMouseLeave={() => setMenuOpen(false)}
             >
+              {/* admin Navigation */}
               <div
                 onClick={handleToggleMenu}
                 className={`flex justify-center items-center cursor-pointer`}
@@ -183,7 +202,7 @@ const Navbar = () => {
                   />
                 </button>
               </div>
-              {/* setup menu */}
+              {/* Setup menu dropdown */}
               {menuOpen && (
                 <div
                   ref={menuRef}
@@ -237,21 +256,6 @@ const Navbar = () => {
                       />
                       {t("event")}
                     </Link>
-                    {/* <Link
-                      to="/transfer-certificate"
-                      className={`flex justify-start items-start gap-3 px-4 py-3 ${
-                        isDarkMode
-                          ? "text-textPrimary hover:bg-background4"
-                          : "text-textBlack hover:bg-whiteBackground"
-                      } text-sm hover:text-textOrange`}
-                    >
-                      <img
-                        src={calendaricon}
-                        alt="calendaricon"
-                        className={`w-4 h-4 relative`}
-                      />
-                      {t("transferCertificate")}
-                    </Link> */}
                   </div>
                 </div>
               )}
@@ -260,7 +264,7 @@ const Navbar = () => {
             ""
           )}
 
-          {/* students setup*/}
+          {/* Student Information System link for admin */}
           {role === "admin" && (
             <>
               <Link to="/student-information-system" className={`py-2 mx-6`}>
@@ -275,7 +279,7 @@ const Navbar = () => {
             </>
           )}
 
-          {/* Requests Menu */}
+          {/* Requests menu for admin */}
           {role === "admin" && (
             <div
               className={`relative`}
@@ -340,7 +344,8 @@ const Navbar = () => {
               )}
             </div>
           )}
-          {/* notice */}
+
+          {/* Notice link for admin */}
           {role === "admin" && (
             <Link
               to="/notice"
@@ -361,6 +366,7 @@ const Navbar = () => {
             </Link>
           )}
 
+          {/* Dark mode toggle */}
           <FormControlLabel
             control={
               <MaterialUISwitch
@@ -374,6 +380,7 @@ const Navbar = () => {
             onMouseEnter={() => setProfileMenuOpen(true)}
             onMouseLeave={() => setProfileMenuOpen(false)}
           >
+            {/* Profile menu */}
             <div
               onClick={handleToggleProfileMenu}
               className={`flex items-center justify-center px-3 py-2 cursor-pointer`}
@@ -390,7 +397,7 @@ const Navbar = () => {
                 className={`size-6 rounded-full border border-borderGray2`}
               />
             </div>
-            {/* profile menu */}
+            {/* Profile menu dropdown */}
             {profileMenuOpen && (
               <div
                 ref={profileMenuRef}

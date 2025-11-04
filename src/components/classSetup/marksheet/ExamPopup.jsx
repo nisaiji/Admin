@@ -20,6 +20,13 @@ export default function CreateExamPopup({
   const [marksheetSubjects, setMarksheetSubjects] = useState([]);
   const gradeOptions = ["A+", "A", "B", "C", "D", "E", "F"];
 
+  /**
+   * getAssignedSubjects
+   * - Fetches assigned subjects for the current section from the server.
+   * - Normalizes each subject with default metadata used by the UI:
+   *     - subjectType default: "mainSubject"
+   *     - scores default: {}
+   */
   const getAssignedSubjects = async () => {
     try {
       const res = await axiosClient.get(
@@ -36,10 +43,20 @@ export default function CreateExamPopup({
     } catch {}
   };
 
+  // Fetch subjects once when component mounts
   useEffect(() => {
     getAssignedSubjects();
   }, []);
 
+  /**
+   * handleScoreChange
+   * - Updates the scores object for a subject row.
+   * - For numeric (mainSubject) fields, only allow digits (regex).
+   *
+   * index: row index
+   * field: one of 'tMax','tMin','pMax','pMin'
+   * value: new value (string)
+   */
   const handleScoreChange = (index, field, value) => {
     setMarksheetSubjects((prev) => {
       const updated = [...prev];
@@ -54,6 +71,14 @@ export default function CreateExamPopup({
     });
   };
 
+  /**
+   * handleTypeChange
+   * - Switches subjectType between "mainSubject" and "gradeOnlySubject".
+   * - Resets scores for the row when type changes.
+   *
+   * index: row index
+   * value: new subjectType string
+   */
   const handleTypeChange = (index, value) => {
     setMarksheetSubjects((prev) => {
       const updated = [...prev];
@@ -63,6 +88,16 @@ export default function CreateExamPopup({
     });
   };
 
+  /**
+   * validateForm
+   * - Ensures examName exists.
+   * - For numeric subjects verifies all required numeric inputs are present and are numbers,
+   *   and that max >= min for both theory and practical.
+   * - For grade-only subjects ensures grades are selected and that max >= min in grade ordering.
+   *
+   * Returns:
+   * - true if validation passes, false otherwise (and shows error toasts).
+   */
   const validateForm = () => {
     if (!examName?.trim()) {
       toast.error("Exam Name is required");
@@ -119,12 +154,13 @@ export default function CreateExamPopup({
           }
         }
 
-        // Grade order check
+        // Ensure ordering using gradeOptions index (higher grade = lower index in this array)
         const tMaxIdx = gradeOptions.indexOf(tMax);
         const tMinIdx = gradeOptions.indexOf(tMin);
         const pMaxIdx = gradeOptions.indexOf(pMax);
         const pMinIdx = gradeOptions.indexOf(pMin);
 
+        // If indexes are valid, ensure max grade index is <= min grade index
         if (tMaxIdx > -1 && tMinIdx > -1 && tMaxIdx > tMinIdx) {
           toast.error(
             `${subj?.subjectName}: T- Max Grade must be ≥ T- Min Grade`
@@ -143,15 +179,22 @@ export default function CreateExamPopup({
     return true;
   };
 
+  /**
+   * handleSubmit
+   * - Validates UI state and maps it into the API payload format.
+   * - Calls the create exam endpoint and handles the response.
+   * - On success: shows success toast, closes modals and refreshes exam list.
+   */
   const handleSubmit = async () => {
     try {
       if (!validateForm()) return;
 
-      // convert frontend data to API format
+      // Build subjects payload expected by backend
       const subjectsPayload = marksheetSubjects?.map((subj) => {
         let components = [];
 
         if (subj?.subjectType === "mainSubject") {
+          // numeric mapping for theory
           if (subj?.scores?.tMax || subj?.scores?.tMin) {
             components.push({
               examType: "theory",
@@ -159,7 +202,7 @@ export default function CreateExamPopup({
               passingMarks: Number(subj?.scores?.tMin || 0),
             });
           }
-
+          // numeric mapping for practical
           if (subj?.scores?.pMax || subj?.scores?.pMin) {
             components.push({
               examType: "practical",
@@ -168,6 +211,7 @@ export default function CreateExamPopup({
             });
           }
         } else if (subj?.subjectType === "gradeOnlySubject") {
+          // grade mapping for theory
           if (subj?.scores?.tMax || subj?.scores?.tMin) {
             components.push({
               examType: "theory",
@@ -175,6 +219,7 @@ export default function CreateExamPopup({
               passingGrade: subj?.scores?.tMin || "",
             });
           }
+          // grade mapping for practical
           if (subj?.scores?.pMax || subj?.scores?.pMin) {
             components.push({
               examType: "practical",

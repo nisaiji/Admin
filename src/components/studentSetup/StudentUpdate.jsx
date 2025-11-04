@@ -107,7 +107,10 @@ export default function StudentUpdate() {
       parentAddress: student?.parentAddress || "",
     },
     validationSchema,
-    // update student api
+    /**
+     * Handles form submission, prepares data, calls update API, and navigates back on success.
+     * @param {object} values - Form values.
+     */
     onSubmit: async (values) => {
       try {
         setLoading(true);
@@ -239,6 +242,7 @@ export default function StudentUpdate() {
     },
   ];
 
+  // Theme configuration for Material UI components
   const theme = (isDarkMode) =>
     createTheme({
       palette: {

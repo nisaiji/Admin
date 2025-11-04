@@ -1,3 +1,56 @@
+/**
+ * StudentSection.jsx
+ *
+ * Purpose:
+ * - Manage students for a class section: list, add, edit, delete, import (Excel), and download a demo template.
+ * - Supports two roles: "admin" and "classTeacher". Role affects which endpoints are used and which section/class data is required.
+ *
+ * High-level responsibilities:
+ * - Fetch section info (teacher metadata) when class/section is selected (admin).
+ * - Fetch students for the selected section (admin) or teacher's section (classTeacher).
+ * - Provide an inline row to add a new student (with validation and duplicate checks).
+ * - Support inline editing of existing students (toggle edit per SNo).
+ * - Show student details in a modal.
+ * - Delete student with confirmation.
+ * - Import students via .xlsx/.xls upload and download a demo template file.
+ * - Provide client-side search over firstname/lastname and basic input sanitization.
+ *
+ * Key hooks & refs:
+ * - useSelector: read appAuth and appConfig (role, classAndSectionData, teacherData, isDarkMode).
+ * - useState: manage students, UI flags, loading states, newStudent model, etc.
+ * - useEffect: fetch data when role or selected class/section/session changes.
+ * - useRef: focus management for newly created and editing inputs; hidden file input for Excel import.
+ *
+ * Important functions:
+ * - getSectionInfo(): GET section metadata (admin endpoint).
+ * - fetchStudents(): GET students for section (role-specific endpoints).
+ * - handleShowInfo(student): open StudentInfo modal.
+ * - checkIsStudentExistForSameParent(): prevent duplicate student for same parent phone + same name + gender.
+ * - validateData(student): run form validations and return error text (or empty string).
+ * - capitalize(str): normalize capitalization for names.
+ * - handleInputChange(sNo, field, value): sanitize and update either newStudent (sNo === null) or an existing student by SNo.
+ * - handleStudentAction(student, isUpdate): POST (register) or PUT (update) a student using the role-specific endpoint. Handles payload transformation.
+ * - registerStudent(): wrapper that runs duplicate check then creates a student.
+ * - handleDelete(): DELETE a student using role-specific endpoint after confirmation.
+ * - uploadExcelSheet(file): upload .xlsx/.xls file (multipart/form-data) and refresh list on success.
+ * - getDemoExcelSheet(): download demo Excel template as blob and trigger client download.
+ *
+ *  * Validation rules:
+ * - firstname/lastname: required, min length 3, no digits.
+ * - gender: required.
+ * - parentFullName: required, min length 3, no digits.
+ * - parentPhone: required, numeric only, matches REGEX.PHONE_LENGTH.
+ *
+ * Notes & UX:
+ * - Inline add row is always visible at top of table; adding focuses the first field after success.
+ * - Inline edits are enabled by toggling editSNo to the student's SNo; inputs disabled when not editing.
+ * - Search is case-insensitive on firstname/lastname.
+ * - Loading spinner covers view during API calls.
+ * - Toasts are used for success/error feedback; duplicate toast guard used for validation messages.
+ *
+ * Where to place this comment:
+ * - Top of StudentSection.jsx above imports to serve as documentation for maintainers.
+ */
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../../services/axiosClient";

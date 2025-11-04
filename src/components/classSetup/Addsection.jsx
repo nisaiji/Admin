@@ -57,11 +57,6 @@ function Addsection({
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const selectRef = useRef(null);
 
-  // console.log("selectedSection", selectedSection);
-  // console.log("sections", sections);
-  // console.log("teachers", teachers);
-  // console.log("newSection", newSection);
-
   /**
    * Helper function to generate the next section name based on the length of existing sections.
    * @param {Array} sections - The current list of sections.
@@ -102,6 +97,7 @@ function Addsection({
     fetchData();
   }, []);
 
+  // check validation for section assignment
   const checkValidation = () => {
     if (sections.length >= 8) {
       if (!toastDisplayed) {
@@ -121,6 +117,7 @@ function Addsection({
     }
     setshowConformationPopup(true);
   };
+
   /**
    * Handles the saving of a new section.
    * This function checks if the section limit is reached, if a teacher is selected, and then attempts to save the section.
@@ -251,9 +248,6 @@ function Addsection({
     }
   }, [selectedSection]);
 
-  // console.log("selectedSection", selectedSection);
-  // console.log("sections", sections);
-
   return (
     <>
       <div
@@ -291,6 +285,7 @@ function Addsection({
               alt="Close"
             />
           </div>
+          {/* header */}
           <div
             className={`mx-auto grid grid-cols-[140px_250px_164px_78px] items-start mt-8 mb-2 font-medium text-[16px] ${
               isDarkMode ? "text-textPrimary" : "text-textBlack"
@@ -303,6 +298,7 @@ function Addsection({
           </div>
           <hr />
           <div className={`my-6 max-h-72 overflow-y-auto`}>
+            {/* assigned section list */}
             {sections.map((section, index) => (
               <div
                 key={section._id}

@@ -240,6 +240,14 @@ function Login() {
                 {formik.errors.password}
               </div>
             )}
+            {isAdmin && (
+              <div
+                onClick={() => navigate("/forgot-password")}
+                className="text-textPrimary text-right select-none mt-6 cursor-pointer "
+              >
+                Forgot Password?
+              </div>
+            )}
             {/* Submit button */}
             <div className="mt-6">
               <button

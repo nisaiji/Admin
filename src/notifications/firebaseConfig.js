@@ -21,24 +21,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const messaging = getMessaging(app);
 
-// export const generateToken = async () => {
-//   const permission = await Notification.requestPermission();
-//   // console.log(permission);
-//   if (permission === "granted") {
-//     const registration = await navigator.serviceWorker.register(
-//       "/firebase-messaging-sw.js"
-//     );
-//     console.log({registration});
-    
-//     const token = await getToken(messaging, {
-//       vapidKey: import.meta.env.VITE_VAPID_KEY,
-//       serviceWorkerRegistration: registration,
-//     });
-//     // console.log(token);
-//     return token;
-//   }
-// };
-
 export const generateToken = async () => {
   const permission = await Notification.requestPermission();
 

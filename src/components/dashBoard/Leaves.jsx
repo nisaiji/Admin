@@ -1,3 +1,22 @@
+/**
+ * Leaves.jsx
+ *
+ * This component manages and displays teacher leave requests for the admin dashboard.
+ * It provides tab-based filtering (pending, approved, rejected, all), pagination, and detailed view for each request.
+ * Admins can approve or reject leave requests, generate guest teacher credentials, and view leave details.
+ * The component fetches leave requests from the backend, validates input, and updates leave status via API.
+ * It supports dark mode styling, displays loading and toast notifications, and uses Material UI for controls.
+ * Uses React hooks for state, Redux for config state, and i18next for translations.
+ *
+ * Main features:
+ * - Tab-based filtering of leave requests
+ * - Pagination and limit selection
+ * - Detailed sidebar for selected leave request
+ * - Approve/reject actions with guest teacher credential generation
+ * - Confirmation popup for rejection
+ * - Responsive and dark mode support
+ */
+
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Spinner from "../Spinner";
@@ -39,6 +58,10 @@ export default function Leaves() {
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
+  /**
+   * Generates a random guest teacher username.
+   * @returns {string} - Username in format GTXXXXXX
+   */
   const generateUsername = () => {
     return `GT${Math.floor(100000 + Math.random() * 900000)}`; // GT + 6 random digits
   };
@@ -49,7 +72,11 @@ export default function Leaves() {
     fullname: "",
   });
 
-  // Compute the status query based on the selected tab.
+  /**
+   * Returns the status query string for API based on selected tab.
+   * @param {string} tab - Tab name
+   * @returns {string} - Status query string
+   */
   const getStatusQuery = (tab) => {
     switch (tab) {
       case "pending":
@@ -64,8 +91,7 @@ export default function Leaves() {
   };
 
   /**
-   * Fetches leave requests from the API
-   * Sends a GET request to fetch the leave requests and updates the state accordingly.
+   * Fetches leave requests from the API and updates state.
    */
   const fetchLeaves = async () => {
     try {
@@ -87,13 +113,16 @@ export default function Leaves() {
   };
 
   /**
-   * Effect hook that runs when the component mounts
-   * Fetches the leave requests when the component loads.
+   * Effect hook to fetch leave requests when pagination or tab changes.
    */
   useEffect(() => {
     fetchLeaves();
   }, [pageNo, limit, selectedTab]);
 
+  /**
+   * Validates guest teacher credential form data.
+   * @returns {string} - Error message if invalid, empty string if valid
+   */
   const validateData = () => {
     if (
       !formData.username.trim() ||
@@ -111,6 +140,7 @@ export default function Leaves() {
       return "";
     }
   };
+
   /**
    * Handles the action of saving, approving, or rejecting a leave request.
    * Sends a PUT request to update the status of the leave request.
@@ -170,6 +200,7 @@ export default function Leaves() {
           (req) => req.status === "reject" || req.status === "expired"
         )
       : requests;
+
   /**
    * @param {string} status - The status code (accept, reject, complete, etc.)
    * @returns {string} - The translated status string

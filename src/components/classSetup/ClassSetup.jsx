@@ -66,7 +66,6 @@ function ClassSetup() {
       updated[index] = !updated[index];
       return updated;
     });
-  // console.log({ classAndSectionData });
 
   // Function to fetch the list of classes via API
   const getAllClass = async () => {
@@ -222,7 +221,6 @@ function ClassSetup() {
                       className={`relative flex flex-col h-full w-full`}
                     >
                       <img
-                        // src={students}
                         src={
                           [
                             "Pre-Nursery",

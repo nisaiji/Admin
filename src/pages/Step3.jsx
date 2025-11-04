@@ -1,3 +1,11 @@
+/**
+ * Step3.jsx
+ *
+ * This component handles the third step of the admin registration process: password update.
+ * It manages password and confirm password input, validation, API call for updating password,
+ * and navigation to the next step. Uses React hooks for state, Redux for authentication state,
+ * and utility functions for validation and notifications.
+ */
 import React, { useState } from "react";
 import hide from "../assets/images/darkmode/hide.png";
 import show from "../assets/images/darkmode/show.png";
@@ -22,6 +30,11 @@ const Step3 = ({ goback, setStep, loading, setLoading }) => {
 
   const [t] = useTranslation();
 
+  /**
+   * Validates password and confirm password fields.
+   * Sets error messages if validation fails.
+   * @returns {boolean} - True if valid, false otherwise.
+   */
   const validate = () => {
     const newErrors = {};
 
@@ -41,6 +54,10 @@ const Step3 = ({ goback, setStep, loading, setLoading }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * Handles form submission, validates input, updates password via API,
+   * updates Redux state, and navigates to the next step.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -123,6 +140,7 @@ const Step3 = ({ goback, setStep, loading, setLoading }) => {
         </div>
       </div>
 
+      {/* Navigation Buttons */}
       <div className="flex justify-between w-full mt-5">
         <button
           type="button"

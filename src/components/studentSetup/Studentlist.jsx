@@ -1,3 +1,12 @@
+/**
+ * Studentlist.jsx
+ *
+ * This component displays a paginated, searchable, and filterable list of students for the admin dashboard.
+ * It allows filtering by class and section, searching by student name, and supports CRUD actions (view, edit, delete).
+ * The component fetches student and class/section data from the backend, manages pagination, and displays modals for student info and delete confirmation.
+ * Uses React hooks for state, Redux for config/auth state, and Material UI for styled controls.
+ * Handles dark mode styling and displays loading and toast notifications.
+ */
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
@@ -71,6 +80,7 @@ export default function Studentlist() {
   const classRef = useRef(searchClass);
   const sectionRef = useRef(searchSection);
 
+   // Class options for dropdown (translated)
   const classOptions = [
     "preNursery",
     "nursery",

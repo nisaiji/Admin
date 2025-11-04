@@ -1,3 +1,50 @@
+/**
+ * DashBoard.jsx
+ *
+ * This component displays the main dashboard for the school admin, class teacher, or teacher.
+ * It provides an overview of attendance statistics (daily, weekly, monthly), a calendar with events and holidays,
+ * and controls for session management and school profile photo upload.
+ *
+ * Main features:
+ * - Attendance statistics with pie/bar charts (daily, weekly, monthly)
+ * - Calendar view with holidays and workdays
+ * - Session management (create, toggle active session)
+ * - School profile photo upload and preview
+ * - Class and section selection for attendance filtering
+ * - Responsive and dark mode support
+ *
+ * Technologies used:
+ * - React hooks for state and lifecycle management
+ * - Redux for global state (school, session, teacher, config)
+ * - Chart.js for attendance visualization
+ * - Material UI for styled controls and dropdowns
+ * - Moment.js for date manipulation
+ * - Toast notifications for feedback
+ * - API integration for data fetching and updates
+ *
+ * Props: None
+ * State:
+ *   - Attendance data, chart data, calendar events, workdays, session info, class/section selection, loading states
+ *   - File input ref for photo upload
+ *   - Date and attendance time ranges for filtering
+ *
+ * Functions:
+ *   - getSession: Fetches session list and sets active session
+ *   - getClassList: Fetches class and section list for the selected session
+ *   - getStudentCount, getDailyAttendanceChart, getAttendanceChart, getSchoolAttendanceChart: Attendance data fetchers
+ *   - getCalenderEvents: Fetches calendar events and workdays
+ *   - uploadPhoto: Handles school profile photo upload and resizing
+ *   - handleCreateSession, handleMarkSessionComplete: Session management actions
+ *   - transformWeeklyData, transformMonthlyData: Attendance data transformers for chart display
+ *   - renderPieChart, renderChart: Chart rendering functions
+ *   - handleChangeDate: Handles navigation between attendance time ranges
+ *   - Clock: Displays current date and time
+ *
+ * UI Structure:
+ *   - School info and session controls (top section)
+ *   - Attendance statistics with chart and class/section filters (middle section)
+ *   - Calendar component and event/holiday list (bottom section)
+ */
 import React, { useEffect, useRef, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
@@ -280,12 +327,14 @@ const Dashboard = () => {
     }
   };
 
+  // fetch classlist when mount and session changes for admin
   useEffect(() => {
     if (role === "admin" && classAndSectionData?.selectedSession?._id) {
       getClassList();
     }
   }, [classAndSectionData?.selectedSession?._id]);
 
+  // fetch user details based on role
   useEffect(() => {
     if (role === "classTeacher" || role === "teacher") {
       dispatch(fetchTeacher());
@@ -294,6 +343,7 @@ const Dashboard = () => {
     }
   }, [dispatch]);
 
+  // modify photo size to less than 1mb
   const resizeImage = (
     file,
     maxSizeMB = 1,
@@ -346,24 +396,16 @@ const Dashboard = () => {
     });
   };
 
+  // upload photo of school by admin
   const uploadPhoto = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    // console.log(
-    //   `Original file size: ${(file.size / 1024 / 1024).toFixed(2)} MB`
-    // );
     try {
       let base64Image;
 
       if (file.size > 1024 * 1024) {
         // Resize if greater than 1MB
         base64Image = await resizeImage(file);
-        // const sizeInBytes =
-        //   base64Image.length * (3 / 4) -
-        //   (base64Image.endsWith("==") ? 2 : base64Image.endsWith("=") ? 1 : 0);
-        // console.log(
-        //   `Resized image size: ${(sizeInBytes / 1024 / 1024).toFixed(2)} MB`
-        // );
       } else {
         // Convert to Base64
         const toBase64 = (file) =>
@@ -614,6 +656,7 @@ const Dashboard = () => {
     }
   };
 
+  // fetch attendance data based on selectedOption
   useEffect(() => {
     const fetchChartData = () => {
       if (selectedOption === "Daily") {

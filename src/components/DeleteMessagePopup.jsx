@@ -7,6 +7,7 @@ export default function DeletePopup({ isVisible, onClose, onDelete }) {
   const { t } = useTranslation();
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
+  // delete confirmation popup
   useEffect(() => {
     if (isVisible) {
       document.body.style.overflow = "hidden";

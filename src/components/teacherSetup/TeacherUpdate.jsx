@@ -1,8 +1,17 @@
+/**
+ * TeacherUpdate.jsx
+ *
+ * This component provides a form for updating teacher details.
+ * It uses Formik for form state management and validation, Yup for schema validation,
+ * and Material UI for styled form controls. The form includes fields for personal and professional details,
+ * such as name, gender, blood group, email, date of birth, address, phone, university, and degree.
+ * The component handles API integration for updating teacher data, displays loading and toast notifications,
+ * and supports dark mode styling.
+ * Uses React hooks for state, Redux for config state, and i18next for translations.
+ */
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useLocation, useNavigate } from "react-router-dom";
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
 import { format, parse } from "date-fns";
 import toast, { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
@@ -35,7 +44,11 @@ import { useSelector } from "react-redux";
 const capitalize = (str) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-// Utility function to filter out empty values from an object
+/**
+ * Utility function to filter out empty values from an object.
+ * @param {object} data - The object to filter.
+ * @returns {object} - Object with empty values removed.
+ */
 const filterEmptyValues = (data) =>
   Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== ""));
 
@@ -75,7 +88,10 @@ const TeacherUpdate = () => {
       degree: teacher?.degree || "",
     },
     validationSchema,
-    // update teacher api
+    /**
+     * Handles form submission, prepares data, calls update API, and navigates back on success.
+     * @param {object} values - Form values.
+     */
     onSubmit: async (values) => {
       try {
         setLoading(true);
@@ -174,6 +190,7 @@ const TeacherUpdate = () => {
     },
   ];
 
+  // Theme configuration for Material UI components
   const theme = (isDarkMode) =>
     createTheme({
       palette: {

@@ -1,11 +1,29 @@
+/**
+ * Event.jsx
+ *
+ * This component manages the school calendar and events for the admin dashboard.
+ * It displays a monthly calendar view, allows navigation between months, and shows holidays and workdays.
+ * Admins can add, edit, and delete events (holidays or workdays) for specific dates.
+ * The right panel lists all events and workdays for the selected month.
+ * The component fetches event and workday data from the backend, supports dark mode styling,
+ * and displays loading and toast notifications.
+ * Uses React hooks for state, Redux for config/auth state, Material UI for controls, and i18next for translations.
+ *
+ * Main features:
+ * - Calendar view with month navigation and day selection
+ * - Add, edit, and delete events (holidays/workdays) for specific dates
+ * - List of events and workdays for the selected month
+ * - Form validation for event creation and editing
+ * - Responsive and dark mode support
+ */
 import React, { useState, useEffect } from "react";
 import noeventsw from "../../assets/images/noevents.png";
 import noevents from "../../assets/images/darkmode/noevents.png";
 import deleteEventw from "../../assets/images/delete2.png";
-import DownArroww from "../../assets/images/dropdown.png";
 import Searchw from "../../assets/images/Search.png";
 import deleteEvent from "../../assets/images/darkmode/delete.png";
 import Search from "../../assets/images/darkmode/Search.png";
+import DownArroww from "../../assets/images/dropdown.png";
 import DownArrow from "../../assets/images/darkmode/downArrow.png";
 import close from "../../assets/images/close.png";
 import calendar from "../../assets/images/calendar.png";
@@ -27,9 +45,12 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 // Event - Manages the logic of the calendar, events, and month navigation
 const Event = () => {
+  // Redux state selectors
   const { classAndSectionData } = useSelector((state) => state.appAuth);
   const isAdmin = useSelector((state) => state.appAuth.role) === "admin";
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+
+  // Calendar and event state
   const [today, setToday] = useState(new Date());
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
@@ -45,11 +66,18 @@ const Event = () => {
   const [newEvent, setNewEvent] = useState();
   const [t] = useTranslation();
 
+  /**
+   * Fetch events and workdays for the selected month from the backend.
+   */
   useEffect(() => {
     fetchEvents();
   }, [month, classAndSectionData?.selectedSession?._id]);
 
-  // edit or update event form
+  /**
+   * EventForm - Renders the form for adding or editing an event.
+   * Handles form state, validation, and submission.
+   * @param {object} props - isOpen, isClose, isSubmit, prevData
+   */
   const EventForm = ({ isOpen, isClose, isSubmit, prevData }) => {
     const isEditMode = Boolean(prevData?.editData?.id);
     const isWorkday = moment(prevData?.date).day() === 0;
@@ -421,7 +449,9 @@ const Event = () => {
     );
   };
 
-  // Fetch events for the selected month
+  /**
+   * Fetch events and workdays for the selected month.
+   */
   const fetchEvents = async () => {
     if (!classAndSectionData?.selectedSession?._id) return;
     setEventLoading(true);
@@ -457,7 +487,10 @@ const Event = () => {
     }
   };
 
-  // set calendar of selected month
+  /**
+   * Handle navigation to a specific month/year from input.
+   * @param {object} e - Input event
+   */
   const handleGotoDate = (e) => {
     const [yyyy, mm] = e.target.value.split("/");
     if (mm && yyyy && mm > 0 && mm < 13 && yyyy.length === 4) {
@@ -465,13 +498,21 @@ const Event = () => {
     }
   };
 
-  // capitalize the first letter
+  /**
+   * Capitalize the first letter of a string.
+   * @param {string} string
+   * @returns {string}
+   */
   const capitalizeFirstLetter = (string) => {
     if (!string) return string;
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
-  // api for handeling register and update event
+  /**
+   * Handle adding or updating an event (holiday/workday).
+   * @param {object} newEvent - Event data
+   * @param {string} Id - Event ID (for update)
+   */
   const handleAddEvent = async (newEvent, Id) => {
     if (disableButton) return;
 
@@ -526,26 +567,42 @@ const Event = () => {
     }
   };
 
-  // handle month change
+  /**
+   * Update calendar state for month/year navigation.
+   * @param {number} newMonth
+   * @param {number} newYear
+   */
   const updateCalendar = (newMonth, newYear) => {
     setMonth(newMonth);
     setYear(newYear);
     setToday(new Date(newYear, newMonth, 1));
   };
 
+  /**
+   * Handle previous month navigation.
+   */
   const handlePrevMonth = () => {
     const newMonth = month === 0 ? 11 : month - 1;
     const newYear = month === 0 ? year - 1 : year;
     updateCalendar(newMonth, newYear);
   };
 
+  /**
+   * Handle next month navigation.
+   */
   const handleNextMonth = () => {
     const newMonth = month === 11 ? 0 : month + 1;
     const newYear = month === 11 ? year + 1 : year;
     updateCalendar(newMonth, newYear);
   };
 
-  // handle click on day
+  /**
+   * Handle click on a day in the calendar.
+   * Opens event form for add/edit if allowed.
+   * @param {number} day
+   * @param {boolean|string} isEdit
+   * @param {object} editData
+   */
   const handleDayClick = (day, isEdit = false, editData) => {
     const todayDate = new Date();
     const currentYear = todayDate.getFullYear();
@@ -569,7 +626,10 @@ const Event = () => {
     }
   };
 
-  // returns days grid
+  /**
+   * Render the days grid for the calendar.
+   * @returns {JSX.Element[]}
+   */
   const renderDays = () => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDayOffset = new Date(year, month, 1).getDay();
@@ -643,7 +703,9 @@ const Event = () => {
     return days;
   };
 
-  // delete event api
+  /**
+   * Confirm and delete an event or workday.
+   */
   const confirmDeleteEvent = async () => {
     try {
       if (disableButton) return;

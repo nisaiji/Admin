@@ -1,3 +1,41 @@
+/**
+ * Subjects.jsx
+ *
+ * This component manages the assignment of subjects to teachers for a given class section.
+ * It supports both admin and class teacher roles, allowing admins to assign, edit, and view
+ * subject-teacher assignments, while class teachers can only view their assignments.
+ *
+ * Features:
+ * - Fetches and displays subjects, teachers, and assigned subject-teacher pairs.
+ * - Allows admins to assign new subjects to teachers.
+ * - Enables editing of existing assignments (subject, teacher, main subject flag).
+ * - Shows teacher profile details when a row is selected.
+ * - Uses Material UI for dropdowns and checkboxes, and react-hot-toast for notifications.
+ *
+ * State Variables:
+ * - loading: Tracks API call status.
+ * - subjectList: List of available subjects for assignment.
+ * - assignedSubjects: List of currently assigned subject-teacher pairs.
+ * - teachers: List of teachers.
+ * - selectedRow: Index of the currently selected row in the table.
+ * - newSubject: State for the new assignment form.
+ * - editingRow: Index of the row currently being edited.
+ * - backupRow: Backup of the row before editing for cancel functionality.
+ * - selectedAssignedSubjects: Currently selected assignment for editing.
+ * - selectedTeacher: Teacher object for the profile sidebar.
+ *
+ * API Calls:
+ * - getSubjects: Fetches subjects for the current section.
+ * - getTeachers: Fetches all teachers.
+ * - getAssignedSubjects: Fetches assigned subjects for the section.
+ * - handleAssignTeacher: Updates an existing assignment.
+ * - handleCreate: Assigns a new subject to a teacher.
+ *
+ * UI Structure:
+ * - Left: Table of subject assignments (with form for new assignment if admin).
+ * - Right: Teacher profile details (admin only, shown when a row is selected).
+ */
+
 import React, { useState, useEffect } from "react";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
@@ -19,11 +57,14 @@ import {
 } from "@mui/material";
 
 export default function Subjects() {
+  // Theme and user role
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-  const { classAndSectionData, teacherData } =
-    useSelector((state) => state.appAuth);
+  const { classAndSectionData, teacherData } = useSelector(
+    (state) => state.appAuth
+  );
   const role = useSelector((state) => state.appAuth.role);
 
+  // State variables for data and UI
   const [loading, setLoading] = useState(false);
   const [subjectList, setSubjectList] = useState([]);
   const [allSubjectList, setAllSubjectList] = useState([]);
@@ -31,6 +72,7 @@ export default function Subjects() {
   const [teachers, setTeachers] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
 
+  // State for new assignment form
   const [newSubject, setNewSubject] = useState({
     subjectId: "",
     isMainSubject: false,
@@ -42,11 +84,17 @@ export default function Subjects() {
   const [selectedAssignedSubjects, setSelectedAssignedSubjects] =
     useState(null);
 
+  /**
+   * Sets the row to edit mode and stores a backup for cancel.
+   */
   const handleEditRow = (index) => {
     setEditingRow(index);
     setBackupRow({ ...assignedSubjects[index] });
   };
 
+  /**
+   * Cancels editing and restores the backup row.
+   */
   const handleCancel = (index) => {
     const updated = [...assignedSubjects];
     updated[index] = backupRow;
@@ -55,7 +103,7 @@ export default function Subjects() {
     setBackupRow(null);
   };
 
-  // APIs
+  // API: Fetch subjects for the current section
   const getSubjects = async () => {
     try {
       const res = await axiosClient.get(
@@ -65,6 +113,7 @@ export default function Subjects() {
     } catch {}
   };
 
+  // API: Fetch all teachers
   const getTeachers = async () => {
     try {
       const res = await axiosClient.get(EndPoints.ADMIN.TEACHER_LIST);
@@ -72,6 +121,7 @@ export default function Subjects() {
     } catch {}
   };
 
+  // API: Fetch assigned subjects for the section
   const getAssignedSubjects = async () => {
     try {
       let res;
@@ -88,6 +138,7 @@ export default function Subjects() {
     } catch {}
   };
 
+  // Fetch data on mount or when role changes
   useEffect(() => {
     if (role === "admin") {
       getSubjects();
@@ -98,7 +149,9 @@ export default function Subjects() {
     }
   }, [role]);
 
-  // Update teacher assignment
+  /**
+   * Updates an existing subject-teacher assignment.
+   */
   const handleAssignTeacher = async (data) => {
     try {
       setLoading(true);
@@ -124,6 +177,9 @@ export default function Subjects() {
     }
   };
 
+  /**
+   * Assigns a new subject to a teacher.
+   */
   const handleCreate = async () => {
     try {
       if (loading) return;
@@ -155,6 +211,9 @@ export default function Subjects() {
     }
   };
 
+  /**
+   * Handles changes to subject, teacher, or main subject flag in a row.
+   */
   const handleSubjectChange = (index, key, value) => {
     const updated = [...assignedSubjects];
     updated[index] = { ...updated[index], [key]: value };
@@ -738,18 +797,19 @@ export default function Subjects() {
 
               {/* Left-aligned Section */}
               <div className="w-full mt-6 text-left">
+                {/* phone */}
                 <div className="flex items-center gap-2 mb-2">
                   <img src={phone} alt="phone" className="size-6" />
                   <p>{selectedTeacher?.phone}</p>
                 </div>
-
+                {/* email */}
                 {selectedTeacher?.email && (
                   <div className="flex items-center gap-2 mb-2">
                     <img src={email} alt="email" className="size-6" />
                     <p>{selectedTeacher?.email}</p>
                   </div>
                 )}
-
+                {/* other class list */}
                 <h4 className="mt-4 font-semibold">Other Classes</h4>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {selectedTeacher?.sectionSubjects?.map((c, idx) => (

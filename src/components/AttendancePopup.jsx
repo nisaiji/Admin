@@ -1,3 +1,13 @@
+/**
+ * AttendancePopup.jsx
+ *
+ * This component displays and manages the monthly attendance sheet for students in a class or section.
+ * It supports viewing, editing, and downloading attendance data as a PDF.
+ * Attendance can be marked as Present (P), Absent (A), Sunday (S), or Holiday (H).
+ * The component handles month navigation, attendance validation, API integration for fetching and saving data,
+ * and dynamic calculation of attendance totals.
+ * Uses React hooks for state, Redux for authentication/config state, and third-party libraries for PDF generation and date handling.
+ */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import backIcon from "../assets/images/backIcon.png";
 import editw from "../assets/images/editw.png";
@@ -29,8 +39,11 @@ export default function AttendancePopup() {
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const [totalAttendanceDays, setTotalAttendanceDays] = useState(0);
   const isFetchingRef = useRef(false);
+
+  // Format date as YYYY-MM-DD
   const formatDate = (date) => moment(date).format("YYYY-MM-DD");
 
+  // Calculate total days in the current month
   const totalDays = useMemo(
     () =>
       new Date(
@@ -40,8 +53,8 @@ export default function AttendancePopup() {
       ).getDate(),
     [currentDate]
   );
-  // console.log(teacherData);
 
+  // Get start time for attendance (depends on role)
   const startTime = useMemo(
     () =>
       role === "classTeacher"
@@ -67,6 +80,11 @@ export default function AttendancePopup() {
     return date.getDay() === 0 && !workdays?.[formatDate(date)];
   };
 
+  /**
+   * Check if a specific date is a holiday.
+   * @param {number} dateIndex - Index of the date in the month (0-based)
+   * @returns {boolean} - True if the date is a holiday
+   */
   const isHoliday = (dateIndex) => {
     const date = new Date(
       currentDate.getFullYear(),
@@ -79,7 +97,7 @@ export default function AttendancePopup() {
 
   /**
    * Change the displayed month in the popup.
-   *
+   * Prevents navigation outside allowed range.
    * @param {number} increment - Positive or negative number to change months
    */
   const changeMonth = (increment) => {
@@ -167,6 +185,7 @@ export default function AttendancePopup() {
 
   /**
    * Save the attendance data to the backend API.
+   * Validates that attendance for each day is either fully filled or empty.
    */
   const handleSaveAttendance = async () => {
     try {
@@ -260,6 +279,7 @@ export default function AttendancePopup() {
 
   /**
    * Fetch monthly attendance data for the current month.
+   * Populates attendanceData state with attendance for each student and day.
    */
   const fetchMonthlyAttendance = async () => {
     if (isFetchingRef.current) return;
@@ -361,6 +381,9 @@ export default function AttendancePopup() {
     }
   };
 
+  /**
+   * Calculate total attendance days for the current month (excluding holidays and Sundays).
+   */
   useEffect(() => {
     const currentMonth = moment(currentDate).format("MM-YYYY");
     const startMonth = moment(startTime).format("MM-YYYY");
@@ -394,14 +417,11 @@ export default function AttendancePopup() {
     }).length;
 
     setTotalAttendanceDays(totalDaysInRange - totalHolidays);
-
-    // console.log("Start:", startDate.format("YYYY-MM-DD"));
-    // console.log("End:", effectiveEnd.format("YYYY-MM-DD"));
-    // console.log("Days:", totalDaysInRange);
-    // console.log("Holidays:", totalHolidays);
-    // console.log("Attendance Days:", totalDaysInRange - totalHolidays);
   }, [startTime, currentDate, holidays, workdays]);
-  // get events api
+
+  /**
+   * Fetch holidays and workdays for the current month.
+   */
   const fetchEvents = async () => {
     setLoading(true);
     try {
@@ -479,9 +499,10 @@ export default function AttendancePopup() {
     }
   };
 
+  /**
+   * Fetch events and attendance data when relevant state changes.
+   */
   useEffect(() => {
-    // console.log(classAndSectionData);
-
     if (
       (role === "classTeacher" &&
         teacherData?.sectionId &&
@@ -504,7 +525,10 @@ export default function AttendancePopup() {
     teacherData?.sectionId,
   ]);
 
-  // attendance download in pdf format
+  /**
+   * Download the attendance sheet as a PDF.
+   * Uses jsPDF and jspdf-autotable for PDF generation.
+   */
   const downloadAttendance = () => {
     const doc = new jsPDF();
 

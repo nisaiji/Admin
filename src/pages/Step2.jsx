@@ -1,3 +1,10 @@
+/**
+ * Step2.jsx
+ *
+ * This component handles the second step of the admin registration process: email verification.
+ * It manages email input, OTP sending and verification, timer for OTP resend, and navigation to the next step.
+ * Uses React hooks for state, Redux for authentication state, and various utility functions.
+ */
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EndPoints from "../services/EndPoints";
@@ -9,6 +16,8 @@ import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
 
 const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
+  // Hooks and state variables
+
   const [t] = useTranslation();
   const dispatch = useDispatch();
   const { status } = useSelector((state) => state.appAuth);
@@ -20,6 +29,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const inputRefs = useRef([]);
 
+  // Timer for OTP resend
   useEffect(() => {
     let interval = null;
     if (timer > 0) {
@@ -32,6 +42,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
     return () => clearInterval(interval);
   }, [timer]);
 
+  // Initialize OTP widget if available
   useEffect(() => {
     if (window?.initSendOTP) {
       if (currentStep === 2) {
@@ -42,6 +53,10 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
     }
   }, [currentStep]);
 
+  /**
+   * Verifies the email using the OTP success token.
+   * Updates Redux state and navigates to the next step.
+   */
   const emailVerifiedApi = async (otpSuccessToken) => {
     try {
       setLoading(true);
@@ -61,6 +76,9 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
     }
   };
 
+  /**
+   * Verifies the entered OTP using the widget's verifyOtp method.
+   */
   const verifyOtp = async () => {
     try {
       setLoading(true);
@@ -82,6 +100,9 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
     }
   };
 
+  /**
+   * Handles email submission, sends OTP, and updates Redux state.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -114,6 +135,9 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
     }
   };
 
+  /**
+   * Handles OTP input changes and auto-focuses next input.
+   */
   const handleOtpChange = (index) => (e) => {
     const val = e.target.value.replace(/[^0-9]/g, "");
     if (!val) return;
@@ -129,11 +153,17 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
     }
   };
 
+  /**
+   * Resets the OTP input fields.
+   */
   const handleOtpReset = () => {
     setOtp(["", "", "", "", "", ""]);
     document.getElementById("otp-0")?.focus();
   };
 
+  /**
+   * Handles OTP resend logic and resets timer.
+   */
   const resendOtp = async () => {
     try {
       setLoading(true);

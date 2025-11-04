@@ -10,6 +10,8 @@
     "selectClass": "Class",
     "selectSection": "Section",
     "calendar": "Calendar",
+    "tags": "Tags",
+    "schedule": "Schedule",
     "holidayAndEvents": "Holiday",
     "holiday": "Holiday",
     "workday": "Workday",

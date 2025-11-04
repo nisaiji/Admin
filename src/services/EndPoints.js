@@ -20,6 +20,8 @@ const EndPoints = {
     UPDATE_FCM_TOKEN: "admin/fcm-token",
     PHONE_TOKEN_VERIFY: "v2/admin/phone/verify",
     EMAIL_TOKEN_VERIFY: "v2/admin/email/verify",
+    PHONE_AND_EMAIL_TOKEN_VERIFY: "v2/admin/reset-password-request",
+    PASSWORD_RESET: "v2/admin/reset-password",
 
     // ADMIN AUTH
     ADMIN_REGISTER: "admin",
@@ -83,6 +85,9 @@ const EndPoints = {
     DELETE_EVENT: "holiday-event",
     GET_LEAVES: "leave/admin",
     UPDATE_LEAVE: "leave/admin",
+
+    // TAGS
+    GET_TAGS: "tag/get-admin",
 
     // ADMIN PROFILE
     GET_ADMIN: "admin",

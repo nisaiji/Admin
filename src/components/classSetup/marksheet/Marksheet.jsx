@@ -28,11 +28,17 @@ export default function Marksheet() {
   const [showConfirm1, setShowConfirm1] = useState(false);
   const [showConfirm2, setShowConfirm2] = useState(false);
 
+  // Handler when user confirms first dialog; chains to second confirmation
   const handleConfirm1 = () => {
     setShowConfirm1(false);
     setShowConfirm2(true); // trigger second popup if needed
   };
 
+  /**
+   * getExamList
+   * - Fetches exams for the current section from the server and stores them in state.
+   * - Selects the first exam by default when results arrive.
+   */
   const getExamList = async () => {
     try {
       const res = await axiosClient.get(
@@ -55,6 +61,11 @@ export default function Marksheet() {
     }
   };
 
+  /**
+   * getStudentsByExam
+   * - Fetches students and their exam results for the currently selected exam.
+   * - Stores results in studentData state.
+   */
   const getStudentsByExam = async () => {
     try {
       const res = await axiosClient.post(EndPoints.ADMIN.GET_STUDENTS_BY_EXAM, {
@@ -70,16 +81,24 @@ export default function Marksheet() {
     }
   };
 
+  // Load exam list on component mount
   useEffect(() => {
     getExamList();
   }, []);
 
+  // When selectedExam changes, fetch students for that exam
   useEffect(() => {
     if (selectedExam?._id) {
       getStudentsByExam();
     }
   }, [selectedExam?._id]);
 
+  /**
+   * handleSaveAllMarks
+   * - Gathers all student results from state, converts to API payload shape,
+   *   and posts to UPDATE_STUDENT_MARKS_BULK.
+   * - On success refreshes student list and exits edit mode.
+   */
   const handleSaveAllMarks = async () => {
     try {
       setLoading(true);
@@ -135,7 +154,18 @@ export default function Marksheet() {
     }
   };
 
-  // update marks
+  /**
+   * handleMarksChange
+   * - Updates numeric marks locally for a student/subject/component.
+   * - Prevents values greater than provided maxMarks and shows an error toast.
+   *
+   * Params:
+   * - studentId: id of the student
+   * - subjectId: id of the subject
+   * - examType: 'theory' | 'practical'
+   * - value: numeric value entered
+   * - maxMarks: maximum allowed marks for this component
+   */
   const handleMarksChange = (
     studentId,
     subjectId,
@@ -192,7 +222,14 @@ export default function Marksheet() {
     );
   };
 
-  // Update grades
+  /**
+   * handleGradeChange
+   * - Updates grade selections locally for a student/subject/component.
+   * - Validates that selected grade is not higher (better) than the allowed maxGrade.
+   *
+   * Params:
+   * - studentId, subjectId, examType ('theory'|'practical'), grade, maxGrade
+   */
   const handleGradeChange = (
     studentId,
     subjectId,
@@ -248,6 +285,12 @@ export default function Marksheet() {
     );
   };
 
+  /**
+   * isAllFieldsFilled (derived)
+   * - Checks whether every student's required components have values filled.
+   * - Note: the original code uses .every inside .every but did not return from the outer
+   *   every; left unchanged but wrapped into a const for clarity. Keep an eye on logic if behavior seems off.
+   */
   const isAllFieldsFilled = studentData?.every((student) => {
     student?.studentExamResult?.every((res) => {
       if (!res?.components || res?.components?.length === 0) return false;
@@ -265,6 +308,11 @@ export default function Marksheet() {
     });
   });
 
+  /**
+   * publishResult
+   * - Marks the selected exam as published via API call.
+   * - Shows toast on success and closes confirmation modal.
+   */
   const publishResult = async () => {
     try {
       setLoading(true);

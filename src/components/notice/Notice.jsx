@@ -1,3 +1,12 @@
+/**
+ * Notice.jsx
+ *
+ * This component manages and displays the notice board for the admin dashboard.
+ * It allows admins to post new notices, filter notices by creator (admin, teacher, all), update or delete notices,
+ * and view notices with pagination. Notices can be targeted to teachers and/or parents.
+ * The component fetches notices from the backend, handles form validation, and supports dark mode styling.
+ * Uses React hooks for state, Redux for config/auth state, Material UI for controls, and i18next for translations.
+ */
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
@@ -40,6 +49,8 @@ export default function Notice() {
   const [updatedDescription, setUpdatedDescription] = useState("");
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const [open, setOpen] = useState(false);
+
+  // Notice filter options
   const options = [
     {
       label: "By All",
@@ -57,15 +68,18 @@ export default function Notice() {
       icon: teacher,
     },
   ];
-
   let selected = options.find((opt) => opt.value === filterRole);
 
+  // Form state for new notice
   const [formData, setFormData] = useState({
     description: "",
     toTeacher: false,
     toParent: false,
   });
 
+  /**
+   * Fetch notices from the backend based on filters and pagination.
+   */
   const fetchNotice = async () => {
     try {
       setLoading(true);
@@ -86,10 +100,15 @@ export default function Notice() {
     }
   };
 
+  // Fetch notices when pagination or filter changes
   useEffect(() => {
     fetchNotice();
   }, [pageNo, limit, filterRole]);
 
+  /**
+   * Validate notice form data before posting.
+   * @returns {string} Error message if invalid, empty string if valid.
+   */
   const validateData = () => {
     if (!formData.description.trim()) {
       return t("validationError.description");
@@ -100,6 +119,9 @@ export default function Notice() {
     }
   };
 
+   /**
+   * Handle posting a new notice.
+   */
   const handleSave = async () => {
     try {
       if (toastDisplayed) return;
@@ -134,12 +156,20 @@ export default function Notice() {
     }
   };
 
+   /**
+   * Enable editing mode for a notice.
+   * @param {object} notice - Notice object to edit.
+   */
   const handleUpdate = (notice) => {
     setEditingNoticeId(notice._id);
     setUpdatedDescription(notice.description);
     setMenuOpenIndex(null);
   };
 
+  /**
+   * Confirm and save notice update.
+   * @param {object} notice - Notice object being updated.
+   */
   const handleConfirmUpdate = async (notice) => {
     try {
       const res = await axiosClient.put(
@@ -161,11 +191,18 @@ export default function Notice() {
     }
   };
 
+   /**
+   * Cancel editing a notice.
+   */
   const handleCancelUpdate = () => {
     setEditingNoticeId(null);
     setUpdatedDescription("");
   };
 
+  /**
+   * Delete a notice.
+   * @param {string} id - Notice ID to delete.
+   */
   const handleDelete = async (id) => {
     try {
       const res = await axiosClient.delete(
