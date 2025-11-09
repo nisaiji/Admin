@@ -2,9 +2,9 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { sha256 } from "js-sha256";
 
-const baseURL = "http://localhost:4000/";
+// const baseURL = "http://localhost:4000/";
 // const baseURL = "https://api.sharedri.com";
-// const baseURL = "https://development-api.nisaiji.com/";
+const baseURL = "https://development-api.nisaiji.com/";
 
 export const axiosClient = axios.create({ baseURL });
 const key = sha256(import.meta.env.VITE_SECOND_SECURITY_KEY);
