@@ -64,7 +64,6 @@ export const fetchTeacher = createAsyncThunk(
  * @property {string|null} sectionStartTime - Start time for the section.
  */
 const initialState = {
-  role: null,
   section: null,
   sectionName: null,
   class: null,
@@ -72,6 +71,9 @@ const initialState = {
   id: null,
   schoolName: null,
   isLoading: false,
+
+  role: null,
+  isFCMToken: false,
   data: JSON.parse(localStorage.getItem("adminData")) || {},
   teacherData: JSON.parse(localStorage.getItem("teacherData")) || {},
   classAndSectionData:
@@ -114,6 +116,9 @@ const appAuthSlice = createSlice({
     updateAdminData(state, action) {
       state.data = { ...state.data, ...action.payload };
     },
+    updatefcmtoken(state) {
+      state.isFCMToken = true;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -132,5 +137,6 @@ const appAuthSlice = createSlice({
   },
 });
 
-export const { getRole, setAuthData, updateAdminData } = appAuthSlice.actions;
+export const { getRole, setAuthData, updateAdminData, updatefcmtoken } =
+  appAuthSlice.actions;
 export default appAuthSlice;

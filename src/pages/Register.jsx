@@ -23,6 +23,7 @@ import Spinner from "../components/Spinner";
 import { setAuthData } from "../store/AppAuthSlice";
 import { useDispatch } from "react-redux";
 import { generateToken } from "../notifications/firebaseConfig";
+import logo from "../assets/images/deer logo.png";
 
 function Register() {
   // React hooks and states for navigation, loading, and step tracking
@@ -218,6 +219,13 @@ function Register() {
         <div className="flex items-center justify-center h-full w-full">
           <div className="bg-gradient-to-t from-fromColor1 to-toColor1 rounded-2xl backdrop-blur-lg w-[1000px] mx-auto my-3 flex flex-col py-6">
             <div className="text-center text-black">
+              <div className="flex justify-center">
+                <img
+                  src={logo}
+                  className="size-[60px] object-contain"
+                  alt="img"
+                />
+              </div>
               <h2 className="font-bold text-2xl mt-3 text-textPrimary">
                 {t("register.setupAccount")}
               </h2>

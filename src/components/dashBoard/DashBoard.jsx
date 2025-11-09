@@ -79,13 +79,15 @@ import {
   fetchTeacher,
   setClassAndSectionData,
   updateAdminData,
+  updatefcmtoken,
 } from "../../store/AppAuthSlice.jsx";
 import { Box } from "@mui/system";
+import { generateToken } from "../../notifications/firebaseConfig.js";
 
 const Dashboard = () => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
-  const { classAndSectionData, data, teacherData } = useSelector(
+  const { classAndSectionData, data, teacherData, isFCMToken } = useSelector(
     (state) => state.appAuth
   );
   const role = useSelector((state) => state.appAuth.role);
@@ -159,6 +161,30 @@ const Dashboard = () => {
   });
 
   const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
+
+  const updateFCMToken = async () => {
+    try {
+      const fcmToken = await generateToken();
+      const url =
+        role === "admin"
+          ? EndPoints.ADMIN.UPDATE_FCM_TOKEN
+          : EndPoints.TEACHER.UPDATE_FCM_TOKEN;
+      const res = await axiosClient.put(url, {
+        fcmToken,
+      });
+      if (res?.statusCode === 200) {
+        dispatch(updatefcmtoken());
+      }
+    } catch (e) {
+      // console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    if (!isFCMToken) {
+      updateFCMToken();
+    }
+  }, []);
 
   const handleMarkSessionComplete = async () => {
     try {

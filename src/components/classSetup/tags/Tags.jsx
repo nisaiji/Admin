@@ -203,7 +203,7 @@ export default function Tags() {
         <div className={`bg-transparent rounded-lg w-full`}>
           {/* Month Navigation */}
           <div
-            className={`month flex items-center justify-between py-4 px-10 mx-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 ${
+            className={`month flex items-center justify-between py-[20px] px-10 mx-10 text-[16px] font-medium rounded-[14px] h-8 capitalize border-2 ${
               isDarkMode ? "border-borderLine" : "border-borderWhite3"
             }`}
           >
@@ -286,7 +286,7 @@ export default function Tags() {
               {filteredEvents.map((itm, index) => (
                 <div
                   key={index}
-                  className="mb-4 rounded-2xl bg-[#0A81D11A] text-white font-poppins p-4 border border-[#0A81D140] border-l-[14px] border-l-[#0A81D1]"
+                  className="mb-4 rounded-xl bg-[#0A81D11A] text-white font-poppins p-4 border border-[#0A81D140] border-l-[14px] border-l-[#0A81D1]"
                 >
                   {/* Teacher name */}
                   <div className="flex items-center mb-2">
@@ -306,7 +306,7 @@ export default function Tags() {
 
                   <hr
                     className={`mb-3 border-t ${
-                      isDarkMode ? "border-borderLine" : "border-borderWhite3"
+                      isDarkMode ? "border-[#68686880]" : "border-borderWhite3"
                     }`}
                   />
 

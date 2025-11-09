@@ -287,7 +287,7 @@ export default function ForgotPassword() {
                     setPhone(e.target.value.replace(/[^0-9]/g, "").slice(0, 10))
                   }
                   className="text-textPrimary w-full rounded-xl py-2 pl-12 pr-4 bg-backgroundGray15 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-backgroundBlue transition-all"
-                  placeholder="Enter phone number"
+                  placeholder="School official phone number"
                 />
               </div>
               {error.phone && (

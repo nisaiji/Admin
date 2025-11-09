@@ -20,7 +20,12 @@ const EndPoints = {
     UPDATE_FCM_TOKEN: "admin/fcm-token",
     PHONE_TOKEN_VERIFY: "v2/admin/phone/verify",
     EMAIL_TOKEN_VERIFY: "v2/admin/email/verify",
-    PHONE_AND_EMAIL_TOKEN_VERIFY: "v2/admin/reset-password-request",
+    // PHONE_AND_EMAIL_TOKEN_VERIFY: "v2/admin/reset-password-request",
+
+    PASSWORD_RESET_PHONE_CHECK: "v2/admin/reset-password/phone",
+    PASSWORD_RESET_PHONE_VERIFY: "v2/admin/reset-password/phone",
+    PASSWORD_RESET_EMAIL_CHECK: "v2/admin/reset-password/email",
+    PASSWORD_RESET_EMAIL_VERIFY: "v2/admin/reset-password/email",
     PASSWORD_RESET: "v2/admin/reset-password",
 
     // ADMIN AUTH

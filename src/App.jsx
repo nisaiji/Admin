@@ -32,8 +32,7 @@ import AttendancePopup from "./components/AttendancePopup";
 import Subjects from "./components/classSetup/subjects/Subjects";
 import Marksheet from "./components/classSetup/marksheet/Marksheet";
 import Tags from "./components/classSetup/tags/Tags";
-import ForgotPassword from "./pages/ForgotPassword";
-import ChangePassword from "./pages/ChangePassword";
+import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -179,7 +178,6 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/change-password" element={<ChangePassword />} />
           </Route>
         </Routes>
       </I18nextProvider>
