@@ -4,8 +4,8 @@ import ReactDOM from "react-dom/client"; // React DOM client for rendering the R
 // Import Redux's Provider component for state management
 import { Provider } from "react-redux"; // Used to provide the Redux store to the application
 
-// Import HashRouter from React Router for managing routing with hash-based URLs
-import { BrowserRouter, HashRouter } from "react-router-dom";
+// Import BrowserRouter from React Router for managing routing with hash-based URLs
+import { BrowserRouter } from "react-router-dom";
 
 // Import the main App component
 import App from "./App.jsx"; // The root component of the application
@@ -14,7 +14,7 @@ import App from "./App.jsx"; // The root component of the application
 import "./index.css"; // Styles applied across the entire application
 
 // Import the Redux store
-import store from "./store/store.jsx"; // Centralized store for managing application state
+import store from "./store/store.js"; // Centralized store for managing application state
 import React from "react";
 
 // Initialize and render the React application

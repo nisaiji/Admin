@@ -283,7 +283,7 @@ export default function Tags() {
             </div>
           ) : (
             <ul className="overflow-y-auto max-h-[450px] mt-4">
-              {filteredEvents.map((itm, index) => (
+              {filteredEvents?.map((itm, index) => (
                 <div
                   key={index}
                   className="mb-4 rounded-xl bg-[#0A81D11A] text-white font-poppins p-4 border border-[#0A81D140] border-l-[14px] border-l-[#0A81D1]"

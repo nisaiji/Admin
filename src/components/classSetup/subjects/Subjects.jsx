@@ -184,23 +184,23 @@ export default function Subjects() {
     try {
       if (loading) return;
       setLoading(true);
-      if (!newSubject.subjectId || !newSubject.teacherId) return;
+      if (!newSubject?.subjectId || !newSubject?.teacherId) return;
       const res = await axiosClient.post(
         EndPoints.ADMIN.ASSIGN_SUBJECT_TO_TEACHER,
         {
           classId: classAndSectionData?.classId,
           sectionId: classAndSectionData?.sectionId,
           sessionId: classAndSectionData?.selectedSession?._id,
-          subjectId: newSubject.subjectId,
-          teacherId: newSubject.teacherId,
-          isMainSubject: newSubject.isMainSubject,
+          subjectId: newSubject?.subjectId,
+          teacherId: newSubject?.teacherId,
+          isMainSubject: newSubject?.isMainSubject,
         }
       );
       if (res?.statusCode === 201) {
         toast.success(res?.result);
         getAssignedSubjects();
         setSubjectList(
-          subjectList.filter((s) => s._id !== newSubject.subjectId)
+          subjectList.filter((s) => s._id !== newSubject?.subjectId)
         );
         setNewSubject({ isMainSubject: false, subjectId: "", teacherId: "" });
       }
@@ -277,7 +277,7 @@ export default function Subjects() {
                     }}
                   >
                     <Select
-                      value={newSubject.subjectId}
+                      value={newSubject?.subjectId ?? ""}
                       onChange={(e) =>
                         setNewSubject({
                           ...newSubject,
@@ -314,7 +314,7 @@ export default function Subjects() {
                       {subjectList?.map((s, i) => (
                         <MenuItem
                           key={i}
-                          value={s?._id}
+                          value={s?._id ?? ""}
                           sx={{
                             backgroundColor: isDarkMode ? "#1a1a1a" : "white",
                             color: isDarkMode ? "#E3E8F3" : "black",
@@ -376,7 +376,7 @@ export default function Subjects() {
                     }}
                   >
                     <Select
-                      value={newSubject.teacherId || ""}
+                      value={newSubject?.teacherId || ""}
                       onChange={(e) =>
                         setNewSubject({
                           ...newSubject,
@@ -389,7 +389,7 @@ export default function Subjects() {
                         borderRadius: "0.5rem",
                         height: "44px",
                         backgroundColor: isDarkMode ? "" : "white",
-                        color: !newSubject.teacherId
+                        color: !newSubject?.teacherId
                           ? "gray"
                           : isDarkMode
                           ? "#E3E8F3"
@@ -410,10 +410,10 @@ export default function Subjects() {
                       <MenuItem value="" disabled>
                         Select Teacher
                       </MenuItem>
-                      {teachers.map((t) => (
+                      {teachers.map((t, i) => (
                         <MenuItem
-                          key={t.id}
-                          value={t.id}
+                          key={i}
+                          value={t?.id ?? ""}
                           sx={{
                             backgroundColor: isDarkMode ? "#1a1a1a" : "white",
                             color: isDarkMode ? "#E3E8F3" : "black",
@@ -424,7 +424,7 @@ export default function Subjects() {
                             },
                           }}
                         >
-                          {t.firstname} {t.lastname}
+                          {t?.firstname} {t?.lastname}
                           {t?.role === "classTeacher" &&
                             t?.sectionId === classAndSectionData?.sectionId && (
                               <span
@@ -557,7 +557,7 @@ export default function Subjects() {
                       {subjectList?.map((s, i) => (
                         <MenuItem
                           key={i}
-                          value={s?._id}
+                          value={s?._id ?? ""}
                           sx={{
                             backgroundColor: isDarkMode ? "#1a1a1a" : "white",
                             color: isDarkMode ? "#E3E8F3" : "black",
@@ -619,7 +619,9 @@ export default function Subjects() {
                       }}
                     >
                       <span>
-                        {`${sub.teacherFirstName} ${sub.teacherLastName || ""}`}
+                        {`${sub?.teacherFirstName} ${
+                          sub?.teacherLastName || ""
+                        }`}
                       </span>
                     </div>
                   ) : role === "admin" ? (
@@ -645,7 +647,7 @@ export default function Subjects() {
                       }}
                     >
                       <Select
-                        value={sub.teacherId}
+                        value={sub?.teacherId ?? ""}
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) =>
                           handleSubjectChange(i, "teacherId", e.target.value)
@@ -679,7 +681,7 @@ export default function Subjects() {
                         {teachers.map((t, i) => (
                           <MenuItem
                             key={i}
-                            value={t?.id}
+                            value={t?.id ?? ""}
                             sx={{
                               display: "flex",
                               alignItems: "center",
@@ -817,7 +819,7 @@ export default function Subjects() {
                       key={idx}
                       className="px-3 py-1 rounded text-sm bg-backgroundGray15 text-textPrimary"
                     >
-                      {c.className} {c.sectionName} {c.subjectName}
+                      {c?.className} {c?.sectionName} {c?.subjectName}
                     </span>
                   ))}
                 </div>

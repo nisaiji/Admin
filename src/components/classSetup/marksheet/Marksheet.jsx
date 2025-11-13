@@ -12,6 +12,7 @@ import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import ConfirmationPopup from "../../ConfirmationPopup2";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import CONSTANT from "../../../utils/constants";
 
 export default function Marksheet() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
@@ -23,8 +24,6 @@ export default function Marksheet() {
   const [selectedExamData, setSelectedExamData] = useState({});
   const [studentData, setStudentData] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
-  const activeToastId = useRef(null);
-  const gradeOrder = ["A+", "A", "B", "C", "D", "E", "F"];
   const [showConfirm1, setShowConfirm1] = useState(false);
   const [showConfirm2, setShowConfirm2] = useState(false);
 
@@ -238,9 +237,8 @@ export default function Marksheet() {
     maxGrade
   ) => {
     if (!grade) return;
-    // console.log(gradeOrder.indexOf(grade), gradeOrder.indexOf(maxGrade));
 
-    if (gradeOrder.indexOf(grade) < gradeOrder.indexOf(maxGrade)) {
+    if (CONSTANT.GRADES.indexOf(grade) < CONSTANT.GRADES.indexOf(maxGrade)) {
       toast.error(`Grade cannot be higher than max grade ${maxGrade}`);
       return;
     }
@@ -621,8 +619,8 @@ export default function Marksheet() {
 
                               const getGradeColor = (grade, passingGrade) => {
                                 if (!grade) return "text-white";
-                                return gradeOrder.indexOf(grade) <=
-                                  gradeOrder.indexOf(passingGrade)
+                                return CONSTANT.GRADES.indexOf(grade) <=
+                                  CONSTANT.GRADES.indexOf(passingGrade)
                                   ? "text-textGreen"
                                   : "text-textRed";
                               };
@@ -784,15 +782,7 @@ export default function Marksheet() {
                                             },
                                           }}
                                         >
-                                          {[
-                                            "A+",
-                                            "A",
-                                            "B",
-                                            "C",
-                                            "D",
-                                            "E",
-                                            "F",
-                                          ].map((g) => (
+                                          {CONSTANT.GRADES.map((g) => (
                                             <MenuItem
                                               key={g}
                                               value={g}
@@ -911,15 +901,7 @@ export default function Marksheet() {
                                             },
                                           }}
                                         >
-                                          {[
-                                            "A+",
-                                            "A",
-                                            "B",
-                                            "C",
-                                            "D",
-                                            "E",
-                                            "F",
-                                          ].map((g) => (
+                                          {CONSTANT.GRADES.map((g) => (
                                             <MenuItem
                                               key={g}
                                               value={g}

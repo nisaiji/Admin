@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import Spinner from "../../components/Spinner";
+import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
@@ -12,7 +12,7 @@ import {
   Select,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import Breadcrumbs from "../../components/BreadCrumbs";
+import Breadcrumbs from "../BreadCrumbs";
 import noDataFound from "../../assets/images/darkmode/noDataFound.png";
 import { useSelector } from "react-redux";
 import moment from "moment";
