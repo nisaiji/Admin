@@ -9,6 +9,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { appConfigAction } from "../store/AppConfigSlice";
+import { FormControlLabel, Switch } from "@mui/material";
+import { styled } from "@mui/system";
+
 import teachericon from "../assets/images/teachericon.png";
 import classroomicon from "../assets/images/classroomicon.png";
 import calendaricon from "../assets/images/calendaricon.png";
@@ -20,10 +25,7 @@ import downArrow from "../assets/images/darkmode/downArrow.png";
 import notice from "../assets/images/darkmode/notice.png";
 import user from "../assets/images/darkmode/user.png";
 import logo from "../assets/images/deer logo.png";
-import { useTranslation } from "react-i18next";
-import { appConfigAction } from "../store/AppConfigSlice";
-import { FormControlLabel, Switch } from "@mui/material";
-import { styled } from "@mui/system";
+import money from "../assets/images/fees/money.png";
 
 const Navbar = () => {
   // Redux and navigation hooks
@@ -32,13 +34,12 @@ const Navbar = () => {
   const { data, teacherData } = useSelector((state) => state.appAuth);
   const role = useSelector((state) => state.appAuth.role);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-  const sectionId = useSelector((state) => state.appAuth.section);
-  const classId = useSelector((state) => state.appAuth.class);
 
   // Local state for menu toggles
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [requestsMenuOpen, setRequestsMenuOpen] = useState(false);
+  const [selected, setSelected] = useState("");
 
   // Refs for menu elements
   const menuRef = useRef(null);
@@ -363,6 +364,36 @@ const Navbar = () => {
                   className={`w-4 h-4 object-contain`}
                 />
               </button>
+            </Link>
+          )}
+          
+          {/* payments link for admin */}
+          {role === "admin" && (
+            <Link
+              to="/payments"
+              className={`flex justify-center items-center cursor-pointer mx-6`}
+            >
+              <div
+                onClick={() => setSelected("payments")}
+                className={`flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group ${
+                  selected === "payments"
+                    ? "text-orange-500"
+                    : isDarkMode
+                    ? "text-textPrimary"
+                    : "text-textBlack"
+                } `}
+              >
+                <img
+                  src={money}
+                  alt="notice"
+                  className={`w-4 h-4 object-contain transition ${
+                    selected === "payments"
+                      ? ""
+                      : "filter invert brightness-0 saturate-0"
+                  }`}
+                />
+                {t("titles.payments")}
+              </div>
             </Link>
           )}
 

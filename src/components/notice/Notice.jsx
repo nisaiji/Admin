@@ -33,9 +33,7 @@ import { Stack } from "@mui/system";
 
 export default function Notice() {
   const { t } = useTranslation();
-  const { classAndSectionData } = useSelector(
-    (state) => state.appAuth
-  );
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const { data } = useSelector((state) => state.appAuth);
@@ -119,7 +117,7 @@ export default function Notice() {
     }
   };
 
-   /**
+  /**
    * Handle posting a new notice.
    */
   const handleSave = async () => {
@@ -156,7 +154,7 @@ export default function Notice() {
     }
   };
 
-   /**
+  /**
    * Enable editing mode for a notice.
    * @param {object} notice - Notice object to edit.
    */
@@ -191,7 +189,7 @@ export default function Notice() {
     }
   };
 
-   /**
+  /**
    * Cancel editing a notice.
    */
   const handleCancelUpdate = () => {
@@ -379,10 +377,11 @@ export default function Notice() {
                 <img
                   src={
                     req?.createdByRole === "admin"
-                      ? data?.photo || profile
+                      ? data?.photo ?? profile
                       : req?.createdByRole === "teacher"
-                      ? `data:image/jpeg;base64,${req?.createdByDetails?.photo}` ||
-                        profile
+                      ? req?.createdByDetails?.photo
+                        ? `data:image/jpeg;base64,${req?.createdByDetails?.photo}`
+                        : profile
                       : profile
                   }
                   alt="Profile"

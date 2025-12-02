@@ -33,12 +33,14 @@ export default {
         backgroundOrange: "#F29E3832", //20%
         backgroundOrange1: "#FF793F",
         backgroundOrange2: "#F29E3808", //5%
+        backgroundOrange15: "#FF993326", //15%
         backgroundGreen: "#4CBC9A",
         backgroundDarkGreen: "#4CBC9A26",
         backgroundRed: "#FE4040",
         backgroundDarkRed: "#d91111",
         backgroundDarkRed2: "#FE404026",
         backgroundBlue: "#0A81D1",
+        backgroundBlue15: "#0A81D126",
         backgroundDarkBlue: "#0F4189",
         backgroundLightBlue: "#DBEAFE",
         backgroundDarkGray: "#2F3035",
@@ -58,6 +60,7 @@ export default {
         textDarkRed: "#D91111",
         textGray: "#6b7280",
         textGray1: "#A9ACB2",
+        textGray2: "#C2C2C2",
         textDarkGray: "#111827",
         textHoliday: " #FF9933",
 

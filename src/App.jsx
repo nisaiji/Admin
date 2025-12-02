@@ -33,6 +33,7 @@ import Subjects from "./components/classSetup/subjects/Subjects";
 import Marksheet from "./components/classSetup/marksheet/Marksheet";
 import Tags from "./components/classSetup/tags/Tags";
 import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
+import Fees from "./components/payments/Fees";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -146,6 +147,7 @@ function App() {
                   <Route path="teacher-leave-requests" element={<Leaves />} />
                   <Route path="add-student" element={<AddStudentForm />} />
                   <Route path="notice" element={<Notice />} />
+                  <Route path="payments" element={<Fees />} />
                 </>
               ) : role === "classTeacher" ? (
                 <>

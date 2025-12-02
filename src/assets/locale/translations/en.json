@@ -251,7 +251,8 @@
     "issueNotice": "Issue notice",
     "passwordReset": "Password Reset Request",
     "leave": "Teacher Leave Request",
-    "transferStudent": "Transfer student"
+    "transferStudent": "Transfer student",
+    "payments": "Payments"
   },
   "buttons": {
     "print": "Print",
