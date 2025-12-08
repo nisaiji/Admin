@@ -107,7 +107,7 @@ const TeacherUpdate = () => {
 
         // Make API request to update teacher details
         const response = await axiosClient.put(
-          `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher._id}`,
+          `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher.id}`,
           filteredTeacherData
         );
 
@@ -122,7 +122,7 @@ const TeacherUpdate = () => {
       }
     },
   });
-
+  
   // form fields
   const fields = [
     {

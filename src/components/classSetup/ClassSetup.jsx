@@ -5,7 +5,6 @@ import students3to8 from "../../assets/images/darkmode/3-8.png";
 import students9to12 from "../../assets/images/darkmode/9-12.png";
 import trash from "../../assets/images/darkmode/delete2.png";
 import trashw from "../../assets/images/trash.png";
-import ReactCardFlip from "react-card-flip";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
@@ -17,6 +16,7 @@ import EndPoints from "../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import Breadcrumbs from "../BreadCrumbs";
 import { setClassAndSectionData } from "../../store/AppAuthSlice";
+import FlipCard from "./FlipCard";
 
 function ClassSetup() {
   const navigate = useNavigate();
@@ -190,135 +190,141 @@ function ClassSetup() {
             <div className={`py-3 flex flex-wrap justify-start`}>
               {/* class cards */}
               {classes.map((data, index) => (
-                <ReactCardFlip
-                  isFlipped={isFlipped[index]}
-                  flipDirection="horizontal"
+                <FlipCard
                   key={index}
-                >
-                  {/* frontside */}
-                  <div
-                    className={`m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 rounded-3xl border cursor-pointer ${
-                      isDarkMode
-                        ? "bg-background5 border-borderGray"
-                        : "border-borderLine"
-                    }`}
-                  >
-                    <div className={`relative rounded-full h-[40] w-[40] z-10`}>
-                      <img
-                        src={isDarkMode ? trash : trashw}
-                        onClick={() => {
-                          setClickedClassId(data._id);
-                          setModalIsOpen(true);
-                        }}
-                        alt="deleteClass"
-                        className={`absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 p-1 ${
-                          isDarkMode ? "" : "bg-whiteBackground"
-                        }`}
-                      />
-                    </div>
+                  isFlipped={isFlipped[index]}
+                  onClick={() => toggleFlip(index)}
+                  front={
                     <div
-                      onClick={() => toggleFlip(index)}
-                      className={`relative flex flex-col h-full w-full`}
-                    >
-                      <img
-                        src={
-                          [
-                            "Pre-Nursery",
-                            "Nursery",
-                            "LKG",
-                            "UKG",
-                            "1st",
-                            "2nd",
-                          ].includes(data.name)
-                            ? studentsPto2
-                            : [
-                                "3rd",
-                                "4th",
-                                "5th",
-                                "6th",
-                                "7th",
-                                "8th",
-                              ].includes(data.name)
-                            ? students3to8
-                            : students9to12
-                        }
-                        className={` object-contain h-[120px] ${
-                          ["9th", "10th", "11th", "12th"].includes(data.name)
-                            ? "w-[120px]"
-                            : "w-full"
-                        }`}
-                        alt="students"
-                      />
-                      <p
-                        className={`h-[40px] text-white text-center font-semibold text-xs md:text-base absolute -bottom-2 right-0 left-0 mb-2 bg-black rounded-b-3xl py-1 flex items-center justify-center`}
-                      >
-                        {data.name}
-                      </p>
-                    </div>
-                  </div>
-                  {/* backside */}
-                  <div
-                    className={`${
-                      isDarkMode
-                        ? "border-borderWhite"
-                        : "bg-white border-borderBlue"
-                    } mt-3 mx-3 md:mt-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border font-bold rounded-3xl cursor-pointer`}
-                  >
-                    <div
-                      className={`flex flex-col justify-between h-full`}
-                      onClick={() => toggleFlip(index)}
-                    >
-                      <div className={`px-4 py-3 flex flex-row flex-wrap`}>
-                        {/* section data */}
-                        {data.section.map((section, j) => (
-                          <div
-                            onClick={() => {
-                              dispatch(
-                                setClassAndSectionData({
-                                  sectionId: section?._id,
-                                  classId: data?._id,
-                                  className: data?.name,
-                                  sectionName: section?.name,
-                                  startTime: section?.startTime,
-                                })
-                              );
-                              setTimeout(() => {
-                                navigate("/class-setup/student-menu");
-                              }, 100);
-                            }}
-                            className={`${
-                              isDarkMode
-                                ? "border-borderWhite text-textPrimary"
-                                : "border-borderOrange1 text-textOrange hover:bg-backgroundOrange1 hover:text-white"
-                            } w-4 h-4 md:w-6 md:h-6 m-2 border rounded-2xl flex justify-center items-center text-sm`}
-                            key={j}
-                          >
-                            {section.name}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {/* update section button */}
-                    <Link
-                      className={` relative -top-8 flex justify-center items-center`}
-                      onClick={() => {
-                        setClickedClassId(data["_id"]);
-                        setAddSectionModelOpen(true);
-                      }}
+                      className={`m-3 md:my-6 md:mx-4 w-40 h-40 rounded-3xl border cursor-pointer ${
+                        isDarkMode
+                          ? "bg-background5 border-borderGray"
+                          : "border-borderLine"
+                      }`}
                     >
                       <div
-                        className={`bg-backgroundBlue text-white text-center text-xs md:text-sm py-1 px-6 rounded-full transition-all duration-200 ease-in-out active:scale-90`}
+                        className={`relative rounded-full h-[40] w-[40] z-10`}
                       >
-                        {t("buttons.update")}
+                        <img
+                          src={isDarkMode ? trash : trashw}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setClickedClassId(data._id);
+                            setModalIsOpen(true);
+                          }}
+                          alt="deleteClass"
+                          className={`absolute rounded-full size-[26px] top-3 right-2 md:top-3 md:right-3 p-1 ${
+                            isDarkMode ? "" : "bg-whiteBackground"
+                          }`}
+                        />
                       </div>
-                    </Link>
-                  </div>
-                </ReactCardFlip>
+                      <div
+                        // onClick={() => toggleFlip(index)}
+                        className={`relative flex flex-col h-full w-full`}
+                      >
+                        <img
+                          src={
+                            [
+                              "Pre-Nursery",
+                              "Nursery",
+                              "LKG",
+                              "UKG",
+                              "1st",
+                              "2nd",
+                            ].includes(data.name)
+                              ? studentsPto2
+                              : [
+                                  "3rd",
+                                  "4th",
+                                  "5th",
+                                  "6th",
+                                  "7th",
+                                  "8th",
+                                ].includes(data.name)
+                              ? students3to8
+                              : students9to12
+                          }
+                          className={` object-contain h-[120px] ${
+                            ["9th", "10th", "11th", "12th"].includes(data.name)
+                              ? "w-[120px]"
+                              : "w-full"
+                          }`}
+                          alt="students"
+                        />
+                        <p
+                          className={`h-[40px] text-white text-center font-semibold text-xs md:text-base absolute -bottom-2 right-0 left-0 mb-2 bg-black rounded-b-3xl py-1 flex items-center justify-center`}
+                        >
+                          {data.name}
+                        </p>
+                      </div>
+                    </div>
+                  }
+                  back={
+                    <div
+                      className={`${
+                        isDarkMode
+                          ? "border-borderWhite"
+                          : "bg-white border-borderBlue"
+                      } mt-3 mx-3 md:mt-6 md:mx-4 w-40 h-40 border font-bold rounded-3xl cursor-pointer`}
+                    >
+                      <div
+                        className={`flex flex-col justify-between h-full`}
+                        // onClick={() => toggleFlip(index)}
+                      >
+                        <div className={`px-4 py-3 flex flex-row flex-wrap`}>
+                          {/* section data */}
+                          {data.section.map((section, j) => (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                dispatch(
+                                  setClassAndSectionData({
+                                    sectionId: section?._id,
+                                    classId: data?._id,
+                                    className: data?.name,
+                                    sectionName: section?.name,
+                                    startTime: section?.startTime,
+                                  })
+                                );
+                                setTimeout(() => {
+                                  navigate("/class-setup/student-menu");
+                                }, 100);
+                              }}
+                              className={`${
+                                isDarkMode
+                                  ? "border-borderWhite text-textPrimary"
+                                  : "border-borderOrange1 text-textOrange hover:bg-backgroundOrange1 hover:text-white"
+                              } w-4 h-4 md:w-6 md:h-6 m-2 border rounded-2xl flex justify-center items-center text-sm`}
+                              key={j}
+                            >
+                              {section.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {/* update section button */}
+                      <Link
+                        className={`relative -top-8 flex justify-center items-center`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setClickedClassId(data["_id"]);
+                          setAddSectionModelOpen(true);
+                        }}
+                      >
+                        <div
+                          className={`bg-backgroundBlue text-white text-center text-xs md:text-sm py-1 px-6 rounded-full transition-all duration-200 ease-in-out active:scale-90`}
+                        >
+                          {t("buttons.update")}
+                        </div>
+                      </Link>
+                    </div>
+                  }
+                />
               ))}
 
               {classes.length < 16 && (
                 <div
-                  className={`m-3 md:my-6 md:mx-4 w-16 h-16 md:w-40 md:h-40 border rounded-3xl flex justify-center items-center ${
+                  className={`m-3 md:my-6 md:mx-4 w-40 h-40 border rounded-3xl flex justify-center items-center ${
                     isDarkMode
                       ? "border-borderWhite"
                       : "bg-white border-borderBlue"

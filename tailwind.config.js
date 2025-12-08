@@ -86,6 +86,9 @@ export default {
         fromColor1: "#191E25",
         toColor1: "#1A1A1A",
       },
+      rotate: {
+        "y-180": "180deg",
+      },
     },
   },
   plugins: [],

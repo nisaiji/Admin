@@ -28,3 +28,18 @@
 body {
   font-family: "Poppins", sans-serif;
 }
+
+/* Tailwind custom utilities */
+
+.flip-card-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.7s;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
