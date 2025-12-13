@@ -10,14 +10,14 @@ import support from "../../assets/images/fees/support.png";
 
 import Sidebar from "./Sidebar";
 import Dashboard from "./Dashboard";
-import Setting from "./Setting";
 import Disputes from "./Disputes";
 import Payments from "./payments/Payments";
 import Reports from "./reports/Reports";
+import SettingSetup from "./setting/SettingSetup";
 
 export default function Fees() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-  const [selected, setSelected] = useState("Reports");
+  const [selected, setSelected] = useState("Settings");
   const items = [
     { src: dashboard, label: "Dashboard" },
     { src: report, label: "Reports" },
@@ -38,7 +38,7 @@ export default function Fees() {
       {selected === "Reports" && <Reports />}
       {selected === "Payments" && <Payments />}
       {selected === "Disputes" && <Disputes />}
-      {selected === "Settings" && <Setting />}
+      {selected === "Settings" && <SettingSetup />}
     </div>
   );
 }
