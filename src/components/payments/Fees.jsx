@@ -17,7 +17,7 @@ import SettingSetup from "./setting/SettingSetup";
 
 export default function Fees() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-  const [selected, setSelected] = useState("Settings");
+  const [selected, setSelected] = useState("Dashboard");
   const items = [
     { src: dashboard, label: "Dashboard" },
     { src: report, label: "Reports" },
