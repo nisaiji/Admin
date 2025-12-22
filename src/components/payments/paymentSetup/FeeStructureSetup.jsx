@@ -1,38 +1,52 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ArrowLeft from "../../../assets/images/fees/leftarrow.png";
 import FeeStructureCreated from "./FeeStructureCreated";
 import FeeStructureReview from "./FeeStructureReview";
+import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { axiosClient } from "../../../services/axiosClient";
+import EndPoints from "../../../services/EndPoints";
+import toast, { Toaster } from "react-hot-toast";
+import moment from "moment";
 
 export default function FeeStructureSetup({ onBack }) {
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const [t] = useTranslation();
+
   const [step, setStep] = useState("setup"); // "setup", "review", "complete"
-  const [selectedGrade, setSelectedGrade] = useState(null);
+
   const [frequency, setFrequency] = useState("");
   const [startDate, setStartDate] = useState("");
   const [lateFeeAmount, setLateFeeAmount] = useState("");
   const [periodAmounts, setPeriodAmounts] = useState({});
   const [baseAmount, setBaseAmount] = useState("");
-  const [differentSection, setDifferentSection] = useState(false);
-  const [selectedSections, setSelectedSections] = useState([]);
 
-  const classes = [
-    "Nursery",
+  const [classList, setClassList] = useState([]);
+  const [sectionList, setSectionList] = useState([]);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [selectedSections, setSelectedSections] = useState([]);
+  const [differentSection, setDifferentSection] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const classOptions = [
+    "preNursery",
+    "nursery",
     "LKG",
     "UKG",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-  ];
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+  ].map((key) => t(`options.${key}`));
 
-  
   const frequencies = [
     "Monthly",
     "Bi-Monthly",
@@ -70,7 +84,68 @@ export default function FeeStructureSetup({ onBack }) {
       Annually: ["Annual"],
     }[freq] || []);
 
+  const frequencyMonthMap = {
+    Monthly: 1,
+    "Bi-Monthly": 2,
+    Quarterly: 3,
+    "Half-Yearly": 6,
+    Annually: 12,
+  };
+
+  /**
+   * Fetches and sets the list of available classes and their corresponding sections.
+   */
+  const getClassList = async () => {
+    try {
+      if (!classAndSectionData?.selectedSession?._id) {
+        return;
+      }
+      const res = await axiosClient.get(
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
+      );
+
+      if (res?.statusCode === 200) {
+        // Filter out classes without sections and then sort them.
+        const filteredSortedClasses = res?.result
+          .filter((cls) => cls?.section?.length > 0)
+          .sort((a, b) => {
+            const aIndex = classOptions.indexOf(a.name);
+            const bIndex = classOptions.indexOf(b.name);
+            return aIndex - bIndex;
+          });
+
+        setClassList(filteredSortedClasses);
+        const [firstClass] = filteredSortedClasses;
+        setSectionList(firstClass?.section || []);
+      }
+    } catch (e) {
+      // toast.error(e);
+    }
+  };
+
+  useEffect(() => {
+    getClassList();
+  }, [classAndSectionData?.selectedSession?._id]);
+
+  useEffect(() => {
+    if (!frequency || !startDate) return;
+
+    setPeriodAmounts((prev) => {
+      const updated = { ...prev };
+
+      getPeriods(frequency).forEach((period) => {
+        if (isPastPeriod(period)) {
+          updated[period] = "0";
+        }
+      });
+
+      return updated;
+    });
+  }, [startDate, frequency]);
+
   const updateFee = (period, value) => {
+    if (isPastPeriod(period)) return;
+
     setPeriodAmounts((prev) => ({
       ...prev,
       [period]: value === "" ? "" : value.replace(/\D/g, ""),
@@ -100,10 +175,116 @@ export default function FeeStructureSetup({ onBack }) {
 
   const allPeriodsFilledIn = () => {
     const periods = getPeriods(frequency);
+
     return periods.every((period) => {
       const v = periodAmounts[period];
+
+      // Past period → always valid
+      if (isPastPeriod(period)) return true;
+
+      // Future / active period → must have amount > 0
       return v !== "" && v !== undefined && Number(v) > 0;
     });
+  };
+
+  const getStartMonthFromPeriod = (period) => {
+    return period.includes("-") ? period.split("-")[0] : period;
+  };
+
+  const getInstallmentDates = (period) => {
+    const session = classAndSectionData?.selectedSession;
+
+    const academicStartYear = session.academicStartYear;
+    const academicEndYear = session.academicEndYear;
+
+    const sessionEnd = moment(session.endDate).endOf("day");
+    const startDay = moment(startDate).date();
+
+    if (frequency === "Annually") {
+      return {
+        startDate: moment(session.startDate).valueOf(),
+        dueDate: sessionEnd.valueOf(),
+      };
+    }
+
+    const startMonth = getStartMonthFromPeriod(period);
+
+    // 1 Build installment start date
+    let start = moment().month(startMonth).date(startDay);
+
+    if (["Jan", "Feb", "Mar"].includes(startMonth)) {
+      start.year(academicEndYear);
+    } else {
+      start.year(academicStartYear);
+    }
+
+    // 2 Due date = day before next installment
+    let due = start
+      .clone()
+      .add(frequencyMonthMap[frequency], "months")
+      .subtract(1, "day")
+      .endOf("day");
+
+    // 3 Clamp to session end (31 March)
+    if (due.isAfter(sessionEnd)) {
+      due = sessionEnd.clone();
+    }
+
+    return {
+      startDate: start.valueOf(),
+      dueDate: due.valueOf(),
+    };
+  };
+
+  const isPastPeriod = (period) => {
+    if (!startDate) return false;
+
+    const { dueDate } = getInstallmentDates(period);
+    return moment(dueDate).isBefore(moment(startDate).startOf("day"));
+  };
+
+  const buildInstallments = () =>
+    Object.entries(periodAmounts).map(([period, amount]) => {
+      const dates = getInstallmentDates(period);
+
+      const isPast = moment(dates.dueDate).isBefore(
+        moment(startDate).startOf("day")
+      );
+
+      return {
+        amount: isPast ? 0 : Number(amount),
+        ...dates,
+      };
+    });
+
+  const createFees = async () => {
+    const sectionsFee = selectedSections.map((section) => ({
+      sectionId: section._id,
+      installmentType: frequency.toLowerCase(),
+      feeInstallments: buildInstallments(),
+    }));
+
+    const payload = {
+      classId: selectedClass._id,
+      sessionId: classAndSectionData.selectedSession._id,
+      totalAmount: getTotalAmount(),
+      lateFee: Number(lateFeeAmount),
+      sectionsFee,
+    };
+
+    // console.log("FINAL PAYLOAD 👉", payload);
+
+    try {
+      const res = await axiosClient.post(EndPoints.ADMIN.CREATE_FEES, payload);
+      if (res?.statusCode === 201) {
+        // console.log(res);
+        toast.success(res?.result?.message);
+        setStep("complete");
+      }
+    } catch (e) {
+      // console.log(e);
+      toast.error(e);
+    }
   };
 
   // View Components for readability
@@ -126,7 +307,11 @@ export default function FeeStructureSetup({ onBack }) {
   // COMPLETE PAGE
   if (step === "complete")
     return (
-      <FeeStructureCreated onBack={onBack} selectedGrade={selectedGrade} />
+      <FeeStructureCreated
+        onBack={onBack}
+        selectedClass={selectedClass}
+        selectedSections={selectedSections}
+      />
     );
 
   // REVIEW PAGE
@@ -134,13 +319,16 @@ export default function FeeStructureSetup({ onBack }) {
     return (
       <FeeStructureReview
         onBack={onBack}
-        selectedGrade={selectedGrade}
+        selectedClass={selectedClass}
+        selectedSections={selectedSections}
         startDate={startDate}
         frequency={frequency}
         periodAmounts={periodAmounts}
         getTotalAmount={() => getTotalAmount()}
         lateFeeAmount={lateFeeAmount}
         setStep={setStep}
+        createFees={() => createFees()}
+        getInstallmentDates={getInstallmentDates}
       />
     );
   }
@@ -149,7 +337,7 @@ export default function FeeStructureSetup({ onBack }) {
   return (
     <div className="p-8 w-full">
       <BackBtn text="Back to Payment Setup" />
-
+      <Toaster position="top-center" reverseOrder={false} />
       <div className="max-w-4xl mx-auto bg-[#1a1d24] px-10 py-6 rounded-xl border border-gray-700">
         <Title>Create Fee Structure</Title>
         <p className="text-base font-poppins-bold text-[#A9ACB2] mb-6">
@@ -163,27 +351,28 @@ export default function FeeStructureSetup({ onBack }) {
         </p>
 
         <div className="grid grid-cols-8 gap-2 mb-6">
-          {classes.map((c) => (
+          {classList?.map((c) => (
             <button
-              key={c}
+              key={c._id}
               onClick={() => {
-                setSelectedGrade(c);
+                setSelectedClass(c);
+                setSectionList(c?.section ?? []);
+                setSelectedSections(c?.section);
                 setDifferentSection(false);
-                setSelectedSections([]);
               }}
               className={`p-3 border-2 rounded-lg text-center transition-all ${
-                selectedGrade === c
+                selectedClass === c
                   ? "border-[#0A81D1] bg-[#0A81D1]/10 text-white"
                   : "border-gray-700 bg-[#0f1419] text-gray-400 hover:border-gray-600"
               }`}
             >
-              {c}
+              {c?.name ?? ""}
             </button>
           ))}
         </div>
 
         {/* Show only AFTER class is selected */}
-        {selectedGrade && (
+        {selectedClass?._id && (
           <div className="mb-6 mt-4">
             <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
               <input
@@ -191,7 +380,6 @@ export default function FeeStructureSetup({ onBack }) {
                 checked={differentSection}
                 onChange={(e) => {
                   setDifferentSection(e.target.checked);
-                  if (!e.target.checked) setSelectedSections([]);
                 }}
                 className="w-4 h-4"
               />
@@ -206,17 +394,22 @@ export default function FeeStructureSetup({ onBack }) {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
-                  {["A", "B", "C", "D", "E"].map((sec) => {
-                    const active = selectedSections.includes(sec);
+                  {sectionList?.map((sec) => {
+                    const active = selectedSections.some(
+                      (s) => s._id === sec._id
+                    );
+
                     return (
                       <button
-                        key={sec}
+                        key={sec?._id}
                         onClick={() =>
-                          setSelectedSections((prev) =>
-                            active
-                              ? prev.filter((s) => s !== sec)
-                              : [...prev, sec]
-                          )
+                          setSelectedSections((prev) => {
+                            const exists = prev.some((s) => s._id === sec._id);
+
+                            return exists
+                              ? prev.filter((s) => s._id !== sec._id)
+                              : [...prev, sec];
+                          })
                         }
                         className={`p-3 border-2 rounded-lg text-center transition-all ${
                           active
@@ -224,15 +417,15 @@ export default function FeeStructureSetup({ onBack }) {
                             : "border-gray-700 bg-[#0f1419] text-gray-400 hover:border-gray-600"
                         }`}
                       >
-                        Section {sec}
+                        Section {sec?.name}
                       </button>
                     );
                   })}
                 </div>
-
                 {selectedSections.length > 0 && (
                   <p className="text-[#0A81D1] mt-2 text-sm">
-                    Selected Sections: {selectedSections.join(", ")}
+                    Selected Sections:{" "}
+                    {selectedSections.map((sec) => sec.name).join(", ")}
                   </p>
                 )}
               </div>
@@ -251,7 +444,7 @@ export default function FeeStructureSetup({ onBack }) {
             onChange={(e) => setFrequency(e.target.value)}
             className="w-full bg-[#0f1419] border border-gray-700 text-white rounded-lg px-4 py-3 appearance-none focus:outline-none focus:border-[#0A81D1]"
           >
-            <option value="">Select frequency...</option>
+            <option value="">Select Frequency...</option>
             {frequencies.map((freq) => (
               <option key={freq} value={freq}>
                 {freq}
@@ -286,12 +479,29 @@ export default function FeeStructureSetup({ onBack }) {
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  const parts = value.split("-");
-                  if (parts[0] && parts[0].length > 4) return;
+                min={moment().add(3, "days").format("YYYY-MM-DD")}
+                max={moment(
+                  classAndSectionData?.selectedSession?.endDate
+                ).format("YYYY-MM-DD")}
+                onChange={(e) => setStartDate(e.target.value)}
+                onBlur={() => {
+                  const today = moment().startOf("day");
+                  const selected = moment(startDate);
+                  const sessionEnd = moment(
+                    classAndSectionData?.selectedSession?.endDate
+                  ).startOf("day");
 
-                  setStartDate(value);
+                  // Past date
+                  if (selected.isBefore(today)) {
+                    setStartDate("");
+                    return;
+                  }
+
+                  // After session end date
+                  if (selected.isAfter(sessionEnd)) {
+                    setStartDate("");
+                    return;
+                  }
                 }}
                 className="w-full bg-[#0f1419] border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0A81D1]"
               />
@@ -312,7 +522,7 @@ export default function FeeStructureSetup({ onBack }) {
           <div>
             <Label text="Late Fee Amount (₹)" />
             <p className="text-gray-500 text-sm mb-4">
-              Penalty for late payment
+              Penalty for late payment per Day
             </p>
             <input
               type="text"
@@ -436,13 +646,23 @@ export default function FeeStructureSetup({ onBack }) {
                       </span>
                       <input
                         type="text"
-                        value={periodAmounts[period] || ""}
+                        value={
+                          isPastPeriod(period)
+                            ? "0"
+                            : periodAmounts[period] || ""
+                        }
+                        disabled={isPastPeriod(period)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/\D/g, "");
                           updateFee(period, value);
                         }}
                         placeholder="0"
-                        className="w-full bg-[#0a0a0a] border border-gray-700 text-white text-sm rounded pl-6 pr-2 py-1.5 focus:outline-none focus:border-[#0A81D1] transition-colors"
+                        // className="w-full bg-[#0a0a0a] border border-gray-700 text-white text-sm rounded pl-6 pr-2 py-1.5 focus:outline-none focus:border-[#0A81D1] transition-colors"
+                        className={`w-full text-sm rounded pl-6 pr-2 py-1.5 transition-colors ${
+                          isPastPeriod(period)
+                            ? "bg-[#0a0a0a] border border-gray-800 text-gray-500 cursor-not-allowed"
+                            : "bg-[#0a0a0a] border border-gray-700 text-white focus:outline-none focus:border-[#0A81D1]"
+                        }`}
                       />
                     </div>
                   </div>
@@ -464,7 +684,7 @@ export default function FeeStructureSetup({ onBack }) {
               <p className="text-amber-400">
                 <strong>Note:</strong> This fee structure will apply to all
                 students in the selected class. Automatic reminders will be sent
-                on the 2nd of every period.
+                on the {moment(startDate).format("D")} of every period.
               </p>
             </div>
 
@@ -472,7 +692,7 @@ export default function FeeStructureSetup({ onBack }) {
             <button
               onClick={() => setStep("review")}
               disabled={
-                !selectedGrade ||
+                !selectedClass ||
                 !frequency ||
                 !startDate ||
                 !allPeriodsFilledIn()

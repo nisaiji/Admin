@@ -8,9 +8,10 @@ import classimg from "../../../assets/images/fees/class.png";
 import PeriodicView from "./PeriodicView";
 import PaymentView from "./PaymentView";
 import FeeSummaryView from "./FeeSummaryView";
+import RefundAndFailedTransition from "./RefundAndFailedTransition";
 
 export default function Reports() {
-  const [selectedView, setSelectedView] = useState("feesummary");
+  const [selectedView, setSelectedView] = useState("class");
 
   return (
     <div className="p-6 w-full text-textPrimary">
@@ -122,6 +123,7 @@ export default function Reports() {
       {selectedView === "periodic" ? <PeriodicView /> : <></>}
       {selectedView === "paymentmode" ? <PaymentView /> : <></>}
       {selectedView === "feesummary" ? <FeeSummaryView /> : <></>}
+      {selectedView === "refund" ? <RefundAndFailedTransition /> : <></>}
     </div>
   );
 }

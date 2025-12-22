@@ -112,6 +112,10 @@ const EndPoints = {
     GET_STUDENTS_BY_EXAM: "student-exam-result/section-student-marks",
     UPDATE_STUDENT_MARKS_BULK: "student-exam-result/admin",
     PUBLISH_RESULT: "exam",
+    
+    // FEES
+    CREATE_FEES: "fee-structure",
+
   },
   TEACHER: {
     // LOGIN

@@ -2,7 +2,11 @@ import React from "react";
 import ArrowLeft from "../../../assets/images/fees/leftarrow.png";
 import accept from "../../../assets/images/darkmode/accept.png";
 
-export default function FeeStructureCreated({ onBack, selectedGrade }) {
+export default function FeeStructureCreated({
+  onBack,
+  selectedClass,
+  selectedSections,
+}) {
   return (
     <div>
       <button
@@ -19,8 +23,12 @@ export default function FeeStructureCreated({ onBack, selectedGrade }) {
           </div>
           <h2 className="text-white text-2xl mb-3">Fee Structure Created!</h2>
           <p className="text-gray-400 mb-6">
-            Fee structure for {`Class ${selectedGrade}`} has been successfully
-            configured. All students in this class will follow this structure.
+            Fee structure for{" "}
+            {`Class ${selectedClass?.name} Section ${selectedSections
+              .map((sec) => sec.name)
+              .join(", ")}`}{" "}
+            has been successfully configured. All students in this class will
+            follow this structure.
           </p>
           <button
             onClick={onBack}
