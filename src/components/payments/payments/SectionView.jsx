@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import collected from "../../../assets/images/fees/collected.png";
 import pending from "../../../assets/images/fees/pending.png";
 import due from "../../../assets/images/fees/due.png";
@@ -12,92 +12,103 @@ import {
   barElementClasses,
   PieChart,
 } from "@mui/x-charts";
+import { axiosClient } from "../../../services/axiosClient";
+import EndPoints from "../../../services/EndPoints";
+import { ChevronRight } from "lucide-react";
 
-export default function SectionView({ setSelectedView }) {
-  // 8 gradients for 8 maximum sections
-  const gradients = [
-    ["#8ADEC5", "#4B786B"],
-    ["#09F1F5", "#058D8F"],
-    ["#1697CB", "#0B4B65"],
-    ["#FF9933", "#995C1F"],
-    ["#F15613", "#8B320B"],
-    ["#B4221A", "#4E0F0B"],
-    ["#0A81D1", "#05426B"],
-    ["#025994", "#011C2E"],
-  ];
+export default function SectionView({
+  setSelectedView,
+  filterSection,
+  setSelectedStudent,
+  filterClass,
+}) {
+  const [feeSummary, setFeeSummary] = useState(null);
 
-  const classSections = {
-    1: ["A", "B", "C"],
-    2: ["A", "B"],
-    3: ["A", "B", "C", "D"],
-    4: ["A", "B", "C", "D", "E"],
-    5: ["A", "B", "C", "D", "E", "F"],
-    6: ["A", "B", "C", "D", "E", "F", "G"],
-    7: ["A", "B", "C", "D", "E", "F", "G", "H"],
+  const getFeeSummary = async () => {
+    try {
+      const res = await axiosClient.post(
+        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sectionId=${filterSection?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        let totalAmount =
+          res?.result?.collectedFee +
+          res?.result?.pending +
+          res?.result?.overdue;
+
+        setFeeSummary({
+          ...res?.result,
+          totalAmount,
+        });
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
   };
 
-  const selectedClass = "7"; // from dropdown
-  const sections = classSections[selectedClass];
+  useEffect(() => {
+    if (filterSection?._id) {
+      getFeeSummary();
+    }
+  }, [filterSection?._id]);
 
   // STUDENT PAYMENT DATA
   const students = [
     {
       name: "Rohit Sharma",
       status: {
-        Jan: "paid",
-        Feb: "unpaid",
-        Mar: "paid",
         Apr: "paid",
-        May: "unpaid",
+        May: "paid",
         Jun: "paid",
         Jul: "paid",
-        Aug: "unpaid",
+        Aug: "paid",
         Sep: "paid",
         Oct: "paid",
-        Nov: "unpaid",
+        Nov: "paid",
         Dec: "paid",
+        Jan: "unpaid",
+        Feb: "unpaid",
+        Mar: "unpaid",
       },
     },
     {
       name: "Anita Verma",
       status: {
-        Jan: "paid",
-        Feb: "paid",
-        Mar: "paid",
-        Apr: "unpaid",
-        May: "unpaid",
+        Apr: "paid",
+        May: "paid",
         Jun: "paid",
         Jul: "paid",
         Aug: "paid",
         Sep: "paid",
-        Oct: "unpaid",
-        Nov: "unpaid",
-        Dec: "paid",
+        Oct: "paid",
+        Nov: "paid",
+        Dec: "unpaid",
+        Jan: "unpaid",
+        Feb: "unpaid",
+        Mar: "unpaid",
       },
     },
     {
       name: "Karan Singh",
       status: {
-        Jan: "unpaid",
-        Feb: "unpaid",
-        Mar: "paid",
         Apr: "paid",
         May: "paid",
-        Jun: "unpaid",
+        Jun: "paid",
         Jul: "paid",
         Aug: "paid",
-        Sep: "unpaid",
+        Sep: "paid",
         Oct: "paid",
-        Nov: "paid",
+        Nov: "unpaid",
         Dec: "unpaid",
+        Jan: "unpaid",
+        Feb: "unpaid",
+        Mar: "unpaid",
       },
     },
   ];
 
   const months = [
-    "Jan",
-    "Feb",
-    "Mar",
     "Apr",
     "May",
     "Jun",
@@ -107,11 +118,27 @@ export default function SectionView({ setSelectedView }) {
     "Oct",
     "Nov",
     "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
   ];
+  // console.log(filterSection);
 
   return (
     <div className="p-6 w-full text-white">
-      <p className="text-sm font-poppins-bold">Payments</p>
+      <div className="flex">
+        <button
+          type="button"
+          onClick={() => setSelectedView("class")}
+          className="text-sm font-poppins-bold cursor-pointer"
+        >
+          Payments
+        </button>
+        <ChevronRight className="w-5 h-5" />
+        <p className="text-sm text-textBlue font-poppins-bold">
+          {filterClass?.name ?? "Nursary"} {filterSection?.name ?? "A"}
+        </p>
+      </div>
 
       {/* TOP CARDS */}
       <div className="grid grid-cols-3 gap-4 my-6">
@@ -125,13 +152,15 @@ export default function SectionView({ setSelectedView }) {
                 className="size-6 object-contain z-10"
               />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 2000000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.collectedFee ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">
             Total Collected Fees
           </p>
           <p className="text-base font-poppins-bold text-textBlue mt-1">
-            +18.2%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular">
               than last week
             </span>
@@ -144,11 +173,13 @@ export default function SectionView({ setSelectedView }) {
             <div className="size-10 bg-backgroundOrange bg-opacity-15 flex justify-center items-center rounded-md">
               <img src={pending} alt="p" className="size-6 object-contain" />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 500000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.pending ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">Pending Payments</p>
           <p className="text-base font-poppins-bold text-textOrange2 mt-1">
-            +4.5%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular">
               than last week
             </span>
@@ -161,11 +192,13 @@ export default function SectionView({ setSelectedView }) {
             <div className="size-10 bg-backgroundRed bg-opacity-15 flex justify-center items-center rounded-md">
               <img src={due} alt="p" className="size-6 object-contain" />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 100000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.overdue ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">Overdue Payments</p>
           <p className="text-base font-poppins-bold text-textRed mt-1">
-            +2%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular">
               than last week
             </span>
@@ -177,7 +210,7 @@ export default function SectionView({ setSelectedView }) {
       <div className="p-5 rounded-xl bg-[#1c1c1c] mb-6">
         <h3 className="text-lg font-poppins-bold">Overdue, Pending, Paid</h3>
         <p className="text-sm font-poppins-regular text-textGray2 mb-4">
-          20 payments pending
+          0 payments pending
         </p>
         <div className="grid grid-cols-4 gap-4 my-6">
           {/* === Paid Card === */}
@@ -194,7 +227,7 @@ export default function SectionView({ setSelectedView }) {
 
               {/* Amount */}
               <p className="text-textPrimary text-2xl font-poppins-bold">
-                ₹ 20M
+                ₹ {feeSummary?.collectedFee ?? 0}
               </p>
             </div>
 
@@ -204,8 +237,17 @@ export default function SectionView({ setSelectedView }) {
                 series={[
                   {
                     data: [
-                      { id: 0, value: 80, color: "#4CCB6A" },
-                      { id: 1, value: 20, color: "#3b3b3b" },
+                      {
+                        id: 0,
+                        value: feeSummary?.collectedFee,
+                        color: "#4CCB6A",
+                      },
+                      {
+                        id: 1,
+                        value:
+                          feeSummary?.totalAmount - feeSummary?.collectedFee,
+                        color: "#3b3b3b",
+                      },
                     ],
                     innerRadius: 0,
                     outerRadius: 32,
@@ -227,7 +269,7 @@ export default function SectionView({ setSelectedView }) {
                 </span>
               </div>
               <p className="text-textPrimary text-2xl font-poppins-bold">
-                ₹ 500,000
+                ₹ {feeSummary?.pending ?? 0}
               </p>
             </div>
 
@@ -236,8 +278,12 @@ export default function SectionView({ setSelectedView }) {
                 series={[
                   {
                     data: [
-                      { id: 0, value: 40, color: "#FACC15" },
-                      { id: 1, value: 60, color: "#3b3b3b" },
+                      { id: 0, value: feeSummary?.pending, color: "#FACC15" },
+                      {
+                        id: 1,
+                        value: feeSummary?.totalAmount - feeSummary?.pending,
+                        color: "#3b3b3b",
+                      },
                     ],
                     innerRadius: 0,
                     outerRadius: 32,
@@ -260,7 +306,7 @@ export default function SectionView({ setSelectedView }) {
                 </span>
               </div>
               <p className="text-textPrimary text-2xl font-poppins-bold">
-                ₹ 100,000
+                ₹ {feeSummary?.overdue ?? 0}
               </p>
             </div>
 
@@ -269,8 +315,12 @@ export default function SectionView({ setSelectedView }) {
                 series={[
                   {
                     data: [
-                      { id: 0, value: 30, color: "#EF4444" },
-                      { id: 1, value: 70, color: "#3b3b3b" },
+                      { id: 0, value: feeSummary?.overdue, color: "#EF4444" },
+                      {
+                        id: 1,
+                        value: feeSummary?.totalAmount - feeSummary?.overdue,
+                        color: "#3b3b3b",
+                      },
                     ],
                     innerRadius: 0,
                     outerRadius: 32,

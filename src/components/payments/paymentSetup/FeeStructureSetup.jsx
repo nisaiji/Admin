@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ArrowLeft from "../../../assets/images/fees/leftarrow.png";
 import FeeStructureCreated from "./FeeStructureCreated";
 import FeeStructureReview from "./FeeStructureReview";
@@ -9,24 +9,166 @@ import EndPoints from "../../../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
 import moment from "moment";
 
+const FREQUENCY_CONFIG = {
+  monthly: {
+    label: "Monthly",
+    months: 1,
+    periods: [
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+    ],
+    grid: 6,
+  },
+  bimonthly: {
+    label: "Bi-Monthly",
+    months: 2,
+    periods: ["Apr-May", "Jun-Jul", "Aug-Sep", "Oct-Nov", "Dec-Jan", "Feb-Mar"],
+    grid: 3,
+  },
+  quarterly: {
+    label: "Quarterly",
+    months: 3,
+    periods: ["Apr-Jun", "Jul-Sep", "Oct-Dec", "Jan-Mar"],
+    grid: 4,
+  },
+  "half-yearly": {
+    label: "Half Yearly",
+    months: 6,
+    periods: ["Apr-Sep", "Oct-Mar"],
+    grid: 2,
+  },
+  annually: {
+    label: "Annually",
+    months: 12,
+    periods: ["Annual"],
+    grid: 2,
+  },
+};
+
 export default function FeeStructureSetup({ onBack }) {
   const { classAndSectionData } = useSelector((state) => state.appAuth);
   const [t] = useTranslation();
 
-  const [step, setStep] = useState("setup"); // "setup", "review", "complete"
-
-  const [frequency, setFrequency] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [lateFeeAmount, setLateFeeAmount] = useState("");
-  const [periodAmounts, setPeriodAmounts] = useState({});
-  const [baseAmount, setBaseAmount] = useState("");
-
+  const [step, setStep] = useState("setup");
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedSections, setSelectedSections] = useState([]);
   const [differentSection, setDifferentSection] = useState(false);
-  const [errors, setErrors] = useState({});
+
+  const [periodAmounts, setPeriodAmounts] = useState({});
+  const [baseAmount, setBaseAmount] = useState("");
+
+  const frequency = classAndSectionData?.feeStructureData?.installmentType;
+  const startDate = moment(
+    classAndSectionData?.feeStructureData?.effectiveFrom
+  ).format("YYYY-MM-DD");
+  const lateFeeAmount = classAndSectionData?.feeStructureData?.lateFeePercent;
+
+  const freqConfig = FREQUENCY_CONFIG[frequency];
+
+  useEffect(() => {
+    if (!classAndSectionData?.selectedSession?._id) return;
+
+    axiosClient
+      .get(
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData.selectedSession._id}`
+      )
+      .then((res) => {
+        if (res?.statusCode === 200) {
+          setClassList(res.result.filter((c) => c.section?.length));
+        }
+      });
+  }, [classAndSectionData?.selectedSession?._id]);
+
+  const getInstallmentDates = (period) => {
+    const session = classAndSectionData.selectedSession;
+    const sessionEnd = moment(session.endDate).endOf("day");
+
+    if (frequency === "annually") {
+      return {
+        startDate: moment(session.startDate).valueOf(),
+        dueDate: sessionEnd.valueOf(),
+      };
+    }
+
+    const startMonth = period.includes("-") ? period.split("-")[0] : period;
+
+    let start = moment(startDate)
+      .month(startMonth)
+      .year(
+        ["Jan", "Feb", "Mar"].includes(startMonth)
+          ? session.academicEndYear
+          : session.academicStartYear
+      );
+
+    let due = start
+      .clone()
+      .add(freqConfig.months, "months")
+      .subtract(1, "day")
+      .endOf("day");
+
+    if (due.isAfter(sessionEnd)) due = sessionEnd.clone();
+
+    return { startDate: start.valueOf(), dueDate: due.valueOf() };
+  };
+
+  const isPastPeriod = (period) =>
+    moment(getInstallmentDates(period).dueDate).isBefore(
+      moment(startDate).startOf("day")
+    );
+
+  const totalAmount = useMemo(
+    () =>
+      freqConfig.periods.reduce(
+        (sum, p) =>
+          isPastPeriod(p) ? sum : sum + Number(periodAmounts[p] || 0),
+        0
+      ),
+    [periodAmounts, frequency]
+  );
+
+  const applyBaseToAll = () =>
+    setPeriodAmounts(
+      Object.fromEntries(freqConfig.periods.map((p) => [p, baseAmount]))
+    );
+
+  const createFees = async () => {
+    const sectionsFee = selectedSections.map((s) => ({
+      sectionId: s._id,
+      feeInstallments: freqConfig.periods.map((p) => ({
+        ...getInstallmentDates(p),
+        amount: isPastPeriod(p) ? 0 : Number(periodAmounts[p] || 0),
+      })),
+    }));
+
+    try {
+      const res = await axiosClient.post(EndPoints.ADMIN.CREATE_FEES, {
+        classId: selectedClass._id,
+        sessionId: classAndSectionData.selectedSession._id,
+        schoolFeeStructureId: classAndSectionData.feeStructureData._id,
+        totalAmount,
+        sectionsFee,
+      });
+      if (res?.statusCode === 201) {
+        // console.log(res);
+        toast.success(res?.result?.message);
+        setStep("complete");
+      }
+    } catch (e) {
+      toast.error(e);
+    }
+  };
 
   const classOptions = [
     "preNursery",
@@ -48,11 +190,23 @@ export default function FeeStructureSetup({ onBack }) {
   ].map((key) => t(`options.${key}`));
 
   const frequencies = [
-    "Monthly",
-    "Bi-Monthly",
-    "Quarterly",
-    "Half-Yearly",
-    "Annually",
+    { value: "monthly", label: "Monthly", description: "12 payments per year" },
+    {
+      value: "bimonthly",
+      label: "Bi-Monthly",
+      description: "6 payments per year",
+    },
+    {
+      value: "quarterly",
+      label: "Quarterly",
+      description: "4 payments per year",
+    },
+    {
+      value: "half-yearly",
+      label: "Half Yearly",
+      description: "2 payments per year",
+    },
+    { value: "annually", label: "Annually", description: "1 payment per year" },
   ];
 
   const getPeriods = (freq) =>
@@ -84,13 +238,15 @@ export default function FeeStructureSetup({ onBack }) {
       Annually: ["Annual"],
     }[freq] || []);
 
-  const frequencyMonthMap = {
-    Monthly: 1,
-    "Bi-Monthly": 2,
-    Quarterly: 3,
-    "Half-Yearly": 6,
-    Annually: 12,
+  const normalizeFrequency = (freq) => {
+    if (!freq) return "";
+    return freq
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join("-");
   };
+
+  const normalizedFrequency = normalizeFrequency(frequency);
 
   /**
    * Fetches and sets the list of available classes and their corresponding sections.
@@ -127,22 +283,6 @@ export default function FeeStructureSetup({ onBack }) {
     getClassList();
   }, [classAndSectionData?.selectedSession?._id]);
 
-  useEffect(() => {
-    if (!frequency || !startDate) return;
-
-    setPeriodAmounts((prev) => {
-      const updated = { ...prev };
-
-      getPeriods(frequency).forEach((period) => {
-        if (isPastPeriod(period)) {
-          updated[period] = "0";
-        }
-      });
-
-      return updated;
-    });
-  }, [startDate, frequency]);
-
   const updateFee = (period, value) => {
     if (isPastPeriod(period)) return;
 
@@ -152,15 +292,10 @@ export default function FeeStructureSetup({ onBack }) {
     }));
   };
 
-  const applyBaseToAll = () =>
-    setPeriodAmounts(
-      Object.fromEntries(getPeriods(frequency).map((p) => [p, baseAmount]))
-    );
-
   const applyBaseToRemaining = () => {
     setPeriodAmounts((prev) => {
       const updated = { ...prev };
-      getPeriods(frequency).forEach((p) => {
+      getPeriods(normalizedFrequency).forEach((p) => {
         if (!updated[p]) updated[p] = baseAmount; // Only fill if empty
       });
       return updated;
@@ -168,13 +303,18 @@ export default function FeeStructureSetup({ onBack }) {
   };
 
   const getTotalAmount = () => {
-    return Object.values(periodAmounts).reduce((sum, amount) => {
-      return sum + (parseFloat(amount) || 0);
+    if (!frequency) return 0;
+
+    return getPeriods(normalizedFrequency).reduce((sum, period) => {
+      if (isPastPeriod(period)) return sum;
+
+      const value = Number(periodAmounts[period]) || 0;
+      return sum + value;
     }, 0);
   };
 
   const allPeriodsFilledIn = () => {
-    const periods = getPeriods(frequency);
+    const periods = getPeriods(normalizedFrequency);
 
     return periods.every((period) => {
       const v = periodAmounts[period];
@@ -185,106 +325,6 @@ export default function FeeStructureSetup({ onBack }) {
       // Future / active period → must have amount > 0
       return v !== "" && v !== undefined && Number(v) > 0;
     });
-  };
-
-  const getStartMonthFromPeriod = (period) => {
-    return period.includes("-") ? period.split("-")[0] : period;
-  };
-
-  const getInstallmentDates = (period) => {
-    const session = classAndSectionData?.selectedSession;
-
-    const academicStartYear = session.academicStartYear;
-    const academicEndYear = session.academicEndYear;
-
-    const sessionEnd = moment(session.endDate).endOf("day");
-    const startDay = moment(startDate).date();
-
-    if (frequency === "Annually") {
-      return {
-        startDate: moment(session.startDate).valueOf(),
-        dueDate: sessionEnd.valueOf(),
-      };
-    }
-
-    const startMonth = getStartMonthFromPeriod(period);
-
-    // 1 Build installment start date
-    let start = moment().month(startMonth).date(startDay);
-
-    if (["Jan", "Feb", "Mar"].includes(startMonth)) {
-      start.year(academicEndYear);
-    } else {
-      start.year(academicStartYear);
-    }
-
-    // 2 Due date = day before next installment
-    let due = start
-      .clone()
-      .add(frequencyMonthMap[frequency], "months")
-      .subtract(1, "day")
-      .endOf("day");
-
-    // 3 Clamp to session end (31 March)
-    if (due.isAfter(sessionEnd)) {
-      due = sessionEnd.clone();
-    }
-
-    return {
-      startDate: start.valueOf(),
-      dueDate: due.valueOf(),
-    };
-  };
-
-  const isPastPeriod = (period) => {
-    if (!startDate) return false;
-
-    const { dueDate } = getInstallmentDates(period);
-    return moment(dueDate).isBefore(moment(startDate).startOf("day"));
-  };
-
-  const buildInstallments = () =>
-    Object.entries(periodAmounts).map(([period, amount]) => {
-      const dates = getInstallmentDates(period);
-
-      const isPast = moment(dates.dueDate).isBefore(
-        moment(startDate).startOf("day")
-      );
-
-      return {
-        amount: isPast ? 0 : Number(amount),
-        ...dates,
-      };
-    });
-
-  const createFees = async () => {
-    const sectionsFee = selectedSections.map((section) => ({
-      sectionId: section._id,
-      installmentType: frequency.toLowerCase(),
-      feeInstallments: buildInstallments(),
-    }));
-
-    const payload = {
-      classId: selectedClass._id,
-      sessionId: classAndSectionData.selectedSession._id,
-      totalAmount: getTotalAmount(),
-      lateFee: Number(lateFeeAmount),
-      sectionsFee,
-    };
-
-    // console.log("FINAL PAYLOAD 👉", payload);
-
-    try {
-      const res = await axiosClient.post(EndPoints.ADMIN.CREATE_FEES, payload);
-      if (res?.statusCode === 201) {
-        // console.log(res);
-        toast.success(res?.result?.message);
-        setStep("complete");
-      }
-    } catch (e) {
-      // console.log(e);
-      toast.error(e);
-    }
   };
 
   // View Components for readability
@@ -441,13 +481,14 @@ export default function FeeStructureSetup({ onBack }) {
         <div className="relative mb-6">
           <select
             value={frequency || ""}
-            onChange={(e) => setFrequency(e.target.value)}
-            className="w-full bg-[#0f1419] border border-gray-700 text-white rounded-lg px-4 py-3 appearance-none focus:outline-none focus:border-[#0A81D1]"
+            disabled
+            // onChange={(e) => setFrequency(e.target.value)}
+            className="w-full bg-[#0f1419] border border-gray-700 text-white rounded-lg px-4 py-3 appearance-none focus:outline-none focus:border-[#0A81D1] cursor-not-allowed"
           >
             <option value="">Select Frequency...</option>
-            {frequencies.map((freq) => (
-              <option key={freq} value={freq}>
-                {freq}
+            {frequencies.map((freq, i) => (
+              <option key={i} value={freq.value}>
+                {freq.label}
               </option>
             ))}
           </select>
@@ -479,31 +520,32 @@ export default function FeeStructureSetup({ onBack }) {
               <input
                 type="date"
                 value={startDate}
-                min={moment().add(3, "days").format("YYYY-MM-DD")}
-                max={moment(
-                  classAndSectionData?.selectedSession?.endDate
-                ).format("YYYY-MM-DD")}
-                onChange={(e) => setStartDate(e.target.value)}
-                onBlur={() => {
-                  const today = moment().startOf("day");
-                  const selected = moment(startDate);
-                  const sessionEnd = moment(
-                    classAndSectionData?.selectedSession?.endDate
-                  ).startOf("day");
+                disabled
+                // min={moment().add(3, "days").format("YYYY-MM-DD")}
+                // max={moment(
+                //   classAndSectionData?.selectedSession?.endDate
+                // ).format("YYYY-MM-DD")}
+                // onChange={(e) => setStartDate(e.target.value)}
+                // onBlur={() => {
+                //   const today = moment().startOf("day");
+                //   const selected = moment(startDate);
+                //   const sessionEnd = moment(
+                //     classAndSectionData?.selectedSession?.endDate
+                //   ).startOf("day");
 
-                  // Past date
-                  if (selected.isBefore(today)) {
-                    setStartDate("");
-                    return;
-                  }
+                //   // Past date
+                //   if (selected.isBefore(today)) {
+                //     setStartDate("");
+                //     return;
+                //   }
 
-                  // After session end date
-                  if (selected.isAfter(sessionEnd)) {
-                    setStartDate("");
-                    return;
-                  }
-                }}
-                className="w-full bg-[#0f1419] border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0A81D1]"
+                //   // After session end date
+                //   if (selected.isAfter(sessionEnd)) {
+                //     setStartDate("");
+                //     return;
+                //   }
+                // }}
+                className="w-full bg-[#0f1419] border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0A81D1] cursor-not-allowed"
               />
               <svg
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
@@ -520,19 +562,20 @@ export default function FeeStructureSetup({ onBack }) {
             </div>
           </div>
           <div>
-            <Label text="Late Fee Amount (₹)" />
+            <Label text="Late Fee Interest (%)" />
             <p className="text-gray-500 text-sm mb-4">
-              Penalty for late payment per Day
+              Penalty for late payment per Annum
             </p>
             <input
               type="text"
               value={lateFeeAmount}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, "");
-                setLateFeeAmount(value);
-              }}
+              disabled
+              // onChange={(e) => {
+              //   const value = e.target.value.replace(/\D/g, "");
+              //   setLateFeeAmount(value);
+              // }}
               placeholder="Enter late fee"
-              className="w-full bg-[#0f1419] border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0A81D1]"
+              className="w-full bg-[#0f1419] border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0A81D1] cursor-not-allowed"
             />
           </div>
         </div>
@@ -541,12 +584,12 @@ export default function FeeStructureSetup({ onBack }) {
           <>
             <Label text="Fee Amounts per Period (₹)" />
             <p className="text-gray-500 text-sm mb-4">
-              {frequency === "annually"
+              {normalizedFrequency === "annually"
                 ? "Set the annual fee amount"
                 : "Set a base amount and customize specific periods if needed"}
             </p>
             {/* Base Amount with Quick Actions - Only show for non-annual frequencies */}
-            {frequency !== "annually" && (
+            {normalizedFrequency !== "annually" && (
               <div className="bg-[#0f1419] border border-gray-800 rounded-lg p-4 mb-4">
                 <div className="flex items-end gap-3">
                   <div className="flex-1">
@@ -607,7 +650,7 @@ export default function FeeStructureSetup({ onBack }) {
                     : "grid-cols-2"
                 }`}
               >
-                {getPeriods(frequency).map((period, index) => (
+                {getPeriods(normalizedFrequency).map((period, index) => (
                   <div
                     key={period}
                     className={`p-3 border-gray-800 ${

@@ -79,6 +79,7 @@ function ClassSetup() {
       );
       if (res?.statusCode === 200) {
         const sortedClasses = res?.result?.sort(compareClasses);
+        dispatch(setClassAndSectionData({ classList: sortedClasses }));
         setClasses(sortedClasses);
       }
     } catch (e) {

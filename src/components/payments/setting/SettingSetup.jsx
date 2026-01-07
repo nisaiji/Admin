@@ -1,16 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FeeStructureSetup from "../paymentSetup/FeeStructureSetup";
 import Setting from "./Setting";
+import { FeeStructureView } from "./ViewFees";
+import SchoolFeeSetting from "./SchoolFeeSetting";
 
 export default function SettingSetup() {
-  //   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
-  const [selected, setSelected] = useState("settingSetup");
-
+  const [selected, setSelected] = useState("viewSetup");
+  
   return (
     <div className="w-full">
       {selected === "settingSetup" && <Setting setSelected={setSelected} />}
+      {selected === "schoolFeeSetting" && (
+        <SchoolFeeSetting setSelected={setSelected} />
+      )}
+      {selected === "viewSetup" && (
+        <FeeStructureView setSelected={setSelected} />
+      )}
       {selected === "paymentSetup" && (
-        <FeeStructureSetup onBack={() => setSelected("settingSetup")} />
+        <FeeStructureSetup onBack={() => setSelected("viewSetup")} />
       )}
     </div>
   );

@@ -12,6 +12,8 @@ import CONSTANT from "../../utils/constants";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import toast from "react-hot-toast";
+import { setClassAndSectionData } from "../../store/AppAuthSlice";
+import { useDispatch } from "react-redux";
 
 export default function AttendanceData({
   isDarkMode,
@@ -21,6 +23,7 @@ export default function AttendanceData({
   date,
 }) {
   const [t] = useTranslation();
+  const dispatch = useDispatch();
   const [selectedOption, setSelectedOption] = useState("Monthly");
   const [loading, setLoading] = useState(false);
   const [selectedClass, setSelectedClass] = useState("");
@@ -343,6 +346,8 @@ export default function AttendanceData({
           });
 
         setClassList(filteredSortedClasses);
+        // console.log(filteredSortedClasses);
+        dispatch(setClassAndSectionData({ classList: filteredSortedClasses }));
         const [firstClass] = filteredSortedClasses;
         setSectionList(firstClass?.section || []);
       }

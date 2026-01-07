@@ -2,6 +2,7 @@ import React from "react";
 import ArrowLeft from "../../../assets/images/fees/leftarrow.png";
 import file from "../../../assets/images/fees/file.png";
 import moment from "moment/moment";
+import { Toaster } from "react-hot-toast";
 
 export default function FeeStructureReview({
   onBack,
@@ -18,6 +19,7 @@ export default function FeeStructureReview({
 }) {
   return (
     <div>
+      <Toaster position="top-center" reverseOrder={false} />
       <button
         className="flex items-center gap-2 text-gray-400 hover:text-white mb-6"
         onClick={onBack}
@@ -49,12 +51,12 @@ export default function FeeStructureReview({
           {/* Fee Details */}
           <div className="bg-[#0f1419] border border-gray-800 rounded-lg p-4 mb-4">
             <p className="text-gray-500 text-sm mb-1">Class</p>
-            <p className="text-white text-xl">{`Class ${selectedClass?.name}`}</p>
+            <p className="text-white">{`Class ${selectedClass?.name}`}</p>
           </div>
 
           <div className="bg-[#0f1419] border border-gray-800 rounded-lg p-4 mb-4">
             <p className="text-gray-500 text-sm mb-1">Section</p>
-            <p className="text-white text-xl">{`Selected Sections: ${selectedSections
+            <p className="text-white">{`Selected Sections: ${selectedSections
               .map((sec) => sec.name)
               .join(", ")}`}</p>
           </div>
@@ -109,12 +111,12 @@ export default function FeeStructureReview({
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="bg-[#0f1419] border border-gray-800 rounded-lg p-4">
               <p className="text-gray-500 text-sm mb-1">Total Annual Fee</p>
-              <p className="text-white text-3xl">₹{getTotalAmount()}</p>
+              <p className="text-white">₹{getTotalAmount()}</p>
             </div>
             <div className="bg-[#0f1419] border border-gray-800 rounded-lg p-4">
-              <p className="text-gray-500 text-sm mb-1">Late Fee Amount</p>
-              <p className="text-white text-3xl">
-                {lateFeeAmount ? `₹${lateFeeAmount}` : "Not set"}
+              <p className="text-gray-500 text-sm mb-1">Late Fee Interest Per Annum</p>
+              <p className="text-white">
+                {lateFeeAmount ? `${lateFeeAmount}%` : "Not set"}
               </p>
             </div>
           </div>

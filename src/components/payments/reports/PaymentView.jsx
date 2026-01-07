@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import collected from "../../../assets/images/fees/collected.png";
 import pending from "../../../assets/images/fees/pending.png";
 import due from "../../../assets/images/fees/due.png";
@@ -31,16 +31,46 @@ import {
   RedCard,
   WhiteCard,
 } from "../TopCard";
+import { axiosClient } from "../../../services/axiosClient";
+import EndPoints from "../../../services/EndPoints";
+import { useSelector } from "react-redux";
 
 export default function PaymentView() {
   const isDarkMode = true;
   const [t] = useTranslation();
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const [paymentModeSummary, setPaymentModeSummary] = useState([]);
+  const [filterClass, setFilterClass] = useState(null);
 
-  const data = [
-    { transition: 30, mode: "UPI", total: 1000 },
-    { transition: 20, mode: "Net Banking", total: 5000 },
-    { transition: 11, mode: "Credit Card", total: 8000 },
-  ];
+  const getPaymentModeSummary = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_PAYMENT_MODE_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}&classID=${filterClass?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setPaymentModeSummary(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (filterClass?._id) {
+      getPaymentModeSummary();
+    }
+  }, [filterClass?._id]);
+
+  useEffect(() => {
+    if (!classAndSectionData?.classList?.length) return;
+
+    const defaultClass = classAndSectionData?.classList[0];
+
+    setFilterClass(defaultClass);
+  }, [classAndSectionData]);
+
   return (
     <>
       {/* Section 1 */}
@@ -48,27 +78,22 @@ export default function PaymentView() {
         <OrangeCard
           img={graphdown}
           heading="UPI"
-          title1="₹ 80000"
-          title2="50"
+          title1={`₹ ${paymentModeSummary?.modes?.[0]?.amount}`}
+          title2={paymentModeSummary?.modes?.[0]?.transactions}
         />
         <GreenCard
           img={paymentgreen}
           heading="Net Banking"
-          title1="₹ 50000"
-          title2="20"
+          title1={`₹ ${paymentModeSummary?.modes?.[1]?.amount}`}
+          title2={paymentModeSummary?.modes?.[1]?.transactions}
         />
         <BlueCard
           img={graphup}
           heading="Credit Card"
-          title1="₹ 30000"
-          title2="20"
+          title1={`₹ ${paymentModeSummary?.modes?.[2]?.amount}`}
+          title2={paymentModeSummary?.modes?.[2]?.transactions}
         />
-        <WhiteCard
-          img={classimg}
-          heading="Other"
-          title1="₹ 5000"
-          title2="30"
-        />
+        {/* <WhiteCard img={classimg} heading="Other" title1="₹ 5000" title2="30" /> */}
       </div>
       {/* PIE CHART */}
       <div className="p-5 rounded-xl bg-[#1c1c1c] mb-6">
@@ -79,8 +104,24 @@ export default function PaymentView() {
               Total number of fees collected by different mode of payment
             </p>
           </div>
-          {/* <SessionDropdaown /> */}
-          select class
+          <div className="space-x-4">
+            <select
+              value={filterClass?._id || ""}
+              onChange={(e) => {
+                const selected = classAndSectionData?.classList?.find(
+                  (cls) => cls._id === e.target.value
+                );
+                setFilterClass(selected);
+              }}
+              className="w-40 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
+            >
+              {classAndSectionData?.classList?.map((cls) => (
+                <option key={cls?._id} value={cls?._id}>
+                  {cls?.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* MIDDLE SECTION */}
@@ -91,9 +132,21 @@ export default function PaymentView() {
               series={[
                 {
                   data: [
-                    { id: 0, value: 10, color: "#0A81D1" },
-                    { id: 1, value: 5, color: "#FF793F" },
-                    { id: 2, value: 5, color: "#4CBC9A" },
+                    {
+                      id: 0,
+                      value: paymentModeSummary?.modes?.[0]?.transactions ?? 0,
+                      color: "#0A81D1",
+                    },
+                    {
+                      id: 1,
+                      value: paymentModeSummary?.modes?.[1]?.transactions ?? 0,
+                      color: "#FF793F",
+                    },
+                    {
+                      id: 2,
+                      value: paymentModeSummary?.modes?.[2]?.transactions ?? 0,
+                      color: "#4CBC9A",
+                    },
                   ],
                   innerRadius: 100,
                   outerRadius: 150,
@@ -108,7 +161,9 @@ export default function PaymentView() {
 
             {/* Center Text */}
             <div className="absolute flex flex-col justify-center items-center">
-              <p className="text-xl font-poppins-bold">₹ 20M</p>
+              <p className="text-xl font-poppins-bold">
+                ₹ {paymentModeSummary?.totalAmount}
+              </p>
               <p className="text-sm text-textGray2 text-center leading-4">
                 Fees Payment <br /> Mode
               </p>
@@ -130,14 +185,14 @@ export default function PaymentView() {
               </thead>
 
               <tbody className="bg-backgroundGray15 rounded-b-xl">
-                {data.map((item, index) => (
+                {paymentModeSummary?.modes?.map((item, index) => (
                   <tr
                     key={index}
                     className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-bold"
                   >
-                    <td className="py-4 px-2">{item.mode}</td>
-                    <td className="py-4 px-2">{item.transition}</td>
-                    <td className="py-4 px-2">{item.total}</td>
+                    <td className="py-4 px-2">{item?.mode}</td>
+                    <td className="py-4 px-2">{item?.transactions}</td>
+                    <td className="py-4 px-2">{item?.amount}</td>
                   </tr>
                 ))}
               </tbody>

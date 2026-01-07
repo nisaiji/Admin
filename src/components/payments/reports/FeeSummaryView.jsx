@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import collected from "../../../assets/images/fees/collectedinvert.png";
 import pending from "../../../assets/images/fees/pending.png";
 import due from "../../../assets/images/fees/due.png";
@@ -30,24 +30,65 @@ import {
   RedCard,
   WhiteCard,
 } from "../TopCard";
+import { axiosClient } from "../../../services/axiosClient";
+import EndPoints from "../../../services/EndPoints";
+import { useSelector } from "react-redux";
 
 export default function FeeSummaryView() {
   const isDarkMode = true;
   const [t] = useTranslation();
-
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
+  const [feeSummary, setFeeSummary] = useState([]);
+  const [feeTransactions, setFeeTransactions] = useState([]);
+  const [filterClass, setFilterClass] = useState(null);
 
-  const data = [
-    {
-      student: "Akash Sharma",
-      class: "1 A",
-      amount: "₹ 50000",
-      due: "24/07/25",
-      overdue: "₹ 20000",
-    },
-  ];
+  const getFeeSummary = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_REPORT_FEE_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}&classID=${filterClass?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setFeeSummary(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  const getFeeTransactions = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_REPORT_FEE_TRANSACTIONS}?sessionID=${classAndSectionData?.selectedSession?._id}&classID=${filterClass?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setFeeTransactions(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (filterClass?._id) {
+      getFeeSummary();
+      getFeeTransactions();
+    }
+  }, [filterClass]);
+
+  useEffect(() => {
+    if (!classAndSectionData?.classList?.length) return;
+
+    const defaultClass = classAndSectionData?.classList[0];
+
+    setFilterClass(defaultClass);
+  }, [classAndSectionData]);
 
   return (
     <>
@@ -60,8 +101,24 @@ export default function FeeSummaryView() {
               Total number of fees collected by different mode of payment
             </p>
           </div>
-          {/* <SessionDropdaown /> */}
-          select class
+          <div className="space-x-4">
+            <select
+              value={filterClass?._id || ""}
+              onChange={(e) => {
+                const selected = classAndSectionData?.classList?.find(
+                  (cls) => cls._id === e.target.value
+                );
+                setFilterClass(selected);
+              }}
+              className="w-40 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
+            >
+              {classAndSectionData?.classList?.map((cls) => (
+                <option key={cls?._id} value={cls?._id}>
+                  {cls?.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* MIDDLE SECTION */}
@@ -72,9 +129,21 @@ export default function FeeSummaryView() {
               series={[
                 {
                   data: [
-                    { id: 0, value: 10, color: "#0A81D1" },
-                    { id: 1, value: 5, color: "#FF793F" },
-                    { id: 2, value: 5, color: "#4CBC9A" },
+                    {
+                      id: 0,
+                      value: feeSummary?.totalCollected?.amount ?? 0,
+                      color: "#0A81D1",
+                    },
+                    {
+                      id: 1,
+                      value: feeSummary?.pending?.amount ?? 0,
+                      color: "#FF793F",
+                    },
+                    {
+                      id: 2,
+                      value: feeSummary?.overdue?.amount ?? 0,
+                      color: "#4CBC9A",
+                    },
                   ],
                   innerRadius: 100,
                   outerRadius: 150,
@@ -89,7 +158,7 @@ export default function FeeSummaryView() {
 
             {/* Center Text */}
             <div className="absolute flex flex-col justify-center items-center">
-              <p className="text-xl font-poppins-bold">₹ 20M</p>
+              <p className="text-xl font-poppins-bold">₹ {feeSummary?.totalFees ?? 0}</p>
               <p className="text-sm text-textGray2 text-center leading-4">
                 Fees Payment <br /> Mode
               </p>
@@ -100,29 +169,29 @@ export default function FeeSummaryView() {
             <BlueCard
               img={collected}
               heading="Total Expected"
-              title1="₹ 30000"
-              title2="20"
+              title1={`₹ ${feeSummary?.totalExpected?.amount ?? 0}`}
+              title2={feeSummary?.totalExpected?.students ?? 0}
               bg="bg-[#2b2b2b]"
             />
             <GreenCard
               img={paymentgreen}
               heading="Total Collected"
-              title1="₹ 50000"
-              title2="20"
+              title1={`₹ ${feeSummary?.totalCollected?.amount ?? 0}`}
+              title2={feeSummary?.totalCollected?.students ?? 0}
               bg="bg-[#2b2b2b]"
             />
             <OrangeCard
               img={pending}
               heading="Pending Payment"
-              title1="₹ 80000"
-              title2="50"
+              title1={`₹ ${feeSummary?.pending?.amount ?? 0}`}
+              title2={feeSummary?.pending?.students ?? 0}
               bg="bg-[#2b2b2b]"
             />
             <RedCard
               img={calred}
               heading="Overdue Payment"
-              title1="₹ 5000"
-              title2="30"
+              title1={`₹ ${feeSummary?.overdue?.amount ?? 0}`}
+              title2={feeSummary?.overdue?.students ?? 0}
               bg="bg-[#2b2b2b]"
             />
           </div>
@@ -137,7 +206,6 @@ export default function FeeSummaryView() {
               Outstanding Fees & Overdue Students
             </p>
           </div>
-          class list
         </div>
         <div className="w-full rounded-xl overflow-hidden"></div>
         <div className="w-full rounded-xl overflow-hidden">
@@ -154,20 +222,20 @@ export default function FeeSummaryView() {
             </thead>
 
             <tbody className="bg-[#2b2b2b]">
-              {data.map((item, index) => (
+              {feeTransactions?.data?.map((item, index) => (
                 <tr
                   key={index}
                   className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-bold"
                 >
-                  <td className="py-4 px-2">{item.student}</td>
-                  <td className="py-4 px-2">{item.class}</td>
-                  <td className="py-4 px-2">{item.amount}</td>
+                  <td className="py-4 px-2">{item?.studentName}</td>
+                  <td className="py-4 px-2">{item?.class}</td>
+                  <td className="py-4 px-2">{item?.amount}</td>
                   <td
-                    className={`py-4 px-2 font-semibold text-textOrange ${item.statusColor}`}
+                    className={`py-4 px-2 font-semibold text-textOrange ${item?.statusColor}`}
                   >
-                    {item.due}
+                    {item?.dueDate}
                   </td>
-                  <td className="py-4 px-2">{item.overdue}</td>
+                  <td className="py-4 px-2">{item?.daysOverdue}</td>
                   <td className="py-4 px-2 flex justify-center cursor-pointer">
                     <img
                       src={dots}

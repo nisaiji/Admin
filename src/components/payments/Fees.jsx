@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 import dashboard from "../../assets/images/fees/dashboard.png";
@@ -18,14 +18,28 @@ import SettingSetup from "./setting/SettingSetup";
 export default function Fees() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [selected, setSelected] = useState("Dashboard");
-  const items = [
-    { src: dashboard, label: "Dashboard" },
-    { src: report, label: "Reports" },
-    { src: payment, label: "Payments" },
-    { src: disputes, label: "Disputes" },
-    { src: settings, label: "Settings" },
-    { src: support, label: "Support" },
-  ];
+
+  const menuItems = useMemo(
+    () => [
+      { src: dashboard, label: "Dashboard" },
+      { src: report, label: "Reports" },
+      { src: payment, label: "Payments" },
+      { src: disputes, label: "Disputes" },
+      { src: settings, label: "Settings" },
+      { src: support, label: "Support" },
+    ],
+    []
+  );
+
+  const screens = {
+    Dashboard: Dashboard,
+    Reports: Reports,
+    Payments: Payments,
+    Disputes: Disputes,
+    Settings: SettingSetup,
+  };
+
+  const ActiveScreen = screens[selected];
 
   return (
     <div
@@ -33,12 +47,13 @@ export default function Fees() {
         isDarkMode ? "bg-background2" : "bg-whiteBackground2"
       } select-none flex`}
     >
-      <Sidebar items={items} selected={selected} setSelected={setSelected} />
-      {selected === "Dashboard" && <Dashboard />}
-      {selected === "Reports" && <Reports />}
-      {selected === "Payments" && <Payments />}
-      {selected === "Disputes" && <Disputes />}
-      {selected === "Settings" && <SettingSetup />}
+      <Sidebar
+        items={menuItems}
+        selected={selected}
+        setSelected={setSelected}
+      />
+
+      {ActiveScreen && <ActiveScreen />}
     </div>
   );
 }

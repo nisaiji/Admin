@@ -112,10 +112,44 @@ const EndPoints = {
     GET_STUDENTS_BY_EXAM: "student-exam-result/section-student-marks",
     UPDATE_STUDENT_MARKS_BULK: "student-exam-result/admin",
     PUBLISH_RESULT: "exam",
-    
-    // FEES
-    CREATE_FEES: "fee-structure",
 
+    // FEES
+    CREATE_FEES_STRUCTURE: "fee-structure/school-fee-structure",
+    GET_FEES_STRUCTURE:
+      "fee-structure/school-fee-structure/get-school-fee-structure",
+
+    CREATE_FEES: "fee-structure/section-fee-structure",
+    GET_FEES: "fee-structure/section-fee-structure",
+
+    GET_FEE_SUMMARY: "payment/dashboard/fee-summary",
+    GET_PAYMENT_BY_MODE: "payment/dashboard/payment-modes",
+    GET_DAILY_PAYMENT_SUMMARY: "payment/dashboard/daywise-paid",
+    GET_MONTHLY_PAYMENT_SUMMARY: "payment/dashboard/monthwise-paid",
+    GET_CLASS_PAYMENT_SUMMARY: "payment/dashboard/class-paid",
+    GET_PAYMENT_TRANSITIIONS: "payment/dashboard/transactions",
+    SEND_PAYMENT_REMINDER: "payment/dashboard/parent-reminder",
+
+    GET_CLASS_WISE_SUMMARY: "payment/dashboard/reports/class-wise/summary",
+    GET_CLASS_WISE_CHART: "payment/dashboard/reports/class-wise/chart",
+    GET_CLASS_WISE_TRANSACTIONS:
+      "payment/dashboard/reports/class-wise/transactions",
+
+    GET_PERIODICALLY_SUMMARY: "payment/dashboard/reports/periodically/summary",
+    GET_PERIODICALLY_CHART: "payment/dashboard/reports/periodically/chart",
+    GET_PERIODICALLY_TRANSACTIONS:
+      "payment/dashboard/reports/periodically/transactions",
+
+    GET_PAYMENT_MODE_SUMMARY: "payment/dashboard/reports/payment-mode/summary",
+    // GET_PAYMENT_MODE_TRANSACTIONS:"payment/dashboard/reports/payment-mode/transactions",
+
+    GET_REPORT_FEE_SUMMARY: "payment/dashboard/reports/fee/summary",
+    GET_REPORT_FEE_TRANSACTIONS: "payment/dashboard/reports/fee/transactions",
+    GET_REPORT_FEE_REMINDER: "payment/dashboard/reports/fee/reminder",
+
+    GET_REFUND_AND_FAILED_SUMMARY: "payment/dashboard/reports/other/summary",
+    GET_REFUND_AND_FAILED_CHART: "payment/dashboard/reports/other/chart",
+    GET_REFUND_AND_FAILED_TRANSACTIONS:
+      "payment/dashboard/reports/other/transactions",
   },
   TEACHER: {
     // LOGIN

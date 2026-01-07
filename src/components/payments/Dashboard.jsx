@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   axisClasses,
   BarChart,
@@ -22,8 +22,302 @@ import refund from "../../assets/images/fees/refund.png";
 import upi from "../../assets/images/fees/upi.png";
 import netbanking from "../../assets/images/fees/net-banking.png";
 import creditcard from "../../assets/images/fees/creditcard.png";
+import BarChartComponent from "./BarChart";
+import EndPoints from "../../services/EndPoints";
+import { axiosClient } from "../../services/axiosClient";
+import { set } from "date-fns";
+import { useSelector } from "react-redux";
+import moment from "moment/moment";
+
+const ALL_PAYMENT_MODES = ["upi", "net_banking", "credit_card"];
+
+const MODE_META = {
+  upi: {
+    label: "UPI",
+    color: "#FF793F",
+    icon: upi,
+    textClass: "text-textOrange2",
+    bgClass: "bg-backgroundOrange",
+  },
+  net_banking: {
+    label: "Net Banking",
+    color: "#0A81D1",
+    icon: netbanking,
+    textClass: "text-textBlue",
+    bgClass: "bg-backgroundBlue",
+  },
+  credit_card: {
+    label: "Credit Card",
+    color: "#4CBC9A",
+    icon: creditcard,
+    textClass: "text-textPrimary",
+    bgClass: "bg-white",
+  },
+};
+
+const apiData = [
+  { _id: "2025-05", totalAmount: 4000, transactionCount: 1 },
+  { _id: "2025-07", totalAmount: 9000, transactionCount: 1 },
+  { _id: "2025-08", totalAmount: 3400, transactionCount: 1 },
+  { _id: "2025-11", totalAmount: 6000, transactionCount: 1 },
+  { _id: "2025-12", totalAmount: 9000, transactionCount: 2 },
+];
+
+const apiData2 = [
+  {
+    _id: "2025-12-10",
+    totalAmount: 1000,
+    TransactionCount: 2,
+  },
+  {
+    _id: "2025-12-14",
+    totalAmount: 1500,
+    TransactionCount: 2,
+  },
+  {
+    _id: "2025-12-18",
+    totalAmount: 2000,
+    TransactionCount: 2,
+  },
+  {
+    _id: "2025-12-19",
+    totalAmount: 3000,
+    TransactionCount: 2,
+  },
+  {
+    _id: "2025-12-20",
+    totalAmount: 3500,
+    TransactionCount: 2,
+  },
+  {
+    _id: "2025-12-25",
+    totalAmount: 3000,
+    TransactionCount: 2,
+  },
+  {
+    _id: "2025-12-26",
+    totalAmount: 2000,
+    TransactionCount: 2,
+  },
+];
+
+const FY_MONTHS = [
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+];
+
+const MONTH_MAP = {
+  1: "Jan",
+  2: "Feb",
+  3: "Mar",
+  4: "Apr",
+  5: "May",
+  6: "Jun",
+  7: "Jul",
+  8: "Aug",
+  9: "Sep",
+  10: "Oct",
+  11: "Nov",
+  12: "Dec",
+};
 
 export default function Dashboard() {
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const [feeSummary, setFeeSummary] = useState(null);
+  const [paymentByMode, setPaymentByMode] = useState([]);
+  const [monthlyPaymentSummary, setMonthlyPaymentSummary] = useState([]);
+  const [dailyPaymentSummary, setDailyPaymentSummary] = useState([]);
+  // console.log(monthlyPaymentSummary);
+
+  const normalizedPayments = ALL_PAYMENT_MODES.map((mode) => {
+    const found = paymentByMode.find((p) => p._id === mode);
+
+    return {
+      _id: mode,
+      totalAmount: found?.totalAmount ?? 0,
+    };
+  });
+
+  const totalAmount = normalizedPayments.reduce(
+    (sum, item) => sum + item.totalAmount,
+    0
+  );
+
+  const pieData =
+    totalAmount > 0
+      ? normalizedPayments.map((item, index) => ({
+          id: index,
+          value: item.totalAmount,
+          color: MODE_META[item._id].color,
+        }))
+      : [
+          {
+            id: 0,
+            value: 1, // fallback invisible slice
+            color: "#2a2a2a",
+          },
+        ];
+
+  const getDaysInMonth = () => {
+    const days = moment().daysInMonth();
+    return Array.from({ length: days }, (_, i) => i + 1);
+  };
+
+  const getDailyLineData = (dailyPaymentSummary) => {
+    const days = getDaysInMonth(); // current month days
+
+    // If API empty / invalid → flat zero line
+    if (
+      !Array.isArray(dailyPaymentSummary) ||
+      dailyPaymentSummary.length === 0
+    ) {
+      return days.map(() => 0);
+    }
+
+    // Build date → amount map
+    const dayAmountMap = {};
+
+    dailyPaymentSummary.forEach((item) => {
+      if (!item?._id || typeof item.totalAmount !== "number") return;
+
+      // "2025-12-26" → 26
+      const day = moment(item._id, "YYYY-MM-DD").date();
+      dayAmountMap[day] = item.totalAmount;
+    });
+
+    // Return ordered daily amounts
+    return days.map((day) => dayAmountMap[day] || 0);
+  };
+
+  const getFinancialYearLineData = () => {
+    // Always return 12 values
+    if (
+      !Array.isArray(monthlyPaymentSummary) ||
+      monthlyPaymentSummary.length === 0
+    ) {
+      return new Array(12).fill(0);
+    }
+
+    const monthAmountMap = {};
+
+    monthlyPaymentSummary?.forEach((item) => {
+      if (!item?._id || typeof item.totalAmount !== "number") return;
+
+      const [, month] = item?._id?.split("-");
+      const monthName = MONTH_MAP[Number(month)];
+
+      if (monthName) {
+        monthAmountMap[monthName] = item?.totalAmount;
+      }
+    });
+
+    return FY_MONTHS.map((month) => monthAmountMap[month] || 0);
+  };
+
+  const lineSeriesData = getFinancialYearLineData(monthlyPaymentSummary);
+
+  const getFeeSummary = async () => {
+    try {
+      const res = await axiosClient.post(
+        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${classAndSectionData?.selectedSession?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        let totalAmount =
+          res?.result?.collectedFee +
+          res?.result?.pending +
+          res?.result?.overdue;
+
+        setFeeSummary({
+          ...res?.result,
+          totalAmount,
+        });
+        // setFeeSummary({
+        //   collectedFee: 15,
+        //   pending: 3,
+        //   overdue: 2,
+        //   refunded: 6,
+        //   totalAmount: 20,
+        // });
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  const getPaymentByMode = async () => {
+    try {
+      const res = await axiosClient.post(EndPoints.ADMIN.GET_PAYMENT_BY_MODE, {
+        startDate: classAndSectionData?.selectedSession?.startDate,
+        endDate: classAndSectionData?.selectedSession?.endDate,
+      });
+      // console.log(res);
+      if (res?.statusCode === 200) {
+        setPaymentByMode(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  const getDailyPaymentSummary = async () => {
+    try {
+      const res = await axiosClient.post(
+        EndPoints.ADMIN.GET_DAILY_PAYMENT_SUMMARY,
+        {
+          startDate: moment().startOf("month").valueOf(),
+          endDate: moment().endOf("month").valueOf(),
+        }
+      );
+
+      // console.log(res);
+      if (res?.statusCode === 200) {
+        setDailyPaymentSummary(res?.result?.payments);
+        // setDailyPaymentSummary(apiData2);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  const getMonthlyPaymentSummary = async () => {
+    try {
+      const res = await axiosClient.post(
+        EndPoints.ADMIN.GET_MONTHLY_PAYMENT_SUMMARY,
+        {
+          sessionId: classAndSectionData?.selectedSession?._id,
+        }
+      );
+      // console.log(res);
+      if (res?.statusCode === 200) {
+        setMonthlyPaymentSummary(res?.result?.payments);
+        // setMonthlyPaymentSummary(apiData);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  useEffect(() => {
+    getFeeSummary();
+    getPaymentByMode();
+    getMonthlyPaymentSummary();
+    getDailyPaymentSummary();
+  }, []);
+
+  // console.log(feeSummary);
+
   return (
     <div className="p-6 w-full text-white">
       <p className="text-xl font-poppins-bold">Fee Overview</p>
@@ -39,13 +333,15 @@ export default function Dashboard() {
                 className="size-6 object-contain z-10"
               />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 2000000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.collectedFee ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">
             Total Collected Fees
           </p>
           <p className="text-base font-poppins-bold text-textBlue mt-1">
-            +18.2%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular ">
               than last week
             </span>
@@ -58,11 +354,13 @@ export default function Dashboard() {
             <div className="size-10 bg-backgroundOrange bg-opacity-15 flex justify-center items-center rounded-md">
               <img src={pending} alt="p" className="size-6 object-contain" />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 500000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.pending ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">Pending Payments</p>
           <p className="text-base font-poppins-bold text-textOrange2 mt-1">
-            +4.5%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular ">
               than last week
             </span>
@@ -75,11 +373,13 @@ export default function Dashboard() {
             <div className="size-10 bg-backgroundRed bg-opacity-15 flex justify-center items-center rounded-md">
               <img src={due} alt="p" className="size-6 object-contain" />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 100000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.overdue ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">Overdue Payments</p>
           <p className="text-base font-poppins-bold text-textRed mt-1">
-            +2%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular ">
               than last week
             </span>
@@ -92,11 +392,13 @@ export default function Dashboard() {
             <div className="size-10 bg-backgroundGreen bg-opacity-15 flex justify-center items-center rounded-md">
               <img src={refund} alt="p" className="size-6 object-contain" />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 50000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.refunded ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">Refunded Amount</p>
           <p className="text-base font-poppins-bold text-textGreen mt-1">
-            +2%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular ">
               than last week
             </span>
@@ -112,61 +414,10 @@ export default function Dashboard() {
             Total number of fees collected this month
           </p>
           <div className="w-full h-[350px] flex justify-center items-center">
-            <BarChart
-              xAxis={[
-                {
-                  data: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                  ],
-                  tickLabelStyle: { fill: "#fff" }, // X-axis text color
-                  labelStyle: { fill: "#fff" },
-                  stroke: "#fff", // X-axis line color
-                },
-              ]}
-              yAxis={[
-                {
-                  tickLabelStyle: { fill: "#fff" }, // Y-axis text color
-                  labelStyle: { fill: "#fff" },
-                  stroke: "#fff", // Y-axis line color
-                },
-              ]}
-              series={[
-                {
-                  data: [
-                    20000, 35000, 45000, 90000, 75000, 60000, 70000, 65000,
-                    55000, 60000, 45000, 50000,
-                  ],
-                },
-              ]}
-              sx={{
-                [`& .${barClasses.series} .${barElementClasses.root}`]: {
-                  fill: "url(#bar-gradient)",
-                  rx: 4,
-                  ry: 4,
-                },
-              }}
-            >
-              <defs>
-                <linearGradient
-                  gradientTransform="rotate(90)"
-                  id="bar-gradient"
-                >
-                  <stop offset="0%" stopColor="#0A81D1" />
-                  <stop offset="100%" stopColor="#4CBC9A" />
-                </linearGradient>
-              </defs>
-            </BarChart>
+            <BarChartComponent
+              xAxisData={getDaysInMonth().map((day) => day.toString())}
+              series={getDailyLineData(dailyPaymentSummary)}
+            />
           </div>
         </div>
 
@@ -177,11 +428,7 @@ export default function Dashboard() {
             <PieChart
               series={[
                 {
-                  data: [
-                    { id: 0, value: 10, color: "#0A81D1" },
-                    { id: 1, value: 5, color: "#FF793F" },
-                    { id: 2, value: 5, color: "#4CBC9A" },
-                  ],
+                  data: pieData,
                   innerRadius: 72,
                   outerRadius: 102,
                 },
@@ -195,7 +442,7 @@ export default function Dashboard() {
 
             {/* Center Text */}
             <div className="absolute flex flex-col justify-center items-center">
-              <p className="text-xl font-poppins-bold">₹ 20M</p>
+              <p className="text-xl font-poppins-bold">₹ {totalAmount}</p>
               <p className="text-sm text-textGray2 text-center leading-4">
                 Fees Payment <br /> Mode
               </p>
@@ -204,50 +451,29 @@ export default function Dashboard() {
 
           {/* Custom Right Legend */}
           <div className="flex flex-col justify-center gap-6 w-full xl:w-auto">
-            {/* UPI */}
-            <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-md bg-backgroundOrange bg-opacity-15 flex justify-center items-center">
-                <img
-                  src={upi}
-                  alt="upi"
-                  className="w-[34px] h-[22px] object-contain"
-                />
-              </div>
-              <div className="text-[15px] font-poppins-bold">
-                <p className="text-textPrimary">₹ 10M</p>
-                <p className="text-textOrange2">UPI</p>
-              </div>
-            </div>
+            {normalizedPayments?.map((item) => {
+              const meta = MODE_META[item._id];
+              if (!meta) return null;
 
-            {/* Net Banking */}
-            <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-md bg-backgroundBlue bg-opacity-15 flex justify-center items-center">
-                <img
-                  src={netbanking}
-                  alt="upi"
-                  className="size-[32px] object-contain"
-                />
-              </div>
-              <div className="text-[15px] font-poppins-bold">
-                <p className="text-textPrimary">₹ 5M</p>
-                <p className="text-textBlue">Net Banking</p>
-              </div>
-            </div>
+              return (
+                <div key={item._id} className="flex items-center gap-3">
+                  <div
+                    className={`h-11 w-11 rounded-md ${meta.bgClass} bg-opacity-15 flex justify-center items-center`}
+                  >
+                    <img
+                      src={meta.icon}
+                      alt={meta.label}
+                      className="size-[32px] object-contain"
+                    />
+                  </div>
 
-            {/* Credit Card */}
-            <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-md bg-white bg-opacity-15 flex justify-center items-center">
-                <img
-                  src={creditcard}
-                  alt="upi"
-                  className="size-6 object-contain"
-                />
-              </div>
-              <div className="text-[15px] font-poppins-bold">
-                <p className="text-textPrimary">₹ 5M</p>
-                <p className="text-textPrimary">Credit Card</p>
-              </div>
-            </div>
+                  <div className="text-[15px] font-poppins-bold">
+                    <p className="text-textPrimary">₹ {item?.totalAmount}</p>
+                    <p className={meta.textClass}>{meta?.label}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -260,7 +486,7 @@ export default function Dashboard() {
             Overdue, Pending, Paid Fees
           </h3>
           <p className="text-sm font-poppins-regular text-textGray2 mb-4">
-            5M pending in this month
+            {feeSummary?.pending ?? 0} pending in this month
           </p>
 
           <div className="space-y-4">
@@ -278,7 +504,7 @@ export default function Dashboard() {
 
                 {/* Amount */}
                 <p className="text-textPrimary text-2xl font-poppins-bold">
-                  ₹ 20M
+                  ₹ {feeSummary?.collectedFee ?? 0}
                 </p>
               </div>
 
@@ -288,8 +514,17 @@ export default function Dashboard() {
                   series={[
                     {
                       data: [
-                        { id: 0, value: 80, color: "#4CCB6A" },
-                        { id: 1, value: 20, color: "#3b3b3b" },
+                        {
+                          id: 0,
+                          value: feeSummary?.collectedFee,
+                          color: "#4CCB6A",
+                        },
+                        {
+                          id: 1,
+                          value:
+                            feeSummary?.totalAmount - feeSummary?.collectedFee,
+                          color: "#3b3b3b",
+                        },
                       ],
                       innerRadius: 0,
                       outerRadius: 32,
@@ -312,7 +547,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-textPrimary text-2xl font-poppins-bold">
-                  ₹ 500,000
+                  ₹ {feeSummary?.pending ?? 0}
                 </p>
               </div>
 
@@ -321,8 +556,16 @@ export default function Dashboard() {
                   series={[
                     {
                       data: [
-                        { id: 0, value: 40, color: "#FACC15" },
-                        { id: 1, value: 60, color: "#3b3b3b" },
+                        {
+                          id: 0,
+                          value: feeSummary?.pending,
+                          color: "#FACC15",
+                        },
+                        {
+                          id: 1,
+                          value: feeSummary?.totalAmount - feeSummary?.pending,
+                          color: "#3b3b3b",
+                        },
                       ],
                       innerRadius: 0,
                       outerRadius: 32,
@@ -345,7 +588,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-textPrimary text-2xl font-poppins-bold">
-                  ₹ 100,000
+                  ₹ {feeSummary?.overdue ?? 0}
                 </p>
               </div>
 
@@ -354,8 +597,16 @@ export default function Dashboard() {
                   series={[
                     {
                       data: [
-                        { id: 0, value: 30, color: "#EF4444" },
-                        { id: 1, value: 70, color: "#3b3b3b" },
+                        {
+                          id: 0,
+                          value: feeSummary?.overdue,
+                          color: "#EF4444",
+                        },
+                        {
+                          id: 1,
+                          value: feeSummary?.totalAmount - feeSummary?.overdue,
+                          color: "#3b3b3b",
+                        },
                       ],
                       innerRadius: 0,
                       outerRadius: 32,
@@ -392,10 +643,7 @@ export default function Dashboard() {
               series={[
                 {
                   type: "line",
-                  data: [
-                    20000, 35000, 45000, 90000, 75000, 60000, 70000, 65000,
-                    55000, 60000, 45000, 50000,
-                  ],
+                  data: lineSeriesData,
                   color: "#0A81D1",
                   curve: "natural",
                   showMark: false,
@@ -405,20 +653,7 @@ export default function Dashboard() {
               xAxis={[
                 {
                   id: "months",
-                  data: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                  ],
+                  data: FY_MONTHS,
                   scaleType: "point",
                   tickLabelStyle: { fill: "#fff" },
                   height: 40,

@@ -1,112 +1,178 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import collected from "../../../assets/images/fees/collected.png";
 import pending from "../../../assets/images/fees/pending.png";
 import due from "../../../assets/images/fees/due.png";
-import SessionDropdaown from "../SessionDropdaown";
-import {
-  BarChart,
-  barClasses,
-  barElementClasses,
-  PieChart,
-} from "@mui/x-charts";
+import BarChartComponent from "../BarChart";
+import { axiosClient } from "../../../services/axiosClient";
+import EndPoints from "../../../services/EndPoints";
+import { useSelector } from "react-redux";
 
-export default function ClassView({ setSelectedView }) {
-  // 8 gradients for 8 maximum sections
-  const gradients = [
-    ["#8ADEC5", "#4B786B"],
-    ["#09F1F5", "#058D8F"],
-    ["#1697CB", "#0B4B65"],
-    ["#FF9933", "#995C1F"],
-    ["#F15613", "#8B320B"],
-    ["#B4221A", "#4E0F0B"],
-    ["#0A81D1", "#05426B"],
-    ["#025994", "#011C2E"],
+const DUMMY_SECTION_MONTHLY_DATA = [
+  {
+    _id: "secA",
+    sectionName: "A",
+    monthlyData: [
+      { month: "2025-04", totalAmount: 20000 },
+      { month: "2025-05", totalAmount: 35000 },
+      { month: "2025-06", totalAmount: 45000 },
+      // { month: "2025-07", totalAmount: 90000 },
+      { month: "2025-08", totalAmount: 75000 },
+      { month: "2025-09", totalAmount: 60000 },
+      // { month: "2025-10", totalAmount: 70000 },
+      { month: "2025-11", totalAmount: 65000 },
+      { month: "2025-12", totalAmount: 55000 },
+      // { month: "2026-01", totalAmount: 60000 },
+      { month: "2026-02", totalAmount: 45000 },
+      { month: "2026-03", totalAmount: 50000 },
+    ],
+  },
+  {
+    _id: "secB",
+    sectionName: "B",
+    monthlyData: [
+      { month: "2025-04", totalAmount: 15000 },
+      { month: "2025-06", totalAmount: 30000 },
+      { month: "2025-07", totalAmount: 50000 },
+      { month: "2026-01", totalAmount: 43000 },
+      { month: "2026-02", totalAmount: 36000 },
+      { month: "2026-03", totalAmount: 40000 },
+    ],
+  },
+  {
+    _id: "secC",
+    sectionName: "C",
+    monthlyData: [
+      { month: "2025-04", totalAmount: 10000 },
+      { month: "2025-06", totalAmount: 24000 },
+      { month: "2025-07", totalAmount: 32000 },
+      { month: "2025-08", totalAmount: 30000 },
+      { month: "2025-11", totalAmount: 31000 },
+      { month: "2025-12", totalAmount: 29000 },
+      { month: "2026-02", totalAmount: 26000 },
+      { month: "2026-03", totalAmount: 30000 },
+    ],
+  },
+];
+
+export default function ClassView({
+  setSelectedView,
+  filterClass,
+  setFilterClass,
+  filterSection,
+  setFilterSection,
+}) {
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const [feeSummary, setFeeSummary] = useState(null);
+  const [classFeeSummary, setClassFeeSummary] = useState([]);
+
+  const [sections, setSections] = useState([]);
+  const [barChartData, setBarChartData] = useState([]);
+
+  const MONTH_ORDER = [
+    "2025-04",
+    "2025-05",
+    "2025-06",
+    "2025-07",
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-01",
+    "2026-02",
+    "2026-03",
   ];
 
-  const classSections = {
-    1: ["A", "B", "C"],
-    2: ["A", "B"],
-    3: ["A", "B", "C", "D"],
-    4: ["A", "B", "C", "D", "E"],
-    5: ["A", "B", "C", "D", "E", "F"],
-    6: ["A", "B", "C", "D", "E", "F", "G"],
-    7: ["A", "B", "C", "D", "E", "F", "G", "H"],
+  const buildBarDataForSection = (sectionName) => {
+    const section = classFeeSummary?.find(
+      (s) => s?.sectionName === sectionName
+    );
+
+    // 🛡️ If section or monthlyData missing
+    const monthlyData = Array.isArray(section?.monthlyData)
+      ? section?.monthlyData
+      : [];
+
+    // Convert monthlyData to map for fast lookup
+    const monthAmountMap = monthlyData.reduce((acc, item) => {
+      if (item?.month) {
+        acc[item?.month] = Number(item?.totalAmount) ?? 0;
+      }
+      return acc;
+    }, {});
+
+    // Always return 12 months in correct order
+    return MONTH_ORDER.map((month) => monthAmountMap[month] ?? 0);
   };
 
-  const selectedClass = "3"; // from dropdown
-  const sections = classSections[selectedClass];
+  useEffect(() => {
+    if (!filterSection || !classFeeSummary.length) {
+      setBarChartData(Array(MONTH_ORDER.length).fill(0));
+      return;
+    }
 
-  // 🔥 Each section gets 12 values (one for each month)
-  const sectionValues = sections.map(() =>
-    Array.from({ length: 12 }, () => Math.floor(Math.random() * 90000) + 10000)
-  );
+    const data = buildBarDataForSection(filterSection);
+    setBarChartData(data);
+  }, [filterSection, classFeeSummary]);
 
-  // 🔥 Each section becomes a bar series
-  const barSeries = sections.map((sec, index) => ({
-    label: sec,
-    id: `section-${sec}`,
-    data: sectionValues[index],
-    color: `url(#gradient-${index})`,
-  }));
+  useEffect(() => {
+    if (!classAndSectionData?.classList?.length) return;
 
-  const feesData = [
-    {
-      section: "A",
-      months: {
-        Jan: "₹7000",
-        Feb: "₹6200",
-        Mar: "₹5000",
-        Apr: "₹7200",
-        May: "₹8000",
-        Jun: "₹6500",
-        Jul: "₹4000",
-        Aug: "₹9000",
-        Sep: "₹7800",
-        Oct: "₹7100",
-        Nov: "₹6900",
-        Dec: "₹8100",
-      },
-    },
-    {
-      section: "B",
-      months: {
-        Jan: "₹6000",
-        Feb: "₹5800",
-        Mar: "₹5000",
-        Apr: "₹6500",
-        May: "₹7000",
-        Jun: "₹6800",
-        Jul: "₹4500",
-        Aug: "₹8200",
-        Sep: "₹7000",
-        Oct: "₹6600",
-        Nov: "₹6400",
-        Dec: "₹7800",
-      },
-    },
-    {
-      section: "C",
-      months: {
-        Jan: "₹5500",
-        Feb: "₹5200",
-        Mar: "₹4800",
-        Apr: "₹6000",
-        May: "₹6500",
-        Jun: "₹6300",
-        Jul: "₹4200",
-        Aug: "₹7800",
-        Sep: "₹7200",
-        Oct: "₹6900",
-        Nov: "₹6700",
-        Dec: "₹7600",
-      },
-    },
-  ];
+    const defaultClass = classAndSectionData?.classList[0];
+    const defaultSection = defaultClass?.section?.[0]?.name ?? null;
+
+    setFilterClass(defaultClass);
+    setSections(defaultClass.section || []);
+    setFilterSection(defaultSection);
+
+    // set default chart
+    // if (defaultSection) {
+    //   const data = buildBarDataForSection(defaultSection);
+    //   setBarChartData(data);
+    // } else {
+    //   setBarChartData(Array(MONTH_ORDER.length).fill(0));
+    // }
+  }, [classAndSectionData]);
+
+  const getFeeSummary = async () => {
+    try {
+      const res = await axiosClient.post(
+        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?classId=${filterClass?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setFeeSummary(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+  const getClassFeeSummary = async () => {
+    try {
+      const res = await axiosClient.post(
+        EndPoints.ADMIN.GET_CLASS_PAYMENT_SUMMARY,
+        { classId: filterClass?._id }
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        // setClassFeeSummary(res?.result);
+        setClassFeeSummary(DUMMY_SECTION_MONTHLY_DATA);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (filterClass?._id) {
+      getFeeSummary();
+      getClassFeeSummary();
+    }
+  }, [filterClass?._id]);
 
   const months = [
-    "Jan",
-    "Feb",
-    "Mar",
     "Apr",
     "May",
     "Jun",
@@ -116,6 +182,9 @@ export default function ClassView({ setSelectedView }) {
     "Oct",
     "Nov",
     "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
   ];
 
   return (
@@ -134,13 +203,15 @@ export default function ClassView({ setSelectedView }) {
                 className="size-6 object-contain z-10"
               />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 2000000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.collectedFee ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">
             Total Collected Fees
           </p>
           <p className="text-base font-poppins-bold text-textBlue mt-1">
-            +18.2%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular">
               than last week
             </span>
@@ -153,11 +224,13 @@ export default function ClassView({ setSelectedView }) {
             <div className="size-10 bg-backgroundOrange bg-opacity-15 flex justify-center items-center rounded-md">
               <img src={pending} alt="p" className="size-6 object-contain" />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 500000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.pending ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">Pending Payments</p>
           <p className="text-base font-poppins-bold text-textOrange2 mt-1">
-            +4.5%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular">
               than last week
             </span>
@@ -170,11 +243,13 @@ export default function ClassView({ setSelectedView }) {
             <div className="size-10 bg-backgroundRed bg-opacity-15 flex justify-center items-center rounded-md">
               <img src={due} alt="p" className="size-6 object-contain" />
             </div>
-            <p className="text-lg font-poppins-bold mt-1">₹ 100000</p>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.overdue ?? 0}
+            </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">Overdue Payments</p>
           <p className="text-base font-poppins-bold text-textRed mt-1">
-            +2%{" "}
+            +0%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular">
               than last week
             </span>
@@ -191,94 +266,58 @@ export default function ClassView({ setSelectedView }) {
               Total number of fees collected this month
             </p>
           </div>
-          <SessionDropdaown />
+          <div className="space-x-4">
+            <select
+              value={filterClass?._id || ""}
+              onChange={(e) => {
+                const selected = classAndSectionData?.classList?.find(
+                  (cls) => cls._id === e.target.value
+                );
+                setFilterClass(selected);
+                setSections(selected?.section || []);
+                setFilterSection(selected?.section?.[0] || null);
+              }}
+              className="w-40 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
+            >
+              {classAndSectionData?.classList?.map((cls) => (
+                <option key={cls?._id} value={cls?._id}>
+                  {cls?.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={filterSection || ""}
+              onChange={(e) => setFilterSection(e.target.value)}
+              className="w-40 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
+            >
+              {sections?.map((sec, i) => (
+                <option key={i} value={sec?.name}>
+                  Section {sec?.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* MIDDLE SECTION */}
         <div className="w-full h-[350px] flex justify-center items-center">
-          <BarChart
-            xAxis={[
-              {
-                data: [
-                  "Jan",
-                  "Feb",
-                  "Mar",
-                  "Apr",
-                  "May",
-                  "Jun",
-                  "Jul",
-                  "Aug",
-                  "Sep",
-                  "Oct",
-                  "Nov",
-                  "Dec",
-                ],
-                tickLabelStyle: { fill: "#fff" },
-              },
+          <BarChartComponent
+            xAxisData={[
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec",
+              "Jan",
+              "Feb",
+              "Mar",
             ]}
-            yAxis={[
-              {
-                tickLabelStyle: { fill: "#fff" },
-              },
-            ]}
-            series={barSeries}
-            sx={{
-              // Rounded bars
-              [`& .${barElementClasses.root}`]: {
-                rx: 4,
-              },
-
-              // Axis lines
-              "& .MuiChartsAxis-line": {
-                stroke: "#fff !important",
-              },
-
-              // Axis tick lines
-              "& .MuiChartsAxis-tick": {
-                stroke: "#fff !important",
-              },
-
-              // ✅ FORCE LABELS TO BE SOLID WHITE
-              "& text": {
-                fill: "#fff !important",
-                opacity: "1 !important",
-              },
-
-              // Legend
-              "& .MuiChartsLegend-root text": {
-                fill: "#fff !important",
-              },
-            }}
-
-            // sx={{
-            //   [`& .${barElementClasses.root}`]: {
-            //     rx: 4, // rounded corners
-            //   },
-            //   "& .MuiChartsLegend-root text": {
-            //     fill: "white",
-            //   },
-            //   "& .MuiChartsAxis-line": {
-            //     stroke: "#fff !important",
-            //   },
-            //   "& .MuiChartsAxis-tick": {
-            //     stroke: "#fff !important",
-            //   },
-            // }}
-          >
-            {/* GRADIENTS */}
-            <defs>
-              {gradients.map((g, index) => (
-                <linearGradient
-                  key={index}
-                  id={`gradient-${index}`}
-                  gradientTransform="rotate(90)"
-                >
-                  <stop offset="0%" stopColor={g[0]} />
-                  <stop offset="100%" stopColor={g[1]} />
-                </linearGradient>
-              ))}
-            </defs>
-          </BarChart>
+            series={barChartData}
+          />
         </div>
       </div>
 
@@ -295,7 +334,7 @@ export default function ClassView({ setSelectedView }) {
               <thead className="text-textBlue text-base font-poppins-bold">
                 <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
                   <th className="py-4 px-2">Class</th>
-                  {months.map((m) => (
+                  {months?.map((m) => (
                     <th key={m} className="py-4 px-2">
                       {m}
                     </th>
@@ -305,28 +344,34 @@ export default function ClassView({ setSelectedView }) {
               </thead>
 
               <tbody className="bg-[#2b2b2b]">
-                {feesData.map((item) => (
+                {classFeeSummary?.map((item, i) => (
                   <tr
-                    key={item}
+                    key={i}
                     className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-bold"
                   >
                     {/* CLASS + SECTION */}
                     <td className="py-4 px-2">
-                      {selectedClass}{" "}
+                      {/* {selectedClass}{" "} */}
+                      {filterClass?.name}{" "}
                       <span className="text-textGray2 text-sm">
-                        {item.section}
+                        {item?.sectionName}
                       </span>
                     </td>
 
                     {/* MONTHS */}
-                    {months?.map((m) => (
-                      <td key={m} className="py-4 px-2">
-                        <span className="text-[#4CBC9A] text-sm">
-                          {/* {feesData[selectedClass][section]?.[m] ?? "--"} */}
-                          {item.months[m]}
-                        </span>
-                      </td>
-                    ))}
+                    {MONTH_ORDER?.map((month, i) => {
+                      const match = item?.monthlyData?.find(
+                        (m) => m?.month === month
+                      );
+
+                      return (
+                        <td key={i} className="py-4 px-2">
+                          <span className="text-[#4CBC9A] text-sm">
+                            {match?.totalAmount ?? 0}
+                          </span>
+                        </td>
+                      );
+                    })}
 
                     {/* ACTION BUTTON */}
                     <td className="py-4 px-2">

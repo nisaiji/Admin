@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import collected from "../../../assets/images/fees/collected.png";
 import pending from "../../../assets/images/fees/pending.png";
 import due from "../../../assets/images/fees/due.png";
@@ -20,64 +20,101 @@ import {
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { BlueCard, GreenCard, RedCard, WhiteCard } from "../TopCard";
+import BarChartComponent from "../BarChart";
+import { axiosClient } from "../../../services/axiosClient";
+import EndPoints from "../../../services/EndPoints";
+import { useSelector } from "react-redux";
 
 export default function ClassView() {
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
   const isDarkMode = true;
   const [t] = useTranslation();
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
-  const data = [
-    {
-      class: "1 A",
-      totalfees: "₹ 70000",
-      paid: "₹ 50000",
-      pending: "₹ 20000",
-      nopaid: "30",
-      nounpaid: "16",
-      due: "24/07/25",
-    },
-    {
-      class: "1 A",
-      totalfees: "₹ 70000",
-      paid: "₹ 50000",
-      pending: "₹ 20000",
-      nopaid: "30",
-      nounpaid: "16",
-      due: "24/07/25",
-    },
-    {
-      class: "1 A",
-      totalfees: "₹ 70000",
-      paid: "₹ 50000",
-      pending: "₹ 20000",
-      nopaid: "30",
-      nounpaid: "16",
-      due: "24/07/25",
-    },
-  ];
+
+  const [filterClass, setFilterClass] = useState(null);
+  const [classWiseSummary, setClassWiseSummary] = useState([]);
+  const [classWiseChart, setClassWiseChart] = useState([]);
+  const [classWiseTransactions, setClassWiseTransactions] = useState([]);
+
+  const getClassWiseSummary = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_CLASS_WISE_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setClassWiseSummary(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  const getClassWiseChart = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_CLASS_WISE_CHART}?sessionID=${classAndSectionData?.selectedSession?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setClassWiseChart(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  const getClassWiseTransactions = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_CLASS_WISE_TRANSACTIONS}?sessionID=${classAndSectionData?.selectedSession?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setClassWiseTransactions(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  useEffect(() => {
+    getClassWiseSummary();
+    getClassWiseChart();
+    getClassWiseTransactions();
+  }, []);
+
   return (
     <>
       {/* Section 1 */}
       <div className="grid grid-cols-4 gap-4 my-6">
-        <WhiteCard img={classimg} heading="Total Classes" title1="20" />
+        <WhiteCard
+          img={classimg}
+          heading="Total Classes"
+          title1={classWiseSummary?.totalClasses ?? 0}
+        />
         <BlueCard
           img={graphup}
           heading="Highest Collection"
-          title1="₹ 500000"
-          title2="1 st"
+          title1={`₹ ${classWiseSummary?.highestCollection?.amount ?? 0}`}
+          title2={classWiseSummary?.highestCollection?.class ?? "NA"}
         />
         <RedCard
           img={graphdown}
           heading="Lowest Collection"
-          title1="₹ 50000"
-          title2="2 nd"
+          title1={`₹ ${classWiseSummary?.lowestCollection?.amount ?? 0}`}
+          title2={classWiseSummary?.lowestCollection?.class ?? "NA"}
         />
         <GreenCard
           img={paymentgreen}
           heading="Overall Paid"
-          title1="₹ 500000"
-          title2="₹ 50000"
+          title1={`₹ ${classWiseSummary?.overallPaid?.totalExpected ?? 0}`}
+          title2={`₹ ${classWiseSummary?.overallPaid?.totalCollected ?? 0}`}
         />
       </div>
       {/* BAR CHART */}
@@ -91,63 +128,32 @@ export default function ClassView() {
               Total number of fees collected this month
             </p>
           </div>
-          <SessionDropdaown />
+          <div className="space-x-4">
+            <select
+              value={filterClass?._id || ""}
+              onChange={(e) => {
+                const selected = classAndSectionData?.classList?.find(
+                  (cls) => cls._id === e.target.value
+                );
+                setFilterClass(selected);
+              }}
+              className="w-40 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
+            >
+              {classAndSectionData?.classList?.map((cls) => (
+                <option key={cls?._id} value={cls?._id}>
+                  {cls?.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* MIDDLE SECTION */}
         <div className="w-full h-[350px] flex justify-center items-center">
-          <BarChart
-            xAxis={[
-              {
-                data: [
-                  "1st",
-                  "2nd",
-                  "3rd",
-                  "4th",
-                  "5th",
-                  "6th",
-                  "7th",
-                  "8th",
-                  "9th",
-                  "10th",
-                  "11th",
-                  "12th",
-                ],
-                tickLabelStyle: { fill: "#fff" }, // X-axis text color
-                labelStyle: { fill: "#fff" },
-                stroke: "#fff", // X-axis line color
-              },
-            ]}
-            yAxis={[
-              {
-                tickLabelStyle: { fill: "#fff" }, // Y-axis text color
-                labelStyle: { fill: "#fff" },
-                stroke: "#fff", // Y-axis line color
-              },
-            ]}
-            series={[
-              {
-                data: [
-                  20000, 35000, 45000, 90000, 75000, 60000, 70000, 65000, 55000,
-                  60000, 45000, 50000,
-                ],
-              },
-            ]}
-            sx={{
-              [`& .${barClasses.series} .${barElementClasses.root}`]: {
-                fill: "url(#bar-gradient)",
-                rx: 4,
-                ry: 4,
-              },
-            }}
-          >
-            <defs>
-              <linearGradient gradientTransform="rotate(90)" id="bar-gradient">
-                <stop offset="0%" stopColor="#0A81D1" />
-                <stop offset="100%" stopColor="#4CBC9A" />
-              </linearGradient>
-            </defs>
-          </BarChart>
+          <BarChartComponent
+            xAxisData={classWiseChart?.map((item) => item?.class)}
+            series={classWiseChart?.map((item) => item?.amount)}
+          />
         </div>
       </div>
 
@@ -160,7 +166,7 @@ export default function ClassView() {
               Class Wise payments
             </p>
           </div>
-          <SessionDropdaown />
+          {/* <SessionDropdaown /> */}
         </div>
         <div className="w-full rounded-xl overflow-hidden">
           <table className="w-full text-left">
@@ -178,19 +184,19 @@ export default function ClassView() {
             </thead>
 
             <tbody className="bg-[#2b2b2b]">
-              {data.map((item, index) => (
+              {classWiseTransactions?.map((item, index) => (
                 <tr
                   key={index}
                   className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-bold"
                 >
                   <td className="py-4 px-2">{item.class}</td>
-                  <td className="py-4 px-2">{item.totalfees}</td>
-                  <td className="py-4 px-2">{item.paid}</td>
-                  <td className="py-4 px-2">{item.pending}</td>
-                  <td className="py-4 px-2">{item.nopaid}</td>
-                  <td className="py-4 px-2 text-textOrange">{item.nounpaid}</td>
+                  <td className="py-4 px-2">{item.totalFees}</td>
+                  <td className="py-4 px-2">{item.paidFees}</td>
+                  <td className="py-4 px-2">{item.pendingFees}</td>
+                  <td className="py-4 px-2">{item.paidCount}</td>
+                  <td className="py-4 px-2 text-textOrange">{item.unPaidCount}</td>
                   <td className={`py-4 px-2 font-semibold ${item.statusColor}`}>
-                    {item.due}
+                    {item.dueDate}
                   </td>
                   <td className="py-4 px-2 flex justify-center cursor-pointer">
                     <img

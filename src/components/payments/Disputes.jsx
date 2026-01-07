@@ -110,7 +110,7 @@ export default function Disputes() {
 
               {/* Amount */}
               <p className="text-textPrimary text-2xl font-poppins-bold">
-                ₹ 20M
+                ₹ 200,000
               </p>
             </div>
 

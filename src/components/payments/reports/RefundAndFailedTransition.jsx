@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import collected from "../../../assets/images/fees/collected.png";
 import pending from "../../../assets/images/fees/pending.png";
-import due from "../../../assets/images/fees/due.png";
+import due from "../../../assets/images/fees/task-due.png";
 import refund from "../../../assets/images/fees/refund.png";
 import classimg from "../../../assets/images/fees/class.png";
 import paymentgreen from "../../../assets/images/fees/paymentgreen.png";
@@ -11,6 +11,7 @@ import SessionDropdaown from "../SessionDropdaown";
 import { BarChart, barClasses, barElementClasses } from "@mui/x-charts";
 import dots from "../../../assets/images/fees/dots.png";
 import {
+  Box,
   FormControl,
   MenuItem,
   Pagination,
@@ -19,20 +20,99 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
-import { BlueCard, GreenCard, OrangeCard, WhiteCard } from "../TopCard";
+import {
+  BlueCard,
+  GreenCard,
+  OrangeCard,
+  RedCard,
+  WhiteCard,
+} from "../TopCard";
+import { useSelector } from "react-redux";
+import { axiosClient } from "../../../services/axiosClient";
+import EndPoints from "../../../services/EndPoints";
 
 export default function RefundAndFailedTransition() {
   const isDarkMode = true;
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
   const [t] = useTranslation();
-  const [view, setView] = useState("year");
+  const [view, setView] = useState("yearly");
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
+  const [refundSummary, setRefundSummary] = useState([]);
+  const [refundCharts, setRefundCharts] = useState([]);
+  const [refundTransactions, setRefundTransactions] = useState([]);
+  const [filterClass, setFilterClass] = useState(null);
+
+  const getRefundSummary = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_REFUND_AND_FAILED_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setRefundSummary(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+  const getRefundCharts = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_REFUND_AND_FAILED_CHART}?sessionID=${classAndSectionData?.selectedSession?._id}&classID=${filterClass?._id}&periodType=${view}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setRefundCharts(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+  const getRefundTransactions = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_REFUND_AND_FAILED_TRANSACTIONS}?sessionID=${classAndSectionData?.selectedSession?._id}&classID=${filterClass?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setRefundTransactions(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (filterClass?._id) {
+      getRefundSummary();
+      getRefundCharts();
+      getRefundTransactions();
+    }
+  }, [filterClass]);
+
+  useEffect(() => {
+    if (filterClass?._id) {
+      getRefundCharts();
+    }
+  }, [view]);
+
+  useEffect(() => {
+    if (!classAndSectionData?.classList?.length) return;
+
+    const defaultClass = classAndSectionData?.classList[0];
+
+    setFilterClass(defaultClass);
+  }, [classAndSectionData]);
 
   const gradients = [
-    ["#8ADEC5", "#4B786B"],
-    ["#09F1F5", "#058D8F"],
-    ["#1697CB", "#0B4B65"],
+    ["#B3F2CA", "#53BE7A"],
+    ["#FE4040", "#BA2C2C"],
+    ["#0A81D1", "#4CBC9A"],
     ["#FF9933", "#995C1F"],
     ["#F15613", "#8B320B"],
     ["#B4221A", "#4E0F0B"],
@@ -66,118 +146,33 @@ export default function RefundAndFailedTransition() {
     color: `url(#gradient-${index})`,
   }));
 
-  const feesData = [
-    {
-      section: "A",
-      months: {
-        Jan: "₹7000",
-        Feb: "₹6200",
-        Mar: "₹5000",
-        Apr: "₹7200",
-        May: "₹8000",
-        Jun: "₹6500",
-        Jul: "₹4000",
-        Aug: "₹9000",
-        Sep: "₹7800",
-        Oct: "₹7100",
-        Nov: "₹6900",
-        Dec: "₹8100",
-      },
-    },
-    {
-      section: "B",
-      months: {
-        Jan: "₹6000",
-        Feb: "₹5800",
-        Mar: "₹5000",
-        Apr: "₹6500",
-        May: "₹7000",
-        Jun: "₹6800",
-        Jul: "₹4500",
-        Aug: "₹8200",
-        Sep: "₹7000",
-        Oct: "₹6600",
-        Nov: "₹6400",
-        Dec: "₹7800",
-      },
-    },
-    {
-      section: "C",
-      months: {
-        Jan: "₹5500",
-        Feb: "₹5200",
-        Mar: "₹4800",
-        Apr: "₹6000",
-        May: "₹6500",
-        Jun: "₹6300",
-        Jul: "₹4200",
-        Aug: "₹7800",
-        Sep: "₹7200",
-        Oct: "₹6900",
-        Nov: "₹6700",
-        Dec: "₹7600",
-      },
-    },
-  ];
-
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  const data = [
-    {
-      year: "2024",
-      expectedfees: "₹ 700000",
-      collectedfees: "₹ 700000",
-      mode: "UPI",
-      refund: "₹ 20000",
-    },
-    {
-      year: "2025",
-      expectedfees: "₹ 700000",
-      collectedfees: "₹ 700000",
-      mode: "UPI",
-      refund: "₹ 20000",
-    },
-  ];
   return (
     <>
       {/* Total Collected Fees */}
       <div className="grid grid-cols-4 gap-4 my-6">
         <WhiteCard
           img={collected}
-          heading="Highest Collection"
-          title1="₹ 500000"
-          title2="1 st"
+          heading="Total Expected"
+          title1={`₹ ${refundSummary?.totalExpected?.amount ?? 0}`}
+          title2={refundSummary?.totalExpected?.students ?? 0}
         />
         <BlueCard
           img={collected}
-          heading="Highest Collection"
-          title1="₹ 500000"
-          title2="1 st"
+          heading="Total Collected"
+          title1={`₹ ${refundSummary?.totalCollected?.amount ?? 0}`}
+          title2={refundSummary?.totalCollected?.students ?? 0}
         />
         <OrangeCard
           img={pending}
-          heading="Lowest Collection"
-          title1="₹ 50000"
-          title2="2 nd"
+          heading="Refunded Amount"
+          title1={`₹ ${refundSummary?.refunded?.amount ?? 0}`}
+          title2={refundSummary?.refunded?.transactions ?? 0}
         />
-        <GreenCard
-          img={refund}
-          heading="Overall Paid"
-          title1="₹ 500000"
-          title2="₹ 50000"
+        <RedCard
+          img={due}
+          heading="Failed Amount"
+          title1={`₹ ${refundSummary?.failed?.amount ?? 0}`}
+          title2={refundSummary?.failed?.transactions ?? 0}
         />
       </div>
       {/* BAR CHART */}
@@ -191,16 +186,33 @@ export default function RefundAndFailedTransition() {
               Total number of fees collected this month
             </p>
           </div>
-          <SessionDropdaown />
+          <div className="space-x-4">
+            <select
+              value={filterClass?._id || ""}
+              onChange={(e) => {
+                const selected = classAndSectionData?.classList?.find(
+                  (cls) => cls._id === e.target.value
+                );
+                setFilterClass(selected);
+              }}
+              className="w-40 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
+            >
+              {classAndSectionData?.classList?.map((cls) => (
+                <option key={cls?._id} value={cls?._id}>
+                  {cls?.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="flex w-full justify-center items-center">
           <div className="border-b border-backgroundGray15">
             <button
               type="button"
-              onClick={() => setView("year")}
+              onClick={() => setView("yearly")}
               className={` text-base font-poppins-bold py-2 w-40 ${
-                view === "year"
+                view === "yearly"
                   ? "text-textOrange bg-backgroundOrange1 border-b-2 border-backgroundOrange1 rounded-md bg-opacity-5"
                   : "text-textPrimary"
               }`}
@@ -209,9 +221,9 @@ export default function RefundAndFailedTransition() {
             </button>
             <button
               type="button"
-              onClick={() => setView("month")}
+              onClick={() => setView("monthly")}
               className={` text-base font-poppins-bold py-2 w-40 ${
-                view === "month"
+                view === "monthly"
                   ? "text-textOrange bg-backgroundOrange1 border-b-2 border-backgroundOrange1 rounded-md bg-opacity-5"
                   : "text-textPrimary"
               }`}
@@ -222,89 +234,49 @@ export default function RefundAndFailedTransition() {
         </div>
         {/* MIDDLE SECTION */}
         <div className="w-full h-[350px] flex justify-center items-center">
-          <BarChart
-            xAxis={[
-              {
-                data: [
-                  "Jan",
-                  "Feb",
-                  "Mar",
-                  "Apr",
-                  "May",
-                  "Jun",
-                  "Jul",
-                  "Aug",
-                  "Sep",
-                  "Oct",
-                  "Nov",
-                  "Dec",
-                ],
-                tickLabelStyle: { fill: "#fff" },
-              },
-            ]}
-            yAxis={[
-              {
-                tickLabelStyle: { fill: "#fff" },
-              },
-            ]}
-            series={barSeries}
-            sx={{
-              // Rounded bars
-              [`& .${barElementClasses.root}`]: {
-                rx: 4,
-              },
-
-              // Axis lines
-              "& .MuiChartsAxis-line": {
-                stroke: "#fff !important",
-              },
-
-              // Axis tick lines
-              "& .MuiChartsAxis-tick": {
-                stroke: "#fff !important",
-              },
-
-              // ✅ FORCE LABELS TO BE SOLID WHITE
-              "& text": {
-                fill: "#fff !important",
-                opacity: "1 !important",
-              },
-
-              // Legend
-              "& .MuiChartsLegend-root text": {
-                fill: "#fff !important",
-              },
-            }}
-
-            // sx={{
-            //   [`& .${barElementClasses.root}`]: {
-            //     rx: 4, // rounded corners
-            //   },
-            //   "& .MuiChartsLegend-root text": {
-            //     fill: "white",
-            //   },
-            //   "& .MuiChartsAxis-line": {
-            //     stroke: "#fff !important",
-            //   },
-            //   "& .MuiChartsAxis-tick": {
-            //     stroke: "#fff !important",
-            //   },
-            // }}
-          >
-            {/* GRADIENTS */}
-            <defs>
-              {gradients.map((g, index) => (
-                <linearGradient
-                  key={index}
-                  id={`gradient-${index}`}
-                  gradientTransform="rotate(90)"
-                >
-                  <stop offset="0%" stopColor={g[0]} />
-                  <stop offset="100%" stopColor={g[1]} />
-                </linearGradient>
-              ))}
-            </defs>
-          </BarChart>
+          <Box sx={{ width: "100%", height: 350 }}>
+            <BarChart
+              xAxis={[
+                {
+                  data: refundCharts?.map((item) =>
+                    view === "monthly" ? item?.period : item?.label
+                  ),
+                  tickLabelStyle: { fill: "#fff" },
+                },
+              ]}
+              yAxis={[
+                {
+                  tickLabelStyle: { fill: "#fff" },
+                },
+              ]}
+              series={[
+                {
+                  label: "Refunded",
+                  data: refundCharts?.map((item) => item?.refunded),
+                  color: `url(#gradient-0)`,
+                },
+                {
+                  label: "Failed",
+                  data: refundCharts?.map((item) => item?.failed),
+                  color: `url(#gradient-1)`,
+                },
+              ]}
+            >
+              {/* GRADIENTS */}
+              <defs>
+                {gradients.map((g, index) => (
+                  <linearGradient
+                    key={index}
+                    id={`gradient-${index}`}
+                    gradientTransform="rotate(90)"
+                  >
+                    <stop offset="0%" stopColor={g[0]} />
+                    <stop offset="100%" stopColor={g[1]} />
+                  </linearGradient>
+                ))}
+              </defs>
+            </BarChart>
+          </Box>
         </div>
       </div>
 
@@ -317,34 +289,45 @@ export default function RefundAndFailedTransition() {
               Class Wise payments
             </p>
           </div>
-          <SessionDropdaown />
         </div>
         <div className="w-full rounded-xl overflow-hidden">
           <table className="w-full text-left">
             <thead className="text-textBlue text-base font-poppins-bold">
               <tr className="border-b border-gray-500/30 bg-[#686868] bg-opacity-5 text-center">
-                <th className="py-4 px-2">Year</th>
-                <th className="py-4 px-2">Fees Expected</th>
-                <th className="py-4 px-2">Fees Collected</th>
-                <th className="py-4 px-2">Familiar Mode</th>
-                <th className="py-4 px-2">Refund</th>
+                <th className="py-4 px-2">Transaction ID</th>
+                <th className="py-4 px-2">Student</th>
+                <th className="py-4 px-2">Class</th>
+                <th className="py-4 px-2">Amount</th>
+                <th className="py-4 px-2">Date and Time</th>
+                <th className="py-4 px-2">Mode</th>
+                <th className="py-4 px-2">Status</th>
                 <th className="py-4 px-2">Action</th>
               </tr>
             </thead>
 
             <tbody className="bg-[#2b2b2b]">
-              {data.map((item, index) => (
+              {refundTransactions?.data?.map((item, index) => (
                 <tr
                   key={index}
                   className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-bold"
                 >
-                  <td className="py-4 px-2">{item.year}</td>
-                  <td className="py-4 px-2">{item.expectedfees}</td>
-                  <td className="py-4 px-2 text-textGreen">
-                    {item.collectedfees}
+                  <td className="py-4 px-2">{item?.transactionId}</td>
+                  <td className="py-4 px-2">{item?.studentName}</td>
+                  <td className="py-4 px-2">{item?.class}</td>
+                  <td className="py-4 px-2">{item?.amount}</td>
+                  <td className="py-4 px-2">{item?.dateTime}</td>
+                  <td className="py-4 px-2">{item?.mode}</td>
+                  <td
+                    className={`py-4 px-2 ${
+                      item?.status === "REFUNDED"
+                        ? "text-textGreen"
+                        : item?.status === "FAILED"
+                        ? "text-textRed"
+                        : ""
+                    }`}
+                  >
+                    {item?.status}
                   </td>
-                  <td className="py-4 px-2">{item.mode}</td>
-                  <td className="py-4 px-2">{item.refund}</td>
                   <td className="py-4 px-2 flex justify-center cursor-pointer">
                     <img
                       src={dots}

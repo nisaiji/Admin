@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import collected from "../../../assets/images/fees/collected.png";
 import pending from "../../../assets/images/fees/pending.png";
 import due from "../../../assets/images/fees/due.png";
@@ -20,11 +20,15 @@ import {
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { BlueCard, GreenCard, OrangeCard, WhiteCard } from "../TopCard";
+import BarChartComponent from "../BarChart";
+import { useSelector } from "react-redux";
+import { axiosClient } from "../../../services/axiosClient";
+import EndPoints from "../../../services/EndPoints";
 
 export default function PeriodicView() {
   const isDarkMode = true;
   const [t] = useTranslation();
-  const [view, setView] = useState("year");
+  const [view, setView] = useState("yearly");
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
@@ -44,33 +48,93 @@ export default function PeriodicView() {
       refund: "₹ 20000",
     },
   ];
+
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const [periodicSummary, setPeriodicSummary] = useState([]);
+  const [periodicChart, setPeriodicChart] = useState([]);
+  const [periodicTransactions, setPeriodicTransactions] = useState([]);
+
+  const getPeriodicSummary = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_PERIODICALLY_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setPeriodicSummary(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  const getPeriodicChart = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_PERIODICALLY_CHART}?sessionID=${classAndSectionData?.selectedSession?._id}&periodType=${view}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setPeriodicChart(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  const getPeriodicTransactions = async () => {
+    try {
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_PERIODICALLY_TRANSACTIONS}?sessionID=${classAndSectionData?.selectedSession?._id}`
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setPeriodicTransactions(res?.result);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+
+  useEffect(() => {
+    getPeriodicSummary();
+  }, []);
+
+  useEffect(() => {
+    getPeriodicChart();
+    getPeriodicTransactions();
+  }, [view]);
+
   return (
     <>
       {/* Total Collected Fees */}
       <div className="grid grid-cols-4 gap-4 my-6">
         <WhiteCard
           img={collected}
-          heading="Highest Collection"
-          title1="₹ 500000"
-          title2="1 st"
+          heading="Total Expected"
+          title1={`₹ ${periodicSummary?.totalExpected?.amount ?? 0}`}
+          title2={periodicSummary?.totalExpected?.students ?? 0}
         />
         <BlueCard
           img={collected}
-          heading="Highest Collection"
-          title1="₹ 500000"
-          title2="1 st"
+          heading="Total Collected"
+          title1={`₹ ${periodicSummary?.totalCollected?.amount ?? 0}`}
+          title2={periodicSummary?.totalCollected?.students ?? 0}
         />
         <OrangeCard
           img={pending}
-          heading="Lowest Collection"
-          title1="₹ 50000"
-          title2="2 nd"
+          heading="Pending Payments"
+          title1={`₹ ${periodicSummary?.pendingPayments?.amount ?? 0}`}
+          title2={periodicSummary?.pendingPayments?.students ?? 0}
         />
         <GreenCard
           img={refund}
-          heading="Overall Paid"
-          title1="₹ 500000"
-          title2="₹ 50000"
+          heading="Refunded Amount"
+          title1={`₹ ${periodicSummary?.refundedAmount?.amount ?? 0}`}
+          title2={periodicSummary?.refundedAmount?.students ?? 0}
         />
       </div>
       {/* BAR CHART */}
@@ -84,16 +148,16 @@ export default function PeriodicView() {
               Total number of fees collected this month
             </p>
           </div>
-          <SessionDropdaown />
+          {/* <SessionDropdaown /> */}
         </div>
 
         <div className="flex w-full justify-center items-center">
           <div className="border-b border-backgroundGray15">
             <button
               type="button"
-              onClick={() => setView("year")}
+              onClick={() => setView("yearly")}
               className={` text-base font-poppins-bold py-2 w-40 ${
-                view === "year"
+                view === "yearly"
                   ? "text-textOrange bg-backgroundOrange1 border-b-2 border-backgroundOrange1 rounded-md bg-opacity-5"
                   : "text-textPrimary"
               }`}
@@ -102,9 +166,9 @@ export default function PeriodicView() {
             </button>
             <button
               type="button"
-              onClick={() => setView("month")}
+              onClick={() => setView("monthly")}
               className={` text-base font-poppins-bold py-2 w-40 ${
-                view === "month"
+                view === "monthly"
                   ? "text-textOrange bg-backgroundOrange1 border-b-2 border-backgroundOrange1 rounded-md bg-opacity-5"
                   : "text-textPrimary"
               }`}
@@ -115,74 +179,12 @@ export default function PeriodicView() {
         </div>
         {/* MIDDLE SECTION */}
         <div className="w-full h-[350px] flex justify-center items-center">
-          <BarChart
-            xAxis={[
-              {
-                data:
-                  view === "year"
-                    ? [
-                        "2015",
-                        "2016",
-                        "2017",
-                        "2018",
-                        "2019",
-                        "2020",
-                        "2021",
-                        "2022",
-                        "2023",
-                        "2024",
-                        "2025",
-                        "2026",
-                      ]
-                    : [
-                        "Jan",
-                        "Feb",
-                        "Mar",
-                        "Apr",
-                        "May",
-                        "Jun",
-                        "Jul",
-                        "Aug",
-                        "Sep",
-                        "Oct",
-                        "Nov",
-                        "Dec",
-                      ],
-                tickLabelStyle: { fill: "#fff" }, // X-axis text color
-                labelStyle: { fill: "#fff" },
-                stroke: "#fff", // X-axis line color
-              },
-            ]}
-            yAxis={[
-              {
-                tickLabelStyle: { fill: "#fff" }, // Y-axis text color
-                labelStyle: { fill: "#fff" },
-                stroke: "#fff", // Y-axis line color
-              },
-            ]}
-            series={[
-              {
-                data: [
-                  20000, 35000, 45000, 90000, 75000, 60000, 70000, 65000, 55000,
-                  60000, 45000, 50000,
-                ],
-              },
-            ]}
-            sx={{
-              [`& .${barClasses.series} .${barElementClasses.root}`]: {
-                fill: "url(#bar-gradient)",
-                rx: 4,
-                ry: 4,
-              },
-            }}
-          >
-            <defs>
-              <linearGradient gradientTransform="rotate(90)" id="bar-gradient">
-                <stop offset="0%" stopColor="#0A81D1" />
-                <stop offset="100%" stopColor="#4CBC9A" />
-              </linearGradient>
-            </defs>
-          </BarChart>
+          <BarChartComponent
+            xAxisData={periodicChart?.map((item) =>
+              view === "yearly" ? item?.label : item?.period
+            )}
+            series={periodicChart?.map((item) => item?.collected)}
+          />
         </div>
       </div>
 
@@ -195,7 +197,7 @@ export default function PeriodicView() {
               Class Wise payments
             </p>
           </div>
-          <SessionDropdaown />
+          {/* <SessionDropdaown /> */}
         </div>
         <div className="w-full rounded-xl overflow-hidden">
           <table className="w-full text-left">
@@ -211,18 +213,18 @@ export default function PeriodicView() {
             </thead>
 
             <tbody className="bg-[#2b2b2b]">
-              {data.map((item, index) => (
+              {periodicTransactions?.map((item, index) => (
                 <tr
                   key={index}
                   className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-bold"
                 >
-                  <td className="py-4 px-2">{item.year}</td>
-                  <td className="py-4 px-2">{item.expectedfees}</td>
+                  <td className="py-4 px-2">{item?.year}</td>
+                  <td className="py-4 px-2">{item?.feesExpected}</td>
                   <td className="py-4 px-2 text-textGreen">
-                    {item.collectedfees}
+                    {item?.feesCollected}
                   </td>
-                  <td className="py-4 px-2">{item.mode}</td>
-                  <td className="py-4 px-2">{item.refund}</td>
+                  <td className="py-4 px-2">{item?.familiarMode}</td>
+                  <td className="py-4 px-2">{item?.refunds}</td>
                   <td className="py-4 px-2 flex justify-center cursor-pointer">
                     <img
                       src={dots}
