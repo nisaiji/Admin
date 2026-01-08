@@ -157,8 +157,8 @@ export default function ClassView({
       // console.log(res);
 
       if (res?.statusCode === 200) {
-        // setClassFeeSummary(res?.result);
-        setClassFeeSummary(DUMMY_SECTION_MONTHLY_DATA);
+        setClassFeeSummary(res?.result);
+        // setClassFeeSummary(DUMMY_SECTION_MONTHLY_DATA);
       }
     } catch (e) {
       // console.log("Error fetching fee summary:", e);
