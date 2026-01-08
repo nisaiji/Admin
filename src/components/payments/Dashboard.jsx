@@ -341,7 +341,7 @@ export default function Dashboard() {
             Total Collected Fees
           </p>
           <p className="text-base font-poppins-bold text-textBlue mt-1">
-            +0%{" "}
+            +{feeSummary?.collectedChangePct ?? 0}%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular ">
               than last week
             </span>
@@ -360,7 +360,7 @@ export default function Dashboard() {
           </div>
           <p className="text-md font-poppins-regular mt-2">Pending Payments</p>
           <p className="text-base font-poppins-bold text-textOrange2 mt-1">
-            +0%{" "}
+            +{feeSummary?.pendingChangePct ?? 0}%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular ">
               than last week
             </span>
@@ -379,7 +379,7 @@ export default function Dashboard() {
           </div>
           <p className="text-md font-poppins-regular mt-2">Overdue Payments</p>
           <p className="text-base font-poppins-bold text-textRed mt-1">
-            +0%{" "}
+            +{feeSummary?.overdueChangePct ?? 0}%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular ">
               than last week
             </span>
@@ -398,7 +398,7 @@ export default function Dashboard() {
           </div>
           <p className="text-md font-poppins-regular mt-2">Refunded Amount</p>
           <p className="text-base font-poppins-bold text-textGreen mt-1">
-            +0%{" "}
+            +{feeSummary?.refundedChangePct ?? 0}%{" "}
             <span className="text-textGray2 text-xs font-poppins-regular ">
               than last week
             </span>
