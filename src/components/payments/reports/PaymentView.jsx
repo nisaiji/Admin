@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import paymentgreen from "../../../assets/images/fees/creditcardgreen.png";
+import paymentgreen from "../../../assets/images/fees/creditcardGreen.png";
 import graphup from "../../../assets/images/fees/net-banking.png";
 import graphdown from "../../../assets/images/fees/upi.png";
 import {
