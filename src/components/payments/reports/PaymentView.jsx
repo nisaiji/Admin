@@ -1,35 +1,15 @@
 import React, { useEffect, useState } from "react";
-import collected from "../../../assets/images/fees/collected.png";
-import pending from "../../../assets/images/fees/pending.png";
-import due from "../../../assets/images/fees/due.png";
-import refund from "../../../assets/images/fees/refund.png";
-import classimg from "../../../assets/images/fees/payment.png";
 import paymentgreen from "../../../assets/images/fees/creditcardgreen.png";
 import graphup from "../../../assets/images/fees/net-banking.png";
 import graphdown from "../../../assets/images/fees/upi.png";
-import SessionDropdaown from "../SessionDropdaown";
 import {
-  BarChart,
-  barClasses,
-  barElementClasses,
   PieChart,
 } from "@mui/x-charts";
-import dots from "../../../assets/images/fees/dots.png";
-import {
-  FormControl,
-  MenuItem,
-  Pagination,
-  PaginationItem,
-  Select,
-} from "@mui/material";
-import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import {
   BlueCard,
   GreenCard,
   OrangeCard,
-  RedCard,
-  WhiteCard,
 } from "../TopCard";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";

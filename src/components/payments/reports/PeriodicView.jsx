@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from "react";
-import collected from "../../../assets/images/fees/collected.png";
 import pending from "../../../assets/images/fees/pending.png";
-import due from "../../../assets/images/fees/due.png";
 import refund from "../../../assets/images/fees/refund.png";
-import classimg from "../../../assets/images/fees/class.png";
-import paymentgreen from "../../../assets/images/fees/paymentgreen.png";
-import graphup from "../../../assets/images/fees/graphup.png";
-import graphdown from "../../../assets/images/fees/graphdown.png";
-import SessionDropdaown from "../SessionDropdaown";
-import { BarChart, barClasses, barElementClasses } from "@mui/x-charts";
 import dots from "../../../assets/images/fees/dots.png";
 import {
   FormControl,

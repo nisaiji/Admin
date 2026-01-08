@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from "react";
 import collected from "../../../assets/images/fees/collectedinvert.png";
 import pending from "../../../assets/images/fees/pending.png";
-import due from "../../../assets/images/fees/due.png";
-import refund from "../../../assets/images/fees/refund.png";
 import paymentgreen from "../../../assets/images/fees/paymentgreen.png";
-import graphup from "../../../assets/images/fees/net-banking.png";
 import calred from "../../../assets/images/fees/calred.png";
-import SessionDropdaown from "../SessionDropdaown";
 import {
-  BarChart,
-  barClasses,
-  barElementClasses,
   PieChart,
 } from "@mui/x-charts";
 import dots from "../../../assets/images/fees/dots.png";
