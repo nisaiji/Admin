@@ -388,7 +388,10 @@ export default function SectionView({
                     <td className="py-4 px-2">
                       <button
                         type="button"
-                        onClick={() => setSelectedView("student")}
+                        onClick={() => {
+                          setSelectedStudent(std);
+                          setSelectedView("student");
+                        }}
                         className="bg-backgroundBlue text-textPrimary text-sm px-4 py-1 rounded-md"
                       >
                         View

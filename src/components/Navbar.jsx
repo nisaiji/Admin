@@ -7,7 +7,7 @@
  * Handles menu open/close logic, click outside detection, and logout functionality.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { appConfigAction } from "../store/AppConfigSlice";
@@ -31,6 +31,9 @@ const Navbar = () => {
   // Redux and navigation hooks
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+  const isActive = (path) => location.pathname === path;
+
   const { data, teacherData } = useSelector((state) => state.appAuth);
   const role = useSelector((state) => state.appAuth.role);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
@@ -39,7 +42,6 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [requestsMenuOpen, setRequestsMenuOpen] = useState(false);
-  const [selected, setSelected] = useState("");
 
   // Refs for menu elements
   const menuRef = useRef(null);
@@ -271,8 +273,12 @@ const Navbar = () => {
               <Link to="/student-information-system" className={`py-2 mx-6`}>
                 <span
                   className={`${
-                    isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  } hover:text-textBlue text-sm font-bold`}
+                    isActive("/student-information-system")
+                      ? "text-orange-500"
+                      : isDarkMode
+                      ? "text-textPrimary"
+                      : "text-textBlack"
+                  } text-sm font-bold`}
                 >
                   {t("roles.student")}
                 </span>
@@ -354,19 +360,27 @@ const Navbar = () => {
             >
               <button
                 className={`${
-                  isDarkMode ? "text-textPrimary" : "text-textBlack"
-                } hover:text-textBlue flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group`}
+                  isActive("/notice")
+                    ? "text-orange-500"
+                    : isDarkMode
+                    ? "text-textPrimary"
+                    : "text-textBlack"
+                } flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group`}
               >
-                {t("titles.notice")}
                 <img
                   src={notice}
                   alt="notice"
-                  className={`w-4 h-4 object-contain`}
+                  className={`w-4 h-4 object-contain ${
+                    isActive("/notice")
+                      ? ""
+                      : "filter invert brightness-0 saturate-0"
+                  }`}
                 />
+                {t("titles.notice")}
               </button>
             </Link>
           )}
-          
+
           {/* payments link for admin */}
           {role === "admin" && (
             <Link
@@ -374,9 +388,8 @@ const Navbar = () => {
               className={`flex justify-center items-center cursor-pointer mx-6`}
             >
               <div
-                onClick={() => setSelected("payments")}
                 className={`flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group ${
-                  selected === "payments"
+                  isActive("/payments")
                     ? "text-orange-500"
                     : isDarkMode
                     ? "text-textPrimary"
@@ -387,7 +400,7 @@ const Navbar = () => {
                   src={money}
                   alt="notice"
                   className={`w-4 h-4 object-contain transition ${
-                    selected === "payments"
+                    isActive("/payments")
                       ? ""
                       : "filter invert brightness-0 saturate-0"
                   }`}

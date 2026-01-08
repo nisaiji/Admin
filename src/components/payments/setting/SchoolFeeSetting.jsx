@@ -18,7 +18,7 @@ export default function SchoolFeeSetting({ setSelected }) {
     effectiveDate:
       moment(classAndSectionData?.feeStructureData?.effectiveFrom).format(
         "YYYY-MM-DD"
-      ) ?? "",
+      ) ?? moment().add(3, "days").format("YYYY-MM-DD"),
     lateFee: classAndSectionData?.feeStructureData?.lateFeePercent ?? 12,
   });
 
@@ -195,7 +195,7 @@ export default function SchoolFeeSetting({ setSelected }) {
             <div className="relative">
               <input
                 type="date"
-                value={settings.effectiveDate}
+                value={settings?.effectiveDate}
                 min={moment().add(3, "days").format("YYYY-MM-DD")}
                 max={moment(
                   classAndSectionData?.selectedSession?.endDate

@@ -29,7 +29,7 @@ export default function StudentView({
       // console.log(res.result);
 
       if (res?.statusCode === 200) {
-        setStudentSummary(res?.result);
+        // setStudentSummary(res?.result);
       }
     } catch (e) {
       // console.log("Error fetching fee summary:", e);
@@ -62,74 +62,32 @@ export default function StudentView({
     getStudentSummary();
   }, [selectedStudent]);
 
-  // const rows = [
-  //   {
-  //     month: "January",
-  //     id: "12128CNN",
-  //     amount: "₹ 5000",
-  //     mode: "UPI",
-  //     modeColor: "#F77F00",
-  //     time: "12:03 AM",
-  //     date: "04/01/2025",
-  //     due: "05/01/2025",
-  //     overdue: false,
-  //   },
-  //   {
-  //     month: "February",
-  //     id: "123FRT67",
-  //     amount: "₹ 5000",
-  //     mode: "Net Banking",
-  //     modeColor: "#0096C7",
-  //     time: "2:03 AM",
-  //     date: "04/02/2025",
-  //     due: "05/02/2025",
-  //     overdue: false,
-  //   },
-  //   {
-  //     month: "March",
-  //     id: "563YTU86",
-  //     amount: "₹ 5000",
-  //     mode: "VISA Card",
-  //     modeColor: "#6A4C93",
-  //     time: "8:03 PM",
-  //     date: "05/03/2025",
-  //     due: "05/03/2025",
-  //     overdue: false,
-  //   },
-  //   {
-  //     month: "April",
-  //     id: "9889TU86",
-  //     amount: "₹ 5000",
-  //     mode: "Net Banking",
-  //     modeColor: "#0096C7",
-  //     time: "5:45 PM",
-  //     date: "02/04/2025",
-  //     due: "05/04/2025",
-  //     overdue: false,
-  //   },
-  //   {
-  //     month: "May",
-  //     id: "87HSB678",
-  //     amount: "₹ 5000",
-  //     mode: "UPI",
-  //     modeColor: "#F77F00",
-  //     time: "8:45 AM",
-  //     date: "06/05/2025",
-  //     due: "05/05/2025",
-  //     overdue: true,
-  //   },
-  //   {
-  //     month: "June",
-  //     id: "87GYQ678",
-  //     amount: "₹ 5000",
-  //     mode: "UPI",
-  //     modeColor: "#F77F00",
-  //     time: "5:45 PM",
-  //     date: "06/06/2025",
-  //     due: "05/06/2025",
-  //     overdue: true,
-  //   },
-  // ];
+  const rows = [
+    {
+      paidAt: 1759934555000,
+      zohoPaymentId: "12128CNN",
+      amount: "5000",
+      paymentMethod: "UPI",
+    },
+    {
+      paidAt: 1762612955000,
+      zohoPaymentId: "12128CNN",
+      amount: "5000",
+      paymentMethod: "UPI",
+    },
+    {
+      paidAt: 1765204955000,
+      zohoPaymentId: "12128CNN",
+      amount: "5000",
+      paymentMethod: "UPI",
+    },
+    {
+      paidAt: 1768848955000,
+      zohoPaymentId: "12128CNN",
+      amount: "5000",
+      paymentMethod: "UPI",
+    },
+  ];
 
   return (
     <div className="p-6 w-full text-white">
@@ -159,8 +117,9 @@ export default function StudentView({
         </button>
         <ChevronRight className="w-5 h-5" />
         <p className="text-sm text-textBlue font-poppins-bold">
-          {studentSummary?.studentFirstname ?? "Akash"}{" "}
-          {studentSummary?.studentLastname ?? "Chouhan"}
+          {/* {studentSummary?.studentFirstname ?? "Akash"}{" "}
+          {studentSummary?.studentLastname ?? "Chouhan"} */}
+          {selectedStudent?.name}
         </p>
       </div>
 
@@ -176,8 +135,9 @@ export default function StudentView({
             className="size-[50px] object-contain rounded-md"
           />
           <p className="text-textPrimary text-sm font-poppins-bold ">
-            {studentSummary?.studentFirstname ?? ""}{" "}
-            {studentSummary?.studentLastname ?? ""}
+            {/* {studentSummary?.studentFirstname ?? ""}{" "}
+            {studentSummary?.studentLastname ?? ""} */}
+            {selectedStudent?.name}
           </p>
         </div>
         <div className="flex gap-6 justify-center items-center">
@@ -224,7 +184,8 @@ export default function StudentView({
             </thead>
 
             <tbody className="bg-[#2b2b2b]">
-              {studentSummary?.map((std, index) => (
+              {/* {studentSummary?.map((std, index) => ( */}
+              {rows?.map((std, index) => (
                 <tr
                   key={index}
                   className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-medium"
@@ -239,7 +200,6 @@ export default function StudentView({
                   <td className="py-4 px-2">
                     {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
                   </td>
-                  {/* <td className="py-4 px-2">{std?.due}</td> */}
                   {/* ACTION */}
                   <td className="py-4 px-2">
                     <button className="bg-backgroundBlue text-white text-sm px-4 py-1 rounded-md">
