@@ -34,8 +34,9 @@ export default function ClassView() {
 
   const getClassWiseSummary = async () => {
     try {
+      console.log("classAndSectionData", classAndSectionData);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_CLASS_WISE_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.ADMIN.GET_CLASS_WISE_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${classAndSectionData?.selectedSession?.school}`
       );
       // console.log(res);
 
@@ -50,7 +51,7 @@ export default function ClassView() {
   const getClassWiseChart = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_CLASS_WISE_CHART}?sessionID=${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.ADMIN.GET_CLASS_WISE_CHART}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${classAndSectionData?.selectedSession?.school}`
       );
       // console.log(res);
 
@@ -65,7 +66,7 @@ export default function ClassView() {
   const getClassWiseTransactions = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_CLASS_WISE_TRANSACTIONS}?sessionID=${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.ADMIN.GET_CLASS_WISE_TRANSACTIONS}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${classAndSectionData?.selectedSession?.school}`
       );
       // console.log(res);
 
