@@ -2,15 +2,9 @@ import React, { useEffect, useState } from "react";
 import paymentgreen from "../../../assets/images/fees/creditcardGreen.png";
 import graphup from "../../../assets/images/fees/net-banking.png";
 import graphdown from "../../../assets/images/fees/upi.png";
-import {
-  PieChart,
-} from "@mui/x-charts";
+import { PieChart } from "@mui/x-charts";
 import { useTranslation } from "react-i18next";
-import {
-  BlueCard,
-  GreenCard,
-  OrangeCard,
-} from "../TopCard";
+import { BlueCard, GreenCard, OrangeCard } from "../TopCard";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { useSelector } from "react-redux";
@@ -58,19 +52,19 @@ export default function PaymentView() {
         <OrangeCard
           img={graphdown}
           heading="UPI"
-          title1={`₹ ${paymentModeSummary?.modes?.[0]?.amount}`}
+          title1={`₹ ${paymentModeSummary?.modes?.[0]?.amount ?? 0}`}
           title2={paymentModeSummary?.modes?.[0]?.transactions}
         />
         <GreenCard
           img={paymentgreen}
           heading="Net Banking"
-          title1={`₹ ${paymentModeSummary?.modes?.[1]?.amount}`}
+          title1={`₹ ${paymentModeSummary?.modes?.[1]?.amount ?? 0}`}
           title2={paymentModeSummary?.modes?.[1]?.transactions}
         />
         <BlueCard
           img={graphup}
           heading="Credit Card"
-          title1={`₹ ${paymentModeSummary?.modes?.[2]?.amount}`}
+          title1={`₹ ${paymentModeSummary?.modes?.[2]?.amount ?? 0}`}
           title2={paymentModeSummary?.modes?.[2]?.transactions}
         />
         {/* <WhiteCard img={classimg} heading="Other" title1="₹ 5000" title2="30" /> */}
@@ -105,80 +99,87 @@ export default function PaymentView() {
         </div>
 
         {/* MIDDLE SECTION */}
-        <div className="w-full flex justify-evenly items-center">
-          <div className="flex justify-center items-center relative">
-            {/* Donut Chart */}
-            <PieChart
-              series={[
-                {
-                  data: [
-                    {
-                      id: 0,
-                      value: paymentModeSummary?.modes?.[0]?.transactions ?? 0,
-                      color: "#0A81D1",
-                    },
-                    {
-                      id: 1,
-                      value: paymentModeSummary?.modes?.[1]?.transactions ?? 0,
-                      color: "#FF793F",
-                    },
-                    {
-                      id: 2,
-                      value: paymentModeSummary?.modes?.[2]?.transactions ?? 0,
-                      color: "#4CBC9A",
-                    },
-                  ],
-                  innerRadius: 100,
-                  outerRadius: 150,
-                },
-              ]}
-              width={300}
-              height={300}
-              slotProps={{
-                legend: { hidden: true }, // hide default legend
-              }}
-            />
+        {paymentModeSummary.length === 0 ? (
+          <div className="flex min-h-[250px] justify-center items-center">No Data To Display</div>
+        ) : (
+          <div className="w-full flex justify-evenly items-center">
+            <div className="flex justify-center items-center relative">
+              {/* Donut Chart */}
+              <PieChart
+                series={[
+                  {
+                    data: [
+                      {
+                        id: 0,
+                        value:
+                          paymentModeSummary?.modes?.[0]?.transactions ?? 0,
+                        color: "#0A81D1",
+                      },
+                      {
+                        id: 1,
+                        value:
+                          paymentModeSummary?.modes?.[1]?.transactions ?? 0,
+                        color: "#FF793F",
+                      },
+                      {
+                        id: 2,
+                        value:
+                          paymentModeSummary?.modes?.[2]?.transactions ?? 0,
+                        color: "#4CBC9A",
+                      },
+                    ],
+                    innerRadius: 100,
+                    outerRadius: 150,
+                  },
+                ]}
+                width={300}
+                height={300}
+                slotProps={{
+                  legend: { hidden: true }, // hide default legend
+                }}
+              />
 
-            {/* Center Text */}
-            <div className="absolute flex flex-col justify-center items-center">
-              <p className="text-xl font-poppins-bold">
-                ₹ {paymentModeSummary?.totalAmount}
+              {/* Center Text */}
+              <div className="absolute flex flex-col justify-center items-center">
+                <p className="text-xl font-poppins-bold">
+                  ₹ {paymentModeSummary?.totalAmount ?? 0}
+                </p>
+                <p className="text-sm text-textGray2 text-center leading-4">
+                  Fees Payment <br /> Mode
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 rounded-xl bg-[#2b2b2b]">
+              <h3 className="text-lg font-poppins-bold">Transitions</h3>
+              <p className="text-sm font-poppins-regular text-textGray2 mb-4">
+                Payment mode breakdown
               </p>
-              <p className="text-sm text-textGray2 text-center leading-4">
-                Fees Payment <br /> Mode
-              </p>
+              <table className=" text-left rounded-b-xl mx-5">
+                <thead className="text-textBlue text-base font-poppins-bold">
+                  <tr className="border-b border-gray-500/30 text-center">
+                    <th className="py-4 px-2">Payment Mode</th>
+                    <th className="py-4 px-2">No of Transistions</th>
+                    <th className="py-4 px-2">Total Amount</th>
+                  </tr>
+                </thead>
+
+                <tbody className="bg-backgroundGray15 rounded-b-xl">
+                  {paymentModeSummary?.modes?.map((item, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-bold"
+                    >
+                      <td className="py-4 px-2">{item?.mode}</td>
+                      <td className="py-4 px-2">{item?.transactions}</td>
+                      <td className="py-4 px-2">{item?.amount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-
-          <div className="p-5 rounded-xl bg-[#2b2b2b] min-h-[350px]">
-            <h3 className="text-lg font-poppins-bold">Transitions</h3>
-            <p className="text-sm font-poppins-regular text-textGray2 mb-4">
-              Payment mode breakdown
-            </p>
-            <table className=" text-left rounded-b-xl mx-5">
-              <thead className="text-textBlue text-base font-poppins-bold">
-                <tr className="border-b border-gray-500/30 text-center">
-                  <th className="py-4 px-2">Payment Mode</th>
-                  <th className="py-4 px-2">No of Transistions</th>
-                  <th className="py-4 px-2">Total Amount</th>
-                </tr>
-              </thead>
-
-              <tbody className="bg-backgroundGray15 rounded-b-xl">
-                {paymentModeSummary?.modes?.map((item, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-bold"
-                  >
-                    <td className="py-4 px-2">{item?.mode}</td>
-                    <td className="py-4 px-2">{item?.transactions}</td>
-                    <td className="py-4 px-2">{item?.amount}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        )}
       </div>
     </>
   );

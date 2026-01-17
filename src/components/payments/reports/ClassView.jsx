@@ -18,11 +18,13 @@ import BarChartComponent from "../BarChart";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { useSelector } from "react-redux";
+import TransactionModal from "../TransitionPopup";
 
 export default function ClassView() {
-  const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const { classAndSectionData, data } = useSelector((state) => state.appAuth);
   const isDarkMode = true;
   const [t] = useTranslation();
+  const [open, setOpen] = useState(false);
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalRequestCount, setTotalRequestCount] = useState(1);
@@ -34,9 +36,9 @@ export default function ClassView() {
 
   const getClassWiseSummary = async () => {
     try {
-      console.log("classAndSectionData", classAndSectionData);
+      // console.log("classAndSectionData", classAndSectionData);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_CLASS_WISE_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${classAndSectionData?.selectedSession?.school}`
+        `${EndPoints.ADMIN.GET_CLASS_WISE_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${data?._id}`
       );
       // console.log(res);
 
@@ -51,7 +53,7 @@ export default function ClassView() {
   const getClassWiseChart = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_CLASS_WISE_CHART}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${classAndSectionData?.selectedSession?.school}`
+        `${EndPoints.ADMIN.GET_CLASS_WISE_CHART}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${data?._id}`
       );
       // console.log(res);
 
@@ -66,7 +68,7 @@ export default function ClassView() {
   const getClassWiseTransactions = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_CLASS_WISE_TRANSACTIONS}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${classAndSectionData?.selectedSession?.school}`
+        `${EndPoints.ADMIN.GET_CLASS_WISE_TRANSACTIONS}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${data?._id}`
       );
       // console.log(res);
 
@@ -189,15 +191,20 @@ export default function ClassView() {
                   <td className="py-4 px-2">{item.paidFees}</td>
                   <td className="py-4 px-2">{item.pendingFees}</td>
                   <td className="py-4 px-2">{item.paidCount}</td>
-                  <td className="py-4 px-2 text-textOrange">{item.unPaidCount}</td>
+                  <td className="py-4 px-2 text-textOrange">
+                    {item.unPaidCount}
+                  </td>
                   <td className={`py-4 px-2 font-semibold ${item.statusColor}`}>
                     {item.dueDate}
                   </td>
-                  <td className="py-4 px-2 flex justify-center cursor-pointer">
-                    <img
-                      src={dots}
-                      className="h-[22px] w-[4px] object-contain"
-                    />
+                  <td className="py-4 px-2">
+                    <button
+                      type="button"
+                      onClick={() => setOpen(true)}
+                      className="bg-blue-500 text-white text-sm px-4 py-1 rounded-md"
+                    >
+                      View
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -300,6 +307,7 @@ export default function ClassView() {
           </div>
         </div>
       </div>
+      <TransactionModal open={open} onClose={() => setOpen(false)} />
     </>
   );
 }

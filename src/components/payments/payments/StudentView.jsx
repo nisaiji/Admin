@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import SessionDropdaown from "../SessionDropdaown";
 import profile from "../../../assets/images/profileEmpty.png";
 import notification from "../../../assets/images/fees/notifications.png";
 import discount from "../../../assets/images/fees/discount.png";
@@ -8,7 +7,6 @@ import EndPoints from "../../../services/EndPoints";
 import moment from "moment";
 import { ChevronRight } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import { set } from "date-fns";
 import Spinner from "../../Spinner";
 
 export default function StudentView({
@@ -24,7 +22,7 @@ export default function StudentView({
     try {
       const res = await axiosClient.post(
         // `${EndPoints.ADMIN.GET_PAYMENT_TRANSITIIONS}?sessionStudentId=${selectedStudent?.sessionStudentId}`
-        `${EndPoints.ADMIN.GET_PAYMENT_TRANSITIIONS}?sessionStudentId=6942fd8fd06f243e76e5beac`
+        `${EndPoints.ADMIN.GET_PAYMENT_TRANSITIIONS}?sessionStudentId=68c30165f168a528eb37944c`
       );
       // console.log(res.result);
 
@@ -38,13 +36,11 @@ export default function StudentView({
 
   const sendParentReminder = async () => {
     try {
-      // ?sessionStudentId=6942fd8fd06f243e76e5beac
       setLoading(true);
       const res = await axiosClient.post(
         `${EndPoints.ADMIN.GET_REPORT_FEE_REMINDER}`,
         { instanceID: "6942fd8fd06f243e76e5beac" }
       );
-      // console.log(res);
 
       if (res?.statusCode === 200) {
         setTimeout(() => {
@@ -166,7 +162,6 @@ export default function StudentView({
               Student paid unpaid status
             </p>
           </div>
-          {/* <SessionDropdaown /> */}
         </div>
 
         <div className="w-full rounded-xl overflow-auto">
@@ -178,7 +173,6 @@ export default function StudentView({
                 <th className="py-4 px-2">Amount</th>
                 <th className="py-4 px-2">Payment Mode</th>
                 <th className="py-4 px-2">Date & Time</th>
-                {/* <th className="py-4 px-2">Due Date</th> */}
                 <th className="py-4 px-2">Action</th>
               </tr>
             </thead>

@@ -1,17 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
   axisClasses,
-  BarChart,
-  barClasses,
-  barElementClasses,
-  barLabelClasses,
-  BarPlot,
   ChartContainer,
   ChartsGrid,
   ChartsTooltip,
   ChartsXAxis,
   ChartsYAxis,
-  LineChart,
   LinePlot,
   PieChart,
 } from "@mui/x-charts";
@@ -25,9 +19,9 @@ import creditcard from "../../assets/images/fees/creditcard.png";
 import BarChartComponent from "./BarChart";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
-import { set } from "date-fns";
 import { useSelector } from "react-redux";
 import moment from "moment/moment";
+import CONSTANT from "../../utils/constants";
 
 const ALL_PAYMENT_MODES = ["upi", "net_banking", "credit_card"];
 
@@ -55,67 +49,6 @@ const MODE_META = {
   },
 };
 
-const apiData = [
-  { _id: "2025-05", totalAmount: 4000, transactionCount: 1 },
-  { _id: "2025-07", totalAmount: 9000, transactionCount: 1 },
-  { _id: "2025-08", totalAmount: 3400, transactionCount: 1 },
-  { _id: "2025-11", totalAmount: 6000, transactionCount: 1 },
-  { _id: "2025-12", totalAmount: 9000, transactionCount: 2 },
-];
-
-const apiData2 = [
-  {
-    _id: "2025-12-10",
-    totalAmount: 1000,
-    TransactionCount: 2,
-  },
-  {
-    _id: "2025-12-14",
-    totalAmount: 1500,
-    TransactionCount: 2,
-  },
-  {
-    _id: "2025-12-18",
-    totalAmount: 2000,
-    TransactionCount: 2,
-  },
-  {
-    _id: "2025-12-19",
-    totalAmount: 3000,
-    TransactionCount: 2,
-  },
-  {
-    _id: "2025-12-20",
-    totalAmount: 3500,
-    TransactionCount: 2,
-  },
-  {
-    _id: "2025-12-25",
-    totalAmount: 3000,
-    TransactionCount: 2,
-  },
-  {
-    _id: "2025-12-26",
-    totalAmount: 2000,
-    TransactionCount: 2,
-  },
-];
-
-const FY_MONTHS = [
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-  "Jan",
-  "Feb",
-  "Mar",
-];
-
 const MONTH_MAP = {
   1: "Jan",
   2: "Feb",
@@ -137,7 +70,6 @@ export default function Dashboard() {
   const [paymentByMode, setPaymentByMode] = useState([]);
   const [monthlyPaymentSummary, setMonthlyPaymentSummary] = useState([]);
   const [dailyPaymentSummary, setDailyPaymentSummary] = useState([]);
-  // console.log(monthlyPaymentSummary);
 
   const normalizedPayments = ALL_PAYMENT_MODES.map((mode) => {
     const found = paymentByMode.find((p) => p._id === mode);
@@ -174,9 +106,7 @@ export default function Dashboard() {
   };
 
   const getDailyLineData = (dailyPaymentSummary) => {
-    const days = getDaysInMonth(); // current month days
-
-    // If API empty / invalid → flat zero line
+    const days = getDaysInMonth();
     if (
       !Array.isArray(dailyPaymentSummary) ||
       dailyPaymentSummary.length === 0
@@ -184,13 +114,10 @@ export default function Dashboard() {
       return days.map(() => 0);
     }
 
-    // Build date → amount map
     const dayAmountMap = {};
 
     dailyPaymentSummary.forEach((item) => {
       if (!item?._id || typeof item.totalAmount !== "number") return;
-
-      // "2025-12-26" → 26
       const day = moment(item._id, "YYYY-MM-DD").date();
       dayAmountMap[day] = item.totalAmount;
     });
@@ -221,7 +148,7 @@ export default function Dashboard() {
       }
     });
 
-    return FY_MONTHS.map((month) => monthAmountMap[month] || 0);
+    return CONSTANT.FY_MONTHS.map((month) => monthAmountMap[month] || 0);
   };
 
   const lineSeriesData = getFinancialYearLineData(monthlyPaymentSummary);
@@ -243,13 +170,6 @@ export default function Dashboard() {
           ...res?.result,
           totalAmount,
         });
-        // setFeeSummary({
-        //   collectedFee: 15,
-        //   pending: 3,
-        //   overdue: 2,
-        //   refunded: 6,
-        //   totalAmount: 20,
-        // });
       }
     } catch (e) {
       // console.log("Error fetching fee summary:", e);
@@ -653,7 +573,7 @@ export default function Dashboard() {
               xAxis={[
                 {
                   id: "months",
-                  data: FY_MONTHS,
+                  data: CONSTANT.FY_MONTHS,
                   scaleType: "point",
                   tickLabelStyle: { fill: "#fff" },
                   height: 40,

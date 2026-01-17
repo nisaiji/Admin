@@ -5,16 +5,13 @@ import due from "../../../assets/images/fees/due.png";
 import retry from "../../../assets/images/fees/retry.png";
 import refund from "../../../assets/images/fees/refund.png";
 import cancel from "../../../assets/images/fees/cancel.png";
-import SessionDropdaown from "../SessionDropdaown";
 import {
-  BarChart,
-  barClasses,
-  barElementClasses,
   PieChart,
 } from "@mui/x-charts";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { ChevronRight } from "lucide-react";
+import CONSTANT from "../../../utils/constants";
 
 export default function SectionView({
   setSelectedView,
@@ -107,22 +104,6 @@ export default function SectionView({
       },
     },
   ];
-
-  const months = [
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-    "Jan",
-    "Feb",
-    "Mar",
-  ];
-  // console.log(filterSection);
 
   return (
     <div className="p-6 w-full text-white">
@@ -349,7 +330,7 @@ export default function SectionView({
               <thead className="text-textBlue text-base font-poppins-bold">
                 <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
                   <th className="py-4 px-2">Student</th>
-                  {months.map((m) => (
+                  {CONSTANT.FY_MONTHS.map((m) => (
                     <th key={m} className="py-4 px-2">
                       {m}
                     </th>
@@ -370,7 +351,7 @@ export default function SectionView({
                     </td>
 
                     {/* MONTH STATUS */}
-                    {months.map((m) => (
+                    {CONSTANT.FY_MONTHS.map((m) => (
                       <td key={m} className="py-4 px-2">
                         <span
                           className={`text-sm font-poppins-bold ${

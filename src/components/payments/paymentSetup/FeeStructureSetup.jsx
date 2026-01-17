@@ -700,7 +700,6 @@ export default function FeeStructureSetup({ onBack }) {
                           updateFee(period, value);
                         }}
                         placeholder="0"
-                        // className="w-full bg-[#0a0a0a] border border-gray-700 text-white text-sm rounded pl-6 pr-2 py-1.5 focus:outline-none focus:border-[#0A81D1] transition-colors"
                         className={`w-full text-sm rounded pl-6 pr-2 py-1.5 transition-colors ${
                           isPastPeriod(period)
                             ? "bg-[#0a0a0a] border border-gray-800 text-gray-500 cursor-not-allowed"

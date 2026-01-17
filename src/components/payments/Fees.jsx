@@ -26,7 +26,7 @@ export default function Fees() {
       { src: payment, label: "Payments" },
       { src: disputes, label: "Disputes" },
       { src: settings, label: "Settings" },
-      { src: support, label: "Support" },
+      // { src: support, label: "Support" },
     ],
     []
   );
@@ -45,15 +45,16 @@ export default function Fees() {
     <div
       className={`${
         isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-      } select-none flex`}
+      } select-none flex h-[calc(100vh-72px)] min-h-[calc(100vh-72px)] overflow-hidden`}
     >
       <Sidebar
         items={menuItems}
         selected={selected}
         setSelected={setSelected}
       />
-
-      {ActiveScreen && <ActiveScreen />}
+      <div className="flex-1 h-full overflow-y-auto">
+        {ActiveScreen && <ActiveScreen />}
+      </div>
     </div>
   );
 }

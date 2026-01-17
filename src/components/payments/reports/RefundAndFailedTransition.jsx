@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import collected from "../../../assets/images/fees/collected.png";
 import pending from "../../../assets/images/fees/pending.png";
 import due from "../../../assets/images/fees/task-due.png";
-import { BarChart, } from "@mui/x-charts";
+import { BarChart } from "@mui/x-charts";
 import dots from "../../../assets/images/fees/dots.png";
 import {
   Box,
@@ -27,7 +27,7 @@ import EndPoints from "../../../services/EndPoints";
 
 export default function RefundAndFailedTransition() {
   const isDarkMode = true;
-  const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const { classAndSectionData, data } = useSelector((state) => state.appAuth);
   const [t] = useTranslation();
   const [view, setView] = useState("yearly");
   const [pageNo, setPageNo] = useState(1);
@@ -41,7 +41,7 @@ export default function RefundAndFailedTransition() {
   const getRefundSummary = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_REFUND_AND_FAILED_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.ADMIN.GET_REFUND_AND_FAILED_SUMMARY}?sessionID=${classAndSectionData?.selectedSession?._id}&school=${data?._id}`
       );
       // console.log(res);
 

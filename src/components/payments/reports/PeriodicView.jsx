@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import collected from "../../../assets/images/fees/collected.png";
 import pending from "../../../assets/images/fees/pending.png";
 import refund from "../../../assets/images/fees/refund.png";
 import dots from "../../../assets/images/fees/dots.png";
@@ -175,7 +176,7 @@ export default function PeriodicView() {
             xAxisData={periodicChart?.map((item) =>
               view === "yearly" ? item?.label : item?.period
             )}
-            series={periodicChart?.map((item) => item?.collected)}
+            series={periodicChart?.map((item) => item?.collected ?? 0)}
           />
         </div>
       </div>

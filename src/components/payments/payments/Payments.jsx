@@ -8,6 +8,7 @@ export default function Payments() {
   const [filterClass, setFilterClass] = useState(null);
   const [filterSection, setFilterSection] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [sections, setSections] = useState([]);
 
   return selectedView === "class" ? (
     <ClassView
@@ -16,6 +17,8 @@ export default function Payments() {
       setFilterClass={setFilterClass}
       filterSection={filterSection}
       setFilterSection={setFilterSection}
+      sections={sections}
+      setSections={setSections}
     />
   ) : selectedView === "section" ? (
     <SectionView

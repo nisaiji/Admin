@@ -6,53 +6,7 @@ import BarChartComponent from "../BarChart";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { useSelector } from "react-redux";
-
-const DUMMY_SECTION_MONTHLY_DATA = [
-  {
-    _id: "secA",
-    sectionName: "A",
-    monthlyData: [
-      { month: "2025-04", totalAmount: 20000 },
-      { month: "2025-05", totalAmount: 35000 },
-      { month: "2025-06", totalAmount: 45000 },
-      // { month: "2025-07", totalAmount: 90000 },
-      { month: "2025-08", totalAmount: 75000 },
-      { month: "2025-09", totalAmount: 60000 },
-      // { month: "2025-10", totalAmount: 70000 },
-      { month: "2025-11", totalAmount: 65000 },
-      { month: "2025-12", totalAmount: 55000 },
-      // { month: "2026-01", totalAmount: 60000 },
-      { month: "2026-02", totalAmount: 45000 },
-      { month: "2026-03", totalAmount: 50000 },
-    ],
-  },
-  {
-    _id: "secB",
-    sectionName: "B",
-    monthlyData: [
-      { month: "2025-04", totalAmount: 15000 },
-      { month: "2025-06", totalAmount: 30000 },
-      { month: "2025-07", totalAmount: 50000 },
-      { month: "2026-01", totalAmount: 43000 },
-      { month: "2026-02", totalAmount: 36000 },
-      { month: "2026-03", totalAmount: 40000 },
-    ],
-  },
-  {
-    _id: "secC",
-    sectionName: "C",
-    monthlyData: [
-      { month: "2025-04", totalAmount: 10000 },
-      { month: "2025-06", totalAmount: 24000 },
-      { month: "2025-07", totalAmount: 32000 },
-      { month: "2025-08", totalAmount: 30000 },
-      { month: "2025-11", totalAmount: 31000 },
-      { month: "2025-12", totalAmount: 29000 },
-      { month: "2026-02", totalAmount: 26000 },
-      { month: "2026-03", totalAmount: 30000 },
-    ],
-  },
-];
+import CONSTANT from "../../../utils/constants";
 
 export default function ClassView({
   setSelectedView,
@@ -60,12 +14,13 @@ export default function ClassView({
   setFilterClass,
   filterSection,
   setFilterSection,
+  sections,
+  setSections,
 }) {
   const { classAndSectionData } = useSelector((state) => state.appAuth);
   const [feeSummary, setFeeSummary] = useState(null);
   const [classFeeSummary, setClassFeeSummary] = useState([]);
 
-  const [sections, setSections] = useState([]);
   const [barChartData, setBarChartData] = useState([]);
 
   const MONTH_ORDER = [
@@ -83,12 +38,12 @@ export default function ClassView({
     "2026-03",
   ];
 
-  const buildBarDataForSection = (sectionName) => {
-    const section = classFeeSummary?.find(
-      (s) => s?.sectionName === sectionName
-    );
+  const buildBarDataForSection = (sectionObj) => {
+    if (!sectionObj) return Array(MONTH_ORDER.length).fill(0);
 
-    // 🛡️ If section or monthlyData missing
+    const section = classFeeSummary?.find((s) => s?._id === sectionObj?._id);
+
+    // If section or monthlyData missing
     const monthlyData = Array.isArray(section?.monthlyData)
       ? section?.monthlyData
       : [];
@@ -106,32 +61,23 @@ export default function ClassView({
   };
 
   useEffect(() => {
-    if (!filterSection || !classFeeSummary.length) {
-      setBarChartData(Array(MONTH_ORDER.length).fill(0));
-      return;
-    }
+    if (!filterClass || !filterSection || classFeeSummary.length === 0) return;
 
     const data = buildBarDataForSection(filterSection);
+
     setBarChartData(data);
   }, [filterSection, classFeeSummary]);
 
   useEffect(() => {
     if (!classAndSectionData?.classList?.length) return;
+    if (!filterClass) {
+      const defaultClass = classAndSectionData.classList[0];
+      const defaultSection = defaultClass?.section?.[0] ?? null;
 
-    const defaultClass = classAndSectionData?.classList[0];
-    const defaultSection = defaultClass?.section?.[0]?.name ?? null;
-
-    setFilterClass(defaultClass);
-    setSections(defaultClass.section || []);
-    setFilterSection(defaultSection);
-
-    // set default chart
-    // if (defaultSection) {
-    //   const data = buildBarDataForSection(defaultSection);
-    //   setBarChartData(data);
-    // } else {
-    //   setBarChartData(Array(MONTH_ORDER.length).fill(0));
-    // }
+      setFilterClass(defaultClass);
+      setSections(defaultClass.section || []);
+      setFilterSection(defaultSection);
+    }
   }, [classAndSectionData]);
 
   const getFeeSummary = async () => {
@@ -139,7 +85,6 @@ export default function ClassView({
       const res = await axiosClient.post(
         `${EndPoints.ADMIN.GET_FEE_SUMMARY}?classId=${filterClass?._id}`
       );
-      // console.log(res);
 
       if (res?.statusCode === 200) {
         setFeeSummary(res?.result);
@@ -154,11 +99,9 @@ export default function ClassView({
         EndPoints.ADMIN.GET_CLASS_PAYMENT_SUMMARY,
         { classId: filterClass?._id }
       );
-      // console.log(res);
 
       if (res?.statusCode === 200) {
-        setClassFeeSummary(res?.result);
-        // setClassFeeSummary(DUMMY_SECTION_MONTHLY_DATA);
+        setClassFeeSummary(res?.result ?? []);
       }
     } catch (e) {
       // console.log("Error fetching fee summary:", e);
@@ -171,21 +114,6 @@ export default function ClassView({
       getClassFeeSummary();
     }
   }, [filterClass?._id]);
-
-  const months = [
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-    "Jan",
-    "Feb",
-    "Mar",
-  ];
 
   return (
     <div className="p-6 w-full text-white">
@@ -286,12 +214,17 @@ export default function ClassView({
               ))}
             </select>
             <select
-              value={filterSection || ""}
-              onChange={(e) => setFilterSection(e.target.value)}
+              value={filterSection?._id || ""}
+              onChange={(e) => {
+                const sectionObj = sections.find(
+                  (sec) => sec._id === e.target.value
+                );
+                setFilterSection(sectionObj);
+              }}
               className="w-40 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
             >
               {sections?.map((sec, i) => (
-                <option key={i} value={sec?.name}>
+                <option key={i} value={sec?._id}>
                   Section {sec?.name}
                 </option>
               ))}
@@ -334,7 +267,7 @@ export default function ClassView({
               <thead className="text-textBlue text-base font-poppins-bold">
                 <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
                   <th className="py-4 px-2">Class</th>
-                  {months?.map((m) => (
+                  {CONSTANT.FY_MONTHS?.map((m) => (
                     <th key={m} className="py-4 px-2">
                       {m}
                     </th>
