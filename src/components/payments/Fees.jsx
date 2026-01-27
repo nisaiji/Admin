@@ -3,15 +3,15 @@ import { useSelector } from "react-redux";
 
 import dashboard from "../../assets/images/fees/dashboard.png";
 import report from "../../assets/images/fees/report.png";
-import payment from "../../assets/images/fees/payment.png";
-import disputes from "../../assets/images/fees/disputes.png";
+// import payment from "../../assets/images/fees/payment.png";
+// import disputes from "../../assets/images/fees/disputes.png";
 import settings from "../../assets/images/fees/settings.png";
-import support from "../../assets/images/fees/support.png";
+// import support from "../../assets/images/fees/support.png";
 
 import Sidebar from "./Sidebar";
 import Dashboard from "./Dashboard";
 import Disputes from "./Disputes";
-import Payments from "./payments/Payments";
+// import Payments from "./payments/Payments";
 import Reports from "./reports/Reports";
 import SettingSetup from "./setting/SettingSetup";
 
@@ -23,18 +23,18 @@ export default function Fees() {
     () => [
       { src: dashboard, label: "Dashboard" },
       { src: report, label: "Reports" },
-      { src: payment, label: "Payments" },
-      { src: disputes, label: "Disputes" },
+      // { src: payment, label: "Payments" },
+      // { src: disputes, label: "Disputes" },
       { src: settings, label: "Settings" },
       // { src: support, label: "Support" },
     ],
-    []
+    [],
   );
 
   const screens = {
     Dashboard: Dashboard,
     Reports: Reports,
-    Payments: Payments,
+    // Payments: Payments,
     Disputes: Disputes,
     Settings: SettingSetup,
   };
@@ -53,7 +53,7 @@ export default function Fees() {
         setSelected={setSelected}
       />
       <div className="flex-1 h-full overflow-y-auto">
-        {ActiveScreen && <ActiveScreen />}
+        {ActiveScreen && <ActiveScreen setSelected={setSelected} />}
       </div>
     </div>
   );

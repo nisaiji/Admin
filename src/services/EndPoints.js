@@ -120,10 +120,17 @@ const EndPoints = {
 
     CREATE_FEES: "fee-structure/section-fee-structure",
     GET_FEES: "fee-structure/section-fee-structure",
+    GET_SCHOOL_FEES: "fee-structure/school-fee-structure/session",
 
-    GET_FEE_SUMMARY: "payment/dashboard/fee-summary",
-    GET_PAYMENT_BY_MODE: "payment/dashboard/payment-modes",
-    GET_DAILY_PAYMENT_SUMMARY: "payment/dashboard/daywise-paid",
+    CREATE_REFUND: "payment/refund",
+
+    GET_FEE_SUMMARY: "payment/v2/dashboard/summary",
+    GET_TRANSITIONS: "payment/v2/dashboard/transactions",
+    GET_PAYMENT_BY_MODE: "payment/v2/dashboard/payment-modes-summary",
+    GET_DAILY_PAYMENT_SUMMARY: "payment/v2/dashboard/daywise-summary",
+    GET_CLASS_SECTIONS_REPORTS: "payment/v2/dashboard/sections-report",
+    GET_SECTIONS_REPORTS: "payment/v2/dashboard/section-students-report",
+
     GET_MONTHLY_PAYMENT_SUMMARY: "payment/dashboard/monthwise-paid",
     GET_CLASS_PAYMENT_SUMMARY: "payment/dashboard/class-paid",
     GET_PAYMENT_TRANSITIIONS: "payment/dashboard/transactions",
@@ -144,7 +151,7 @@ const EndPoints = {
 
     GET_REPORT_FEE_SUMMARY: "payment/dashboard/reports/fee/summary",
     GET_REPORT_FEE_TRANSACTIONS: "payment/dashboard/reports/fee/transactions",
-    GET_REPORT_FEE_REMINDER: "payment/dashboard/reports/fee/reminder",
+    GET_REPORT_FEE_REMINDER: "payment/dashboard/parent-reminder",
 
     GET_REFUND_AND_FAILED_SUMMARY: "payment/dashboard/reports/other/summary",
     GET_REFUND_AND_FAILED_CHART: "payment/dashboard/reports/other/chart",

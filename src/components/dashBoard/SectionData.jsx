@@ -142,6 +142,8 @@ export default function SectionData({
       if (role === "admin") {
         const res = await axiosClient.get(EndPoints.ADMIN.GET_SESSION);
         if (res?.statusCode === 200) {
+          // console.log(res);
+          
           const activeSession = res?.result?.find((s) => s?.isCurrent === true);
           if (!classAndSectionData?.selectedSession?._id) {
             dispatch(

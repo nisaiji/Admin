@@ -31,14 +31,14 @@ export function FeeStructureView({ onBack, setSelected }) {
   const getSchoolFeeStructure = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_FEES}?sessionId=${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.ADMIN.GET_FEES}?sessionId=${classAndSectionData?.selectedSession?._id}`,
       );
-      // console.log(res);
+      console.log(res);
       if (res?.statusCode === 200) {
         setData(res?.result);
       }
     } catch (e) {
-      // console.log(e);
+      //       console.log(e);
     }
   };
 
@@ -57,7 +57,7 @@ export function FeeStructureView({ onBack, setSelected }) {
       status: item?.isActive ? "Active" : "Inactive",
       frequency: item?.schoolFeeStructure?.installmentType,
       startDate: moment(item?.schoolFeeStructure?.effectiveFrom).format(
-        "DD MMM YYYY"
+        "DD MMM YYYY",
       ),
       lateFee: item?.schoolFeeStructure?.lateFeePercent,
       createdAt: moment(item?.createdAt).format("DD MMM YYYY"),
@@ -89,16 +89,16 @@ export function FeeStructureView({ onBack, setSelected }) {
   };
 
   const classes = useMemo(() => {
-  const uniqueClasses = new Set();
+    const uniqueClasses = new Set();
 
-  structures?.forEach((item) => {
-    if (item?.className && item?.className !== "-") {
-      uniqueClasses.add(item?.className);
-    }
-  });
+    structures?.forEach((item) => {
+      if (item?.className && item?.className !== "-") {
+        uniqueClasses.add(item?.className);
+      }
+    });
 
-  return ["all", ...Array.from(uniqueClasses)];
-}, [structures]);
+    return ["all", ...Array.from(uniqueClasses)];
+  }, [structures]);
 
   // const classes = [
   //   "all",
@@ -163,7 +163,7 @@ export function FeeStructureView({ onBack, setSelected }) {
       {/* Combined Card with Filters, Search and Table */}
       {filteredStructures.length === 0 ? (
         <div className="bg-[#1a1d24] border border-gray-800 rounded-xl p-12 text-center">
-          <div className="text-gray-500 mb-2">No fee structures found</div>
+          <div className="text-gray-500 mb-2"> No fee structures found</div>
           <p className="text-gray-600 text-sm mb-6">
             Get started by creating your first fee structure
           </p>
@@ -286,7 +286,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs border ${getStatusColor(
-                            structure.status
+                            structure.status,
                           )}`}
                         >
                           {structure?.status}
@@ -424,7 +424,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                       <span className="text-gray-400">Status</span>
                       <span
                         className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs border ${getStatusColor(
-                          selectedStructure?.status
+                          selectedStructure?.status,
                         )}`}
                       >
                         {selectedStructure?.status}
@@ -483,12 +483,12 @@ export function FeeStructureView({ onBack, setSelected }) {
                 className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all"
               >
                 Close
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-[#0A81D1] text-white rounded-lg hover:bg-[#0A81D1]/90 transition-all">
-                <Edit2 className="w-4 h-4" />
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-[#0A81D1] text-white rounded-lg hover:bg-[#0A81D1]/90 transition-all">
+              <Edit2 className="w-4 h-4" />
                 Edit Structure
-              </button>
-            </div> */}
+            </button>
+</div> */}
           </div>
         </div>
       )}

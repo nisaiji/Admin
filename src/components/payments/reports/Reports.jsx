@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from "react";
 
-import ClassView from "./ClassView";
-import PeriodicView from "./PeriodicView";
+import ClassSummary from "./classsummary/ClassSummary";
+// import PeriodicView from "./PeriodicView";
 import PaymentView from "./PaymentView";
-import FeeSummaryView from "./FeeSummaryView";
+// import FeeSummaryView from "./FeeSummaryView";
 import RefundAndFailedTransition from "./RefundAndFailedTransition";
 
-import calendar from "../../../assets/images/fees/calendar.png";
-import pending from "../../../assets/images/fees/pendingBlue.png";
+// import calendar from "../../../assets/images/fees/calendar.png";
+// import pending from "../../../assets/images/fees/pendingBlue.png";
 import receipt from "../../../assets/images/fees/receipt.png";
 import wallet from "../../../assets/images/fees/wallet.png";
 import classimg from "../../../assets/images/fees/class.png";
@@ -21,26 +21,26 @@ export default function Reports() {
         key: "class",
         label: "Class-wise",
         icon: classimg,
-        component: ClassView,
+        component: ClassSummary,
       },
-      {
-        key: "periodic",
-        label: "Periodically",
-        icon: calendar,
-        component: PeriodicView,
-      },
+      // {
+      //   key: "periodic",
+      //   label: "Periodically",
+      //   icon: calendar,
+      //   component: PeriodicView,
+      // },
       {
         key: "paymentmode",
-        label: "Payment Mode",
+        label: "Datail Transitions",
         icon: wallet,
         component: PaymentView,
       },
-      {
-        key: "feesummary",
-        label: "Fee Summary",
-        icon: pending,
-        component: FeeSummaryView,
-      },
+      // {
+      //   key: "feesummary",
+      //   label: "Fee Summary",
+      //   icon: pending,
+      //   component: FeeSummaryView,
+      // },
       {
         key: "refund",
         label: "Refund & Failed Txns",

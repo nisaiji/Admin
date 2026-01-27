@@ -25,6 +25,13 @@ const CONSTANT = {
     "Feb",
     "Mar",
   ],
+  INSTALLMENT_PERIOD_MONTHS: {
+    monthly: 1,
+    bimonthly: 2,
+    quarterly: 3,
+    halfyearly: 6,
+    yearly: 12,
+  },
 };
 
 export default CONSTANT;
