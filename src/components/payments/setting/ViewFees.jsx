@@ -22,7 +22,7 @@ import { capitalize } from "@mui/material";
 export function FeeStructureView({ onBack, setSelected }) {
   const { classAndSectionData } = useSelector((state) => state.appAuth);
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterClass, setFilterClass] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -31,9 +31,9 @@ export function FeeStructureView({ onBack, setSelected }) {
   const getSchoolFeeStructure = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_FEES}?sessionId=${classAndSectionData?.selectedSession?._id}`,
+        `${EndPoints.ADMIN.GET_FEES_STRUCTURE}/${classAndSectionData?.selectedSession?._id}`,
       );
-      console.log(res);
+      // console.log(res);
       if (res?.statusCode === 200) {
         setData(res?.result);
       }
@@ -49,25 +49,46 @@ export function FeeStructureView({ onBack, setSelected }) {
   }, [classAndSectionData]);
 
   const structures = useMemo(() => {
-    return data.map((item) => ({
-      id: item?._id,
-      className: item?.class?.name || "-",
-      sections: item?.section ? [item?.section?.name] : [],
-      totalAmount: item?.totalAmount,
-      status: item?.isActive ? "Active" : "Inactive",
-      frequency: item?.schoolFeeStructure?.installmentType,
-      startDate: moment(item?.schoolFeeStructure?.effectiveFrom).format(
-        "DD MMM YYYY",
-      ),
-      lateFee: item?.schoolFeeStructure?.lateFeePercent,
-      createdAt: moment(item?.createdAt).format("DD MMM YYYY"),
-      periodBreakdown: item?.feeInstallments.map((f, i) => ({
-        title: `Installment ${i + 1}`,
-        amount: f?.amount,
-        startDate: moment(f?.startDate).format("DD MMM YYYY"),
-        dueDate: moment(f?.dueDate).format("DD MMM YYYY"),
-      })),
-    }));
+    const schoolFeeStructure = data?.schoolFeeStructure;
+    const classes = data?.sessionSectionsFeeStructure?.classes || [];
+
+    let rows = [];
+
+    classes.forEach((cls) => {
+      const sections = cls?.sections || [];
+
+      sections.forEach((sec) => {
+        const sectionFeeStructure = sec?.sectionFeeStructure;
+
+        rows.push({
+          id: sectionFeeStructure?._id || sec?._id,
+
+          className: cls?.name || "-",
+          sectionName: sec?.name || "-",
+
+          // ✅ totalAmount now per section
+          totalAmount: sectionFeeStructure?.totalAmount || 0,
+
+          status: sectionFeeStructure?.isActive ? "Active" : "Inactive",
+
+          frequency: schoolFeeStructure?.installmentType || "-",
+          startDate: schoolFeeStructure?.effectiveFrom
+            ? moment(schoolFeeStructure?.effectiveFrom).format("DD MMM YYYY")
+            : "-",
+
+          lateFee: schoolFeeStructure?.lateFeePercent || 0,
+
+          createdAt: sectionFeeStructure?.createdAt
+            ? moment(sectionFeeStructure?.createdAt).format("DD MMM YYYY")
+            : "-",
+
+          // ✅ for modal
+          feeInstallments: sectionFeeStructure?.feeInstallments || [],
+        });
+      });
+    });
+
+    return rows;
   }, [data]);
 
   const filteredStructures = structures.filter((s) => {
@@ -100,28 +121,9 @@ export function FeeStructureView({ onBack, setSelected }) {
     return ["all", ...Array.from(uniqueClasses)];
   }, [structures]);
 
-  // const classes = [
-  //   "all",
-  //   "Nursery",
-  //   "LKG",
-  //   "UKG",
-  //   "Class 1",
-  //   "Class 2",
-  //   "Class 3",
-  //   "Class 4",
-  //   "Class 5",
-  //   "Class 6",
-  //   "Class 7",
-  //   "Class 8",
-  //   "Class 9",
-  //   "Class 10",
-  //   "Class 11",
-  //   "Class 12",
-  // ];
-
   const statuses = ["all", "Active", "Inactive", "Draft"];
 
-  const currentStructures = filteredStructures.slice((1 - 1) * 10, 1 * 10);
+  const currentStructures = filteredStructures.slice(0, 10);
 
   return (
     <div className="w-full mx-auto max-w-5xl my-6">
@@ -263,26 +265,22 @@ export function FeeStructureView({ onBack, setSelected }) {
                     >
                       <td className="px-6 py-4">
                         <span className="text-white">
-                          {structure?.className ?? ""}
+                          {structure?.className}
                         </span>
                       </td>
+
                       <td className="px-6 py-4">
-                        <div className="flex gap-1">
-                          {structure?.sections?.map((section) => (
-                            <span
-                              key={section}
-                              className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded"
-                            >
-                              {section}
-                            </span>
-                          ))}
-                        </div>
+                        <span className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded">
+                          {structure?.sectionName}
+                        </span>
                       </td>
+
                       <td className="px-6 py-4">
                         <span className="text-white">
-                          {structure?.totalAmount}
+                          ₹ {structure?.totalAmount || 0}
                         </span>
                       </td>
+
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs border ${getStatusColor(
@@ -338,7 +336,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                 <X className="w-6 h-6" />
               </button>
             </div>
-
+            {console.log(selectedStructure)}
             {/* Modal Content */}
             <div className="p-6 space-y-6">
               {/* Overview Cards */}
@@ -352,7 +350,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                       <p className="text-gray-400 text-xs">Class</p>
                       <p className="text-white">
                         {selectedStructure?.className}{" "}
-                        {selectedStructure?.sections}
+                        {selectedStructure?.sectionName}
                       </p>
                     </div>
                   </div>
@@ -404,20 +402,6 @@ export function FeeStructureView({ onBack, setSelected }) {
               {/* Sections & Status */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
-                  <h3 className="text-white mb-3">Sections</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedStructure?.sections?.map((section) => (
-                      <span
-                        key={section}
-                        className="px-3 py-1.5 bg-[#0A81D1]/10 text-[#0A81D1] border border-[#0A81D1]/20 rounded-lg"
-                      >
-                        Section {section}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
                   <h3 className="text-white mb-3">Status & Fees</h3>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -434,7 +418,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                       <div className="flex items-center justify-between">
                         <span className="text-gray-400">Late Fee Interest</span>
                         <span className="text-white">
-                          {selectedStructure?.lateFee}
+                          {selectedStructure?.lateFee}%
                         </span>
                       </div>
                     )}
@@ -445,19 +429,87 @@ export function FeeStructureView({ onBack, setSelected }) {
               {/* Period Breakdown */}
               <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
                 <h3 className="text-white mb-4">Payment Breakdown</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {selectedStructure?.periodBreakdown?.map((period, index) => (
-                    <div
-                      key={index}
-                      className="bg-[#1a1d24] border border-gray-700 rounded-lg p-4 hover:border-[#0A81D1]/30 transition-colors"
-                    >
-                      <p className="text-gray-400 text-sm mb-1">
-                        {period?.title}
-                      </p>
-                      <p className="text-white text-lg">{period?.amount}</p>
-                    </div>
-                  ))}
-                </div>
+                {selectedStructure?.feeInstallments?.length === 0 ? (
+                  <div className="text-gray-500 text-sm py-6 text-center">
+                    No installments available
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {selectedStructure?.feeInstallments?.map((inst, index) => {
+                      const amount = inst?.amount || 0;
+                      const isZero = amount === 0;
+
+                      return (
+                        <div
+                          key={inst?._id || index}
+                          className="group bg-[#12141b] border border-gray-800 rounded-2xl p-4 hover:border-[#0A81D1]/40 hover:shadow-[0_0_0_1px_rgba(10,129,209,0.25)] transition-all"
+                        >
+                          {/* Top */}
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-2">
+
+                              <div>
+                                <p className="text-white text-sm font-medium">
+                                  Installment{" "}
+                                  {inst?.installmentNumber
+                                    ? inst.installmentNumber
+                                    : index + 1}
+                                </p>
+                                <p className="text-gray-500 text-xs">
+                                  {moment(inst?.startDate).format("MMM YYYY")}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Due pill */}
+                            <span className="px-2.5 py-1 rounded-full text-[11px] border border-orange-500/20 bg-orange-500/10 text-orange-300">
+                              Due {moment(inst?.dueDate).format("DD MMM")}
+                            </span>
+                          </div>
+
+                          {/* Amount */}
+                          <div className="mt-4">
+                            <p className="text-gray-400 text-xs mb-1">Amount</p>
+
+                            {isZero ? (
+                              <p className="text-gray-500 text-lg font-semibold">
+                                ₹ 0{" "}
+                                <span className="text-xs font-normal text-gray-600">
+                                  (Not Set)
+                                </span>
+                              </p>
+                            ) : (
+                              <p className="text-white text-2xl font-bold tracking-wide">
+                                ₹ {amount}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Dates */}
+                          <div className="mt-4 grid grid-cols-2 gap-3">
+                            <div className="bg-[#0a0a0a] border border-gray-800 rounded-xl p-2.5">
+                              <p className="text-gray-500 text-[11px]">
+                                Start Date
+                              </p>
+                              <p className="text-gray-200 text-xs font-medium">
+                                {moment(inst?.startDate).format("DD MMM YYYY")}
+                              </p>
+                            </div>
+
+                            <div className="bg-[#0a0a0a] border border-gray-800 rounded-xl p-2.5">
+                              <p className="text-gray-500 text-[11px]">
+                                Due Date
+                              </p>
+                              <p className="text-gray-200 text-xs font-medium">
+                                {moment(inst?.dueDate).format("DD MMM YYYY")}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Metadata */}

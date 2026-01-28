@@ -337,7 +337,8 @@ export default function StudentView({
                         </button>
 
                         <button
-                          onClick={() => handleRefund(std)}
+                          type="button"
+                          // onClick={() => handleRefund(std)}
                           className="w-full px-4 py-3 flex items-center gap-2 text-sm hover:bg-white/10 transition"
                         >
                           <img

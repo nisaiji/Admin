@@ -470,7 +470,7 @@ export default function SectionView({
             Students Paid and Unpaid Status
           </p>
 
-          <div className="w-full rounded-xl overflow-auto">
+          <div className="max-h-[420px] w-full rounded-xl overflow-auto">
             <table className="w-full text-left">
               <thead className="text-textBlue text-base font-poppins-bold">
                 <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
