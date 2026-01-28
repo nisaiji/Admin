@@ -115,6 +115,8 @@ const EndPoints = {
 
     // FEES
     CREATE_FEES_STRUCTURE: "fee-structure/school-fee-structure",
+    GET_FEES_STRUCTURE_OF_SCHOOL:
+      "fee-structure/school-fee-structure",
     GET_FEES_STRUCTURE:
       "fee-structure/school-fee-structure/session",
 

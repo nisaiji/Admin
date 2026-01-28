@@ -75,7 +75,7 @@ export default function SchoolFeeSetting({ setSelected }) {
 
   const getSchoolFeeStructure = async () => {
     try {
-      const res = await axiosClient.post(EndPoints.ADMIN.GET_FEES_STRUCTURE, {
+      const res = await axiosClient.post(EndPoints.ADMIN.GET_FEES_STRUCTURE_OF_SCHOOL, {
         sessionId: classAndSectionData?.selectedSession?._id,
       });
       // console.log(res);
