@@ -16,7 +16,7 @@ export default function SchoolFeeSetting({ setSelected }) {
   const [settings, setSettings] = useState({
     frequency: classAndSectionData?.feeStructureData?.installmentType ?? "",
     effectiveDate:
-      moment(classAndSectionData?.feeStructureData?.effectiveFrom).format(
+      moment(classAndSectionData?.feeStructureData?.effectiveFromDate).format(
         "YYYY-MM-DD"
       ) ?? moment().add(3, "days").format("YYYY-MM-DD"),
     lateFee: classAndSectionData?.feeStructureData?.lateFeePercent ?? 12,
@@ -55,7 +55,7 @@ export default function SchoolFeeSetting({ setSelected }) {
           sessionId: classAndSectionData?.selectedSession?._id,
           installmentType: settings.frequency,
           lateFeePercent: Number(settings.lateFee),
-          effectiveFrom: moment(settings.effectiveDate).valueOf(),
+          effectiveFromDate: moment(settings.effectiveDate),
         }
       );
       // console.log(res);

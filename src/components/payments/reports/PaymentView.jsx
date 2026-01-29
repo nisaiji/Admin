@@ -10,9 +10,9 @@ import {
   Select,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
+import { Eraser } from "lucide-react";
 
 const modesData = [
   { label: "UPI", value: "upi" },
@@ -77,15 +77,16 @@ export default function PaymentView() {
 
       // Only add class/section if selected
       if (filterClass?._id) query = query + `&classId=${filterClass?._id}`;
-      if (filterSection?._id) query = query + `&sectionId=${filterSection?._id}`;
-      if (filterMode) query = query + `&paymentMethord=${filterMode}`;
+      if (filterSection?._id)
+        query = query + `&sectionId=${filterSection?._id}`;
+      if (filterMode) query = query + `&paymentMethod=${filterMode}`;
 
-      console.log(query);
+      // console.log(query);
 
       const res = await axiosClient.post(
         `${EndPoints.ADMIN.GET_TRANSITIONS}?${query}`,
       );
-      console.log(res);
+      // console.log(res);
 
       if (res?.statusCode === 200) {
         setPaymentTransitions(res?.result?.transactions || []);
@@ -134,111 +135,119 @@ export default function PaymentView() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Modes dropdown */}
-            <select
-              value={filterMode || ""}
-              onChange={(e) => {
-                const val = e.target.value;
-                setFilterMode(val);
-              }}
-              className="w-44 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
-            >
-              <option value="">All Modes</option>
-              {modesData?.map((cls, i) => (
-                <option key={i} value={cls?.value}>
-                  {cls?.label}
-                </option>
-              ))}
-            </select>
+          <div className="flex justify-between items-center w-full">
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Modes dropdown */}
+              <select
+                value={filterMode || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFilterMode(val);
+                }}
+                className="w-44 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
+              >
+                <option value="">All Modes</option>
+                {modesData?.map((cls, i) => (
+                  <option key={i} value={cls?.value}>
+                    {cls?.label}
+                  </option>
+                ))}
+              </select>
 
-            {/* Class Dropdown (All) */}
-            <select
-              value={filterClass?._id || ""}
-              onChange={(e) => {
-                const val = e.target.value;
+              {/* Class Dropdown (All) */}
+              <select
+                value={filterClass?._id || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
 
-                // ALL
-                if (!val) {
-                  setFilterClass(null);
-                  setSections([]);
-                  setFilterSection(null);
+                  // ALL
+                  if (!val) {
+                    setFilterClass(null);
+                    setSections([]);
+                    setFilterSection(null);
+                    setPageNo(1);
+                    return;
+                  }
+
+                  const selected = classAndSectionData?.classList?.find(
+                    (cls) => cls._id === val,
+                  );
+
+                  setFilterClass(selected || null);
+                  setSections(selected?.section || []);
+                  setFilterSection(null); // ✅ section also ALL by default
                   setPageNo(1);
-                  return;
-                }
+                }}
+                className="w-44 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
+              >
+                <option value="">All Classes</option>
+                {classAndSectionData?.classList?.map((cls) => (
+                  <option key={cls?._id} value={cls?._id}>
+                    {cls?.name}
+                  </option>
+                ))}
+              </select>
 
-                const selected = classAndSectionData?.classList?.find(
-                  (cls) => cls._id === val,
-                );
+              {/* Section Dropdown (All) */}
+              <select
+                value={filterSection?._id || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
 
-                setFilterClass(selected || null);
-                setSections(selected?.section || []);
-                setFilterSection(null); // ✅ section also ALL by default
-                setPageNo(1);
-              }}
-              className="w-44 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
-            >
-              <option value="">All Classes</option>
-              {classAndSectionData?.classList?.map((cls) => (
-                <option key={cls?._id} value={cls?._id}>
-                  {cls?.name}
-                </option>
-              ))}
-            </select>
+                  // ALL
+                  if (!val) {
+                    setFilterSection(null);
+                    setPageNo(1);
+                    return;
+                  }
 
-            {/* Section Dropdown (All) */}
-            <select
-              value={filterSection?._id || ""}
-              onChange={(e) => {
-                const val = e.target.value;
-
-                // ALL
-                if (!val) {
-                  setFilterSection(null);
+                  const sectionObj = sections?.find((sec) => sec._id === val);
+                  setFilterSection(sectionObj || null);
                   setPageNo(1);
-                  return;
-                }
+                }}
+                disabled={!filterClass?._id} // section only enabled if class selected
+                className={`w-44 pl-4 pr-4 py-2.5 border border-gray-700 rounded-lg text-white appearance-none ${
+                  !filterClass?._id
+                    ? "bg-[#1f1f1f] opacity-60 cursor-not-allowed"
+                    : "bg-[#242424]"
+                }`}
+              >
+                <option value="">All Sections</option>
+                {sections?.map((sec, i) => (
+                  <option key={i} value={sec?._id}>
+                    Section {sec?.name}
+                  </option>
+                ))}
+              </select>
 
-                const sectionObj = sections?.find((sec) => sec._id === val);
-                setFilterSection(sectionObj || null);
-                setPageNo(1);
-              }}
-              disabled={!filterClass?._id} // section only enabled if class selected
-              className={`w-44 pl-4 pr-4 py-2.5 border border-gray-700 rounded-lg text-white appearance-none ${
-                !filterClass?._id
-                  ? "bg-[#1f1f1f] opacity-60 cursor-not-allowed"
-                  : "bg-[#242424]"
-              }`}
+              {/* Start Date */}
+              <input
+                type="date"
+                value={startDate || ""}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setPageNo(1);
+                }}
+                className="w-44 px-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white"
+              />
+
+              {/* End Date */}
+              <input
+                type="date"
+                value={endDate || ""}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setPageNo(1);
+                }}
+                className="w-44 px-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white"
+              />
+            </div>
+            {/* <button
+              type="button"
+              className="bg-[#242424] border border-gray-700 rounded-lg size-[45px] flex justify-center items-center cursor-pointer"
             >
-              <option value="">All Sections</option>
-              {sections?.map((sec, i) => (
-                <option key={i} value={sec?._id}>
-                  Section {sec?.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Start Date */}
-            <input
-              type="date"
-              value={startDate || ""}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setPageNo(1);
-              }}
-              className="w-44 px-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white"
-            />
-
-            {/* End Date */}
-            <input
-              type="date"
-              value={endDate || ""}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setPageNo(1);
-              }}
-              className="w-44 px-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white"
-            />
+              <Eraser />
+            </button> */}
           </div>
         </div>
 

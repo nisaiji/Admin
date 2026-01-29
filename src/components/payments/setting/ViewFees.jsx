@@ -72,8 +72,8 @@ export function FeeStructureView({ onBack, setSelected }) {
           status: sectionFeeStructure?.isActive ? "Active" : "Inactive",
 
           frequency: schoolFeeStructure?.installmentType || "-",
-          startDate: schoolFeeStructure?.effectiveFrom
-            ? moment(schoolFeeStructure?.effectiveFrom).format("DD MMM YYYY")
+          startDate: schoolFeeStructure?.effectiveFromDate
+            ? moment(schoolFeeStructure?.effectiveFromDate).format("DD MMM YYYY")
             : "-",
 
           lateFee: schoolFeeStructure?.lateFeePercent || 0,

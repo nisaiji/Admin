@@ -91,7 +91,7 @@ export default function StudentView({
 
   const feeInstallments = filterData?.studentData?.studentFeeInstallments || [];
   const advanceAmount = filterData?.studentData?.wallet?.balance ?? 0;
-  // console.log(filterData);
+  // console.log(feeInstallments);
 
   const getStatusStyles = (status) => {
     if (!status) return "bg-gray-500/20 text-gray-200 border-gray-500/30";
@@ -205,21 +205,16 @@ export default function StudentView({
       {/* installment cards */}
       <div className="my-6">
         <div className="flex flex-wrap gap-4">
-          {feeInstallments?.length > 0 ? (
+          {/* {feeInstallments?.length > 0 ? (
             feeInstallments?.map((ins, idx) => (
               <div
                 key={idx}
                 className="min-w-[230px] flex-1 bg-[#1c1c1c] border border-white/10 rounded-2xl p-4"
               >
                 <div className="flex justify-between items-start gap-2">
-                  <div>
-                    <p className="text-sm text-textGray2 font-poppins-regular">
-                      Installment
-                    </p>
-                    <p className="text-base font-poppins-bold text-white">
-                      {ins?.month ?? idx + 1}
-                    </p>
-                  </div>
+                  <p className="text-sm text-textGray2 font-poppins-regular">
+                    Installment {ins?.month ?? idx + 1}
+                  </p>
 
                   <span
                     className={`px-3 py-1 rounded-full text-xs border ${getStatusStyles(
@@ -258,9 +253,9 @@ export default function StudentView({
                 No installments found
               </p>
             </div>
-          )}
+          )} */}
 
-          {/* ✅ Advance Amount Card */}
+          {/* Advance Amount Card */}
           <div className="min-w-[230px] flex-1 bg-[#1c1c1c] border border-white/10 rounded-2xl p-4">
             <p className="text-sm text-textGray2 font-poppins-regular">
               Advance Amount
@@ -286,76 +281,83 @@ export default function StudentView({
             </p>
           </div>
         </div>
-
-        <div className="w-full rounded-xl overflow-auto">
-          <table className="w-full text-left">
-            <thead className="text-textBlue text-base font-poppins-bold">
-              <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
-                <th className="py-4 px-2">Transaction ID</th>
-                <th className="py-4 px-2">Amount</th>
-                <th className="py-4 px-2">Payment Mode</th>
-                <th className="py-4 px-2">Date & Time</th>
-                <th className="py-4 px-2">Action</th>
-              </tr>
-            </thead>
-
-            <tbody className="bg-[#2b2b2b]">
-              {studentSummary?.map((std, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-medium"
-                >
-                  <td className="py-4 px-2">{std?.zohoPaymentId ?? "NA"}</td>
-                  <td className="py-4 px-2">{std?.amount}</td>
-                  <td className="py-4 px-2">{std?.paymentMethod ?? "NA"}</td>
-                  <td className="py-4 px-2">
-                    {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
-                  </td>
-                  {/* ACTION */}
-                  <td className="py-4 px-2 relative">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setOpenMenuId(openMenuId === std?._id ? null : std?._id)
-                      }
-                      className="inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-white/10 transition"
-                    >
-                      <MoreVertical className="w-5 h-5 text-white" />
-                    </button>
-
-                    {openMenuId === std?._id && (
-                      <div
-                        ref={dropdownRef}
-                        className="absolute right-4 top-[55px] z-40 min-w-[180px] bg-[#1c1c1c] border border-white/10 rounded-xl overflow-hidden shadow-xl"
-                      >
-                        <button
-                          onClick={() => handleDownloadReceipt(std)}
-                          className="w-full px-4 py-3 flex items-center gap-2 text-sm hover:bg-white/10 transition"
-                        >
-                          <Download className="w-4 h-4 text-textBlue" />
-                          Download Receipt
-                        </button>
-
-                        <button
-                          type="button"
-                          // onClick={() => handleRefund(std)}
-                          className="w-full px-4 py-3 flex items-center gap-2 text-sm hover:bg-white/10 transition"
-                        >
-                          <img
-                            src={discount}
-                            alt="refund"
-                            className="w-4 h-4 object-contain"
-                          />
-                          Refund
-                        </button>
-                      </div>
-                    )}
-                  </td>
+        {studentSummary?.length === 0 ? (
+          <div className="font-poppins-bold text-lg text-textGray2 text-center">
+            No Transition right now
+          </div>
+        ) : (
+          <div className="w-full rounded-xl overflow-auto">
+            <table className="w-full text-left">
+              <thead className="text-textBlue text-base font-poppins-bold">
+                <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
+                  <th className="py-4 px-2">Transaction ID</th>
+                  <th className="py-4 px-2">Amount</th>
+                  <th className="py-4 px-2">Payment Mode</th>
+                  <th className="py-4 px-2">Date & Time</th>
+                  <th className="py-4 px-2">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+
+              <tbody className="bg-[#2b2b2b]">
+                {studentSummary?.map((std, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-medium"
+                  >
+                    <td className="py-4 px-2">{std?.zohoPaymentId ?? "NA"}</td>
+                    <td className="py-4 px-2">{std?.amount}</td>
+                    <td className="py-4 px-2">{std?.paymentMethod ?? "NA"}</td>
+                    <td className="py-4 px-2">
+                      {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
+                    </td>
+                    {/* ACTION */}
+                    <td className="py-4 px-2 relative">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenMenuId(
+                            openMenuId === std?._id ? null : std?._id,
+                          )
+                        }
+                        className="inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-white/10 transition"
+                      >
+                        <MoreVertical className="w-5 h-5 text-white" />
+                      </button>
+
+                      {openMenuId === std?._id && (
+                        <div
+                          ref={dropdownRef}
+                          className="absolute right-4 top-[55px] z-40 min-w-[180px] bg-[#1c1c1c] border border-white/10 rounded-xl overflow-hidden shadow-xl"
+                        >
+                          <button
+                            onClick={() => handleDownloadReceipt(std)}
+                            className="w-full px-4 py-3 flex items-center gap-2 text-sm hover:bg-white/10 transition"
+                          >
+                            <Download className="w-4 h-4 text-textBlue" />
+                            Download Receipt
+                          </button>
+
+                          <button
+                            type="button"
+                            // onClick={() => handleRefund(std)}
+                            className="w-full px-4 py-3 flex items-center gap-2 text-sm hover:bg-white/10 transition"
+                          >
+                            <img
+                              src={discount}
+                              alt="refund"
+                              className="w-4 h-4 object-contain"
+                            />
+                            Refund
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

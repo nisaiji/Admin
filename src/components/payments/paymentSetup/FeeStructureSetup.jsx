@@ -71,7 +71,7 @@ export default function FeeStructureSetup({ onBack }) {
 
   const frequency = classAndSectionData?.feeStructureData?.installmentType;
   const startDate = moment(
-    classAndSectionData?.feeStructureData?.effectiveFrom
+    classAndSectionData?.feeStructureData?.effectiveFromDate
   ).format("YYYY-MM-DD");
   const lateFeeAmount = classAndSectionData?.feeStructureData?.lateFeePercent;
 
@@ -97,8 +97,8 @@ export default function FeeStructureSetup({ onBack }) {
 
     if (frequency === "annually") {
       return {
-        startDate: moment(session.startDate).valueOf(),
-        dueDate: sessionEnd.valueOf(),
+        startDate: moment(session.startDate),
+        dueDate: sessionEnd,
       };
     }
 
@@ -120,7 +120,7 @@ export default function FeeStructureSetup({ onBack }) {
 
     if (due.isAfter(sessionEnd)) due = sessionEnd.clone();
 
-    return { startDate: start.valueOf(), dueDate: due.valueOf() };
+    return { startDate: start, dueDate: due };
   };
 
   const isPastPeriod = (period) =>

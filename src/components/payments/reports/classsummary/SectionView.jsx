@@ -36,182 +36,6 @@ const INSTALLMENT_CONFIG = {
   },
 };
 
-const dummyData = [
-  {
-    _id: "689f1491aa3b1de0f259883d",
-    student: {
-      _id: "689f0b0f887210aaedf2502a",
-      firstname: "Himanshu",
-      lastname: "patidar",
-      isActive: true,
-      gender: "male",
-      dob: "2003-08-20",
-      address: "bholaram indore",
-      parent: "689f0b0f887210aaedf25025",
-      schoolParent: "689f0b0f887210aaedf25027",
-      admin: "689edec82daf9b7c6ca88842",
-      createdAt: "2025-08-15T10:25:19.027Z",
-      updatedAt: "2025-08-15T10:25:19.027Z",
-      __v: 0,
-    },
-    section: "689ee11474d391f6f87fd2dc",
-    classId: "689ee0b774d391f6f87fd2d5",
-    session: "689ee06b74d391f6f87fd2cf",
-    school: "689edec82daf9b7c6ca88842",
-    transferCertificateIssued: false,
-    feeStatus: "pending",
-    isActive: true,
-    createdAt: "2025-08-15T11:05:53.700Z",
-    updatedAt: "2025-08-15T11:05:53.700Z",
-    __v: 0,
-    studentFeeInstallments: [
-      {
-        _id: "696d16b67f504deaba6adc81",
-        feeInstallment: {
-          _id: "694ebe896eb73a5ccc8666b4",
-          installmentNumber: 1,
-          amount: 5000,
-          startDate: 998989898989,
-          dueDate: "2025-11-01T16:57:45.481Z",
-          sectionFeeStructure: "694ebe896eb73a5ccc8666b2",
-          isActive: true,
-          createdAt: "2025-12-26T16:57:45.476Z",
-          updatedAt: "2025-12-26T16:57:45.476Z",
-          __v: 0,
-          section: "689ee11474d391f6f87fd2dc",
-        },
-        sessionStudent: "689f1491aa3b1de0f259883d",
-        student: "689f0b0f887210aaedf2502a",
-        school: "689edec82daf9b7c6ca88842",
-        session: "689ee06b74d391f6f87fd2cf",
-        classId: "689ee0b774d391f6f87fd2d5",
-        section: "689ee11474d391f6f87fd2dc",
-        month: 1,
-        baseAmount: 5000,
-        lateFeeApplied: 0,
-        totalPayable: 5000,
-        amountPaid: 5000,
-        status: "paid",
-        dueDate: "2025-11-01T16:57:45.481Z",
-        createdAt: "2026-01-18T17:21:58.847Z",
-        updatedAt: "2026-01-18T17:22:55.435Z",
-        __v: 0,
-      },
-      {
-        _id: "696d16ef7f504deaba6adcdd",
-        feeInstallment: {
-          _id: "694ebe896eb73a5ccc8666b6",
-          installmentNumber: 2,
-          amount: 500,
-          startDate: 998989898989,
-          dueDate: "2025-12-01T16:57:45.481Z",
-          sectionFeeStructure: "694ebe896eb73a5ccc8666b2",
-          isActive: true,
-          createdAt: "2025-12-26T16:57:45.481Z",
-          updatedAt: "2025-12-26T16:57:45.481Z",
-          __v: 0,
-          section: "689ee11474d391f6f87fd2dc",
-        },
-        sessionStudent: "689f1491aa3b1de0f259883d",
-        student: "689f0b0f887210aaedf2502a",
-        school: "689edec82daf9b7c6ca88842",
-        session: "689ee06b74d391f6f87fd2cf",
-        classId: "689ee0b774d391f6f87fd2d5",
-        section: "689ee11474d391f6f87fd2dc",
-        month: 2,
-        baseAmount: 500,
-        lateFeeApplied: 0,
-        totalPayable: 500,
-        amountPaid: 500,
-        status: "paid",
-        dueDate: "2025-12-01T16:57:45.481Z",
-        createdAt: "2026-01-18T17:22:55.445Z",
-        updatedAt: "2026-01-18T17:22:57.211Z",
-        __v: 0,
-      },
-      {
-        _id: "696d16f37f504deaba6adcf0",
-        feeInstallment: {
-          _id: "694ebe896eb73a5ccc8666b4",
-          installmentNumber: 1,
-          amount: 5000,
-          startDate: 998989898989,
-          dueDate: "2025-11-01T16:57:45.481Z",
-          sectionFeeStructure: "694ebe896eb73a5ccc8666b2",
-          isActive: true,
-          createdAt: "2025-12-26T16:57:45.476Z",
-          updatedAt: "2025-12-26T16:57:45.476Z",
-          __v: 0,
-          section: "689ee11474d391f6f87fd2dc",
-        },
-        sessionStudent: "689f1491aa3b1de0f259883d",
-        student: "689f0b0f887210aaedf2502a",
-        school: "689edec82daf9b7c6ca88842",
-        session: "689ee06b74d391f6f87fd2cf",
-        classId: "689ee0b774d391f6f87fd2d5",
-        section: "689ee11474d391f6f87fd2dc",
-        month: 1,
-        baseAmount: 5000,
-        lateFeeApplied: 12822,
-        totalPayable: 17822,
-        amountPaid: 500,
-        status: "paid",
-        dueDate: "2025-11-01T16:57:45.481Z",
-        createdAt: "2026-01-18T17:22:59.399Z",
-        updatedAt: "2026-01-18T17:22:59.399Z",
-        __v: 0,
-      },
-    ],
-  },
-  {
-    _id: "68a9a4adf727e99a02b477e9",
-    student: {
-      _id: "68a9a4adf727e99a02b477e7",
-      firstname: "Raj",
-      lastname: "gurjar",
-      isActive: true,
-      gender: "male",
-      admin: "689edec82daf9b7c6ca88842",
-      createdAt: "2025-08-23T11:23:25.792Z",
-      updatedAt: "2025-08-23T11:23:25.792Z",
-      __v: 0,
-    },
-    section: "689ee11474d391f6f87fd2dc",
-    classId: "689ee0b774d391f6f87fd2d5",
-    session: "689ee06b74d391f6f87fd2cf",
-    transferCertificateIssued: false,
-    feeStatus: "pending",
-    isActive: true,
-    createdAt: "2025-08-23T11:23:25.800Z",
-    updatedAt: "2025-08-23T11:23:25.800Z",
-    __v: 0,
-    studentFeeInstallments: [],
-  },
-  {
-    _id: "68a9a4eef727e99a02b477f6",
-    student: {
-      _id: "68a9a4eef727e99a02b477f4",
-      firstname: "Rohan",
-      lastname: "Gurjar",
-      isActive: true,
-      gender: "male",
-      admin: "689edec82daf9b7c6ca88842",
-      createdAt: "2025-08-23T11:24:30.888Z",
-      updatedAt: "2025-08-23T11:24:30.888Z",
-      __v: 0,
-    },
-    section: "689ee11474d391f6f87fd2dc",
-    classId: "689ee0b774d391f6f87fd2d5",
-    session: "689ee06b74d391f6f87fd2cf",
-    transferCertificateIssued: false,
-    feeStatus: "pending",
-    isActive: true,
-    createdAt: "2025-08-23T11:24:30.899Z",
-    updatedAt: "2025-08-23T11:24:30.899Z",
-    __v: 0,
-    studentFeeInstallments: [],
-  },
-];
 export default function SectionView({
   setSelectedView,
   filterData,
@@ -220,7 +44,7 @@ export default function SectionView({
   const { classAndSectionData } = useSelector((state) => state.appAuth);
   const [feeSummary, setFeeSummary] = useState(null);
   const [sectionList, setSectionList] = useState([]);
-  const [filterTable, setFilterTable] = useState([]);
+  const [filterTable, setFilterTable] = useState({});
 
   const installmentType =
     classAndSectionData?.feeStructureData?.installmentType || "monthly";
@@ -258,8 +82,13 @@ export default function SectionView({
 
   const getFeeSummary = async () => {
     try {
+      const sDate = moment(
+        `${classAndSectionData?.selectedSession?.academicStartYear}-04-01`,
+      ).startOf("day");
+
+      const eDate = moment().endOf("day");
       const res = await axiosClient.post(
-        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${classAndSectionData?.selectedSession?._id}&sectionId=${filterData?._id}`,
+        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${classAndSectionData?.selectedSession?._id}&sectionId=${filterData?._id}&startDate=${sDate}&endDate=${eDate}`,
       );
       // console.log(res);
 
@@ -271,11 +100,10 @@ export default function SectionView({
     }
   };
 
-  const normalizeStudentInstallments = (
-    student,
-    installmentConfig,
-    sessionStartDate, // optional (can come from session)
-  ) => {
+  const normalizeStudentInstallments = (student, installmentConfig) => {
+    // const sessionStart =
+    //   classAndSectionData?.selectedSession?.academicStartYear;
+
     const existing = student?.studentFeeInstallments || [];
 
     const existingMap = new Map(existing?.map((i) => [i?.month, i]));
@@ -287,12 +115,11 @@ export default function SectionView({
         installments?.push(existingMap?.get(i));
       } else {
         // create missing installment
-        const startDate = sessionStartDate
-          ? new Date(sessionStartDate)
-          : new Date();
+        // const startDate = new Date();
 
-        const dueDate = new Date(startDate);
-        dueDate?.setMonth(dueDate?.getMonth() + i);
+        // const dueDate = new Date(startDate);
+        // dueDate?.setMonth(dueDate?.getMonth() + i);
+        // console.log(startDate, dueDate);
 
         installments?.push({
           _id: `virtual-${student?._id}-${i}`,
@@ -302,8 +129,10 @@ export default function SectionView({
           totalPayable: 0,
           amountPaid: 0,
           status: "unpaid",
-          startDate: startDate?.toISOString(),
-          dueDate: dueDate?.toISOString(),
+          // startDate: startDate?.toISOString(),
+          // dueDate: dueDate?.toISOString(),
+          // startDate: startDate?.toISOString(),
+          // dueDate: dueDate?.toISOString(),
           isVirtual: true, // important flag
         });
       }
@@ -323,24 +152,8 @@ export default function SectionView({
       // console.log(res);
 
       if (res?.statusCode === 200) {
-        // setSectionList(res?.result);
-        // setSectionList(dummyData);
-        const sessionStart =
-          classAndSectionData?.selectedSession?.academicStartYear;
-
-        // const normalizedData = dummyData.map((student) =>
-        //   normalizeStudentInstallments(
-        //     student,
-        //     installmentConfig,
-        //     sessionStart,
-        //   ),
-        // );
         const normalizedData = res?.result?.map((student) =>
-          normalizeStudentInstallments(
-            student,
-            installmentConfig,
-            sessionStart,
-          ),
+          normalizeStudentInstallments(student, installmentConfig),
         );
         // console.log(normalizedData);
 
@@ -359,8 +172,6 @@ export default function SectionView({
   }, [filterData?._id]);
 
   const filterPendingPayments = () => {
-    // const effectiveDate = classAndSectionData?.feeStructureData?.effectiveFrom;
-
     const filtered = sectionList?.filter((student) => {
       const currentInstallmentIndex = getCurrentInstallmentIndex();
 
@@ -376,11 +187,16 @@ export default function SectionView({
       return installment.status !== "paid";
     });
 
-    setFilterTable(filtered);
+    setFilterTable({ data: filtered, type: "Pending Payments" });
   };
 
   const filterAdvancePayments = () => {
-    // setFilterTable(sectionList);
+    const filtered = sectionList?.filter((student) => {
+      // console.log(student);
+
+      return student?.wallet?.balance > 0;
+    });
+    setFilterTable({ data: filtered, type: "Advance Payments" });
   };
 
   return (
@@ -440,12 +256,12 @@ export default function SectionView({
         </button>
 
         {/* Advanced Amount */}
-        {/* <button
+        <button
           type="button"
           onClick={filterAdvancePayments}
           className="p-4 rounded-xl bg-[#1c1c1c] border-b-2 border-b-backgroundGreen"
-        > */}
-        <div className="p-4 rounded-xl bg-[#1c1c1c] border-b-2 border-b-backgroundGreen">
+        >
+          {/* <div className="p-4 rounded-xl bg-[#1c1c1c] border-b-2 border-b-backgroundGreen"> */}
           <div className="flex gap-4">
             <div className="size-10 bg-backgroundGreen bg-opacity-15 flex justify-center items-center rounded-md">
               <img src={refund} alt="p" className="size-6 object-contain" />
@@ -457,8 +273,8 @@ export default function SectionView({
           <p className="text-md font-poppins-regular mt-2">
             Advanced Paid Amount
           </p>
-          {/* </button> */}
-        </div>
+          {/* </div> */}
+        </button>
       </div>
 
       {/* BOTTOM SECTION */}
@@ -490,6 +306,7 @@ export default function SectionView({
                     key={index}
                     className="border-b border-backgroundGray15 text-center text-base font-poppins-medium"
                   >
+                    {/* {console.log({std})} */}
                     {/* STUDENT NAME */}
                     <td className="py-4 px-2 text-white font-poppins-bold">
                       {std?.student?.firstname ?? ""}{" "}
@@ -533,16 +350,16 @@ export default function SectionView({
         </div>
       </div>
 
-      {filterTable.length > 0 && (
+      {filterTable?.data?.length > 0 && (
         <div className="mt-6">
           {/* Monthly Fee Trends */}
           <div className="p-4 rounded-xl bg-[#1c1c1c] min-h-[260px]">
             <h3 className="text-lg font-poppins-bold">Transactions</h3>
             <p className="text-sm font-poppins-regular text-textGray2 mb-4">
-              Students Paid and Unpaid Status
+              {filterTable?.type} of Students
             </p>
 
-            <div className="w-full rounded-xl overflow-auto">
+            <div className="max-h-[420px] w-full rounded-xl overflow-auto">
               <table className="w-full text-left">
                 <thead className="text-textBlue text-base font-poppins-bold">
                   <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
@@ -557,7 +374,7 @@ export default function SectionView({
                 </thead>
 
                 <tbody className="bg-[#2b2b2b]">
-                  {filterTable?.map((std, index) => (
+                  {filterTable?.data?.map((std, index) => (
                     <tr
                       key={index}
                       className="border-b border-backgroundGray15 text-center text-base font-poppins-medium"

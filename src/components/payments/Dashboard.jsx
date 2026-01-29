@@ -159,8 +159,13 @@ export default function Dashboard({ setSelected }) {
 
   const getFeeSummary = async () => {
     try {
+      const sDate = moment(
+        `${classAndSectionData?.selectedSession?.academicStartYear}-04-01`,
+      ).startOf("day");
+
+      const eDate = moment().endOf("day");
       const res = await axiosClient.post(
-        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${classAndSectionData?.selectedSession?._id}`,
+        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${classAndSectionData?.selectedSession?._id}&startDate=${sDate}&endDate=${eDate}`,
       );
       // console.log(res);
 
