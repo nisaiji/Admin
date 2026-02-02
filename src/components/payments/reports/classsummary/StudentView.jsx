@@ -142,20 +142,20 @@ export default function StudentView({
         <button
           type="button"
           onClick={() => setSelectedView("class")}
-          className="text-sm font-poppins-bold cursor-pointer"
+          className="text-xl font-poppins-bold cursor-pointer"
         >
-          Reports
+          Reports & Analytics
         </button>
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-7 h-7" />
         <button
           type="button"
           onClick={() => setSelectedView("section")}
-          className="text-sm font-poppins-bold cursor-pointer"
+          className="text-xl font-poppins-bold cursor-pointer"
         >
           {filterData?.className ?? "NA"} {filterData?.name ?? ""}
         </button>
-        <ChevronRight className="w-5 h-5" />
-        <p className="text-sm text-textBlue font-poppins-bold">
+        <ChevronRight className="w-7 h-7" />
+        <p className="text-xl text-textBlue font-poppins-bold">
           {filterData?.studentData?.student?.firstname ?? ""}{" "}
           {filterData?.studentData?.student?.lastname ?? ""}
         </p>

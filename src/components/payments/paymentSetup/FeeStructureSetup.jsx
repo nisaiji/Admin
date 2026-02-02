@@ -71,7 +71,7 @@ export default function FeeStructureSetup({ onBack }) {
 
   const frequency = classAndSectionData?.feeStructureData?.installmentType;
   const startDate = moment(
-    classAndSectionData?.feeStructureData?.effectiveFromDate
+    classAndSectionData?.feeStructureData?.effectiveFromDate,
   ).format("YYYY-MM-DD");
   const lateFeeAmount = classAndSectionData?.feeStructureData?.lateFeePercent;
 
@@ -82,7 +82,7 @@ export default function FeeStructureSetup({ onBack }) {
 
     axiosClient
       .get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData.selectedSession._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData.selectedSession._id}`,
       )
       .then((res) => {
         if (res?.statusCode === 200) {
@@ -109,7 +109,7 @@ export default function FeeStructureSetup({ onBack }) {
       .year(
         ["Jan", "Feb", "Mar"].includes(startMonth)
           ? session.academicEndYear
-          : session.academicStartYear
+          : session.academicStartYear,
       );
 
     let due = start
@@ -123,24 +123,25 @@ export default function FeeStructureSetup({ onBack }) {
     return { startDate: start, dueDate: due };
   };
 
-  const isPastPeriod = (period) =>
-    moment(getInstallmentDates(period).dueDate).isBefore(
-      moment(startDate).startOf("day")
-    );
+  const isPastPeriod = (period) => 
+    // false;
+  moment(getInstallmentDates(period).dueDate).isBefore(
+    moment(startDate).startOf("day"),
+  );
 
   const totalAmount = useMemo(
     () =>
       freqConfig.periods.reduce(
         (sum, p) =>
           isPastPeriod(p) ? sum : sum + Number(periodAmounts[p] || 0),
-        0
+        0,
       ),
-    [periodAmounts, frequency]
+    [periodAmounts, frequency],
   );
 
   const applyBaseToAll = () =>
     setPeriodAmounts(
-      Object.fromEntries(freqConfig.periods.map((p) => [p, baseAmount]))
+      Object.fromEntries(freqConfig.periods.map((p) => [p, baseAmount])),
     );
 
   const createFees = async () => {
@@ -236,7 +237,7 @@ export default function FeeStructureSetup({ onBack }) {
       Quarterly: ["Apr-Jun", "Jul-Sep", "Oct-Dec", "Jan-Mar"],
       "Half-Yearly": ["Apr-Sep", "Oct-Mar"],
       Annually: ["Annual"],
-    }[freq] || []);
+    })[freq] || [];
 
   const normalizeFrequency = (freq) => {
     if (!freq) return "";
@@ -257,7 +258,7 @@ export default function FeeStructureSetup({ onBack }) {
         return;
       }
       const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`,
       );
 
       if (res?.statusCode === 200) {
@@ -436,7 +437,7 @@ export default function FeeStructureSetup({ onBack }) {
                 <div className="flex flex-wrap gap-2">
                   {sectionList?.map((sec) => {
                     const active = selectedSections.some(
-                      (s) => s._id === sec._id
+                      (s) => s._id === sec._id,
                     );
 
                     return (
@@ -474,7 +475,7 @@ export default function FeeStructureSetup({ onBack }) {
         )}
 
         {/* Frequency */}
-        <Label text="Payment Frequency" />
+        {/* <Label text="Payment Frequency" />
         <p className="text-gray-500 text-sm mb-4">
           How often should students pay the fee?
         </p>
@@ -507,10 +508,10 @@ export default function FeeStructureSetup({ onBack }) {
               />
             </svg>
           </div>
-        </div>
+        </div> */}
 
         {/* Start Date and Late Fee Amount */}
-        <div className="grid grid-cols-2 gap-6 mb-6">
+        {/* <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
             <Label text="Effective From" />
             <p className="text-gray-500 text-sm mb-4">
@@ -578,7 +579,7 @@ export default function FeeStructureSetup({ onBack }) {
               className="w-full bg-[#0f1419] border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#0A81D1] cursor-not-allowed"
             />
           </div>
-        </div>
+        </div> */}
 
         {frequency && (
           <>
@@ -642,12 +643,12 @@ export default function FeeStructureSetup({ onBack }) {
                   frequency === "monthly"
                     ? "grid-cols-6"
                     : frequency === "bi-monthly"
-                    ? "grid-cols-3"
-                    : frequency === "quarterly"
-                    ? "grid-cols-4"
-                    : frequency === "half-yearly"
-                    ? "grid-cols-2"
-                    : "grid-cols-2"
+                      ? "grid-cols-3"
+                      : frequency === "quarterly"
+                        ? "grid-cols-4"
+                        : frequency === "half-yearly"
+                          ? "grid-cols-2"
+                          : "grid-cols-2"
                 }`}
               >
                 {getPeriods(normalizedFrequency).map((period, index) => (
@@ -658,10 +659,10 @@ export default function FeeStructureSetup({ onBack }) {
                         (frequency === "monthly"
                           ? 6
                           : frequency === "bi-monthly"
-                          ? 3
-                          : frequency === "quarterly"
-                          ? 4
-                          : 2) !==
+                            ? 3
+                            : frequency === "quarterly"
+                              ? 4
+                              : 2) !==
                       0
                         ? "border-l"
                         : ""
@@ -670,12 +671,12 @@ export default function FeeStructureSetup({ onBack }) {
                       (frequency === "monthly"
                         ? 6
                         : frequency === "bi-monthly"
-                        ? 3
-                        : frequency === "quarterly"
-                        ? 4
-                        : frequency === "half-yearly"
-                        ? 2
-                        : 1)
+                          ? 3
+                          : frequency === "quarterly"
+                            ? 4
+                            : frequency === "half-yearly"
+                              ? 2
+                              : 1)
                         ? "border-t"
                         : ""
                     }`}
@@ -724,9 +725,10 @@ export default function FeeStructureSetup({ onBack }) {
             {/* Info Box */}
             <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
               <p className="text-amber-400">
-                <strong>Note:</strong> This fee structure will apply to all
-                students in the selected class. Automatic reminders will be sent
-                on the {moment(startDate).format("D")} of every period.
+                <strong>Note:</strong> This {frequency} fee structure will apply
+                to all students in the selected class. Automatic reminders will
+                be sent on the {moment(startDate).format("D")} of every period.
+                Late Fee Interest is {lateFeeAmount}% Annually.
               </p>
             </div>
 

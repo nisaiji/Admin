@@ -205,12 +205,12 @@ export default function SectionView({
         <button
           type="button"
           onClick={() => setSelectedView("class")}
-          className="text-sm font-poppins-bold cursor-pointer"
+          className="text-xl font-poppins-bold cursor-pointer"
         >
-          Reports
+          Reports & Analytics
         </button>
-        <ChevronRight className="w-5 h-5" />
-        <p className="text-sm text-textBlue font-poppins-bold">
+        <ChevronRight className="w-7 h-7" />
+        <p className="text-xl text-textBlue font-poppins-bold">
           {filterData?.className ?? "Nursary"} {filterData?.name ?? "A"}
         </p>
       </div>
@@ -228,7 +228,7 @@ export default function SectionView({
               />
             </div>
             <p className="text-lg font-poppins-bold mt-1">
-              ₹ {feeSummary?.totalAmount ?? 0}
+              ₹ {feeSummary?.totalPaidAmount ?? 0}
             </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">
@@ -267,7 +267,7 @@ export default function SectionView({
               <img src={refund} alt="p" className="size-6 object-contain" />
             </div>
             <p className="text-lg font-poppins-bold mt-1">
-              ₹ {feeSummary?.totalTransactions ?? 0}
+              ₹ {feeSummary?.advanceAmount ?? 0}
             </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">
@@ -306,7 +306,6 @@ export default function SectionView({
                     key={index}
                     className="border-b border-backgroundGray15 text-center text-base font-poppins-medium"
                   >
-                    {/* {console.log({std})} */}
                     {/* STUDENT NAME */}
                     <td className="py-4 px-2 text-white font-poppins-bold">
                       {std?.student?.firstname ?? ""}{" "}
@@ -316,14 +315,20 @@ export default function SectionView({
                     {/* INSTALLMENT STATUS */}
                     {std?.studentFeeInstallments?.map((s, i) => {
                       const isPaid = s?.status === "paid";
+                      const isUnpaid =
+                        s?.baseAmount > 0 || s?.isVirtual === true;
                       return (
                         <td key={i} className="py-4 px-2">
                           <span
                             className={`text-sm font-poppins-bold ${
-                              isPaid ? "text-[#4CBC9A]" : "text-[#E45858]"
+                              isPaid
+                                ? "text-[#4CBC9A]"
+                                : isUnpaid
+                                  ? "text-[#E45858]"
+                                  : "text-[#FFFFFF]"
                             }`}
                           >
-                            {isPaid ? "Paid" : "Unpaid"}
+                            {isPaid ? "Paid" : isUnpaid ? "Unpaid" : "-"}
                           </span>
                         </td>
                       );

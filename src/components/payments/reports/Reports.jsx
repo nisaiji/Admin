@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import ClassSummary from "./classsummary/ClassSummary";
 // import PeriodicView from "./PeriodicView";
@@ -13,34 +13,25 @@ import wallet from "../../../assets/images/fees/wallet.png";
 import classimg from "../../../assets/images/fees/class.png";
 
 export default function Reports() {
-  const [selectedView, setSelectedView] = useState("class");
+  const [selectedView, setSelectedView] = useState("paymentmode");
+  const [isHide, setIsHide] = useState(() => {
+    return localStorage.getItem("hideReportsHeader") === "true";
+  });
 
   const views = useMemo(
     () => [
-      {
-        key: "class",
-        label: "Class-wise",
-        icon: classimg,
-        component: ClassSummary,
-      },
-      // {
-      //   key: "periodic",
-      //   label: "Periodically",
-      //   icon: calendar,
-      //   component: PeriodicView,
-      // },
       {
         key: "paymentmode",
         label: "Datail Transitions",
         icon: wallet,
         component: PaymentView,
       },
-      // {
-      //   key: "feesummary",
-      //   label: "Fee Summary",
-      //   icon: pending,
-      //   component: FeeSummaryView,
-      // },
+      {
+        key: "class",
+        label: "Class-wise",
+        icon: classimg,
+        component: ClassSummary,
+      },
       {
         key: "refund",
         label: "Refund & Failed Txns",
@@ -48,46 +39,62 @@ export default function Reports() {
         component: RefundAndFailedTransition,
       },
     ],
-    []
+    [],
   );
 
   const ActiveView = views.find((v) => v.key === selectedView)?.component;
 
+  useEffect(() => {
+    localStorage.setItem("hideReportsHeader", isHide ? "true" : "false");
+  }, [isHide]);
+
+  // when switching tabs, reset hide state (optional but recommended)
+  useEffect(() => {
+    if (selectedView !== "class") {
+      setIsHide(false);
+      localStorage.setItem("hideReportsHeader", "false");
+    }
+  }, [selectedView]);
+
   return (
     <div className="p-6 w-full text-textPrimary">
-      <p className="text-xl font-poppins-bold">Reports & Analytics</p>
+      {!isHide && (
+        <>
+          <p className="text-xl font-poppins-bold">Reports & Analytics</p>
 
-      {/* Top buttons */}
-      <div className="my-6 flex items-center gap-6">
-        {views.map(({ key, label, icon }) => {
-          const isActive = selectedView === key;
+          {/* Top buttons */}
+          <div className="my-6 flex items-center gap-6">
+            {views.map(({ key, label, icon }) => {
+              const isActive = selectedView === key;
 
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setSelectedView(key)}
-              className={`text-sm font-poppins-bold p-[10px] rounded-md flex justify-center items-center gap-2 ${
-                isActive
-                  ? "bg-backgroundBlue text-textPrimary"
-                  : "text-textBlue"
-              }`}
-            >
-              <img
-                src={icon}
-                alt={label}
-                className={`size-6 object-contain ${
-                  isActive ? "filter invert brightness-0 saturate-0" : ""
-                }`}
-              />
-              {label}
-            </button>
-          );
-        })}
-      </div>
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSelectedView(key)}
+                  className={`text-sm font-poppins-bold p-[10px] rounded-md flex justify-center items-center gap-2 ${
+                    isActive
+                      ? "bg-backgroundBlue text-textPrimary"
+                      : "text-textBlue"
+                  }`}
+                >
+                  <img
+                    src={icon}
+                    alt={label}
+                    className={`size-6 object-contain ${
+                      isActive ? "filter invert brightness-0 saturate-0" : ""
+                    }`}
+                  />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* Active view */}
-      {ActiveView && <ActiveView />}
+      {ActiveView && <ActiveView setHideReportsHeader={setIsHide} />}
     </div>
   );
 }

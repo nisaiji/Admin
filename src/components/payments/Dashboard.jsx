@@ -12,7 +12,11 @@ import { axiosClient } from "../../services/axiosClient";
 import { useSelector } from "react-redux";
 import moment from "moment/moment";
 
-const ALL_PAYMENT_MODES = ["upi", "net_banking", "credit_card"];
+const ALL_PAYMENT_MODES = [
+  { label: "UPI", value: "upi" },
+  { label: "Net Banking", value: "net_banking" },
+  { label: "Credit Card", value: "card" },
+];
 
 const MODE_META = {
   upi: {
@@ -29,7 +33,7 @@ const MODE_META = {
     textClass: "text-textBlue",
     bgClass: "bg-backgroundBlue",
   },
-  credit_card: {
+  card: {
     label: "Credit Card",
     color: "#4CBC9A",
     icon: creditcard,
@@ -102,11 +106,11 @@ export default function Dashboard({ setSelected }) {
     return months;
   }, [academicStartYear]);
 
-  const normalizedPayments = ALL_PAYMENT_MODES.map((mode) => {
-    const found = paymentByMode.find((p) => p._id === mode);
+  const normalizedPayments = ALL_PAYMENT_MODES?.map((mode) => {
+    const found = paymentByMode?.find((p) => p?._id === mode.value);
 
     return {
-      _id: mode,
+      _id: mode.value,
       totalAmount: found?.totalAmount ?? 0,
     };
   });
@@ -118,10 +122,10 @@ export default function Dashboard({ setSelected }) {
 
   const pieData =
     totalAmount > 0
-      ? normalizedPayments.map((item, index) => ({
+      ? normalizedPayments?.map((item, index) => ({
           id: index,
-          value: item.totalAmount,
-          color: MODE_META[item._id].color,
+          value: item?.totalAmount,
+          color: MODE_META[item?._id]?.color,
         }))
       : [
           {
@@ -131,13 +135,14 @@ export default function Dashboard({ setSelected }) {
           },
         ];
 
-  const getDaysInMonth = () => {
-    const days = moment().daysInMonth();
-    return Array.from({ length: days }, (_, i) => i + 1);
+  const getDaysInMonth = (monthValue) => {
+    const daysInMonth = moment(monthValue, "YYYY-MM").daysInMonth();
+    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
   };
 
-  const getDailyLineData = (dailyPaymentSummary) => {
-    const days = getDaysInMonth();
+  const getDailyLineData = (dailyPaymentSummary, monthValue) => {
+    const days = getDaysInMonth(monthValue);
+
     if (
       !Array.isArray(dailyPaymentSummary) ||
       dailyPaymentSummary.length === 0
@@ -153,7 +158,6 @@ export default function Dashboard({ setSelected }) {
       dayAmountMap[day] = item.totalAmount;
     });
 
-    // Return ordered daily amounts
     return days.map((day) => dayAmountMap[day] || 0);
   };
 
@@ -193,11 +197,16 @@ export default function Dashboard({ setSelected }) {
     }
   };
 
-  const getPaymentByMode = async () => {
+  const getPaymentByMode = async (monthValue) => {
     try {
+      const startDate = moment(monthValue, "YYYY-MM")
+        .startOf("month")
+        .valueOf();
+
+      const endDate = moment(monthValue, "YYYY-MM").endOf("month").valueOf();
       const res = await axiosClient.post(EndPoints.ADMIN.GET_PAYMENT_BY_MODE, {
-        startDate: classAndSectionData?.selectedSession?.startDate,
-        endDate: classAndSectionData?.selectedSession?.endDate,
+        startDate,
+        endDate,
       });
       // console.log(res);
       if (res?.statusCode === 200) {
@@ -215,7 +224,6 @@ export default function Dashboard({ setSelected }) {
         .valueOf();
 
       const endDate = moment(monthValue, "YYYY-MM").endOf("month").valueOf();
-      // console.log(startDate, endDate);
 
       const res = await axiosClient.post(
         EndPoints.ADMIN.GET_DAILY_PAYMENT_SUMMARY,
@@ -224,11 +232,8 @@ export default function Dashboard({ setSelected }) {
           endDate,
         },
       );
-
-      // console.log(res);
       if (res?.statusCode === 200) {
         setDailyPaymentSummary(res?.result?.payments);
-        // setDailyPaymentSummary(apiData2);
       }
     } catch (e) {
       // console.log("Error fetching fee summary:", e);
@@ -238,11 +243,13 @@ export default function Dashboard({ setSelected }) {
   useEffect(() => {
     getFeeSummary();
     getPaymentTransitions();
-    getPaymentByMode();
   }, []);
 
   useEffect(() => {
+    // console.log(selectedMonth);
+
     if (selectedMonth) {
+      getPaymentByMode(selectedMonth);
       getDailyPaymentSummary(selectedMonth);
     }
   }, [selectedMonth]);
@@ -263,7 +270,7 @@ export default function Dashboard({ setSelected }) {
               />
             </div>
             <p className="text-lg font-poppins-bold mt-1">
-              ₹ {feeSummary?.totalAmount ?? 0}
+              ₹ {feeSummary?.totalPaidAmount ?? 0}
             </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">
@@ -293,7 +300,7 @@ export default function Dashboard({ setSelected }) {
               <img src={refund} alt="p" className="size-6 object-contain" />
             </div>
             <p className="text-lg font-poppins-bold mt-1">
-              ₹ {feeSummary?.totalTransactions ?? 0}
+              ₹ {feeSummary?.advanceAmount ?? 0}
             </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">
@@ -306,10 +313,10 @@ export default function Dashboard({ setSelected }) {
       <div className="p-5 rounded-xl bg-[#1c1c1c] my-6">
         <div className="mb-4 flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-poppins-bold">Recent Transactions</h3>
-            <p className="text-sm font-poppins-regular text-textGray2">
+            <h3 className="text-lg font-poppins-bold">Recent 5 Transactions Details</h3>
+            {/* <p className="text-sm font-poppins-regular text-textGray2">
               Recent 5 transitions Details
-            </p>
+            </p> */}
           </div>
           <button
             type="button"
@@ -329,10 +336,13 @@ export default function Dashboard({ setSelected }) {
             <table className="w-full text-left">
               <thead className="text-textBlue text-base font-poppins-bold">
                 <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
-                  <th className="py-4 px-2">Date & Time</th>
+                  <th className="py-4 px-2">Student Name</th>
+                  <th className="py-4 px-2">Class & Section</th>
+                  <th className="py-4 px-2">Phone</th>
                   <th className="py-4 px-2">Transaction ID</th>
                   <th className="py-4 px-2">Amount</th>
                   <th className="py-4 px-2">Payment Mode</th>
+                  <th className="py-4 px-2">Date & Time</th>
                   <th className="py-4 px-2">Status</th>
                 </tr>
               </thead>
@@ -343,14 +353,19 @@ export default function Dashboard({ setSelected }) {
                     key={index}
                     className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-medium"
                   >
-                    <td className="py-4 px-2">
-                      {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
-                    </td>
                     {/* STUDENT NAME */}
+                    <td className="py-4 px-2">{std?.studentName ?? "NA"}</td>
+                    <td className="py-4 px-2">
+                      {`${std?.className ?? "NA"} ${std?.sectionName ?? ""}`}
+                    </td>
+                    <td className="py-4 px-2">{std?.parentPhone ?? "NA"}</td>
                     <td className="py-4 px-2">{std?.zohoPaymentId ?? "NA"}</td>
                     <td className="py-4 px-2">{std?.amount}</td>
                     <td className="py-4 px-2 uppercase">
                       {std?.paymentMethod ?? "NA"}
+                    </td>
+                    <td className="py-4 px-2">
+                      {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
                     </td>
                     <td
                       className={`py-4 px-2 uppercase ${
@@ -375,28 +390,32 @@ export default function Dashboard({ setSelected }) {
           <div className="mb-4 flex justify-between items-center">
             <div>
               <h3 className="text-lg font-poppins-bold">
-                Total Fee Collection
+                Fee Collection
               </h3>
               <p className="text-sm font-poppins-regular text-textGray2 mb-4">
-                Total number of fees collected this month
+                Total number of fees collected by month
               </p>
             </div>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="w-40 pl-4 pr-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white appearance-none"
-            >
-              {monthOptions?.map((month) => (
-                <option key={month?.value} value={month?.value}>
-                  {month?.label}
-                </option>
-              ))}
-            </select>
+            {monthOptions.length > 0 && (
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="w-40 pl-4 pr-4 py-2.5 bg-[#242424] cursor-pointer border border-gray-700 rounded-lg text-white appearance-none"
+              >
+                {monthOptions?.map((month) => (
+                  <option key={month?.value} value={month?.value}>
+                    {month?.label}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           <div className="w-full h-[350px] flex justify-center items-center">
             <BarChartComponent
-              xAxisData={getDaysInMonth().map((day) => day.toString())}
-              series={getDailyLineData(dailyPaymentSummary)}
+              xAxisData={getDaysInMonth(selectedMonth).map((day) =>
+                day.toString(),
+              )}
+              series={getDailyLineData(dailyPaymentSummary, selectedMonth)}
             />
           </div>
         </div>
@@ -432,11 +451,11 @@ export default function Dashboard({ setSelected }) {
           {/* Custom Right Legend */}
           <div className="flex flex-col justify-center gap-6 w-full xl:w-auto">
             {normalizedPayments?.map((item) => {
-              const meta = MODE_META[item._id];
+              const meta = MODE_META[item?._id];
               if (!meta) return null;
 
               return (
-                <div key={item._id} className="flex items-center gap-3">
+                <div key={item?._id} className="flex items-center gap-3">
                   <div
                     className={`h-11 w-11 rounded-md ${meta.bgClass} bg-opacity-15 flex justify-center items-center`}
                   >

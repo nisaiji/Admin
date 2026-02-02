@@ -50,6 +50,13 @@ export default function PaymentView() {
     return moment().format("YYYY-MM-DD");
   }, []);
 
+  const minDate = academicStartYear
+    ? moment(`${academicStartYear}-04-01`).format("YYYY-MM-DD")
+    : "";
+  // console.log(minDate);
+
+  const today = moment().format("YYYY-MM-DD");
+
   const [startDate, setStartDate] = useState(""); // YYYY-MM-DD
   const [endDate, setEndDate] = useState(""); // YYYY-MM-DD
 
@@ -128,9 +135,9 @@ export default function PaymentView() {
       <div className="p-5 rounded-xl bg-[#1c1c1c] mb-6">
         <div className="mb-4 flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h3 className="text-lg font-poppins-bold">Payment Mode</h3>
+            <h3 className="text-lg font-poppins-bold">Transitions Details</h3>
             <p className="text-sm font-poppins-regular text-textGray2">
-              Total number of fees collected by different mode of payment
+              All Transitions details with different filters
             </p>
           </div>
 
@@ -224,9 +231,19 @@ export default function PaymentView() {
               <input
                 type="date"
                 value={startDate || ""}
+                min={minDate}
+                max={endDate || today}
                 onChange={(e) => {
-                  setStartDate(e.target.value);
+                  const newStart = e.target.value;
+                  setStartDate(newStart);
                   setPageNo(1);
+                  // if startDate > endDate then fix endDate
+                  if (endDate && moment(newStart).isAfter(endDate)) {
+                    setEndDate(newStart);
+                  }
+                }}
+                style={{
+                  colorScheme: "dark",
                 }}
                 className="w-44 px-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white"
               />
@@ -235,9 +252,24 @@ export default function PaymentView() {
               <input
                 type="date"
                 value={endDate || ""}
+                min={startDate || minDate}
+                max={today}
                 onChange={(e) => {
-                  setEndDate(e.target.value);
+                  const newEnd = e.target.value;
+
+                  // prevent selecting future date
+                  if (moment(newEnd).isAfter(today)) return;
+
+                  setEndDate(newEnd);
                   setPageNo(1);
+
+                  // if endDate < startDate then fix startDate
+                  if (startDate && moment(newEnd).isBefore(startDate)) {
+                    setStartDate(newEnd);
+                  }
+                }}
+                style={{
+                  colorScheme: "dark",
                 }}
                 className="w-44 px-4 py-2.5 bg-[#242424] border border-gray-700 rounded-lg text-white"
               />
@@ -256,14 +288,17 @@ export default function PaymentView() {
             No Transition right now
           </div>
         ) : (
-          <div className="w-full rounded-xl overflow-hidden">
+          <div className="w-full rounded-xl overflow-auto">
             <table className="w-full text-left">
               <thead className="text-textBlue text-base font-poppins-bold">
                 <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
-                  <th className="py-4 px-2">Date & Time</th>
+                  <th className="py-4 px-2">Student Name</th>
+                  <th className="py-4 px-2">Class & Section</th>
+                  <th className="py-4 px-2">Phone</th>
                   <th className="py-4 px-2">Transaction ID</th>
                   <th className="py-4 px-2">Amount</th>
                   <th className="py-4 px-2">Payment Mode</th>
+                  <th className="py-4 px-2">Date & Time</th>
                   <th className="py-4 px-2">Status</th>
                 </tr>
               </thead>
@@ -274,13 +309,18 @@ export default function PaymentView() {
                     key={index}
                     className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-medium"
                   >
+                    <td className="py-4 px-2">{std?.studentName ?? "NA"}</td>
                     <td className="py-4 px-2">
-                      {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
+                      {`${std?.className ?? "NA"} ${std?.sectionName ?? ""}`}
                     </td>
+                    <td className="py-4 px-2">{std?.parentPhone ?? "NA"}</td>
                     <td className="py-4 px-2">{std?.zohoPaymentId ?? "NA"}</td>
                     <td className="py-4 px-2">{std?.amount}</td>
                     <td className="py-4 px-2 uppercase">
                       {std?.paymentMethod ?? "NA"}
+                    </td>
+                    <td className="py-4 px-2">
+                      {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
                     </td>
                     <td
                       className={`py-4 px-2 uppercase ${

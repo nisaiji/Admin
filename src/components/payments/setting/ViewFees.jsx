@@ -73,7 +73,9 @@ export function FeeStructureView({ onBack, setSelected }) {
 
           frequency: schoolFeeStructure?.installmentType || "-",
           startDate: schoolFeeStructure?.effectiveFromDate
-            ? moment(schoolFeeStructure?.effectiveFromDate).format("DD MMM YYYY")
+            ? moment(schoolFeeStructure?.effectiveFromDate).format(
+                "DD MMM YYYY",
+              )
             : "-",
 
           lateFee: schoolFeeStructure?.lateFeePercent || 0,
@@ -82,7 +84,7 @@ export function FeeStructureView({ onBack, setSelected }) {
             ? moment(sectionFeeStructure?.createdAt).format("DD MMM YYYY")
             : "-",
 
-          // ✅ for modal
+          // for modal
           feeInstallments: sectionFeeStructure?.feeInstallments || [],
         });
       });
@@ -121,7 +123,7 @@ export function FeeStructureView({ onBack, setSelected }) {
     return ["all", ...Array.from(uniqueClasses)];
   }, [structures]);
 
-  const statuses = ["all", "Active", "Inactive", "Draft"];
+  const statuses = ["all", "Active", "Inactive",];
 
   const currentStructures = filteredStructures.slice(0, 10);
 
@@ -194,7 +196,6 @@ export function FeeStructureView({ onBack, setSelected }) {
                   value={filterClass}
                   onChange={(e) => {
                     setFilterClass(e.target.value);
-                    handleFilterChange();
                   }}
                   className="w-full pl-9 pr-4 py-2.5 bg-[#0a0a0a] border border-gray-700 rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:border-[#0A81D1] transition-colors"
                 >
@@ -213,11 +214,10 @@ export function FeeStructureView({ onBack, setSelected }) {
                   value={filterStatus}
                   onChange={(e) => {
                     setFilterStatus(e.target.value);
-                    handleFilterChange();
                   }}
                   className="w-full pl-9 pr-4 py-2.5 bg-[#0a0a0a] border border-gray-700 rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:border-[#0A81D1] transition-colors"
                 >
-                  {statuses.map((status) => (
+                  {statuses?.map((status) => (
                     <option key={status} value={status}>
                       {status === "all" ? "All Status" : status}
                     </option>
@@ -258,7 +258,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentStructures.map((structure, i) => (
+                  {currentStructures?.map((structure, i) => (
                     <tr
                       key={i}
                       className="border-b border-gray-800 hover:bg-[#0a0a0a]/50 transition-colors"
@@ -284,7 +284,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs border ${getStatusColor(
-                            structure.status,
+                            structure?.status,
                           )}`}
                         >
                           {structure?.status}
@@ -336,7 +336,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            {console.log(selectedStructure)}
+            {/* {console.log(selectedStructure)} */}
             {/* Modal Content */}
             <div className="p-6 space-y-6">
               {/* Overview Cards */}
@@ -402,7 +402,7 @@ export function FeeStructureView({ onBack, setSelected }) {
               {/* Sections & Status */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
-                  <h3 className="text-white mb-3">Status & Fees</h3>
+                  {/* <h3 className="text-white mb-3">Status & Fees</h3> */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400">Status</span>
@@ -447,7 +447,6 @@ export function FeeStructureView({ onBack, setSelected }) {
                           {/* Top */}
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-2">
-
                               <div>
                                 <p className="text-white text-sm font-medium">
                                   Installment{" "}
@@ -486,7 +485,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                           </div>
 
                           {/* Dates */}
-                          <div className="mt-4 grid grid-cols-2 gap-3">
+                          {/* <div className="mt-4 grid grid-cols-2 gap-3">
                             <div className="bg-[#0a0a0a] border border-gray-800 rounded-xl p-2.5">
                               <p className="text-gray-500 text-[11px]">
                                 Start Date
@@ -504,7 +503,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                                 {moment(inst?.dueDate).format("DD MMM YYYY")}
                               </p>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
                       );
                     })}
@@ -513,7 +512,7 @@ export function FeeStructureView({ onBack, setSelected }) {
               </div>
 
               {/* Metadata */}
-              <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
+              {/* <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
                 <h3 className="text-white mb-3">Additional Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -525,7 +524,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                     <p className="text-white">{selectedStructure?.startDate}</p>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Modal Footer */}
