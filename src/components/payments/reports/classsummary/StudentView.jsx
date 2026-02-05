@@ -13,6 +13,10 @@ import {
   Download,
   IndianRupee,
 } from "lucide-react";
+import {
+  getPaymentStatusColor,
+  getPaymentStatusText,
+} from "../../../../utils/helper";
 
 export default function StudentView({
   setSelectedView,
@@ -25,6 +29,11 @@ export default function StudentView({
   const dropdownRef = useRef(null);
   const academicStartYear =
     classAndSectionData?.selectedSession?.academicStartYear;
+
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [selectedTxn, setSelectedTxn] = useState(null);
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundError, setRefundError] = useState("");
 
   const getStudentSummary = async () => {
     try {
@@ -65,19 +74,19 @@ export default function StudentView({
     getStudentSummary();
   }, [filterData]);
 
-  const giveDiscount = async () => {
-    try {
-      const res = await axiosClient.post(`${EndPoints.ADMIN.CREATE_REFUND}`, {
-        sessionStudentId: filterData?.studentData?._id,
-        paymentId: "",
-        amount: 50,
-      });
-      // if (res?.statusCode = 200) {
-      // }
-    } catch (e) {
-      // console.log(e);
-    }
-  };
+  // const giveDiscount = async () => {
+  //   try {
+  //     const res = await axiosClient.post(`${EndPoints.ADMIN.CREATE_REFUND}`, {
+  //       sessionStudentId: filterData?.studentData?._id,
+  //       paymentId: "",
+  //       amount: 50,
+  //     });
+  //     // if (res?.statusCode = 200) {
+  //     // }
+  //   } catch (e) {
+  //     // console.log(e);
+  //   }
+  // };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -109,22 +118,57 @@ export default function StudentView({
     toast.success(`Downloading receipt for ${txn?.zohoPaymentId ?? "NA"}`);
   };
 
-  const handleRefund = async (txn) => {
-    try {
-      const res = await axiosClient.post(`${EndPoints.ADMIN.CREATE_REFUND}`, {
-        sessionStudentId: txn?.sessionStudent,
-        paymentId: txn?.zohoPaymentId,
-        amount: txn?.amount,
-      });
-      // console.log(res);
+  // const handleRefund = async (txn) => {
+  //   try {
+  //     const res = await axiosClient.post(`${EndPoints.ADMIN.CREATE_REFUND}`, {
+  //       sessionStudentId: txn?.sessionStudent,
+  //       paymentId: txn?.zohoPaymentId,
+  //       amount: txn?.amount,
+  //     });
+  //     // console.log(res);
 
-      // setOpenMenuId(null);
-      // console.log(txn);
-      // giveDiscount();
-      toast.success(`Refund action for ${txn?.zohoPaymentId ?? "NA"}`);
+  //     // setOpenMenuId(null);
+  //     // console.log(txn);
+  //     // giveDiscount();
+  //     toast.success(`Refund action for ${txn?.zohoPaymentId ?? "NA"}`);
+  //   } catch (e) {
+  //     // console.log(e);
+  //     toast.error(e);
+  //   }
+  // };
+
+  const submitRefund = async () => {
+    const amount = Number(refundAmount);
+
+    if (!amount || amount <= 0) {
+      return setRefundError("Enter a valid refund amount");
+    }
+
+    if (amount > selectedTxn?.amount) {
+      return setRefundError("Refund amount cannot exceed transaction amount");
+    }
+
+    // if (amount > advanceAmount) {
+    //   return setRefundError("Refund amount cannot exceed advance balance");
+    // }
+
+    try {
+      setLoading(true);
+      const res = await axiosClient.post(`${EndPoints.ADMIN.CREATE_REFUND}`, {
+        sessionStudentId: selectedTxn?.sessionStudent,
+        paymentId: selectedTxn?.zohoPaymentId,
+        amount,
+      });
+
+      if (res?.statusCode === 200) {
+        toast.success(res?.result?.message ?? "Refund successful");
+        setShowRefundModal(false);
+        getStudentSummary(); // refresh list
+      }
     } catch (e) {
-      // console.log(e);
-      toast.error(e);
+      toast.error("Refund failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -292,6 +336,8 @@ export default function StudentView({
                 <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
                   <th className="py-4 px-2">Transaction ID</th>
                   <th className="py-4 px-2">Amount</th>
+                  <th className="py-4 px-2">Refunded</th>
+                  <th className="py-4 px-2">Status</th>
                   <th className="py-4 px-2">Payment Mode</th>
                   <th className="py-4 px-2">Date & Time</th>
                   <th className="py-4 px-2">Action</th>
@@ -305,11 +351,43 @@ export default function StudentView({
                     className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-medium"
                   >
                     <td className="py-4 px-2">{std?.zohoPaymentId ?? "NA"}</td>
-                    <td className="py-4 px-2">{std?.amount}</td>
-                    <td className="py-4 px-2">{std?.paymentMethod ?? "NA"}</td>
+                    {/* Amount */}
+                    <td className="py-4 px-2">
+                      <span className="flex justify-center items-center gap-1">
+                        <IndianRupee className="w-4 h-4" />
+                        {std?.amount ?? 0}
+                      </span>
+                    </td>
+
+                    {/* Refunded Amount */}
+                    <td className="py-4 px-2">
+                      {std?.refundedAmount > 0 ? (
+                        <span className="flex justify-center items-center gap-1 text-textGreen font-semibold">
+                          <IndianRupee className="w-4 h-4" />
+                          {std?.refundedAmount}
+                        </span>
+                      ) : (
+                        <span className="text-textGray2">—</span>
+                      )}
+                    </td>
+
+                    {/* Status */}
+                    <td
+                      className={`py-4 px-2 uppercase ${getPaymentStatusColor(std?.status)}`}
+                    >
+                      {getPaymentStatusText(std?.status) ?? "NA"}
+                    </td>
+
+                    {/* Payment Mode */}
+                    <td className="py-4 px-2 uppercase">
+                      {std?.paymentMethod ?? "NA"}
+                    </td>
+
+                    {/* Date */}
                     <td className="py-4 px-2">
                       {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
                     </td>
+
                     {/* ACTION */}
                     <td className="py-4 px-2 relative">
                       <button
@@ -336,19 +414,26 @@ export default function StudentView({
                             <Download className="w-4 h-4 text-textBlue" />
                             Download Receipt
                           </button>
-
-                          <button
-                            type="button"
-                            // onClick={() => handleRefund(std)}
-                            className="w-full px-4 py-3 flex items-center gap-2 text-sm hover:bg-white/10 transition"
-                          >
-                            <img
-                              src={discount}
-                              alt="refund"
-                              className="w-4 h-4 object-contain"
-                            />
-                            Refund
-                          </button>
+                          {std?.status !== "refunded" && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedTxn(std);
+                                setRefundAmount("");
+                                setRefundError("");
+                                setShowRefundModal(true);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full px-4 py-3 flex items-center gap-2 text-sm hover:bg-white/10 transition"
+                            >
+                              <img
+                                src={discount}
+                                alt="refund"
+                                className="w-4 h-4"
+                              />
+                              Refund
+                            </button>
+                          )}
                         </div>
                       )}
                     </td>
@@ -359,6 +444,53 @@ export default function StudentView({
           </div>
         )}
       </div>
+      {showRefundModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+          <div className="w-[380px] bg-[#1c1c1c] rounded-2xl p-6 border border-white/10">
+            <h3 className="text-lg font-poppins-bold mb-4">Refund Amount</h3>
+
+            <div className="mb-3 text-sm text-textGray2">
+              Transaction Amount: ₹{selectedTxn?.amount}
+            </div>
+
+            <div className="mb-3 text-sm text-textGray2">
+              Advance Balance: ₹{advanceAmount}
+            </div>
+
+            <input
+              type="text"
+              value={refundAmount}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9.]/g, "");
+                setRefundAmount(value);
+                setRefundError("");
+              }}
+              placeholder="Enter refund amount"
+              className="w-full px-4 py-3 rounded-lg bg-[#2b2b2b] border border-white/10 text-white outline-none"
+            />
+
+            {refundError && (
+              <p className="text-red-400 text-sm mt-2">{refundError}</p>
+            )}
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowRefundModal(false)}
+                className="px-4 py-2 rounded-lg text-sm bg-white/10 hover:bg-white/20"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={submitRefund}
+                className="px-4 py-2 rounded-lg text-sm bg-backgroundBlue text-white"
+              >
+                Refund
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,6 +11,12 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
+import moment from "moment";
+import {
+  getPaymentStatusColor,
+  getPaymentStatusText,
+} from "../../../utils/helper";
+import { IndianRupee } from "lucide-react";
 
 export default function RefundAndFailedTransition() {
   const [t] = useTranslation();
@@ -21,11 +27,15 @@ export default function RefundAndFailedTransition() {
   const [totalRequestCount, setTotalRequestCount] = useState(1);
   const [refundTransactions, setRefundTransactions] = useState([]);
   const [filterClass, setFilterClass] = useState(null);
+  const academicStartYear =
+    classAndSectionData?.selectedSession?.academicStartYear;
 
   const getRefundTransactions = async () => {
     try {
+      const start = moment(`${academicStartYear}-04-01`);
+      const end = moment();
       const res = await axiosClient.post(
-        `${EndPoints.ADMIN.GET_TRANSITIONS}?sessionId=${classAndSectionData?.selectedSession?._id}&status=refunded&limit=${limit}&page=${pageNo}&startDate=${start}&endDate=${end}`,
+        `${EndPoints.ADMIN.GET_TRANSITIONS}?sessionId=${classAndSectionData?.selectedSession?._id}&status=partialRefunded&limit=${limit}&page=${pageNo}&startDate=${start}&endDate=${end}`,
       );
       // console.log(res);
       if (res?.statusCode === 200) {
@@ -37,8 +47,10 @@ export default function RefundAndFailedTransition() {
   };
 
   useEffect(() => {
-    getRefundTransactions();
-  }, [filterClass, pageNo, limit]);
+    if (classAndSectionData?.selectedSession?._id) {
+      getRefundTransactions();
+    }
+  }, [filterClass, pageNo, limit, classAndSectionData]);
 
   useEffect(() => {
     if (!classAndSectionData?.classList?.length) return;
@@ -70,11 +82,15 @@ export default function RefundAndFailedTransition() {
             <table className="w-full text-left">
               <thead className="text-textBlue text-base font-poppins-bold">
                 <tr className="border-b border-gray-500/30 bg-[#686868]/10 text-center">
-                  <th className="py-4 px-2">Date & Time</th>
+                  <th className="py-4 px-2">Student Name</th>
+                  <th className="py-4 px-2">Class & Section</th>
+                  <th className="py-4 px-2">Phone</th>
                   <th className="py-4 px-2">Transaction ID</th>
                   <th className="py-4 px-2">Amount</th>
-                  <th className="py-4 px-2">Payment Mode</th>
+                  <th className="py-4 px-2">Refunded</th>
                   <th className="py-4 px-2">Status</th>
+                  <th className="py-4 px-2">Payment Mode</th>
+                  <th className="py-4 px-2">Date & Time</th>
                 </tr>
               </thead>
 
@@ -84,21 +100,47 @@ export default function RefundAndFailedTransition() {
                     key={index}
                     className="border-b border-backgroundGray15 text-center text-textPrimary text-base font-poppins-medium"
                   >
+                    <td className="py-4 px-2">{std?.studentName ?? "NA"}</td>
+                    <td className="py-4 px-2">
+                      {`${std?.className ?? "NA"} ${std?.sectionName ?? ""}`}
+                    </td>
+                    <td className="py-4 px-2">{std?.parentPhone ?? "NA"}</td>
+                    <td className="py-4 px-2">{std?.zohoPaymentId ?? "NA"}</td>
+                    {/* Amount */}
+                    <td className="py-4 px-2">
+                      <span className="flex justify-center items-center gap-1">
+                        <IndianRupee className="w-4 h-4" />
+                        {std?.amount ?? 0}
+                      </span>
+                    </td>
+
+                    {/* Refunded Amount */}
+                    <td className="py-4 px-2">
+                      {std?.refundedAmount > 0 ? (
+                        <span className="flex justify-center items-center gap-1 text-textGreen font-semibold">
+                          <IndianRupee className="w-4 h-4" />
+                          {std?.refundedAmount}
+                        </span>
+                      ) : (
+                        <span className="text-textGray2">—</span>
+                      )}
+                    </td>
+
+                    {/* Status */}
+                    <td
+                      className={`py-4 px-2 uppercase ${getPaymentStatusColor(std?.status)}`}
+                    >
+                      {getPaymentStatusText(std?.status) ?? "NA"}
+                    </td>
+
+                    {/* Payment Mode */}
+                    <td className="py-4 px-2 uppercase">
+                      {std?.paymentMethod ?? "NA"}
+                    </td>
+
+                    {/* Date */}
                     <td className="py-4 px-2">
                       {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
-                    </td>
-                    {/* STUDENT NAME */}
-                    <td className="py-4 px-2">{std?.zohoPaymentId}</td>
-                    <td className="py-4 px-2">{std?.amount}</td>
-                    <td className="py-4 px-2">{std?.paymentMethod}</td>
-                    <td
-                      className={`py-4 px-2 ${
-                        std?.status === "PAID"
-                          ? "text-textGreen"
-                          : "text-textRed"
-                      }`}
-                    >
-                      {std?.status}
                     </td>
                   </tr>
                 ))}

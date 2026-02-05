@@ -83,7 +83,7 @@ export default function Notice() {
       setLoading(true);
 
       const resAdmin = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_NOTICE}?page=${pageNo}&limit=${limit}&createdBy=${filterRole}`
+        `${EndPoints.ADMIN.GET_NOTICE}?page=${pageNo}&limit=${limit}&createdBy=${filterRole}&session=${classAndSectionData?.selectedSession?._id}`,
       );
 
       if (resAdmin?.statusCode === 200) {
@@ -100,8 +100,8 @@ export default function Notice() {
 
   // Fetch notices when pagination or filter changes
   useEffect(() => {
-    fetchNotice();
-  }, [pageNo, limit, filterRole]);
+    if (classAndSectionData?.selectedSession?._id) fetchNotice();
+  }, [pageNo, limit, filterRole, classAndSectionData]);
 
   /**
    * Validate notice form data before posting.
@@ -175,7 +175,7 @@ export default function Notice() {
         {
           description: updatedDescription,
           targetAudience: notice.targetAudience,
-        }
+        },
       );
       // console.log(res);
 
@@ -204,7 +204,7 @@ export default function Notice() {
   const handleDelete = async (id) => {
     try {
       const res = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_NOTICE}/${id}`
+        `${EndPoints.ADMIN.DELETE_NOTICE}/${id}`,
       );
       if (res?.statusCode === 200) {
         toast.success("Notice deleted");
@@ -284,8 +284,8 @@ export default function Notice() {
                         formData.toTeacher
                           ? "text-textBlue border-borderBlue"
                           : isDarkMode
-                          ? "text-textPrimary border-borderWhite"
-                          : ""
+                            ? "text-textPrimary border-borderWhite"
+                            : ""
                       }`}
                       onClick={() =>
                         setFormData((prev) => ({
@@ -301,8 +301,8 @@ export default function Notice() {
                         formData.toParent
                           ? "text-textBlue border-borderBlue"
                           : isDarkMode
-                          ? "text-textPrimary border-borderWhite"
-                          : ""
+                            ? "text-textPrimary border-borderWhite"
+                            : ""
                       }`}
                       onClick={() =>
                         setFormData((prev) => ({
@@ -377,12 +377,12 @@ export default function Notice() {
                 <img
                   src={
                     req?.createdByRole === "admin"
-                      ? data?.photo ?? profile
+                      ? (data?.photo ?? profile)
                       : req?.createdByRole === "teacher"
-                      ? req?.createdByDetails?.photo
-                        ? `data:image/jpeg;base64,${req?.createdByDetails?.photo}`
+                        ? req?.createdByDetails?.photo
+                          ? `data:image/jpeg;base64,${req?.createdByDetails?.photo}`
+                          : profile
                         : profile
-                      : profile
                   }
                   alt="Profile"
                   className="w-10 h-10 rounded-full object-cover"
@@ -430,7 +430,7 @@ export default function Notice() {
                           e.target.style.height = "auto";
                           const newHeight = Math.min(
                             e.target.scrollHeight,
-                            200
+                            200,
                           );
                           e.target.style.height = `${newHeight}px`;
                         }}

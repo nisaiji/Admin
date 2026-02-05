@@ -13,6 +13,10 @@ import { Stack } from "@mui/system";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { Eraser } from "lucide-react";
+import {
+  getPaymentStatusColor,
+  getPaymentStatusText,
+} from "../../../utils/helper";
 
 const modesData = [
   { label: "UPI", value: "upi" },
@@ -323,13 +327,9 @@ export default function PaymentView() {
                       {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
                     </td>
                     <td
-                      className={`py-4 px-2 uppercase ${
-                        std?.status === "paid"
-                          ? "text-textGreen"
-                          : "text-textRed"
-                      }`}
+                      className={`py-4 px-2  ${getPaymentStatusColor(std?.status)}`}
                     >
-                      {std?.status}
+                      {getPaymentStatusText(std?.status)}
                     </td>
                   </tr>
                 ))}

@@ -11,6 +11,7 @@ import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
 import { useSelector } from "react-redux";
 import moment from "moment/moment";
+import { getPaymentStatusColor, getPaymentStatusText } from "../../utils/helper";
 
 const ALL_PAYMENT_MODES = [
   { label: "UPI", value: "upi" },
@@ -313,7 +314,9 @@ export default function Dashboard({ setSelected }) {
       <div className="p-5 rounded-xl bg-[#1c1c1c] my-6">
         <div className="mb-4 flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-poppins-bold">Recent 5 Transactions Details</h3>
+            <h3 className="text-lg font-poppins-bold">
+              Recent 5 Transactions Details
+            </h3>
             {/* <p className="text-sm font-poppins-regular text-textGray2">
               Recent 5 transitions Details
             </p> */}
@@ -368,13 +371,9 @@ export default function Dashboard({ setSelected }) {
                       {moment(std?.paidAt).format("DD/MM/YYYY HH:mm A")}
                     </td>
                     <td
-                      className={`py-4 px-2 uppercase ${
-                        std?.status === "paid"
-                          ? "text-textGreen"
-                          : "text-textRed"
-                      }`}
+                      className={`py-4 px-2 ${getPaymentStatusColor(std?.status)}`}
                     >
-                      {std?.status}
+                      {getPaymentStatusText(std?.status)}
                     </td>
                   </tr>
                 ))}
@@ -389,9 +388,7 @@ export default function Dashboard({ setSelected }) {
         <div className="col-span-2 p-5 rounded-xl bg-[#1c1c1c] min-h-[400px]">
           <div className="mb-4 flex justify-between items-center">
             <div>
-              <h3 className="text-lg font-poppins-bold">
-                Fee Collection
-              </h3>
+              <h3 className="text-lg font-poppins-bold">Fee Collection</h3>
               <p className="text-sm font-poppins-regular text-textGray2 mb-4">
                 Total number of fees collected by month
               </p>
