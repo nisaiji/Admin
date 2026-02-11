@@ -35,11 +35,12 @@ export default function RefundAndFailedTransition() {
       const start = moment(`${academicStartYear}-04-01`);
       const end = moment();
       const res = await axiosClient.post(
-        `${EndPoints.ADMIN.GET_TRANSITIONS}?sessionId=${classAndSectionData?.selectedSession?._id}&status=partialRefunded&limit=${limit}&page=${pageNo}&startDate=${start}&endDate=${end}`,
+        `${EndPoints.ADMIN.GET_TRANSITIONS}?sessionId=${classAndSectionData?.selectedSession?._id}&status=partialRefunded,refunded,failed,active&limit=${limit}&page=${pageNo}&startDate=${start}&endDate=${end}`,
       );
       // console.log(res);
       if (res?.statusCode === 200) {
         setRefundTransactions(res?.result?.transactions);
+        setTotalRequestCount(res?.result?.pagination?.totalCount || 0);
       }
     } catch (e) {
       // console.log("Error fetching fee summary:", e);

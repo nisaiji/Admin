@@ -10,19 +10,17 @@ export default function Sidebar({ items, selected, setSelected }) {
 
   return (
     <div
-      className={`${
-        isDarkMode
-          ? "bg-gradient-to-t from-[#0A81D11A] to-[#0f0f0f]"
-          : "bg-whiteBackground"
-      } w-[250px] min-h-[calc(100vh-70px)] pt-[30px] flex flex-col items-center gap-3`}
+      className={`${isDarkMode
+        ? "bg-gradient-to-t from-[#0A81D11A] to-[#0f0f0f]"
+        : "bg-whiteBackground"
+        } w-[250px] min-h-[calc(100vh-70px)] pt-[30px] flex flex-col items-center gap-3`}
     >
       {items.map((item, idx) => (
         <div
           key={idx}
           onClick={() => setSelected(item.label)}
-          className={`w-full flex justify-center cursor-pointer relative ${
-            selected === item.label ? "bg-[#0A81D11A]" : ""
-          }`}
+          className={`w-full flex justify-center cursor-pointer relative ${selected === item.label ? "bg-[#0A81D11A]" : ""
+            }`}
         >
           {/* BLUE SELECTED TAB LINE */}
           {selected === item.label && (
@@ -55,7 +53,7 @@ export default function Sidebar({ items, selected, setSelected }) {
           Setup Classroom
         </p>
         <p className="text-textPrimary opacity-40 text-xs font-poppins-regular">
-          Increase your speed with more members
+          Build your school structure in minutes
         </p>
       </div>
     </div>

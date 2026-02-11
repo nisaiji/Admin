@@ -60,39 +60,25 @@ export default function AttendancePopup() {
       role === "classTeacher"
         ? teacherData?.sectionStartTime
         : role === "admin"
-        ? classAndSectionData?.startTime
-        : "",
+          ? classAndSectionData?.startTime
+          : "",
     [role, teacherData?.sectionStartTime, classAndSectionData?.startTime]
   );
 
   /**
    * Check if a specific date is a Sunday or a holiday.
-   *
-   * @param {number} dateIndex - Index of the date in the month (0-based)
-   * @returns {boolean} - True if the date is a Sunday or a holiday
+   * Optimized to use string lookups instead of Date objects where possible
    */
-  const isSunday = (dateIndex) => {
-    const date = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      dateIndex + 1
-    );
-    return date.getDay() === 0 && !workdays?.[formatDate(date)];
+  const isSunday = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.getDay() === 0 && !workdays?.[dateStr];
   };
 
   /**
    * Check if a specific date is a holiday.
-   * @param {number} dateIndex - Index of the date in the month (0-based)
-   * @returns {boolean} - True if the date is a holiday
    */
-  const isHoliday = (dateIndex) => {
-    const date = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      dateIndex + 1
-    );
-    const formattedDate = formatDate(date);
-    return holidays[formattedDate];
+  const isHoliday = (dateStr) => {
+    return holidays[dateStr];
   };
 
   /**
@@ -171,13 +157,13 @@ export default function AttendancePopup() {
       prevData.map((student, idx) =>
         idx === studentIndex
           ? {
-              ...student,
-              attendances: student.attendances.map((attendance, i) =>
-                i === dateIndex
-                  ? { ...attendance, attendance: value } // Update attendance field
-                  : attendance
-              ),
-            }
+            ...student,
+            attendances: student.attendances.map((attendance, i) =>
+              i === dateIndex
+                ? { ...attendance, attendance: value } // Update attendance field
+                : attendance
+            ),
+          }
           : student
       )
     );
@@ -248,8 +234,8 @@ export default function AttendancePopup() {
               item?.attendance === "P"
                 ? "present"
                 : item?.attendance === "A"
-                ? "absent"
-                : "",
+                  ? "absent"
+                  : "",
           });
         });
       });
@@ -259,15 +245,17 @@ export default function AttendancePopup() {
         role === "classTeacher"
           ? `${EndPoints.TEACHER.UPDATE_ATTENDANCE}/${teacherData?.sectionId}`
           : role === "admin"
-          ? `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${classAndSectionData?.sectionId}`
-          : "";
+            ? `${EndPoints.ADMIN.UPDATE_ATTENDANCE}/${classAndSectionData?.sectionId}`
+            : "";
       // API call
       const res = await axiosClient.post(url, { studentsAttendances });
 
       if (res.statusCode === 200) {
         toast.success(res?.result);
         setIsEditable(false);
-        fetchMonthlyAttendance();
+        // We need to re-fetch with current state logic or pass current state if we want to be safe, 
+        // but typically safe here as save doesn't change holidays/workdays
+        fetchMonthlyAttendance({ holidayMap: holidays, workdayMap: workdays });
       }
     } catch (e) {
       toast.error(e);
@@ -280,10 +268,16 @@ export default function AttendancePopup() {
   /**
    * Fetch monthly attendance data for the current month.
    * Populates attendanceData state with attendance for each student and day.
+   * @param {Object} eventData - Optional object containing holidayMap and workdayMap
    */
-  const fetchMonthlyAttendance = async () => {
+  const fetchMonthlyAttendance = async (eventData = {}) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
+
+    // Use passed data or fall back to state
+    const currentHolidays = eventData.holidayMap || holidays;
+    const currentWorkdays = eventData.workdayMap || workdays;
+
     try {
       setLoading(true);
       const startTime = new Date(
@@ -304,8 +298,8 @@ export default function AttendancePopup() {
         role === "classTeacher"
           ? `${EndPoints.TEACHER.GET_ATTENDANCE}?section=${teacherData?.sectionId}&startTime=${startTime}&endTime=${endTime}&session=${teacherData?.sessionId}`
           : role === "admin"
-          ? `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.selectedSession?.school}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.selectedSession?._id}`
-          : "";
+            ? `${EndPoints.ADMIN.GET_ATTENDANCE}?admin=${classAndSectionData?.selectedSession?.school}&section=${classAndSectionData?.sectionId}&classId=${classAndSectionData?.classId}&startTime=${startTime}&endTime=${endTime}&session=${classAndSectionData?.selectedSession?._id}`
+            : "";
       // console.log(url);
       const res = await axiosClient.get(url);
 
@@ -319,8 +313,8 @@ export default function AttendancePopup() {
               item.teacherAttendance === "present"
                 ? "P"
                 : item.teacherAttendance === "absent"
-                ? "A"
-                : "";
+                  ? "A"
+                  : "";
             return acc;
           }, {});
 
@@ -329,23 +323,26 @@ export default function AttendancePopup() {
             const dateKey = formatDate(
               new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
             );
-            // console.log(
-            //   dateKey,
-            //   new Date(dateKey).getDay() === 0,
-            //   !(dateKey in workdays)
-            // );
+
+            const isDateSunday = new Date(dateKey).getDay() === 0;
+            const isDateWorkday = !!currentWorkdays[dateKey];
+            const isDateHoliday = !!currentHolidays[dateKey];
+
+            let attendanceStatus = "";
+
+            if (isDateHoliday) {
+              attendanceStatus = "H";
+            } else if (isDateSunday && !isDateWorkday) {
+              attendanceStatus = "S";
+            } else {
+              attendanceStatus = attendanceByDate[dateKey] || "";
+            }
 
             return {
               date: dateKey,
-              attendance:
-                dateKey in holidays
-                  ? "H"
-                  : new Date(dateKey).getDay() === 0 && !(dateKey in workdays)
-                  ? "S"
-                  : attendanceByDate[dateKey] || "",
+              attendance: attendanceStatus,
             };
           });
-          // console.log(monthDates);
 
           return {
             ...student,
@@ -362,16 +359,7 @@ export default function AttendancePopup() {
           return firstNameComparison;
         });
 
-        const totalHolidays = Array.from({ length: totalDays }, (_, i) => {
-          const dateKey = formatDate(
-            new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
-          );
-          return dateKey in holidays || new Date(dateKey).getDay() === 0;
-        }).filter(Boolean).length;
-
         setAttendanceData(updatedAttendanceData);
-
-        // setTotalAttendanceDays(totalDays - totalHolidays);
       }
     } catch (e) {
       toast.error(e);
@@ -421,9 +409,13 @@ export default function AttendancePopup() {
 
   /**
    * Fetch holidays and workdays for the current month.
+   * Returns the fetched maps for immediate use.
    */
   const fetchEvents = async () => {
     setLoading(true);
+    let holidayMap = {};
+    let workdayMap = {};
+
     try {
       const startTime = new Date(
         currentDate.getFullYear(),
@@ -443,8 +435,8 @@ export default function AttendancePopup() {
         role === "classTeacher"
           ? EndPoints.TEACHER.GET_EVENTS
           : role === "admin"
-          ? EndPoints.ADMIN.GET_EVENTS
-          : "";
+            ? EndPoints.ADMIN.GET_EVENTS
+            : "";
       // console.log(classAndSectionData);
 
       const res = await axiosClient.post(url, {
@@ -454,13 +446,13 @@ export default function AttendancePopup() {
           role === "classTeacher"
             ? teacherData?.sessionId
             : role === "admin"
-            ? classAndSectionData?.selectedSession?._id
-            : "",
+              ? classAndSectionData?.selectedSession?._id
+              : "",
       });
       // console.log(res);
 
       if (res?.statusCode === 200) {
-        const holidayMap = res?.result?.reduce((acc, item) => {
+        holidayMap = res?.result?.reduce((acc, item) => {
           acc[formatDate(item.date)] = true;
           return acc;
         }, {});
@@ -471,8 +463,8 @@ export default function AttendancePopup() {
         role === "classTeacher"
           ? EndPoints.TEACHER.GET_SUNDAY_HOLIDAY
           : role === "admin"
-          ? EndPoints.ADMIN.GET_SUNDAY_HOLIDAY
-          : "";
+            ? EndPoints.ADMIN.GET_SUNDAY_HOLIDAY
+            : "";
       const res2 = await axiosClient.post(url, {
         startTime,
         endTime,
@@ -480,12 +472,12 @@ export default function AttendancePopup() {
           role === "classTeacher"
             ? teacherData?.sessionId
             : role === "admin"
-            ? classAndSectionData?.selectedSession?._id
-            : "",
+              ? classAndSectionData?.selectedSession?._id
+              : "",
       });
 
       if (res2?.statusCode === 200) {
-        const workdayMap = res2?.result?.reduce((acc, item) => {
+        workdayMap = res2?.result?.reduce((acc, item) => {
           acc[formatDate(item.date)] = true;
           return acc;
         }, {});
@@ -497,6 +489,8 @@ export default function AttendancePopup() {
     } finally {
       setLoading(false);
     }
+
+    return { holidayMap, workdayMap };
   };
 
   /**
@@ -513,7 +507,7 @@ export default function AttendancePopup() {
         classAndSectionData?.sectionId &&
         classAndSectionData?.classId)
     ) {
-      fetchEvents().then(fetchMonthlyAttendance);
+      fetchEvents().then((data) => fetchMonthlyAttendance(data));
     }
   }, [
     currentDate,
@@ -535,17 +529,15 @@ export default function AttendancePopup() {
     // Title
     let title;
     if (role === "admin") {
-      title = `${classAndSectionData?.className}-${
-        classAndSectionData?.sectionName
-      } Monthly Attendance ${currentDate.toLocaleString("default", {
-        month: "long",
-      })} ${currentDate.getFullYear()}`;
+      title = `${classAndSectionData?.className}-${classAndSectionData?.sectionName
+        } Monthly Attendance ${currentDate.toLocaleString("default", {
+          month: "long",
+        })} ${currentDate.getFullYear()}`;
     } else if (role === "classTeacher") {
-      title = `${teacherData?.className}-${
-        teacherData?.sectionName
-      } Monthly Attendance ${currentDate.toLocaleString("default", {
-        month: "long",
-      })} ${currentDate.getFullYear()}`;
+      title = `${teacherData?.className}-${teacherData?.sectionName
+        } Monthly Attendance ${currentDate.toLocaleString("default", {
+          month: "long",
+        })} ${currentDate.getFullYear()}`;
     }
     doc.setFontSize(16);
     doc.text(title, 14, 20);
@@ -631,14 +623,12 @@ export default function AttendancePopup() {
     // Save PDF
     if (role === "admin") {
       doc.save(
-        `Attendance_${classAndSectionData?.className}_${
-          classAndSectionData?.sectionName
+        `Attendance_${classAndSectionData?.className}_${classAndSectionData?.sectionName
         }_${currentDate.getFullYear()}_${currentDate.getMonth() + 1}.pdf`
       );
     } else if (role === "classTeacher") {
       doc.save(
-        `Attendance_${teacherData?.className}_${
-          teacherData?.sectionName
+        `Attendance_${teacherData?.className}_${teacherData?.sectionName
         }_${currentDate.getFullYear()}_${currentDate.getMonth() + 1}.pdf`
       );
     }
@@ -647,9 +637,8 @@ export default function AttendancePopup() {
   return (
     <div className={`z-40 select-none`}>
       <div
-        className={`min-h-[calc(100vh-72px)] p-4 shadow flex flex-col ${
-          isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-        }`}
+        className={`min-h-[calc(100vh-72px)] p-4 shadow flex flex-col ${isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+          }`}
       >
         <Toaster />
         {/* Header */}
@@ -664,8 +653,8 @@ export default function AttendancePopup() {
               onClick={() =>
                 isEditable
                   ? toast.error(
-                      "please save the data before changing the month"
-                    )
+                    "please save the data before changing the month"
+                  )
                   : changeMonth(-1)
               }
             />
@@ -680,8 +669,8 @@ export default function AttendancePopup() {
               onClick={() =>
                 isEditable
                   ? toast.error(
-                      "please save the data before changing the month"
-                    )
+                    "please save the data before changing the month"
+                  )
                   : changeMonth(1)
               }
             />
@@ -716,16 +705,14 @@ export default function AttendancePopup() {
 
         {/* Table */}
         <div
-          className={`overflow-x-auto p-4 h-[500px] overflow-y-auto ${
-            isDarkMode
-              ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-              : "bg-whiteBackground"
-          }`}
+          className={`overflow-x-auto p-4 h-[500px] overflow-y-auto ${isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
+            }`}
         >
           <div
-            className={`text-2xl font-poppins-regular text-center w-full ${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+            className={`text-2xl font-poppins-regular text-center w-full ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
           >
             Monthly Attendance Sheet
           </div>
@@ -737,11 +724,10 @@ export default function AttendancePopup() {
           </div>
           <table className={`w-full text-center border border-borderLine`}>
             <thead
-              className={`sticky -top-4 z-10 ${
-                isDarkMode
-                  ? "bg-backgroundTableCell text-textPrimary"
-                  : "bg-whiteBackground text-textBlack"
-              }`}
+              className={`sticky -top-4 z-10 ${isDarkMode
+                ? "bg-backgroundTableCell text-textPrimary"
+                : "bg-whiteBackground text-textBlack"
+                }`}
             >
               <tr>
                 <th
@@ -780,35 +766,28 @@ export default function AttendancePopup() {
                 return (
                   <tr key={index}>
                     <td
-                      className={`border border-borderLine p-1  ${
-                        isDarkMode ? "text-textPrimary" : "text-textBlack"
-                      }`}
+                      className={`border border-borderLine p-1  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        }`}
                     >
                       {index + 1}
                     </td>
                     <td
-                      className={`border border-borderLine p-1  ${
-                        isDarkMode ? "text-textPrimary" : "text-textBlack"
-                      }`}
+                      className={`border border-borderLine p-1  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        }`}
                     >
                       {data?.firstname || ""} {data?.lastname || ""}
                     </td>
                     {data.attendances.map((value, idx) => {
-                      const attendance = isSunday(idx)
-                        ? "S"
-                        : isHoliday(idx)
-                        ? "H"
-                        : value.attendance;
+                      const attendance = value.attendance;
                       return (
                         <td
                           key={idx}
-                          className={`border border-borderLine  ${
-                            isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          }`}
+                          className={`border border-borderLine  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                            }`}
                         >
                           {isEditable &&
-                          attendance !== "S" &&
-                          attendance !== "H" ? (
+                            attendance !== "S" &&
+                            attendance !== "H" ? (
                             <select
                               name="attendance"
                               value={attendance}
@@ -816,17 +795,15 @@ export default function AttendancePopup() {
                               onChange={(e) => {
                                 handleInputChange(index, idx, e.target.value);
                               }}
-                              className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring ${
-                                isDarkMode
-                                  ? "focus:ring-gray"
-                                  : "focus:ring-black"
-                              } ${
-                                value?.attendance === "P"
+                              className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring ${isDarkMode
+                                ? "focus:ring-gray"
+                                : "focus:ring-black"
+                                } ${value?.attendance === "P"
                                   ? "text-textBlue"
                                   : value?.attendance === "A"
-                                  ? "text-textDarkRed"
-                                  : "text-textBlack"
-                              }`}
+                                    ? "text-textDarkRed"
+                                    : "text-textBlack"
+                                }`}
                             >
                               <option value="" label="" />
                               <option
@@ -843,15 +820,14 @@ export default function AttendancePopup() {
                           ) : (
                             <div
                               className={`w-full text-center focus:outline-none bg-transparent uppercase
-                              ${
-                                attendance === "P"
+                              ${attendance === "P"
                                   ? "text-textBlue"
                                   : attendance === "A"
-                                  ? "text-textRed"
-                                  : attendance === "S" || attendance === "H"
-                                  ? "text-textHoliday"
-                                  : "text-textBlack"
-                              }
+                                    ? "text-textRed"
+                                    : attendance === "S" || attendance === "H"
+                                      ? "text-textHoliday"
+                                      : "text-textBlack"
+                                }
                               `}
                             >
                               {attendance}
@@ -862,9 +838,8 @@ export default function AttendancePopup() {
                     })}
                     {/* Horizontal totals */}
                     <td
-                      className={`border border-borderLine p-1 font-poppins-regular  ${
-                        isDarkMode ? "text-textPrimary" : "text-textBlack"
-                      }`}
+                      className={`border border-borderLine p-1 font-poppins-regular  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        }`}
                     >
                       {totalPresent}/{totalAttendanceDays}
                     </td>
@@ -875,9 +850,8 @@ export default function AttendancePopup() {
               <tr>
                 <td
                   colSpan="2"
-                  className={`border border-borderLine font-poppins-regular p-1  ${
-                    isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  }`}
+                  className={`border border-borderLine font-poppins-regular p-1  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                    }`}
                 >
                   Total
                 </td>
@@ -894,9 +868,8 @@ export default function AttendancePopup() {
                   return (
                     <td
                       key={dayIndex}
-                      className={`border border-borderLine font-poppins-regular p-1  ${
-                        isDarkMode ? "text-textPrimary" : "text-textBlack"
-                      }`}
+                      className={`border border-borderLine font-poppins-regular p-1  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        }`}
                     >
                       {totalPresentForDay}/{attendanceData?.length || 0}
                     </td>

@@ -11,7 +11,10 @@ import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
 import { useSelector } from "react-redux";
 import moment from "moment/moment";
-import { getPaymentStatusColor, getPaymentStatusText } from "../../utils/helper";
+import {
+  getPaymentStatusColor,
+  getPaymentStatusText,
+} from "../../utils/helper";
 
 const ALL_PAYMENT_MODES = [
   { label: "UPI", value: "upi" },
@@ -301,7 +304,7 @@ export default function Dashboard({ setSelected }) {
               <img src={refund} alt="p" className="size-6 object-contain" />
             </div>
             <p className="text-lg font-poppins-bold mt-1">
-              ₹ {feeSummary?.advanceAmount ?? 0}
+              ₹ {feeSummary?.totalAdvancedAmount ?? 0}
             </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">
@@ -384,8 +387,65 @@ export default function Dashboard({ setSelected }) {
       </div>
 
       {/* BOTTOM SECTION */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="col-span-2 p-5 rounded-xl bg-[#1c1c1c] min-h-[400px]">
+      <div className="grid grid-cols-4 gap-4 mb-6 bg-[#1c1c1c] rounded-xl">
+        <div className="p-5 rounded-xl bg-[#1c1c1c] min-h-[260px] flex flex-col">
+          <div className="flex-1 flex justify-center items-center relative">
+            {/* Donut Chart */}
+            <PieChart
+              series={[
+                {
+                  data: pieData,
+                  innerRadius: 72,
+                  outerRadius: 102,
+                },
+              ]}
+              width={222}
+              height={222}
+              slotProps={{
+                legend: { hidden: true }, // hide default legend
+              }}
+            />
+
+            {/* Center Text */}
+            <div className="absolute flex flex-col justify-center items-center">
+              <p className="text-xl font-poppins-bold">₹ {totalAmount}</p>
+              <p className="text-sm text-textGray2 text-center leading-4">
+                Fees Payment <br /> Mode
+              </p>
+            </div>
+          </div>
+
+          {/* Custom Right Legend */}
+          <div className="flex flex-col justify-center items-center gap-6 w-full xl:w-auto">
+            {normalizedPayments?.map((item) => {
+              const meta = MODE_META[item?._id];
+              if (!meta) return null;
+
+              return (
+                <div
+                  key={item?._id}
+                  className="flex items-center gap-3 w-[150px]"
+                >
+                  <div
+                    className={`h-11 w-11 rounded-md ${meta.bgClass} bg-opacity-15 flex justify-center items-center`}
+                  >
+                    <img
+                      src={meta.icon}
+                      alt={meta.label}
+                      className="size-[32px] object-contain"
+                    />
+                  </div>
+
+                  <div className="text-[15px] font-poppins-bold">
+                    <p className="text-textPrimary">₹ {item?.totalAmount}</p>
+                    <p className={meta.textClass}>{meta?.label}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="col-span-3 p-5 rounded-xl bg-[#1c1c1c] min-h-[400px]">
           <div className="mb-4 flex justify-between items-center">
             <div>
               <h3 className="text-lg font-poppins-bold">Fee Collection</h3>
@@ -414,62 +474,6 @@ export default function Dashboard({ setSelected }) {
               )}
               series={getDailyLineData(dailyPaymentSummary, selectedMonth)}
             />
-          </div>
-        </div>
-
-        {/* Payment Mode */}
-        <div className="p-5 rounded-xl bg-[#1c1c1c] min-h-[260px] flex flex-col xl:flex-row gap-6 md:gap-0">
-          <div className="flex-1 flex justify-center items-center relative">
-            {/* Donut Chart */}
-            <PieChart
-              series={[
-                {
-                  data: pieData,
-                  innerRadius: 72,
-                  outerRadius: 102,
-                },
-              ]}
-              width={222}
-              height={222}
-              slotProps={{
-                legend: { hidden: true }, // hide default legend
-              }}
-            />
-
-            {/* Center Text */}
-            <div className="absolute flex flex-col justify-center items-center">
-              <p className="text-xl font-poppins-bold">₹ {totalAmount}</p>
-              <p className="text-sm text-textGray2 text-center leading-4">
-                Fees Payment <br /> Mode
-              </p>
-            </div>
-          </div>
-
-          {/* Custom Right Legend */}
-          <div className="flex flex-col justify-center gap-6 w-full xl:w-auto">
-            {normalizedPayments?.map((item) => {
-              const meta = MODE_META[item?._id];
-              if (!meta) return null;
-
-              return (
-                <div key={item?._id} className="flex items-center gap-3">
-                  <div
-                    className={`h-11 w-11 rounded-md ${meta.bgClass} bg-opacity-15 flex justify-center items-center`}
-                  >
-                    <img
-                      src={meta.icon}
-                      alt={meta.label}
-                      className="size-[32px] object-contain"
-                    />
-                  </div>
-
-                  <div className="text-[15px] font-poppins-bold">
-                    <p className="text-textPrimary">₹ {item?.totalAmount}</p>
-                    <p className={meta.textClass}>{meta?.label}</p>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
       </div>

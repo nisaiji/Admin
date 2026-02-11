@@ -332,7 +332,7 @@ export default function AttendanceData({
         return;
       }
       const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`,
       );
 
       if (res?.statusCode === 200) {
@@ -368,24 +368,21 @@ export default function AttendanceData({
    */
   const getDailyAttendanceChart = async () => {
     try {
-      const url =
-        role === "classTeacher"
-          ? EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS
-          : role === "admin"
-          ? `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`
-          : "";
-      setLoading(true);
-      const response = await axiosClient.post(url, {
+      const url = EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS;
+      const payload = {
         startTime: attendanceTime.day.startTime,
         endTime: attendanceTime.day.endTime,
-      });
+      };
+      setLoading(true);
+      const response = await axiosClient.post(url, payload);
+
       const result = response?.result;
       if (response?.statusCode === 200) {
         setStudentAbsentCountData(
-          result?.sectionAttendance[0]?.absentCount || 0
+          result?.sectionAttendance[0]?.absentCount || 0,
         );
         setStudentPresentCountData(
-          result?.sectionAttendance[0]?.presentCount || 0
+          result?.sectionAttendance[0]?.presentCount || 0,
         );
         setTotalStudentClassSectionWise(result?.totalStudent);
       }
@@ -406,8 +403,8 @@ export default function AttendanceData({
         role === "classTeacher"
           ? EndPoints.TEACHER.STUDENT_COUNT
           : role === "admin"
-          ? EndPoints.ADMIN.STUDENT_COUNT
-          : "";
+            ? EndPoints.ADMIN.STUDENT_COUNT
+            : "";
       const res = await axiosClient.post(url, {
         startTime: attendanceTime.day.startTime,
         endTime: attendanceTime.day.endTime,
@@ -415,8 +412,8 @@ export default function AttendanceData({
           role === "classTeacher"
             ? teacherData?.sessionId
             : role === "admin"
-            ? classAndSectionData?.selectedSession?._id
-            : "",
+              ? classAndSectionData?.selectedSession?._id
+              : "",
       });
       if (res?.statusCode === 200) {
         setStudentAbsentCountData(res?.result?.absentCount || 0);
@@ -568,8 +565,8 @@ export default function AttendanceData({
         role === "classTeacher"
           ? EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS
           : role === "admin"
-          ? `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`
-          : "";
+            ? `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}/${selectedSection}`
+            : "";
 
       const response = await axiosClient.post(url, currentDates);
 
@@ -590,7 +587,7 @@ export default function AttendanceData({
   // api for monthly, weekly chart for school
   const getSchoolAttendanceChart = async (type) => {
     try {
-      const currentDates =
+      let currentDates =
         type === "Weekly"
           ? {
               startTime: attendanceTime.week.startTime,
@@ -600,11 +597,15 @@ export default function AttendanceData({
               startTime: attendanceTime.month.startTime,
               endTime: attendanceTime.month.endTime,
             };
+      if (role === "admin") {
+        currentDates.sessionId = classAndSectionData?.selectedSession?._id;
+      }
+
       setLoading(true);
 
       const res = await axiosClient.post(
         `${EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS}`,
-        currentDates
+        currentDates,
       );
 
       if (res?.statusCode === 200) {
@@ -638,8 +639,8 @@ export default function AttendanceData({
           role === "classTeacher"
             ? getAttendanceChart(selectedOption)
             : role === "admin"
-            ? getSchoolAttendanceChart(selectedOption)
-            : "";
+              ? getSchoolAttendanceChart(selectedOption)
+              : "";
         }
       }
     };
@@ -676,8 +677,8 @@ export default function AttendanceData({
               selectedOption === "Daily"
                 ? "bg-[#0F4189] text-textPrimary"
                 : isDarkMode
-                ? "text-textPrimary"
-                : "text-textBlack"
+                  ? "text-textPrimary"
+                  : "text-textBlack"
             }`}
             onClick={() => handleOptionChange({ target: { value: "Daily" } })}
           >
@@ -688,8 +689,8 @@ export default function AttendanceData({
               selectedOption === "Weekly"
                 ? "bg-[#0F4189] text-textPrimary"
                 : isDarkMode
-                ? "text-textPrimary"
-                : "text-textBlack"
+                  ? "text-textPrimary"
+                  : "text-textBlack"
             }`}
             onClick={() => handleOptionChange({ target: { value: "Weekly" } })}
           >
@@ -700,8 +701,8 @@ export default function AttendanceData({
               selectedOption === "Monthly"
                 ? "bg-[#0F4189] text-textPrimary"
                 : isDarkMode
-                ? "text-textPrimary"
-                : "text-textBlack"
+                  ? "text-textPrimary"
+                  : "text-textBlack"
             }`}
             onClick={() => handleOptionChange({ target: { value: "Monthly" } })}
           >
@@ -726,12 +727,12 @@ export default function AttendanceData({
             {selectedOption === "Daily"
               ? moment(attendanceTime.day.startTime).format("dddd, DD MMM YYYY")
               : selectedOption === "Weekly"
-              ? `${moment(attendanceTime.week.startTime).format(
-                  "D MMM YYYY"
-                )} - ${moment(attendanceTime.week.endTime).format(
-                  "D MMM YYYY"
-                )}`
-              : moment(attendanceTime.month.startTime).format("MMMM YYYY")}
+                ? `${moment(attendanceTime.week.startTime).format(
+                    "D MMM YYYY",
+                  )} - ${moment(attendanceTime.week.endTime).format(
+                    "D MMM YYYY",
+                  )}`
+                : moment(attendanceTime.month.startTime).format("MMMM YYYY")}
           </div>
           {!(
             selectedOption === "Daily" &&
@@ -819,7 +820,7 @@ export default function AttendanceData({
                 onChange={(e) => {
                   setSelectedClass(e.target.value);
                   const classData = classList.filter(
-                    (itm) => itm["_id"] === e.target.value
+                    (itm) => itm["_id"] === e.target.value,
                   );
                   setSectionList(classData[0]?.section);
                   setSelectedSection(classData[0]?.section[0]?._id || "");

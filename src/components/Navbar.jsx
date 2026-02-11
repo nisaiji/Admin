@@ -411,14 +411,14 @@ const Navbar = () => {
           )}
 
           {/* Dark mode toggle */}
-          <FormControlLabel
+          {/* <FormControlLabel
             control={
               <MaterialUISwitch
                 checked={isDarkMode}
                 onChange={toggleDarkMode}
               />
             }
-          />
+          /> */}
           <div
             className={`relative rounded-xl`}
             onMouseEnter={() => setProfileMenuOpen(true)}

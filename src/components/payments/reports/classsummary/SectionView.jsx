@@ -82,13 +82,8 @@ export default function SectionView({
 
   const getFeeSummary = async () => {
     try {
-      const sDate = moment(
-        `${classAndSectionData?.selectedSession?.academicStartYear}-04-01`,
-      ).startOf("day");
-
-      const eDate = moment().endOf("day");
       const res = await axiosClient.post(
-        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${classAndSectionData?.selectedSession?._id}&sectionId=${filterData?._id}&startDate=${sDate}&endDate=${eDate}`,
+        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${classAndSectionData?.selectedSession?._id}&sectionId=${filterData?._id}`,
       );
       // console.log(res);
 
@@ -100,49 +95,35 @@ export default function SectionView({
     }
   };
 
-  const normalizeStudentInstallments = (student, installmentConfig) => {
-    // const sessionStart =
-    //   classAndSectionData?.selectedSession?.academicStartYear;
+  // const normalizeStudentInstallments = (student, installmentConfig) => {
+  //   const existing = student?.studentFeeInstallments || [];
 
-    const existing = student?.studentFeeInstallments || [];
+  //   const existingMap = new Map(existing?.map((i) => [i?.month, i]));
 
-    const existingMap = new Map(existing?.map((i) => [i?.month, i]));
+  //   const installments = [];
 
-    const installments = [];
+  //   for (let i = 1; i <= installmentConfig?.count; i++) {
+  //     if (existingMap?.has(i)) {
+  //       installments?.push(existingMap?.get(i));
+  //     } else {
+  //       installments?.push({
+  //         _id: `virtual-${student?._id}-${i}`,
+  //         month: i,
+  //         baseAmount: 0,
+  //         lateFeeApplied: 0,
+  //         totalPayable: 0,
+  //         amountPaid: 0,
+  //         status: "unpaid",
+  //         isVirtual: true,
+  //       });
+  //     }
+  //   }
 
-    for (let i = 1; i <= installmentConfig?.count; i++) {
-      if (existingMap?.has(i)) {
-        installments?.push(existingMap?.get(i));
-      } else {
-        // create missing installment
-        // const startDate = new Date();
-
-        // const dueDate = new Date(startDate);
-        // dueDate?.setMonth(dueDate?.getMonth() + i);
-        // console.log(startDate, dueDate);
-
-        installments?.push({
-          _id: `virtual-${student?._id}-${i}`,
-          month: i,
-          baseAmount: 0,
-          lateFeeApplied: 0,
-          totalPayable: 0,
-          amountPaid: 0,
-          status: "unpaid",
-          // startDate: startDate?.toISOString(),
-          // dueDate: dueDate?.toISOString(),
-          // startDate: startDate?.toISOString(),
-          // dueDate: dueDate?.toISOString(),
-          isVirtual: true, // important flag
-        });
-      }
-    }
-
-    return {
-      ...student,
-      studentFeeInstallments: installments?.sort((a, b) => a?.month - b?.month),
-    };
-  };
+  //   return {
+  //     ...student,
+  //     studentFeeInstallments: installments?.sort((a, b) => a?.month - b?.month),
+  //   };
+  // };
 
   const getSectionReports = async () => {
     try {
@@ -152,12 +133,12 @@ export default function SectionView({
       // console.log(res);
 
       if (res?.statusCode === 200) {
-        const normalizedData = res?.result?.map((student) =>
-          normalizeStudentInstallments(student, installmentConfig),
-        );
+        // const normalizedData = res?.result?.map((student) =>
+        //   normalizeStudentInstallments(student, installmentConfig),
+        // );
         // console.log(normalizedData);
 
-        setSectionList(normalizedData);
+        setSectionList(res?.result);
       }
     } catch (e) {
       // console.log("Error fetching fee summary:", e);
@@ -267,7 +248,7 @@ export default function SectionView({
               <img src={refund} alt="p" className="size-6 object-contain" />
             </div>
             <p className="text-lg font-poppins-bold mt-1">
-              ₹ {feeSummary?.advanceAmount ?? 0}
+              ₹ {feeSummary?.totalAdvancedAmount ?? 0}
             </p>
           </div>
           <p className="text-md font-poppins-regular mt-2">
@@ -311,12 +292,11 @@ export default function SectionView({
                       {std?.student?.firstname ?? ""}{" "}
                       {std?.student?.lastname ?? ""}
                     </td>
-
                     {/* INSTALLMENT STATUS */}
-                    {std?.studentFeeInstallments?.map((s, i) => {
+                    {std?.feeInstallments?.map((s, i) => {
                       const isPaid = s?.status === "paid";
-                      const isUnpaid =
-                        s?.baseAmount > 0 || s?.isVirtual === true;
+                      const isUnpaid = s?.amount > 0 || s?.baseAmount;
+
                       return (
                         <td key={i} className="py-4 px-2">
                           <span
