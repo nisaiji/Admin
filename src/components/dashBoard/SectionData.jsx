@@ -30,7 +30,7 @@ export default function SectionData({
     file,
     maxSizeMB = 1,
     maxWidth = 1000,
-    maxHeight = 1000
+    maxHeight = 1000,
   ) => {
     return new Promise((resolve, reject) => {
       const image = new Image();
@@ -68,7 +68,7 @@ export default function SectionData({
             reader2.onloadend = () => resolve(reader2.result);
           },
           "image/jpeg",
-          0.8 // adjust quality (0.0 - 1.0)
+          0.8, // adjust quality (0.0 - 1.0)
         );
       };
 
@@ -119,15 +119,34 @@ export default function SectionData({
 
   // Helper to get next session years
   const getNextSessionYears = () => {
-    // If session already exists for this period, don't create again
+    const today = moment();
+
+    // Academic year starts in April
+    const isAfterMarch = today.month() >= 3; // month() is 0-based → April = 3
+
+    const currentAcademicStart = isAfterMarch ? today.year() : today.year() - 1;
+
+    const currentAcademicEnd = currentAcademicStart + 1;
+
+    const nextAcademicStart = currentAcademicStart + 1;
+    const nextAcademicEnd = currentAcademicEnd + 1;
+
+    // Check if next session already exists
     const nextSessionExists = session?.some(
       (s) =>
-        s?.academicStartYear === moment().year() + 1 &&
-        s?.academicEndYear === moment().year() + 2
+        s?.academicStartYear === nextAcademicStart &&
+        s?.academicEndYear === nextAcademicEnd,
     );
+
     if (!nextSessionExists) {
-      return { start: moment().year() + 1, end: moment().year() + 2 };
+      return {
+        start: nextAcademicStart,
+        end: nextAcademicEnd,
+        startDate: moment(`${nextAcademicStart}-04-01`).toDate(),
+        endDate: moment(`${nextAcademicEnd}-03-31`).toDate(),
+      };
     }
+
     return null;
   };
 
@@ -143,14 +162,14 @@ export default function SectionData({
         const res = await axiosClient.get(EndPoints.ADMIN.GET_SESSION);
         if (res?.statusCode === 200) {
           // console.log(res);
-          
+
           const activeSession = res?.result?.find((s) => s?.isCurrent === true);
           if (!classAndSectionData?.selectedSession?._id) {
             dispatch(
               setClassAndSectionData({
                 selectedSession: activeSession,
                 session: res?.result,
-              })
+              }),
             );
           }
           setSession(res?.result);
@@ -190,7 +209,7 @@ export default function SectionData({
         return;
       }
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.MARK_SESSION_COMPLETE}/${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.ADMIN.MARK_SESSION_COMPLETE}/${classAndSectionData?.selectedSession?._id}`,
       );
       if (res?.statusCode === 200) {
         toast.success(res?.result);
@@ -204,7 +223,7 @@ export default function SectionData({
   // Function to render the clock with current time
   const Clock = () => {
     const [currentTime, setCurrentTime] = useState(
-      moment().format("hh:mm:ss A")
+      moment().format("hh:mm:ss A"),
     );
 
     useEffect(() => {
@@ -317,7 +336,7 @@ export default function SectionData({
                 Toggle Session{" "}
                 {classAndSectionData?.selectedSession?.academicStartYear}-
                 {String(
-                  classAndSectionData?.selectedSession?.academicEndYear
+                  classAndSectionData?.selectedSession?.academicEndYear,
                 ).slice(-2)}
               </button>
             )}
@@ -326,19 +345,19 @@ export default function SectionData({
               <Select
                 value={
                   session?.some(
-                    (s) => s?._id === classAndSectionData?.selectedSession?._id
+                    (s) => s?._id === classAndSectionData?.selectedSession?._id,
                   )
                     ? classAndSectionData?.selectedSession?._id
                     : ""
                 }
                 onChange={(e) => {
                   const selected = session?.find(
-                    (s) => s?._id === e?.target?.value
+                    (s) => s?._id === e?.target?.value,
                   );
                   dispatch(
                     setClassAndSectionData({
                       selectedSession: selected,
-                    })
+                    }),
                   );
                 }}
                 displayEmpty
@@ -362,7 +381,7 @@ export default function SectionData({
                 }}
                 renderValue={(selectedValue) => {
                   const s = session?.find(
-                    (item) => item?._id === selectedValue
+                    (item) => item?._id === selectedValue,
                   );
                   if (!s) return <Typography>Select Session</Typography>;
 
