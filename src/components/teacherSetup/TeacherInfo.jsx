@@ -17,6 +17,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
     };
   }, [modelOpen]);
 
+
   const personalDetails = [
     [t("labels.id"), currTeacher?.teacherId || CONSTANT.NA],
     [
@@ -25,8 +26,8 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
     ],
     [
       t("labels.class"),
-      `${currTeacher?.section?.classId?.name || ""} ${
-        currTeacher?.section?.name || CONSTANT.NA
+      `${currTeacher?.className || ""} ${
+        currTeacher?.sectionName || CONSTANT.NA
       }`,
     ],
     [t("labels.gender"), currTeacher?.gender || CONSTANT.NA],

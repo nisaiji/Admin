@@ -91,7 +91,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         (err) => {
           toast.error(err?.message);
         },
-        status?.emailOtpReqId
+        status?.emailOtpReqId,
       );
     } catch (e) {
       toast.error(e);
@@ -126,7 +126,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         (err) => {
           // console.log({ err });
           toast.error(err?.message);
-        }
+        },
       );
     } catch (e) {
       // console.log(e);
@@ -180,7 +180,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         (err) => {
           toast.error(err?.message);
         },
-        status?.emailOtpReqId
+        status?.emailOtpReqId,
       );
     } catch (e) {
       // toast.error(e);
@@ -203,6 +203,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
           placeholder={t("placeholders.emailAddress")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={otpVisible}
         />
         {error && (
           <div className="text-textRed text-sm text-left p-1">{error}</div>

@@ -18,13 +18,13 @@ import EndPoints from "../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable"; // 👈 MUST import like this
 import moment from "moment";
 
 export default function AttendancePopup() {
   // Redux state selectors
   const { classAndSectionData, teacherData } = useSelector(
-    (state) => state.appAuth
+    (state) => state.appAuth,
   );
   const role = useSelector((state) => state.appAuth.role);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
@@ -49,9 +49,9 @@ export default function AttendancePopup() {
       new Date(
         currentDate.getFullYear(),
         currentDate.getMonth() + 1,
-        0
+        0,
       ).getDate(),
-    [currentDate]
+    [currentDate],
   );
 
   // Get start time for attendance (depends on role)
@@ -62,7 +62,7 @@ export default function AttendancePopup() {
         : role === "admin"
           ? classAndSectionData?.startTime
           : "",
-    [role, teacherData?.sectionStartTime, classAndSectionData?.startTime]
+    [role, teacherData?.sectionStartTime, classAndSectionData?.startTime],
   );
 
   /**
@@ -91,7 +91,7 @@ export default function AttendancePopup() {
       const newDate = new Date(
         prevDate.getFullYear(),
         prevDate.getMonth() + increment,
-        1
+        1,
       );
       const startMonth = new Date(startTime).getMonth();
       const startYear = new Date(startTime).getFullYear();
@@ -112,8 +112,8 @@ export default function AttendancePopup() {
           setToastDisplayed(true);
           toast.error(
             `You can only change month between the ${moment(startTime).format(
-              "MMMM YYYY"
-            )} to ${moment().format("MMMM YYYY")}.`
+              "MMMM YYYY",
+            )} to ${moment().format("MMMM YYYY")}.`,
           );
           setTimeout(() => setToastDisplayed(false), 3000);
         }
@@ -134,7 +134,7 @@ export default function AttendancePopup() {
     const attendanceDate = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
-      dateIndex + 1
+      dateIndex + 1,
     );
 
     // Ensure the date is within the valid range
@@ -144,10 +144,11 @@ export default function AttendancePopup() {
     ) {
       if (!toastDisplayed) {
         setToastDisplayed(true);
+
         toast.error(
           `You can only edit attendance between the ${moment(startTime).format(
-            "DD/MM/YYYY"
-          )} and ${moment().format("DD/MM/YYYY")}.`
+            "DD/MM/YYYY",
+          )} and ${moment().format("DD/MM/YYYY")}.`,
         );
         setTimeout(() => setToastDisplayed(false), 3000);
       }
@@ -161,11 +162,11 @@ export default function AttendancePopup() {
             attendances: student.attendances.map((attendance, i) =>
               i === dateIndex
                 ? { ...attendance, attendance: value } // Update attendance field
-                : attendance
+                : attendance,
             ),
           }
-          : student
-      )
+          : student,
+      ),
     );
   };
 
@@ -211,8 +212,8 @@ export default function AttendancePopup() {
           setToastDisplayed(true);
           toast.error(
             `Please fill all the cells to save the attendance. Incomplete attendance on: ${invalidDays.join(
-              ", "
-            )}`
+              ", ",
+            )}`,
           );
           setTimeout(() => setToastDisplayed(false), 3000);
         }
@@ -253,7 +254,7 @@ export default function AttendancePopup() {
       if (res.statusCode === 200) {
         toast.success(res?.result);
         setIsEditable(false);
-        // We need to re-fetch with current state logic or pass current state if we want to be safe, 
+        // We need to re-fetch with current state logic or pass current state if we want to be safe,
         // but typically safe here as save doesn't change holidays/workdays
         fetchMonthlyAttendance({ holidayMap: holidays, workdayMap: workdays });
       }
@@ -283,7 +284,7 @@ export default function AttendancePopup() {
       const startTime = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
-        1
+        1,
       ).getTime();
       const endTime = new Date(
         currentDate.getFullYear(),
@@ -292,7 +293,7 @@ export default function AttendancePopup() {
         23,
         59,
         59,
-        999
+        999,
       ).getTime();
       const url =
         role === "classTeacher"
@@ -321,7 +322,11 @@ export default function AttendancePopup() {
           // Generate an array for all days in the month
           const monthDates = Array.from({ length: totalDays }, (_, i) => {
             const dateKey = formatDate(
-              new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
+              new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                i + 1,
+              ),
             );
 
             const isDateSunday = new Date(dateKey).getDay() === 0;
@@ -420,7 +425,7 @@ export default function AttendancePopup() {
       const startTime = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
-        1
+        1,
       ).getTime();
       const endTime = new Date(
         currentDate.getFullYear(),
@@ -429,7 +434,7 @@ export default function AttendancePopup() {
         23,
         59,
         59,
-        999
+        999,
       ).getTime();
       let url =
         role === "classTeacher"
@@ -524,112 +529,106 @@ export default function AttendancePopup() {
    * Uses jsPDF and jspdf-autotable for PDF generation.
    */
   const downloadAttendance = () => {
-    const doc = new jsPDF();
-
-    // Title
-    let title;
-    if (role === "admin") {
-      title = `${classAndSectionData?.className}-${classAndSectionData?.sectionName
-        } Monthly Attendance ${currentDate.toLocaleString("default", {
-          month: "long",
-        })} ${currentDate.getFullYear()}`;
-    } else if (role === "classTeacher") {
-      title = `${teacherData?.className}-${teacherData?.sectionName
-        } Monthly Attendance ${currentDate.toLocaleString("default", {
-          month: "long",
-        })} ${currentDate.getFullYear()}`;
+    if (!attendanceData?.length) {
+      toast.error("No attendance data to download");
+      return;
     }
-    doc.setFontSize(16);
-    doc.text(title, 14, 20);
 
-    // Table headers
-    const headers = [
+    const doc = new jsPDF({
+      orientation: "landscape", // required for many columns
+      unit: "pt",
+      format: "a4",
+    });
+
+    const monthYear = moment(currentDate).format("MMMM YYYY");
+
+    // ===== Title =====
+    doc.setFontSize(16);
+    doc.text(
+      "Monthly Attendance Sheet",
+      doc.internal.pageSize.getWidth() / 2,
+      30,
+      {
+        align: "center",
+      },
+    );
+
+    doc.setFontSize(11);
+    doc.text(
+      `${classAndSectionData?.className || ""} - ${classAndSectionData?.sectionName || ""
+      } | ${monthYear}`,
+      doc.internal.pageSize.getWidth() / 2,
+      50,
+      { align: "center" },
+    );
+
+    // ===== Table Head =====
+    const headRow = [
       "S.No",
       "Student Name",
-      ...Array.from({ length: totalDays }, (_, i) => i + 1),
-      "Total Attendance",
+      ...Array.from({ length: totalDays }, (_, i) => `${i + 1}`),
+      "Total",
     ];
 
-    // Table rows
-    const rows = attendanceData.map((student, index) => {
+    // ===== Table Body =====
+    const bodyRows = attendanceData.map((student, index) => {
       const totalPresent = student.attendances.filter(
-        (a) => a.attendance === "P"
+        (a) => a.attendance === "P",
       ).length;
+
       return [
         index + 1,
-        `${student?.firstname || ""} ${student?.lastname || ""}`,
-        ...student?.attendances.map((item) => item.attendance || ""),
-        `${totalPresent}/${totalDays}`, // Horizontal total
+        `${student.firstname || ""} ${student.lastname || ""}`,
+        ...student.attendances.map((a) => a.attendance || ""),
+        `${totalPresent}/${totalAttendanceDays}`,
       ];
     });
 
-    // Add vertical totals (final row)
-    const totalRow = [
-      "Total",
-      "",
-      ...Array.from({ length: totalDays }, (_, dayIndex) => {
-        const totalPresentForDay = attendanceData.filter(
-          (student) => student.attendances[dayIndex]?.attendance === "P"
-        ).length;
-        return `${totalPresentForDay}/${attendanceData?.length || 0}`;
-      }),
-      "", // Empty cell for total column
-    ];
-    rows.push(totalRow); // Add vertical total row to rows
-
-    // Add table to PDF
-    doc.autoTable({
-      margin: { left: 0, right: 0 },
-      startY: 30,
-      head: [headers],
-      body: rows,
+    // ===== AutoTable =====
+    autoTable(doc, {
+      startY: 70,
+      head: [headRow],
+      body: bodyRows,
       styles: {
-        fontSize: 5,
-        lineWidth: 0.01,
-        lineColor: [0, 0, 0],
-        textColor: [0, 0, 0],
-        fillColor: [255, 255, 255],
-        cellPadding: 1,
+        fontSize: 8,
+        halign: "center",
+        valign: "middle",
+        cellPadding: 3,
       },
       headStyles: {
-        textColor: [0, 0, 0],
-        fillColor: [255, 255, 255],
-        lineWidth: 0.01,
-        lineColor: [0, 0, 0],
+        fillColor: [40, 40, 40],
+        textColor: 255,
+        fontStyle: "bold",
       },
-      alternateRowStyles: { fillColor: [255, 255, 255] },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
       columnStyles: {
-        0: { cellWidth: 9 }, // S.No
-        1: { cellWidth: 15 }, // Student Name
-        ...Array.from({ length: totalDays }, (_, i) => ({
-          [i + 2]: { cellWidth: 5.5 }, // date
-        })).reduce((acc, style) => Object.assign(acc, style), {}),
-        [totalDays + 2]: { cellWidth: 15 }, // Total Attendance column
+        0: { cellWidth: 40 }, // S.No
+        1: { cellWidth: 120 }, // Name
       },
-      didParseCell: (data) => {
-        if (data.section === "body" && data.column.index > 1) {
-          const cellValue = data.cell.raw; // Get cell value
-          if (cellValue === "P") {
-            data.cell.styles.textColor = "#0F4189"; // Blue for "P"
-          } else if (cellValue === "A") {
-            data.cell.styles.textColor = "#FE4040"; // Red for "A"
-          } else if (cellValue === "S" || cellValue === "H") {
-            data.cell.styles.textColor = "#FF9933";
-          }
-        }
+      didDrawPage: () => {
+        doc.setFontSize(9);
+        doc.text(
+          `Generated on: ${moment().format("DD/MM/YYYY")}`,
+          doc.internal.pageSize.getWidth() - 40,
+          doc.internal.pageSize.getHeight() - 20,
+          { align: "right" },
+        );
       },
     });
 
-    // Save PDF
+    // ===== Save =====
+    // doc.save(`Attendance_${monthYear}.pdf`);
     if (role === "admin") {
       doc.save(
         `Attendance_${classAndSectionData?.className}_${classAndSectionData?.sectionName
-        }_${currentDate.getFullYear()}_${currentDate.getMonth() + 1}.pdf`
+        }_${monthYear}.pdf`,
       );
     } else if (role === "classTeacher") {
       doc.save(
         `Attendance_${teacherData?.className}_${teacherData?.sectionName
-        }_${currentDate.getFullYear()}_${currentDate.getMonth() + 1}.pdf`
+        }_${monthYear}.pdf`,
       );
     }
   };
@@ -653,7 +652,7 @@ export default function AttendancePopup() {
               onClick={() =>
                 isEditable
                   ? toast.error(
-                    "please save the data before changing the month"
+                    "please save the data before changing the month",
                   )
                   : changeMonth(-1)
               }
@@ -669,7 +668,7 @@ export default function AttendancePopup() {
               onClick={() =>
                 isEditable
                   ? toast.error(
-                    "please save the data before changing the month"
+                    "please save the data before changing the month",
                   )
                   : changeMonth(1)
               }
@@ -706,8 +705,8 @@ export default function AttendancePopup() {
         {/* Table */}
         <div
           className={`overflow-x-auto p-4 h-[500px] overflow-y-auto ${isDarkMode
-            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-            : "bg-whiteBackground"
+              ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+              : "bg-whiteBackground"
             }`}
         >
           <div
@@ -725,8 +724,8 @@ export default function AttendancePopup() {
           <table className={`w-full text-center border border-borderLine`}>
             <thead
               className={`sticky -top-4 z-10 ${isDarkMode
-                ? "bg-backgroundTableCell text-textPrimary"
-                : "bg-whiteBackground text-textBlack"
+                  ? "bg-backgroundTableCell text-textPrimary"
+                  : "bg-whiteBackground text-textBlack"
                 }`}
             >
               <tr>
@@ -758,10 +757,10 @@ export default function AttendancePopup() {
               {/* {console.log(attendanceData)} */}
               {attendanceData.map((data, index) => {
                 const totalPresent = data.attendances.filter(
-                  (a) => a.attendance === "P"
+                  (a) => a.attendance === "P",
                 ).length;
                 const totalAbsent = data.attendances.filter(
-                  (a) => a.attendance === "A"
+                  (a) => a.attendance === "A",
                 ).length;
                 return (
                   <tr key={index}>
@@ -796,8 +795,8 @@ export default function AttendancePopup() {
                                 handleInputChange(index, idx, e.target.value);
                               }}
                               className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring ${isDarkMode
-                                ? "focus:ring-gray"
-                                : "focus:ring-black"
+                                  ? "focus:ring-gray"
+                                  : "focus:ring-black"
                                 } ${value?.attendance === "P"
                                   ? "text-textBlue"
                                   : value?.attendance === "A"
@@ -858,11 +857,11 @@ export default function AttendancePopup() {
                 {Array.from({ length: totalDays }, (_, dayIndex) => {
                   const totalPresentForDay = attendanceData.filter(
                     (student) =>
-                      student.attendances[dayIndex]?.attendance === "P"
+                      student.attendances[dayIndex]?.attendance === "P",
                   ).length;
                   const totalAbsentForDay = attendanceData.filter(
                     (student) =>
-                      student.attendances[dayIndex]?.attendance === "A"
+                      student.attendances[dayIndex]?.attendance === "A",
                   ).length;
 
                   return (

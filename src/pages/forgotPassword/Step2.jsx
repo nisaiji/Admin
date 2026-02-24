@@ -223,6 +223,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
           placeholder={t("placeholders.emailAddress")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={otpVisible}
         />
         {error && (
           <div className="text-textRed text-sm text-left p-1">{error}</div>

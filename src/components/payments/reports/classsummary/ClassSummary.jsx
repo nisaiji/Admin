@@ -5,12 +5,12 @@ import StudentView from "./StudentView";
 import { useSelector } from "react-redux";
 
 export default function ClassSummary({ setHideReportsHeader }) {
-  const { classAndSectionData } = useSelector((state) => state.appAuth);
-  const [filterData, setFilterData] = useState(null);
-  const [filterClass, setFilterClass] = useState(null);
-  const [filterSection, setFilterSection] = useState(null);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedView, setSelectedView] = useState("class");
+  const { classAndSectionData, tempData } = useSelector(
+    (state) => state.appAuth,
+  );
+  const [selectedView, setSelectedView] = useState(
+    tempData?.selectedReportsClassTab || "class",
+  );
 
   useEffect(() => {
     if (selectedView === "section" || selectedView === "student") {
@@ -23,20 +23,14 @@ export default function ClassSummary({ setHideReportsHeader }) {
   }, [selectedView, setHideReportsHeader]);
 
   return selectedView === "class" ? (
-    <ClassView
-      setFilterData={setFilterData}
-      setSelectedView={setSelectedView}
-    />
+    <ClassView setSelectedView={setSelectedView} />
   ) : selectedView === "section" ? (
     <SectionView
       setSelectedView={setSelectedView}
-      filterData={filterData}
-      setFilterData={setFilterData}
     />
   ) : selectedView === "student" ? (
     <StudentView
       setSelectedView={setSelectedView}
-      filterData={filterData}
       classAndSectionData={classAndSectionData}
     />
   ) : (

@@ -230,6 +230,7 @@ const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
           onChange={(e) =>
             setPhone(e.target.value.replace(/[^0-9]/g, "").slice(0, 10))
           }
+          disabled={otpVisible}
         />
         {error && (
           <div className="text-textRed text-sm text-left p-1">{error}</div>

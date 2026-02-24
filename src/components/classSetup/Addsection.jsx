@@ -44,7 +44,11 @@ function Addsection({
   const [newSection, setNewSection] = useState({
     name: "",
     teacherId: "",
-    startTime: moment().startOf("day").valueOf(),
+    startTime: classAndSectionData?.selectedSession?.startDate
+      ? moment(classAndSectionData.selectedSession.startDate)
+          .startOf("day")
+          .valueOf()
+      : moment().startOf("day").valueOf(),
   });
   const [sections, setSections] = useState([]);
   const [selectedTeachersList, setSelectedTeachersList] = useState([]);
@@ -135,7 +139,7 @@ function Addsection({
 
       const res = await axiosClient.post(
         EndPoints.ADMIN.REGISTER_SECTION,
-        sectionData
+        sectionData,
       );
       if ([200, 201].includes(res?.statusCode)) {
         fetchData();
@@ -149,7 +153,11 @@ function Addsection({
       setNewSection({
         name: "",
         teacherId: "",
-        startTime: moment().startOf("day").valueOf(),
+        startTime: classAndSectionData?.selectedSession?.startDate
+          ? moment(classAndSectionData.selectedSession.startDate)
+              .startOf("day")
+              .valueOf()
+          : moment().startOf("day").valueOf(),
       });
       setShowForm(true);
     }
@@ -199,7 +207,11 @@ function Addsection({
     setNewSection({
       name: "",
       teacherId: "",
-      startTime: moment().startOf("day").valueOf(),
+      startTime: classAndSectionData?.selectedSession?.startDate
+        ? moment(classAndSectionData.selectedSession.startDate)
+            .startOf("day")
+            .valueOf()
+        : moment().startOf("day").valueOf(),
     });
   };
 
@@ -226,7 +238,7 @@ function Addsection({
     try {
       setLoading(true);
       const res = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_SECTION}/${deleteSectionId}`
+        `${EndPoints.ADMIN.DELETE_SECTION}/${deleteSectionId}`,
       );
 
       if (res?.statusCode === 200) {
@@ -329,8 +341,8 @@ function Addsection({
                           newSection?.teacherId === ""
                             ? "gray"
                             : isDarkMode
-                            ? "#E3E8F3"
-                            : "black",
+                              ? "#E3E8F3"
+                              : "black",
                         backgroundColor: isDarkMode ? "#1a1a1a" : "white",
                         borderRadius: "0.75rem",
                       },
@@ -362,7 +374,7 @@ function Addsection({
                           );
                         }
                         const teacherObj = selectedTeachersList.find(
-                          (teacher) => teacher._id === selected
+                          (teacher) => teacher._id === selected,
                         );
                         return teacherObj
                           ? `${teacherObj.firstname} ${teacherObj.lastname}`
@@ -528,7 +540,7 @@ function Addsection({
                         );
                       }
                       const teacherObj = teachers.find(
-                        (teacher) => teacher._id === selected
+                        (teacher) => teacher._id === selected,
                       );
                       return teacherObj
                         ? `${teacherObj.firstname} ${teacherObj.lastname}`
@@ -555,8 +567,8 @@ function Addsection({
                           newSection?.teacherId === ""
                             ? "gray"
                             : isDarkMode
-                            ? "#E3E8F3"
-                            : "black",
+                              ? "#E3E8F3"
+                              : "black",
                       },
                     }}
                   >
@@ -580,6 +592,7 @@ function Addsection({
                     ))}
                   </Select>
                 </FormControl>
+                {/* {console.log(classAndSectionData.selectedSession)} */}
                 <DatePicker
                   selected={newSection.startTime}
                   onChange={(date) => {

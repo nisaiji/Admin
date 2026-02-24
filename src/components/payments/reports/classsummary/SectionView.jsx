@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from "react";
 import collected from "../../../../assets/images/fees/collected.png";
 import pending from "../../../../assets/images/fees/pending.png";
-// import refunded from "../../../../assets/images/fees/refunded.png";
-// import retry from "../../../assets/images/fees/retry.png";
 import refund from "../../../../assets/images/fees/refund.png";
-// import cancel from "../../../assets/images/fees/cancel.png";
-// import { PieChart } from "@mui/x-charts";
 import { axiosClient } from "../../../../services/axiosClient";
 import EndPoints from "../../../../services/EndPoints";
 import { ChevronRight } from "lucide-react";
 import CONSTANT from "../../../../utils/constants";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
+import { setTempData } from "../../../../store/AppAuthSlice";
 
 const INSTALLMENT_CONFIG = {
   monthly: {
@@ -36,12 +33,11 @@ const INSTALLMENT_CONFIG = {
   },
 };
 
-export default function SectionView({
-  setSelectedView,
-  filterData,
-  setFilterData,
-}) {
-  const { classAndSectionData } = useSelector((state) => state.appAuth);
+export default function SectionView({ setSelectedView }) {
+  const dispatch = useDispatch();
+  const { classAndSectionData, tempData } = useSelector(
+    (state) => state.appAuth,
+  );
   const [feeSummary, setFeeSummary] = useState(null);
   const [sectionList, setSectionList] = useState([]);
   const [filterTable, setFilterTable] = useState({});
@@ -83,7 +79,7 @@ export default function SectionView({
   const getFeeSummary = async () => {
     try {
       const res = await axiosClient.post(
-        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${classAndSectionData?.selectedSession?._id}&sectionId=${filterData?._id}`,
+        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${classAndSectionData?.selectedSession?._id}&sectionId=${tempData?.selectedReportsClassData?._id}`,
       );
       // console.log(res);
 
@@ -128,7 +124,7 @@ export default function SectionView({
   const getSectionReports = async () => {
     try {
       const res = await axiosClient.post(
-        `${EndPoints.ADMIN.GET_SECTIONS_REPORTS}?sectionId=${filterData?._id}`,
+        `${EndPoints.ADMIN.GET_SECTIONS_REPORTS}?sectionId=${tempData?.selectedReportsClassData?._id}`,
       );
       // console.log(res);
 
@@ -146,11 +142,11 @@ export default function SectionView({
   };
 
   useEffect(() => {
-    if (filterData?._id) {
+    if (tempData?.selectedReportsClassData?._id) {
       getFeeSummary();
+      getSectionReports();
     }
-    getSectionReports();
-  }, [filterData?._id]);
+  }, [tempData?.selectedReportsClassData?._id]);
 
   const filterPendingPayments = () => {
     const filtered = sectionList?.filter((student) => {
@@ -185,14 +181,23 @@ export default function SectionView({
       <div className="flex">
         <button
           type="button"
-          onClick={() => setSelectedView("class")}
+          onClick={() => {
+            setSelectedView("class");
+            dispatch(
+              setTempData({
+                selectedReportsClassTab: "class",
+                selectedReportsClassData: null,
+              }),
+            );
+          }}
           className="text-xl font-poppins-bold cursor-pointer"
         >
           Reports & Analytics
         </button>
         <ChevronRight className="w-7 h-7" />
         <p className="text-xl text-textBlue font-poppins-bold">
-          {filterData?.className ?? "Nursary"} {filterData?.name ?? "A"}
+          {tempData?.selectedReportsClassData?.className ?? ""}{" "}
+          {tempData?.selectedReportsClassData?.name ?? ""}
         </p>
       </div>
 
@@ -319,8 +324,15 @@ export default function SectionView({
                       <button
                         type="button"
                         onClick={() => {
-                          setFilterData({ ...filterData, studentData: std });
+                          console.log(std);
+
                           setSelectedView("student");
+                          dispatch(
+                            setTempData({
+                              selectedReportsClassTab: "student",
+                              selectedReportsStudentData: std,
+                            }),
+                          );
                         }}
                         className="bg-backgroundBlue text-textPrimary text-sm px-4 py-1 rounded-md"
                       >
@@ -397,8 +409,13 @@ export default function SectionView({
                         <button
                           type="button"
                           onClick={() => {
-                            setFilterData({ ...filterData, studentData: std });
                             setSelectedView("student");
+                            dispatch(
+                              setTempData({
+                                selectedReportsClassTab: "student",
+                                selectedReportsStudentData: std,
+                              }),
+                            );
                           }}
                           className="bg-backgroundBlue text-textPrimary text-sm px-4 py-1 rounded-md"
                         >

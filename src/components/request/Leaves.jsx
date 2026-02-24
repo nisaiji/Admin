@@ -450,7 +450,7 @@ export default function Leaves() {
                   </table>
                 </div>
                 <section
-                  className={`w-[350px] p-5 rounded-2xl overflow-y-auto sticky top-4 flex flex-col ${
+                  className={`w-[350px] ml-2 p-5 rounded-2xl overflow-y-auto sticky top-4 flex flex-col ${
                     isDarkMode ? "bg-[#6868684D]" : "bg-whiteBackground2"
                   }`}
                 >

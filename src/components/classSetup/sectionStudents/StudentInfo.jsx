@@ -25,6 +25,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
       document.body.style.overflow = "auto";
     };
   }, [modelOpen]);
+// console.log(currStudent);
 
   // Print student information in pdf format.
   const handleScreenshot = () => {

@@ -172,7 +172,11 @@ export default function SectionData({
               }),
             );
           }
-          setSession(res?.result);
+          setSession(
+            res?.result.sort(
+              (a, b) => a?.academicStartYear - b?.academicStartYear,
+            ),
+          );
         }
       }
     } catch (e) {
@@ -354,6 +358,8 @@ export default function SectionData({
                   const selected = session?.find(
                     (s) => s?._id === e?.target?.value,
                   );
+                  localStorage.removeItem("classAndSectionData");
+                  localStorage.removeItem("tempData");
                   dispatch(
                     setClassAndSectionData({
                       selectedSession: selected,

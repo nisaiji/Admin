@@ -1,31 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { axiosClient } from "../../../../services/axiosClient";
 import EndPoints from "../../../../services/EndPoints";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setTempData } from "../../../../store/AppAuthSlice";
 
-const dummayData = [
-  {
-    _id: "689ee11474d391f6f87fd2dc",
-    name: "A",
-    paidStudentsCount: 1,
-    totalStudentsCount: 3,
-    unpaidStudentsCount: 2,
-    classId: "689ee0b774d391f6f87fd2d5",
-    className: "1th",
-    sectionStudentCount: 7,
-  },
-  {
-    _id: "69594fb2cf00e1de857d4acf",
-    name: "B",
-    paidStudentsCount: 0,
-    totalStudentsCount: 0,
-    unpaidStudentsCount: 0,
-    classId: "689ee0b774d391f6f87fd2d5",
-    className: "1th",
-    sectionStudentCount: 0,
-  },
-];
-export default function ClassView({ setFilterData, setSelectedView }) {
+export default function ClassView({ setSelectedView }) {
+  const dispatch = useDispatch();
   const { classAndSectionData } = useSelector((state) => state.appAuth);
   const [classWiseTransactions, setClassWiseTransactions] = useState([]);
 
@@ -98,8 +78,13 @@ export default function ClassView({ setFilterData, setSelectedView }) {
                       <button
                         type="button"
                         onClick={() => {
-                          setFilterData(item);
                           setSelectedView("section");
+                          dispatch(
+                            setTempData({
+                              selectedReportsClassTab: "section",
+                              selectedReportsClassData: item,
+                            }),
+                          );
                         }}
                         className="bg-blue-500 text-white text-sm px-4 py-1 rounded-md"
                       >

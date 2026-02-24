@@ -368,10 +368,11 @@ export default function AttendanceData({
    */
   const getDailyAttendanceChart = async () => {
     try {
-      const url = EndPoints.TEACHER.DASHBOARD_ATTENDANCE_STATUS;
+      const url = EndPoints.ADMIN.DASHBOARD_ATTENDANCE_STATUS;
       const payload = {
         startTime: attendanceTime.day.startTime,
         endTime: attendanceTime.day.endTime,
+        sessionId: classAndSectionData?.selectedSession?._id,
       };
       setLoading(true);
       const response = await axiosClient.post(url, payload);
@@ -379,10 +380,10 @@ export default function AttendanceData({
       const result = response?.result;
       if (response?.statusCode === 200) {
         setStudentAbsentCountData(
-          result?.sectionAttendance[0]?.absentCount || 0,
+          result?.sectionAttendance?.[0]?.absentCount || 0,
         );
         setStudentPresentCountData(
-          result?.sectionAttendance[0]?.presentCount || 0,
+          result?.sectionAttendance?.[0]?.presentCount || 0,
         );
         setTotalStudentClassSectionWise(result?.totalStudent);
       }
@@ -560,6 +561,9 @@ export default function AttendanceData({
               startTime: attendanceTime.month.startTime,
               endTime: attendanceTime.month.endTime,
             };
+      if (role === "admin") {
+        currentDates.sessionId = classAndSectionData?.selectedSession?._id;
+      }
       setLoading(true);
       const url =
         role === "classTeacher"

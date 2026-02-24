@@ -19,7 +19,19 @@ export const setClassAndSectionData = createAsyncThunk(
     const mergedData = { ...parsed, ...data };
     localStorage.setItem("classAndSectionData", JSON.stringify(mergedData));
     return mergedData;
-  }
+  },
+);
+
+// temp filter data
+export const setTempData = createAsyncThunk(
+  "auth/setTempData",
+  async (data) => {
+    const existing = localStorage.getItem("tempData");
+    const parsed = existing ? JSON.parse(existing) : {};
+    const mergedData = { ...parsed, ...data };
+    localStorage.setItem("tempData", JSON.stringify(mergedData));
+    return mergedData;
+  },
 );
 
 // Thunk to fetch admin data
@@ -49,7 +61,7 @@ export const fetchTeacher = createAsyncThunk(
     } catch (e) {
       // console.log({ e });
     }
-  }
+  },
 );
 
 /**
@@ -78,6 +90,7 @@ const initialState = {
   teacherData: JSON.parse(localStorage.getItem("teacherData")) || {},
   classAndSectionData:
     JSON.parse(localStorage.getItem("classAndSectionData")) || {},
+  tempData: JSON.parse(localStorage.getItem("tempData")) || {},
   status: JSON.parse(localStorage.getItem("status")) || {},
 };
 
@@ -133,6 +146,9 @@ const appAuthSlice = createSlice({
       })
       .addCase(setClassAndSectionData.fulfilled, (state, action) => {
         state.classAndSectionData = action.payload;
+      })
+      .addCase(setTempData.fulfilled, (state, action) => {
+        state.tempData = action.payload;
       });
   },
 });

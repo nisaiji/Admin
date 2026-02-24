@@ -260,8 +260,8 @@ const Event = () => {
                   ? t("eventForm.title.updateWorkday")
                   : t("eventForm.title.edit")
                 : isWorkday
-                ? t("eventForm.title.addWorkday")
-                : t("eventForm.title.add")
+                  ? t("eventForm.title.addWorkday")
+                  : t("eventForm.title.add")
             }
           />
           {errors.title && (
@@ -350,7 +350,7 @@ const Event = () => {
                               endDate:
                                 prev.endDate &&
                                 moment(prev.endDate, "DD/MM/YYYY").isBefore(
-                                  date
+                                  date,
                                 )
                                   ? formattedDate
                                   : prev.endDate,
@@ -467,17 +467,19 @@ const Event = () => {
           startTime: new Date(year, month, 1).getTime(),
           endTime: new Date(year, month + 1, 0, 23, 59, 59, 999).getTime(),
           sessionId: classAndSectionData?.selectedSession?._id,
-        }
+        },
       );
 
       if (response?.statusCode === 200) {
         setEvents(
-          response?.result?.sort((a, b) => new Date(a.date) - new Date(b.date))
+          response?.result?.sort((a, b) => new Date(a.date) - new Date(b.date)),
         );
       }
       if (response2?.statusCode === 200) {
         setWorkdays(
-          response2?.result?.sort((a, b) => new Date(a.date) - new Date(b.date))
+          response2?.result?.sort(
+            (a, b) => new Date(a.date) - new Date(b.date),
+          ),
         );
       }
     } catch (e) {
@@ -652,7 +654,7 @@ const Event = () => {
       const isSunday =
         moment(targetDate).day() === 0 &&
         !workdays.some(
-          (w) => moment(w.date).format("YYYY-MM-DD") === targetDate
+          (w) => moment(w.date).format("YYYY-MM-DD") === targetDate,
         );
 
       // Find event or workday data
@@ -667,7 +669,7 @@ const Event = () => {
       const isHoliday = !!title;
 
       const workdayData = workdays.find((w) =>
-        moment(w.date).isSame(targetDate, "day")
+        moment(w.date).isSame(targetDate, "day"),
       );
 
       const handleClick = () => {
@@ -697,7 +699,7 @@ const Event = () => {
           onClick={handleClick}
           isSunday={isSunday}
           isToday={isToday}
-        />
+        />,
       );
     }
     return days;
@@ -822,7 +824,7 @@ const Event = () => {
 
   return (
     <div
-      className={`grid grid-cols-6 gap-6 p-6 ${
+      className={`grid grid-cols-6 gap-6 p-6 min-h-[calc(100vh-72px)] ${
         isDarkMode ? "bg-background2" : "bg-whiteBackground2"
       }`}
     >
@@ -939,7 +941,7 @@ const Event = () => {
           ) : (
             <ul className={`overflow-y-auto max-h-[450px] mt-4`}>
               {/* list of events */}
-              {workdays.map((itm, index) => (
+              {workdays?.map((itm, index) => (
                 <div
                   key={index}
                   className={`mb-4 rounded-lg overflow-hidden border-l-8 border-borderBlue`}
@@ -953,16 +955,20 @@ const Event = () => {
                       {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                     </div>
                     {/* delete icon for admin */}
-                    {isAdmin && (
-                      <img
-                        src={isDarkMode ? deleteEvent : deleteEventw}
-                        onClick={() => {
-                          setEventToDelete(itm);
-                          setShowDeleteConfirmation(true);
-                        }}
-                        className={`size-[25px] cursor-pointer`}
-                      />
-                    )}
+                    {isAdmin &&
+                      moment(itm?.date).isAfter(
+                        moment().subtract(1, "day"),
+                        "day",
+                      ) && (
+                        <img
+                          src={isDarkMode ? deleteEvent : deleteEventw}
+                          onClick={() => {
+                            setEventToDelete(itm);
+                            setShowDeleteConfirmation(true);
+                          }}
+                          className={`size-[25px] cursor-pointer`}
+                        />
+                      )}
                   </div>
                   <div className={`bg-transparent mt-2`}>
                     <div className={`flex py-1 justify-between items-center`}>
@@ -993,7 +999,7 @@ const Event = () => {
                   </div>
                 </div>
               ))}
-              {events.map((itm, index) => (
+              {events?.map((itm, index) => (
                 <div
                   key={index}
                   className={`mb-4 rounded-lg overflow-hidden border-l-8 border-borderBlue`}
@@ -1005,16 +1011,20 @@ const Event = () => {
                       {moment(itm?.date).format("DD MMMM YYYY, ddd")}
                     </div>
                     {/* delete icon for admin */}
-                    {isAdmin && (
-                      <img
-                        src={isDarkMode ? deleteEvent : deleteEventw}
-                        onClick={() => {
-                          setEventToDelete(itm);
-                          setShowDeleteConfirmation(true);
-                        }}
-                        className={`size-[25px] cursor-pointer`}
-                      />
-                    )}
+                    {isAdmin &&
+                      moment(itm?.date).isAfter(
+                        moment().subtract(1, "day"),
+                        "day",
+                      ) && (
+                        <img
+                          src={isDarkMode ? deleteEvent : deleteEventw}
+                          onClick={() => {
+                            setEventToDelete(itm);
+                            setShowDeleteConfirmation(true);
+                          }}
+                          className={`size-[25px] cursor-pointer`}
+                        />
+                      )}
                   </div>
                   <div className={`bg-transparent mt-2`}>
                     <div className={`flex py-1 justify-between items-center`}>

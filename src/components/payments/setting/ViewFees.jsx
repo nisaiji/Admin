@@ -54,7 +54,7 @@ export function FeeStructureView({ onBack, setSelected }) {
 
     let rows = [];
 
-    classes.forEach((cls) => {
+    classes?.forEach((cls) => {
       const sections = cls?.sections || [];
 
       sections.forEach((sec) => {
@@ -123,9 +123,7 @@ export function FeeStructureView({ onBack, setSelected }) {
     return ["all", ...Array.from(uniqueClasses)];
   }, [structures]);
 
-  const statuses = ["all", "Active", "Inactive",];
-
-  const currentStructures = filteredStructures.slice(0, 10);
+  const statuses = ["all", "Active", "Inactive"];
 
   return (
     <div className="w-full mx-auto max-w-5xl my-6">
@@ -199,7 +197,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                   }}
                   className="w-full pl-9 pr-4 py-2.5 bg-[#0a0a0a] border border-gray-700 rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:border-[#0A81D1] transition-colors"
                 >
-                  {classes.map((cls) => (
+                  {classes?.map((cls) => (
                     <option key={cls} value={cls}>
                       {cls === "all" ? "All Classes" : cls}
                     </option>
@@ -258,7 +256,7 @@ export function FeeStructureView({ onBack, setSelected }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentStructures?.map((structure, i) => (
+                  {filteredStructures?.map((structure, i) => (
                     <tr
                       key={i}
                       className="border-b border-gray-800 hover:bg-[#0a0a0a]/50 transition-colors"

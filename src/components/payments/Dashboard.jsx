@@ -211,6 +211,7 @@ export default function Dashboard({ setSelected }) {
       const res = await axiosClient.post(EndPoints.ADMIN.GET_PAYMENT_BY_MODE, {
         startDate,
         endDate,
+        sessionId: classAndSectionData?.selectedSession?._id,
       });
       // console.log(res);
       if (res?.statusCode === 200) {
@@ -234,6 +235,7 @@ export default function Dashboard({ setSelected }) {
         {
           startDate,
           endDate,
+          sessionId: classAndSectionData?.selectedSession?._id,
         },
       );
       if (res?.statusCode === 200) {
@@ -252,11 +254,11 @@ export default function Dashboard({ setSelected }) {
   useEffect(() => {
     // console.log(selectedMonth);
 
-    if (selectedMonth) {
+    if (selectedMonth && classAndSectionData?.selectedSession?._id) {
       getPaymentByMode(selectedMonth);
       getDailyPaymentSummary(selectedMonth);
     }
-  }, [selectedMonth]);
+  }, [selectedMonth, classAndSectionData?.selectedSession?._id]);
 
   return (
     <div className="p-6 w-full text-white">

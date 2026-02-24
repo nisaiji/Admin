@@ -5,14 +5,15 @@ import {
   Clock,
   CheckCircle2,
   TrendingUp,
-  Bell,
-  CirclePercent,
   Download,
-  IndianRupee,
   ChevronRight,
   MoreVertical,
+  Info,
+  CirclePercent,
+  AlertCircle,
+  Calendar,
 } from "lucide-react";
-import discount from "../../../../assets/images/fees/discount.png";
+import discountimg from "../../../../assets/images/fees/discount.png";
 import profile from "../../../../assets/images/profileEmpty.png";
 import notification from "../../../../assets/images/fees/notifications.png";
 
@@ -25,13 +26,20 @@ import {
   getPaymentStatusColor,
   getPaymentStatusText,
 } from "../../../../utils/helper";
+import { useDispatch, useSelector } from "react-redux";
+import { setTempData } from "../../../../store/AppAuthSlice";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../../../utils/tooltip";
 
-export default function StudentView({
-  setSelectedView,
-  filterData,
-  classAndSectionData,
-}) {
+export default function StudentView({ setSelectedView, classAndSectionData }) {
+  const dispatch = useDispatch();
+  const tempData = useSelector((state) => state.appAuth.tempData);
   const [studentSummary, setStudentSummary] = useState(null);
+  const [studentInstallmentData, setStudentInstallmentData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
 
@@ -52,23 +60,40 @@ export default function StudentView({
       const start = moment(`${academicStartYear}-04-01`);
       const end = moment();
       // Only fetch if we have a valid student ID
-      if (!filterData?.studentData?._id) return;
+      if (!tempData?.selectedReportsStudentData?._id) return;
 
       const res = await axiosClient.post(
-        `${EndPoints.ADMIN.GET_TRANSITIONS}?sessionStudentId=${filterData?.studentData?._id}&limit=${999}&startDate=${start}&endDate=${end}`,
+        `${EndPoints.ADMIN.GET_TRANSITIONS}?sessionStudentId=${tempData?.selectedReportsStudentData?._id}&limit=${999}&startDate=${start}&endDate=${end}`,
       );
 
       if (res?.statusCode === 200) {
         setStudentSummary(res?.result?.transactions);
       }
     } catch (e) {
-      console.log("Error fetching fee summary:", e);
+      // console.log("Error fetching fee summary:", e);
+    }
+  };
+  // console.log({tempData});
+
+  const getStudentReports = async () => {
+    try {
+      const res = await axiosClient.post(
+        `${EndPoints.ADMIN.GET_SECTIONS_REPORTS}?sessionStudentId=${tempData?.selectedReportsStudentData?._id}&sectionId=${tempData?.selectedReportsStudentData?.section}`,
+      );
+      // console.log(res);
+
+      if (res?.statusCode === 200) {
+        setStudentInstallmentData(res?.result?.[0] ?? null);
+      }
+    } catch (e) {
+      // console.log("Error fetching fee summary:", e);
     }
   };
 
   useEffect(() => {
     getStudentSummary();
-  }, [filterData, academicStartYear]);
+    getStudentReports();
+  }, [tempData, academicStartYear]);
 
   // Send Reminder
   const sendParentReminder = async () => {
@@ -76,7 +101,7 @@ export default function StudentView({
       setLoading(true);
       const res = await axiosClient.post(
         `${EndPoints.ADMIN.GET_REPORT_FEE_REMINDER}`,
-        { sessionStudentId: filterData?.studentData?._id },
+        { sessionStudentId: tempData?.selectedReportsStudentData?._id },
       );
 
       if (res?.statusCode === 200) {
@@ -101,7 +126,7 @@ export default function StudentView({
     if (amount > selectedTxn?.amount) {
       return setRefundError("Refund amount cannot exceed transaction amount");
     }
-    if (amount > filterData?.studentData?.wallet?.balance ?? 0) {
+    if (amount > tempData?.selectedReportsStudentData?.wallet?.balance) {
       return setRefundError("Refund amount cannot exceed advance balance");
     }
 
@@ -126,28 +151,159 @@ export default function StudentView({
   };
 
   // Calculate Financial Summary
-  const feeInstallments = filterData?.studentData?.feeInstallments || [];
-  // console.log(feeInstallments);
-  const totalFees = feeInstallments.reduce((acc, curr) => {
-    console.log(curr);
+  const feeInstallments = studentInstallmentData?.feeInstallments || [];
 
+  const totalFees = feeInstallments.reduce((acc, curr) => {
     const total =
       (curr?.baseAmount ? (curr?.baseAmount ?? 0) : (curr?.amount ?? 0)) +
       (curr?.lateFeeApplied ?? 0);
     return acc + total;
   }, 0);
 
+  const discount = 0;
+
   const paidAmount = feeInstallments.reduce(
     (acc, curr) => acc + (curr?.amountPaid ?? 0),
     0,
   );
 
-  const pendingAmount = totalFees - paidAmount;
+  const interest = feeInstallments.reduce(
+    (acc, curr) => acc + (curr?.lateFeeApplied ?? 0),
+    0,
+  );
+
+  const pendingAmount = feeInstallments.reduce((acc, curr) => {
+    if (curr?.amountPaid < curr?.totalPayable) {
+      return acc + curr?.baseAmount - curr?.amountPaid;
+    }
+  }, 0);
 
   const handleDownloadReceipt = (txn) => {
     // Integration logic for receipt download
     toast.success(`Downloading receipt for ${txn?.zohoPaymentId ?? "NA"}`);
   };
+
+  const deriveInstallmentState = (inst, today = moment()) => {
+    const total = Number(inst.totalPayable);
+    const paid = Number(inst.amountPaid ?? 0);
+    const remaining = Math.max(total - paid, 0);
+
+    const isNA = inst.baseAmount === 0;
+    const isPaid = inst?.status === "paid";
+    const isOverdue = inst?.lateFeeApplied ?? 0;
+    const isCurrent =
+      remaining > 0 &&
+      today.isBetween(
+        moment(inst.startDate),
+        moment(inst.dueDate),
+        "day",
+        "[]",
+      );
+
+    const isAdvanceCovered =
+      remaining === 0 && paid === 0 && inst.advanceUsed > 0;
+
+    return {
+      isNA,
+      isPaid,
+      isOverdue,
+      isCurrent,
+      isUpcoming: !isPaid && !isOverdue && !isCurrent,
+      remaining,
+      isAdvanceCovered,
+    };
+  };
+
+  function MonthlyCard({ installment }) {
+    const state = deriveInstallmentState(installment);
+
+    const ui = state.isPaid
+      ? {
+          bg: "bg-[rgba(0,166,146,0.10)]",
+          border: "border-[#4CBC9A]",
+          text: "text-[#4CBC9A]",
+          label: state.isAdvanceCovered ? "Advance Paid" : "Payment Completed",
+          iconBg: state.isAdvanceCovered ? "#0A81D1" : "#4CBC9A",
+          icon: (
+            <svg
+              className="w-4.5 h-4.5 stroke-[3.5]"
+              fill="none"
+              stroke="white"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          ),
+        }
+      : state.isOverdue
+        ? {
+            bg: "bg-gradient-to-br from-[#2d1a1a] to-[#1a0f0f]",
+            border: "border-[#EF4444]",
+            text: "text-[#EF4444]",
+            label: "Overdue",
+            icon: (
+              <AlertCircle className="w-4.5 h-4.5 text-white stroke-[2.5]" />
+            ),
+          }
+        : state.isCurrent
+          ? {
+              bg: "bg-gradient-to-br from-[#2d2416] to-[#1a1610]",
+              border: "border-[#F59E0B]",
+              text: "text-[#F59E0B]",
+              label: "Pending",
+              icon: <Clock className="w-4.5 h-4.5 text-white stroke-[2.5]" />,
+            }
+          : {
+              bg: "bg-gradient-to-br from-[#1a1d28] to-[#0f1216]",
+              border: "border-white/20",
+              text: "text-gray-400",
+              label: "Upcoming",
+              icon: <Calendar className="w-4.5 h-4.5 text-white stroke-[2]" />,
+            };
+
+    return (
+      <div
+        className={`${ui.bg} rounded-lg border-l-4 ${ui.border} p-4 shadow-lg`}
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center shadow-lg"
+              style={{ backgroundColor: ui.iconBg || "rgba(255,255,255,0.1)" }}
+            >
+              {ui.icon}
+            </div>
+
+            <div>
+              <h3 className="text-white font-bold">
+                {moment(installment.startDate).format("MMM")}
+              </h3>
+              <p className={`text-xs font-semibold ${ui.text}`}>{ui.label}</p>
+            </div>
+          </div>
+
+          <div className="text-right">
+            <span className="text-white font-bold">
+              ₹
+              {state.isPaid
+                ? installment.amountPaid - installment.lateFeeApplied
+                : installment.amount}
+            </span>
+
+            {installment.lateFeeApplied > 0 && (
+              <div className="mt-1 bg-[#EF4444] text-white text-xs px-2 py-1 rounded">
+                +₹{installment.lateFeeApplied}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -163,35 +319,65 @@ export default function StudentView({
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setSelectedView("section")} // Back to Section View
+              onClick={() => {
+                setSelectedView("section");
+                dispatch(
+                  setTempData({
+                    selectedReportsClassTab: "section",
+                    selectedReportsStudentData: null,
+                  }),
+                );
+              }}
               className="text-gray-400 hover:text-white hover:bg-[#1a1d24]"
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="flex items-center gap-2 text-sm text-gray-400">
               <span
-                onClick={() => setSelectedView("class")}
+                onClick={() => {
+                  setSelectedView("class");
+                  dispatch(
+                    setTempData({
+                      selectedReportsClassTab: "class",
+                      selectedReportsClassData: null,
+                      selectedReportsStudentData: null,
+                    }),
+                  );
+                }}
                 className="hover:text-white cursor-pointer"
               >
                 Reports & Analytics
               </span>
               <ChevronRight className="w-7 h-7" />
               <span
-                onClick={() => setSelectedView("section")}
+                onClick={() => {
+                  setSelectedView("section");
+                  dispatch(
+                    setTempData({
+                      selectedReportsClassTab: "section",
+                      selectedReportsStudentData: null,
+                    }),
+                  );
+                }}
                 className="hover:text-white cursor-pointer"
               >
-                {filterData?.className ?? "NA"} {filterData?.name ?? ""}
+                {tempData?.selectedReportsClassData?.className ?? "NA"}{" "}
+                {tempData?.selectedReportsClassData?.name ?? ""}
               </span>
               <ChevronRight className="w-7 h-7" />
               <span className="text-[#0A81D1]">
-                {filterData?.studentData?.student?.firstname ?? ""}{" "}
-                {filterData?.studentData?.student?.lastname ?? ""}
+                {tempData?.selectedReportsStudentData?.student?.firstname ?? ""}{" "}
+                {tempData?.selectedReportsStudentData?.student?.lastname ?? ""}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button className="bg-backgroundBlue15 text-textBlue text-sm font-poppins-bold p-[10px] rounded-md flex justify-center items-center gap-2">
-              <img src={discount} alt="d" className="size-6 object-contain" />
+              <img
+                src={discountimg}
+                alt="d"
+                className="size-6 object-contain"
+              />
               Dispute
             </button>
             <button
@@ -229,12 +415,13 @@ export default function StudentView({
             />
             <div>
               <h2 className="text-xl mb-1">
-                {filterData?.studentData?.student?.firstname}{" "}
-                {filterData?.studentData?.student?.lastname}
+                {tempData?.selectedReportsStudentData?.student?.firstname}{" "}
+                {tempData?.selectedReportsStudentData?.student?.lastname}
               </h2>
               <p className="text-sm text-gray-400">
                 Student ID:{" "}
-                {filterData?.studentData?.student?.studentId ?? "N/A"}
+                {tempData?.selectedReportsStudentData?.student?.studentId ??
+                  "N/A"}
               </p>
             </div>
           </div>
@@ -242,20 +429,81 @@ export default function StudentView({
 
         {/* Financial Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          {/* Total Fees Card */}
+          {/* Total Fees (less discount) Card */}
           <div className="bg-[#1a1d24] rounded-lg p-5 border border-gray-800">
             <div className="flex items-start justify-between mb-3">
               <div className="p-2 bg-blue-500/10 rounded-lg">
                 <CircleDollarSign className="h-5 w-5 text-blue-500" />
               </div>
+              <div className="relative inline-block">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="text-gray-400 hover:text-white transition-colors">
+                        <Info className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-[#1a1d24] border border-gray-700 p-4 w-[250px]">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-white mb-3">
+                          Fee Breakdown
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">
+                              Annual Tuition:
+                            </span>
+                            <span className="text-white">
+                              ₹ {totalFees - discount - interest}
+                            </span>
+                          </div>
+                          {interest > 0 && (
+                            <div className="flex justify-between text-red-500">
+                              <span>Interest Applied:</span>
+                              <span>+ ₹ {interest ?? 0}</span>
+                            </div>
+                          )}
+                          {discount > 0 && (
+                            <div className="flex justify-between text-green-500">
+                              <span>Discount Applied:</span>
+                              <span>- ₹ {discount ?? 0}</span>
+                            </div>
+                          )}
+                          <div className="border-t border-gray-700 pt-2 mt-2">
+                            <div className="flex justify-between font-medium">
+                              <span className="text-gray-300">
+                                Net Annual Fee:
+                              </span>
+                              <span className="text-[#0A81D1]">
+                                ₹ {totalFees - discount}
+                              </span>
+                            </div>
+                          </div>
+                          {/* <div className="flex justify-between text-xs text-gray-500 pt-1">
+                          <span>Monthly Fee:</span>
+                          <span>₹ {(totalFees - discount) / 12}</span>
+                        </div> */}
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
             <div className="space-y-1">
-              <p className="text-sm text-gray-400">Total Fees</p>
-              <p className="text-2xl">₹ {totalFees.toLocaleString()}</p>
+              <p className="text-sm text-gray-400">
+                Total Fees (less discount)
+              </p>
+              <p className="text-2xl">₹ {totalFees - discount}</p>
+              {discount > 0 && (
+                <p className="text-xs text-gray-500">
+                  Discount: ₹ {discount ?? 0}
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Paid Amount Card */}
+          {/* Fees Accrued Card */}
           <div className="bg-[#1a1d24] rounded-lg p-5 border border-gray-800">
             <div className="flex items-start justify-between mb-3">
               <div className="p-2 bg-green-500/10 rounded-lg">
@@ -263,44 +511,77 @@ export default function StudentView({
               </div>
             </div>
             <div className="space-y-1">
-              <p className="text-sm text-gray-400">Paid Amount</p>
-              <p className="text-2xl text-green-500">
-                ₹ {paidAmount.toLocaleString()}
+              <p className="text-sm text-gray-400">
+                Fees Accrued (till due date)
               </p>
+              <p className="text-2xl text-green-500">₹ {paidAmount ?? 0}</p>
             </div>
           </div>
 
-          {/* Pending Amount Card */}
-          <div className="bg-[#1a1d24] rounded-lg p-5 border border-gray-800">
-            <div className="flex items-start justify-between mb-3">
-              <div className="p-2 bg-orange-500/10 rounded-lg">
-                <Clock className="h-5 w-5 text-orange-500" />
+          {/* Conditional: Pending Amount Card OR Advanced Amount Card */}
+          {pendingAmount > 0 ? (
+            // Pending Amount Card
+            <div className="bg-[#1a1d24] rounded-lg p-5 border border-gray-800">
+              <div className="flex items-start justify-between mb-3">
+                <div className="p-2 bg-orange-500/10 rounded-lg">
+                  <Clock className="h-5 w-5 text-orange-500" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-400">Pending Amount</p>
+                <p className="text-2xl text-orange-500">₹ {pendingAmount}</p>
               </div>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm text-gray-400">Pending Amount</p>
-              <p className="text-2xl text-orange-500">
-                ₹ {pendingAmount.toLocaleString()}
-              </p>
+          ) : (
+            // Advanced Amount Card
+            <div className="bg-[#1a1d24] rounded-lg p-5 border border-gray-800">
+              <div className="flex items-start justify-between mb-3">
+                <div className="p-2 bg-purple-500/10 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-purple-500" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-400">Advanced Amount</p>
+                <p className="text-2xl text-purple-500">
+                  ₹ {studentInstallmentData?.wallet?.balance ?? 0}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Advance Payment Card */}
+          {/* Interest Card */}
           <div className="bg-[#1a1d24] rounded-lg p-5 border border-gray-800">
             <div className="flex items-start justify-between mb-3">
-              <div className="p-2 bg-purple-500/10 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-purple-500" />
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <CirclePercent className="h-5 w-5 text-red-500" />
               </div>
             </div>
             <div className="space-y-1">
-              <p className="text-sm text-gray-400">Advance Payment</p>
-              <p className="text-2xl text-purple-500">
-                ₹ {filterData?.studentData?.wallet?.balance ?? 0}
-              </p>
+              <p className="text-sm text-gray-400">Interest (if any)</p>
+              <p className="text-2xl text-red-500">₹ {interest}</p>
             </div>
           </div>
         </div>
 
+        {/* installment cards */}
+        <div className="w-full my-3">
+          <div className="mb-6">
+            <h2 className="text-white text-2xl font-bold mb-2">
+              Monthly Fee Breakdown
+            </h2>
+            <p className="text-gray-400 text-sm">
+              Overview of all monthly installments
+            </p>
+          </div>
+
+          {/* Monthly Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {feeInstallments?.map((installment, i) => (
+              <MonthlyCard key={i} installment={installment} />
+            ))}
+          </div>
+        </div>
+        
         {/* Transactions Section */}
         <div className="bg-[#1a1d24] rounded-lg p-6">
           {/* Transactions Header */}
@@ -460,7 +741,8 @@ export default function StudentView({
             </div>
 
             <div className="mb-3 text-sm text-gray-400">
-              Advance Balance: ₹{filterData?.studentData?.wallet?.balance ?? 0}
+              Advance Balance: ₹
+              {tempData?.selectedReportsStudentData?.wallet?.balance ?? 0}
             </div>
 
             <div className="mb-3 text-sm text-gray-400">

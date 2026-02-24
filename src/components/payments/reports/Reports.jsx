@@ -1,19 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import ClassSummary from "./classsummary/ClassSummary";
-// import PeriodicView from "./PeriodicView";
 import PaymentView from "./PaymentView";
-// import FeeSummaryView from "./FeeSummaryView";
 import RefundAndFailedTransition from "./RefundAndFailedTransition";
 
-// import calendar from "../../../assets/images/fees/calendar.png";
-// import pending from "../../../assets/images/fees/pendingBlue.png";
 import receipt from "../../../assets/images/fees/receipt.png";
 import wallet from "../../../assets/images/fees/wallet.png";
 import classimg from "../../../assets/images/fees/class.png";
+import { useDispatch, useSelector } from "react-redux";
+import { setTempData } from "../../../store/AppAuthSlice";
 
 export default function Reports() {
-  const [selectedView, setSelectedView] = useState("paymentmode");
+  const dispatch = useDispatch();
+  const tempData = useSelector((state) => state.appAuth.tempData);
+  const [selectedView, setSelectedView] = useState(
+    tempData?.selectedReportsTab || "paymentmode",
+  );
   const [isHide, setIsHide] = useState(() => {
     return localStorage.getItem("hideReportsHeader") === "true";
   });
@@ -48,7 +50,6 @@ export default function Reports() {
     localStorage.setItem("hideReportsHeader", isHide ? "true" : "false");
   }, [isHide]);
 
-  // when switching tabs, reset hide state (optional but recommended)
   useEffect(() => {
     if (selectedView !== "class") {
       setIsHide(false);
@@ -71,7 +72,10 @@ export default function Reports() {
                 <button
                   key={key}
                   type="button"
-                  onClick={() => setSelectedView(key)}
+                  onClick={() => {
+                    setSelectedView(key);
+                    dispatch(setTempData({ selectedReportsTab: key }));
+                  }}
                   className={`text-sm font-poppins-bold p-[10px] rounded-md flex justify-center items-center gap-2 ${
                     isActive
                       ? "bg-backgroundBlue text-textPrimary"

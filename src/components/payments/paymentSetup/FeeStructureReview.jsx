@@ -18,7 +18,7 @@ export default function FeeStructureReview({
   getInstallmentDates,
 }) {
   return (
-    <div>
+    <div className="p-8">
       <Toaster position="top-center" reverseOrder={false} />
       <button
         className="flex items-center gap-2 text-gray-400 hover:text-white mb-6"

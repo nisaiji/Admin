@@ -1,26 +1,33 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import classroom from "../../assets/images/fees/classroom.png";
 import arrow from "../../assets/images/ArrowRight.png";
 import { useNavigate } from "react-router-dom";
+import { setTempData } from "../../store/AppAuthSlice";
 
 export default function Sidebar({ items, selected, setSelected }) {
+  const dispatch = useDispatch();
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const navigate = useNavigate();
 
   return (
     <div
-      className={`${isDarkMode
-        ? "bg-gradient-to-t from-[#0A81D11A] to-[#0f0f0f]"
-        : "bg-whiteBackground"
-        } w-[250px] min-h-[calc(100vh-70px)] pt-[30px] flex flex-col items-center gap-3`}
+      className={`${
+        isDarkMode
+          ? "bg-gradient-to-t from-[#0A81D11A] to-[#0f0f0f]"
+          : "bg-whiteBackground"
+      } w-[250px] min-h-[calc(100vh-70px)] pt-[30px] flex flex-col items-center gap-3`}
     >
       {items.map((item, idx) => (
         <div
           key={idx}
-          onClick={() => setSelected(item.label)}
-          className={`w-full flex justify-center cursor-pointer relative ${selected === item.label ? "bg-[#0A81D11A]" : ""
-            }`}
+          onClick={() => {
+            setSelected(item.label);
+            dispatch(setTempData({ selectedTab: item?.label }));
+          }}
+          className={`w-full flex justify-center cursor-pointer relative ${
+            selected === item.label ? "bg-[#0A81D11A]" : ""
+          }`}
         >
           {/* BLUE SELECTED TAB LINE */}
           {selected === item.label && (
