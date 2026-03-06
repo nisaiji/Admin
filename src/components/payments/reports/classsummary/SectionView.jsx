@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import collected from "../../../../assets/images/fees/collected.png";
 import pending from "../../../../assets/images/fees/pending.png";
 import refund from "../../../../assets/images/fees/refund.png";
+import due from "../../../../assets/images/fees/due.png";
 import { axiosClient } from "../../../../services/axiosClient";
 import EndPoints from "../../../../services/EndPoints";
 import { ChevronRight } from "lucide-react";
@@ -202,7 +203,7 @@ export default function SectionView({ setSelectedView }) {
       </div>
 
       {/* TOP CARDS */}
-      <div className="grid grid-cols-3 gap-4 my-6">
+      <div className="grid grid-cols-4 gap-4 my-6">
         {/* Total Collected Fees */}
         <div className="p-4 rounded-xl bg-[#1c1c1c] border-b-2 border-b-backgroundBlue">
           <div className="flex gap-4">
@@ -261,6 +262,19 @@ export default function SectionView({ setSelectedView }) {
           </p>
           {/* </div> */}
         </button>
+
+        {/* intrest */}
+        <div className="p-4 rounded-xl bg-[#1c1c1c] border-b-2 border-b-backgroundRed">
+          <div className="flex gap-4">
+            <div className="size-10 bg-backgroundRed bg-opacity-15 flex justify-center items-center rounded-md">
+              <img src={due} alt="p" className="size-6 object-contain" />
+            </div>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.totalLateFee ?? 0}
+            </p>
+          </div>
+          <p className="text-md font-poppins-regular mt-2">Interest</p>
+        </div>
       </div>
 
       {/* BOTTOM SECTION */}
@@ -305,13 +319,12 @@ export default function SectionView({ setSelectedView }) {
                       return (
                         <td key={i} className="py-4 px-2">
                           <span
-                            className={`text-sm font-poppins-bold ${
-                              isPaid
+                            className={`text-sm font-poppins-bold ${isPaid
                                 ? "text-[#4CBC9A]"
                                 : isUnpaid
                                   ? "text-[#E45858]"
                                   : "text-[#FFFFFF]"
-                            }`}
+                              }`}
                           >
                             {isPaid ? "Paid" : isUnpaid ? "Unpaid" : "-"}
                           </span>
@@ -324,8 +337,6 @@ export default function SectionView({ setSelectedView }) {
                       <button
                         type="button"
                         onClick={() => {
-                          console.log(std);
-
                           setSelectedView("student");
                           dispatch(
                             setTempData({
@@ -394,9 +405,8 @@ export default function SectionView({ setSelectedView }) {
                         return (
                           <td key={index} className="py-4 px-2">
                             <span
-                              className={`text-sm font-poppins-bold ${
-                                isPaid ? "text-[#4CBC9A]" : "text-[#E45858]"
-                              }`}
+                              className={`text-sm font-poppins-bold ${isPaid ? "text-[#4CBC9A]" : "text-[#E45858]"
+                                }`}
                             >
                               {isPaid ? "Paid" : "Unpaid"}
                             </span>

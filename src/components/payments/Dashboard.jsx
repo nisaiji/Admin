@@ -3,18 +3,20 @@ import { PieChart } from "@mui/x-charts";
 import collected from "../../assets/images/fees/collected.png";
 import pending from "../../assets/images/fees/pending.png";
 import refund from "../../assets/images/fees/refund.png";
+import due from "../../assets/images/fees/due.png";
 import upi from "../../assets/images/fees/upi.png";
 import netbanking from "../../assets/images/fees/net-banking.png";
 import creditcard from "../../assets/images/fees/creditcard.png";
 import BarChartComponent from "./BarChart";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import moment from "moment/moment";
 import {
   getPaymentStatusColor,
   getPaymentStatusText,
 } from "../../utils/helper";
+import { setTempData } from "../../store/AppAuthSlice";
 
 const ALL_PAYMENT_MODES = [
   { label: "UPI", value: "upi" },
@@ -77,6 +79,7 @@ const rows = [
   },
 ];
 export default function Dashboard({ setSelected }) {
+  const dispatch = useDispatch();
   const { classAndSectionData } = useSelector((state) => state.appAuth);
   const [feeSummary, setFeeSummary] = useState(null);
   const [paymentTransitions, setPaymentTransitions] = useState([]);
@@ -264,7 +267,7 @@ export default function Dashboard({ setSelected }) {
     <div className="p-6 w-full text-white">
       <p className="text-xl font-poppins-bold">Fee Overview</p>
       {/* TOP CARDS */}
-      <div className="grid grid-cols-3 gap-4 my-6">
+      <div className="grid grid-cols-4 gap-4 my-6">
         {/* Total Collected Fees */}
         <div className="p-4 rounded-xl bg-[#1c1c1c] border-b-2 border-b-backgroundBlue">
           <div className="flex gap-4">
@@ -313,6 +316,21 @@ export default function Dashboard({ setSelected }) {
             Advanced Paid Amount
           </p>
         </div>
+
+        {/* intrest */}
+        <div className="p-4 rounded-xl bg-[#1c1c1c] border-b-2 border-b-backgroundRed">
+          <div className="flex gap-4">
+            <div className="size-10 bg-backgroundRed bg-opacity-15 flex justify-center items-center rounded-md">
+              <img src={due} alt="p" className="size-6 object-contain" />
+            </div>
+            <p className="text-lg font-poppins-bold mt-1">
+              ₹ {feeSummary?.totalLateFee ?? 0}
+            </p>
+          </div>
+          <p className="text-md font-poppins-regular mt-2">
+            Interest
+          </p>
+        </div>
       </div>
 
       {/* Monthly Fee Trends */}
@@ -328,7 +346,15 @@ export default function Dashboard({ setSelected }) {
           </div>
           <button
             type="button"
-            onClick={() => setSelected("Reports")}
+            onClick={async () => {
+              await dispatch(
+                setTempData({
+                  selectedTab: "Reports",
+                  selectedReportsTab: "paymentmode",
+                }),
+              );
+              setSelected("Reports");
+            }}
             className="bg-backgroundBlue text-textPrimary text-sm px-4 py-1 rounded-md"
           >
             View More

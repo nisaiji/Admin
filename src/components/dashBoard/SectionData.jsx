@@ -7,10 +7,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import toast from "react-hot-toast";
-import { setClassAndSectionData } from "../../store/AppAuthSlice";
+import { setClassAndSectionData, updateAdminData } from "../../store/AppAuthSlice";
 import { Chip, FormControl, MenuItem, Select, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
+import { getSessionPhase } from "../../utils/helper";
 
 export default function SectionData({
   isDarkMode,
@@ -391,6 +392,14 @@ export default function SectionData({
                   );
                   if (!s) return <Typography>Select Session</Typography>;
 
+                  const phase = getSessionPhase(s, moment);
+                  const chipLabel =
+                    phase === "current"
+                      ? "Current"
+                      : phase === "upcoming"
+                        ? "Upcoming"
+                        : "Previous";
+
                   return (
                     <Box
                       display="flex"
@@ -405,11 +414,21 @@ export default function SectionData({
                       </Typography>
                       {s?._id && (
                         <Chip
-                          label="Active"
+                          label={chipLabel}
                           size="small"
                           sx={{
-                            bgcolor: "#4CBC9A26",
-                            color: "#4CBC9A",
+                            bgcolor:
+                              phase === "current"
+                                ? "#4CBC9A26"
+                                : phase === "upcoming"
+                                  ? "#3A86FF26"
+                                  : "#9CA3AF26",
+                            color:
+                              phase === "current"
+                                ? "#4CBC9A"
+                                : phase === "upcoming"
+                                  ? "#3A86FF"
+                                  : "#9CA3AF",
                             fontWeight: "bold",
                             fontSize: 14,
                             p: 2,

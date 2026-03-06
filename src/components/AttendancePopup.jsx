@@ -18,8 +18,9 @@ import EndPoints from "../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable"; // 👈 MUST import like this
+import autoTable from "jspdf-autotable";
 import moment from "moment";
+import { getSessionPermissions, getSessionWindow } from "../utils/helper";
 
 export default function AttendancePopup() {
   // Redux state selectors
@@ -40,6 +41,62 @@ export default function AttendancePopup() {
   const [totalAttendanceDays, setTotalAttendanceDays] = useState(0);
   const isFetchingRef = useRef(false);
 
+  const selectedSession = classAndSectionData?.selectedSession;
+
+  // Get start time for attendance (depends on role)
+  const startTime = useMemo(
+    () =>
+      role === "classTeacher"
+        ? teacherData?.sectionStartTime
+        : role === "admin"
+          ? classAndSectionData?.startTime
+          : "",
+    [role, teacherData?.sectionStartTime, classAndSectionData?.startTime],
+  );
+
+  const sessionPermissions = useMemo(() => {
+    if (role !== "admin") {
+      return {
+        phase: "current",
+        canView: true,
+        canEdit: true,
+        canCreate: true,
+        canCreateAttendance: true,
+      };
+    }
+
+    return getSessionPermissions(selectedSession);
+  }, [role, selectedSession]);
+
+  const sessionWindow = useMemo(() => {
+    if (role !== "admin") {
+      return null;
+    }
+
+    return getSessionWindow(selectedSession);
+  }, [role, selectedSession]);
+
+  const canEditAttendance = sessionPermissions?.canCreateAttendance;
+
+  const editableStartDate = useMemo(() => {
+    if (role === "admin" && sessionWindow?.start) {
+      return sessionWindow.start.clone().startOf("day");
+    }
+
+    return moment(startTime).startOf("day");
+  }, [role, sessionWindow, startTime]);
+
+  const editableEndDate = useMemo(() => {
+    if (role === "admin" && sessionWindow?.end) {
+      return moment.min(
+        moment().startOf("day"),
+        sessionWindow.end.clone().startOf("day"),
+      );
+    }
+
+    return moment().startOf("day");
+  }, [role, sessionWindow]);
+
   // Format date as YYYY-MM-DD
   const formatDate = (date) => moment(date).format("YYYY-MM-DD");
 
@@ -52,17 +109,6 @@ export default function AttendancePopup() {
         0,
       ).getDate(),
     [currentDate],
-  );
-
-  // Get start time for attendance (depends on role)
-  const startTime = useMemo(
-    () =>
-      role === "classTeacher"
-        ? teacherData?.sectionStartTime
-        : role === "admin"
-          ? classAndSectionData?.startTime
-          : "",
-    [role, teacherData?.sectionStartTime, classAndSectionData?.startTime],
   );
 
   /**
@@ -93,27 +139,34 @@ export default function AttendancePopup() {
         prevDate.getMonth() + increment,
         1,
       );
-      const startMonth = new Date(startTime).getMonth();
-      const startYear = new Date(startTime).getFullYear();
-      const currentMonth = new Date().getMonth();
-      const currentYear = new Date().getFullYear();
+
+      const nextMonthMoment = moment(newDate).startOf("month");
+
+      let minAllowedMonth;
+      let maxAllowedMonth;
+
+      if (role === "admin" && sessionWindow?.start && sessionWindow?.end) {
+        minAllowedMonth = sessionWindow.start.clone().startOf("month");
+        maxAllowedMonth =
+          sessionPermissions?.phase === "current"
+            ? moment.min(moment(), sessionWindow.end.clone()).endOf("month")
+            : sessionWindow.end.clone().endOf("month");
+      } else {
+        minAllowedMonth = moment(startTime).startOf("month");
+        maxAllowedMonth = moment().endOf("month");
+      }
+
       // Prevent changing to months outside the allowed range
       if (
-        newDate.getFullYear() < startYear ||
-        (newDate.getFullYear() === startYear &&
-          newDate.getMonth() < startMonth) ||
-        newDate.getFullYear() > currentYear ||
-        (newDate.getFullYear() === currentYear &&
-          newDate.getMonth() > currentMonth)
+        nextMonthMoment.isBefore(minAllowedMonth, "month") ||
+        nextMonthMoment.isAfter(maxAllowedMonth, "month")
       ) {
-        // console.log({ toastDisplayed });
-
         if (!toastDisplayed) {
           setToastDisplayed(true);
           toast.error(
-            `You can only change month between the ${moment(startTime).format(
+            `You can only change month between ${minAllowedMonth.format(
               "MMMM YYYY",
-            )} to ${moment().format("MMMM YYYY")}.`,
+            )} and ${maxAllowedMonth.format("MMMM YYYY")}.`,
           );
           setTimeout(() => setToastDisplayed(false), 3000);
         }
@@ -131,24 +184,39 @@ export default function AttendancePopup() {
    * @param {string} value - New attendance value ("P" or "A")
    */
   const handleInputChange = (studentIndex, dateIndex, value) => {
+    if (!canEditAttendance) {
+      if (!toastDisplayed) {
+        setToastDisplayed(true);
+        toast.error(
+          sessionPermissions?.phase === "upcoming"
+            ? "Attendance cannot be created in upcoming session."
+            : "Previous session attendance is view only.",
+        );
+        setTimeout(() => setToastDisplayed(false), 3000);
+      }
+      return;
+    }
+
     const attendanceDate = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
       dateIndex + 1,
     );
 
+    const attendanceMoment = moment(attendanceDate).startOf("day");
+
     // Ensure the date is within the valid range
     if (
-      moment(attendanceDate).isBefore(moment(startTime), "day") ||
-      moment(attendanceDate).isAfter(moment().startOf("day"))
+      attendanceMoment.isBefore(editableStartDate, "day") ||
+      attendanceMoment.isAfter(editableEndDate, "day")
     ) {
       if (!toastDisplayed) {
         setToastDisplayed(true);
 
         toast.error(
-          `You can only edit attendance between the ${moment(startTime).format(
+          `You can only edit attendance between ${editableStartDate.format(
             "DD/MM/YYYY",
-          )} and ${moment().format("DD/MM/YYYY")}.`,
+          )} and ${editableEndDate.format("DD/MM/YYYY")}.`,
         );
         setTimeout(() => setToastDisplayed(false), 3000);
       }
@@ -158,13 +226,13 @@ export default function AttendancePopup() {
       prevData.map((student, idx) =>
         idx === studentIndex
           ? {
-            ...student,
-            attendances: student.attendances.map((attendance, i) =>
-              i === dateIndex
-                ? { ...attendance, attendance: value } // Update attendance field
-                : attendance,
-            ),
-          }
+              ...student,
+              attendances: student.attendances.map((attendance, i) =>
+                i === dateIndex
+                  ? { ...attendance, attendance: value } // Update attendance field
+                  : attendance,
+              ),
+            }
           : student,
       ),
     );
@@ -175,24 +243,33 @@ export default function AttendancePopup() {
    * Validates that attendance for each day is either fully filled or empty.
    */
   const handleSaveAttendance = async () => {
+    if (!canEditAttendance) {
+      toast.error(
+        sessionPermissions?.phase === "upcoming"
+          ? "Attendance cannot be created in upcoming session."
+          : "Previous session attendance is view only.",
+      );
+      return;
+    }
+
     try {
       setLoading(true);
       const attendances = attendanceData;
-
-      // Define the date range for checking
-      const startDate = moment(startTime).format("DD-MM-YYYY");
-      const today = moment(new Date()).format("DD-MM-YYYY");
 
       // Group attendance statuses by day
       const dayAttendance = {};
       attendanceData.forEach((student) => {
         student.attendances.forEach((item) => {
-          const itemDate = moment(item.date).format("DD-MM-YYYY");
-          if (itemDate >= startDate && itemDate <= today) {
-            if (!dayAttendance[itemDate]) {
-              dayAttendance[itemDate] = [];
+          const itemDate = moment(item.date);
+          if (
+            itemDate.isSameOrAfter(editableStartDate, "day") &&
+            itemDate.isSameOrBefore(editableEndDate, "day")
+          ) {
+            const itemDateKey = itemDate.format("YYYY-MM-DD");
+            if (!dayAttendance[itemDateKey]) {
+              dayAttendance[itemDateKey] = [];
             }
-            dayAttendance[itemDate].push(item.attendance);
+            dayAttendance[itemDateKey].push(item.attendance);
           }
         });
       });
@@ -378,6 +455,12 @@ export default function AttendancePopup() {
    * Calculate total attendance days for the current month (excluding holidays and Sundays).
    */
   useEffect(() => {
+    if (!canEditAttendance && isEditable) {
+      setIsEditable(false);
+    }
+  }, [canEditAttendance, isEditable]);
+
+  useEffect(() => {
     const currentMonth = moment(currentDate).format("MM-YYYY");
     const startMonth = moment(startTime).format("MM-YYYY");
     const todayMonth = moment().format("MM-YYYY");
@@ -555,7 +638,8 @@ export default function AttendancePopup() {
 
     doc.setFontSize(11);
     doc.text(
-      `${classAndSectionData?.className || ""} - ${classAndSectionData?.sectionName || ""
+      `${classAndSectionData?.className || ""} - ${
+        classAndSectionData?.sectionName || ""
       } | ${monthYear}`,
       doc.internal.pageSize.getWidth() / 2,
       50,
@@ -622,12 +706,14 @@ export default function AttendancePopup() {
     // doc.save(`Attendance_${monthYear}.pdf`);
     if (role === "admin") {
       doc.save(
-        `Attendance_${classAndSectionData?.className}_${classAndSectionData?.sectionName
+        `Attendance_${classAndSectionData?.className}_${
+          classAndSectionData?.sectionName
         }_${monthYear}.pdf`,
       );
     } else if (role === "classTeacher") {
       doc.save(
-        `Attendance_${teacherData?.className}_${teacherData?.sectionName
+        `Attendance_${teacherData?.className}_${
+          teacherData?.sectionName
         }_${monthYear}.pdf`,
       );
     }
@@ -636,8 +722,9 @@ export default function AttendancePopup() {
   return (
     <div className={`z-40 select-none`}>
       <div
-        className={`min-h-[calc(100vh-72px)] p-4 shadow flex flex-col ${isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-          }`}
+        className={`min-h-[calc(100vh-72px)] p-4 shadow flex flex-col ${
+          isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+        }`}
       >
         <Toaster />
         {/* Header */}
@@ -652,8 +739,8 @@ export default function AttendancePopup() {
               onClick={() =>
                 isEditable
                   ? toast.error(
-                    "please save the data before changing the month",
-                  )
+                      "please save the data before changing the month",
+                    )
                   : changeMonth(-1)
               }
             />
@@ -668,8 +755,8 @@ export default function AttendancePopup() {
               onClick={() =>
                 isEditable
                   ? toast.error(
-                    "please save the data before changing the month",
-                  )
+                      "please save the data before changing the month",
+                    )
                   : changeMonth(1)
               }
             />
@@ -689,7 +776,18 @@ export default function AttendancePopup() {
                   src={editw}
                   alt=""
                   className={`w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
-                  onClick={() => setIsEditable(true)}
+                  onClick={() => {
+                    if (!canEditAttendance) {
+                      toast.error(
+                        sessionPermissions?.phase === "upcoming"
+                          ? "Attendance cannot be created in upcoming session."
+                          : "Previous session attendance is view only.",
+                      );
+                      return;
+                    }
+
+                    setIsEditable(true);
+                  }}
                 />
                 <img
                   onClick={downloadAttendance}
@@ -704,14 +802,16 @@ export default function AttendancePopup() {
 
         {/* Table */}
         <div
-          className={`overflow-x-auto p-4 h-[500px] overflow-y-auto ${isDarkMode
+          className={`overflow-x-auto p-4 h-[500px] overflow-y-auto ${
+            isDarkMode
               ? "bg-gradient-to-r from-fromColor1 to-toColor1"
               : "bg-whiteBackground"
-            }`}
+          }`}
         >
           <div
-            className={`text-2xl font-poppins-regular text-center w-full ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-              }`}
+            className={`text-2xl font-poppins-regular text-center w-full ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
           >
             Monthly Attendance Sheet
           </div>
@@ -723,10 +823,11 @@ export default function AttendancePopup() {
           </div>
           <table className={`w-full text-center border border-borderLine`}>
             <thead
-              className={`sticky -top-4 z-10 ${isDarkMode
+              className={`sticky -top-4 z-10 ${
+                isDarkMode
                   ? "bg-backgroundTableCell text-textPrimary"
                   : "bg-whiteBackground text-textBlack"
-                }`}
+              }`}
             >
               <tr>
                 <th
@@ -765,14 +866,16 @@ export default function AttendancePopup() {
                 return (
                   <tr key={index}>
                     <td
-                      className={`border border-borderLine p-1  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        }`}
+                      className={`border border-borderLine p-1  ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
                     >
                       {index + 1}
                     </td>
                     <td
-                      className={`border border-borderLine p-1  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        }`}
+                      className={`border border-borderLine p-1  ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
                     >
                       {data?.firstname || ""} {data?.lastname || ""}
                     </td>
@@ -781,28 +884,35 @@ export default function AttendancePopup() {
                       return (
                         <td
                           key={idx}
-                          className={`border border-borderLine  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                            }`}
+                          className={`border border-borderLine  ${
+                            isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          }`}
                         >
                           {isEditable &&
-                            attendance !== "S" &&
-                            attendance !== "H" ? (
+                          attendance !== "S" &&
+                          attendance !== "H" ? (
                             <select
                               name="attendance"
                               value={attendance}
-                              disabled={isSunday(idx) || isHoliday(idx)}
+                              disabled={
+                                !canEditAttendance ||
+                                isSunday(value.date) ||
+                                isHoliday(value.date)
+                              }
                               onChange={(e) => {
                                 handleInputChange(index, idx, e.target.value);
                               }}
-                              className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring ${isDarkMode
+                              className={`w-full h-full m-0 text-center bg-transparent uppercase focus:outline-none focus:ring ${
+                                isDarkMode
                                   ? "focus:ring-gray"
                                   : "focus:ring-black"
-                                } ${value?.attendance === "P"
+                              } ${
+                                value?.attendance === "P"
                                   ? "text-textBlue"
                                   : value?.attendance === "A"
                                     ? "text-textDarkRed"
                                     : "text-textBlack"
-                                }`}
+                              }`}
                             >
                               <option value="" label="" />
                               <option
@@ -819,14 +929,15 @@ export default function AttendancePopup() {
                           ) : (
                             <div
                               className={`w-full text-center focus:outline-none bg-transparent uppercase
-                              ${attendance === "P"
+                              ${
+                                attendance === "P"
                                   ? "text-textBlue"
                                   : attendance === "A"
                                     ? "text-textRed"
                                     : attendance === "S" || attendance === "H"
                                       ? "text-textHoliday"
                                       : "text-textBlack"
-                                }
+                              }
                               `}
                             >
                               {attendance}
@@ -837,8 +948,9 @@ export default function AttendancePopup() {
                     })}
                     {/* Horizontal totals */}
                     <td
-                      className={`border border-borderLine p-1 font-poppins-regular  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        }`}
+                      className={`border border-borderLine p-1 font-poppins-regular  ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
                     >
                       {totalPresent}/{totalAttendanceDays}
                     </td>
@@ -849,8 +961,9 @@ export default function AttendancePopup() {
               <tr>
                 <td
                   colSpan="2"
-                  className={`border border-borderLine font-poppins-regular p-1  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                    }`}
+                  className={`border border-borderLine font-poppins-regular p-1  ${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
                 >
                   Total
                 </td>
@@ -867,8 +980,9 @@ export default function AttendancePopup() {
                   return (
                     <td
                       key={dayIndex}
-                      className={`border border-borderLine font-poppins-regular p-1  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        }`}
+                      className={`border border-borderLine font-poppins-regular p-1  ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      }`}
                     >
                       {totalPresentForDay}/{attendanceData?.length || 0}
                     </td>

@@ -184,31 +184,25 @@ export default function StudentView({ setSelectedView, classAndSectionData }) {
   };
 
   const deriveInstallmentState = (inst, today = moment()) => {
-    const total = Number(inst.totalPayable);
+    const total = Number(inst.totalPayable ?? 0);
     const paid = Number(inst.amountPaid ?? 0);
     const remaining = Math.max(total - paid, 0);
 
-    const isNA = inst.baseAmount === 0;
+    const isNA = inst?.baseAmount === 0;
     const isPaid = inst?.status === "paid";
-    const isOverdue = inst?.lateFeeApplied ?? 0;
-    const isCurrent =
-      remaining > 0 &&
-      today.isBetween(
-        moment(inst.startDate),
-        moment(inst.dueDate),
-        "day",
-        "[]",
-      );
+    const isOverdue = (inst?.lateFeeApplied ?? 0) > 0;
+    const isCurrent = moment(inst?.feeInstallmentDetails?.startDate).isBefore(
+      today,
+    );
 
     const isAdvanceCovered =
-      remaining === 0 && paid === 0 && inst.advanceUsed > 0;
+      isPaid && paid === 0 && (inst.advanceUsed ?? 0) > 0;
 
     return {
       isNA,
       isPaid,
       isOverdue,
       isCurrent,
-      isUpcoming: !isPaid && !isOverdue && !isCurrent,
       remaining,
       isAdvanceCovered,
     };
@@ -217,12 +211,23 @@ export default function StudentView({ setSelectedView, classAndSectionData }) {
   function MonthlyCard({ installment }) {
     const state = deriveInstallmentState(installment);
 
-    const ui = state.isPaid
+    const ui = state.isNA
       ? {
+        bg: "bg-[#1a1d24]/50",
+        border: "border-gray-600",
+        text: "text-gray-500",
+        label: "Not Set",
+        iconBg: "rgba(255,255,255,0.05)",
+        icon: <Info className="w-4.5 h-4.5 text-white stroke-[2.5]" />,
+      }
+      : state.isPaid
+        ? {
           bg: "bg-[rgba(0,166,146,0.10)]",
           border: "border-[#4CBC9A]",
           text: "text-[#4CBC9A]",
-          label: state.isAdvanceCovered ? "Advance Paid" : "Payment Completed",
+          label: state.isAdvanceCovered
+            ? "Advance Paid"
+            : "Payment Completed",
           iconBg: state.isAdvanceCovered ? "#0A81D1" : "#4CBC9A",
           icon: (
             <svg
@@ -239,25 +244,25 @@ export default function StudentView({ setSelectedView, classAndSectionData }) {
             </svg>
           ),
         }
-      : state.isOverdue
-        ? {
+        : state.isOverdue
+          ? {
             bg: "bg-gradient-to-br from-[#2d1a1a] to-[#1a0f0f]",
             border: "border-[#EF4444]",
             text: "text-[#EF4444]",
-            label: "Overdue",
+            label: "Due",
             icon: (
               <AlertCircle className="w-4.5 h-4.5 text-white stroke-[2.5]" />
             ),
           }
-        : state.isCurrent
-          ? {
+          : state.isCurrent
+            ? {
               bg: "bg-gradient-to-br from-[#2d2416] to-[#1a1610]",
               border: "border-[#F59E0B]",
               text: "text-[#F59E0B]",
               label: "Pending",
               icon: <Clock className="w-4.5 h-4.5 text-white stroke-[2.5]" />,
             }
-          : {
+            : {
               bg: "bg-gradient-to-br from-[#1a1d28] to-[#0f1216]",
               border: "border-white/20",
               text: "text-gray-400",
@@ -280,7 +285,9 @@ export default function StudentView({ setSelectedView, classAndSectionData }) {
 
             <div>
               <h3 className="text-white font-bold">
-                {moment(installment.startDate).format("MMM")}
+                {moment(installment?.feeInstallmentDetails?.startDate).format(
+                  "MMM",
+                )}
               </h3>
               <p className={`text-xs font-semibold ${ui.text}`}>{ui.label}</p>
             </div>
@@ -289,12 +296,17 @@ export default function StudentView({ setSelectedView, classAndSectionData }) {
           <div className="text-right">
             <span className="text-white font-bold">
               ₹
-              {state.isPaid
-                ? installment.amountPaid - installment.lateFeeApplied
-                : installment.amount}
+              {state.isNA
+                ? 0
+                : state.isAdvanceCovered
+                  ? (installment.amount ?? 0)
+                  : state.isPaid
+                    ? (installment.amountPaid ?? 0) -
+                    (installment.lateFeeApplied ?? 0)
+                    : state.isCurrent ? (installment.totalPayable ?? 0) : (installment.amount ?? 0)}
             </span>
 
-            {installment.lateFeeApplied > 0 && (
+            {(installment.lateFeeApplied ?? 0) > 0 && !state.isPaid && (
               <div className="mt-1 bg-[#EF4444] text-white text-xs px-2 py-1 rounded">
                 +₹{installment.lateFeeApplied}
               </div>
@@ -581,7 +593,7 @@ export default function StudentView({ setSelectedView, classAndSectionData }) {
             ))}
           </div>
         </div>
-        
+
         {/* Transactions Section */}
         <div className="bg-[#1a1d24] rounded-lg p-6">
           {/* Transactions Header */}
@@ -650,13 +662,12 @@ export default function StudentView({ setSelectedView, classAndSectionData }) {
                       </td>
                       <td className="py-4 px-4 text-sm">
                         <span
-                          className={`${
-                            std?.paymentMethod === "UPI"
-                              ? "text-orange-500"
-                              : std?.paymentMethod === "Net Banking"
-                                ? "text-[#0A81D1]"
-                                : "text-gray-300"
-                          } uppercase`}
+                          className={`${std?.paymentMethod === "UPI"
+                            ? "text-orange-500"
+                            : std?.paymentMethod === "Net Banking"
+                              ? "text-[#0A81D1]"
+                              : "text-gray-300"
+                            } uppercase`}
                         >
                           {std?.paymentMethod ?? "NA"}
                         </span>

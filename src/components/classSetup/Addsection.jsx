@@ -81,7 +81,7 @@ function Addsection({
     try {
       const [sectionsRes, teachersRes] = await Promise.all([
         axiosClient.get(`${EndPoints.ADMIN.CLASS_SECTION}/${clickedClassId}`),
-        axiosClient.get(EndPoints.ADMIN.UNASSIGNED_TEACHER),
+        axiosClient.get(`${EndPoints.ADMIN.UNASSIGNED_TEACHER}/${classAndSectionData?.selectedSession?._id}`),
       ]);
 
       if (sectionsRes?.statusCode === 200) {

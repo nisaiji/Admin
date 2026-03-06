@@ -1,0 +1,300 @@
+Session Rules (Source of Truth)
+- Session period: 1 April to 31 March.
+- Previous session: View only.
+- Current session: View and edit.
+- Upcoming session: View and create.
+- Attendance creation in upcoming session: Not allowed.
+
+Detailed Bug List
+
+[SD-001] Session start boundary excludes 1 April
+- Module: Session date mapping
+- Scope: All sessions
+- Severity/Priority: High/High
+- Steps: Create record on 1 April -> open session list.
+- Expected: Record belongs to new session.
+- Actual: Record mapped to previous session or missing.
+
+[SD-002] Session end boundary excludes 31 March
+- Module: Session date mapping
+- Scope: All sessions
+- Severity/Priority: High/High
+- Steps: Create record on 31 March -> open session list/reports.
+- Expected: Record belongs to closing session.
+- Actual: Record mapped to next session or missing.
+
+[SD-003] Midnight timezone shift maps records to wrong session
+- Module: Date-time conversion
+- Scope: All sessions
+- Severity/Priority: High/Medium
+- Steps: Save near 31 March 23:30 local -> reload from another timezone.
+- Expected: Same session retained.
+- Actual: Record moves to adjacent session.
+
+[SD-004] Leap day (29 Feb) session mapping fails
+- Module: Date parser/validator
+- Scope: Leap-year sessions
+- Severity/Priority: Medium/Medium
+- Steps: Create record on 29 Feb -> filter by session.
+- Expected: Correct session assignment.
+- Actual: Parse/mapping error or hidden record.
+
+[SD-005] Date format confusion (DD/MM vs MM/DD)
+- Module: Input parsing
+- Scope: All sessions
+- Severity/Priority: High/High
+- Steps: Enter ambiguous date (04/05/YYYY) -> save.
+- Expected: Consistent configured format.
+- Actual: Wrong date and wrong session assigned.
+
+[SD-006] Overlap in session filter results
+- Module: Session filtering
+- Scope: Previous/current or current/upcoming boundary
+- Severity/Priority: High/Medium
+- Steps: Open adjacent session filters for boundary dates.
+- Expected: No duplicate records across sessions.
+- Actual: Same record appears in multiple sessions.
+
+[SD-007] Session label year range displayed incorrectly
+- Module: Session label UI
+- Scope: All sessions
+- Severity/Priority: Low/Medium
+- Steps: Check dropdown labels after config change.
+- Expected: Correct YYYY-YY range.
+- Actual: Wrong year text shown.
+
+[PS-001] Previous session still shows Edit button
+- Module: UI permissions
+- Scope: Previous session
+- Severity/Priority: High/High
+- Steps: Open previous session list -> inspect actions.
+- Expected: View-only actions.
+- Actual: Edit action visible.
+
+[PS-002] Previous session update allowed via API
+- Module: Backend authorization
+- Scope: Previous session
+- Severity/Priority: Critical/High
+- Steps: Send update request for previous-session record.
+- Expected: API should reject.
+- Actual: Record updates successfully.
+
+[PS-003] Previous session delete allowed
+- Module: Access control
+- Scope: Previous session
+- Severity/Priority: Critical/High
+- Steps: Attempt delete from UI/API.
+- Expected: Delete blocked.
+- Actual: Record deleted.
+
+[PS-004] Bulk import updates previous-session records
+- Module: Bulk import
+- Scope: Previous session
+- Severity/Priority: Critical/High
+- Steps: Upload import file targeting previous records.
+- Expected: Rows rejected as read-only session.
+- Actual: Rows updated.
+
+[PS-005] Inline editing active in previous session grid
+- Module: Data grid
+- Scope: Previous session
+- Severity/Priority: High/Medium
+- Steps: Click editable cell in previous-session grid.
+- Expected: Cell read-only.
+- Actual: Save succeeds.
+
+[CS-001] Current session edit blocked incorrectly
+- Module: Permission evaluator
+- Scope: Current session
+- Severity/Priority: High/High
+- Steps: Open current session record -> click edit.
+- Expected: Edit allowed.
+- Actual: Edit disabled/rejected.
+
+[CS-002] UI allows edit but API rejects current-session save
+- Module: UI/API rule mismatch
+- Scope: Current session
+- Severity/Priority: High/High
+- Steps: Edit in UI -> submit.
+- Expected: Save succeeds.
+- Actual: API returns session/permission error.
+
+[CS-003] Current-session save writes wrong sessionId
+- Module: Payload mapping
+- Scope: Current session
+- Severity/Priority: High/Medium
+- Steps: Edit current record -> inspect stored sessionId.
+- Expected: sessionId stays current.
+- Actual: sessionId becomes previous/upcoming.
+
+[CS-004] Current session turns read-only after rollover cache
+- Module: Cache/session context
+- Scope: Current session
+- Severity/Priority: High/Medium
+- Steps: Keep app open across date rollover -> try edit.
+- Expected: Edit remains available after refresh.
+- Actual: Treated as previous session.
+
+[US-001] Upcoming session Create button missing
+- Module: UI permissions
+- Scope: Upcoming session
+- Severity/Priority: High/High
+- Steps: Switch to upcoming session.
+- Expected: Create visible.
+- Actual: Create hidden.
+
+[US-002] Upcoming create form submits but API rejects
+- Module: Backend validation
+- Scope: Upcoming session
+- Severity/Priority: High/High
+- Steps: Fill valid upcoming data -> submit.
+- Expected: Record created in upcoming.
+- Actual: Invalid session error.
+
+[US-003] Upcoming create saves into current session
+- Module: Session binding
+- Scope: Upcoming session
+- Severity/Priority: High/High
+- Steps: Create from upcoming page -> open saved record.
+- Expected: Upcoming session assignment.
+- Actual: Current session assignment.
+
+[US-004] Upcoming default date prefilled from current session
+- Module: Form defaults
+- Scope: Upcoming session
+- Severity/Priority: Medium/Medium
+- Steps: Open create form in upcoming session.
+- Expected: Date defaults within upcoming session window.
+- Actual: Current-session date defaults.
+
+[US-005] Upcoming records not visible after successful create
+- Module: List filter/index refresh
+- Scope: Upcoming session
+- Severity/Priority: High/Medium
+- Steps: Create record -> return to list.
+- Expected: New record appears.
+- Actual: Record missing or shown in wrong session.
+
+[AT-001] Attendance creation allowed in upcoming session
+- Module: Attendance permissions
+- Scope: Upcoming session
+- Severity/Priority: Critical/High
+- Steps: Go to attendance in upcoming session -> create attendance.
+- Expected: Creation blocked with rule message.
+- Actual: Attendance created.
+
+[AT-002] Attendance bulk upload allowed in upcoming session
+- Module: Attendance import
+- Scope: Upcoming session
+- Severity/Priority: Critical/High
+- Steps: Upload attendance file for upcoming.
+- Expected: Upload blocked.
+- Actual: Upload succeeds.
+
+[AT-003] Attendance POST API allows upcoming session
+- Module: Attendance API
+- Scope: Upcoming session
+- Severity/Priority: Critical/High
+- Steps: Call attendance POST with upcoming sessionId.
+- Expected: Request denied.
+- Actual: Request accepted.
+
+[AT-004] UI hides attendance create but endpoint remains open
+- Module: Security enforcement
+- Scope: Upcoming session
+- Severity/Priority: Critical/High
+- Steps: Trigger API directly using token.
+- Expected: Backend enforces block.
+- Actual: Backend creates attendance.
+
+[AT-005] Rule inversion: current blocked, upcoming allowed
+- Module: Attendance rule engine
+- Scope: Current + upcoming
+- Severity/Priority: High/High
+- Steps: Create attendance in current and upcoming.
+- Expected: Current allowed, upcoming blocked.
+- Actual: Current blocked, upcoming allowed.
+
+[OT-001] Role matrix inconsistency across modules
+- Module: RBAC
+- Scope: All sessions
+- Severity/Priority: High/Medium
+- Steps: Compare same action for same role in list/form/API.
+- Expected: Consistent rule behavior.
+- Actual: Different outcomes per module.
+
+[OT-002] Session dropdown order misleading
+- Module: Session selector
+- Scope: All sessions
+- Severity/Priority: Low/Low
+- Steps: Open dropdown and inspect order.
+- Expected: Previous -> Current -> Upcoming (or configured order).
+- Actual: Incorrect order.
+
+[OT-003] Pagination resets selected session filter
+- Module: List state management
+- Scope: All sessions
+- Severity/Priority: Medium/Medium
+- Steps: Select session -> go to next page.
+- Expected: Same session filter preserved.
+- Actual: Filter resets, mixed data shown.
+
+[OT-004] Export includes unauthorized session data
+- Module: Reports/export
+- Scope: All sessions
+- Severity/Priority: High/High
+- Steps: Export while restricted to one session.
+- Expected: Export only allowed session data.
+- Actual: Other session data included.
+
+[OT-005] Denied session actions not logged in audit trail
+- Module: Audit logging
+- Scope: All sessions
+- Severity/Priority: Medium/Medium
+- Steps: Perform blocked action and check logs.
+- Expected: Denied attempt logged with reason.
+- Actual: No audit event.
+
+[OT-006] Generic errors hide session rule reason
+- Module: Error handling UX
+- Scope: All sessions
+- Severity/Priority: Low/Medium
+- Steps: Trigger blocked action.
+- Expected: Clear message (Attendance cannot be created in upcoming session).
+- Actual: Generic error (Something went wrong).
+
+[OT-007] Mobile allows actions blocked on web
+- Module: Cross-platform policy enforcement
+- Scope: All sessions
+- Severity/Priority: Critical/High
+- Steps: Try restricted action on web then mobile.
+- Expected: Same restriction on both clients.
+- Actual: Mobile bypasses rule.
+
+[OT-008] API accepts mismatched session context values
+- Module: API validation
+- Scope: All sessions
+- Severity/Priority: High/High
+- Steps: Send different session values in payload/query/header.
+- Expected: Request rejected for mismatch.
+- Actual: Request accepted with unpredictable mapping.
+
+Quick Validation Checklist
+1. Boundary dates: 1 April, 31 March, 29 Feb, timezone midnight.
+2. Previous session: view only.
+3. Current session: view + edit.
+4. Upcoming session: view + create.
+5. Upcoming attendance: always blocked (UI + API + bulk + mobile).
+6. Verify behavior in list, form, API, import/export, and reports.
+
+Fix Status (Implemented in Frontend)
+- SD-005: Fixed date-range comparisons in attendance validation to use real date comparisons.
+- AT-001: Blocked attendance create/edit for upcoming session in attendance UI.
+- AT-005: Enforced current-session-only attendance editing in UI.
+- PS-001/PS-005: Previous session attendance is now view-only in attendance UI.
+- OT-002: Session badge now correctly shows Current/Upcoming/Previous instead of always Active.
+- OT-006: Added clear, session-specific error messages for blocked attendance actions.
+
+Remaining Items
+- API-level restrictions (PS-002, PS-003, AT-003, AT-004, OT-008) require backend changes.
+- Import/export, audit trail, and mobile parity items require corresponding module or service updates.
