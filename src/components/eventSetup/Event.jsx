@@ -74,6 +74,34 @@ const Event = () => {
   }, [month, classAndSectionData?.selectedSession?._id]);
 
   /**
+   * Adjust calendar month when the session changes so that it stays
+   * within the start and end year.
+   */
+  useEffect(() => {
+    if (classAndSectionData?.selectedSession) {
+      const sessionStartYear = classAndSectionData.selectedSession.academicStartYear;
+      const sessionEndYear = classAndSectionData.selectedSession.academicEndYear;
+      if (sessionStartYear && sessionEndYear) {
+        const currentDate = new Date();
+        const minDate = new Date(sessionStartYear, 3, 1); // April 1st
+        const maxDate = new Date(sessionEndYear, 2, 31, 23, 59, 59); // March 31st end of day
+
+        let targetDate = currentDate;
+        if (currentDate < minDate) {
+          targetDate = minDate;
+        } else if (currentDate > maxDate) {
+          targetDate = maxDate;
+        }
+
+        setMonth(targetDate.getMonth());
+        setYear(targetDate.getFullYear());
+        setToday(targetDate);
+        setActiveDay(targetDate.getDate());
+      }
+    }
+  }, [classAndSectionData?.selectedSession]);
+
+  /**
    * EventForm - Renders the form for adding or editing an event.
    * Handles form state, validation, and submission.
    * @param {object} props - isOpen, isClose, isSubmit, prevData
@@ -163,13 +191,13 @@ const Event = () => {
           mode: isDarkMode ? "dark" : "light",
           ...(isDarkMode
             ? {
-                background: { default: "#121212", paper: "#1e1e1e" },
-                text: { primary: "#fff", secondary: "#aaa" },
-              }
+              background: { default: "#121212", paper: "#1e1e1e" },
+              text: { primary: "#fff", secondary: "#aaa" },
+            }
             : {
-                background: { default: "#f5f5f5", paper: "#fff" },
-                text: { primary: "#000", secondary: "#666" },
-              }),
+              background: { default: "#f5f5f5", paper: "#fff" },
+              text: { primary: "#000", secondary: "#666" },
+            }),
         },
         components: {
           MuiOutlinedInput: {
@@ -223,14 +251,12 @@ const Event = () => {
 
     return (
       <div
-        className={`fixed inset-0 flex items-center justify-center bg-opacity-50 ${
-          isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
-        }`}
+        className={`fixed inset-0 flex items-center justify-center bg-opacity-50 ${isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
+          }`}
       >
         <div
-          className={`rounded-2xl px-[30px] py-[20px] w-[450px] h-[430px] shadow-lg ${
-            isDarkMode ? "bg-background1" : "bg-whiteBackground"
-          }`}
+          className={`rounded-2xl px-[30px] py-[20px] w-[450px] h-[430px] shadow-lg ${isDarkMode ? "bg-background1" : "bg-whiteBackground"
+            }`}
         >
           <div className={`flex justify-end`}>
             <img
@@ -244,11 +270,10 @@ const Event = () => {
             />
           </div>
           <input
-            className={`w-full text-lg font-medium border-b py-3 outline-none bg-transparent ${
-              isDarkMode
-                ? "text-textPrimary border-borderLine"
-                : "text-textBlack border-borderGray2"
-            }`}
+            className={`w-full text-lg font-medium border-b py-3 outline-none bg-transparent ${isDarkMode
+              ? "text-textPrimary border-borderLine"
+              : "text-textBlack border-borderGray2"
+              }`}
             type="text"
             name="title"
             value={newEventForm.title}
@@ -287,9 +312,8 @@ const Event = () => {
                         />
                       )}
                       sx={{
-                        border: `1px solid ${
-                          isDarkMode ? "#2b2e4a80" : "gray"
-                        }`,
+                        border: `1px solid ${isDarkMode ? "#2b2e4a80" : "gray"
+                          }`,
                         borderRadius: "8px",
                         backgroundColor: isDarkMode ? "" : "white",
                         color: isDarkMode ? "#E3E8F3" : "black",
@@ -349,9 +373,9 @@ const Event = () => {
                               startDate: formattedDate,
                               endDate:
                                 prev.endDate &&
-                                moment(prev.endDate, "DD/MM/YYYY").isBefore(
-                                  date,
-                                )
+                                  moment(prev.endDate, "DD/MM/YYYY").isBefore(
+                                    date,
+                                  )
                                   ? formattedDate
                                   : prev.endDate,
                             }));
@@ -414,11 +438,10 @@ const Event = () => {
                 value={newEventForm.description}
                 onChange={handleChange}
                 onBlur={validateForm}
-                className={`w-full bg-transparent border ${
-                  isDarkMode
-                    ? "text-textPrimary border-borderLine"
-                    : "text-textBlack border-borderGray2"
-                } p-3 outline-none rounded-lg max-h-32 h-32`}
+                className={`w-full bg-transparent border ${isDarkMode
+                  ? "text-textPrimary border-borderLine"
+                  : "text-textBlack border-borderGray2"
+                  } p-3 outline-none rounded-lg max-h-32 h-32`}
               />
             </label>
             {errors.description && (
@@ -586,6 +609,17 @@ const Event = () => {
   const handlePrevMonth = () => {
     const newMonth = month === 0 ? 11 : month - 1;
     const newYear = month === 0 ? year - 1 : year;
+
+    const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+    if (sessionStartYear) {
+      // April is month 3
+      const minDate = new Date(sessionStartYear, 3, 1);
+      const targetDate = new Date(newYear, newMonth, 1);
+      if (targetDate < minDate) {
+        return; // Prevent navigating before session start
+      }
+    }
+
     updateCalendar(newMonth, newYear);
   };
 
@@ -595,6 +629,17 @@ const Event = () => {
   const handleNextMonth = () => {
     const newMonth = month === 11 ? 0 : month + 1;
     const newYear = month === 11 ? year + 1 : year;
+
+    const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+    if (sessionEndYear) {
+      // March is month 2. Max date is end of March.
+      const maxDate = new Date(sessionEndYear, 2, 1);
+      const targetDate = new Date(newYear, newMonth, 1);
+      if (targetDate > maxDate) {
+        return; // Prevent navigating after session end
+      }
+    }
+
     updateCalendar(newMonth, newYear);
   };
 
@@ -660,7 +705,7 @@ const Event = () => {
       // Find event or workday data
       const findEventByDate = (key) =>
         events.find((item) => moment(item.date).isSame(targetDate, "day"))?.[
-          key
+        key
         ];
 
       const title = findEventByDate("title");
@@ -732,21 +777,26 @@ const Event = () => {
     }
   };
 
+  const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+  const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+
+  const isPrevDisabled = sessionStartYear && month === 3 && year === sessionStartYear;
+  const isNextDisabled = sessionEndYear && month === 2 && year === sessionEndYear;
+
   // Calendar Component - Displays a calendar with month navigation and event handling
   const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
     return (
       <div className={`bg-transparent rounded-lg w-full`}>
         {/* Month Navigation */}
         <div
-          className={`month flex items-center justify-between py-4 px-10 mx-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 ${
-            isDarkMode ? "border-borderLine" : "border-borderWhite3"
-          }`}
+          className={`month flex items-center justify-between py-4 px-10 mx-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
+            }`}
         >
           <img
             src={isDarkMode ? DownArrow : DownArroww}
             alt=""
-            className={`size-5 rotate-90 cursor-pointer`}
-            onClick={onPrevMonth}
+            className={`size-5 rotate-90 ${isPrevDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
+            onClick={!isPrevDisabled ? onPrevMonth : undefined}
           />
           <div
             className={`${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}
@@ -756,8 +806,8 @@ const Event = () => {
           <img
             src={isDarkMode ? DownArrow : DownArroww}
             alt=""
-            className={`size-5 -rotate-90 cursor-pointer`}
-            onClick={onNextMonth}
+            className={`size-5 -rotate-90 ${isNextDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
+            onClick={!isNextDisabled ? onNextMonth : undefined}
           />
         </div>
         {/* Weekdays header */}
@@ -765,9 +815,8 @@ const Event = () => {
           {CONSTANT.WEEKDAYS1.map((day) => (
             <div
               key={day}
-              className={`text-center font-medium capitalize text-md ${
-                isDarkMode ? "text-textBlue" : "text-textBlack"
-              }`}
+              className={`text-center font-medium capitalize text-md ${isDarkMode ? "text-textBlue" : "text-textBlack"
+                }`}
             >
               {day}
             </div>
@@ -783,23 +832,20 @@ const Event = () => {
       if (isHoliday) {
         return `text-textPrimary bg-backgroundRed border-borderRed`;
       } else if (isSunday) {
-        return `${
-          isDarkMode
-            ? "bg-backgroundOrange border-borderHoliday"
-            : "bg-backgroundOrange2 border-borderOrange"
-        } text-textHoliday`;
+        return `${isDarkMode
+          ? "bg-backgroundOrange border-borderHoliday"
+          : "bg-backgroundOrange2 border-borderOrange"
+          } text-textHoliday`;
       } else if (isToday) {
-        return `${
-          isDarkMode
-            ? "text-textBlue bg-backgroundGrayDays border-borderBlue"
-            : "text-textDarkBlue bg-whiteBackground2 border-borderDarkBlue"
-        }`;
+        return `${isDarkMode
+          ? "text-textBlue bg-backgroundGrayDays border-borderBlue"
+          : "text-textDarkBlue bg-whiteBackground2 border-borderDarkBlue"
+          }`;
       } else {
-        return `${
-          isDarkMode
-            ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
-            : "text-textBlack bg-whiteBackground2 border-borderWhite3"
-        }`;
+        return `${isDarkMode
+          ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
+          : "text-textBlack bg-whiteBackground2 border-borderWhite3"
+          }`;
       }
     };
 
@@ -824,9 +870,8 @@ const Event = () => {
 
   return (
     <div
-      className={`grid grid-cols-6 gap-6 p-6 min-h-[calc(100vh-72px)] ${
-        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-      }`}
+      className={`grid grid-cols-6 gap-6 p-6 min-h-[calc(100vh-72px)] ${isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+        }`}
     >
       {loading && (
         <div
@@ -837,25 +882,23 @@ const Event = () => {
       )}
       {/* left view */}
       <div
-        className={`col-span-4 px-10 ${
-          isDarkMode
-            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-            : "bg-whiteBackground"
-        } rounded-[16px] p-4`}
+        className={`col-span-4 px-10 ${isDarkMode
+          ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+          : "bg-whiteBackground"
+          } rounded-[16px] p-4`}
       >
         <Breadcrumbs />
         <div className={`flex justify-between items-center mb-3`}>
           <p
-            className={`text-2xl ${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            } font-poppins-bold`}
+            className={`text-2xl ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } font-poppins-bold`}
           >
             {t("dashboard.calendar")}
           </p>
-          <div
+          {/* search input */}
+          {/* <div
             className={`flex justify-around w-32 h-[36px] bg-transparent border-2 border-borderGray rounded-[8px] overflow-hidden`}
           >
-            {/* search input */}
             <button className={`py-1`}>
               <img
                 src={isDarkMode ? Search : Searchw}
@@ -866,9 +909,8 @@ const Event = () => {
             <input
               type="text"
               placeholder={t("calendar.gotoDatePlaceholder")}
-              className={`date-input outline-none text-[14px] w-20 ${
-                isDarkMode ? "text-textPrimary" : "text-textBlack"
-              } bg-transparent`}
+              className={`date-input outline-none text-[14px] w-20 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } bg-transparent`}
               onBlur={handleGotoDate}
               maxLength={7}
               onChange={(e) => {
@@ -885,12 +927,11 @@ const Event = () => {
                 }
               }}
             />
-          </div>
+          </div> */}
         </div>
         <hr
-          className={`mb-4 border ${
-            isDarkMode ? "border-borderLine" : "border-borderWhite3"
-          }`}
+          className={`mb-4 border ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
+            }`}
         />
         <Calendar
           className={`px-10`}
@@ -904,11 +945,10 @@ const Event = () => {
       </div>
       {/* right view */}
       <div
-        className={`col-span-2 relative ${
-          isDarkMode
-            ? "bg-gradient-to-l from-fromColor1 to-toColor1"
-            : "bg-whiteBackground"
-        } rounded-[16px] py-3 px-4`}
+        className={`col-span-2 relative ${isDarkMode
+          ? "bg-gradient-to-l from-fromColor1 to-toColor1"
+          : "bg-whiteBackground"
+          } rounded-[16px] py-3 px-4`}
       >
         {eventLoading && (
           <div
@@ -919,16 +959,14 @@ const Event = () => {
         )}
         <div>
           <div
-            className={`text-2xl text-center font-bold my-2 pb-1 ${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+            className={`text-2xl text-center font-bold my-2 pb-1 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
           >
             {t("events.title")}
           </div>
           <hr
-            className={`mb-6 border-t ${
-              isDarkMode ? "border-borderLine" : "border-borderWhite3"
-            }`}
+            className={`mb-6 border-t ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
+              }`}
           />
           {events.length === 0 && workdays.length === 0 ? (
             <div className={`relative top-40 w-full h-full`}>
@@ -973,18 +1011,16 @@ const Event = () => {
                   <div className={`bg-transparent mt-2`}>
                     <div className={`flex py-1 justify-between items-center`}>
                       <div
-                        className={`py-0 px-1 ml-4 ${
-                          isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } text-xs font-bold`}
+                        className={`py-0 px-1 ml-4 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-xs font-bold`}
                       >
                         {itm.title}
                       </div>
                     </div>
                     <div className={`flex pb-2 justify-between items-center`}>
                       <div
-                        className={`py-0 px-1 ml-4 ${
-                          isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } text-xs font-poppins-regular`}
+                        className={`py-0 px-1 ml-4 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-xs font-poppins-regular`}
                       >
                         {itm.description}
                       </div>
@@ -1029,18 +1065,16 @@ const Event = () => {
                   <div className={`bg-transparent mt-2`}>
                     <div className={`flex py-1 justify-between items-center`}>
                       <div
-                        className={`py-0 px-1 ml-4 ${
-                          isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } text-xs font-bold`}
+                        className={`py-0 px-1 ml-4 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-xs font-bold`}
                       >
                         {itm.title}
                       </div>
                     </div>
                     <div className={`flex pb-2 justify-between items-center`}>
                       <div
-                        className={`py-0 px-1 ml-4 ${
-                          isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } text-xs font-poppins-regular`}
+                        className={`py-0 px-1 ml-4 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } text-xs font-poppins-regular`}
                       >
                         {itm.description}
                       </div>

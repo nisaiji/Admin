@@ -64,14 +64,61 @@ export default function Tags() {
   }, [month, classAndSectionData?.sectionId]);
 
   /**
+   * Adjust calendar month when the session changes so that it stays
+   * within the start and end year.
+   */
+  useEffect(() => {
+    if (classAndSectionData?.selectedSession) {
+      const sessionStartYear = classAndSectionData.selectedSession.academicStartYear;
+      const sessionEndYear = classAndSectionData.selectedSession.academicEndYear;
+      if (sessionStartYear && sessionEndYear) {
+        const currentDate = new Date();
+        const minDate = new Date(sessionStartYear, 3, 1); // April 1st
+        const maxDate = new Date(sessionEndYear, 2, 31, 23, 59, 59); // March 31st end of day
+
+        let targetDate = currentDate;
+        let clearSelection = false;
+        if (currentDate < minDate) {
+          targetDate = minDate;
+          clearSelection = true;
+        } else if (currentDate > maxDate) {
+          targetDate = maxDate;
+          clearSelection = true;
+        }
+
+        setMonth(targetDate.getMonth());
+        setYear(targetDate.getFullYear());
+        setToday(targetDate);
+        if (clearSelection) {
+          setSelectedDate("");
+        } else {
+          setSelectedDate(moment(currentDate).format("YYYY-MM-DD"));
+        }
+      }
+    }
+  }, [classAndSectionData?.selectedSession]);
+
+  /**
    * Handle previous month navigation.
    */
   const handlePrevMonth = () => {
     const newMonth = month === 0 ? 11 : month - 1;
     const newYear = month === 0 ? year - 1 : year;
+
+    const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+    if (sessionStartYear) {
+      // April is month 3 (0-indexed)
+      const minDate = new Date(sessionStartYear, 3, 1);
+      const targetDate = new Date(newYear, newMonth, 1);
+      if (targetDate < minDate) {
+        return; // Prevent navigating before session start
+      }
+    }
+
     setMonth(newMonth);
     setYear(newYear);
     setToday(new Date(newYear, newMonth, 1));
+    setSelectedDate("");
   };
 
   /**
@@ -80,9 +127,22 @@ export default function Tags() {
   const handleNextMonth = () => {
     const newMonth = month === 11 ? 0 : month + 1;
     const newYear = month === 11 ? year + 1 : year;
+
+    const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+    if (sessionEndYear) {
+      // March is month 2 (0-indexed). Max date is end of March.
+      // So targetDate (1st of month) cannot be greater than March 1st of end year
+      const maxDate = new Date(sessionEndYear, 2, 1);
+      const targetDate = new Date(newYear, newMonth, 1);
+      if (targetDate > maxDate) {
+        return; // Prevent navigating after session end
+      }
+    }
+
     setMonth(newMonth);
     setYear(newYear);
     setToday(new Date(newYear, newMonth, 1));
+    setSelectedDate("");
   };
 
   /** Handle day click */
@@ -123,23 +183,20 @@ export default function Tags() {
 
       const renderCss = () => {
         if (isSelected) {
-          return `${
-            isDarkMode
-              ? "bg-[#0A81D1] border-[#0A81D1] text-textPrimary"
-              : "bg-backgroundLightBlue border-borderBlue text-textBlue"
-          }`;
+          return `${isDarkMode
+            ? "bg-[#0A81D1] border-[#0A81D1] text-textPrimary"
+            : "bg-backgroundLightBlue border-borderBlue text-textBlue"
+            }`;
         } else if (isSunday && !hasEvent) {
-          return `${
-            isDarkMode
-              ? "bg-backgroundOrange border-borderHoliday"
-              : "bg-backgroundOrange2 border-borderOrange"
-          } text-textHoliday`;
+          return `${isDarkMode
+            ? "bg-backgroundOrange border-borderHoliday"
+            : "bg-backgroundOrange2 border-borderOrange"
+            } text-textHoliday`;
         } else {
-          return `${
-            isDarkMode
-              ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
-              : "text-textBlack bg-whiteBackground2 border-borderWhite3"
-          }`;
+          return `${isDarkMode
+            ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
+            : "text-textBlack bg-whiteBackground2 border-borderWhite3"
+            }`;
         }
       };
 
@@ -153,9 +210,8 @@ export default function Tags() {
           {/* White rectangle indicator if there’s an event */}
           {hasEvent && (
             <div
-              className={`w-[8px] h-[30px] rounded-[4px] ${
-                isDarkMode ? "bg-[#E3E8F3]" : "bg-backgroundBlue"
-              }`}
+              className={`w-[8px] h-[30px] rounded-[4px] ${isDarkMode ? "bg-[#E3E8F3]" : "bg-backgroundBlue"
+                }`}
             />
           )}
         </div>
@@ -164,11 +220,16 @@ export default function Tags() {
     return days;
   };
 
+  const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+  const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+
+  const isPrevDisabled = sessionStartYear && month === 3 && year === sessionStartYear;
+  const isNextDisabled = sessionEndYear && month === 2 && year === sessionEndYear;
+
   return (
     <div
-      className={`select-none grid grid-cols-6 gap-6 p-6 ${
-        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-      }`}
+      className={`select-none grid grid-cols-6 gap-6 p-6 ${isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+        }`}
     >
       {loading && (
         <div
@@ -179,52 +240,47 @@ export default function Tags() {
       )}
       {/* left view */}
       <div
-        className={`col-span-4 px-10 ${
-          isDarkMode
-            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-            : "bg-whiteBackground"
-        } rounded-[16px] p-4`}
+        className={`col-span-4 px-10 ${isDarkMode
+          ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+          : "bg-whiteBackground"
+          } rounded-[16px] p-4`}
       >
         <Breadcrumbs />
         <div className={`flex justify-between items-center mb-3`}>
           <p
-            className={`text-2xl ${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            } font-poppins-bold`}
+            className={`text-2xl ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } font-poppins-bold`}
           >
             {t("dashboard.tags")}
           </p>
         </div>
         <hr
-          className={`mb-4 border ${
-            isDarkMode ? "border-borderLine" : "border-borderWhite3"
-          }`}
+          className={`mb-4 border ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
+            }`}
         />
         <div className={`bg-transparent rounded-lg w-full`}>
           {/* Month Navigation */}
           <div
-            className={`month flex items-center justify-between py-[20px] px-10 mx-10 text-[16px] font-medium rounded-[14px] h-8 capitalize border-2 ${
-              isDarkMode ? "border-borderLine" : "border-borderWhite3"
-            }`}
+            className={`month flex items-center justify-between py-[20px] px-10 mx-10 text-[16px] font-medium rounded-[14px] h-8 capitalize border-2 ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
+              }`}
           >
             <img
               src={isDarkMode ? DownArrow : DownArroww}
               alt=""
-              className={`size-5 rotate-90 cursor-pointer`}
-              onClick={handlePrevMonth}
+              className={`size-5 rotate-90 ${isPrevDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
+              onClick={!isPrevDisabled ? handlePrevMonth : undefined}
             />
             <div
-              className={`${
-                isDarkMode ? "text-textPrimary" : "text-textBlack"
-              }`}
+              className={`${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
             >
               {moment({ year, month }).format("MMMM YYYY")}
             </div>
             <img
               src={isDarkMode ? DownArrow : DownArroww}
               alt=""
-              className={`size-5 -rotate-90 cursor-pointer`}
-              onClick={handleNextMonth}
+              className={`size-5 -rotate-90 ${isNextDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
+              onClick={!isNextDisabled ? handleNextMonth : undefined}
             />
           </div>
           {/* Weekdays header */}
@@ -232,9 +288,8 @@ export default function Tags() {
             {CONSTANT.WEEKDAYS1.map((day) => (
               <div
                 key={day}
-                className={`text-center font-medium capitalize text-md ${
-                  isDarkMode ? "text-textBlue" : "text-textBlack"
-                }`}
+                className={`text-center font-medium capitalize text-md ${isDarkMode ? "text-textBlue" : "text-textBlack"
+                  }`}
               >
                 {day}
               </div>
@@ -246,32 +301,29 @@ export default function Tags() {
         </div>
       </div>
       <div
-        className={`col-span-2 relative ${
-          isDarkMode
-            ? "bg-gradient-to-l from-fromColor1 to-toColor1"
-            : "bg-whiteBackground"
-        } rounded-[16px] py-3 px-4`}
+        className={`col-span-2 relative ${isDarkMode
+          ? "bg-gradient-to-l from-fromColor1 to-toColor1"
+          : "bg-whiteBackground"
+          } rounded-[16px] py-3 px-4`}
       >
         <div>
           <div className="flex justify-between items-center">
             <div
-              className={`text-2xl text-center font-bold my-2 pb-1 ${
-                isDarkMode ? "text-textPrimary" : "text-textBlack"
-              }`}
+              className={`text-2xl text-center font-bold my-2 pb-1 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
             >
               {t("dashboard.schedule")}
             </div>
             <div className="flex items-center bg-[#0A81D11A]  px-2 py-1 rounded-md gap-2">
               <img src={calb} alt="" className="size-6" />
               <div className="text-textBlue font-poppins-bold text-base">
-                {moment(selectedDate).format("dddd, D MMMM, YYYY")}
+                {selectedDate ? moment(selectedDate).format("dddd, D MMMM, YYYY") : "Select a date"}
               </div>
             </div>
           </div>
           <hr
-            className={`mb-6 border-t ${
-              isDarkMode ? "border-borderLine" : "border-borderWhite3"
-            }`}
+            className={`mb-6 border-t ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
+              }`}
           />
           {filteredEvents.length === 0 ? (
             <div className={`relative top-30 w-full h-full`}>
@@ -305,9 +357,8 @@ export default function Tags() {
                   </div>
 
                   <hr
-                    className={`mb-3 border-t ${
-                      isDarkMode ? "border-[#68686880]" : "border-borderWhite3"
-                    }`}
+                    className={`mb-3 border-t ${isDarkMode ? "border-[#68686880]" : "border-borderWhite3"
+                      }`}
                   />
 
                   {/* Subject */}

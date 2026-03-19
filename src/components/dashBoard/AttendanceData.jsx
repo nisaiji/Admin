@@ -124,9 +124,65 @@ export default function AttendanceData({
           .valueOf();
       }
 
+      const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+      const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+
+      if (sessionStartYear && sessionEndYear) {
+        const minDate = new Date(sessionStartYear, 3, 1).getTime();
+        const maxDate = new Date(sessionEndYear, 2, 31, 23, 59, 59, 999).getTime();
+
+        if (selectedOption === "Daily" && (newTime.day.startTime > maxDate || newTime.day.endTime < minDate)) {
+          return prev;
+        }
+        if (selectedOption === "Weekly" && (newTime.week.startTime > maxDate || newTime.week.endTime < minDate)) {
+          return prev;
+        }
+        if (selectedOption === "Monthly" && (newTime.month.startTime > maxDate || newTime.month.endTime < minDate)) {
+          return prev;
+        }
+      }
+
       return newTime;
     });
   };
+
+  /**
+   * Adjust attendance time when the session changes so that it stays
+   * within the start and end year boundaries.
+   */
+  useEffect(() => {
+    if (classAndSectionData?.selectedSession) {
+      const sessionStartYear = classAndSectionData.selectedSession.academicStartYear;
+      const sessionEndYear = classAndSectionData.selectedSession.academicEndYear;
+      if (sessionStartYear && sessionEndYear) {
+        const currentDate = new Date();
+        const minDate = new Date(sessionStartYear, 3, 1); // April 1st
+        const maxDate = new Date(sessionEndYear, 2, 31, 23, 59, 59); // March 31st
+
+        let targetDate = currentDate;
+        if (currentDate < minDate) {
+          targetDate = minDate;
+        } else if (currentDate > maxDate) {
+          targetDate = maxDate;
+        }
+
+        setAttendanceTime({
+          day: {
+            startTime: moment(targetDate).startOf("day").valueOf(),
+            endTime: moment(targetDate).endOf("day").valueOf(),
+          },
+          week: {
+            startTime: moment(targetDate).startOf("week").valueOf(),
+            endTime: moment(targetDate).endOf("week").valueOf(),
+          },
+          month: {
+            startTime: moment(targetDate).startOf("month").valueOf(),
+            endTime: moment(targetDate).endOf("month").valueOf(),
+          },
+        });
+      }
+    }
+  }, [classAndSectionData?.selectedSession]);
 
   // Register required chart elements
   Chart.register(ArcElement, Tooltip, Legend);
@@ -140,11 +196,11 @@ export default function AttendanceData({
         {
           data: hasAttendance
             ? [
-                studentPresentCountData,
-                studentAbsentCountData,
-                totalStudentClassSectionWise -
-                  (studentPresentCountData + studentAbsentCountData),
-              ]
+              studentPresentCountData,
+              studentAbsentCountData,
+              totalStudentClassSectionWise -
+              (studentPresentCountData + studentAbsentCountData),
+            ]
             : [1],
           backgroundColor: hasAttendance
             ? isDarkMode
@@ -554,13 +610,13 @@ export default function AttendanceData({
       const currentDates =
         type === "Weekly"
           ? {
-              startTime: attendanceTime.week.startTime,
-              endTime: attendanceTime.week.endTime,
-            }
+            startTime: attendanceTime.week.startTime,
+            endTime: attendanceTime.week.endTime,
+          }
           : {
-              startTime: attendanceTime.month.startTime,
-              endTime: attendanceTime.month.endTime,
-            };
+            startTime: attendanceTime.month.startTime,
+            endTime: attendanceTime.month.endTime,
+          };
       if (role === "admin") {
         currentDates.sessionId = classAndSectionData?.selectedSession?._id;
       }
@@ -594,13 +650,13 @@ export default function AttendanceData({
       let currentDates =
         type === "Weekly"
           ? {
-              startTime: attendanceTime.week.startTime,
-              endTime: attendanceTime.week.endTime,
-            }
+            startTime: attendanceTime.week.startTime,
+            endTime: attendanceTime.week.endTime,
+          }
           : {
-              startTime: attendanceTime.month.startTime,
-              endTime: attendanceTime.month.endTime,
-            };
+            startTime: attendanceTime.month.startTime,
+            endTime: attendanceTime.month.endTime,
+          };
       if (role === "admin") {
         currentDates.sessionId = classAndSectionData?.selectedSession?._id;
       }
@@ -656,19 +712,37 @@ export default function AttendanceData({
     classAndSectionData?.selectedSession?._id,
   ]);
 
+  const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+  const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+
+  const minDate = sessionStartYear ? new Date(sessionStartYear, 3, 1).getTime() : 0;
+  const maxDate = sessionEndYear ? new Date(sessionEndYear, 2, 31, 23, 59, 59, 999).getTime() : Infinity;
+
+  let isPrevDisabled = false;
+  let isNextDisabled = false;
+
+  if (selectedOption === "Daily") {
+    isPrevDisabled = attendanceTime.day.startTime <= minDate;
+    isNextDisabled = attendanceTime.day.endTime >= maxDate;
+  } else if (selectedOption === "Weekly") {
+    isPrevDisabled = attendanceTime.week.startTime <= minDate;
+    isNextDisabled = attendanceTime.week.endTime >= maxDate;
+  } else if (selectedOption === "Monthly") {
+    isPrevDisabled = attendanceTime.month.startTime <= minDate;
+    isNextDisabled = attendanceTime.month.endTime >= maxDate;
+  }
+
   return (
     <div
-      className={`${
-        isDarkMode
-          ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-          : "bg-whiteBackground"
-      } justify-center mx-5 mt-5 rounded-[16px] relative`}
+      className={`${isDarkMode
+        ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+        : "bg-whiteBackground"
+        } justify-center mx-5 mt-5 rounded-[16px] relative`}
     >
       <div className={`flex justify-between items-center py-3 px-5`}>
         <h2
-          className={`text-2xl ${
-            isDarkMode ? "text-textPrimary" : "text-textBlack"
-          } font-semibold pl-5`}
+          className={`text-2xl ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+            } font-semibold pl-5`}
         >
           {t("dashboard.attendance")}
         </h2>
@@ -677,37 +751,34 @@ export default function AttendanceData({
           className={`flex justify-evenly bg-[#68686826] p-2 rounded-[20px]`}
         >
           <button
-            className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
-              selectedOption === "Daily"
-                ? "bg-[#0F4189] text-textPrimary"
-                : isDarkMode
-                  ? "text-textPrimary"
-                  : "text-textBlack"
-            }`}
+            className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${selectedOption === "Daily"
+              ? "bg-[#0F4189] text-textPrimary"
+              : isDarkMode
+                ? "text-textPrimary"
+                : "text-textBlack"
+              }`}
             onClick={() => handleOptionChange({ target: { value: "Daily" } })}
           >
             {t("dashboard.daily")}
           </button>
           <button
-            className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
-              selectedOption === "Weekly"
-                ? "bg-[#0F4189] text-textPrimary"
-                : isDarkMode
-                  ? "text-textPrimary"
-                  : "text-textBlack"
-            }`}
+            className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${selectedOption === "Weekly"
+              ? "bg-[#0F4189] text-textPrimary"
+              : isDarkMode
+                ? "text-textPrimary"
+                : "text-textBlack"
+              }`}
             onClick={() => handleOptionChange({ target: { value: "Weekly" } })}
           >
             {t("dashboard.weekly")}
           </button>
           <button
-            className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${
-              selectedOption === "Monthly"
-                ? "bg-[#0F4189] text-textPrimary"
-                : isDarkMode
-                  ? "text-textPrimary"
-                  : "text-textBlack"
-            }`}
+            className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${selectedOption === "Monthly"
+              ? "bg-[#0F4189] text-textPrimary"
+              : isDarkMode
+                ? "text-textPrimary"
+                : "text-textBlack"
+              }`}
             onClick={() => handleOptionChange({ target: { value: "Monthly" } })}
           >
             {t("dashboard.monthly")}
@@ -719,38 +790,25 @@ export default function AttendanceData({
         >
           <img
             src={isDarkMode ? DownIcon : DownIconw}
-            onClick={() => handleChangeDate("previous")}
+            onClick={!isPrevDisabled ? () => handleChangeDate("previous") : undefined}
             alt=""
-            className={`h-7 w-7 rotate-90 object-contain cursor-pointer`}
+            className={`h-7 w-7 rotate-90 object-contain ${isPrevDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
           />
           <div
-            className={`text-base ${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            } font-poppins-regular`}
+            className={`text-base ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } font-poppins-regular`}
           >
             {selectedOption === "Daily"
               ? moment(attendanceTime.day.startTime).format("dddd, DD MMM YYYY")
               : selectedOption === "Weekly"
                 ? `${moment(attendanceTime.week.startTime).format(
-                    "D MMM YYYY",
-                  )} - ${moment(attendanceTime.week.endTime).format(
-                    "D MMM YYYY",
-                  )}`
+                  "D MMM YYYY",
+                )} - ${moment(attendanceTime.week.endTime).format(
+                  "D MMM YYYY",
+                )}`
                 : moment(attendanceTime.month.startTime).format("MMMM YYYY")}
           </div>
-          {!(
-            selectedOption === "Daily" &&
-            attendanceTime.day.startTime === moment().startOf("day").valueOf()
-          ) &&
-          !(
-            selectedOption === "Weekly" &&
-            attendanceTime.week.startTime === moment().startOf("week").valueOf()
-          ) &&
-          !(
-            selectedOption === "Monthly" &&
-            attendanceTime.month.startTime ===
-              moment().startOf("month").valueOf()
-          ) ? (
+          {!isNextDisabled ? (
             <img
               src={isDarkMode ? DownIcon : DownIconw}
               onClick={() => handleChangeDate("next")}
@@ -767,9 +825,8 @@ export default function AttendanceData({
         </div>
       </div>
       <hr
-        className={`border ${
-          isDarkMode ? "border-borderLine" : "border-borderWhite3"
-        }`}
+        className={`border ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
+          }`}
       />
       {loading && (
         <div
@@ -933,9 +990,8 @@ export default function AttendanceData({
       {/* Pie/Bar charts */}
       <div className={`flex justify-center pb-5`}>
         <div
-          className={`h-96 flex justify-center ${
-            selectedOption === "Weekly" ? "w-8/12" : "w-11/12"
-          }`}
+          className={`h-96 flex justify-center ${selectedOption === "Weekly" ? "w-8/12" : "w-11/12"
+            }`}
         >
           {selectedOption === "Daily" ? renderPieChart() : renderChart()}
         </div>

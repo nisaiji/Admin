@@ -642,7 +642,7 @@ export default function Studentlist() {
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           }`}
                         >
-                          <div className={`flex justify-around`}>
+                          <div className={`flex justify-evenly`}>
                             <button
                               onClick={() =>
                                 navigate(
@@ -666,7 +666,7 @@ export default function Studentlist() {
                                 className={`size-5`}
                               />
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => {
                                 handleDelete(student?._id);
                               }}
@@ -676,7 +676,7 @@ export default function Studentlist() {
                                 alt="deleteStudent"
                                 className={`size-5`}
                               />
-                            </button>
+                            </button> */}
                           </div>
                         </td>
                       </tr>

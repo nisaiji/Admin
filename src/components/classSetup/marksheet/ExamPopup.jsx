@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Toaster, toast } from "react-hot-toast";
-import ConformationPopup from "../../ConformationPopup";
-
+import ConfirmationPopup from "../../ConfirmationPopup2";
 import accept from "../../../assets/images/darkmode/accept.png";
+import confirm1 from "../../../assets/images/darkmode/confirm1.png";
 import cross from "../../../assets/images/darkmode/cross.png";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
@@ -30,7 +30,7 @@ export default function CreateExamPopup({
   const getAssignedSubjects = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_ASSIGN_SUBJECTS}/${classAndSectionData?.sectionId}`
+        `${EndPoints.ADMIN.GET_ASSIGN_SUBJECTS}/${classAndSectionData?.sectionId}`,
       );
       if (res?.statusCode === 200) {
         const data = res?.result?.map((subj) => ({
@@ -128,13 +128,13 @@ export default function CreateExamPopup({
         // Logical checks
         if (Number(tMax) < Number(tMin)) {
           toast.error(
-            `${subj?.subjectName}: T- Max must be greater than T- Min`
+            `${subj?.subjectName}: T- Max must be greater than T- Min`,
           );
           return false;
         }
         if (Number(pMax) < Number(pMin)) {
           toast.error(
-            `${subj?.subjectName}: P- Max must be greater than P- Min`
+            `${subj?.subjectName}: P- Max must be greater than P- Min`,
           );
           return false;
         }
@@ -163,13 +163,13 @@ export default function CreateExamPopup({
         // If indexes are valid, ensure max grade index is <= min grade index
         if (tMaxIdx > -1 && tMinIdx > -1 && tMaxIdx > tMinIdx) {
           toast.error(
-            `${subj?.subjectName}: T- Max Grade must be ≥ T- Min Grade`
+            `${subj?.subjectName}: T- Max Grade must be ≥ T- Min Grade`,
           );
           return false;
         }
         if (pMaxIdx > -1 && pMinIdx > -1 && pMaxIdx > pMinIdx) {
           toast.error(
-            `${subj?.subjectName}: P- Max Grade must be ≥ P- Min Grade`
+            `${subj?.subjectName}: P- Max Grade must be ≥ P- Min Grade`,
           );
           return false;
         }
@@ -359,8 +359,8 @@ export default function CreateExamPopup({
                           selected === ""
                             ? "Select Type"
                             : selected === "mainSubject"
-                            ? "Numeric"
-                            : "Grade"
+                              ? "Numeric"
+                              : "Grade"
                         }
                       >
                         <MenuItem value="mainSubject">Numeric</MenuItem>
@@ -464,13 +464,14 @@ export default function CreateExamPopup({
       </div>
 
       {/* confirm popup of section startDate */}
-      <ConformationPopup
-        isVisible={showConformationPopup}
-        onClose={() => setshowConformationPopup(false)}
-        onSubmit={() => {
-          handleSubmit();
-        }}
-        message="save changes"
+      <ConfirmationPopup
+        visible={showConformationPopup}
+        onConfirm={handleSubmit}
+        onCancel={() => setshowConformationPopup(false)}
+        title="Create Exam"
+        message="Are you sure you want to create this exam?"
+        confirmImg={confirm1}
+        cancelImg={cross}
       />
     </div>
   );

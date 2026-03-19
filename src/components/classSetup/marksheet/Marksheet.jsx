@@ -41,7 +41,7 @@ export default function Marksheet() {
   const getExamList = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_EXAM_OF_SECTION}/${classAndSectionData?.sectionId}`
+        `${EndPoints.ADMIN.GET_EXAM_OF_SECTION}/${classAndSectionData?.sectionId}`,
       );
       // console.log(res);
 
@@ -113,11 +113,11 @@ export default function Marksheet() {
               examType: c?.examType,
               marksObtained:
                 c?.gradingType === "marks"
-                  ? c?.marksObtained ?? undefined
+                  ? (c?.marksObtained ?? undefined)
                   : undefined,
               gradeObtained:
                 c?.gradingType === "grades"
-                  ? c?.gradeObtained ?? undefined
+                  ? (c?.gradeObtained ?? undefined)
                   : undefined,
               maxMarks: c?.maxMarks ?? undefined,
               gradingType: c?.gradingType,
@@ -136,7 +136,7 @@ export default function Marksheet() {
 
       const res = await axiosClient.post(
         EndPoints.ADMIN.UPDATE_STUDENT_MARKS_BULK,
-        payload
+        payload,
       );
 
       // console.log(res);
@@ -170,14 +170,12 @@ export default function Marksheet() {
     subjectId,
     examType,
     value,
-    maxMarks
+    maxMarks,
   ) => {
     // Show toast if value exceeds max
     if (value > maxMarks) {
       toast.dismiss(); // remove any existing toasts
-      toast.error(`Marks must be between 0 and ${maxMarks}`, {
-        duration: 2000, // optional
-      });
+      toast.error(`Marks must be between 0 and ${maxMarks}`);
       return;
     }
 
@@ -186,7 +184,7 @@ export default function Marksheet() {
         if (student?._id !== studentId) return student;
 
         let examResult = student.studentExamResult.find(
-          (r) => r?.subjectId === subjectId
+          (r) => r?.subjectId === subjectId,
         );
 
         // If examResult doesn't exist, create it
@@ -204,7 +202,7 @@ export default function Marksheet() {
 
         // Update existing component or add new one
         const compIndex = examResult?.components?.findIndex(
-          (c) => c?.examType === examType
+          (c) => c?.examType === examType,
         );
         if (compIndex >= 0) {
           examResult.components[compIndex].marksObtained = value;
@@ -217,7 +215,7 @@ export default function Marksheet() {
         }
 
         return { ...student };
-      })
+      }),
     );
   };
 
@@ -234,7 +232,7 @@ export default function Marksheet() {
     subjectId,
     examType,
     grade,
-    maxGrade
+    maxGrade,
   ) => {
     if (!grade) return;
 
@@ -248,7 +246,7 @@ export default function Marksheet() {
         if (student?._id !== studentId) return student;
 
         let examResult = student?.studentExamResult?.find(
-          (r) => r?.subjectId === subjectId
+          (r) => r?.subjectId === subjectId,
         );
 
         // If examResult doesn't exist, create it
@@ -266,7 +264,7 @@ export default function Marksheet() {
 
         // Update existing grade component or create new
         const compIndex = examResult?.components?.findIndex(
-          (c) => c?.examType === examType
+          (c) => c?.examType === examType,
         );
         if (compIndex >= 0) {
           examResult.components[compIndex].gradeObtained = grade;
@@ -279,7 +277,7 @@ export default function Marksheet() {
         }
 
         return { ...student };
-      })
+      }),
     );
   };
 
@@ -316,7 +314,7 @@ export default function Marksheet() {
       setLoading(true);
       const res = await axiosClient.put(
         `${EndPoints.ADMIN.PUBLISH_RESULT}/${selectedExam?._id}`,
-        { resultPublished: "true" }
+        { resultPublished: "true" },
       );
       // console.log(res)
       if (res?.statusCode === 200) {
@@ -402,7 +400,7 @@ export default function Marksheet() {
                         value={selectedExam?._id}
                         onChange={(e) => {
                           const exam = examList?.find(
-                            (ex) => ex?._id === e.target.value
+                            (ex) => ex?._id === e.target.value,
                           );
                           setSelectedExam(exam);
                         }}
@@ -483,10 +481,10 @@ export default function Marksheet() {
                         <th className="p-2">Student</th>
                         {selectedExam?.subjects?.map((subj, i) => {
                           const maxTheoryMarks = subj?.components.find(
-                            (c) => c.examType === "theory"
+                            (c) => c.examType === "theory",
                           )?.maxMarks;
                           const maxPracticalMarks = subj?.components.find(
-                            (c) => c.examType === "practical"
+                            (c) => c.examType === "practical",
                           )?.maxMarks;
 
                           return (
@@ -510,41 +508,41 @@ export default function Marksheet() {
                       {studentData?.map((student, i) => {
                         // Filter only main subjects
                         const mainSubjects = selectedExam?.subjects?.filter(
-                          (subj) => subj?.subjectType === "mainSubject"
+                          (subj) => subj?.subjectType === "mainSubject",
                         );
 
                         // Calculate total marks obtained
                         const totalMarksObtained = mainSubjects?.reduce(
                           (sum, subj) => {
                             const result = student?.studentExamResult?.find(
-                              (r) => r?.subjectId === subj?.subject?._id
+                              (r) => r?.subjectId === subj?.subject?._id,
                             );
 
                             const theoryMarks = Number(
                               result?.components.find(
-                                (c) => c.examType === "theory"
-                              )?.marksObtained ?? 0
+                                (c) => c.examType === "theory",
+                              )?.marksObtained ?? 0,
                             );
                             const practicalMarks = Number(
                               result?.components.find(
-                                (c) => c.examType === "practical"
-                              )?.marksObtained ?? 0
+                                (c) => c.examType === "practical",
+                              )?.marksObtained ?? 0,
                             );
 
                             return sum + theoryMarks + practicalMarks;
                           },
-                          0
+                          0,
                         );
 
                         // Calculate total maximum marks
                         const totalMarks = mainSubjects?.reduce((sum, subj) => {
                           const maxTheoryMarks =
                             subj?.components.find(
-                              (c) => c.examType === "theory"
+                              (c) => c.examType === "theory",
                             )?.maxMarks ?? 0;
                           const maxPracticalMarks =
                             subj?.components.find(
-                              (c) => c.examType === "practical"
+                              (c) => c.examType === "practical",
                             )?.maxMarks ?? 0;
 
                           return sum + maxTheoryMarks + maxPracticalMarks;
@@ -562,59 +560,59 @@ export default function Marksheet() {
                             {selectedExam?.subjects?.map((subj, i) => {
                               // Try to find result for this subject from student?.studentExamResult
                               const result = student?.studentExamResult?.find(
-                                (r) => r?.subjectId === subj?.subject?._id
+                                (r) => r?.subjectId === subj?.subject?._id,
                               );
 
                               const theoryMarks =
                                 result?.components.find(
-                                  (c) => c.examType === "theory"
+                                  (c) => c.examType === "theory",
                                 )?.marksObtained ?? "";
                               const practicalMarks =
                                 result?.components.find(
-                                  (c) => c.examType === "practical"
+                                  (c) => c.examType === "practical",
                                 )?.marksObtained ?? "";
 
                               const theoryMinMarks =
                                 subj?.components.find(
-                                  (c) => c.examType === "theory"
+                                  (c) => c.examType === "theory",
                                 )?.passingMarks ?? "";
                               const practicalMinMarks =
                                 subj?.components.find(
-                                  (c) => c.examType === "practical"
+                                  (c) => c.examType === "practical",
                                 )?.passingMarks ?? "";
 
                               const maxTheoryMarks = subj?.components.find(
-                                (c) => c.examType === "theory"
+                                (c) => c.examType === "theory",
                               )?.maxMarks;
                               const maxPracticalMarks = subj?.components.find(
-                                (c) => c.examType === "practical"
+                                (c) => c.examType === "practical",
                               )?.maxMarks;
 
                               const theoryGrade =
                                 result?.components.find(
-                                  (c) => c.examType === "theory"
+                                  (c) => c.examType === "theory",
                                 )?.gradeObtained ?? "";
                               const practicalGrade =
                                 result?.components.find(
-                                  (c) => c.examType === "practical"
+                                  (c) => c.examType === "practical",
                                 )?.gradeObtained ?? "";
 
                               const minTheoryGrade =
                                 subj?.components.find(
-                                  (c) => c.examType === "theory"
+                                  (c) => c.examType === "theory",
                                 )?.passingGrade ?? "";
                               const minPracticleGrade =
                                 subj?.components.find(
-                                  (c) => c.examType === "practical"
+                                  (c) => c.examType === "practical",
                                 )?.passingGrade ?? "";
 
                               const maxTheoryGrade =
                                 subj?.components.find(
-                                  (c) => c.examType === "theory"
+                                  (c) => c.examType === "theory",
                                 )?.maxGrade ?? "";
                               const maxPracticleGrade =
                                 subj?.components.find(
-                                  (c) => c.examType === "practical"
+                                  (c) => c.examType === "practical",
                                 )?.maxGrade ?? "";
 
                               const getGradeColor = (grade, passingGrade) => {
@@ -639,14 +637,14 @@ export default function Marksheet() {
                                             let value = e.target.value;
                                             value = value.replace(
                                               /[^0-9]/g,
-                                              ""
+                                              "",
                                             );
                                             handleMarksChange(
                                               student._id,
                                               subj?.subject?._id,
                                               "theory",
                                               value,
-                                              maxTheoryMarks
+                                              maxTheoryMarks,
                                             );
                                           }}
                                           className={`font-semibold w-full bg-transparent size-10 text-center ${
@@ -667,14 +665,14 @@ export default function Marksheet() {
                                             let value = e.target.value;
                                             value = value.replace(
                                               /[^0-9]/g,
-                                              ""
+                                              "",
                                             );
                                             handleMarksChange(
                                               student._id,
                                               subj?.subject?._id,
                                               "practical",
                                               value,
-                                              maxPracticalMarks
+                                              maxPracticalMarks,
                                             );
                                           }}
                                           className={`font-semibold w-full bg-transparent size-10 text-center ${
@@ -726,7 +724,7 @@ export default function Marksheet() {
                                               subj?.subject?._id,
                                               "theory",
                                               e.target.value,
-                                              maxTheoryGrade
+                                              maxTheoryGrade,
                                             )
                                           }
                                           disabled={!isEdit}
@@ -748,7 +746,7 @@ export default function Marksheet() {
 
                                             const colorClass = getGradeColor(
                                               selected,
-                                              minTheoryGrade
+                                              minTheoryGrade,
                                             );
                                             const colorMap = {
                                               "text-textGreen": "#00e676",
@@ -845,7 +843,7 @@ export default function Marksheet() {
                                               subj?.subject?._id,
                                               "practical",
                                               e.target.value,
-                                              maxPracticleGrade
+                                              maxPracticleGrade,
                                             )
                                           }
                                           disabled={!isEdit}
@@ -867,7 +865,7 @@ export default function Marksheet() {
 
                                             const colorClass = getGradeColor(
                                               selected,
-                                              minPracticleGrade
+                                              minPracticleGrade,
                                             );
                                             const colorMap = {
                                               "text-textGreen": "#00e676",

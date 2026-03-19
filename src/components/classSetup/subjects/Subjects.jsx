@@ -60,7 +60,7 @@ export default function Subjects() {
   // Theme and user role
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const { classAndSectionData, teacherData } = useSelector(
-    (state) => state.appAuth
+    (state) => state.appAuth,
   );
   const role = useSelector((state) => state.appAuth.role);
 
@@ -107,7 +107,7 @@ export default function Subjects() {
   const getSubjects = async () => {
     try {
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_SUBJECT}/${classAndSectionData?.sectionId}`
+        `${EndPoints.ADMIN.GET_SUBJECT}/${classAndSectionData?.sectionId}`,
       );
       if (res?.statusCode === 200) setSubjectList(res?.result);
     } catch {}
@@ -116,7 +116,9 @@ export default function Subjects() {
   // API: Fetch all teachers
   const getTeachers = async () => {
     try {
-      const res = await axiosClient.get(EndPoints.ADMIN.TEACHER_LIST);
+      const res = await axiosClient.post(EndPoints.ADMIN.TEACHER_LIST, {
+        sessionId: classAndSectionData?.selectedSession?._id,
+      });
       if (res?.statusCode === 200) setTeachers(res?.result);
     } catch {}
   };
@@ -127,7 +129,7 @@ export default function Subjects() {
       let res;
       if (role === "admin") {
         res = await axiosClient.get(
-          `${EndPoints.ADMIN.GET_ASSIGN_SUBJECTS}/${classAndSectionData?.sectionId}`
+          `${EndPoints.ADMIN.GET_ASSIGN_SUBJECTS}/${classAndSectionData?.sectionId}`,
         );
       } else if (role === "classTeacher") {
         res = await axiosClient.get(EndPoints.TEACHER.GET_ASSIGN_SUBJECTS);
@@ -164,7 +166,7 @@ export default function Subjects() {
           subjectId: data?.subjectId,
           teacherId: data?.teacherId,
           isMainSubject: data?.isMainSubject,
-        }
+        },
       );
       if (res?.statusCode === 200) {
         toast.success(res?.result);
@@ -194,13 +196,13 @@ export default function Subjects() {
           subjectId: newSubject?.subjectId,
           teacherId: newSubject?.teacherId,
           isMainSubject: newSubject?.isMainSubject,
-        }
+        },
       );
       if (res?.statusCode === 201) {
         toast.success(res?.result);
         getAssignedSubjects();
         setSubjectList(
-          subjectList.filter((s) => s._id !== newSubject?.subjectId)
+          subjectList.filter((s) => s._id !== newSubject?.subjectId),
         );
         setNewSubject({ isMainSubject: false, subjectId: "", teacherId: "" });
       }
@@ -293,8 +295,8 @@ export default function Subjects() {
                         color: !newSubject?.subjectId
                           ? "gray"
                           : isDarkMode
-                          ? "#E3E8F3"
-                          : "black",
+                            ? "#E3E8F3"
+                            : "black",
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
                         },
@@ -392,8 +394,8 @@ export default function Subjects() {
                         color: !newSubject?.teacherId
                           ? "gray"
                           : isDarkMode
-                          ? "#E3E8F3"
-                          : "black",
+                            ? "#E3E8F3"
+                            : "black",
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
                         },
@@ -477,7 +479,7 @@ export default function Subjects() {
                     setSelectedRow(i);
                     setSelectedAssignedSubjects(sub);
                     setSelectedTeacher(
-                      teachers.find((t) => t.id === sub?.teacherId)
+                      teachers.find((t) => t.id === sub?.teacherId),
                     );
                   }
                 }}
@@ -539,7 +541,7 @@ export default function Subjects() {
                           );
                         }
                         const subjectObj = subjectList?.find(
-                          (subject) => subject?._id === selected?.subjectId
+                          (subject) => subject?._id === selected?.subjectId,
                         );
                         return subjectObj
                           ? subjectObj?.name
@@ -586,7 +588,7 @@ export default function Subjects() {
                           handleSubjectChange(
                             i,
                             "isMainSubject",
-                            e.target.checked
+                            e.target.checked,
                           )
                         }
                         disabled={editingRow !== i}

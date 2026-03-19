@@ -28,6 +28,7 @@ export default function Teacher() {
   const searchInputRef = useRef(null);
   const newTeacherFirstNameRef = useRef(null);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
   // State variables
   const [teacherInfoModelOpen, setTeacherInfoModelOpen] = useState(false);
   const [currTeacher, setCurrTeacher] = useState([]);
@@ -43,7 +44,7 @@ export default function Teacher() {
     lastname: "",
     phone: "",
   });
-// console.log(teachers);
+  // console.log(teachers);
 
   /**
    * Capitalizes the first letter of a string and converts the rest to lowercase.
@@ -103,7 +104,7 @@ export default function Teacher() {
           firstname: capitalizeFirstLetter(newTeacher?.firstname.trim()),
           lastname: capitalizeFirstLetter(newTeacher?.lastname.trim()),
           phone: newTeacher.phone.trim(),
-        }
+        },
       );
 
       if ([200, 201].includes(response?.statusCode)) {
@@ -125,7 +126,9 @@ export default function Teacher() {
   const getTeacher = async () => {
     try {
       setLoading(true);
-      const response = await axiosClient.get(EndPoints.ADMIN.TEACHER_LIST);
+      const response = await axiosClient.post(EndPoints.ADMIN.TEACHER_LIST, {
+        sessionId: classAndSectionData?.selectedSession?._id,
+      });
       if (response?.statusCode === 200) {
         const teachersWithSNos = response?.result
           ?.map((teacher, index, array) => ({
@@ -172,8 +175,8 @@ export default function Teacher() {
         prevTeachers.map((teacher) =>
           teacher.SNo === SNo
             ? { ...teacher, [field]: formattedValue }
-            : teacher
-        )
+            : teacher,
+        ),
       );
     }
   };
@@ -188,7 +191,7 @@ export default function Teacher() {
     try {
       setLoading(true);
       const response = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_TEACHER}/${currTeacher._id}`
+        `${EndPoints.ADMIN.DELETE_TEACHER}/${currTeacher._id}`,
       );
 
       if (response?.statusCode === 200) {
@@ -218,7 +221,7 @@ export default function Teacher() {
     (teacher) =>
       teacher?.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
       teacher?.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      teacher?.phone.includes(searchQuery)
+      teacher?.phone.includes(searchQuery),
   );
 
   return (
@@ -428,7 +431,7 @@ export default function Teacher() {
                       </button>
                     </td>
                   </tr>
-                  {filteredTeachers.map((teacher,i) => (
+                  {filteredTeachers.map((teacher, i) => (
                     <tr key={i} className="bg-transparent">
                       {/* SNo */}
                       <td
@@ -450,7 +453,7 @@ export default function Teacher() {
                             handleInputChange(
                               teacher.SNo,
                               "firstname",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           maxLength={15}
@@ -474,7 +477,7 @@ export default function Teacher() {
                             handleInputChange(
                               teacher.SNo,
                               "lastname",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           maxLength={15}
@@ -498,7 +501,7 @@ export default function Teacher() {
                             handleInputChange(
                               teacher.SNo,
                               "phone",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           placeholder={t("placeholders.phoneNumber")}

@@ -165,14 +165,20 @@ export default function SectionData({
           // console.log(res);
 
           const activeSession = res?.result?.find((s) => s?.isCurrent === true);
-          if (!classAndSectionData?.selectedSession?._id) {
+
+          const selectedExists = res?.result?.some(
+            (s) => s?._id === classAndSectionData?.selectedSession?._id
+          );
+
+          if (!selectedExists) {
             dispatch(
               setClassAndSectionData({
                 selectedSession: activeSession,
                 session: res?.result,
-              }),
+              })
             );
           }
+
           setSession(
             res?.result.sort(
               (a, b) => a?.academicStartYear - b?.academicStartYear,
@@ -241,9 +247,8 @@ export default function SectionData({
 
     return (
       <div
-        className={`flex items-center justify-between  rounded-full px-6 py-2 shadow-md w-fit ${
-          isDarkMode ? "bg-[#68686826] text-textPrimary" : "bg-whiteBackground"
-        }`}
+        className={`flex items-center justify-between  rounded-full px-6 py-2 shadow-md w-fit ${isDarkMode ? "bg-[#68686826] text-textPrimary" : "bg-whiteBackground"
+          }`}
       >
         {/* Date Section */}
         <div
@@ -269,15 +274,14 @@ export default function SectionData({
 
   useEffect(() => {
     getSession();
-  }, [date, classAndSectionData?.selectedSession?._id]);
+  }, [date]);
 
   return (
     <div
-      className={`${
-        isDarkMode
-          ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-          : "bg-whiteBackground"
-      } flex items-center w-full p-4 shadow-lg`}
+      className={`${isDarkMode
+        ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+        : "bg-whiteBackground"
+        } flex items-center w-full p-4 shadow-lg`}
     >
       {role === "classTeacher" || role === "teacher" ? (
         <img
@@ -311,9 +315,8 @@ export default function SectionData({
       />
       <div className={`flex flex-col justify-center flex-grow px-4`}>
         <h1
-          className={`text-3xl font-bold ${
-            isDarkMode ? "text-textPrimary" : "text-textBlack"
-          }`}
+          className={`text-3xl font-bold ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
         >
           {localStorage.getItem("schoolName") || schoolName}
         </h1>

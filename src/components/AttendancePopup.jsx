@@ -12,7 +12,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import backIcon from "../assets/images/backIcon.png";
 import editw from "../assets/images/editw.png";
 import downloadw from "../assets/images/downloadw.png";
-import closew from "../assets/images/closew.png";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
@@ -21,10 +20,11 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import moment from "moment";
 import { getSessionPermissions, getSessionWindow } from "../utils/helper";
+import Breadcrumbs from "./BreadCrumbs";
 
 export default function AttendancePopup() {
   // Redux state selectors
-  const { classAndSectionData, teacherData } = useSelector(
+  const { classAndSectionData, teacherData, data } = useSelector(
     (state) => state.appAuth,
   );
   const role = useSelector((state) => state.appAuth.role);
@@ -628,9 +628,17 @@ export default function AttendancePopup() {
     // ===== Title =====
     doc.setFontSize(16);
     doc.text(
-      "Monthly Attendance Sheet",
+      `${role === "classTeacher" ? teacherData?.schoolName : role === "admin" ? data?.schoolName : ""}`,
       doc.internal.pageSize.getWidth() / 2,
       30,
+      {
+        align: "center",
+      },
+    );
+    doc.text(
+      "Monthly Attendance Sheet",
+      doc.internal.pageSize.getWidth() / 2,
+      50,
       {
         align: "center",
       },
@@ -642,7 +650,7 @@ export default function AttendancePopup() {
         classAndSectionData?.sectionName || ""
       } | ${monthYear}`,
       doc.internal.pageSize.getWidth() / 2,
-      50,
+      65,
       { align: "center" },
     );
 
@@ -670,7 +678,7 @@ export default function AttendancePopup() {
 
     // ===== AutoTable =====
     autoTable(doc, {
-      startY: 70,
+      startY: 80,
       head: [headRow],
       body: bodyRows,
       styles: {
@@ -694,7 +702,7 @@ export default function AttendancePopup() {
       didDrawPage: () => {
         doc.setFontSize(9);
         doc.text(
-          `Generated on: ${moment().format("DD/MM/YYYY")}`,
+          `Generated on: ${moment().format("DD/MM/YYYY hh:mm A")}`,
           doc.internal.pageSize.getWidth() - 40,
           doc.internal.pageSize.getHeight() - 20,
           { align: "right" },
@@ -808,12 +816,18 @@ export default function AttendancePopup() {
               : "bg-whiteBackground"
           }`}
         >
-          <div
-            className={`text-2xl font-poppins-regular text-center w-full ${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
-          >
-            Monthly Attendance Sheet
+          <div className="relative flex items-center">
+            <div>
+              <Breadcrumbs />
+            </div>
+
+            <div
+              className={`absolute left-1/2 -translate-x-1/2 text-2xl font-poppins-regular ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
+            >
+              Monthly Attendance Sheet
+            </div>
           </div>
           <div
             className={`text-xl font-poppins-regular text-textGray text-center w-full my-2`}

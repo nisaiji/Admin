@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DownArroww from "../../assets/images/dropdown.png";
 import DownArrow from "../../assets/images/darkmode/downArrow.png";
 import toast, { Toaster } from "react-hot-toast";
@@ -12,6 +12,7 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+  const { classAndSectionData } = useSelector((state) => state.appAuth);
 
   // Handle month navigation (previous/next month)
   const updateCalendar = (newMonth, newYear) => {
@@ -22,11 +23,49 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
   };
 
   /**
+   * Adjust calendar month when the session changes so that it stays
+   * within the start and end year.
+   */
+  useEffect(() => {
+    if (classAndSectionData?.selectedSession) {
+      const sessionStartYear = classAndSectionData.selectedSession.academicStartYear;
+      const sessionEndYear = classAndSectionData.selectedSession.academicEndYear;
+      if (sessionStartYear && sessionEndYear) {
+        const currentDate = new Date();
+        const minDate = new Date(sessionStartYear, 3, 1); // April 1st
+        const maxDate = new Date(sessionEndYear, 2, 31, 23, 59, 59); // March 31st
+
+        let targetDate = currentDate;
+        if (currentDate < minDate) {
+          targetDate = minDate;
+        } else if (currentDate > maxDate) {
+          targetDate = maxDate;
+        }
+
+        const targetMonth = targetDate.getMonth();
+        const targetYear = targetDate.getFullYear();
+        setMonth(targetMonth);
+        setYear(targetYear);
+        setToday(targetDate);
+        updateDate({ month: targetMonth, year: targetYear });
+      }
+    }
+  }, [classAndSectionData?.selectedSession]);
+
+  /**
    * Handle previous month navigation.
    */
   const handlePrevMonth = () => {
     const newMonth = month === 0 ? 11 : month - 1;
     const newYear = month === 0 ? year - 1 : year;
+
+    const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+    if (sessionStartYear) {
+      const minDate = new Date(sessionStartYear, 3, 1);
+      const targetDate = new Date(newYear, newMonth, 1);
+      if (targetDate < minDate) return;
+    }
+
     updateCalendar(newMonth, newYear);
   };
 
@@ -36,6 +75,14 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
   const handleNextMonth = () => {
     const newMonth = month === 11 ? 0 : month + 1;
     const newYear = month === 11 ? year + 1 : year;
+
+    const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+    if (sessionEndYear) {
+      const maxDate = new Date(sessionEndYear, 2, 1);
+      const targetDate = new Date(newYear, newMonth, 1);
+      if (targetDate > maxDate) return;
+    }
+
     updateCalendar(newMonth, newYear);
   };
 
@@ -69,7 +116,7 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
         (event) =>
           event.title &&
           new Date(event.date).toDateString() ===
-            new Date(year, month, day).toDateString()
+          new Date(year, month, day).toDateString()
       );
 
       days.push(
@@ -85,21 +132,26 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
     return days;
   };
 
+  const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+  const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+
+  const isPrevDisabled = sessionStartYear && month === 3 && year === sessionStartYear;
+  const isNextDisabled = sessionEndYear && month === 2 && year === sessionEndYear;
+
   // Calendar Component - Displays a calendar with month navigation and event handling
   const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
     return (
       <div className={`bg-transparent rounded-lg w-full`}>
         {/* Month Navigation */}
         <div
-          className={`month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 ${
-            isDarkMode ? "border-borderLine" : "border-borderWhite3"
-          }`}
+          className={`month flex items-center justify-between py-4 px-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
+            }`}
         >
           <img
             src={isDarkMode ? DownArrow : DownArroww}
             alt=""
-            className={`size-5 rotate-90 cursor-pointer`}
-            onClick={onPrevMonth}
+            className={`size-5 rotate-90 ${isPrevDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
+            onClick={!isPrevDisabled ? onPrevMonth : undefined}
           />
           <div
             className={`${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}
@@ -109,8 +161,8 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
           <img
             src={isDarkMode ? DownArrow : DownArroww}
             alt=""
-            className={`size-5 -rotate-90 cursor-pointer`}
-            onClick={onNextMonth}
+            className={`size-5 -rotate-90 ${isNextDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
+            onClick={!isNextDisabled ? onNextMonth : undefined}
           />
         </div>
         {/* Weekdays header */}
@@ -118,9 +170,8 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
           {CONSTANT.WEEKDAYS1.map((day) => (
             <div
               key={day}
-              className={`text-center text-md ${
-                isDarkMode ? "text-textBlue" : "text-textBlack"
-              }`}
+              className={`text-center text-md ${isDarkMode ? "text-textBlue" : "text-textBlack"
+                }`}
             >
               {day}
             </div>
@@ -136,23 +187,20 @@ const CalendarComponent = ({ events, workdays, updateDate }) => {
       if (isHoliday) {
         return `text-textPrimary bg-backgroundRed border-borderRed`;
       } else if (isSunday) {
-        return `${
-          isDarkMode
-            ? "bg-backgroundOrange border-borderHoliday"
-            : "bg-backgroundOrange2 border-borderOrange"
-        } text-textHoliday`;
+        return `${isDarkMode
+          ? "bg-backgroundOrange border-borderHoliday"
+          : "bg-backgroundOrange2 border-borderOrange"
+          } text-textHoliday`;
       } else if (isToday) {
-        return `${
-          isDarkMode
-            ? "text-textBlue bg-backgroundGrayDays border-borderBlue"
-            : "text-textDarkBlue bg-whiteBackground2 border-borderDarkBlue"
-        }`;
+        return `${isDarkMode
+          ? "text-textBlue bg-backgroundGrayDays border-borderBlue"
+          : "text-textDarkBlue bg-whiteBackground2 border-borderDarkBlue"
+          }`;
       } else {
-        return `${
-          isDarkMode
-            ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
-            : "text-textBlack bg-whiteBackground2 border-borderWhite3"
-        }`;
+        return `${isDarkMode
+          ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
+          : "text-textBlack bg-whiteBackground2 border-borderWhite3"
+          }`;
       }
     };
 
