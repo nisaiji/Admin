@@ -34,7 +34,7 @@ import Marksheet from "./components/classSetup/marksheet/Marksheet";
 import Tags from "./components/classSetup/tags/Tags";
 import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
 import Fees from "./components/payments/Fees";
-import { OnboardingScreen } from "./components/onboarding/OnBoarding";
+import { OnboardingScreen } from "./components/onboarding/Onboarding";
 import { TCPage } from "./components/transferCertificate/TransferCertificate";
 
 /**
