@@ -34,6 +34,8 @@ import Marksheet from "./components/classSetup/marksheet/Marksheet";
 import Tags from "./components/classSetup/tags/Tags";
 import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
 import Fees from "./components/payments/Fees";
+import { OnboardingScreen } from "./components/onboarding/OnBoarding";
+import { TCPage } from "./components/transferCertificate/TransferCertificate";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -91,6 +93,7 @@ function App() {
                 <>
                   {/* Routes available for admin users */}
                   <Route path="" element={<DashBoard />} />
+                  <Route path="onboard" element={<OnboardingScreen />} />
                   <Route
                     path="student-information-system"
                     element={<Studentlist />}
@@ -102,11 +105,11 @@ function App() {
                   />
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
-                  {/* <Route
-                    path="transfer-certificate"
-                    element={<TransferCertificate />}
-                  />
                   <Route
+                    path="transfer-certificate"
+                    element={<TCPage />}
+                  />
+                  {/* <Route
                     path="transfer-certificate-apply"
                     element={<TransferCertificateApply />}
                   /> */}
@@ -145,7 +148,7 @@ function App() {
                     element={<Requests />}
                   />
                   <Route path="teacher-leave-requests" element={<Leaves />} />
-                  <Route path="add-student" element={<AddStudentForm />} />
+                  <Route path="student-information-system/add-student" element={<AddStudentForm />} />
                   <Route path="notice" element={<Notice />} />
                   <Route path="payments" element={<Fees />} />
                 </>

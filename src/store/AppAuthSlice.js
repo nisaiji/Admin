@@ -11,6 +11,14 @@ export const setAuth = createAsyncThunk("auth/setAuth", async (data) => {
   return mergedData;
 });
 
+export const setSessionCreated = createAsyncThunk(
+  "auth/setSessionCreated",
+  async (data) => {
+    localStorage.setItem("isSessionCreated", true);
+    return true;
+  },
+);
+
 export const setClassAndSectionData = createAsyncThunk(
   "auth/setClassAndSectionData",
   async (data) => {
@@ -83,7 +91,6 @@ const initialState = {
   id: null,
   schoolName: null,
   isLoading: false,
-
   role: null,
   isFCMToken: false,
   data: JSON.parse(localStorage.getItem("adminData")) || {},
@@ -92,6 +99,7 @@ const initialState = {
     JSON.parse(localStorage.getItem("classAndSectionData")) || {},
   tempData: JSON.parse(localStorage.getItem("tempData")) || {},
   status: JSON.parse(localStorage.getItem("status")) || {},
+  isSessionCreated: localStorage.getItem("isSessionCreated") === "true",
 };
 
 /**
@@ -143,6 +151,9 @@ const appAuthSlice = createSlice({
       })
       .addCase(setAuth.fulfilled, (state, action) => {
         state.status = action.payload;
+      })
+      .addCase(setSessionCreated.fulfilled, (state, action) => {
+        state.isSessionCreated = true;
       })
       .addCase(setClassAndSectionData.fulfilled, (state, action) => {
         state.classAndSectionData = action.payload;

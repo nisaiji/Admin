@@ -1,12 +1,26 @@
-import React, { useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
-import Navbar from '../components/Navbar'
+import React, { useEffect } from "react";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import { useSelector } from "react-redux";
 
 export default function Home() {
+  const { role, isSessionCreated } = useSelector((state) => state.appAuth);
+  const location = useLocation();
+
+  if (
+    role === "admin" &&
+    isSessionCreated === false &&
+    location.pathname !== "/onboard"
+  ) {
+    return <Navigate to="/onboard" />;
+  }
+
+  const showNav = location.pathname !== "/onboard";
+
   return (
     <>
-    <Navbar/>
-    <Outlet/> 
+      {showNav && <Navbar />}
+      <Outlet />
     </>
-  )
+  );
 }

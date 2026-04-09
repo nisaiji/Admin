@@ -1,837 +1,1443 @@
-/**
- * Studentlist.jsx
- *
- * This component displays a paginated, searchable, and filterable list of students for the admin dashboard.
- * It allows filtering by class and section, searching by student name, and supports CRUD actions (view, edit, delete).
- * The component fetches student and class/section data from the backend, manages pagination, and displays modals for student info and delete confirmation.
- * Uses React hooks for state, Redux for config/auth state, and Material UI for styled controls.
- * Handles dark mode styling and displays loading and toast notifications.
- */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
-import PaginationItem from "@mui/material/PaginationItem";
-import infow from "../../assets/images/info.png";
-import crossw from "../../assets/images/cross.png";
-import edit2w from "../../assets/images/edit2.png";
-import delete2w from "../../assets/images/delete2.png";
-import Searchw from "../../assets/images/Search.png";
-import clearw from "../../assets/images/clear.png";
-import info from "../../assets/images/darkmode/info.png";
-import cross from "../../assets/images/darkmode/cross.png";
-import edit2 from "../../assets/images/darkmode/edit.png";
-import delete2 from "../../assets/images/darkmode/delete.png";
-import Search from "../../assets/images/darkmode/Search.png";
-import clear from "../../assets/images/darkmode/clear.png";
 import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Stack,
-  Pagination,
-} from "@mui/material";
-import { axiosClient } from "../../services/axiosClient";
-import noDataFound from "../../assets/images/darkmode/noDataFound.png";
-import EndPoints from "../../services/EndPoints";
-import StudentInfo from "../classSetup/sectionStudents/StudentInfo";
-import { Link, useNavigate } from "react-router-dom";
-import DeletePopup from "../DeleteMessagePopup";
-import Spinner from "../Spinner";
+  BookOpen,
+  Briefcase,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Droplets,
+  Edit3,
+  GraduationCap,
+  Heart,
+  Info,
+  Mail,
+  MapPin,
+  Phone,
+  Plus,
+  RefreshCw,
+  Save,
+  Search,
+  Shield,
+  Trash2,
+  User,
+  Users,
+  X,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
-import CONSTANT from "../../utils/constants";
+import { axiosClient } from "../../services/axiosClient";
+import EndPoints from "../../services/EndPoints";
+import DeletePopup from "../DeleteMessagePopup";
 import Breadcrumbs from "../BreadCrumbs";
+import CONSTANT from "../../utils/constants";
+import REGEX from "../../utils/regix";
 
-export default function Studentlist() {
-  // Import necessary modules and hooks
-  const navigate = useNavigate();
-  const { t } = useTranslation();
+const PAGE_LIMIT_OPTIONS = [10, 20, 25, 50, 100];
+const AVATAR_CLASSES = [
+  "bg-[#4F8EF7]",
+  "bg-[#4cbc9a]",
+  "bg-[#94A3B8]",
+  "bg-[#FBBF24]",
+  "bg-[#FF793F]",
+  "bg-[#fe4040]",
+  "bg-[#0a81d1]",
+];
+const CLASS_OPTION_KEYS = [
+  "preNursery",
+  "nursery",
+  "LKG",
+  "UKG",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+];
 
-  // Redux selectors to fetch required state
-  const { classAndSectionData } = useSelector(
-    (state) => state.appAuth
+function cn(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function getStoredFilter(key) {
+  if (typeof window === "undefined") return "";
+  return window.localStorage.getItem(key) || "";
+}
+
+function persistFilter(key, value) {
+  if (typeof window === "undefined") return;
+
+  if (value) {
+    window.localStorage.setItem(key, value);
+    return;
+  }
+
+  window.localStorage.removeItem(key);
+}
+
+function getStudentRecordId(student) {
+  return student?._id || student?.id || student?.studentId || "";
+}
+
+function getStudentKey(student, index) {
+  return getStudentRecordId(student) || `student-${index}`;
+}
+
+function getDisplayValue(value) {
+  if (value === null || value === undefined) return CONSTANT.NA;
+
+  const normalized = String(value).trim();
+  return normalized || CONSTANT.NA;
+}
+
+function getFullName(student) {
+  const firstName = student?.firstname || student?.firstName || "";
+  const lastName = student?.lastname || student?.lastName || "";
+  const fullName = `${firstName} ${lastName}`.trim();
+
+  return fullName || CONSTANT.NA;
+}
+
+function getInitials(student) {
+  const fullName = getFullName(student);
+  if (fullName === CONSTANT.NA) return "NA";
+
+  return fullName
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function getAvatarClass(student, index) {
+  const source = String(getStudentRecordId(student) || index);
+  let hash = 0;
+
+  for (let i = 0; i < source.length; i += 1) {
+    hash += source.charCodeAt(i);
+  }
+
+  return AVATAR_CLASSES[Math.abs(hash) % AVATAR_CLASSES.length];
+}
+
+function getClassSortValue(className, classOptions) {
+  const translatedIndex = classOptions.indexOf(className);
+  if (translatedIndex >= 0) return translatedIndex;
+
+  const numericValue = Number.parseInt(String(className || "").replace(/\D/g, ""), 10);
+  return Number.isNaN(numericValue) ? Number.MAX_SAFE_INTEGER : numericValue;
+}
+
+function buildVisiblePages(pageNo, totalPages) {
+  if (totalPages <= 5) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([1, totalPages, pageNo - 1, pageNo, pageNo + 1]);
+  return Array.from(pages)
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((firstPage, secondPage) => firstPage - secondPage);
+}
+
+function getApiErrorMessage(error, fallback) {
+  if (typeof error === "string") return error;
+  return error?.message || error?.data?.message || fallback;
+}
+
+function capitalizeValue(value) {
+  const normalized = String(value || "").trim();
+  if (!normalized) return "";
+  return normalized.replace(
+    /\S+/g,
+    (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
   );
-  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+}
 
-  // State variables for pagination, modal visibility, and student data
-  const [pageNo, setPageNo] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [totalStudentCount, setTotalStudentCount] = useState(5);
-  const [openInfoModal, setOpenInfoModal] = useState(false);
-  const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
-
-  // State variables for managing students, classes, and filters
-  const [studentList, setStudentList] = useState([]);
-  const [selectedStudent, setSelectedStudent] = useState([]);
-  const [idForDelete, setIdForDelete] = useState();
-  const [name, setName] = useState("");
-  const [classList, setClassList] = useState([]);
-  const [sectionList, setSectionList] = useState([]);
-  const [searchClass, setSearchClass] = useState(
-    () => localStorage.getItem("searchClass") || ""
+function getStudentClassName(student) {
+  return getDisplayValue(
+    student?.className || student?.class?.name || student?.class || student?.classId?.name
   );
-  const [searchSection, setSearchSection] = useState(
-    () => localStorage.getItem("searchSection") || ""
+}
+
+function getStudentSectionName(student) {
+  return getDisplayValue(
+    student?.sectionName ||
+      student?.section?.name ||
+      student?.section ||
+      student?.sectionId?.name
   );
+}
 
-  // State variables for loading and references
-  const [loading, setLoading] = useState(false);
-  const debounceTimeoutRef = useRef(null);
-  const classRef = useRef(searchClass);
-  const sectionRef = useRef(searchSection);
+function getStudentRollNo(student) {
+  return getDisplayValue(student?.rollNo || student?.rollNumber || student?.studentId);
+}
 
-   // Class options for dropdown (translated)
-  const classOptions = [
-    "preNursery",
-    "nursery",
-    "LKG",
-    "UKG",
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
-    "ten",
-    "eleven",
-    "twelve",
-  ].map((key) => t(`options.${key}`));
+function normalizeStudentDraft(student) {
+  return {
+    id: getStudentRecordId(student),
+    firstname: student?.firstname || student?.firstName || "",
+    lastname: student?.lastname || student?.lastName || "",
+    gender: student?.gender || "",
+    bloodGroup: student?.bloodGroup || "",
+    dob: student?.dob || "",
+    address: student?.address || "",
+    parentName: student?.parentFullName || student?.parentName || "",
+    guardianName: student?.guardianName || "",
+    phone: student?.parentPhone || student?.phone || "",
+    parentGender: student?.parentGender || "",
+    parentAge: student?.parentAge || "",
+    parentEmail: student?.parentEmail || student?.email || "",
+    parentQualification: student?.parentQualification || "",
+    parentOccupation: student?.parentOccupation || "",
+    parentAddress: student?.parentAddress || "",
+  };
+}
 
-  // Fetch initial data when the component is mounted
-  useEffect(() => {
-    if (classAndSectionData?.id) {
-      getClassList();
-      fetchStudents({});
-    }
-  }, [classAndSectionData?.id]);
-
-  // Update section list when the selected class changes
-  useEffect(() => {
-    if (searchClass && classList.length > 0) {
-      const classData = classList.find((itm) => itm["_id"] === searchClass);
-      setSectionList(classData?.section || []);
-    }
-  }, [searchClass, classList]);
-
-  // Sync local storage and fetch students when the section filter changes
-  useEffect(() => {
-    localStorage.setItem("searchClass", searchClass);
-    localStorage.setItem("searchSection", searchSection);
-    classRef.current = searchClass;
-    sectionRef.current = searchSection;
-    fetchStudents({ searchSection });
-  }, [searchSection, pageNo, limit]);
-
-  /**
-   * Fetch students based on filters and pagination.
-   * @param {Object} params - Contains searchName and searchSection.
-   */
-  const fetchStudents = async ({ searchName = "", searchSection = "" }) => {
-    const url = EndPoints.ADMIN.SEARCH_STUDENT;
-
-    // let query = `?admin=${id}&page=${pageNo}&limit=${limit}&include=parent,class,section`;
-    let query = `?page=${pageNo}&limit=${limit}&session=${classAndSectionData?.selectedSession?._id}`;
-
-    // Determine the query parameters based on the inputs
-    if (searchName) {
-      // query += `&firstname=${searchName}`;
-      query += `&search=${searchName}`;
-    }
-    if (searchSection) {
-      query += `&section=${searchSection}`;
-    }
-
-    try {
-      setLoading(true);
-      const response = await axiosClient.get(`${url}${query}`);
-      // console.log({ response });
-
-      if (response?.statusCode === 200) {
-        const { totalStudents, students } = response?.result;
-        setTotalStudentCount(totalStudents);
-        setStudentList(students);
-      }
-    } catch (e) {
-      console.log({ e });
-      toast.error(e);
-    } finally {
-      setLoading(false);
-    }
+function buildStudentUpdatePayload(draft) {
+  const cleanedValues = {
+    firstname: capitalizeValue(draft.firstname),
+    lastname: capitalizeValue(draft.lastname),
+    gender: draft.gender,
+    bloodGroup: draft.bloodGroup,
+    dob: String(draft.dob || "").trim(),
+    address: capitalizeValue(draft.address),
+    parentName: capitalizeValue(draft.parentName),
+    guardianName: capitalizeValue(draft.guardianName),
+    parentGender: draft.parentGender,
+    parentAge: String(draft.parentAge || "").trim(),
+    parentEmail: String(draft.parentEmail || "").trim().toLowerCase(),
+    phone: String(draft.phone || "").trim(),
+    parentQualification: capitalizeValue(draft.parentQualification),
+    parentOccupation: capitalizeValue(draft.parentOccupation),
+    parentAddress: capitalizeValue(draft.parentAddress),
   };
 
-  /**
-   * Fetch the list of classes from the API.
-   */
-  const getClassList = async () => {
-    try {
-      const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
-      );
+  return Object.fromEntries(
+    Object.entries(cleanedValues).filter(([, value]) => value !== "")
+  );
+}
 
-      // Filter out classes without sections and then sort them.
-      const filteredSortedClasses = res?.result
-        .filter((cls) => cls?.section?.length > 0)
-        .sort((a, b) => {
-          const aIndex = classOptions.indexOf(a.name);
-          const bIndex = classOptions.indexOf(b.name);
-          return aIndex - bIndex;
-        });
+function validateStudentDraft(draft, t) {
+  if (
+    !String(draft.firstname || "").trim() ||
+    String(draft.firstname || "").trim().length < 3 ||
+    REGEX.NUMBER.test(draft.firstname)
+  ) {
+    return t("validationError.enterFirstName");
+  }
 
-      setClassList(filteredSortedClasses);
-    } catch (e) {
-      toast.error(e);
-    }
-  };
+  if (
+    !String(draft.lastname || "").trim() ||
+    String(draft.lastname || "").trim().length < 3 ||
+    REGEX.NUMBER.test(draft.lastname)
+  ) {
+    return t("validationError.enterLastName");
+  }
 
-  /**
-   * Handle page change for pagination.
-   * @param {Object} event - Event object.
-   * @param {number} value - New page number.
-   */
-  const handlePageChange = (event, value) => setPageNo(value);
+  if (!draft.gender) {
+    return t("validationError.gender");
+  }
 
-  /**
-   * Handle student search based on name and section.
-   */
-  useEffect(() => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-    debounceTimeoutRef.current = setTimeout(async () => {
-      fetchStudents({ searchName: name, searchSection });
-    }, 1000);
-  }, [name]);
+  if (
+    !String(draft.parentName || "").trim() ||
+    String(draft.parentName || "").trim().length < 3 ||
+    REGEX.NUMBER.test(draft.parentName)
+  ) {
+    return t("validationError.parentName");
+  }
 
-  /**
-   * Show information modal for a specific student.
-   * @param {Object} student - Selected student object.
-   */
-  const handleShowInfo = (student) => {
-    setSelectedStudent(student);
-    setOpenInfoModal(true);
-  };
+  if (!String(draft.phone || "").trim()) {
+    return t("validationError.phone");
+  }
 
-  /**
-   * Clear all search filters and reset pagination.
-   */
-  const handleClear = () => {
-    setName("");
-    setSearchClass("");
-    setSearchSection("");
-    setPageNo(1);
-    fetchStudents({});
-  };
+  if (!REGEX.PHONE_LENGTH.test(String(draft.phone || "").trim())) {
+    return t("validationError.validationPhoneCount");
+  }
 
-  /**
-   * Trigger delete confirmation modal for a student.
-   * @param {string} studentId - ID of the student to be deleted.
-   */
-  const handleDelete = (studentId) => {
-    setIdForDelete(studentId);
-    setDeleteConfirmModal(true);
-  };
+  if (draft.parentEmail && !REGEX.EMAIL.test(draft.parentEmail)) {
+    return t("validationError.emailAddress");
+  }
 
-  /**
-   * Confirm and delete a student from the list.
-   */
-  const handleConfirmDelete = async () => {
-    const url = EndPoints.ADMIN.DELETE_SECTION_STUDENT;
+  return "";
+}
 
-    try {
-      const res = await axiosClient.delete(`${url}/${idForDelete}`);
-      if (res?.statusCode === 200) {
-        fetchStudents({});
-        toast.success(res?.result);
-      }
-    } catch (e) {
-      toast.error(e);
-    } finally {
-      setIdForDelete("");
-      setDeleteConfirmModal(false);
-      setSelectedStudent([]);
-    }
-  };
-
+function SectionTitle({ Icon, title, isDarkMode }) {
   return (
     <div
-      className={`${
-        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-      } p-6 flex-col`}
-    >
-      <Toaster />
-      {loading && (
-        <div
-          className={`fixed inset-0 flex items-center justify-center ${
-            isDarkMode ? "bg-background1" : "bg-whiteBackground"
-          } opacity-50 z-30`}
-        >
-          <Spinner />
-        </div>
+      className={cn(
+        "mb-2 mt-5 flex items-center gap-2 border-b pb-2 text-xs font-poppins-bold uppercase text-[#0A81D1]",
+        isDarkMode ? "border-[#0A81D1]/20" : "border-borderWhite"
       )}
+    >
+      <Icon size={14} />
+      {title}
+    </div>
+  );
+}
+
+function DetailRow({ Icon, label, value, isDarkMode, accentClass = "" }) {
+  return (
+    <div
+      className={cn(
+        "flex gap-3 border-b py-3",
+        isDarkMode ? "border-white/[0.04]" : "border-borderWhite"
+      )}
+    >
       <div
-        className={`${
-          isDarkMode
-            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-            : "bg-whiteBackground"
-        } flex flex-col self-center w-full max-w-[100%] rounded-[16px] max-md:max-w-full min-h-[calc(100vh-72px)]`}
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-lg",
+          isDarkMode ? "bg-white/[0.04] text-slate-500" : "bg-whiteBackground2 text-textGray"
+        )}
       >
-        <div className={`px-14 py-6`}>
-          <Breadcrumbs />
-          <div className="flex justify-between items-center">
-            <h1
-              className={`text-2xl font-poppins-bold ${
-                isDarkMode ? "text-textPrimary" : "text-textBlack"
-              }`}
-            >
-              {t("titles.sis")}
-            </h1>
-            <Link
-              to="/add-student"
-              className={`flex flex-row justify-center items-center px-2 py-1 space-x-2 cursor-pointer rounded border border-[#FF793F]/10 bg-[#FF793F]/10 transition-all duration-200 ease-in-out active:scale-90`}
-            >
-              <span className={`text-xs font-poppins-bold text-textOrange`}>
-                Add Student
-              </span>
-            </Link>
-          </div>
-        </div>
-        <div
-          className={`flex flex-col self-center w-full font-medium max-w-full max-md:max-w-full`}
+        <Icon size={15} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className={cn("text-[11px] font-poppins-bold uppercase", isDarkMode ? "text-slate-500" : "text-textGray")}>
+          {label}
+        </p>
+        <p
+          className={cn(
+            "mt-1 break-words text-sm font-poppins-regular",
+            accentClass || (isDarkMode ? "text-[#E3E8F3]" : "text-textBlack")
+          )}
         >
-          {/* Search Bar*/}
-          <div className={`flex gap-5 max-md:flex-wrap mb-5`}>
-            <div
-              className={`flex flex-auto justify-around gap-3 text-md max-md:flex-wrap max-md:max-w-full`}
-            >
-              <div
-                className={`flex flex-col grow shrink-0 justify-center items-start py-0.5 rounded-[14px] w-fit max-md:max-w-full max-md:hidden`}
+          {getDisplayValue(value)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SidebarTabs({ tabs, activeTab, onChange, accentClass }) {
+  return (
+    <div className="flex gap-1 border-b border-white/[0.06]">
+      {tabs.map(({ key, label, Icon }) => (
+        <button
+          key={key}
+          type="button"
+          onClick={() => onChange(key)}
+          className={cn(
+            "mb-[-1px] inline-flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-poppins-bold transition",
+            activeTab === key
+              ? `${accentClass} border-current`
+              : "border-transparent text-slate-500 hover:text-[#E3E8F3]"
+          )}
+        >
+          <Icon size={14} />
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
+  const [tab, setTab] = useState("personal");
+  const fullName = getFullName(student);
+  const className = getStudentClassName(student);
+  const sectionName = getStudentSectionName(student);
+  const avatarClass = getAvatarClass(student, 0);
+  const tabs = [
+    { key: "personal", label: "Personal", Icon: User },
+    { key: "guardian", label: "Guardian", Icon: Users },
+    { key: "academic", label: "Academic", Icon: GraduationCap },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-40 flex">
+      <button
+        type="button"
+        aria-label="Close student profile"
+        className="flex-1 bg-black/65"
+        onClick={onClose}
+      />
+      <aside
+        data-testid="student-detail-sidebar"
+        className={cn(
+          "flex h-screen w-full max-w-[540px] flex-col border-l shadow-2xl",
+          isDarkMode
+            ? "border-white/10 bg-[#111315] text-[#E3E8F3]"
+            : "border-borderWhite bg-whiteBackground text-textBlack"
+        )}
+      >
+        <div
+          className={cn(
+            "sticky top-0 z-10 border-b px-6 pt-5",
+            isDarkMode ? "border-white/10 bg-[#111315]" : "border-borderWhite bg-whiteBackground"
+          )}
+        >
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="text-xs font-poppins-bold uppercase text-slate-500">
+              Student Profile
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#FF793F]/30 bg-[#FF793F]/10 px-3 text-xs font-poppins-bold text-[#FF793F] transition hover:bg-[#FF793F]/20"
               >
-                <div className={`flex gap-2 px-10 rounded-3xl w-full`}>
-                  <div className={`flex justify-between w-full space-x-2`}>
-                    {/* Class select dropdown */}
-                    <FormControl
-                      size="medium"
-                      sx={{
-                        width: "150px",
-                        border: "1px solid #2b2e4a40",
-                        borderRadius: "14px",
-                        backgroundColor: isDarkMode ? "" : "white",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
-                        },
-                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "white !important",
-                        },
-                        "& .MuiInputBase-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiSvgIcon-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                      }}
-                    >
-                      <InputLabel
-                        id="class-select-label"
-                        sx={{
-                          zIndex: 1,
-                          backgroundColor: isDarkMode ? "" : "white",
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                          fontSize: 16,
-                          px: 0.5,
-                        }}
-                      >
-                        {t("titles.class")}
-                      </InputLabel>
-                      <Select
-                        labelId="class-select-label"
-                        id="class-select"
-                        value={searchClass}
-                        onChange={(e) => {
-                          setSearchClass(e.target.value);
-                          const classData = classList?.filter(
-                            (itm) => itm["_id"] === e.target.value
-                          );
-                          setSectionList(classData[0]["section"]);
-                        }}
-                        data-testid="classlist"
-                        MenuProps={{
-                          PaperProps: {
-                            sx: {
-                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
-                            },
-                          },
-                        }}
-                      >
-                        {classList
-                          ?.sort((a, b) => {
-                            const classA = parseInt(
-                              a.name.replace(/\D/g, ""),
-                              10
-                            );
-                            const classB = parseInt(
-                              b.name.replace(/\D/g, ""),
-                              10
-                            );
-                            return classA - classB;
-                          })
-                          .map((itm) => (
-                            <MenuItem
-                              key={itm["_id"]}
-                              value={itm["_id"]}
-                              sx={{
-                                backgroundColor: isDarkMode
-                                  ? "#1a1a1a"
-                                  : "white",
-                                color: isDarkMode ? "#E3E8F3" : "black",
-                                "&:hover": {
-                                  backgroundColor: isDarkMode
-                                    ? "#2a2a2a"
-                                    : "#E9EEF2",
-                                },
-                              }}
-                            >
-                              {itm?.name}
-                            </MenuItem>
-                          ))}
-                      </Select>
-                    </FormControl>
+                <Edit3 size={14} />
+                Edit
+              </button>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={onClose}
+                className={cn(
+                  "inline-flex size-9 items-center justify-center rounded-lg border transition",
+                  isDarkMode
+                    ? "border-white/10 bg-white/[0.04] text-slate-500 hover:text-[#E3E8F3]"
+                    : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack"
+                )}
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
 
-                    {/* Section select dropdown */}
-                    <FormControl
-                      size="medium"
-                      sx={{
-                        width: "150px",
-                        border: "1px solid #2b2e4a40",
-                        borderRadius: "14px",
-                        backgroundColor: isDarkMode ? "" : "white",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
-                        },
-                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "white !important",
-                        },
-                        "& .MuiInputBase-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiSvgIcon-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                      }}
-                    >
-                      <InputLabel
-                        id="section-select-label"
-                        sx={{
-                          backgroundColor: isDarkMode ? "" : "white",
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                          fontSize: 16,
-                          px: 0.5,
-                        }}
-                      >
-                        {t("titles.section")}
-                      </InputLabel>
-                      <Select
-                        labelId="section-select-label"
-                        id="section-select"
-                        value={searchSection}
-                        disabled={!searchClass}
-                        onChange={(e) => {
-                          setSearchSection(e.target.value);
-                          setPageNo(1);
-                        }}
-                        data-testid="sectionlist"
-                        MenuProps={{
-                          PaperProps: {
-                            sx: {
-                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
-                            },
-                          },
-                        }}
-                      >
-                        {sectionList.map((itm) => {
-                          return (
-                            <MenuItem
-                              key={itm["_id"]}
-                              value={itm["_id"]}
-                              sx={{
-                                backgroundColor: isDarkMode
-                                  ? "#1a1a1a"
-                                  : "white",
-                                color: isDarkMode ? "#E3E8F3" : "black",
-                                "&:hover": {
-                                  backgroundColor: isDarkMode
-                                    ? "#2a2a2a"
-                                    : "#E9EEF2",
-                                },
-                              }}
-                            >
-                              {itm?.name}
-                            </MenuItem>
-                          );
-                        })}
-                      </Select>
-                    </FormControl>
-
-                    {/* Search Bar */}
-                    <div
-                      className={`flex px-3 rounded-[14px] w-full shadow-sm border ${
-                        isDarkMode ? "border-borderLine" : "border-borderGray2"
-                      }`}
-                    >
-                      <div
-                        className={`flex items-center pl-3 pointer-events-none`}
-                      >
-                        <img
-                          src={isDarkMode ? Search : Searchw}
-                          alt=""
-                          className={`w-7 h-7`}
-                        />
-                      </div>
-                      <input
-                        type="text"
-                        placeholder={t("placeholders.search")}
-                        className={`focus:outline-none pl-3 w-full bg-transparent ${
-                          isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        }`}
-                        onChange={(e) => {
-                          setName(e.target.value);
-                        }}
-                        value={name}
-                      />
-                      {name && (
-                        <button
-                          type="button"
-                          onClick={() => setName("")}
-                          className={`flex items-center`}
-                        >
-                          <img
-                            src={isDarkMode ? cross : crossw}
-                            alt=""
-                            className={`${
-                              isDarkMode ? "size-4 mr-2" : "size-8"
-                            }`}
-                          />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Clear button */}
-                    <button
-                      className={`${
-                        isDarkMode
-                          ? "hover:bg-background4 border-borderLine"
-                          : "hover:bg-whiteBackground1 border-borderGray2"
-                      } border w-20 text-lg rounded-[14px] flex items-center justify-center`}
-                      onClick={handleClear}
-                    >
-                      <img
-                        src={isDarkMode ? clear : clearw}
-                        alt="Clear"
-                        className={`w-6 h-6`}
-                      />
-                    </button>
-                  </div>
-                </div>
+          <div className="mb-5 flex items-center gap-4">
+            <div
+              className={cn(
+                "flex size-16 shrink-0 items-center justify-center rounded-full border-4 border-white/10 text-xl font-poppins-bold text-white",
+                avatarClass
+              )}
+            >
+              {getInitials(student)}
+            </div>
+            <div className="min-w-0">
+              <h2 className="truncate text-xl font-poppins-bold">{fullName}</h2>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                <span className="rounded-full bg-[#0A81D1]/15 px-2 py-1 font-poppins-bold text-[#0A81D1]">
+                  Class {className} - {sectionName}
+                </span>
+                <span className="text-slate-500">Roll {getStudentRollNo(student)}</span>
+                <span className="rounded-full bg-white/[0.06] px-2 py-1 text-slate-400">
+                  {getDisplayValue(student?.gender)}
+                </span>
               </div>
             </div>
           </div>
-          {studentList?.length > 0 ? (
+
+          <SidebarTabs
+            tabs={tabs}
+            activeTab={tab}
+            onChange={setTab}
+            accentClass="text-[#0A81D1]"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 pb-8">
+          {tab === "personal" ? (
             <>
-              <div className={`overflow-x-auto relative h-[400px] mx-10`}>
-                <table
-                  className={`${
-                    isDarkMode ? "" : "bg-whiteBackground"
-                  } min-w-full border-separate border-spacing-0`}
-                >
-                  {/* table headings */}
-                  <thead
-                    className={`${
-                      isDarkMode
-                        ? "bg-backgroundTableCell"
-                        : "bg-whiteBackground"
-                    } text-base font-bold sticky top-0 z-10`}
-                  >
-                    <tr className={`text-base text-bold text-textBlue`}>
+              <SectionTitle Icon={User} title="Basic Info" isDarkMode={isDarkMode} />
+              <DetailRow Icon={User} label="Full Name" value={fullName} isDarkMode={isDarkMode} />
+              <DetailRow Icon={Calendar} label="Date of Birth" value={student?.dob} isDarkMode={isDarkMode} />
+              <DetailRow Icon={Droplets} label="Blood Group" value={student?.bloodGroup} isDarkMode={isDarkMode} accentClass="text-[#FE4040]" />
+              <DetailRow Icon={Shield} label="Gender" value={student?.gender} isDarkMode={isDarkMode} />
+              <SectionTitle Icon={Phone} title="Contact" isDarkMode={isDarkMode} />
+              <DetailRow Icon={Phone} label="Phone" value={student?.parentPhone || student?.phone} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
+              <DetailRow Icon={Mail} label="Email" value={student?.parentEmail || student?.email} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
+              <DetailRow Icon={MapPin} label="Address" value={student?.address} isDarkMode={isDarkMode} />
+            </>
+          ) : null}
+
+          {tab === "guardian" ? (
+            <>
+              <SectionTitle Icon={Briefcase} title="Parent Details" isDarkMode={isDarkMode} />
+              <DetailRow Icon={User} label="Parent Name" value={student?.parentFullName || student?.parentName} isDarkMode={isDarkMode} />
+              <DetailRow Icon={User} label="Guardian Name" value={student?.guardianName} isDarkMode={isDarkMode} />
+              <DetailRow Icon={Phone} label="Phone" value={student?.parentPhone || student?.phone} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
+              <DetailRow Icon={Mail} label="Email" value={student?.parentEmail || student?.email} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
+              <DetailRow Icon={Heart} label="Gender" value={student?.parentGender} isDarkMode={isDarkMode} />
+              <DetailRow Icon={Briefcase} label="Occupation" value={student?.parentOccupation} isDarkMode={isDarkMode} />
+              <DetailRow Icon={BookOpen} label="Qualification" value={student?.parentQualification} isDarkMode={isDarkMode} />
+              <DetailRow Icon={MapPin} label="Address" value={student?.parentAddress} isDarkMode={isDarkMode} />
+            </>
+          ) : null}
+
+          {tab === "academic" ? (
+            <>
+              <SectionTitle Icon={GraduationCap} title="Academic Identity" isDarkMode={isDarkMode} />
+              <DetailRow Icon={BookOpen} label="Class" value={className} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
+              <DetailRow Icon={BookOpen} label="Section" value={sectionName} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
+              <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
+              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || getStudentRecordId(student)} isDarkMode={isDarkMode} />
+            </>
+          ) : null}
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+function EditField({
+  label,
+  value,
+  onChange,
+  type = "text",
+  options,
+  error,
+  isDarkMode,
+}) {
+  const inputClass = cn(
+    "mt-2 h-10 w-full rounded-lg border px-3 text-sm outline-none transition",
+    isDarkMode
+      ? "border-white/10 bg-[#1a1d28] text-[#E3E8F3] focus:border-[#0A81D1]"
+      : "border-borderWhite bg-whiteBackground text-textBlack focus:border-borderBlue",
+    error && "border-[#FE4040] focus:border-[#FE4040]"
+  );
+
+  return (
+    <label className="mb-4 block text-xs font-poppins-bold uppercase text-slate-500">
+      {label}
+      {options ? (
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={inputClass}
+        >
+          <option value="">Select {label}</option>
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={value}
+          max={type === "date" ? new Date().toISOString().split("T")[0] : undefined}
+          onChange={(event) => onChange(event.target.value)}
+          className={inputClass}
+        />
+      )}
+      {error ? <span className="mt-1 block text-xs text-[#FE4040]">{error}</span> : null}
+    </label>
+  );
+}
+
+function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t }) {
+  const [draft, setDraft] = useState(() => normalizeStudentDraft(student));
+  const [tab, setTab] = useState("personal");
+  const [errorMessage, setErrorMessage] = useState("");
+  const fullName = `${draft.firstname} ${draft.lastname}`.trim() || getFullName(student);
+  const avatarClass = getAvatarClass(student, 0);
+  const tabs = [
+    { key: "personal", label: "Personal", Icon: User },
+    { key: "guardian", label: "Guardian", Icon: Users },
+    { key: "academic", label: "Academic", Icon: GraduationCap },
+  ];
+
+  function setField(field, value) {
+    setDraft((currentDraft) => ({
+      ...currentDraft,
+      [field]: value,
+    }));
+    setErrorMessage("");
+  }
+
+  function handleSave() {
+    const validationError = validateStudentDraft(draft, t);
+
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
+    onSave(draft);
+  }
+
+  return (
+    <div className="fixed inset-0 z-40 flex">
+      <button
+        type="button"
+        aria-label="Close edit student"
+        className="flex-1 bg-black/65"
+        onClick={onClose}
+      />
+      <aside
+        data-testid="student-edit-sidebar"
+        className={cn(
+          "flex h-screen w-full max-w-[560px] flex-col border-l shadow-2xl",
+          isDarkMode
+            ? "border-white/10 bg-[#111315] text-[#E3E8F3]"
+            : "border-borderWhite bg-whiteBackground text-textBlack"
+        )}
+      >
+        <div
+          className={cn(
+            "sticky top-0 z-10 border-b px-6 pt-5",
+            isDarkMode ? "border-white/10 bg-[#111315]" : "border-borderWhite bg-whiteBackground"
+          )}
+        >
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div
+                className={cn(
+                  "flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-poppins-bold text-white",
+                  avatarClass
+                )}
+              >
+                {getInitials(draft)}
+              </div>
+              <div className="min-w-0">
+                <h2 className="truncate text-base font-poppins-bold">{fullName}</h2>
+                <p className="text-xs text-slate-500">Editing student record</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+              className={cn(
+                "inline-flex size-9 items-center justify-center rounded-lg border transition",
+                isDarkMode
+                  ? "border-white/10 bg-white/[0.04] text-slate-500 hover:text-[#E3E8F3]"
+                  : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack"
+              )}
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <SidebarTabs
+            tabs={tabs}
+            activeTab={tab}
+            onChange={setTab}
+            accentClass="text-[#FF793F]"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          {errorMessage ? (
+            <div className="mb-4 rounded-lg border border-[#FE4040]/30 bg-[#FE4040]/10 px-3 py-2 text-sm text-[#FE4040]">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          {tab === "personal" ? (
+            <>
+              <p className="mb-4 text-sm text-slate-500">
+                Update personal and contact information.
+              </p>
+              <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
+                <EditField label="First Name" value={draft.firstname} onChange={(value) => setField("firstname", value)} isDarkMode={isDarkMode} />
+                <EditField label="Last Name" value={draft.lastname} onChange={(value) => setField("lastname", value)} isDarkMode={isDarkMode} />
+                <EditField label="Gender" value={draft.gender} onChange={(value) => setField("gender", value)} options={["Male", "Female", "Other"]} isDarkMode={isDarkMode} />
+                <EditField label="Blood Group" value={draft.bloodGroup} onChange={(value) => setField("bloodGroup", value)} options={["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]} isDarkMode={isDarkMode} />
+              </div>
+              <EditField type='date' label="Date of Birth" value={draft.dob} onChange={(value) => setField("dob", value)} isDarkMode={isDarkMode} />
+              <EditField label="Address" value={draft.address} onChange={(value) => setField("address", value)} isDarkMode={isDarkMode} />
+            </>
+          ) : null}
+
+          {tab === "guardian" ? (
+            <>
+              <p className="mb-4 text-sm text-slate-500">
+                Update parent, guardian, and contact details.
+              </p>
+              <EditField label="Parent Name" value={draft.parentName} onChange={(value) => setField("parentName", value)} isDarkMode={isDarkMode} />
+              <EditField label="Guardian Name" value={draft.guardianName} onChange={(value) => setField("guardianName", value)} isDarkMode={isDarkMode} />
+              <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
+                <EditField label="Phone Number" value={draft.phone} onChange={(value) => setField("phone", value)} type="tel" isDarkMode={isDarkMode} />
+                <EditField label="Email Address" value={draft.parentEmail} onChange={(value) => setField("parentEmail", value)} type="email" isDarkMode={isDarkMode} />
+                <EditField label="Parent Gender" value={draft.parentGender} onChange={(value) => setField("parentGender", value)} options={["Male", "Female", "Other"]} isDarkMode={isDarkMode} />
+                <EditField label="Parent Age" value={draft.parentAge} onChange={(value) => setField("parentAge", value)} isDarkMode={isDarkMode} />
+              </div>
+              <EditField label="Qualification" value={draft.parentQualification} onChange={(value) => setField("parentQualification", value)} isDarkMode={isDarkMode} />
+              <EditField label="Occupation" value={draft.parentOccupation} onChange={(value) => setField("parentOccupation", value)} isDarkMode={isDarkMode} />
+              <EditField label="Parent Address" value={draft.parentAddress} onChange={(value) => setField("parentAddress", value)} isDarkMode={isDarkMode} />
+            </>
+          ) : null}
+
+          {tab === "academic" ? (
+            <>
+              <p className="mb-4 text-sm text-slate-500">
+                Academic placement is shown for reference. Class and section changes stay in the section setup flow.
+              </p>
+              <DetailRow Icon={BookOpen} label="Class" value={getStudentClassName(student)} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
+              <DetailRow Icon={BookOpen} label="Section" value={getStudentSectionName(student)} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
+              <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
+              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || getStudentRecordId(student)} isDarkMode={isDarkMode} />
+            </>
+          ) : null}
+        </div>
+
+        <div
+          className={cn(
+            "flex items-center justify-between gap-3 border-t px-6 py-4",
+            isDarkMode ? "border-white/10 bg-[#111315]" : "border-borderWhite bg-whiteBackground"
+          )}
+        >
+          <span className="text-xs text-slate-500">Changes save to the student API</span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className={cn(
+                "rounded-lg border px-4 py-2 text-sm font-poppins-bold transition",
+                isDarkMode
+                  ? "border-white/10 text-slate-400 hover:bg-white/[0.04]"
+                  : "border-borderWhite text-textGray hover:bg-whiteBackground2"
+              )}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#FF793F] px-5 py-2 text-sm font-poppins-bold text-white transition hover:bg-[#ff6b2b] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving ? <RefreshCw size={15} /> : <Save size={15} />}
+              {saving ? "Saving" : "Save Changes"}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+export default function Studentlist() {
+  const { t } = useTranslation();
+  const { classAndSectionData } = useSelector((state) => state.appAuth || {});
+  const isDarkMode = useSelector((state) => state.appConfig?.isDarkMode);
+  const selectedSessionId = classAndSectionData?.selectedSession?._id;
+
+  const [pageNo, setPageNo] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalStudentCount, setTotalStudentCount] = useState(0);
+  const [studentList, setStudentList] = useState([]);
+  const [detailStudent, setDetailStudent] = useState(null);
+  const [editStudent, setEditStudent] = useState(null);
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
+  const [idForDelete, setIdForDelete] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [classList, setClassList] = useState([]);
+  const [sectionList, setSectionList] = useState([]);
+  const [searchClass, setSearchClass] = useState(() => getStoredFilter("searchClass"));
+  const [searchSection, setSearchSection] = useState(() =>
+    getStoredFilter("searchSection")
+  );
+  const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [savingStudent, setSavingStudent] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const requestIdRef = useRef(0);
+
+  const classOptions = useMemo(
+    () => CLASS_OPTION_KEYS.map((key) => t(`options.${key}`)),
+    [t]
+  );
+
+  const selectedClass = useMemo(
+    () => classList.find((item) => item?._id === searchClass),
+    [classList, searchClass]
+  );
+
+  const selectedSection = useMemo(
+    () => sectionList.find((item) => item?._id === searchSection),
+    [sectionList, searchSection]
+  );
+
+  const totalPages = Math.max(1, Math.ceil(totalStudentCount / limit) || 1);
+  const visiblePages = useMemo(
+    () => buildVisiblePages(pageNo, totalPages),
+    [pageNo, totalPages]
+  );
+  const showingFrom = totalStudentCount === 0 ? 0 : (pageNo - 1) * limit + 1;
+  const showingTo = Math.min(totalStudentCount, pageNo * limit);
+  const activeFilterLabel = selectedSessionId
+    ? `${selectedClass?.name || "All classes"} - ${
+        selectedSection?.name || "All sections"
+      }`
+    : "No active session";
+
+  const pageClass = isDarkMode
+    ? "bg-[#0B0D14] text-[#E3E8F3]"
+    : "bg-whiteBackground2 text-textBlack";
+  const panelClass = isDarkMode
+    ? "border-white/10 bg-[#111315]"
+    : "border-borderWhite bg-whiteBackground";
+  const headerClass = isDarkMode
+    ? "border-white/[0.05] bg-white/[0.02]"
+    : "border-borderWhite bg-whiteBackground1";
+  const rowClass = isDarkMode
+    ? "border-white/[0.04] hover:bg-[#0a81d1]/10"
+    : "border-borderWhite hover:bg-backgroundLightBlue/40";
+  const mutedClass = isDarkMode ? "text-slate-500" : "text-textGray";
+  const bodyTextClass = isDarkMode ? "text-[#E3E8F3]" : "text-textBlack";
+  const secondaryTextClass = isDarkMode ? "text-[#E3E8F3]/75" : "text-textGray";
+  const controlClass = isDarkMode
+    ? "border-white/10 bg-[#6868681A] text-[#E3E8F3] placeholder:text-slate-500 focus:border-[#0A81D1]"
+    : "border-borderWhite bg-whiteBackground text-textBlack placeholder:text-textGray focus:border-borderBlue";
+  const iconButtonClass = isDarkMode
+    ? "border-white/10 bg-white/[0.04] text-slate-500 hover:border-[#FF793F]/30 hover:bg-[#FF793F]/10 hover:text-[#FF793F]"
+    : "border-borderWhite bg-whiteBackground text-textGray hover:border-borderOrange1 hover:bg-backgroundOrange2 hover:text-textOrange";
+  const activeIconButtonClass = isDarkMode
+    ? "border-[#0A81D1]/30 bg-[#0A81D1]/15 text-[#0A81D1] hover:bg-[#0A81D1]/25"
+    : "border-borderBlue bg-backgroundBlue15 text-textBlue hover:bg-backgroundLightBlue";
+  const dangerIconButtonClass = isDarkMode
+    ? "border-white/10 bg-white/[0.04] text-slate-500 hover:border-[#FE4040]/30 hover:bg-[#FE4040]/10 hover:text-[#FE4040]"
+    : "border-borderWhite bg-whiteBackground text-textGray hover:border-borderRed hover:bg-backgroundDarkRed2 hover:text-textRed";
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 350);
+
+    return () => window.clearTimeout(timeout);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    persistFilter("searchClass", searchClass);
+  }, [searchClass]);
+
+  useEffect(() => {
+    persistFilter("searchSection", searchSection);
+  }, [searchSection]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadClassList() {
+      if (!selectedSessionId) {
+        setClassList([]);
+        setSectionList([]);
+        return;
+      }
+
+      try {
+        const response = await axiosClient.get(
+          `${EndPoints.COMMON.CLASS_LIST}/${selectedSessionId}`
+        );
+        const classes = Array.isArray(response?.result) ? response.result : [];
+        const sortedClasses = classes
+          .filter((item) => Array.isArray(item?.section) && item.section.length > 0)
+          .sort((firstClass, secondClass) => {
+            const firstValue = getClassSortValue(firstClass?.name, classOptions);
+            const secondValue = getClassSortValue(secondClass?.name, classOptions);
+            return firstValue - secondValue;
+          });
+
+        if (isActive) {
+          setClassList(sortedClasses);
+        }
+      } catch (error) {
+        if (isActive) {
+          setClassList([]);
+          toast.error(getApiErrorMessage(error, "Failed to load classes"));
+        }
+      }
+    }
+
+    loadClassList();
+
+    return () => {
+      isActive = false;
+    };
+  }, [classOptions, selectedSessionId]);
+
+  useEffect(() => {
+    if (!searchClass) {
+      setSectionList([]);
+      if (searchSection) setSearchSection("");
+      return;
+    }
+
+    const classData = classList.find((item) => item?._id === searchClass);
+
+    if (!classData && classList.length > 0) {
+      setSearchClass("");
+      setSearchSection("");
+      setSectionList([]);
+      return;
+    }
+
+    const nextSections = Array.isArray(classData?.section) ? classData.section : [];
+    setSectionList(nextSections);
+
+    if (
+      searchSection &&
+      !nextSections.some((section) => section?._id === searchSection)
+    ) {
+      setSearchSection("");
+    }
+  }, [classList, searchClass, searchSection]);
+
+  const fetchStudents = useCallback(
+    async (overrides = {}) => {
+      if (!selectedSessionId) {
+        setStudentList([]);
+        setTotalStudentCount(0);
+        setErrorMessage("");
+        setLoading(false);
+        return;
+      }
+
+      const nextPage = overrides.page ?? pageNo;
+      const nextLimit = overrides.limit ?? limit;
+      const nextSearch = overrides.searchName ?? debouncedSearch;
+      const nextSection = overrides.searchSection ?? searchSection;
+      const query = new URLSearchParams({
+        page: String(nextPage),
+        limit: String(nextLimit),
+        session: selectedSessionId,
+      });
+
+      if (nextSearch) query.set("search", nextSearch);
+      if (nextSection) query.set("section", nextSection);
+
+      const requestId = requestIdRef.current + 1;
+      requestIdRef.current = requestId;
+
+      try {
+        setLoading(true);
+        setErrorMessage("");
+
+        const response = await axiosClient.get(
+          `${EndPoints.ADMIN.SEARCH_STUDENT}?${query.toString()}`
+        );
+
+        if (requestId !== requestIdRef.current) return;
+
+        if (response?.statusCode !== 200) {
+          throw new Error(response?.message || "Failed to load students");
+        }
+
+        const students = Array.isArray(response?.result?.students)
+          ? response.result.students
+          : [];
+        const totalStudents = Number(response?.result?.totalStudents);
+
+        setStudentList(students);
+        setTotalStudentCount(
+          Number.isFinite(totalStudents) ? totalStudents : students.length
+        );
+      } catch (error) {
+        if (requestId !== requestIdRef.current) return;
+
+        const message = getApiErrorMessage(error, "Failed to load students");
+        setStudentList([]);
+        setTotalStudentCount(0);
+        setErrorMessage(message);
+        toast.error(message);
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setLoading(false);
+        }
+      }
+    },
+    [debouncedSearch, limit, pageNo, searchSection, selectedSessionId]
+  );
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  useEffect(() => {
+    if (totalStudentCount > 0 && pageNo > totalPages) {
+      setPageNo(totalPages);
+    }
+  }, [pageNo, totalPages, totalStudentCount]);
+
+  function handleSearchChange(event) {
+    setSearchTerm(event.target.value);
+    setPageNo(1);
+  }
+
+  function handleClassChange(event) {
+    setSearchClass(event.target.value);
+    setSearchSection("");
+    setPageNo(1);
+  }
+
+  function handleSectionChange(event) {
+    setSearchSection(event.target.value);
+    setPageNo(1);
+  }
+
+  function handleLimitChange(event) {
+    setLimit(Number(event.target.value));
+    setPageNo(1);
+  }
+
+  function handleClear() {
+    setSearchTerm("");
+    setDebouncedSearch("");
+    setSearchClass("");
+    setSearchSection("");
+    setPageNo(1);
+  }
+
+  function handleShowInfo(student) {
+    setDetailStudent(student);
+  }
+
+  function handleEdit(student) {
+    setEditStudent(student);
+    setDetailStudent(null);
+  }
+
+  function handleDelete(student) {
+    const studentId = getStudentRecordId(student);
+
+    if (!studentId) {
+      toast.error("Student id is missing");
+      return;
+    }
+
+    setIdForDelete(studentId);
+    setDeleteConfirmModal(true);
+  }
+
+  async function handleConfirmDelete() {
+    if (!idForDelete) {
+      setDeleteConfirmModal(false);
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      const response = await axiosClient.delete(
+        `${EndPoints.ADMIN.DELETE_SECTION_STUDENT}/${idForDelete}`
+      );
+
+      if (response?.statusCode !== 200) {
+        throw new Error(response?.message || "Failed to delete student");
+      }
+
+      toast.success(response?.result || "Student deleted");
+
+      if (studentList.length === 1 && pageNo > 1) {
+        setPageNo((currentPage) => Math.max(1, currentPage - 1));
+      } else {
+        await fetchStudents();
+      }
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to delete student"));
+    } finally {
+      setDeleting(false);
+      setIdForDelete("");
+      setDeleteConfirmModal(false);
+    }
+  }
+
+  async function handleSaveStudent(draft) {
+    if (!draft?.id) {
+      toast.error("Student id is missing");
+      return;
+    }
+
+    try {
+      setSavingStudent(true);
+      const payload = buildStudentUpdatePayload(draft);
+      const response = await axiosClient.put(
+        `${EndPoints.ADMIN.STUDENT_UPDATE}/${draft.id}`,
+        payload
+      );
+
+      if (response?.statusCode !== 200) {
+        throw new Error(response?.message || "Failed to update student");
+      }
+
+      toast.success(response?.result || "Student updated");
+      setEditStudent(null);
+      await fetchStudents();
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to update student"));
+    } finally {
+      setSavingStudent(false);
+    }
+  }
+
+  const emptyTitle = !selectedSessionId
+    ? "No active session selected"
+    : errorMessage
+      ? "Unable to load students"
+      : "No students found";
+  const emptyMessage = !selectedSessionId
+    ? "Choose an academic session to load student records."
+    : errorMessage || "Try changing the class, section, or search text.";
+
+  return (
+    <div className={cn("min-h-[calc(100vh-72px)] p-6", pageClass)}>
+      <Toaster />
+
+      <div className="mx-auto w-full max-w-[1600px]">
+        <Breadcrumbs />
+
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-poppins-bold text-current">Students</h1>
+            <p className={cn("mt-1 text-sm", mutedClass)}>
+              {activeFilterLabel} - {totalStudentCount} students
+              {loading && studentList.length > 0 ? " - Refreshing" : ""}
+            </p>
+          </div>
+
+          <Link
+            to="/student-information-system/add-student"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#FF793F] px-4 text-sm font-poppins-bold text-white transition hover:bg-[#ff6b2b] active:scale-95"
+          >
+            <Plus size={16} />
+            Add Student
+          </Link>
+        </div>
+
+        <div className="mb-5 grid grid-cols-1 gap-3 lg:grid-cols-[180px_180px_1fr_auto]">
+          <label className="sr-only" htmlFor="student-class-filter">
+            Class
+          </label>
+          <select
+            id="student-class-filter"
+            data-testid="classlist"
+            value={searchClass}
+            onChange={handleClassChange}
+            className={cn(
+              "h-12 rounded-lg border px-4 text-sm font-poppins-regular outline-none transition disabled:cursor-not-allowed disabled:opacity-60",
+              controlClass
+            )}
+            disabled={!selectedSessionId || classList.length === 0}
+          >
+            <option value="">All classes</option>
+            {classList.map((item) => (
+              <option key={item?._id} value={item?._id}>
+                {getDisplayValue(item?.name)}
+              </option>
+            ))}
+          </select>
+
+          <label className="sr-only" htmlFor="student-section-filter">
+            Section
+          </label>
+          <select
+            id="student-section-filter"
+            data-testid="sectionlist"
+            value={searchSection}
+            onChange={handleSectionChange}
+            className={cn(
+              "h-12 rounded-lg border px-4 text-sm font-poppins-regular outline-none transition disabled:cursor-not-allowed disabled:opacity-60",
+              controlClass
+            )}
+            disabled={!searchClass || sectionList.length === 0}
+          >
+            <option value="">
+              {searchClass ? "All sections" : "Select class first"}
+            </option>
+            {sectionList.map((item) => (
+              <option key={item?._id} value={item?._id}>
+                {getDisplayValue(item?.name)}
+              </option>
+            ))}
+          </select>
+
+          <div className="relative">
+            <Search
+              size={18}
+              className={cn("pointer-events-none absolute left-4 top-1/2 -translate-y-1/2", mutedClass)}
+            />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder="Search by name, email or phone..."
+              className={cn(
+                "h-12 w-full rounded-lg border py-3 pl-12 pr-11 text-sm outline-none transition",
+                controlClass
+              )}
+            />
+            {searchTerm ? (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDebouncedSearch("");
+                  setPageNo(1);
+                }}
+                className={cn(
+                  "absolute right-3 top-1/2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-lg transition",
+                  isDarkMode ? "text-slate-500 hover:bg-white/10" : "text-textGray hover:bg-whiteBackground2"
+                )}
+              >
+                <X size={16} />
+              </button>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleClear}
+            className={cn(
+              "inline-flex h-12 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-poppins-bold transition",
+              controlClass
+            )}
+          >
+            <X size={16} />
+            Clear
+          </button>
+        </div>
+
+        <section className={cn("overflow-hidden rounded-lg border", panelClass)}>
+          <div className={cn("flex items-center justify-between border-b px-5 py-4", headerClass)}>
+            <div>
+              <h2 className={cn("text-sm font-poppins-bold", bodyTextClass)}>
+                Student records
+              </h2>
+              <p className={cn("mt-1 text-xs", mutedClass)}>
+                Showing {showingFrom}-{showingTo} from {totalStudentCount} students
+              </p>
+            </div>
+
+            {errorMessage ? (
+              <button
+                type="button"
+                onClick={() => fetchStudents()}
+                className="inline-flex items-center gap-2 rounded-lg border border-[#0A81D1]/40 px-3 py-2 text-xs font-poppins-bold text-[#0A81D1] transition hover:bg-[#0A81D1]/10"
+              >
+                <RefreshCw size={14} />
+                Retry
+              </button>
+            ) : null}
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[920px] border-collapse">
+              <thead>
+                <tr className={cn("border-b", headerClass)}>
+                  {["Student", "Gender", "Phone", "Email", "Blood", "Action"].map(
+                    (heading) => (
                       <th
-                        className={`text-center px-4 py-2 max-sm:hidden border border-borderLine2 bg-clip-padding`}
+                        key={heading}
+                        className={cn(
+                          "px-5 py-3 text-left text-xs font-poppins-bold uppercase text-[#0A81D1]",
+                          heading === "Action" && "text-right"
+                        )}
                       >
-                        {t("labels.fullName")}
+                        {heading}
                       </th>
-                      <th
-                        className={`text-center px-4 py-2 max-xl:hidden border border-borderLine2 bg-clip-padding`}
-                      >
-                        {t("labels.gender")}
-                      </th>
-                      <th
-                        className={`text-center px-4 py-2 max-md:hidden border border-borderLine2 bg-clip-padding`}
-                      >
-                        {t("labels.phoneNumber")}
-                      </th>
-                      <th
-                        className={`text-center px-4 py-2 max-lg:hidden border border-borderLine2 bg-clip-padding`}
-                      >
-                        {t("labels.email")}
-                      </th>
-                      <th
-                        className={`text-center px-4 py-2 max-lg:hidden border border-borderLine2 bg-clip-padding`}
-                      >
-                        {t("labels.guardianName")}
-                      </th>
-                      <th
-                        className={`text-center px-4 py-2 border border-borderLine2 bg-clip-padding`}
-                      >
-                        {t("labels.action")}
-                      </th>
-                    </tr>
-                  </thead>
-                  {/* list of students */}
-                  <tbody>
-                    {studentList.map((student, i) => (
+                    )
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {loading && studentList.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-5 py-14 text-center">
+                      <div className={cn("text-sm", mutedClass)}>Loading students...</div>
+                    </td>
+                  </tr>
+                ) : studentList.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-5 py-14 text-center">
+                      <Users size={30} className={cn("mx-auto mb-3", mutedClass)} />
+                      <p className={cn("text-sm font-poppins-bold", bodyTextClass)}>
+                        {emptyTitle}
+                      </p>
+                      <p className={cn("mt-1 text-xs", mutedClass)}>{emptyMessage}</p>
+                    </td>
+                  </tr>
+                ) : (
+                  studentList.map((student, index) => {
+                    const fullName = getFullName(student);
+                    const recordId = getStudentRecordId(student);
+
+                    return (
                       <tr
-                        className={`${
-                          i % 2 === 0
-                            ? isDarkMode
-                              ? ""
-                              : "bg-whiteBackground3"
-                            : ""
-                        } border-t `}
-                        key={i}
+                        key={getStudentKey(student, index)}
+                        className={cn(
+                          "border-b transition last:border-b-0",
+                          index % 2 === 1 && (isDarkMode ? "bg-white/[0.02]" : "bg-whiteBackground1"),
+                          rowClass
+                        )}
                       >
-                        <td
-                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
-                            isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } max-sm:hidden`}
-                        >
-                          {student?.firstname} {student?.lastname}
-                        </td>
-                        <td
-                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
-                            isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } max-xl:hidden`}
-                        >
-                          {student?.gender}
-                        </td>
-                        <td
-                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
-                            isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } max-md:hidden`}
-                        >
-                          {student?.parentPhone}
-                        </td>
-                        <td
-                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
-                            isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } max-lg:hidden`}
-                        >
-                          {student?.parentEmail || CONSTANT.NA}
-                        </td>
-                        <td
-                          className={`p-4 text-center text-sm font-medium border border-borderLine2 ${
-                            isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } max-lg:hidden`}
-                        >
-                          {student?.parentFullName || CONSTANT.NA}
-                        </td>
-                        {/* Action Buttons */}
-                        <td
-                          className={`p-4 text-center font-medium border border-borderLine2 ${
-                            isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          }`}
-                        >
-                          <div className={`flex justify-evenly`}>
-                            <button
-                              onClick={() =>
-                                navigate(
-                                  "/student-information-system/student-update",
-                                  {
-                                    state: student,
-                                  }
-                                )
-                              }
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={cn(
+                                "flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-poppins-bold text-white",
+                                getAvatarClass(student, index)
+                              )}
                             >
-                              <img
-                                src={isDarkMode ? edit2 : edit2w}
-                                alt="editStudent"
-                                className={`size-5`}
-                              />
+                              {getInitials(student)}
+                            </div>
+                            <div className="min-w-0">
+                              <p className={cn("truncate text-sm font-poppins-bold", bodyTextClass)}>
+                                {fullName}
+                              </p>
+                              <p className={cn("mt-1 truncate text-xs", mutedClass)}>
+                                Roll {getDisplayValue(student?.rollNo || student?.rollNumber || student?.studentId)}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className={cn("px-5 py-4 text-sm", secondaryTextClass)}>
+                          {getDisplayValue(student?.gender)}
+                        </td>
+                        <td className={cn("px-5 py-4 text-sm", secondaryTextClass)}>
+                          {getDisplayValue(student?.parentPhone || student?.phone)}
+                        </td>
+                        <td className={cn("px-5 py-4 text-sm", secondaryTextClass)}>
+                          <span className="block max-w-[240px] truncate">
+                            {getDisplayValue(student?.parentEmail || student?.email)}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-sm font-poppins-bold text-[#FE4040]">
+                          {getDisplayValue(student?.bloodGroup)}
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              title="Edit"
+                              aria-label={`Edit ${fullName}`}
+                              onClick={() => handleEdit(student)}
+                              className={cn(
+                                "inline-flex size-8 items-center justify-center rounded-lg border transition",
+                                iconButtonClass
+                              )}
+                            >
+                              <Edit3 size={14} />
                             </button>
-                            <button onClick={() => handleShowInfo(student)}>
-                              <img
-                                src={isDarkMode ? info : infow}
-                                alt="infoStudent"
-                                className={`size-5`}
-                              />
+                            <button
+                              type="button"
+                              title="Info"
+                              aria-label={`Info ${fullName}`}
+                              onClick={() => handleShowInfo(student)}
+                              className={cn(
+                                "inline-flex size-8 items-center justify-center rounded-lg border transition",
+                                activeIconButtonClass
+                              )}
+                            >
+                              <Info size={15} />
                             </button>
                             {/* <button
-                              onClick={() => {
-                                handleDelete(student?._id);
-                              }}
+                              type="button"
+                              title="Delete"
+                              aria-label={`Delete ${fullName}`}
+                              onClick={() => handleDelete(student)}
+                              className={cn(
+                                "inline-flex size-8 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-60",
+                                dangerIconButtonClass
+                              )}
+                              disabled={deleting && idForDelete === recordId}
                             >
-                              <img
-                                src={isDarkMode ? delete2 : delete2w}
-                                alt="deleteStudent"
-                                className={`size-5`}
-                              />
+                              <Trash2 size={14} />
                             </button> */}
                           </div>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {/* pagination logic */}
-                <div
-                  className={`flex gap-5 justify-between items-center my-9 mx-10 text-sm max-md:flex-wrap max-md:mr-2.5 max-md:max-w-full`}
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {totalStudentCount > 0 ? (
+            <div className={cn("flex flex-wrap items-center justify-between gap-4 border-t px-5 py-4", headerClass)}>
+              <label className={cn("flex items-center gap-2 text-sm", mutedClass)}>
+                Rows
+                <select
+                  value={limit}
+                  onChange={handleLimitChange}
+                  className={cn("h-9 rounded-lg border px-3 text-sm outline-none", controlClass)}
                 >
-                  <div className={`text-[#9391a5] text-base leading-5`}>
-                    {t("titles.showing")}
-                    <span className={`text-textBlue`}>
-                      {" "}
-                      {pageNo * limit - (limit - 1)} -{" "}
-                      {Math.min(totalStudentCount, pageNo * limit)}{" "}
-                    </span>
-                    {t("titles.from")}
-                    <span className={`text-textBlue`}>
-                      {" "}
-                      {totalStudentCount}{" "}
-                    </span>
-                    {t("titles.data")}
-                  </div>
+                  {PAGE_LIMIT_OPTIONS.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-                  <div className={`flex items-center gap-4`}>
-                    {/* Dropdown to select how many data per page */}
-                    <FormControl
-                      variant="outlined"
-                      size="small"
-                      sx={{
-                        border: "1px solid #2b2e4a40",
-                        borderRadius: "6px",
-                        minWidth: "80px",
-                        backgroundColor: isDarkMode ? "" : "white",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
-                        },
-                        "& .MuiInputBase-root, & .MuiSvgIcon-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                      }}
-                    >
-                      <Select
-                        value={limit}
-                        onChange={(e) => {
-                          setLimit(e.target.value);
-                          setPageNo(1);
-                        }}
-                        MenuProps={{
-                          PaperProps: {
-                            sx: {
-                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
-                            },
-                          },
-                        }}
-                      >
-                        {[10, 20, 25, 50, 100].map((itm, i) => (
-                          <MenuItem
-                            key={i}
-                            value={itm}
-                            sx={{
-                              backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
-                              "&:hover": {
-                                backgroundColor: isDarkMode
-                                  ? "#2a2a2a"
-                                  : "#E9EEF2",
-                              },
-                            }}
-                          >
-                            {itm}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPageNo((currentPage) => Math.max(1, currentPage - 1))}
+                  disabled={pageNo === 1 || loading}
+                  aria-label="Previous page"
+                  className="inline-flex size-8 items-center justify-center rounded-full border border-[#0A81D1] text-[#0A81D1] transition hover:bg-[#0A81D1]/10 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeft size={15} />
+                </button>
 
-                    <Stack spacing={2}>
-                      <Pagination
-                        count={Math.ceil(totalStudentCount / limit)}
-                        shape="rounded"
-                        page={pageNo}
-                        onChange={handlePageChange}
-                        renderItem={(item) => (
-                          <PaginationItem
-                            {...item}
-                            sx={{
-                              color: isDarkMode ? "white" : "black",
-                              borderColor:
-                                item.type === "previous" || item.type === "next"
-                                  ? "transparent"
-                                  : "#0F4189",
-                              borderWidth: "2px",
-                              borderRadius: "20px",
-                              borderStyle: "solid",
-                              "&.Mui-selected": {
-                                color: "white",
-                                backgroundColor: "#0F4189",
-                              },
-                            }}
-                          />
-                        )}
-                      />
-                    </Stack>
-                  </div>
-                </div>
+                {visiblePages.map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setPageNo(page)}
+                    disabled={loading}
+                    aria-label={`Page ${page}`}
+                    className={cn(
+                      "inline-flex size-8 items-center justify-center rounded-full border border-[#0A81D1] text-xs font-poppins-bold transition disabled:cursor-not-allowed disabled:opacity-60",
+                      page === pageNo
+                        ? "bg-[#0A81D1] text-white"
+                        : "text-[#0A81D1] hover:bg-[#0A81D1]/10"
+                    )}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPageNo((currentPage) => Math.min(totalPages, currentPage + 1))
+                  }
+                  disabled={pageNo === totalPages || loading}
+                  aria-label="Next page"
+                  className="inline-flex size-8 items-center justify-center rounded-full border border-[#0A81D1] text-[#0A81D1] transition hover:bg-[#0A81D1]/10 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronRight size={15} />
+                </button>
               </div>
-            </>
-          ) : (
-            <>
-              {/* no student */}
-              <div
-                className={`flex flex-col items-center justify-center text-center pb-6`}
-              >
-                <img
-                  src={noDataFound}
-                  className={`mb-4 h-[200px] w-[250px] object-contain`}
-                />
-                <p
-                  className={`${
-                    isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  } text-2xl font-bold `}
-                >
-                  {t("titles.message")}
-                </p>
-                <p
-                  className={`${
-                    isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  } text-sm`}
-                >
-                  {t("titles.subMessage")}
-                </p>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* student info modal */}
-        {openInfoModal && (
-          <StudentInfo
-            modelOpen={setOpenInfoModal}
-            currStudent={selectedStudent}
-          />
-        )}
-
-        {/* delete confirmation popup */}
-        {deleteConfirmModal && (
-          <DeletePopup
-            isVisible={deleteConfirmModal}
-            onClose={() => setDeleteConfirmModal(false)}
-            onDelete={handleConfirmDelete}
-          />
-        )}
+            </div>
+          ) : null}
+        </section>
       </div>
+
+      {detailStudent && !editStudent ? (
+        <StudentDetailSidebar
+          student={detailStudent}
+          isDarkMode={isDarkMode}
+          onClose={() => setDetailStudent(null)}
+          onEdit={() => handleEdit(detailStudent)}
+        />
+      ) : null}
+
+      {editStudent ? (
+        <StudentEditSidebar
+          student={editStudent}
+          isDarkMode={isDarkMode}
+          saving={savingStudent}
+          onClose={() => setEditStudent(null)}
+          onSave={handleSaveStudent}
+          t={t}
+        />
+      ) : null}
+
+      {deleteConfirmModal ? (
+        <DeletePopup
+          isVisible={deleteConfirmModal}
+          onClose={() => setDeleteConfirmModal(false)}
+          onDelete={handleConfirmDelete}
+        />
+      ) : null}
     </div>
   );
 }

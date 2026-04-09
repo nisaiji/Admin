@@ -145,7 +145,16 @@ export default function AttendancePopup() {
       let minAllowedMonth;
       let maxAllowedMonth;
 
-      if (role === "admin" && sessionWindow?.start && sessionWindow?.end) {
+      if (sessionPermissions?.phase === "current") {
+        minAllowedMonth = moment(classAndSectionData?.startTime).startOf(
+          "month",
+        );
+        maxAllowedMonth = moment().endOf("month");
+      } else if (
+        role === "admin" &&
+        sessionWindow?.start &&
+        sessionWindow?.end
+      ) {
         minAllowedMonth = sessionWindow.start.clone().startOf("month");
         maxAllowedMonth =
           sessionPermissions?.phase === "current"

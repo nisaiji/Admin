@@ -35,3 +35,26 @@ const CONSTANT = {
 };
 
 export default CONSTANT;
+
+export const C = {
+  bg: "#0B0D14",
+  nav: "#0a0c12",
+  surface: "#111315",
+  card: "#181b24",
+  border: "rgba(255,255,255,0.07)",
+  borderSoft: "rgba(255,255,255,0.04)",
+  text: "#E3E8F3",
+  textSub: "#64748B",
+  textMuted: "#374151",
+  blue: "#4F8EF7",
+  blueBright: "#0a81d1",
+  blueDim: "rgba(79,142,247,0.12)",
+  green: "#4cbc9a",
+  greenDim: "rgba(76,188,154,0.1)",
+  red: "#fe4040",
+  redDim: "rgba(254,64,64,0.12)",
+  amber: "#FBBF24",
+  amberDim: "rgba(251,191,36,0.1)",
+  violet: "#CBD5E1",
+  orange: "#FF793F",
+};

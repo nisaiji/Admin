@@ -77,7 +77,9 @@ const EndPoints = {
     REPLACE_TEACHER: "section/replace-teacher",
     SECTION_INFO: "section",
     GET_DEMO_EXCEL: "admin/students-excelsheet",
+    GET_TEACHER_DEMO_EXCEL: "admin/teachers-excelsheet",
     UPLOAD_EXCEL: "v3/student/excel",
+    UPLOAD_TEACHER_EXCEL: "teacher/bulk",
     GET_ATTENDANCE: "attendance/admin",
     UPDATE_ATTENDANCE: "attendance/admin/bulk-mark",
 
@@ -112,6 +114,10 @@ const EndPoints = {
     GET_STUDENTS_BY_EXAM: "student-exam-result/section-student-marks",
     UPDATE_STUDENT_MARKS_BULK: "student-exam-result/admin",
     PUBLISH_RESULT: "exam",
+
+    // TC
+    APPLY_TC: "transfer-certificate/admin/apply",
+    GET_ISSUED_TC: "transfer-certificate/admin",
 
     // FEES
     CREATE_FEES_STRUCTURE: "fee-structure/school-fee-structure",

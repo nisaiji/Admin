@@ -7,11 +7,31 @@ import { useDispatch, useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import toast from "react-hot-toast";
-import { setClassAndSectionData, updateAdminData } from "../../store/AppAuthSlice";
+import {
+  setClassAndSectionData,
+  updateAdminData,
+} from "../../store/AppAuthSlice";
 import { Chip, FormControl, MenuItem, Select, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
 import { getSessionPhase } from "../../utils/helper";
+import { motion, AnimatePresence } from "motion/react";
+import { C } from "../../utils/constants";
+import {
+  Users,
+  BookOpen,
+  DollarSign,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+  CalendarDays,
+  CheckCircle2,
+  UserCheck,
+  Clock,
+  School,
+  RefreshCw,
+} from "lucide-react";
+import { ChartDropdown } from "./ChartDropdown";
 
 export default function SectionData({
   isDarkMode,
@@ -25,6 +45,35 @@ export default function SectionData({
   const schoolName = useSelector((state) => state.appAuth.schoolName);
   const fileInputRef = useRef(null);
   const [session, setSession] = useState([]);
+
+  const sessionOptions = session?.map(
+    (s) => `${s.academicStartYear}-${String(s.academicEndYear).slice(-2)}`,
+  );
+
+  const selectedSessionLabel = classAndSectionData?.selectedSession
+    ? `${classAndSectionData.selectedSession.academicStartYear}-${String(
+        classAndSectionData.selectedSession.academicEndYear,
+      ).slice(-2)}`
+    : "Select Session";
+
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+  function useClock() {
+    const [now, setNow] = useState(new Date());
+    useEffect(() => {
+      const t = setInterval(() => setNow(new Date()), 1000);
+      return () => clearInterval(t);
+    }, []);
+    return now;
+  }
+  const now = useClock();
+  const dateStr = now.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
   // modify photo size to less than 1mb
   const resizeImage = (
@@ -167,7 +216,7 @@ export default function SectionData({
           const activeSession = res?.result?.find((s) => s?.isCurrent === true);
 
           const selectedExists = res?.result?.some(
-            (s) => s?._id === classAndSectionData?.selectedSession?._id
+            (s) => s?._id === classAndSectionData?.selectedSession?._id,
           );
 
           if (!selectedExists) {
@@ -175,7 +224,7 @@ export default function SectionData({
               setClassAndSectionData({
                 selectedSession: activeSession,
                 session: res?.result,
-              })
+              }),
             );
           }
 
@@ -231,248 +280,419 @@ export default function SectionData({
     }
   };
 
-  // Function to render the clock with current time
-  const Clock = () => {
-    const [currentTime, setCurrentTime] = useState(
-      moment().format("hh:mm:ss A"),
-    );
-
-    useEffect(() => {
-      const timer = setInterval(() => {
-        setCurrentTime(moment().format("hh:mm:ss A"));
-      }, 1000); // Update every second
-
-      return () => clearInterval(timer); // Cleanup on unmount
-    }, []);
-
-    return (
-      <div
-        className={`flex items-center justify-between  rounded-full px-6 py-2 shadow-md w-fit ${isDarkMode ? "bg-[#68686826] text-textPrimary" : "bg-whiteBackground"
-          }`}
-      >
-        {/* Date Section */}
-        <div
-          className={`flex flex-col items-start pr-6 border-r border-gray-500`}
-        >
-          <span className={`text-xs text-gray-400`}>Date</span>
-          <span className={`text-lg font-medium`}>
-            {moment().format("DD-MM-YYYY")}
-          </span>
-        </div>
-
-        {/* Time Section */}
-        <div className={`flex flex-col items-start px-6`}>
-          <span className={`text-xs text-gray-400`}>Time</span>
-          <span className={`text-lg font-medium`}>{currentTime}</span>
-        </div>
-
-        {/* Edit Icon */}
-        <img src={edit} alt="Edit" className={`w-10 h-10 ml-4`} />
-      </div>
-    );
-  };
-
   useEffect(() => {
     getSession();
   }, [date]);
 
   return (
-    <div
-      className={`${isDarkMode
-        ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-        : "bg-whiteBackground"
-        } flex items-center w-full p-4 shadow-lg`}
-    >
-      {role === "classTeacher" || role === "teacher" ? (
-        <img
-          src={teacherData?.photo || school}
-          alt="School Logo"
-          className="w-[300px] h-[200px] rounded-lg object-cover"
+    <>
+      {/* Session status strip */}
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "11px 18px",
+          borderRadius: "11px",
+          background: "rgba(52,211,153,0.04)",
+          border: "1px solid rgba(52,211,153,0.12)",
+          marginBottom: "18px",
+        }}
+      >
+        <CheckCircle2 size={16} color="#34D399" style={{ flexShrink: 0 }} />
+        <span style={{ flex: 1, fontSize: "13px", color: "#94A3B8" }}>
+          Academic session <strong style={{ color: C.text }}>{selectedSessionLabel}</strong> is
+          active —{" "}
+          <span style={{ color: C.textSub }}>
+            you're ready to set up classes, staff, and students.
+          </span>
+        </span>
+        {/* <button
+          // onClick={() => navigate("/")}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            padding: "6px 12px",
+            borderRadius: "7px",
+            background: "transparent",
+            border: "1px solid rgba(255,255,255,0.09)",
+            color: C.textSub,
+            fontSize: "12px",
+            fontWeight: 600,
+            cursor: "pointer",
+            transition: "all 0.15s",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.background = "transparent")
+          }
+        >
+          <RefreshCw size={11} /> Change Session
+        </button> */}
+        <ChartDropdown
+          value={selectedSessionLabel}
+          options={sessionOptions}
+          onChange={(selectedLabel) => {
+            const selected = session.find(
+              (s) =>
+                `${s.academicStartYear}-${String(s.academicEndYear).slice(-2)}` ===
+                selectedLabel,
+            );
+
+            if (!selected) return;
+
+            localStorage.removeItem("classAndSectionData");
+            localStorage.removeItem("tempData");
+
+            dispatch(
+              setClassAndSectionData({
+                selectedSession: selected,
+              }),
+            );
+          }}
         />
-      ) : role === "admin" ? (
-        <div className="relative inline-block">
-          <img
-            src={data?.photo || school}
-            alt="School Logo"
-            className="w-[300px] h-[200px] rounded-xl  object-cover border-2 border-borderLine"
-          />
-          <img
-            src={isDarkMode ? editPhotow : editPhoto}
-            alt="Edit"
-            className={`absolute size-10 bottom-0 right-0 cursor-pointer`}
-            onClick={() => fileInputRef?.current?.click()}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.06, duration: 0.4 }}
+        style={{
+          display: "flex",
+          alignItems: "stretch",
+          background: C.card,
+          border: `1px solid ${C.border}`,
+          borderRadius: "16px",
+          overflow: "hidden",
+          marginBottom: "20px",
+        }}
+      >
+        <div style={{ flexShrink: 0, width: "160px", position: "relative" }}>
+          {role === "classTeacher" || role === "teacher" ? (
+            <img
+              src={teacherData?.photo || school}
+              alt="School"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+          ) : (
+            <div className="relative inline-block">
+              <img
+                src={school}
+                alt="School"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+              <img
+                src={isDarkMode ? editPhotow : editPhoto}
+                alt="Edit"
+                className={`absolute size-8 bottom-0 right-0 cursor-pointer z-10`}
+                onClick={() => fileInputRef?.current?.click()}
+              />
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={uploadPhoto}
+              />
+            </div>
+          )}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(to right, transparent 50%, rgba(24,27,36,0.8))",
+            }}
           />
         </div>
-      ) : (
-        ""
-      )}
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        accept="image/*"
-        onChange={uploadPhoto}
-      />
-      <div className={`flex flex-col justify-center flex-grow px-4`}>
-        <h1
-          className={`text-3xl font-bold ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+        <div
+          style={{
+            flex: 1,
+            padding: "20px 24px",
+            borderRight: `1px solid ${C.border}`,
+          }}
         >
-          {localStorage.getItem("schoolName") || schoolName}
-        </h1>
-        <span className={`text-textGray`}>Welcome to School Dashboard!</span>
-      </div>
-
-      <div className={`flex flex-col items-end space-y-4`}>
-        {role === "admin" && (
-          <div className="flex items-center gap-4">
-            {/* Add create session option if next session does not exist */}
-            {nextSession && (
-              <button
-                className="font-bold text-white bg-[#4CBC9A] rounded-lg px-4 py-2 cursor-pointer mr-3  focus:outline-none"
-                onClick={handleCreateSession}
-              >
-                Create Session {nextSession?.start}-
-                {String(nextSession?.end).slice(-2)}
-              </button>
-            )}
-            {classAndSectionData?.selectedSession?._id && (
-              <button
-                className="font-bold text-white bg-[#0F4189] rounded-lg px-4 py-2 cursor-pointer mr-3 focus:outline-none"
-                onClick={handleMarkSessionComplete}
-              >
-                Toggle Session{" "}
-                {classAndSectionData?.selectedSession?.academicStartYear}-
-                {String(
-                  classAndSectionData?.selectedSession?.academicEndYear,
-                ).slice(-2)}
-              </button>
-            )}
-            {/* session dropdown */}
-            <FormControl sx={{ bgcolor: "#1e1e1e", borderRadius: 3 }}>
-              <Select
-                value={
-                  session?.some(
-                    (s) => s?._id === classAndSectionData?.selectedSession?._id,
-                  )
-                    ? classAndSectionData?.selectedSession?._id
-                    : ""
-                }
-                onChange={(e) => {
-                  const selected = session?.find(
-                    (s) => s?._id === e?.target?.value,
-                  );
-                  localStorage.removeItem("classAndSectionData");
-                  localStorage.removeItem("tempData");
-                  dispatch(
-                    setClassAndSectionData({
-                      selectedSession: selected,
-                    }),
-                  );
-                }}
-                displayEmpty
-                sx={{
-                  color: "#fff",
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  borderRadius: 14,
-                  ".MuiSelect-select": {
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  },
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    border: "none",
-                  },
-                  ".MuiSelect-icon": {
-                    color: isDarkMode ? "#fff" : "#000",
-                  },
-                  bgcolor: "#1e1e1e",
-                }}
-                renderValue={(selectedValue) => {
-                  const s = session?.find(
-                    (item) => item?._id === selectedValue,
-                  );
-                  if (!s) return <Typography>Select Session</Typography>;
-
-                  const phase = getSessionPhase(s, moment);
-                  const chipLabel =
-                    phase === "current"
-                      ? "Current"
-                      : phase === "upcoming"
-                        ? "Upcoming"
-                        : "Previous";
-
-                  return (
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      gap={1}
-                      width="100%"
-                    >
-                      <Typography fontWeight="bold">
-                        {s?.academicStartYear}-
-                        {String(s?.academicEndYear).slice(-2)}
-                      </Typography>
-                      {s?._id && (
-                        <Chip
-                          label={chipLabel}
-                          size="small"
-                          sx={{
-                            bgcolor:
-                              phase === "current"
-                                ? "#4CBC9A26"
-                                : phase === "upcoming"
-                                  ? "#3A86FF26"
-                                  : "#9CA3AF26",
-                            color:
-                              phase === "current"
-                                ? "#4CBC9A"
-                                : phase === "upcoming"
-                                  ? "#3A86FF"
-                                  : "#9CA3AF",
-                            fontWeight: "bold",
-                            fontSize: 14,
-                            p: 2,
-                          }}
-                        />
-                      )}
-                    </Box>
-                  );
-                }}
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      bgcolor: "#1e1e1e",
-                      color: "#fff",
-                      borderRadius: 3,
-                      mt: 1,
-                    },
-                  },
-                }}
-              >
-                {session?.map((data) => (
-                  <MenuItem
-                    key={data?._id}
-                    value={data?._id} // ✅ only pass id
-                    sx={{
-                      fontWeight: "bold",
-                      "&:hover": {
-                        bgcolor: "#333",
-                      },
-                    }}
-                  >
-                    {data?.academicStartYear}-
-                    {String(data?.academicEndYear).slice(-2)}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              marginBottom: 4,
+            }}
+          >
+            <School size={13} color={C.textMuted} />
+            <span
+              style={{
+                fontSize: "10px",
+                color: C.textMuted,
+                fontWeight: 600,
+                letterSpacing: "0.07em",
+                textTransform: "uppercase",
+              }}
+            >
+              Your School
+            </span>
           </div>
-        )}
-        <Clock />
-      </div>
-    </div>
+          <h2
+            style={{
+              margin: "0 0 4px",
+              fontSize: "22px",
+              fontWeight: 700,
+              color: C.text,
+            }}
+          >
+            {localStorage.getItem("schoolName") || schoolName}
+          </h2>
+          <p style={{ margin: 0, fontSize: "13px", color: C.textSub }}>
+            Welcome to School Dashboard!
+          </p>
+        </div>
+        <div
+          style={{
+            padding: "20px 28px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: 14,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: "8px",
+                background: C.blueDim,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <CalendarDays size={14} color={C.blue} />
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: "10px",
+                  color: C.textMuted,
+                  fontWeight: 600,
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Date
+              </div>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: C.text }}>
+                {dateStr}
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: "8px",
+                background: "rgba(255,255,255,0.06)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Clock size={14} color="#94A3B8" />
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: "10px",
+                  color: C.textMuted,
+                  fontWeight: 600,
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Time
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  color: C.text,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {timeStr}
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+      {/* 
+        <div className={`flex flex-col items-end space-y-4`}>
+          {role === "admin" && (
+            <div className="flex items-center gap-4">
+              {nextSession && (
+                <button
+                  className="font-bold text-white bg-[#4CBC9A] rounded-lg px-4 py-2 cursor-pointer mr-3  focus:outline-none"
+                  onClick={handleCreateSession}
+                >
+                  Create Session {nextSession?.start}-
+                  {String(nextSession?.end).slice(-2)}
+                </button>
+              )}
+              {classAndSectionData?.selectedSession?._id && (
+                <button
+                  className="font-bold text-white bg-[#0F4189] rounded-lg px-4 py-2 cursor-pointer mr-3 focus:outline-none"
+                  onClick={handleMarkSessionComplete}
+                >
+                  Toggle Session{" "}
+                  {classAndSectionData?.selectedSession?.academicStartYear}-
+                  {String(
+                    classAndSectionData?.selectedSession?.academicEndYear,
+                  ).slice(-2)}
+                </button>
+              )}
+              <FormControl sx={{ bgcolor: "#1e1e1e", borderRadius: 3 }}>
+                <Select
+                  value={
+                    session?.some(
+                      (s) =>
+                        s?._id === classAndSectionData?.selectedSession?._id,
+                    )
+                      ? classAndSectionData?.selectedSession?._id
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const selected = session?.find(
+                      (s) => s?._id === e?.target?.value,
+                    );
+                    localStorage.removeItem("classAndSectionData");
+                    localStorage.removeItem("tempData");
+                    dispatch(
+                      setClassAndSectionData({
+                        selectedSession: selected,
+                      }),
+                    );
+                  }}
+                  displayEmpty
+                  sx={{
+                    color: "#fff",
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    borderRadius: 14,
+                    ".MuiSelect-select": {
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "none",
+                    },
+                    ".MuiSelect-icon": {
+                      color: isDarkMode ? "#fff" : "#000",
+                    },
+                    bgcolor: "#1e1e1e",
+                  }}
+                  renderValue={(selectedValue) => {
+                    const s = session?.find(
+                      (item) => item?._id === selectedValue,
+                    );
+                    if (!s) return <Typography>Select Session</Typography>;
+
+                    const phase = getSessionPhase(s, moment);
+                    const chipLabel =
+                      phase === "current"
+                        ? "Current"
+                        : phase === "upcoming"
+                          ? "Upcoming"
+                          : "Previous";
+
+                    return (
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        gap={1}
+                        width="100%"
+                      >
+                        <Typography fontWeight="bold">
+                          {s?.academicStartYear}-
+                          {String(s?.academicEndYear).slice(-2)}
+                        </Typography>
+                        {s?._id && (
+                          <Chip
+                            label={chipLabel}
+                            size="small"
+                            sx={{
+                              bgcolor:
+                                phase === "current"
+                                  ? "#4CBC9A26"
+                                  : phase === "upcoming"
+                                    ? "#3A86FF26"
+                                    : "#9CA3AF26",
+                              color:
+                                phase === "current"
+                                  ? "#4CBC9A"
+                                  : phase === "upcoming"
+                                    ? "#3A86FF"
+                                    : "#9CA3AF",
+                              fontWeight: "bold",
+                              fontSize: 14,
+                              p: 2,
+                            }}
+                          />
+                        )}
+                      </Box>
+                    );
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        bgcolor: "#1e1e1e",
+                        color: "#fff",
+                        borderRadius: 3,
+                        mt: 1,
+                      },
+                    },
+                  }}
+                >
+                  {session?.map((data) => (
+                    <MenuItem
+                      key={data?._id}
+                      value={data?._id} // ✅ only pass id
+                      sx={{
+                        fontWeight: "bold",
+                        "&:hover": {
+                          bgcolor: "#333",
+                        },
+                      }}
+                    >
+                      {data?.academicStartYear}-
+                      {String(data?.academicEndYear).slice(-2)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+          )}
+        </div>
+      </div> */}
+    </>
   );
 }

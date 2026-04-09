@@ -95,10 +95,10 @@ function Login() {
         const payload = isAdmin
           ? { user: values.userInput, password: values.password }
           : {
-              user: values.userInput,
-              password: values.password,
-              platform: "web",
-            };
+            user: values.userInput,
+            password: values.password,
+            platform: "web",
+          };
 
         // Make API request for login
         const res = await axiosClient.post(endpoint, payload);
@@ -115,7 +115,11 @@ function Login() {
               dispatch(setAuthData(res?.result?.accessToken));
               toast.success(t("messages.login.success"));
               resetForm();
-              navigate("/", { replace: true });
+              if (decodedToken?.role === "admin" && decodedToken?.isSessionCreated === false) {
+                navigate("/onboard", { replace: true });
+              } else {
+                navigate("/", { replace: true });
+              }
             } else {
               localStorage.setItem(
                 "temp_access_token",

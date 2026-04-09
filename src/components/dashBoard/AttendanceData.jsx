@@ -6,14 +6,96 @@ import moment from "moment";
 import Spinner from "../Spinner";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { ArcElement, Chart, Legend, Tooltip } from "chart.js";
-import { Bar, Doughnut } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
-import CONSTANT from "../../utils/constants";
+import CONSTANT, { C } from "../../utils/constants";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import toast from "react-hot-toast";
 import { setClassAndSectionData } from "../../store/AppAuthSlice";
 import { useDispatch } from "react-redux";
+import { ChevronRight, ChevronLeft, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+
+/* ─── Chart Dropdown ─────────────────────────────────────────── */
+function ChartDropdown({ value, options, onChange }) {
+    const [open, setOpen] = useState(false);
+    const ref = React.useRef(null);
+    useEffect(() => {
+        if (!open) return;
+        const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener("mousedown", h);
+        return () => document.removeEventListener("mousedown", h);
+    }, [open]);
+    return (
+        <div ref={ref} style={{ position: "relative" }}>
+            <button onClick={() => setOpen(p => !p)} style={{
+                display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: "8px",
+                background: open ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${open ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.1)"}`,
+                color: C.text, fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "all 0.15s",
+            }}>
+                {value}
+                <ChevronDown size={13} color={C.textSub} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+            </button>
+            <AnimatePresence>
+                {open && (
+                    <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.15 }}
+                        style={{
+                            position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 200, background: "#1a1d28",
+                            border: "1px solid rgba(255,255,255,0.12)", borderRadius: "10px", overflow: "hidden",
+                            minWidth: "120px", boxShadow: "0 8px 24px rgba(0,0,0,0.4)"
+                        }}>
+                        {options.map(opt => (
+                            <button key={opt} onClick={() => { onChange(opt); setOpen(false); }} style={{
+                                display: "block", width: "100%", textAlign: "left", padding: "9px 14px",
+                                background: opt === value ? C.blueDim : "transparent", border: "none",
+                                color: opt === value ? "#7EB3FF" : C.text, fontSize: "13px",
+                                fontWeight: opt === value ? 600 : 400, cursor: "pointer", transition: "all 0.1s",
+                            }}
+                                onMouseEnter={e => { if (opt !== value) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
+                                onMouseLeave={e => { if (opt !== value) e.currentTarget.style.background = "transparent"; }}>
+                                {opt}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
+
+/* ─── Chart Tooltip ──────────────────────────────────────────── */
+function ChartTooltip({ data, x, y, viewMode, date }) {
+    let dayName = "";
+    if (viewMode === "Weekly") {
+        dayName = data.day;
+    } else {
+        const currentDate = new Date(date.year, date.month, data.day);
+        dayName = currentDate.toLocaleDateString("en-IN", { weekday: "short" });
+    }
+    return (
+        <div style={{
+            position: "fixed", left: x + 12, top: y - 10, zIndex: 999,
+            background: "#111315", border: "1px solid rgba(104,104,104,0.35)",
+            borderRadius: "10px", padding: "11px 14px", pointerEvents: "none",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.5)", minWidth: "160px",
+        }}>
+            <p style={{ margin: "0 0 8px", fontSize: "12px", fontWeight: 700, color: C.text }}>
+                {viewMode === "Monthly" ? `${dayName}, ${data.day} ${moment().month(date.month).format("MMM")} ${date.year}` : dayName}
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <span style={{ width: 9, height: 9, borderRadius: "50%", background: C.red, flexShrink: 0, display: "block" }} />
+                <span style={{ fontSize: "12px", color: C.text }}>{data.absent} Absent</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ width: 9, height: 9, borderRadius: "50%", background: C.green, flexShrink: 0, display: "block" }} />
+                <span style={{ fontSize: "12px", color: C.text }}>{data.present} Present</span>
+            </div>
+        </div>
+    );
+}
 
 export default function AttendanceData({
   isDarkMode,
@@ -36,6 +118,7 @@ export default function AttendanceData({
   const [totalStudentClassSectionWise, setTotalStudentClassSectionWise] =
     useState(1);
   const [chartData, setChartData] = useState(null);
+  const [hovered, setHovered] = useState(null);
 
   const daysInMonth = new Date(date.year, date.month + 1, 0).getDate();
 
@@ -203,11 +286,9 @@ export default function AttendanceData({
             ]
             : [1],
           backgroundColor: hasAttendance
-            ? isDarkMode
-              ? ["#4CBC9A", "#FE404026", "#384A714D"]
-              : ["#FF793F", "#D9E2E9", "#E9EEF2"]
-            : ["gray"],
-          borderWidth: 2,
+            ? [C.green, "rgba(254,64,64,0.4)", "rgba(56,74,113,0.3)"]
+            : ["rgba(255,255,255,0.05)"],
+          borderWidth: 0,
         },
       ],
     };
@@ -216,14 +297,7 @@ export default function AttendanceData({
       cutout: "70%", // Makes the pie chart hollow (controls the doughnut size)
       plugins: {
         legend: {
-          display: true,
-          position: "top",
-          labels: {
-            font: {
-              size: 14,
-            },
-            color: "#333", // Legend text color
-          },
+          display: false,
         },
         tooltip: {
           enabled: hasAttendance, // Disable tooltip when no attendance
@@ -232,7 +306,7 @@ export default function AttendanceData({
         centerText: {
           display: true,
           text: `Attendance ${studentPresentCountData}/${totalStudentClassSectionWise}`,
-          color: "#333",
+          color: C.text,
           font: {
             size: "18px",
             weight: "bold",
@@ -732,270 +806,174 @@ export default function AttendanceData({
     isNextDisabled = attendanceTime.month.endTime >= maxDate;
   }
 
+  const getCustomChartData = () => {
+    let raw = [];
+    if (selectedOption === "Weekly" || selectedOption === "Monthly") {
+         if (chartData && chartData.labels && chartData.datasets.length >= 3) {
+             raw = chartData.labels.map((lbl, idx) => ({
+                 day: lbl,
+                 present: chartData.datasets[0].data[idx] || 0,
+                 absent: chartData.datasets[1].data[idx] || 0,
+                 na: chartData.datasets[2].data[idx] || 0,
+                 total: totalStudentClassSectionWise || 1
+             }));
+         } else {
+             const labels = selectedOption === "Weekly" ? CONSTANT.WEEKDAYS : Array.from({length: daysInMonth}, (_,i)=>i+1);
+             raw = labels.map(lbl => ({ day: lbl, present: 0, absent: 0, na: 0, total: 1 }));
+         }
+    }
+    return raw;
+  };
+
+  const customChartData = getCustomChartData();
+  const MAX_H = 220;
+  const rawMax = totalStudentClassSectionWise || 1;
+  const step = Math.ceil(rawMax / 5) || 1;
+  const MAX_AXIS = step * 5;
+  
+  let yLabels = [];
+  for (let i = 5; i >= 0; i--) yLabels.push(i * step);
+
+  const classOptionsNames = classList.map(c => c.name);
+  const selectedClassName = classList.find(c => c._id === selectedClass)?.name || "Select Class";
+  const sectionOptionsNames = sectionList?.map(s => s.name) || [];
+  const selectedSectionName = sectionList?.find(s => s._id === selectedSection)?.name || "Select Section";
+
+  const handleClassDropdown = (v) => {
+    const selectedObj = classList.find(c => c.name === v);
+    if (selectedObj) {
+        setSelectedClass(selectedObj._id);
+        setSectionList(selectedObj.section);
+        if (selectedObj.section && selectedObj.section.length > 0) {
+            setSelectedSection(selectedObj.section[0]._id);
+            setStartTime(selectedObj.section[0].startTime || "");
+        } else {
+            setSelectedSection("");
+            setStartTime("");
+        }
+    }
+  };
+
+  const handleSectionDropdown = (v) => {
+    const selectedObj = sectionList.find(c => c.name === v);
+    if (selectedObj) setSelectedSection(selectedObj._id);
+  };
+
+  const displayedDateStr = selectedOption === "Daily"
+    ? moment(attendanceTime.day.startTime).format("dddd, D MMM YYYY")
+    : selectedOption === "Weekly"
+    ? `${moment(attendanceTime.week.startTime).format("D MMM")} - ${moment(attendanceTime.week.endTime).format("D MMM YYYY")}`
+    : moment(attendanceTime.month.startTime).format("MMMM YYYY");
+
   return (
-    <div
-      className={`${isDarkMode
-        ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-        : "bg-whiteBackground"
-        } justify-center mx-5 mt-5 rounded-[16px] relative`}
-    >
-      <div className={`flex justify-between items-center py-3 px-5`}>
-        <h2
-          className={`text-2xl ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-            } font-semibold pl-5`}
-        >
-          {t("dashboard.attendance")}
-        </h2>
-        {/* Graph toggle button */}
-        <div
-          className={`flex justify-evenly bg-[#68686826] p-2 rounded-[20px]`}
-        >
-          <button
-            className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${selectedOption === "Daily"
-              ? "bg-[#0F4189] text-textPrimary"
-              : isDarkMode
-                ? "text-textPrimary"
-                : "text-textBlack"
-              }`}
-            onClick={() => handleOptionChange({ target: { value: "Daily" } })}
-          >
-            {t("dashboard.daily")}
-          </button>
-          <button
-            className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${selectedOption === "Weekly"
-              ? "bg-[#0F4189] text-textPrimary"
-              : isDarkMode
-                ? "text-textPrimary"
-                : "text-textBlack"
-              }`}
-            onClick={() => handleOptionChange({ target: { value: "Weekly" } })}
-          >
-            {t("dashboard.weekly")}
-          </button>
-          <button
-            className={`px-5 py-1 rounded-[14px] font-medium text-[16px] ${selectedOption === "Monthly"
-              ? "bg-[#0F4189] text-textPrimary"
-              : isDarkMode
-                ? "text-textPrimary"
-                : "text-textBlack"
-              }`}
-            onClick={() => handleOptionChange({ target: { value: "Monthly" } })}
-          >
-            {t("dashboard.monthly")}
-          </button>
-        </div>
-        {/* date change buttons */}
-        <div
-          className={`flex justify-between items-center space-x-2 w-[270px]`}
-        >
-          <img
-            src={isDarkMode ? DownIcon : DownIconw}
-            onClick={!isPrevDisabled ? () => handleChangeDate("previous") : undefined}
-            alt=""
-            className={`h-7 w-7 rotate-90 object-contain ${isPrevDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
-          />
-          <div
-            className={`text-base ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-              } font-poppins-regular`}
-          >
-            {selectedOption === "Daily"
-              ? moment(attendanceTime.day.startTime).format("dddd, DD MMM YYYY")
-              : selectedOption === "Weekly"
-                ? `${moment(attendanceTime.week.startTime).format(
-                  "D MMM YYYY",
-                )} - ${moment(attendanceTime.week.endTime).format(
-                  "D MMM YYYY",
-                )}`
-                : moment(attendanceTime.month.startTime).format("MMMM YYYY")}
-          </div>
-          {!isNextDisabled ? (
-            <img
-              src={isDarkMode ? DownIcon : DownIconw}
-              onClick={() => handleChangeDate("next")}
-              alt=""
-              className={`h-7 w-7 -rotate-90 object-contain cursor-pointer`}
-            />
-          ) : (
-            <img
-              src={isDarkMode ? DownIcon : DownIconw}
-              alt=""
-              className={`h-7 w-7 -rotate-90 object-contain opacity-30 cursor-not-allowed`}
-            />
-          )}
+    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "16px", overflow: "hidden", marginBottom: "20px", display: "flex", flexDirection: "column", minHeight: "360px", position: "relative" }}>
+      {/* Header */}
+      <div style={{ padding: "18px 24px 14px", borderBottom: `1px solid ${C.borderSoft}`, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", justifyContent: "space-between" }}>
+        <span style={{ fontSize: "18px", fontWeight: 700, color: C.text }}>{t("dashboard.attendance")}</span>
+        
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "4px", padding: "4px", background: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}`, borderRadius: "10px" }}>
+                {(["Daily", "Weekly", "Monthly"]).map(m => (
+                    <button key={m} onClick={() => handleOptionChange({ target: { value: m } })} style={{
+                        padding: "5px 16px", borderRadius: "7px", background: selectedOption === m ? C.blue : "transparent",
+                        border: "none", color: selectedOption === m ? "#fff" : C.textSub, fontSize: "13px", fontWeight: 600,
+                        cursor: "pointer", transition: "all 0.2s",
+                    }}>{t(`dashboard.${m.toLowerCase()}`)}</button>
+                ))}
+            </div>
+
+            {role === "admin" && (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <ChartDropdown value={selectedClassName} options={classOptionsNames} onChange={handleClassDropdown} />
+                <ChartDropdown value={selectedSectionName} options={sectionOptionsNames} onChange={handleSectionDropdown} />
+              </div>
+            )}
         </div>
       </div>
-      <hr
-        className={`border ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
-          }`}
-      />
+
       {loading && (
-        <div
-          className={`absolute inset-0 flex items-center justify-center bg-[#fafafa] bg-opacity-50 z-30 w-full`}
-        >
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(11, 13, 20, 0.5)", zIndex: 10 }}>
           <Spinner />
         </div>
       )}
-      {/* class and section list */}
-      <div className={`flex justify-end items-center py-3`}>
-        {/* class and section dropdoown */}
-        {role === "admin" && (
-          <div className={`flex space-x-2 p-1`}>
-            {/* Class dropdown */}
-            <FormControl
-              size="small"
-              sx={{
-                width: "150px",
-                border: "1px solid #2b2e4a40",
-                borderRadius: "14px",
-                backgroundColor: isDarkMode ? "" : "white",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  border: "none",
-                },
-                "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "white !important",
-                },
-                "& .MuiInputBase-root": {
-                  color: isDarkMode ? "#E3E8F3" : "black",
-                },
-                "& .MuiSvgIcon-root": {
-                  color: isDarkMode ? "#E3E8F3" : "black",
-                },
-              }}
-            >
-              <InputLabel
-                id="class-select-label"
-                sx={{
-                  zIndex: 1,
-                  backgroundColor: isDarkMode ? "" : "white",
-                  color: isDarkMode ? "#E3E8F3" : "black",
-                  fontSize: 14,
-                  px: 0.5,
-                }}
-              >
-                {t("dashboard.selectClass")}
-              </InputLabel>
-              <Select
-                labelId="class-select-label"
-                id="class-select"
-                value={selectedClass}
-                onChange={(e) => {
-                  setSelectedClass(e.target.value);
-                  const classData = classList.filter(
-                    (itm) => itm["_id"] === e.target.value,
-                  );
-                  setSectionList(classData[0]?.section);
-                  setSelectedSection(classData[0]?.section[0]?._id || "");
-                  setStartTime(classData[0]?.section[0]?.startTime || "");
-                }}
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                      color: isDarkMode ? "#E3E8F3" : "black",
-                    },
-                  },
-                }}
-              >
-                <MenuItem value="">{t("dashboard.selectClass")}</MenuItem>
-                {classList?.map((itm) => (
-                  <MenuItem
-                    key={itm["_id"]}
-                    value={itm["_id"]}
-                    sx={{
-                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                      color: isDarkMode ? "#E3E8F3" : "black",
-                      "&:hover": {
-                        backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
-                      },
-                    }}
-                  >
-                    {itm?.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
 
-            {/* Section dropdown */}
-            <FormControl
-              size="small"
-              sx={{
-                width: "150px",
-                border: "1px solid #2b2e4a40",
-                borderRadius: "14px",
-                backgroundColor: isDarkMode ? "" : "white",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  border: "none",
-                },
-                "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "white !important",
-                },
-                "& .MuiInputBase-root": {
-                  color: isDarkMode ? "#E3E8F3" : "black",
-                },
-                "& .MuiSvgIcon-root": {
-                  color: isDarkMode ? "#E3E8F3" : "black",
-                },
-              }}
-            >
-              <InputLabel
-                id="section-select-label"
-                sx={{
-                  zIndex: 1,
-                  backgroundColor: isDarkMode ? "" : "white",
-                  color: isDarkMode ? "#E3E8F3" : "black",
-                  fontSize: 14,
-                  px: 0.5,
-                }}
-              >
-                {t("dashboard.selectSection")}
-              </InputLabel>
-              <Select
-                labelId="section-select-label"
-                id="section-select"
-                value={selectedSection}
-                disabled={!selectedClass}
-                onChange={(e) => setSelectedSection(e.target.value)}
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                      color: isDarkMode ? "#E3E8F3" : "black",
-                      cursor: selectedClass ? "pointer" : "none",
-                    },
-                  },
-                }}
-              >
-                <MenuItem value="">{t("dashboard.selectSection")}</MenuItem>
-                {sectionList?.map((itm) => (
-                  <MenuItem
-                    key={itm["_id"]}
-                    value={itm["_id"]}
-                    sx={{
-                      backgroundColor: isDarkMode ? "#1a1a1a" : "white",
-                      color: isDarkMode ? "#E3E8F3" : "black",
-                      "&:hover": {
-                        backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
-                      },
-                    }}
-                  >
-                    {itm?.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </div>
+      {/* Date Navigator */}
+      <div style={{ padding: "14px 24px 0", display: "flex", alignItems: "center", gap: "14px" }}>
+        <button onClick={!isPrevDisabled ? () => handleChangeDate("previous") : undefined} style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`, color: C.textSub, display: "flex", alignItems: "center", justifyContent: "center", cursor: isPrevDisabled ? "not-allowed" : "pointer", opacity: isPrevDisabled ? 0.3 : 1 }}>
+            <ChevronLeft size={14} />
+        </button>
+        <span style={{ fontSize: "15px", fontWeight: 600, color: "rgba(227,232,243,0.75)", minWidth: "200px", textAlign: "center" }}>{displayedDateStr}</span>
+        <button onClick={!isNextDisabled ? () => handleChangeDate("next") : undefined} style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`, color: C.textSub, display: "flex", alignItems: "center", justifyContent: "center", cursor: isNextDisabled ? "not-allowed" : "pointer", opacity: isNextDisabled ? 0.3 : 1 }}>
+            <ChevronRight size={14} />
+        </button>
+
+        <div style={{ marginLeft: "auto", display: "flex", gap: "16px", alignItems: "center" }}>
+            {[{ color: "rgba(254,64,64,0.4)", label: "Absent" }, { color: C.green, label: "Present" }, { color: "rgba(56,74,113,0.3)", label: "NA" }].map(l => (
+                <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <span style={{ width: 10, height: 10, borderRadius: "50%", background: l.color, display: "block" }} />
+                    <span style={{ fontSize: "12px", color: C.textSub }}>{l.label}</span>
+                </div>
+            ))}
+        </div>
+      </div>
+
+      {/* Chart Section */}
+      <div style={{ padding: "16px 24px 20px", display: "flex", gap: "12px", flex: 1, minHeight: "260px" }}>
+        {selectedOption === "Daily" ? (
+            <div style={{ width: "100%", height: "100%", display: "flex", justifyContent: "center" }}>
+              <div style={{ height: "240px", width: "240px" }}>
+                 {renderPieChart()}
+              </div>
+            </div>
+        ) : (
+            <>
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: MAX_H + 4, paddingBottom: "4px", flexShrink: 0 }}>
+                    {yLabels.map(v => <span key={v} style={{ fontSize: "12px", color: "#686868", lineHeight: 1, textAlign: "right", width: "24px" }}>{v}</span>)}
+                </div>
+                <div style={{ flex: 1, overflow: "hidden" }}>
+                    <div style={{ position: "relative", height: MAX_H }}>
+                        {yLabels.slice(0, -1).map((v, i) => (
+                            <div key={v} style={{ position: "absolute", left: 0, right: 0, top: `${(i / (yLabels.length - 1)) * 100}%`, borderTop: "1px solid rgba(104,104,104,0.12)" }} />
+                        ))}
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "flex-end", gap: selectedOption === "Monthly" ? "4px" : "30px", paddingBottom: "1px" }}>
+                            {customChartData.map((d, i) => {
+                                const totalH = (d.total / MAX_AXIS) * MAX_H;
+                                const presentH = (d.present / MAX_AXIS) * MAX_H;
+                                const absentH = (d.absent / MAX_AXIS) * MAX_H;
+                                const naH = (d.na / MAX_AXIS) * MAX_H;
+                                const domId = `chart-bar-${i}`;
+                                const isHov = hovered?.id === domId;
+                                return (
+                                    <div key={i} style={{ flex: selectedOption === "Monthly" ? "1 0 0" : "0 0 45px", maxWidth: selectedOption === "Monthly" ? "24px" : "45px", height: `${totalH}px`, position: "relative", cursor: "pointer" }}
+                                        onMouseEnter={e => { const r = e.currentTarget.getBoundingClientRect(); setHovered({ id: domId, data: d, x: r.right, y: r.top }); }}
+                                        onMouseLeave={() => setHovered(null)}>
+                                        <div style={{ position: "absolute", bottom: `${presentH + absentH}px`, left: 0, right: 0, height: `${naH}px`, background: isHov ? "rgba(56,74,113,0.55)" : "rgba(56,74,113,0.3)", borderRadius: "4px 4px 0 0", transition: "background 0.15s" }} />
+                                        <div style={{ position: "absolute", bottom: `${presentH}px`, left: 0, right: 0, height: `${absentH}px`, background: isHov ? C.red : "rgba(254,64,64,0.4)", borderRadius: presentH === 0 && naH === 0 ? "4px" : naH === 0 ? "4px 4px 0 0" : "0", transition: "background 0.15s" }} />
+                                        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: `${presentH}px`, background: C.green, borderRadius: absentH === 0 && naH === 0 ? "4px" : "0 0 4px 4px", opacity: isHov ? 1 : 0.85, transition: "opacity 0.15s" }} />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: selectedOption === "Monthly" ? "4px" : "30px", paddingTop: "8px" }}>
+                        {customChartData.map((d, i) => (
+                            <div key={i} style={{ flex: selectedOption === "Monthly" ? "1 0 0" : "0 0 45px", maxWidth: selectedOption === "Monthly" ? "24px" : "45px", textAlign: "center", fontSize: "11px", color: "#686868" }}>
+                                {selectedOption === "Monthly" ? (d.day % 5 === 1 || d.day === 1 ? d.day : "") : d.day}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </>
         )}
       </div>
 
-      {/* Pie/Bar charts */}
-      <div className={`flex justify-center pb-5`}>
-        <div
-          className={`h-96 flex justify-center ${selectedOption === "Weekly" ? "w-8/12" : "w-11/12"
-            }`}
-        >
-          {selectedOption === "Daily" ? renderPieChart() : renderChart()}
-        </div>
-      </div>
+      <AnimatePresence>
+        {hovered && hovered.data && (
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.1 }}>
+                <ChartTooltip data={hovered.data} x={hovered.x} y={hovered.y} viewMode={selectedOption} date={date} />
+            </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

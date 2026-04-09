@@ -109,6 +109,7 @@ export default function StudentSection() {
     lastname: "",
     gender: "",
     parentFullName: "",
+    guardianName: "",
     parentPhone: "",
     sectionId: "",
   });
@@ -201,6 +202,7 @@ export default function StudentSection() {
           ...student,
           SNo: index + 1,
           parentFullName: student?.parentFullName || "",
+          guardianName: student?.guardianName || "",
           parentPhone: student?.parentPhone || "",
         }));
         // console.table(studentList)
@@ -332,6 +334,7 @@ export default function StudentSection() {
       firstname: capitalize(student.firstname.trim()),
       lastname: capitalize(student.lastname.trim()),
       parentName: capitalize(student.parentFullName.trim()),
+      ...(student.guardianName && { guardianName: capitalize(student.guardianName.trim()) }),
       gender: student.gender,
       phone: student.parentPhone,
       ...(!isUpdate && {
@@ -361,6 +364,7 @@ export default function StudentSection() {
             lastname: "",
             gender: "",
             parentFullName: "",
+            guardianName: "",
             parentPhone: "",
             sectionId:
               role === "admin"
@@ -678,6 +682,11 @@ export default function StudentSection() {
                   <th
                     className={` py-2 border border-borderLine2 bg-clip-padding`}
                   >
+                    {t("labels.guardianName2")}
+                  </th>
+                  <th
+                    className={` py-2 border border-borderLine2 bg-clip-padding`}
+                  >
                     {t("labels.phone")}
                   </th>
                   <th
@@ -787,6 +796,26 @@ export default function StudentSection() {
                       }
                       maxLength={20}
                       placeholder={t("placeholders.parentName")}
+                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                    />
+                  </td>
+                  <td
+                    className={`py-1 px-2 border ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
+                  >
+                    <input
+                      type="text"
+                      value={newStudent.guardianName}
+                      onChange={(e) =>
+                        handleInputChange(
+                          null,
+                          "guardianName",
+                          e.target.value
+                        )
+                      }
+                      maxLength={20}
+                      placeholder={t("placeholders.guardianName")}
                       className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
                         } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                     />
@@ -925,6 +954,27 @@ export default function StudentSection() {
                         }
                         maxLength={20}
                         placeholder={t("placeholders.parentName")}
+                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                          } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                        disabled={editSNo !== student.SNo}
+                      />
+                    </td>
+                    <td
+                      className={`px-2 py-1 border text-sm ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                        }`}
+                    >
+                      <input
+                        type="text"
+                        value={student.guardianName}
+                        onChange={(e) =>
+                          handleInputChange(
+                            student.SNo,
+                            "guardianName",
+                            e.target.value
+                          )
+                        }
+                        maxLength={20}
+                        placeholder="guardian2"
                         className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                         disabled={editSNo !== student.SNo}

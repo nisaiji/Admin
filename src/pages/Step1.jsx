@@ -66,6 +66,8 @@ const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         phone,
         token: otpSuccessToken,
       });
+      console.log(res);
+      
       if (res?.statusCode === 200) {
         dispatch(setAuth({ phoneVerified: true }));
         localStorage.setItem("temp_access_token", res?.result?.token);

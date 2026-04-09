@@ -25,7 +25,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
       document.body.style.overflow = "auto";
     };
   }, [modelOpen]);
-// console.log(currStudent);
+  // console.log(currStudent);
 
   // Print student information in pdf format.
   const handleScreenshot = () => {
@@ -57,7 +57,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
       document.body.removeChild(hiddenContainer);
     });
   };
-  
+
   // Student details array.
   const personalDetails = [
     [t("labels.id"), currStudent?.studentId || CONSTANT.NA],
@@ -68,7 +68,7 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     [
       t("labels.classAndSection"),
       `${currStudent?.className} ${currStudent?.sectionName}` ||
-        CONSTANT.NA,
+      CONSTANT.NA,
     ],
     [t("labels.gender"), currStudent?.gender || CONSTANT.NA],
     [t("labels.bloodGroup"), currStudent?.bloodGroup || CONSTANT.NA],
@@ -82,28 +82,29 @@ export default function StudentInfo({ currStudent, modelOpen }) {
       t("labels.guardianName"),
       currStudent?.parentFullName || CONSTANT.NA,
     ],
+    [
+      t("labels.guardianName2"),
+      currStudent?.guardianName || CONSTANT.NA,
+    ],
     [t("labels.phoneNumber"), currStudent?.parentPhone || CONSTANT.NA],
   ];
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4 ${
-        isDarkMode ? "bg-backgroundTableCell" : "bg-background"
-      }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4 ${isDarkMode ? "bg-backgroundTableCell" : "bg-background"
+        }`}
     >
       <div
-        className={`relative ${
-          isDarkMode ? "bg-background" : "bg-whiteBackground"
-        } rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto`}
+        className={`relative ${isDarkMode ? "bg-background" : "bg-whiteBackground"
+          } rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto`}
       >
         {/* Header */}
         <div
           className={`flex items-center justify-between border-b border-borderLine px-4 py-3`}
         >
           <h2
-            className={`text-xl font-bold  ${
-              isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+            className={`text-xl font-bold  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
           >
             {t("titles.studentDetails")}
           </h2>
@@ -121,9 +122,8 @@ export default function StudentInfo({ currStudent, modelOpen }) {
           <div className={`flex-1`}>
             <section>
               <h3
-                className={`text-lg font-semibold mb-2 ${
-                  isDarkMode ? "text-textPrimary" : "text-textBlack"
-                }`}
+                className={`text-lg font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
               >
                 {t("titles.personalDetails")}
               </h3>
@@ -134,16 +134,14 @@ export default function StudentInfo({ currStudent, modelOpen }) {
                     className={`flex justify-between border-b border-borderLine pb-1`}
                   >
                     <span
-                      className={`text-sm font-medium ${
-                        isDarkMode ? "text-textPrimary" : "text-textGray"
-                      }`}
+                      className={`text-sm font-medium ${isDarkMode ? "text-textPrimary" : "text-textGray"
+                        }`}
                     >
                       {label}
                     </span>
                     <span
-                      className={` text-sm ${
-                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
-                      }`}
+                      className={` text-sm ${isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                        }`}
                     >
                       {value}
                     </span>
@@ -154,9 +152,8 @@ export default function StudentInfo({ currStudent, modelOpen }) {
 
             <section className={`mt-6`}>
               <h3
-                className={`text-lg font-semibold mb-2  ${
-                  isDarkMode ? "text-textPrimary" : "text-textBlack"
-                }`}
+                className={`text-lg font-semibold mb-2  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
               >
                 {t("titles.guardianDetails")}
               </h3>
@@ -167,16 +164,14 @@ export default function StudentInfo({ currStudent, modelOpen }) {
                     className={`flex justify-between border-b border-borderLine pb-1`}
                   >
                     <span
-                      className={`text-sm font-medium ${
-                        isDarkMode ? "text-textPrimary" : "text-textGray"
-                      }`}
+                      className={`text-sm font-medium ${isDarkMode ? "text-textPrimary" : "text-textGray"
+                        }`}
                     >
                       {label}
                     </span>
                     <span
-                      className={`text-sm ${
-                        isDarkMode ? "text-textPrimary" : "text-textDarkGray"
-                      }`}
+                      className={`text-sm ${isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                        }`}
                     >
                       {value}
                     </span>

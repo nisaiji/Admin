@@ -1,164 +1,24 @@
-// import React from "react";
-// import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-// import Studentlist from "../../components/studentSetup/Studentlist";
-// import { BrowserRouter } from "react-router-dom";
-// import { useSelector } from "react-redux";
-// import { axiosClient } from "../../services/axiosClient";
-// import toast from "react-hot-toast";
-
-// // ---- Mocks ----
-// jest.mock("react-redux", () => ({
-//   useSelector: jest.fn(),
-// }));
-
-// jest.mock("../../services/axiosClient", () => ({
-//   axiosClient: {
-//     get: jest.fn(),
-//     delete: jest.fn(),
-//   },
-// }));
-
-// jest.mock("react-i18next", () => ({
-//   useTranslation: () => ({
-//     t: (key) => key, // simple mock: return key itself
-//     i18n: {
-//       changeLanguage: jest.fn(),
-//     },
-//   }),
-// }));
-
-// jest.mock("react-hot-toast", () => ({ success: jest.fn(), error: jest.fn() }));
-
-// // ---- Tests ----
-// describe("Studentlist Component", () => {
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//     mockRedux();
-//   });
-
-//   // test("can search students by name", async () => {
-//   //   axiosClient.get.mockResolvedValue({
-//   //     statusCode: 200,
-//   //     result: { totalStudents: 1, students: [] },
-//   //   });
-
-//   //   renderComponent();
-//   //   const searchInput = screen.getByPlaceholderText("placeholders.search");
-//   //   fireEvent.change(searchInput, { target: { value: "John" } });
-
-//   //   await waitFor(() => {
-//   //     expect(axiosClient.get).toHaveBeenCalled();
-//   //   });
-//   // });
-
-//   // test("clear button resets filters", async () => {
-//   //   axiosClient.get.mockResolvedValue({
-//   //     statusCode: 200,
-//   //     result: { totalStudents: 0, students: [] },
-//   //   });
-
-//   //   renderComponent();
-//   //   const clearBtn = screen.getByAltText("Clear");
-//   //   fireEvent.click(clearBtn);
-
-//   //   await waitFor(() => {
-//   //     expect(axiosClient.get).toHaveBeenCalled();
-//   //   });
-//   // });
-
-//   // test("clicking info button opens student info modal", async () => {
-//   //   axiosClient.get.mockResolvedValueOnce({
-//   //     statusCode: 200,
-//   //     result: {
-//   //       totalStudents: 1,
-//   //       students: [{ _id: "1", firstname: "John", lastname: "Doe" }],
-//   //     },
-//   //   });
-
-//   //   renderComponent();
-//   //   const infoBtn = await screen.findByAltText("infoStudent");
-//   //   fireEvent.click(infoBtn);
-
-//   //   expect(await screen.findByTestId("student-info-modal")).toBeInTheDocument();
-//   // });
-
-//   // test("clicking delete opens confirmation and calls delete API", async () => {
-//   //   axiosClient.get.mockResolvedValueOnce({
-//   //     statusCode: 200,
-//   //     result: {
-//   //       totalStudents: 1,
-//   //       students: [{ _id: "1", firstname: "John", lastname: "Doe" }],
-//   //     },
-//   //   });
-
-//   //   axiosClient.delete.mockResolvedValueOnce({
-//   //     statusCode: 200,
-//   //     result: "Deleted",
-//   //   });
-
-//   //   renderComponent();
-//   //   const deleteBtn = await screen.findByAltText("deleteStudent");
-//   //   fireEvent.click(deleteBtn);
-
-//   //   const confirmBtn = await screen.findByTestId("confirm-delete");
-//   //   fireEvent.click(confirmBtn);
-
-//   //   await waitFor(() => {
-//   //     expect(axiosClient.delete).toHaveBeenCalledWith(
-//   //       expect.stringContaining("1")
-//   //     );
-//   //     expect(toast.success).toHaveBeenCalledWith("Deleted");
-//   //   });
-//   // });
-
-//   // test("pagination works and triggers API call", async () => {
-//   //   axiosClient.get.mockResolvedValue({
-//   //     statusCode: 200,
-//   //     result: { totalStudents: 25, students: [] },
-//   //   });
-
-//   //   renderComponent();
-//   //   const pageBtn = await screen.findByRole("button", { name: "2" });
-//   //   fireEvent.click(pageBtn);
-
-//   //   await waitFor(() => {
-//   //     expect(axiosClient.get).toHaveBeenCalled();
-//   //   });
-//   // });
-
-//   // test("dropdown to change limit triggers API call", async () => {
-//   //   axiosClient.get.mockResolvedValue({
-//   //     statusCode: 200,
-//   //     result: { totalStudents: 30, students: [] },
-//   //   });
-
-//   //   renderComponent();
-//   //   const limitDropdown = await screen.findByRole("button", { name: "10" });
-//   //   fireEvent.mouseDown(limitDropdown);
-
-//   //   const option = await screen.findByText("25");
-//   //   fireEvent.click(option);
-
-//   //   await waitFor(() => {
-//   //     expect(axiosClient.get).toHaveBeenCalled();
-//   //   });
-//   // });
-
-//   // test("applies dark mode classes when isDarkMode=true", () => {
-//   //   mockRedux({ isDarkMode: true });
-//   //   renderComponent();
-//   //   expect(screen.getByText("titles.sis").className).toContain(
-//   //     "text-textPrimary"
-//   //   );
-//   // });
-// });
-
 import React from "react";
-import { BrowserRouter } from "react-router-dom";
-import Studentlist from "../../components/studentSetup/Studentlist";
-import { render, screen } from "@testing-library/react";
+import { TextDecoder, TextEncoder } from "util";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { useDispatch, useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
+
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+const mockToast = {
+  success: jest.fn(),
+  error: jest.fn(),
+};
+const mockT = jest.fn((key, options) => options?.defaultValue || key);
 
 jest.mock("react-redux", () => ({
   useSelector: jest.fn(),
@@ -169,79 +29,344 @@ jest.mock("../../services/axiosClient", () => ({
   axiosClient: {
     get: jest.fn(),
     delete: jest.fn(),
+    put: jest.fn(),
   },
 }));
+
+jest.mock("react-hot-toast", () => ({
+  __esModule: true,
+  default: mockToast,
+  success: mockToast.success,
+  error: mockToast.error,
+  Toaster: () => {
+    const ReactForMock = require("react");
+    return ReactForMock.createElement("div", { "data-testid": "toaster" });
+  },
+}));
+
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: mockT,
+    i18n: {
+      changeLanguage: jest.fn(),
+    },
+  }),
+}));
+
+jest.mock("../../components/DeleteMessagePopup", () =>
+  function MockDeletePopup({ isVisible, onClose, onDelete }) {
+    const ReactForMock = require("react");
+
+    if (!isVisible) return null;
+
+    return ReactForMock.createElement(
+      "div",
+      { "data-testid": "delete-popup" },
+      ReactForMock.createElement("button", { onClick: onClose }, "Cancel"),
+      ReactForMock.createElement(
+        "button",
+        { "data-testid": "confirmdeleteTeacher", onClick: onDelete },
+        "Delete"
+      )
+    );
+  }
+);
+
+const { BrowserRouter } = require("react-router-dom");
+const Studentlist = require("../../components/studentSetup/Studentlist").default;
+
+const mockClasses = [
+  {
+    _id: "class-8",
+    name: "8th",
+    section: [
+      {
+        _id: "section-a",
+        name: "A",
+      },
+    ],
+  },
+];
+
+const mockStudents = [
+  {
+    _id: "student-1",
+    studentId: "ADM001",
+    firstname: "Mahi",
+    lastname: "Sharma",
+    gender: "Female",
+    parentPhone: "9876500001",
+    parentEmail: "mahi.parent@school.in",
+    parentFullName: "Rajesh Sharma",
+    bloodGroup: "AB+",
+    rollNo: "A001",
+  },
+  {
+    _id: "student-2",
+    studentId: "ADM002",
+    firstname: "Tony",
+    lastname: "Dsouza",
+    gender: "Male",
+    parentPhone: "9876500002",
+    parentEmail: "tony.parent@school.in",
+    parentFullName: "Robert Dsouza",
+    bloodGroup: "O+",
+    rollNo: "A002",
+  },
+];
 
 const mockState = {
   appConfig: {
     isDarkMode: true,
   },
   appAuth: {
-    classAndSectionData: [{ id: 1, name: "Class 1 - A" }],
-    teacherData: [{ id: 1, name: "Class 1 - A" }],
+    classAndSectionData: {
+      selectedSession: {
+        _id: "session-1",
+        school: "school-1",
+      },
+    },
   },
 };
 
-const renderComponent = () =>
-  render(
+function mockApi({
+  students = mockStudents,
+  totalStudents = students.length,
+  studentError,
+  classes = mockClasses,
+} = {}) {
+  axiosClient.get.mockImplementation((url) => {
+    if (url.startsWith("class/session")) {
+      return Promise.resolve({
+        statusCode: 200,
+        result: classes,
+      });
+    }
+
+    if (url.startsWith("v3/student/admin")) {
+      if (studentError) return Promise.reject(studentError);
+
+      return Promise.resolve({
+        statusCode: 200,
+        result: {
+          totalStudents,
+          students,
+        },
+      });
+    }
+
+    return Promise.reject(new Error(`Unhandled GET ${url}`));
+  });
+}
+
+function renderComponent() {
+  return render(
     <BrowserRouter>
       <Studentlist />
     </BrowserRouter>
   );
+}
 
 describe("Studentlist Component", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+    window.localStorage.clear();
+    useDispatch.mockReturnValue(jest.fn());
     useSelector.mockImplementation((selectorFn) => selectorFn(mockState));
   });
 
-  test("renders with breadcrumbs and add student button", () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test("renders the API-backed student list with filters and add action", async () => {
+    mockApi();
+
     renderComponent();
+
     expect(screen.getByTestId("breadcrumbs")).toBeInTheDocument();
-    expect(screen.getByText("titles.sis")).toBeInTheDocument();
-    expect(screen.getByText("Add Student")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /add student/i })).toHaveAttribute(
+      "href",
+      "/add-student"
+    );
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+    expect(screen.getByText("Tony Dsouza")).toBeInTheDocument();
+    expect(screen.getByText("AB+")).toBeInTheDocument();
+    expect(axiosClient.get).toHaveBeenCalledWith(
+      "v3/student/admin?page=1&limit=10&session=session-1"
+    );
   });
 
-  test("shows no data message when no students", async () => {
-    axiosClient.get.mockResolvedValueOnce({
-      statusCode: 200,
-      result: { totalStudents: 0, students: [] },
-    });
+  test("shows an empty state when the API returns no students", async () => {
+    mockApi({ students: [], totalStudents: 0 });
+
     renderComponent();
-    expect(await screen.findByText("titles.message")).toBeInTheDocument();
+
+    expect(await screen.findByText("No students found")).toBeInTheDocument();
+    expect(screen.getByText("Try changing the class, section, or search text.")).toBeInTheDocument();
   });
 
-  // test("renders student table when students are available", async () => {
-  //   axiosClient.get.mockResolvedValueOnce({
-  //       statusCode: 200,
-  //       result: {
-  //         totalStudents: 1,
-  //         students: [
-  //           {
-  //             studentId: "1",
-  //             firstname: "John",
-  //             lastname: "Doe",
-  //             gender: "Male",
-  //             parentPhone: "123",
-  //             parentEmail: "a@b.com",
-  //             parentFullName: "Parent One",
-  //           },
-  //         ],
-  //       },
-  //   });
+  test("keeps rendering safe fallbacks for incomplete student data", async () => {
+    mockApi({
+      students: [
+        {
+          _id: "student-3",
+          firstname: "Asha",
+          lastname: "Rao",
+        },
+      ],
+      totalStudents: 1,
+    });
 
-  //   renderComponent();
+    renderComponent();
 
-  //   const fullNameCell = await screen.findByText("John Doe");
-  //   expect(fullNameCell).toBeInTheDocument();
+    expect(await screen.findByText("Asha Rao")).toBeInTheDocument();
+    expect(screen.getAllByText("NA").length).toBeGreaterThan(0);
+  });
 
-  //   expect(screen.getByText("Male")).toBeInTheDocument();
-  //   expect(screen.getByText("123")).toBeInTheDocument();
-  //   expect(screen.getByText("a@b.com")).toBeInTheDocument();
+  test("debounces search text and sends it to the student API", async () => {
+    jest.useFakeTimers();
+    mockApi();
 
-  //   // expect(await screen.findByText("John Doe")).toBeInTheDocument();
-  //   // expect(await screen.findByText("Doe")).toBeInTheDocument();
-  //   // expect(await screen.findByText("Male")).toBeInTheDocument();
-  //   // expect(await screen.findByText("123")).toBeInTheDocument();
-  //   // expect(await screen.findByText("a@b.com")).toBeInTheDocument();
-  // });
+    renderComponent();
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("Search by name, email or phone..."), {
+      target: { value: "Tony" },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(400);
+    });
+
+    await waitFor(() => {
+      expect(axiosClient.get).toHaveBeenCalledWith(
+        expect.stringContaining("search=Tony")
+      );
+    });
+  });
+
+  test("updates section filtering and includes the selected section in API calls", async () => {
+    mockApi();
+
+    renderComponent();
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId("classlist"), {
+      target: { value: "class-8" },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("sectionlist")).not.toBeDisabled();
+    });
+
+    fireEvent.change(screen.getByTestId("sectionlist"), {
+      target: { value: "section-a" },
+    });
+
+    await waitFor(() => {
+      expect(axiosClient.get).toHaveBeenCalledWith(
+        expect.stringContaining("section=section-a")
+      );
+    });
+  });
+
+  test("shows an error state and retry path when student loading fails", async () => {
+    mockApi({ studentError: "Network down" });
+
+    renderComponent();
+
+    expect(await screen.findByText("Unable to load students")).toBeInTheDocument();
+    expect(mockToast.error).toHaveBeenCalledWith("Network down");
+
+    fireEvent.click(screen.getByRole("button", { name: /retry/i }));
+
+    await waitFor(() => {
+      expect(axiosClient.get).toHaveBeenCalledWith(
+        "v3/student/admin?page=1&limit=10&session=session-1"
+      );
+    });
+  });
+
+  test("opens the detail sidebar from the info action", async () => {
+    mockApi();
+
+    renderComponent();
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /info mahi sharma/i }));
+
+    const sidebar = screen.getByTestId("student-detail-sidebar");
+    expect(sidebar).toBeInTheDocument();
+    expect(within(sidebar).getByText("Student Profile")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Class NA - NA")).toBeInTheDocument();
+  });
+
+  test("opens the edit sidebar and saves through the update API", async () => {
+    mockApi();
+    axiosClient.put.mockResolvedValue({
+      statusCode: 200,
+      result: "Updated",
+    });
+
+    renderComponent();
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /edit mahi sharma/i }));
+    const sidebar = screen.getByTestId("student-edit-sidebar");
+
+    fireEvent.change(within(sidebar).getByLabelText("First Name"), {
+      target: { value: "Mahira" },
+    });
+    fireEvent.click(within(sidebar).getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() => {
+      expect(axiosClient.put).toHaveBeenCalledWith(
+        "v3/student/admin/student-1",
+        expect.objectContaining({
+          firstname: "Mahira",
+          lastname: "Sharma",
+          gender: "Female",
+          parentName: "Rajesh Sharma",
+          phone: "9876500001",
+        })
+      );
+    });
+    expect(mockToast.success).toHaveBeenCalledWith("Updated");
+  });
+
+  test("deletes a selected student", async () => {
+    mockApi();
+    axiosClient.delete.mockResolvedValue({
+      statusCode: 200,
+      result: "Deleted",
+    });
+
+    renderComponent();
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /delete mahi sharma/i }));
+    fireEvent.click(await screen.findByTestId("confirmdeleteTeacher"));
+
+    await waitFor(() => {
+      expect(axiosClient.delete).toHaveBeenCalledWith("v3/student/admin/student-1");
+    });
+    expect(mockToast.success).toHaveBeenCalledWith("Deleted");
+  });
+
+  test("does not call APIs when no active session is available", async () => {
+    useSelector.mockImplementation((selectorFn) =>
+      selectorFn({
+        ...mockState,
+        appAuth: {
+          classAndSectionData: {},
+        },
+      })
+    );
+
+    renderComponent();
+
+    expect(screen.getByText("No active session selected")).toBeInTheDocument();
+    expect(axiosClient.get).not.toHaveBeenCalled();
+  });
 });

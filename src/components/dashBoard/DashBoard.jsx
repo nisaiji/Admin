@@ -46,7 +46,6 @@
  *   - Calendar component and event/holiday list (bottom section)
  */
 import React, { useEffect, useState } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
 import EndPoints from "../../services/EndPoints.js";
 import moment from "moment";
@@ -62,12 +61,28 @@ import { generateToken } from "../../notifications/firebaseConfig.js";
 import EventData from "./EventData.jsx";
 import AttendanceData from "./AttendanceData.jsx";
 import SectionData from "./SectionData.jsx";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  Users,
+  BookOpen,
+  DollarSign,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+  CalendarDays,
+  CheckCircle2,
+  UserCheck,
+  Clock,
+  School,
+  RefreshCw,
+} from "lucide-react";
+import { C } from "../../utils/constants.js";
 
 const Dashboard = () => {
   const [t] = useTranslation();
   const dispatch = useDispatch();
   const { classAndSectionData, data, teacherData, isFCMToken } = useSelector(
-    (state) => state.appAuth
+    (state) => state.appAuth,
   );
   const role = useSelector((state) => state.appAuth.role);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
@@ -111,43 +126,41 @@ const Dashboard = () => {
   }, [dispatch]);
 
   return (
-    <div
-      className={`relative w-full ${
-        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-      } select-none`}
-    >
-      <Toaster position="top-center" reverseOrder={false} />
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.text }}>
+      <main style={{ padding: "24px 32px 40px" }}>
+        <Toaster position="top-center" reverseOrder={false} />
 
-      {/* section 1 */}
-      <SectionData
-        isDarkMode={isDarkMode}
-        role={role}
-        teacherData={teacherData}
-        classAndSectionData={classAndSectionData}
-        data={data}
-        date={date}
-      />
+        {/* section 1 */}
+        <SectionData
+          isDarkMode={isDarkMode}
+          role={role}
+          teacherData={teacherData}
+          classAndSectionData={classAndSectionData}
+          data={data}
+          date={date}
+        />
 
-      {/* section 2 Attendance */}
-      {(role === "admin" || role === "classTeacher") && (
-        <AttendanceData
+        {/* section 2 Attendance */}
+        {(role === "admin" || role === "classTeacher") && (
+          <AttendanceData
+            isDarkMode={isDarkMode}
+            role={role}
+            teacherData={teacherData}
+            classAndSectionData={classAndSectionData}
+            date={date}
+          />
+        )}
+
+        {/* Calender component */}
+        <EventData
           isDarkMode={isDarkMode}
           role={role}
           teacherData={teacherData}
           classAndSectionData={classAndSectionData}
           date={date}
+          setDate={setDate}
         />
-      )}
-
-      {/* Calender component */}
-      <EventData
-        isDarkMode={isDarkMode}
-        role={role}
-        teacherData={teacherData}
-        classAndSectionData={classAndSectionData}
-        date={date}
-        setDate={setDate}
-      />
+      </main>
     </div>
   );
 };

@@ -1,492 +1,512 @@
 /**
  * Navbar.jsx
  *
- * This component renders the main navigation bar for the admin dashboard.
- * It provides navigation links based on user role, dark mode toggle, and profile/logout menu.
- * Uses React hooks for state, Redux for authentication/config state, and Material UI for switch styling.
- * Handles menu open/close logic, click outside detection, and logout functionality.
+ * Main navigation bar for the admin dashboard.
+ * Uses the modern dark UI design with Lucide icons and Framer Motion animations.
+ * Preserves role-based navigation, i18n translations, and logout functionality.
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { appConfigAction } from "../store/AppConfigSlice";
-import { FormControlLabel, Switch } from "@mui/material";
-import { styled } from "@mui/system";
-
-import teachericon from "../assets/images/teachericon.png";
-import classroomicon from "../assets/images/classroomicon.png";
-import calendaricon from "../assets/images/calendaricon.png";
-import leave from "../assets/images/leaves.png";
-import passwordReset from "../assets/images/passwordReset.png";
-import downArroww from "../assets/images/dropdown.png";
-import userw from "../assets/images/user profile.png";
-import downArrow from "../assets/images/darkmode/downArrow.png";
-import notice from "../assets/images/darkmode/notice.png";
-import user from "../assets/images/darkmode/user.png";
+import {
+  ChevronDown,
+  Bell,
+  CreditCard,
+  User,
+  LogOut,
+  HelpCircle,
+  UserCog,
+  BookOpen,
+  Umbrella,
+  FileText,
+  Lock,
+  Megaphone,
+  GraduationCap,
+} from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import logo from "../assets/images/deer logo.png";
-import money from "../assets/images/fees/money.png";
 
+/* ─── Colours ────────────────────────────────────────────────── */
+const C = {
+  nav: "#0a0c12",
+  bg: "#13161f",
+  border: "rgba(255,255,255,0.07)",
+  text: "#E3E8F3",
+  sub: "rgba(227,232,243,0.85)",
+  muted: "#64748B",
+  orange: "#FF793F",
+  blue: "#0a81d1",
+};
+
+/* ─── Reusable dropdown component ────────────────────────────── */
+function NavDrop({ label, items, icon, align = "left" }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const h = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+          padding: "7px 13px",
+          background: open ? "rgba(255,255,255,0.08)" : "transparent",
+          border: `1px solid ${open ? "rgba(255,255,255,0.11)" : "transparent"}`,
+          borderRadius: "9px",
+          color: open ? C.text : C.sub,
+          fontSize: "14px",
+          fontWeight: 600,
+          cursor: "pointer",
+          transition: "all 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          if (!open) e.currentTarget.style.color = C.text;
+        }}
+        onMouseLeave={(e) => {
+          if (!open) e.currentTarget.style.color = C.sub;
+        }}
+      >
+        {icon && <span style={{ opacity: 0.8, display: "flex" }}>{icon}</span>}
+        {label}
+        <ChevronDown
+          size={13}
+          color={C.muted}
+          style={{
+            transform: open ? "rotate(180deg)" : "none",
+            transition: "transform 0.2s",
+            marginLeft: 1,
+          }}
+        />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.96 }}
+            transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              position: "absolute",
+              top: "calc(100% + 10px)",
+              [align === "right" ? "right" : "left"]: 0,
+              zIndex: 600,
+              background: "#111520",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: "13px",
+              overflow: "hidden",
+              minWidth: "190px",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.55)",
+            }}
+          >
+            {items.map((item, i) =>
+              item.divider ? (
+                <div
+                  key={i}
+                  style={{
+                    height: 1,
+                    background: "rgba(255,255,255,0.06)",
+                    margin: "4px 0",
+                  }}
+                />
+              ) : (
+                <button
+                  key={i}
+                  onClick={() => {
+                    item.onClick?.();
+                    setOpen(false);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 11,
+                    width: "100%",
+                    padding: "11px 18px",
+                    background: "transparent",
+                    border: "none",
+                    color: C.text,
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "background 0.12s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background =
+                      "rgba(255,255,255,0.05)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "transparent")
+                  }
+                >
+                  {item.icon && (
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 26,
+                        height: 26,
+                        borderRadius: "7px",
+                        background: item.iconColor
+                          ? `${item.iconColor}18`
+                          : "rgba(255,255,255,0.05)",
+                        color: item.iconColor || C.muted,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {item.icon}
+                    </span>
+                  )}
+                  {item.label}
+                </button>
+              ),
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ─── Flat nav button ─────────────────────────────────────────── */
+function NavBtn({ label, icon, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "7px 13px",
+        background: active ? "rgba(255,255,255,0.06)" : "transparent",
+        border: "1px solid transparent",
+        borderRadius: "9px",
+        color: active ? C.text : C.sub,
+        fontSize: "14px",
+        fontWeight: 600,
+        cursor: "pointer",
+        transition: "all 0.15s",
+      }}
+      onMouseEnter={(e) => {
+        const b = e.currentTarget;
+        b.style.color = C.text;
+        b.style.background = "rgba(255,255,255,0.06)";
+      }}
+      onMouseLeave={(e) => {
+        const b = e.currentTarget;
+        b.style.color = active ? C.text : C.sub;
+        b.style.background = active ? "rgba(255,255,255,0.06)" : "transparent";
+      }}
+    >
+      {icon && <span style={{ display: "flex", opacity: 0.75 }}>{icon}</span>}
+      {label}
+    </button>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════════════ */
 const Navbar = () => {
-  // Redux and navigation hooks
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const isActive = (path) => location.pathname === path;
+  const { t } = useTranslation();
 
   const { data, teacherData } = useSelector((state) => state.appAuth);
   const role = useSelector((state) => state.appAuth.role);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
-  // Local state for menu toggles
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [requestsMenuOpen, setRequestsMenuOpen] = useState(false);
-
-  // Refs for menu elements
-  const menuRef = useRef(null);
-  const profileMenuRef = useRef(null);
-  const requestsMenuRef = useRef(null);
-
-  const { t } = useTranslation();
-
-  // Toggle main menu
-  const handleToggleMenu = () => {
-    setMenuOpen((prevState) => !prevState);
-  };
-
-  // Toggle profile menu
-  const handleToggleProfileMenu = () => {
-    setProfileMenuOpen((prevState) => !prevState);
-  };
-
-  // Toggle requests menu
-  const handleToggleRequestsMenu = () => setRequestsMenuOpen((prev) => !prev);
-
-  // Close all menus
-  const closeMenus = () => {
-    setMenuOpen(false);
-    setProfileMenuOpen(false);
-    setRequestsMenuOpen(false);
-  };
-
-  // close all menus when click outside
-  const handleOutsideClick = (event) => {
-    if (
-      menuRef.current &&
-      !menuRef.current.contains(event.target) &&
-      profileMenuRef.current &&
-      !profileMenuRef.current.contains(event.target) &&
-      requestsMenuRef.current &&
-      !requestsMenuRef.current?.contains(event.target)
-    ) {
-      closeMenus();
-    }
-  };
+  const isActive = (path) => location.pathname === path;
 
   // Logout: clear local storage
   const handleLogout = () => {
     localStorage.clear();
   };
 
-  // Attach outside click listener
-  useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, []);
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    dispatch(appConfigAction.toggleDarkMode());
+  // Determine avatar initial from user data
+  const getAvatarInitial = () => {
+    if (role === "classTeacher" || role === "teacher") {
+      return teacherData?.name?.charAt(0)?.toUpperCase() || "T";
+    }
+    if (role === "admin") {
+      return data?.name?.charAt(0)?.toUpperCase() || "A";
+    }
+    return "U";
   };
 
-  // Custom styled Material UI switch for dark mode
-  const MaterialUISwitch = styled(Switch)(({ theme }) => ({
-    width: 50,
-    height: 28,
-    padding: 7,
-    "& .MuiSwitch-switchBase": {
-      padding: 0,
-      "&.Mui-checked": {
-        color: "#fff",
-        "& .MuiSwitch-thumb:before": {
-          backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
-            "#fff"
-          )}" d="M4.2 2.5l-.7 1.8-1.8.7 1.8.7.7 1.8.6-1.8L6.7 5l-1.9-.7-.6-1.8zm15 8.3a6.7 6.7 0 11-6.6-6.6 5.8 5.8 0 006.6 6.6z"/></svg>')`,
-        },
-        "& + .MuiSwitch-track": {
-          opacity: 1,
-          backgroundColor: "#aab4be",
-          ...theme.applyStyles("dark", {
-            backgroundColor: "#8796A5",
-          }),
-        },
-      },
-    },
-    "& .MuiSwitch-thumb": {
-      backgroundColor: "#001e3c",
-      width: 24,
-      height: 24,
-      "&::before": {
-        content: "''",
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        left: 0,
-        top: 0,
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
-          "#fff"
-        )}" d="M9.305 1.667V3.75h1.389V1.667h-1.39zm-4.707 1.95l-.982.982L5.09 6.072l.982-.982-1.473-1.473zm10.802 0L13.927 5.09l.982.982 1.473-1.473-.982-.982zM10 5.139a4.872 4.872 0 00-4.862 4.86A4.872 4.872 0 0010 14.862 4.872 4.872 0 0014.86 10 4.872 4.872 0 0010 5.139zm0 1.389A3.462 3.462 0 0113.471 10a3.462 3.462 0 01-3.473 3.472A3.462 3.462 0 016.527 10 3.462 3.462 0 0110 6.528zM1.665 9.305v1.39h2.083v-1.39H1.666zm14.583 0v1.39h2.084v-1.39h-2.084zM5.09 13.928L3.616 15.4l.982.982 1.473-1.473-.982-.982zm9.82 0l-.982.982 1.473 1.473.982-.982-1.473-1.473zM9.305 16.25v2.083h1.389V16.25h-1.39z"/></svg>')`,
-      },
-      ...theme.applyStyles("dark", {
-        backgroundColor: "#003892",
-      }),
-    },
-    "& .MuiSwitch-track": {
-      opacity: 1,
-      backgroundColor: "#aab4be",
-      borderRadius: 20 / 2,
-      ...theme.applyStyles("dark", {
-        backgroundColor: "#8796A5",
-      }),
-    },
-  }));
+  // Determine profile photo if available
+  const profilePhoto =
+    role === "classTeacher" || role === "teacher"
+      ? teacherData?.photo
+      : role === "admin"
+        ? data?.photo
+        : null;
+
+  // Determine the profile route
+  const profileRoute =
+    role === "classTeacher" || role === "teacher"
+      ? "/teacher-profile"
+      : role === "admin"
+        ? "/admin-profile"
+        : "/";
 
   return (
-    <div
-      className={`${
-        isDarkMode ? "bg-background2" : "bg-whiteBackground"
-      } px-10 py-4 h-[72px] sticky top-0 z-40 shadow-[0px_4px_10px_rgba(102,_116,_204,_0.15)] select-none`}
+    <nav
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 300,
+        height: 60,
+        background: C.nav,
+        borderBottom: `1px solid ${C.border}`,
+        display: "flex",
+        alignItems: "center",
+        padding: "0 28px",
+        gap: 4,
+        userSelect: "none",
+      }}
     >
-      <div className={`flex items-center justify-between`}>
-        {/* Logo */}
-        <div className={`flex items-center ml-3`}>
-          <Link to="/" className={`flex items-center`}>
-            <img src={logo} alt="logo" className={`size-9`} />
-          </Link>
-        </div>
-
-        <div className={`flex`}>
-          {/* Class Teacher Navigation */}
-          {role === "classTeacher" ? (
-            <div
-              onClick={() => navigate("student-menu")}
-              className={`block mx-6 px-4 py-3 ${
-                isDarkMode ? "text-textPrimary" : "text-textBlack"
-              } cursor-pointer`}
-            >
-              {t("titles.classRoom")}
-            </div>
-          ) : role === "admin" ? (
-            <div
-              className={`relative items-end z-10 mx-6`}
-              onMouseEnter={() => setMenuOpen(true)}
-              onMouseLeave={() => setMenuOpen(false)}
-            >
-              {/* admin Navigation */}
-              <div
-                onClick={handleToggleMenu}
-                className={`flex justify-center items-center cursor-pointer`}
-              >
-                <button
-                  className={`${
-                    isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  } hover:text-textBlue flex flex-row gap-2 px-2 py-2.5 text-sm font-bold rounded-md relative group`}
-                >
-                  {t("setup")}
-                  <img
-                    src={isDarkMode ? downArrow : downArroww}
-                    alt="downArrow"
-                    className={`w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180`}
-                  />
-                </button>
-              </div>
-              {/* Setup menu dropdown */}
-              {menuOpen && (
-                <div
-                  ref={menuRef}
-                  className={`absolute top-10 -right-10 w-40 ${
-                    isDarkMode ? "bg-background3" : "bg-whiteBackground"
-                  } shadow-lg z-10 `}
-                >
-                  <div className={`py-1`} onClick={closeMenus}>
-                    <Link
-                      to="/teacher"
-                      className={`flex justify-start items-start gap-3 px-3 py-3 ${
-                        isDarkMode
-                          ? "text-textPrimary hover:bg-background4"
-                          : "text-textBlack hover:bg-whiteBackground"
-                      } text-sm hover:text-textOrange `}
-                    >
-                      <img
-                        src={teachericon}
-                        alt="teachericon"
-                        className={`w-4 h-4 relative object-contain`}
-                      />
-                      {t("roles.teacher")}
-                    </Link>
-                    <Link
-                      to="/class-setup"
-                      className={`flex justify-start items-start gap-3 px-3 py-3 ${
-                        isDarkMode
-                          ? "text-textPrimary hover:bg-background4"
-                          : "text-textBlack hover:bg-whiteBackground"
-                      } text-sm hover:text-textOrange`}
-                    >
-                      <img
-                        src={classroomicon}
-                        alt="classroomicon"
-                        className={`w-4 h-4 relative object-contain`}
-                      />
-                      {t("titles.classRoom")}
-                    </Link>
-                    <Link
-                      to="/event"
-                      className={`flex justify-start items-start gap-3 px-3 py-3 ${
-                        isDarkMode
-                          ? "text-textPrimary hover:bg-background4"
-                          : "text-textBlack hover:bg-whiteBackground"
-                      } text-sm hover:text-textOrange`}
-                    >
-                      <img
-                        src={calendaricon}
-                        alt="calendaricon"
-                        className={`w-4 h-4 relative object-contain`}
-                      />
-                      {t("event")}
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            ""
-          )}
-
-          {/* Student Information System link for admin */}
-          {role === "admin" && (
-            <>
-              <Link to="/student-information-system" className={`py-2 mx-6`}>
-                <span
-                  className={`${
-                    isActive("/student-information-system")
-                      ? "text-orange-500"
-                      : isDarkMode
-                      ? "text-textPrimary"
-                      : "text-textBlack"
-                  } text-sm font-bold`}
-                >
-                  {t("roles.student")}
-                </span>
-              </Link>
-            </>
-          )}
-
-          {/* Requests menu for admin */}
-          {role === "admin" && (
-            <div
-              className={`relative`}
-              onMouseEnter={() => setRequestsMenuOpen(true)}
-              onMouseLeave={() => setRequestsMenuOpen(false)}
-            >
-              <div
-                onClick={handleToggleRequestsMenu}
-                className={`flex justify-center items-center cursor-pointer mx-6`}
-              >
-                <button
-                  className={`${
-                    isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  } hover:text-textBlue flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group`}
-                >
-                  {t("titles.requests")}
-                  <img
-                    src={isDarkMode ? downArrow : downArroww}
-                    alt="downArrow"
-                    className={`w-4 h-4 transform transition-transform duration-300 group-hover:rotate-180`}
-                  />
-                </button>
-              </div>
-              {requestsMenuOpen && (
-                <div
-                  ref={requestsMenuRef}
-                  className={`absolute top-10 w-40 ${
-                    isDarkMode ? "bg-background3" : "bg-whiteBackground"
-                  } shadow-lg z-10 `}
-                >
-                  <Link
-                    to="/password-reset-requests"
-                    className={`flex justify-start items-center gap-3 px-3 py-3 ${
-                      isDarkMode
-                        ? "text-textPrimary hover:bg-background4"
-                        : "text-textBlack hover:bg-whiteBackground"
-                    } text-sm hover:text-textOrange`}
-                  >
-                    <img
-                      src={passwordReset}
-                      alt="passwordReset"
-                      className={`w-4 h-4 relative`}
-                    />
-                    Password Reset
-                  </Link>
-                  <Link
-                    to="/teacher-leave-requests"
-                    className={`flex justify-start items-start gap-3 px-3 py-3 ${
-                      isDarkMode
-                        ? "text-textPrimary hover:bg-background4"
-                        : "text-textBlack hover:bg-whiteBackground"
-                    } text-sm hover:text-textOrange`}
-                  >
-                    <img
-                      src={leave}
-                      alt="leaves"
-                      className={`w-4 h-4 relative`}
-                    />
-                    {t("leaves")}
-                  </Link>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Notice link for admin */}
-          {role === "admin" && (
-            <Link
-              to="/notice"
-              className={`flex justify-center items-center cursor-pointer mx-6`}
-            >
-              <button
-                className={`${
-                  isActive("/notice")
-                    ? "text-orange-500"
-                    : isDarkMode
-                    ? "text-textPrimary"
-                    : "text-textBlack"
-                } flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group`}
-              >
-                <img
-                  src={notice}
-                  alt="notice"
-                  className={`w-4 h-4 object-contain ${
-                    isActive("/notice")
-                      ? ""
-                      : "filter invert brightness-0 saturate-0"
-                  }`}
-                />
-                {t("titles.notice")}
-              </button>
-            </Link>
-          )}
-
-          {/* payments link for admin */}
-          {role === "admin" && (
-            <Link
-              to="/payments"
-              className={`flex justify-center items-center cursor-pointer mx-6`}
-            >
-              <div
-                className={`flex flex-row gap-2 px-2 py-3 text-sm font-bold rounded-md relative group ${
-                  isActive("/payments")
-                    ? "text-orange-500"
-                    : isDarkMode
-                    ? "text-textPrimary"
-                    : "text-textBlack"
-                } `}
-              >
-                <img
-                  src={money}
-                  alt="notice"
-                  className={`w-4 h-4 object-contain transition ${
-                    isActive("/payments")
-                      ? ""
-                      : "filter invert brightness-0 saturate-0"
-                  }`}
-                />
-                {t("titles.payments")}
-              </div>
-            </Link>
-          )}
-
-          {/* Dark mode toggle */}
-          {/* <FormControlLabel
-            control={
-              <MaterialUISwitch
-                checked={isDarkMode}
-                onChange={toggleDarkMode}
-              />
-            }
-          /> */}
+      {/* ── Logo ─────────────────────────────────────────── */}
+      <button
+        onClick={() => navigate("/")}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 9,
+          marginRight: 24,
+          flexShrink: 0,
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          padding: "4px 6px",
+          borderRadius: 8,
+        }}
+      >
+        <img src={logo} alt="logo" className="size-9 object-contain" />
+        <div style={{ textAlign: "left" }}>
           <div
-            className={`relative rounded-xl`}
-            onMouseEnter={() => setProfileMenuOpen(true)}
-            onMouseLeave={() => setProfileMenuOpen(false)}
+            style={{
+              fontSize: "15px",
+              fontWeight: 700,
+              color: C.text,
+              lineHeight: 1.2,
+            }}
           >
-            {/* Profile menu */}
-            <div
-              onClick={handleToggleProfileMenu}
-              className={`flex items-center justify-center px-3 py-2 cursor-pointer`}
-            >
-              <img
-                src={
-                  role === "classTeacher" || role === "teacher"
-                    ? teacherData?.photo || (isDarkMode ? user : userw)
-                    : role === "admin"
-                    ? data?.photo || (isDarkMode ? user : userw)
-                    : ""
-                }
-                alt="user"
-                className={`size-6 rounded-full border border-borderGray2`}
-              />
-            </div>
-            {/* Profile menu dropdown */}
-            {profileMenuOpen && (
-              <div
-                ref={profileMenuRef}
-                className={`absolute top-full right-0 w-[120px] ${
-                  isDarkMode ? "text-textPrimary" : "text-textBlack"
-                } text-sm ${
-                  isDarkMode ? "bg-background3" : "bg-whiteBackground"
-                } shadow-lg z-10 `}
-                onClick={closeMenus}
-              >
-                <div className={`py-1`}>
-                  <Link
-                    to={
-                      role === "classTeacher" || role === "teacher"
-                        ? "/teacher-profile"
-                        : role === "admin"
-                        ? "/admin-profile"
-                        : ""
-                    }
-                    className={`block px-4 py-3 ${
-                      isDarkMode
-                        ? "text-textPrimary hover:bg-background4"
-                        : "text-textBlack hover:bg-whiteBackground"
-                    } text-sm hover:text-textOrange`}
-                  >
-                    {t("profile")}
-                  </Link>
-                  <Link
-                    onClick={handleLogout}
-                    to="/login"
-                    className={`block px-4 py-3 ${
-                      isDarkMode
-                        ? "text-textPrimary hover:bg-background4"
-                        : "text-textBlack hover:bg-whiteBackground"
-                    } text-sm hover:text-textOrange`}
-                  >
-                    {t("logout")}
-                  </Link>
-                </div>
-              </div>
-            )}
+            SikshaOS
+          </div>
+          <div
+            style={{ fontSize: "9px", color: C.muted, letterSpacing: "0.05em" }}
+          >
+            SCHOOL MANAGEMENT
           </div>
         </div>
-      </div>
-    </div>
+      </button>
+
+      {/* ── Class Teacher: single "Classroom" link ────────── */}
+      {role === "classTeacher" && (
+        <NavBtn
+          label={t("titles.classRoom")}
+          icon={<BookOpen size={14} />}
+          active={isActive("/student-menu")}
+          onClick={() => navigate("/student-menu")}
+        />
+      )}
+
+      {/* ── Admin navigation items ────────────────────────── */}
+      {role === "admin" && (
+        <>
+          {/* Setup dropdown */}
+          <NavDrop
+            label={t("setup")}
+            items={[
+              {
+                label: t("roles.teacher"),
+                icon: <UserCog size={13} />,
+                iconColor: C.orange,
+                onClick: () => navigate("/teacher"),
+              },
+              {
+                label: t("titles.classRoom"),
+                icon: <BookOpen size={13} />,
+                iconColor: C.orange,
+                onClick: () => navigate("/class-setup"),
+              },
+              {
+                label: t("event"),
+                icon: <Umbrella size={13} />,
+                iconColor: C.orange,
+                onClick: () => navigate("/event"),
+              },
+            ]}
+          />
+
+          {/* SIS dropdown */}
+          <NavDrop
+            label={t("roles.student")}
+            items={[
+              {
+                label: t("roles.student"),
+                icon: <GraduationCap size={13} />,
+                iconColor: C.blue,
+                onClick: () => navigate("/student-information-system"),
+              },
+              {
+                label: "TC",
+                icon: <FileText size={13} />,
+                iconColor: C.blue,
+                onClick: () => navigate("/transfer-certificate"),
+              },
+            ]}
+          />
+
+          {/* Requests dropdown */}
+          <NavDrop
+            label={t("titles.requests")}
+            items={[
+              {
+                label: "Password Reset",
+                icon: <Lock size={13} />,
+                iconColor: C.orange,
+                onClick: () => navigate("/password-reset-requests"),
+              },
+              {
+                label: t("leaves"),
+                icon: <FileText size={13} />,
+                iconColor: C.orange,
+                onClick: () => navigate("/teacher-leave-requests"),
+              },
+            ]}
+          />
+
+          {/* Notice button */}
+          <NavBtn
+            label={t("titles.notice")}
+            icon={<Megaphone size={14} />}
+            active={isActive("/notice")}
+            onClick={() => navigate("/notice")}
+          />
+
+          {/* Payments button */}
+          <NavBtn
+            label={t("titles.payments")}
+            icon={<CreditCard size={14} />}
+            active={isActive("/payments")}
+            onClick={() => navigate("/payments")}
+          />
+        </>
+      )}
+
+      {/* ── Spacer ───────────────────────────────────────── */}
+      <div style={{ flex: 1 }} />
+
+      {/* ── Bell notification ─────────────────────────────── */}
+      {/* <button
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: "9px",
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          color: C.muted,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          position: "relative",
+          marginRight: 4,
+        }}
+      >
+        <Bell size={15} />
+        <span
+          style={{
+            position: "absolute",
+            top: 7,
+            right: 7,
+            width: 7,
+            height: 7,
+            borderRadius: "50%",
+            background: C.orange,
+            border: `2px solid ${C.nav}`,
+          }}
+        />
+      </button> */}
+
+      {/* ── User avatar / profile dropdown ────────────────── */}
+      <NavDrop
+        label=""
+        align="right"
+        icon={
+          profilePhoto ? (
+            <img
+              src={profilePhoto}
+              alt="profile"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "1px solid rgba(255,255,255,0.12)",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: "#1E3A5F",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "12px",
+                fontWeight: 800,
+                color: "#7EB3FF",
+              }}
+            >
+              {getAvatarInitial()}
+            </div>
+          )
+        }
+        items={[
+          {
+            label: t("profile"),
+            icon: <User size={13} />,
+            iconColor: C.muted,
+            onClick: () => navigate(profileRoute),
+          },
+          {
+            label: "Support",
+            icon: <HelpCircle size={13} />,
+            iconColor: C.muted,
+            onClick: () => {},
+          },
+          { divider: true, label: "" },
+          {
+            label: t("logout"),
+            icon: <LogOut size={13} />,
+            iconColor: "#fe4040",
+            onClick: () => {
+              handleLogout();
+              navigate("/login");
+            },
+          },
+        ]}
+      />
+    </nav>
   );
 };
 

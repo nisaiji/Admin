@@ -12,6 +12,8 @@ import cross from "../../assets/images/darkmode/cross.png";
 import info from "../../assets/images/darkmode/info.png";
 import edit from "../../assets/images/darkmode/edit.png";
 import delete2 from "../../assets/images/darkmode/delete.png";
+import importIcon from "../../assets/images/importIcon.png";
+import downloadIcon from "../../assets/images/downloadIcon.png";
 import TeacherInfo from "./TeacherInfo";
 import { useNavigate } from "react-router-dom";
 import DeletePopup from "../DeleteMessagePopup";
@@ -27,6 +29,7 @@ export default function Teacher() {
   const { t } = useTranslation();
   const searchInputRef = useRef(null);
   const newTeacherFirstNameRef = useRef(null);
+  const fileInputRef = useRef(null);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const { classAndSectionData } = useSelector((state) => state.appAuth);
   // State variables
@@ -181,6 +184,82 @@ export default function Teacher() {
     }
   };
 
+  // download the excel sheet in pdf format
+  const getDemoExcelSheet = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosClient.get(
+        EndPoints.ADMIN.GET_TEACHER_DEMO_EXCEL,
+        {
+          responseType: "blob", // Required for binary file download
+        },
+      );
+
+      // Create a Blob from the response data
+      const url = window.URL.createObjectURL(new Blob([response]));
+      // console.log({ url });
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Set the filename for download
+      link.setAttribute("download", "teacher-template.xlsx");
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Uploads an Excel sheet containing teacher data
+  const uploadExcelSheet = async (file) => {
+    try {
+      if (!file) {
+        toast.error("Please select a valid Excel file.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      setLoading(true);
+      const res = await axiosClient.post(
+        EndPoints.ADMIN.UPLOAD_TEACHER_EXCEL,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      if (res?.statusCode === 201 || res?.statusCode === 200) {
+        if (res?.result?.errors.length > 0) {
+          toast.error(res?.result?.errors[0])
+        } else {
+          toast.success(res?.result?.message);
+        }
+        getTeacher();
+      }
+    } catch (e) {
+      const err = JSON.parse(e);
+      toast.error(`error in student ${err?.student} of ${err?.reason}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      uploadExcelSheet(file); // Call upload API when file is selected
+    }
+    e.target.value = "";
+  };
+
   /**
    * Deletes the currently selected teacher.
    */
@@ -191,7 +270,7 @@ export default function Teacher() {
     try {
       setLoading(true);
       const response = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_TEACHER}/${currTeacher._id}`,
+        `${EndPoints.ADMIN.DELETE_TEACHER}/${currTeacher._id ?? currTeacher?.id}`,
       );
 
       if (response?.statusCode === 200) {
@@ -259,44 +338,76 @@ export default function Teacher() {
             </div>
             {/* Search bar */}
             <div className={`p-0 pt-2`}>
-              <div className={`flex justify-between w-full relative z-10`}>
-                <div className={`relative w-full`}>
-                  <div
-                    className={`absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none`}
-                  >
-                    <img
-                      src={isDarkMode ? Search : Searchw}
-                      alt=""
-                      className={`size-5`}
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder={t("placeholders.search")}
-                    value={searchQuery}
-                    onChange={handleSearchInputChange}
-                    ref={searchInputRef}
-                    className={`bg-transparent ${
-                      isDarkMode
-                        ? "text-textPrimary border-borderLine"
-                        : "text-textBlack border-borderGray2"
-                    } border
-                    px-14 py-2 rounded-xl focus:outline-[#05022B]/10 w-full`}
-                    onFocus={() => searchInputRef.current.focus()}
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery("")}
-                      className={`absolute inset-y-0 right-0 flex items-center pr-2`}
+              <div className={`flex justify-between w-full relative space-x-2`}>
+                <div className={`flex justify-between w-full relative z-10`}>
+                  <div className={`relative w-full`}>
+                    <div
+                      className={`absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none`}
                     >
                       <img
-                        src={isDarkMode ? cross : crossw}
+                        src={isDarkMode ? Search : Searchw}
                         alt=""
-                        className={`${isDarkMode ? "size-4 mr-2" : "size-8"}`}
+                        className={`size-5`}
                       />
-                    </button>
-                  )}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder={t("placeholders.search")}
+                      value={searchQuery}
+                      onChange={handleSearchInputChange}
+                      ref={searchInputRef}
+                      className={`bg-transparent ${
+                        isDarkMode
+                          ? "text-textPrimary border-borderLine"
+                          : "text-textBlack border-borderGray2"
+                      } border
+                    px-14 py-2 rounded-xl focus:outline-[#05022B]/10 w-full`}
+                      onFocus={() => searchInputRef.current.focus()}
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery("")}
+                        className={`absolute inset-y-0 right-0 flex items-center pr-2`}
+                      >
+                        <img
+                          src={isDarkMode ? cross : crossw}
+                          alt=""
+                          className={`${isDarkMode ? "size-4 mr-2" : "size-8"}`}
+                        />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  accept=".xlsx, .xls"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+                {/* download and import button */}
+                <div className={`flex flex-row`}>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef?.current?.click()}
+                    title="Upload Teachers Excel Sheet"
+                    className={`bg-backgroundBlue rounded-l-lg h-[40px] py-1.5 px-4 flex flex-row justify-center items-center`}
+                  >
+                    <img src={importIcon} alt="" className={`size-3 mr-2`} />
+                    <div className={`text-textPrimary text-sm font-medium`}>
+                      Import
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    title="Sample File Download"
+                    onClick={getDemoExcelSheet}
+                    className={`bg-white w-[55px] h-[40px] flex justify-center items-center border border-borderBlue rounded-r-lg`}
+                  >
+                    <img src={downloadIcon} alt="" className={`w-4 h-4`} />
+                  </button>
                 </div>
               </div>
             </div>
