@@ -14,7 +14,7 @@ import Spinner from "../components/Spinner";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
-import { setAuthData } from "../store/AppAuthSlice";
+import { setAuthData, setSessionCreated } from "../store/AppAuthSlice";
 
 /**
  * Login Component
@@ -113,6 +113,7 @@ function Login() {
               localStorage.setItem("refresh_token", res?.result?.refreshToken);
               localStorage.removeItem("temp_access_token");
               dispatch(setAuthData(res?.result?.accessToken));
+              dispatch(setSessionCreated());
               toast.success(t("messages.login.success"));
               resetForm();
               if (decodedToken?.role === "admin" && decodedToken?.isSessionCreated === false) {
