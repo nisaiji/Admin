@@ -104,57 +104,6 @@ export function OnboardingScreen() {
       }}
     >
       <Toaster />
-      {/* Top brand bar */}
-      {/* <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          padding: "0 32px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          background: "#0D1019",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "34px",
-              height: "34px",
-              borderRadius: "9px",
-              background: "#4F8EF7",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <GraduationCap size={18} color="#fff" />
-          </div>
-          <span style={{ fontSize: "16px", fontWeight: 700, color: "#F1F5F9", letterSpacing: "-0.01em" }}>
-            EduAdmin
-          </span>
-        </div>
-
-        <div style={{ marginLeft: "auto" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "5px 12px",
-              borderRadius: "999px",
-              background: "rgba(79,142,247,0.1)",
-              border: "1px solid rgba(79,142,247,0.2)",
-            }}
-          >
-            <ShieldCheck size={13} color="#7EB3FF" />
-            <span style={{ fontSize: "12px", color: "#7EB3FF", fontWeight: 600 }}>First Login Setup</span>
-          </div>
-        </div>
-      </div> */}
 
       {/* Main card */}
       <motion.div

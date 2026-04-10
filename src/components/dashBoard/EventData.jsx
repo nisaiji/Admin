@@ -190,7 +190,7 @@ export default function EventData({
                   {/* Date block */}
                   <div
                     style={{
-                      width: 100,
+                      width: 150,
                       flexShrink: 0,
                       display: "flex",
                       flexDirection: "column",
@@ -291,7 +291,7 @@ export default function EventData({
                   {/* Date block */}
                   <div
                     style={{
-                      width: 100,
+                      width: 150,
                       flexShrink: 0,
                       display: "flex",
                       flexDirection: "column",

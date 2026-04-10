@@ -27,11 +27,7 @@ const TAB_ITEMS = [
   },
 ];
 
-function PageHeader({
-  activeTab,
-  isInForm,
-  onTabChange,
-}) {
+function PageHeader({ activeTab, isInForm, onTabChange }) {
   return (
     <div
       style={{ borderBottom: `1px solid ${C.border}`, background: C.surface }}
@@ -161,7 +157,7 @@ export function TCPage() {
           status,
         },
       });
-      onSuccess(getTcRequestsFromResponse(response));
+      onSuccess(response?.result?.requests || []);
     }
 
     if (!selectedSessionId) {
@@ -214,7 +210,14 @@ export function TCPage() {
   const isInForm = activeTab === "generate" && selectedStudent !== null;
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, userSelect: "none" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: C.bg,
+        color: C.text,
+        userSelect: "none",
+      }}
+    >
       <Toaster />
       <PageHeader
         activeTab={activeTab}
@@ -231,7 +234,10 @@ export function TCPage() {
             exit={{ opacity: 0, x: -20 }}
             transition={PAGE_TRANSITION}
           >
-            <PendingStep tcRequests={pendingRequests} loading={pendingLoading} />
+            <PendingStep
+              tcRequests={pendingRequests}
+              loading={pendingLoading}
+            />
           </motion.div>
         ) : null}
 
