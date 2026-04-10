@@ -674,7 +674,7 @@ export function AlumniStep({ tcRequests = [], loading = false }) {
   return (
     <div style={{ padding: "28px 28px 60px" }}>
       <div style={{ maxWidth: 1384, margin: "0 auto" }}>
-        <div
+        {/* <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4,1fr)",
@@ -710,7 +710,7 @@ export function AlumniStep({ tcRequests = [], loading = false }) {
             bg={C.purpleDim}
             icon={<GraduationCap size={18} color={C.purple} />}
           />
-        </div>
+        </div> */}
 
         <div
           style={{
