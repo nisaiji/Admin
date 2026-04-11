@@ -1,56 +1,52 @@
-import React, { useRef } from "react";
-import student from "../../../assets/images/student.png";
-import cross from "../../../assets/images/cross.png";
+import React, { useEffect, useRef } from "react";
+import profileEmpty from "../../../assets/images/profileEmpty.png";
+import cross from "../../../assets/images/darkmode/cross.png";
+import crossw from "../../../assets/images/cross.png";
 import html2canvas from "html2canvas";
-import { useReactToPrint } from "react-to-print";
 import { useTranslation } from "react-i18next";
 import CONSTANT from "../../../utils/constants";
+import { useSelector } from "react-redux";
 
+/**
+ * A modal component to display detailed information about a student.
+ *
+ * @param {Object} currStudent - Current student's details.
+ * @param {Function} modelOpen - Function to toggle the modal visibility.
+ *
+ * @returns {JSX.Element} Student information modal component.
+ */
 export default function StudentInfo({ currStudent, modelOpen }) {
   const [t] = useTranslation();
   const captureRef = useRef(null);
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+  useEffect(() => {
+    document.body.style.overflow = modelOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [modelOpen]);
+  // console.log(currStudent);
 
-  // print schema
+  // Print student information in pdf format.
   const handleScreenshot = () => {
+    // Create an off-screen container to hold the cloned content
     const hiddenContainer = document.createElement("div");
     hiddenContainer.style.position = "fixed";
-    hiddenContainer.style.width = "500px";
-    hiddenContainer.style.backgroundColor = "white";
-    hiddenContainer.style.zIndex = "-1";
+    hiddenContainer.style.width = "768px";
+    hiddenContainer.style.backgroundColor = isDarkMode ? "#1E1E1E" : "#FFFFFF";
 
+    // Clone the content in captureRef without changing its layout
     const clonedNode = captureRef.current.cloneNode(true);
-
-    const imageContainer = document.createElement("div");
-    imageContainer.style.position = "absolute";
-    imageContainer.style.top = "100px";
-    imageContainer.style.right = "50px";
-    imageContainer.style.width = "100px";
-    imageContainer.style.height = "130px";
-    imageContainer.style.border = "1px solid black";
-    imageContainer.style.overflow = "hidden";
-    imageContainer.style.backgroundColor = "white";
-
-    const imageElement = document.createElement("img");
-    imageElement.src = student;
-    imageElement.style.width = "100px";
-    imageElement.style.height = "130px";
-    imageElement.style.objectFit = "cover";
-
-    imageContainer.appendChild(imageElement);
-    clonedNode.style.position = "relative";
-    clonedNode.appendChild(imageContainer);
+    // Append the cloned node to the hidden container
     hiddenContainer.appendChild(clonedNode);
+    // Append the container to the body
     document.body.appendChild(hiddenContainer);
 
-    const largeImage = clonedNode.querySelector('img[id="StudentInfoImage"]');
-    if (largeImage) {
-      largeImage.style.display = "none";
-    }
-
+    // Use html2canvas to capture the hidden container
     html2canvas(clonedNode, {
       scrollY: -window.scrollY,
+      backgroundColor: null,
       useCORS: true,
-      scale: 2,
     }).then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
       const link = document.createElement("a");
@@ -62,97 +58,156 @@ export default function StudentInfo({ currStudent, modelOpen }) {
     });
   };
 
-  // student details
+  // Student details array.
   const personalDetails = [
+    [t("labels.id"), currStudent?.studentId || CONSTANT.NA],
     [
       t("labels.fullName"),
-      `${currStudent.firstname} ${currStudent.lastname}` || CONSTANT.NA,
+      `${currStudent?.firstname} ${currStudent?.lastname}` || CONSTANT.NA,
     ],
     [
       t("labels.classAndSection"),
-      `${currStudent.classId.name} ${currStudent.section.name}` || CONSTANT.NA,
+      `${currStudent?.className} ${currStudent?.sectionName}` ||
+      CONSTANT.NA,
     ],
-    [t("labels.gender"), currStudent.gender || CONSTANT.NA],
-    [t("labels.bloodGroup"), currStudent.bloodGroup || CONSTANT.NA],
-    [t("labels.dob"), currStudent.dob || CONSTANT.NA],
+    [t("labels.gender"), currStudent?.gender || CONSTANT.NA],
+    [t("labels.bloodGroup"), currStudent?.bloodGroup || CONSTANT.NA],
+    [t("labels.dob"), currStudent?.dob || CONSTANT.NA],
+    [t("labels.address"), currStudent?.address || CONSTANT.NA],
   ];
 
-  // parent details
+  // Guardian details array.
   const guardianDetails = [
-    [t("labels.fullName"), currStudent.parent.fullname || CONSTANT.NA],
-    [t("labels.gender"), currStudent.parent.gender || CONSTANT.NA],
-    [t("labels.age"), currStudent.parent.age || CONSTANT.NA],
-    [t("labels.email"), CONSTANT.NA],
-    [t("labels.phoneNumber"), currStudent.parent.phone || CONSTANT.NA],
     [
-      t("labels.qualification"),
-      currStudent.parent.qualification || CONSTANT.NA,
+      t("labels.guardianName"),
+      currStudent?.parentFullName || CONSTANT.NA,
     ],
-    [t("labels.occupation"), currStudent.parent.occupation || CONSTANT.NA],
-    [t("labels.address"), currStudent.parent.address || CONSTANT.NA],
+    [
+      t("labels.guardianName2"),
+      currStudent?.guardianName || CONSTANT.NA,
+    ],
+    [t("labels.phoneNumber"), currStudent?.parentPhone || CONSTANT.NA],
   ];
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 flex justify-center items-end pb-5 bg-gray-900 bg-opacity-50">
-        <div className="relative flex flex-col w-[80%] h-4/5 bg-white rounded-lg shadow-lg overflow-hidden">
-          <div
-            className="absolute top-3 right-5 cursor-pointer"
-            onClick={() => modelOpen(false)}
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4 ${isDarkMode ? "bg-backgroundTableCell" : "bg-background"
+        }`}
+    >
+      <div
+        className={`relative ${isDarkMode ? "bg-background" : "bg-whiteBackground"
+          } rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto`}
+      >
+        {/* Header */}
+        <div
+          className={`flex items-center justify-between border-b border-borderLine px-4 py-3`}
+        >
+          <h2
+            className={`text-xl font-bold  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+              }`}
           >
-            <img className="h-10 w-10" src={cross} alt="close" />
-          </div>
-          <div
-            ref={captureRef}
-            className="flex flex-col lg:flex-row overflow-y-auto p-6"
-          >
-            <div className="w-full">
-              <h2 className="text-2xl font-bold mb-4">
-                {t("titles.studentDetails")}
-              </h2>
-              <h3 className="pb-2 font-bold">{t("titles.personalDetails")}</h3>
-              <div className="pb-6 font-medium">
-                {/* student details */}
+            {t("titles.studentDetails")}
+          </h2>
+          <button onClick={() => modelOpen(false)} aria-label="Close">
+            <img
+              src={isDarkMode ? cross : crossw}
+              alt="close"
+              className={`${isDarkMode ? "h-4 w-4" : "h-7 w-7"}`}
+            />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div ref={captureRef} className={`p-6 flex flex-col lg:flex-row gap-6`}>
+          <div className={`flex-1`}>
+            <section>
+              <h3
+                className={`text-lg font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
+              >
+                {t("titles.personalDetails")}
+              </h3>
+              <div className={`space-y-2`}>
                 {personalDetails.map(([label, value], index) => (
-                  <div className="flex pb-2" key={index}>
-                    <p className="w-1/3">{label}</p>
-                    <p className="w-1/5">-</p>
-                    <p className="w-1/3 font-poppins-bold">{value}</p>
+                  <div
+                    key={index}
+                    className={`flex justify-between border-b border-borderLine pb-1`}
+                  >
+                    <span
+                      className={`text-sm font-medium ${isDarkMode ? "text-textPrimary" : "text-textGray"
+                        }`}
+                    >
+                      {label}
+                    </span>
+                    <span
+                      className={` text-sm ${isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                        }`}
+                    >
+                      {value}
+                    </span>
                   </div>
                 ))}
               </div>
-              <h3 className="pb-2 font-bold">{t("titles.guardianDetails")}</h3>
-              <div className="font-medium">
-                {/* parent details */}
+            </section>
+
+            <section className={`mt-6`}>
+              <h3
+                className={`text-lg font-semibold mb-2  ${isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
+              >
+                {t("titles.guardianDetails")}
+              </h3>
+              <div className={`space-y-2`}>
                 {guardianDetails.map(([label, value], index) => (
-                  <div className="flex pb-2" key={index}>
-                    <p className="w-1/3">{label}</p>
-                    <p className="w-1/5">-</p>
-                    <p className="w-1/3 font-poppins-bold">{value}</p>
+                  <div
+                    key={index}
+                    className={`flex justify-between border-b border-borderLine pb-1`}
+                  >
+                    <span
+                      className={`text-sm font-medium ${isDarkMode ? "text-textPrimary" : "text-textGray"
+                        }`}
+                    >
+                      {label}
+                    </span>
+                    <span
+                      className={`text-sm ${isDarkMode ? "text-textPrimary" : "text-textDarkGray"
+                        }`}
+                    >
+                      {value}
+                    </span>
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="flex justify-center items-center w-full mt-32">
-              <img
-                id="StudentInfoImage"
-                className="h-[370px] w-[300px] object-center"
-                src={student}
-                alt={t("titles.student")}
-              />
-            </div>
+            </section>
           </div>
-          {/* screenshot button */}
-          <div className="flex justify-center mt-5 space-x-5">
-            <button
-              className="px-4 py-2 bg-green-500 text-white rounded"
-              onClick={handleScreenshot}
-            >
-              {t("buttons.screenshot")}
-            </button>
+
+          {/* Student Photo */}
+          <div className={`flex-shrink-0 flex items-center justify-center`}>
+            <img
+              id="StudentInfoImage"
+              className={`h-60 w-40 object-cover border border-gray-300`}
+              src={
+                currStudent?.photo
+                  ? `data:image/jpeg;base64,${currStudent?.photo}`
+                  : profileEmpty
+              }
+              alt={t("titles.student")}
+            />
           </div>
         </div>
+
+        {/* Footer */}
+        <div
+          className={`flex justify-end border-t border-borderLine px-4 py-3`}
+        >
+          <button
+            className={`px-4 py-2 bg-backgroundBlue transition text-textPrimary text-sm font-medium rounded-md`}
+            onClick={handleScreenshot}
+          >
+            {t("buttons.screenshot")}
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

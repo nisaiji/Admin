@@ -1,29 +1,57 @@
-import { useState, useMemo } from "react";
+// Import necessary dependencies and assets
+import React, { useState, useMemo } from "react";
 import { useFormik } from "formik";
+import { jwtDecode } from "jwt-decode";
 import { Link, useNavigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { axiosClient } from "../services/axiosClient";
-import {
-  setItem,
-  setUsername,
-  setFirstname,
-} from "../services/LocalStorageManager";
 import LoginVideo from "../assets/videos/LoginVideo.mp4";
-import hide from "../assets/images/hide.png";
-import show from "../assets/images/show.png";
+import hide from "../assets/images/darkmode/hide.png";
+import show from "../assets/images/darkmode/show.png";
+import logo from "../assets/images/deer logo.png";
 import EndPoints from "../services/EndPoints";
 import Spinner from "../components/Spinner";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+import { setAuthData, setSessionCreated } from "../store/AppAuthSlice";
 
+/**
+ * Login Component
+ *
+ * This component renders the login page, allowing users to authenticate as either
+ * Admin or Teacher. It includes:
+ * - Form validation with Yup.
+ * - Form management with Formik.
+ * - API integration with axios for login requests.
+ * - UI toggles for password visibility and role switching.
+ * - A video background for aesthetic appeal.
+ */
 function Login() {
+  // Redux hook to dispatch actions
+  const dispatch = useDispatch();
+
+  // State to toggle between Admin and Teacher login
   const [isAdmin, setIsAdmin] = useState(true);
+
+  // React Router hook for navigation
   const navigate = useNavigate();
+
+  // State for managing password visibility
   const [ishide, setIsHide] = useState(true);
+
+  // State for managing loading spinner visibility
   const [loading, setLoading] = useState(false);
+
+  const [toastDisplayed, setToastDisplayed] = useState(false);
+
+  // Translation hook for multilingual support
   const [t] = useTranslation();
 
-  // Memoized validation schema for login form to avoid recalculating on re-render
+  /**
+   * Memoized Yup validation schema
+   * Dynamically adjusts based on the login role (Admin/Teacher).
+   */
   const validationSchema = useMemo(
     () =>
       Yup.object({
@@ -37,103 +65,133 @@ function Login() {
             (value) =>
               isAdmin ? Yup.string().email().isValidSync(value) : true
           ),
-        password: Yup.string().required(t("validationError.password")),
+        password: Yup.string()
+          .required(t("validationError.password"))
+          .min(8, t("validationError.passwordLength")),
       }),
     [isAdmin, t]
   );
 
-  // Setup formik for handling form submission, validation, and field management
+  /**
+   * Formik setup for managing form submission, validation, and field state.
+   */
   const formik = useFormik({
     initialValues: {
       userInput: "",
       password: "",
     },
-    validationSchema, // Schema to validate the input
+    validationSchema, // Validation schema for form fields
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        setLoading(true);
+        if (toastDisplayed) return;
+        setToastDisplayed(true);
+        setTimeout(() => setToastDisplayed(false), 3000);
+        setLoading(true); // Show loading spinner
 
-        // Set API endpoint and payload based on Admin/Teacher toggle
+        // Define API endpoint and payload based on login role
         const endpoint = isAdmin
-          ? EndPoints.ADMIN.ADMIN_LOGIN
+          ? EndPoints.ADMIN.LOGIN
           : EndPoints.TEACHER.TEACHER_LOGIN;
         const payload = isAdmin
-          ? { email: values.userInput, password: values.password }
-          : { user: values.userInput, password: values.password };
+          ? { user: values.userInput, password: values.password }
+          : {
+            user: values.userInput,
+            password: values.password,
+            platform: "web",
+          };
 
-        // Submit login request
-        const response = await axiosClient.post(endpoint, payload);
+        // Make API request for login
+        const res = await axiosClient.post(endpoint, payload);
 
-        // If login is successful
-        if (response?.statusCode === 200) {
-          isAdmin
-            ? setUsername(response?.result?.username)
-            : setFirstname(response?.result?.firstname);
-          setItem(response?.result?.accessToken);
-          toast.success(t("messages.login.success"));
-          resetForm();
-          navigate("/");
+        if (res?.statusCode === 200) {
+          const decodedToken = jwtDecode(res?.result?.accessToken);
+          // console.log(decodedToken);
+          // console.log({ result });
+          if (decodedToken?.role === "admin") {
+            if (decodedToken?.active) {
+              localStorage.setItem("access_token", res?.result?.accessToken);
+              localStorage.setItem("refresh_token", res?.result?.refreshToken);
+              localStorage.removeItem("temp_access_token");
+              dispatch(setAuthData(res?.result?.accessToken));
+              dispatch(setSessionCreated());
+              toast.success(t("messages.login.success"));
+              resetForm();
+              if (decodedToken?.role === "admin" && decodedToken?.isSessionCreated === false) {
+                navigate("/onboard", { replace: true });
+              } else {
+                navigate("/", { replace: true });
+              }
+            } else {
+              localStorage.setItem(
+                "temp_access_token",
+                res?.result?.accessToken
+              );
+              let page;
+              if (!decodedToken?.username) {
+                page = 4;
+              } else if (!decodedToken?.pincode) {
+                page = 5;
+              } else {
+                page = 6;
+              }
+              localStorage.setItem("page", page);
+              navigate("/signup");
+            }
+          } else {
+            localStorage.setItem("access_token", res?.result?.accessToken);
+            localStorage.setItem("refresh_token", res?.result?.refreshToken);
+            dispatch(setAuthData(res?.result?.accessToken));
+            toast.success(t("messages.login.success"));
+            resetForm();
+            navigate("/", { replace: true });
+          }
         }
       } catch (e) {
-        toast.error(e);
+        // console.log({e});
+        toast.error(e); // Show error message
       } finally {
-        setLoading(false);
-        setSubmitting(false);
+        setLoading(false); // Hide loading spinner
+        setSubmitting(false); // Reset form submission state
       }
     },
   });
 
   return (
-    <div className="min-h-screen py-20 bg-[#05022B] relative">
-      {/* Background video for the login page */}
+    <div className="min-h-screen py-20 bg-background2 relative">
+      {/* Background video */}
       <video
-        className="fixed top-0 left-0 h-[800px] w-[700px] object-cover opacity-25"
+        className="fixed top-0 left-0 h-full w-[55%] bg-background1 bg-blend-multiply object-cover"
         autoPlay
         loop
         muted
         src={LoginVideo}
         type="video/mp4"
       />
-      {/* Welcome text and description */}
-      <div className="absolute top-[100px] left-[92px] z-10">
-        <h1 className="text-white text-[50px] font-light leading-[75px]">
-          {t("login.welcome")} <br />
-          <span className="font-semibold">{t("login.managementHub")}</span>
-        </h1>
-        <p className="text-white text-[20px] font-medium leading-[36px]">
-          {t("login.simplify")}
-        </p>
-      </div>
+
       {/* Form container */}
-      <div className="flex flex-col lg:flex-row mx-auto shadow-lg overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[520px] bg-white bg-opacity-20 rounded-3xl backdrop-blur-lg">
-        {/* Form starts here */}
+      <div className="flex flex-col lg:flex-row mx-auto overflow-hidden absolute top-1/2 left-[52%] transform -translate-y-1/2 right-0 z-10 w-[420px] h-[460px] bg-gradient-to-r from-fromColor1 to-toColor1 backdrop-filter: blur(25px) rounded-3xl">
         <form onSubmit={formik.handleSubmit} className="w-full h-full">
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-30">
+            <div className="absolute inset-0 flex items-center justify-center bg-[#93a3b6]/10 bg-opacity-50 z-30">
               <Spinner />
             </div>
           )}
-          {/* Logo section */}
-          <div className="text-white w-full py-8 px-12">
-            <h2 className="flex text-3xl mb-4">
-              <Link to="/">
-                <div className="bg-[#05022B] w-[30px] h-[30px] rounded-md flex justify-center items-center">
-                  <span className="text-white font-bold text-xl">
-                    {t("login.A")}
-                  </span>
-                </div>
-              </Link>
-              <span className="font-bold text-xl ml-2 text-white">
-                {t("login.LOGO")}
-              </span>
-            </h2>
-            <h2 className="font-bold text-[48px]">{t("login.login")}</h2>
-            <p className="text-white opacity-70">{t("login.enterDetails")}</p>
 
-            {/* Input field for email/username */}
-            <div className="mt-5 border-b border-white/40 w-full">
+          {/* Logo and header */}
+          <div className="text-textDarkBlue w-full px-[42px] py-4 justify-center">
+            <h2 className="flex text-3xl mb-4 justify-center">
+              <Link to="/" className="flex items-center">
+                <img src={logo} alt="logo" className="size-12" />
+              </Link>
+            </h2>
+            <h2 className="font-bold text-[24px] text-textBlue">
+              {t("login.login")}
+            </h2>
+
+            {/* Email/username input */}
+            <div className="mt-6 border-b border-[#686868]/60 w-full">
               <input
-                className="py-1 px-2 w-full bg-transparent text-white placeholder-white focus:outline-none"
+                className="py-1 px-2 w-full bg-transparent text-textPrimary placeholder-[#686868]/50 focus:outline-none"
                 type="text"
                 name="userInput"
                 placeholder={
@@ -144,87 +202,83 @@ function Login() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.userInput}
+                data-testid="email-input"
               />
             </div>
-            {/* Validation error for userInput */}
             {formik.touched.userInput && formik.errors.userInput && (
-              <div className="text-red-500 text-xs">
+              <div className="text-textRed text-xs">
                 {formik.errors.userInput}
               </div>
             )}
 
-            {/* Input field for password with toggle visibility feature */}
-            <div className="mt-5 relative border-b border-white w-full">
+            {/* Password input with visibility toggle */}
+            <div className="mt-6 relative border-b border-[#686868]/60 w-full">
               <input
-                className="py-1 px-2 w-full bg-transparent text-white placeholder-white focus:outline-none"
+                className="py-1 px-2 w-full bg-transparent text-textPrimary placeholder-[#686868]/50 focus:outline-none"
                 type={ishide ? "password" : "text"}
                 name="password"
                 placeholder={t("login.placeholders.password")}
                 onChange={formik.handleChange}
                 value={formik.values.password}
+                data-testid="password-input"
               />
-              {/* Password visibility toggle */}
               <img
                 src={ishide ? hide : show}
                 onClick={() => setIsHide(!ishide)}
                 alt={ishide ? "Show Password" : "Hide Password"}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 cursor-pointer"
-                style={{
-                  filter:
-                    "invert(41%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(85%)",
-                }}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 cursor-pointer object-contain"
               />
-              {/* Validation error for password */}
-              {formik.touched.password && formik.errors.password && (
-                <div className="text-red-500 text-xs">
-                  {formik.errors.password}
-                </div>
-              )}
             </div>
-
-            {/* Forgot password link */}
-            <div className="text-white text-end text-sm mt-2 opacity-70">
-              <Link to="/forgot-password" className="text-white">
-                {t("login.forgotPassword")}
-              </Link>
-            </div>
-
-            {/* Submit button for login */}
-            <div className="mt-5">
+            {formik.touched.password && formik.errors.password && (
+              <div className="text-textRed text-xs">
+                {formik.errors.password}
+              </div>
+            )}
+            {isAdmin && (
+              <div
+                onClick={() => navigate("/forgot-password")}
+                className="text-textPrimary text-right select-none mt-6 cursor-pointer "
+              >
+                Forgot Password?
+              </div>
+            )}
+            {/* Submit button */}
+            <div className="mt-6">
               <button
-                className="w-full py-1.5 text-center bg-white text-[#05022B] font-semibold rounded-lg disabled:opacity-50"
+                name="submit"
+                data-testid="submit"
+                className="w-full py-1.5 text-center bg-backgroundBlue text-textPrimary font-poppins-bold rounded-lg disabled:opacity-50 transition-all duration-200 ease-in-out active:scale-90"
                 type="submit"
                 disabled={formik.isSubmitting}
               >
-                {t("login.login")}
+                {t("login.loginButton")}
               </button>
             </div>
-
-            {/* Toggle button to switch between Admin and Teacher login */}
-            <div className="mt-5">
+            {/* Toggle between Admin and Teacher */}
+            <div className="mt-3">
               <button
                 type="button"
                 onClick={() => setIsAdmin(!isAdmin)}
-                className="w-full py-1 border-2 border-white text-white rounded-lg font-poppins-regular"
+                className="w-full py-1 border border-borderBlue text-textBlue rounded-lg font-bold transition-all duration-200 ease-in-out active:scale-90"
               >
                 {t("login.toggleButton")} {isAdmin ? "Teacher" : "Admin"}
               </button>
             </div>
 
             {isAdmin && (
-              <div className="flex justify-center text-white text-xs opacity-70 mt-3">
-                <div className="text-[#FFFFFFB3] pr-1">
+              <div className="flex justify-center text-white text-xs mt-6">
+                <div className="text-textPrimary pr-1">
                   {t("login.notHaveAccount")}
                 </div>
-                <Link to="/signup" className="text-white">
+                <a href="/signup" className="text-textBlue font-bold">
                   {t("login.register")}
-                </Link>
+                </a>
               </div>
             )}
           </div>
         </form>
       </div>
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster />
     </div>
   );
 }

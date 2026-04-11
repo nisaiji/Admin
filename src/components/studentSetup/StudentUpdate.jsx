@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useLocation, useNavigate } from "react-router-dom";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
 import toast, { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
 import Spinner from "../Spinner";
@@ -14,7 +11,25 @@ import REGEX from "../../utils/regix";
 import mail from "../../assets/images/mail.png";
 import India from "../../assets/images/India.png";
 import location from "../../assets/images/location.png";
+import moment from "moment";
+import Breadcrumbs from "../BreadCrumbs";
+import {
+  createTheme,
+  FormControl,
+  MenuItem,
+  Select,
+  TextField,
+  ThemeProvider,
+} from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import { useSelector } from "react-redux";
 
+/**
+ * Capitalizes the first letter of a string and converts the rest to lowercase.
+ * @param {string} str - The input string.
+ * @returns {string} The capitalized string.
+ */
 const capitalize = (str) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
@@ -23,74 +38,105 @@ export default function StudentUpdate() {
   const student = useLocation().state;
   const [t] = useTranslation();
   const [loading, setLoading] = useState(false);
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
-  // validation schema
+  /**
+   * Validation schema for the student update form.
+   * Defines required fields, types, and custom validation rules.
+   */
   const validationSchema = Yup.object({
     firstname: Yup.string().required(t("validationError.firstName")),
     lastname: Yup.string().required(t("validationError.lastName")),
     gender: Yup.string().required(t("validationError.gender")),
-    bloodGroup: Yup.string().required(t("validationError.bloodGroup")),
-    dob: Yup.date().required(t("validationError.dob")),
-    address: Yup.string().required(t("validationError.address")),
-    parentFullname: Yup.string().required(t("validationError.fullName")),
-    parentGender: Yup.string().required(t("validationError.gender")),
-    parentAge: Yup.string(t("validationError.age")).required(),
-    parentEmail: Yup.string()
-      .email(t("validationError.emailAddress"))
-      .required(t("validationError.email")),
-    parentPhone: Yup.string()
-      .required()
+    // bloodGroup: Yup.string().required(t("validationError.bloodGroup")),
+    // dob: Yup.date()
+    //   .nullable()
+    //   .required(t("validationError.dob"))
+    //   .transform((value, originalValue) =>
+    //     moment(originalValue, "DD/MM/YYYY").isValid()
+    //       ? moment(originalValue, "DD/MM/YYYY").toDate()
+    //       : null
+    //   ),
+    // address: Yup.string().required(t("validationError.address")),
+    parentName: Yup.string().required(t("validationError.parentName")),
+    // parentGender: Yup.string().required(t("validationError.gender")),
+    // parentAge: Yup.string().required(t("validationError.age")),
+    // parentEmail: Yup.string()
+    //   .email(t("validationError.emailAddress"))
+    //   .required(t("validationError.email")),
+    phone: Yup.string()
+      .required(t("validationError.phone"))
       .matches(REGEX.PHONE, t("validationError.phoneNumber"))
       .test(
         "starts-with-1-to-5",
         t("validationError.phoneStart"),
         (value) => value && REGEX.PHONE_TEST.test(value)
       ),
-    parentQualification: Yup.string().required(
-      t("validationError.qualification")
-    ),
-    parentOccupation: Yup.string().required(t("validationError.occupation")),
-    parentAddress: Yup.string().required(t("validationError.address")),
+    // parentQualification: Yup.string().required(
+    //   t("validationError.qualification")
+    // ),
+    // parentOccupation: Yup.string().required(t("validationError.occupation")),
+    // parentAddress: Yup.string().required(t("validationError.address")),
   });
+  // console.log(student);
 
+  /**
+   * Formik initialization for managing form state and handling submission.
+   * Handles input values, validation, and API calls for updating student data.
+   */
   const formik = useFormik({
     initialValues: {
-      firstname: student.firstname || "",
-      lastname: student.lastname || "",
-      gender: student.gender || "",
-      bloodGroup: student.bloodGroup || "",
-      dob: student.dob || "",
-      address: student.address || "",
-      parentFullname: student.parent.fullname || "",
-      parentGender: student.parent.gender || "",
-      parentAge: student.parent.age || "",
-      parentEmail: student.parent.email || "",
-      parentPhone: student.parent.phone || "",
-      parentQualification: student.parent.qualification || "",
-      parentOccupation: student.parent.occupation || "",
-      parentAddress: student.parent.address || "",
+      firstname: student?.firstname || "",
+      lastname: student?.lastname || "",
+      gender: student?.gender || "",
+      bloodGroup: student?.bloodGroup || "",
+      dob: student?.dob
+        ? moment(student?.dob, moment.ISO_8601).isValid()
+          ? moment(student?.dob).format("DD/MM/YYYY")
+          : moment(student?.dob, "DD/MM/YYYY").format("DD/MM/YYYY")
+        : "",
+      // dob: student?.dob ? moment(student?.dob).format("DD/MM/YYYY") : "",
+      address: student?.address || "",
+      parentName: student?.parentFullName || "",
+      parentGender: student?.parentGender || "",
+      parentAge: student?.parentAge || "",
+      parentEmail: student?.parentEmail || "",
+      phone: student?.parentPhone || "",
+      parentQualification: student?.parentQualification || "",
+      parentOccupation: student?.parentOccupation || "",
+      parentAddress: student?.parentAddress || "",
     },
     validationSchema,
-    // update student api
+    /**
+     * Handles form submission, prepares data, calls update API, and navigates back on success.
+     * @param {object} values - Form values.
+     */
     onSubmit: async (values) => {
       try {
         setLoading(true);
-        const response = await axiosClient.put(
-          `${EndPoints.ADMIN.STUDENT_UPDATE}/${student._id}`,
-          {
-            ...values,
-            firstname: capitalize(values.firstname),
-            lastname: capitalize(values.lastname),
-            address: capitalize(values.address),
-            parentFullname: capitalize(values.parentFullname),
-            parentEmail: values.parentEmail.toLowerCase(),
-            parentQualification: capitalize(values.parentQualification),
-            parentOccupation: capitalize(values.parentOccupation),
-            parentAddress: capitalize(values.parentAddress),
-          }
+        // Capitalize and clean fields
+        const cleanedValues = {
+          ...values,
+          firstname: capitalize(values.firstname),
+          lastname: capitalize(values.lastname),
+          address: capitalize(values.address),
+          parentName: capitalize(values.parentName),
+          parentEmail: values.parentEmail?.toLowerCase(),
+          parentQualification: capitalize(values.parentQualification),
+          parentOccupation: capitalize(values.parentOccupation),
+          parentAddress: capitalize(values.parentAddress),
+        };
+        // Remove keys with empty string values
+        const filteredValues = Object.fromEntries(
+          Object.entries(cleanedValues).filter(([_, value]) => value !== "")
         );
+        const response = await axiosClient.put(
+          `${EndPoints.ADMIN.STUDENT_UPDATE}/${student?.id}`,
+          filteredValues
+        );
+
         if (response?.statusCode === 200) {
-          toast.success(t("messages.student.updateSuccess"));
+          toast.success(response.result);
           navigate(-1);
         }
       } catch (e) {
@@ -131,7 +177,7 @@ export default function StudentUpdate() {
       label: t("labels.dob"),
       name: "dob",
       type: "date",
-      placeholder: t("placeholders.dob"),
+      placeholder: t("placeholders.date"),
     },
     {
       label: t("labels.address"),
@@ -145,7 +191,7 @@ export default function StudentUpdate() {
   const guardianFields = [
     {
       label: t("labels.fullName"),
-      name: "parentFullname",
+      name: "parentName",
       type: "text",
       placeholder: t("placeholders.fullName"),
     },
@@ -166,14 +212,14 @@ export default function StudentUpdate() {
       name: "parentEmail",
       type: "email",
       placeholder: t("placeholders.emailAddress"),
-      icon: { src: mail, width: 40, height: 40, top: 0 },
+      icon: { src: mail, width: 24, height: 24, top: 7 },
     },
     {
       label: t("labels.phoneNumber"),
-      name: "parentPhone",
+      name: "phone",
       type: "text",
       placeholder: t("placeholders.phoneNumber"),
-      icon: { src: India, width: 35, height: 25, top: 7 },
+      icon: { src: India, width: 24, height: 20, top: 9 },
     },
     {
       label: t("labels.qualification"),
@@ -192,54 +238,223 @@ export default function StudentUpdate() {
       name: "parentAddress",
       type: "text",
       placeholder: t("placeholders.address"),
-      icon: { src: location, width: 30, height: 30, top: 5 },
+      icon: { src: location, width: 20, height: 20, top: 9 },
     },
   ];
 
-  // logic for input fields to reduce repetative code
+  // Theme configuration for Material UI components
+  const theme = (isDarkMode) =>
+    createTheme({
+      palette: {
+        mode: isDarkMode ? "dark" : "light",
+        ...(isDarkMode
+          ? {
+              background: { default: "#121212", paper: "#1e1e1e" },
+              text: { primary: "#fff", secondary: "#aaa" },
+            }
+          : {
+              background: { default: "#f5f5f5", paper: "#fff" },
+              text: { primary: "#000", secondary: "#666" },
+            }),
+      },
+      components: {
+        MuiOutlinedInput: {
+          styleOverrides: {
+            root: {
+              borderRadius: 8,
+              minHeight: 40,
+              fontSize: "14px",
+              backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
+              border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
+              "& fieldset": { border: "none" },
+              "&:hover fieldset": { border: "none" },
+              "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
+            },
+            input: {
+              color: isDarkMode ? "#fff" : "#000",
+              fontSize: "14px",
+              padding: "10px 12px",
+            },
+            inputAdornedEnd: {
+              color: isDarkMode ? "#fff" : "#000",
+            },
+          },
+        },
+        MuiInputLabel: {
+          styleOverrides: {
+            root: {
+              color: isDarkMode ? "#aaa" : "#666",
+            },
+          },
+        },
+        MuiSvgIcon: {
+          styleOverrides: {
+            root: {
+              color: isDarkMode ? "#E3E8F3" : "black",
+            },
+          },
+        },
+      },
+    });
+
+  /**
+   * Renders input fields dynamically based on the provided configuration.
+   * @param {Array} fields - The fields to render.
+   * @returns {JSX.Element} The rendered input fields.
+   */
   const renderFields = (fields) => (
-    <div className="grid grid-cols-2 gap-4">
+    <div className={`grid grid-cols-2 gap-4`}>
       {fields.map(({ label, name, type, placeholder, options, icon }) => (
-        <div key={name} className="flex flex-col mx-4 mt-3">
-          <label className="text-xl font-semibold">{label}</label>
-          <div className="relative mt-2">
+        <div key={name} className={`flex flex-col mx-4 mt-3`}>
+          <label
+            className={`text-l font-semibold ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
+            {label}
+          </label>
+          <div className={`relative mt-2`}>
             {type === "select" ? (
-              <select
-                name={name}
-                onChange={formik.handleChange}
-                value={formik.values[name]}
-                className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
+              <FormControl
+                fullWidth
+                variant="outlined"
+                sx={{
+                  border: "1px solid #2b2e4a80",
+                  borderRadius: "8px",
+                  backgroundColor: isDarkMode ? "" : "white",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                  "& .MuiInputBase-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                  "& .MuiSvgIcon-root": {
+                    color: isDarkMode ? "#E3E8F3" : "black",
+                  },
+                }}
               >
-                <option value="" label={label} />
-                {options.map((option) => (
-                  <option key={option} value={option} label={option} />
-                ))}
-              </select>
+                <Select
+                  labelId={`${name}-label`}
+                  id={`${name}-select`}
+                  name={name}
+                  value={formik.values[name]}
+                  label={label}
+                  onChange={formik.handleChange}
+                  displayEmpty
+                  sx={{
+                    border: "1px solid #2b2e4a80",
+                    borderRadius: "0.5rem",
+                    height: "40px",
+                    backgroundColor: isDarkMode ? "" : "white",
+                    color:
+                      formik.values[name] === ""
+                        ? "gray"
+                        : isDarkMode
+                        ? "#E3E8F3"
+                        : "black",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "none",
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    {label}
+                  </MenuItem>
+                  {options.map((option) => (
+                    <MenuItem
+                      key={option}
+                      value={option}
+                      sx={{
+                        backgroundColor: isDarkMode ? "#1a1a1a" : "white",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                        "&:hover": {
+                          backgroundColor: isDarkMode ? "#2a2a2a" : "#E9EEF2",
+                        },
+                      }}
+                    >
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             ) : type === "date" ? (
-              <DatePicker
-                selected={formik.values[name]}
-                onChange={(date) =>
-                  formik.setFieldValue(name, format(date, "MM/dd/yyyy"))
-                }
-                dateFormat="MM/dd/yyyy"
-                placeholderText={placeholder}
-                className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
-                wrapperClassName="w-full"
-              />
+              <ThemeProvider theme={theme}>
+                <LocalizationProvider dateAdapter={AdapterMoment}>
+                  <DatePicker
+                    views={["day", "month", "year"]}
+                    format="DD/MM/YYYY"
+                    value={
+                      formik.values.dob
+                        ? moment(formik.values.dob, "DD/MM/YYYY")
+                        : null
+                    }
+                    maxDate={moment().startOf("day")}
+                    onChange={(date) => {
+                      if (date) {
+                        formik.setFieldValue(
+                          "dob",
+                          moment(date).format("DD/MM/YYYY")
+                        );
+                      }
+                    }}
+                    className={`w-full`}
+                    textField={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder={t("placeholders.date")}
+                        variant="outlined"
+                      />
+                    )}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        sx: {
+                          "& .MuiSvgIcon-root": {
+                            color: isDarkMode ? "#E3E8F3" : "black", // calendar icon
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </ThemeProvider>
             ) : (
               <input
                 type={type}
                 name={name}
                 placeholder={placeholder}
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                maxLength={
+                  name === "phone"
+                    ? 10
+                    : name === "firstname" || name == "lastname"
+                    ? 15
+                    : name == "parentName"
+                    ? 20
+                    : ""
+                }
                 value={formik.values[name]}
-                className="border-2 border-[#d1d1e3] rounded px-2 py-1.5 w-full"
+                className={` ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                } border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full`}
               />
             )}
             {icon && (
               <img
                 src={icon.src}
-                className="absolute right-2"
+                className={`absolute right-2`}
                 style={{
                   top: icon.top,
                   width: icon.width,
@@ -249,55 +464,91 @@ export default function StudentUpdate() {
               />
             )}
             {formik.touched[name] && formik.errors[name] && (
-              <div className="text-red-500 text-sm">{formik.errors[name]}</div>
+              <div className={`text-red-500 text-sm`}>
+                {formik.errors[name]}
+              </div>
             )}
           </div>
         </div>
       ))}
-      ;
     </div>
   );
 
   return (
-    <div className="flex justify-center items-center w-full h-full bg-[#8A89FA1A] pt-10">
+    <div
+      className={`flex justify-center items-center w-full h-full pt-[25px] ${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      }`}
+    >
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-30">
+        <div
+          className={`fixed inset-0 flex items-center justify-center bg-whiteBackground bg-opacity-50 z-30`}
+        >
           <Spinner />
         </div>
       )}
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="bg-white rounded-2xl w-full mx-10 flex flex-col items-start py-3 px-10 box-border">
-        <h1 className="text-4xl font-poppins-bold mt-6">
+      <div
+        className={`${
+          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+        } rounded-2xl w-full mx-6 flex flex-col items-start py-3 px-10 box-border`}
+      >
+        <Breadcrumbs />
+        <h1
+          className={`text-2xl font-poppins-bold mt-3  ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
+        >
           {t("titles.studentDetails")}
         </h1>
-        <div className="w-full">
-          <h2 className="text-2xl font-poppins-regular mt-6 text-left">
+        <div className={`w-full`}>
+          <h2
+            className={`text-lg font-poppins-regular mt-6 text-left  ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
             {t("titles.personalDetails")}
           </h2>
-          <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
-            <form onSubmit={formik.handleSubmit} className="w-full">
+          {/* student input fields */}
+          <div
+            className={`${
+              isDarkMode ? "" : "bg-[rgba(70,69,144,0.05)]"
+            } w-full p-5 box-border flex flex-col items-center my-5`}
+          >
+            <form onSubmit={formik.handleSubmit} className={`w-full`}>
               {renderFields(studentFields)}
             </form>
           </div>
 
-          <h2 className="text-2xl font-poppins-bold text-left ml-5">
+          <h2
+            className={`text-xl font-poppins-regular mt-6 text-left  ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
+          >
             {t("titles.guardianDetails")}
           </h2>
-          <div className="bg-[rgba(70,69,144,0.05)] w-full p-5 box-border flex flex-col items-center my-5">
-            <form onSubmit={formik.handleSubmit} className="w-full">
+          <div
+            className={`${
+              isDarkMode ? "" : "bg-[rgba(70,69,144,0.05)]"
+            } w-full p-5 box-border flex flex-col items-center my-5`}
+          >
+            {/* Parent input fields */}
+            <form onSubmit={formik.handleSubmit} className={`w-full`}>
               {renderFields(guardianFields)}
               {/* save and cancel buttons */}
-              <div className="flex justify-end gap-4 mt-10 w-full">
+              <div className={`flex justify-end gap-4 mt-10 w-full`}>
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="border-2 border-[#a3a2c7] text-[#464590] py-2 px-4 rounded w-36"
+                  className={`border-2 border-borderGray ${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  } py-2 px-4 rounded-xl w-36`}
                 >
                   {t("buttons.cancel")}
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#464590] text-white py-2 px-4 rounded w-36"
+                  className={`bg-backgroundDarkBlue text-textPrimary py-2 px-4 rounded-xl w-36`}
                 >
                   {t("buttons.save")}
                 </button>
