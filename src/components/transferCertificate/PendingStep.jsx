@@ -113,7 +113,7 @@ function PendingRequestModal({ record, onClose }) {
           ["Last Attendance Date", record?.lastAttendanceDate],
           ["Conduct", record?.conductLabel],
           ["Promotion Status", record?.promotionStatus],
-          ["Fee Status", record?.feeStatus],
+          ["Fee Status", "Cleared"],
           ["Certificate Number", record?.certificateNumber || "-"],
         ]}
       />
