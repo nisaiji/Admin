@@ -207,6 +207,7 @@
     "classTeacher": "Class Teacher",
     "reasonToReset": "Reason to Reset",
     "class": "Class",
+    "nopassword": "No Reset Password request at ths time",
     "noleave": "No Leave request at ths time",
     "noNotice": "No Notice at ths time",
     "reasonForLeave": "Reason for leave",

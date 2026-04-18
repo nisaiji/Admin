@@ -138,7 +138,7 @@ export default function CreateExamPopup({
           );
           return false;
         }
-      } else if (subj?.type === "gradeOnlySubject") {
+      } else if (subj?.subjectType === "gradeOnlySubject") {
         const { tMax, tMin, pMax, pMin } = subj?.scores || {};
 
         // Required checks
@@ -160,16 +160,26 @@ export default function CreateExamPopup({
         const pMaxIdx = gradeOptions.indexOf(pMax);
         const pMinIdx = gradeOptions.indexOf(pMin);
 
-        // If indexes are valid, ensure max grade index is <= min grade index
-        if (tMaxIdx > -1 && tMinIdx > -1 && tMaxIdx > tMinIdx) {
+        if (
+          tMaxIdx === -1 ||
+          tMinIdx === -1 ||
+          pMaxIdx === -1 ||
+          pMinIdx === -1
+        ) {
+          toast.error(`${subj?.subjectName}: Invalid grade selected`);
+          return false;
+        }
+
+        if (tMaxIdx > tMinIdx) {
           toast.error(
-            `${subj?.subjectName}: T- Max Grade must be ≥ T- Min Grade`,
+            `${subj?.subjectName}: T- Max Grade must be better than or equal to T- Min Grade`,
           );
           return false;
         }
-        if (pMaxIdx > -1 && pMinIdx > -1 && pMaxIdx > pMinIdx) {
+
+        if (pMaxIdx > pMinIdx) {
           toast.error(
-            `${subj?.subjectName}: P- Max Grade must be ≥ P- Min Grade`,
+            `${subj?.subjectName}: P- Max Grade must be better than or equal to P- Min Grade`,
           );
           return false;
         }

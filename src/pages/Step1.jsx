@@ -67,7 +67,7 @@ const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         token: otpSuccessToken,
       });
       console.log(res);
-      
+
       if (res?.statusCode === 200) {
         dispatch(setAuth({ phoneVerified: true }));
         localStorage.setItem("temp_access_token", res?.result?.token);
@@ -335,7 +335,7 @@ const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
           <button
             type="button"
             onClick={verifyOtp}
-            disabled={loading}
+            disabled={loading || otp.some((digit) => digit === "")}
             className="rounded-lg px-4 h-8 bg-backgroundBlue font-medium flex items-center justify-center text-white transition-all duration-200 ease-in-out active:scale-90"
           >
             <p className="text-base">{t("buttons.verify")}</p>

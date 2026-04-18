@@ -342,7 +342,8 @@ export default function AdminProfile() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 data-testid="email"
-                className={`p-2 mt-1 w-full text-base leading-6 ${
+                disabled
+                className={`p-2 mt-1 w-full text-base leading-6 cursor-not-allowed ${
                   formik.errors.email && formik.touched.email
                     ? "border-borderRed"
                     : "border-borderLine2"
@@ -1003,7 +1004,8 @@ export default function AdminProfile() {
               onBlur={formik.handleBlur}
               data-testid="phone"
               maxLength={10}
-              className={`flex-auto ${
+              disabled
+              className={`flex-auto cursor-not-allowed ${
                 isDarkMode ? "text-textPrimary" : "text-textBlack"
               } bg-transparent outline-none`}
             />

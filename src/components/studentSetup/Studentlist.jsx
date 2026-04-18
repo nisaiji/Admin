@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
@@ -134,7 +140,10 @@ function getClassSortValue(className, classOptions) {
   const translatedIndex = classOptions.indexOf(className);
   if (translatedIndex >= 0) return translatedIndex;
 
-  const numericValue = Number.parseInt(String(className || "").replace(/\D/g, ""), 10);
+  const numericValue = Number.parseInt(
+    String(className || "").replace(/\D/g, ""),
+    10,
+  );
   return Number.isNaN(numericValue) ? Number.MAX_SAFE_INTEGER : numericValue;
 }
 
@@ -159,13 +168,16 @@ function capitalizeValue(value) {
   if (!normalized) return "";
   return normalized.replace(
     /\S+/g,
-    (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
   );
 }
 
 function getStudentClassName(student) {
   return getDisplayValue(
-    student?.className || student?.class?.name || student?.class || student?.classId?.name
+    student?.className ||
+      student?.class?.name ||
+      student?.class ||
+      student?.classId?.name,
   );
 }
 
@@ -174,12 +186,14 @@ function getStudentSectionName(student) {
     student?.sectionName ||
       student?.section?.name ||
       student?.section ||
-      student?.sectionId?.name
+      student?.sectionId?.name,
   );
 }
 
 function getStudentRollNo(student) {
-  return getDisplayValue(student?.rollNo || student?.rollNumber || student?.studentId);
+  return getDisplayValue(
+    student?.rollNo || student?.rollNumber || student?.studentId,
+  );
 }
 
 function normalizeStudentDraft(student) {
@@ -215,7 +229,9 @@ function buildStudentUpdatePayload(draft) {
     guardianName: capitalizeValue(draft.guardianName),
     parentGender: draft.parentGender,
     parentAge: String(draft.parentAge || "").trim(),
-    parentEmail: String(draft.parentEmail || "").trim().toLowerCase(),
+    parentEmail: String(draft.parentEmail || "")
+      .trim()
+      .toLowerCase(),
     phone: String(draft.phone || "").trim(),
     parentQualification: capitalizeValue(draft.parentQualification),
     parentOccupation: capitalizeValue(draft.parentOccupation),
@@ -223,7 +239,7 @@ function buildStudentUpdatePayload(draft) {
   };
 
   return Object.fromEntries(
-    Object.entries(cleanedValues).filter(([, value]) => value !== "")
+    Object.entries(cleanedValues).filter(([, value]) => value !== ""),
   );
 }
 
@@ -276,7 +292,7 @@ function SectionTitle({ Icon, title, isDarkMode }) {
     <div
       className={cn(
         "mb-2 mt-5 flex items-center gap-2 border-b pb-2 text-xs font-poppins-bold uppercase text-[#0A81D1]",
-        isDarkMode ? "border-[#0A81D1]/20" : "border-borderWhite"
+        isDarkMode ? "border-[#0A81D1]/20" : "border-borderWhite",
       )}
     >
       <Icon size={14} />
@@ -290,25 +306,32 @@ function DetailRow({ Icon, label, value, isDarkMode, accentClass = "" }) {
     <div
       className={cn(
         "flex gap-3 border-b py-3",
-        isDarkMode ? "border-white/[0.04]" : "border-borderWhite"
+        isDarkMode ? "border-white/[0.04]" : "border-borderWhite",
       )}
     >
       <div
         className={cn(
           "flex size-8 shrink-0 items-center justify-center rounded-lg",
-          isDarkMode ? "bg-white/[0.04] text-slate-500" : "bg-whiteBackground2 text-textGray"
+          isDarkMode
+            ? "bg-white/[0.04] text-slate-500"
+            : "bg-whiteBackground2 text-textGray",
         )}
       >
         <Icon size={15} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className={cn("text-[11px] font-poppins-bold uppercase", isDarkMode ? "text-slate-500" : "text-textGray")}>
+        <p
+          className={cn(
+            "text-[11px] font-poppins-bold uppercase",
+            isDarkMode ? "text-slate-500" : "text-textGray",
+          )}
+        >
           {label}
         </p>
         <p
           className={cn(
             "mt-1 break-words text-sm font-poppins-regular",
-            accentClass || (isDarkMode ? "text-[#E3E8F3]" : "text-textBlack")
+            accentClass || (isDarkMode ? "text-[#E3E8F3]" : "text-textBlack"),
           )}
         >
           {getDisplayValue(value)}
@@ -330,7 +353,7 @@ function SidebarTabs({ tabs, activeTab, onChange, accentClass }) {
             "mb-[-1px] inline-flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-poppins-bold transition",
             activeTab === key
               ? `${accentClass} border-current`
-              : "border-transparent text-slate-500 hover:text-[#E3E8F3]"
+              : "border-transparent text-slate-500 hover:text-[#E3E8F3]",
           )}
         >
           <Icon size={14} />
@@ -350,7 +373,7 @@ function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
   const tabs = [
     { key: "personal", label: "Personal", Icon: User },
     { key: "guardian", label: "Guardian", Icon: Users },
-    { key: "academic", label: "Academic", Icon: GraduationCap },
+    // { key: "academic", label: "Academic", Icon: GraduationCap },
   ];
 
   return (
@@ -367,13 +390,15 @@ function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
           "flex h-screen w-full max-w-[540px] flex-col border-l shadow-2xl",
           isDarkMode
             ? "border-white/10 bg-[#111315] text-[#E3E8F3]"
-            : "border-borderWhite bg-whiteBackground text-textBlack"
+            : "border-borderWhite bg-whiteBackground text-textBlack",
         )}
       >
         <div
           className={cn(
             "sticky top-0 z-10 border-b px-6 pt-5",
-            isDarkMode ? "border-white/10 bg-[#111315]" : "border-borderWhite bg-whiteBackground"
+            isDarkMode
+              ? "border-white/10 bg-[#111315]"
+              : "border-borderWhite bg-whiteBackground",
           )}
         >
           <div className="mb-4 flex items-center justify-between gap-3">
@@ -397,7 +422,7 @@ function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
                   "inline-flex size-9 items-center justify-center rounded-lg border transition",
                   isDarkMode
                     ? "border-white/10 bg-white/[0.04] text-slate-500 hover:text-[#E3E8F3]"
-                    : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack"
+                    : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack",
                 )}
               >
                 <X size={16} />
@@ -409,7 +434,7 @@ function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
             <div
               className={cn(
                 "flex size-16 shrink-0 items-center justify-center rounded-full border-4 border-white/10 text-xl font-poppins-bold text-white",
-                avatarClass
+                avatarClass,
               )}
             >
               {getInitials(student)}
@@ -420,7 +445,9 @@ function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
                 <span className="rounded-full bg-[#0A81D1]/15 px-2 py-1 font-poppins-bold text-[#0A81D1]">
                   Class {className} - {sectionName}
                 </span>
-                <span className="text-slate-500">Roll {getStudentRollNo(student)}</span>
+                <span className="text-slate-500">
+                  Roll {getStudentRollNo(student)}
+                </span>
                 <span className="rounded-full bg-white/[0.06] px-2 py-1 text-slate-400">
                   {getDisplayValue(student?.gender)}
                 </span>
@@ -439,33 +466,125 @@ function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
         <div className="flex-1 overflow-y-auto px-6 pb-8">
           {tab === "personal" ? (
             <>
-              <SectionTitle Icon={User} title="Basic Info" isDarkMode={isDarkMode} />
-              <DetailRow Icon={User} label="Full Name" value={fullName} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Calendar} label="Date of Birth" value={student?.dob} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Droplets} label="Blood Group" value={student?.bloodGroup} isDarkMode={isDarkMode} accentClass="text-[#FE4040]" />
-              <DetailRow Icon={Shield} label="Gender" value={student?.gender} isDarkMode={isDarkMode} />
-              <SectionTitle Icon={Phone} title="Contact" isDarkMode={isDarkMode} />
-              <DetailRow Icon={Phone} label="Phone" value={student?.parentPhone || student?.phone} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={Mail} label="Email" value={student?.parentEmail || student?.email} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={MapPin} label="Address" value={student?.address} isDarkMode={isDarkMode} />
+              <SectionTitle
+                Icon={User}
+                title="Basic Info"
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={User}
+                label="Full Name"
+                value={fullName}
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={Calendar}
+                label="Date of Birth"
+                value={student?.dob}
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={Droplets}
+                label="Blood Group"
+                value={student?.bloodGroup}
+                isDarkMode={isDarkMode}
+                accentClass="text-[#FE4040]"
+              />
+              <DetailRow
+                Icon={Shield}
+                label="Gender"
+                value={student?.gender}
+                isDarkMode={isDarkMode}
+              />
+              <SectionTitle
+                Icon={Phone}
+                title="Contact"
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={Phone}
+                label="Phone"
+                value={student?.parentPhone || student?.phone}
+                isDarkMode={isDarkMode}
+                accentClass="text-[#0A81D1]"
+              />
+              <DetailRow
+                Icon={Mail}
+                label="Email"
+                value={student?.parentEmail || student?.email}
+                isDarkMode={isDarkMode}
+                accentClass="text-[#0A81D1]"
+              />
+              <DetailRow
+                Icon={MapPin}
+                label="Address"
+                value={student?.address}
+                isDarkMode={isDarkMode}
+              />
             </>
           ) : null}
 
           {tab === "guardian" ? (
             <>
-              <SectionTitle Icon={Briefcase} title="Parent Details" isDarkMode={isDarkMode} />
-              <DetailRow Icon={User} label="Parent Name" value={student?.parentFullName || student?.parentName} isDarkMode={isDarkMode} />
-              <DetailRow Icon={User} label="Guardian Name" value={student?.guardianName} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Phone} label="Phone" value={student?.parentPhone || student?.phone} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={Mail} label="Email" value={student?.parentEmail || student?.email} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={Heart} label="Gender" value={student?.parentGender} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Briefcase} label="Occupation" value={student?.parentOccupation} isDarkMode={isDarkMode} />
-              <DetailRow Icon={BookOpen} label="Qualification" value={student?.parentQualification} isDarkMode={isDarkMode} />
-              <DetailRow Icon={MapPin} label="Address" value={student?.parentAddress} isDarkMode={isDarkMode} />
+              <SectionTitle
+                Icon={Briefcase}
+                title="Parent Details"
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={User}
+                label="Parent Name"
+                value={student?.parentFullName || student?.parentName}
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={User}
+                label="Guardian Name"
+                value={student?.guardianName}
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={Phone}
+                label="Phone"
+                value={student?.parentPhone || student?.phone}
+                isDarkMode={isDarkMode}
+                accentClass="text-[#0A81D1]"
+              />
+              <DetailRow
+                Icon={Mail}
+                label="Email"
+                value={student?.parentEmail || student?.email}
+                isDarkMode={isDarkMode}
+                accentClass="text-[#0A81D1]"
+              />
+              <DetailRow
+                Icon={Heart}
+                label="Gender"
+                value={student?.parentGender}
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={Briefcase}
+                label="Occupation"
+                value={student?.parentOccupation}
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={BookOpen}
+                label="Qualification"
+                value={student?.parentQualification}
+                isDarkMode={isDarkMode}
+              />
+              <DetailRow
+                Icon={MapPin}
+                label="Address"
+                value={student?.parentAddress}
+                isDarkMode={isDarkMode}
+              />
             </>
           ) : null}
 
-          {tab === "academic" ? (
+          {/* {tab === "academic" ? (
             <>
               <SectionTitle Icon={GraduationCap} title="Academic Identity" isDarkMode={isDarkMode} />
               <DetailRow Icon={BookOpen} label="Class" value={className} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
@@ -473,7 +592,7 @@ function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
               <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
               <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || getStudentRecordId(student)} isDarkMode={isDarkMode} />
             </>
-          ) : null}
+          ) : null} */}
         </div>
       </aside>
     </div>
@@ -494,7 +613,7 @@ function EditField({
     isDarkMode
       ? "border-white/10 bg-[#1a1d28] text-[#E3E8F3] focus:border-[#0A81D1]"
       : "border-borderWhite bg-whiteBackground text-textBlack focus:border-borderBlue",
-    error && "border-[#FE4040] focus:border-[#FE4040]"
+    error && "border-[#FE4040] focus:border-[#FE4040]",
   );
 
   return (
@@ -517,26 +636,38 @@ function EditField({
         <input
           type={type}
           value={value}
-          max={type === "date" ? new Date().toISOString().split("T")[0] : undefined}
+          max={
+            type === "date" ? new Date().toISOString().split("T")[0] : undefined
+          }
           onChange={(event) => onChange(event.target.value)}
           className={inputClass}
         />
       )}
-      {error ? <span className="mt-1 block text-xs text-[#FE4040]">{error}</span> : null}
+      {error ? (
+        <span className="mt-1 block text-xs text-[#FE4040]">{error}</span>
+      ) : null}
     </label>
   );
 }
 
-function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t }) {
+function StudentEditSidebar({
+  student,
+  isDarkMode,
+  saving,
+  onClose,
+  onSave,
+  t,
+}) {
   const [draft, setDraft] = useState(() => normalizeStudentDraft(student));
   const [tab, setTab] = useState("personal");
   const [errorMessage, setErrorMessage] = useState("");
-  const fullName = `${draft.firstname} ${draft.lastname}`.trim() || getFullName(student);
+  const fullName =
+    `${draft.firstname} ${draft.lastname}`.trim() || getFullName(student);
   const avatarClass = getAvatarClass(student, 0);
   const tabs = [
     { key: "personal", label: "Personal", Icon: User },
     { key: "guardian", label: "Guardian", Icon: Users },
-    { key: "academic", label: "Academic", Icon: GraduationCap },
+    // { key: "academic", label: "Academic", Icon: GraduationCap },
   ];
 
   function setField(field, value) {
@@ -572,13 +703,15 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
           "flex h-screen w-full max-w-[560px] flex-col border-l shadow-2xl",
           isDarkMode
             ? "border-white/10 bg-[#111315] text-[#E3E8F3]"
-            : "border-borderWhite bg-whiteBackground text-textBlack"
+            : "border-borderWhite bg-whiteBackground text-textBlack",
         )}
       >
         <div
           className={cn(
             "sticky top-0 z-10 border-b px-6 pt-5",
-            isDarkMode ? "border-white/10 bg-[#111315]" : "border-borderWhite bg-whiteBackground"
+            isDarkMode
+              ? "border-white/10 bg-[#111315]"
+              : "border-borderWhite bg-whiteBackground",
           )}
         >
           <div className="mb-4 flex items-center justify-between gap-3">
@@ -586,13 +719,15 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
               <div
                 className={cn(
                   "flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-poppins-bold text-white",
-                  avatarClass
+                  avatarClass,
                 )}
               >
                 {getInitials(draft)}
               </div>
               <div className="min-w-0">
-                <h2 className="truncate text-base font-poppins-bold">{fullName}</h2>
+                <h2 className="truncate text-base font-poppins-bold">
+                  {fullName}
+                </h2>
                 <p className="text-xs text-slate-500">Editing student record</p>
               </div>
             </div>
@@ -604,7 +739,7 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
                 "inline-flex size-9 items-center justify-center rounded-lg border transition",
                 isDarkMode
                   ? "border-white/10 bg-white/[0.04] text-slate-500 hover:text-[#E3E8F3]"
-                  : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack"
+                  : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack",
               )}
             >
               <X size={16} />
@@ -632,13 +767,46 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
                 Update personal and contact information.
               </p>
               <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
-                <EditField label="First Name" value={draft.firstname} onChange={(value) => setField("firstname", value)} isDarkMode={isDarkMode} />
-                <EditField label="Last Name" value={draft.lastname} onChange={(value) => setField("lastname", value)} isDarkMode={isDarkMode} />
-                <EditField label="Gender" value={draft.gender} onChange={(value) => setField("gender", value)} options={["Male", "Female", "Other"]} isDarkMode={isDarkMode} />
-                <EditField label="Blood Group" value={draft.bloodGroup} onChange={(value) => setField("bloodGroup", value)} options={["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]} isDarkMode={isDarkMode} />
+                <EditField
+                  label="First Name"
+                  value={draft.firstname}
+                  onChange={(value) => setField("firstname", value)}
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Last Name"
+                  value={draft.lastname}
+                  onChange={(value) => setField("lastname", value)}
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Gender"
+                  value={draft.gender}
+                  onChange={(value) => setField("gender", value)}
+                  options={["Male", "Female", "Other"]}
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Blood Group"
+                  value={draft.bloodGroup}
+                  onChange={(value) => setField("bloodGroup", value)}
+                  options={["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]}
+                  isDarkMode={isDarkMode}
+                />
               </div>
-              <EditField type='date' label="Date of Birth" value={draft.dob} onChange={(value) => setField("dob", value)} isDarkMode={isDarkMode} />
-              <EditField label="Address" value={draft.address} onChange={(value) => setField("address", value)} isDarkMode={isDarkMode} />
+              <EditField
+                type="date"
+                label="Date of Birth"
+                value={draft.dob}
+                onChange={(value) => setField("dob", value)}
+                isDarkMode={isDarkMode}
+              />
+              <EditField
+                label="Address"
+                value={draft.address}
+                onChange={(value) => setField("address", value)}
+                isDarkMode={isDarkMode}
+              />
             </>
           ) : null}
 
@@ -647,21 +815,69 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
               <p className="mb-4 text-sm text-slate-500">
                 Update parent, guardian, and contact details.
               </p>
-              <EditField label="Parent Name" value={draft.parentName} onChange={(value) => setField("parentName", value)} isDarkMode={isDarkMode} />
-              <EditField label="Guardian Name" value={draft.guardianName} onChange={(value) => setField("guardianName", value)} isDarkMode={isDarkMode} />
+              <EditField
+                label="Parent Name"
+                value={draft.parentName}
+                onChange={(value) => setField("parentName", value)}
+                isDarkMode={isDarkMode}
+              />
+              <EditField
+                label="Guardian Name"
+                value={draft.guardianName}
+                onChange={(value) => setField("guardianName", value)}
+                isDarkMode={isDarkMode}
+              />
               <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
-                <EditField label="Phone Number" value={draft.phone} onChange={(value) => setField("phone", value)} type="tel" isDarkMode={isDarkMode} />
-                <EditField label="Email Address" value={draft.parentEmail} onChange={(value) => setField("parentEmail", value)} type="email" isDarkMode={isDarkMode} />
-                <EditField label="Parent Gender" value={draft.parentGender} onChange={(value) => setField("parentGender", value)} options={["Male", "Female", "Other"]} isDarkMode={isDarkMode} />
-                <EditField label="Parent Age" value={draft.parentAge} onChange={(value) => setField("parentAge", value)} isDarkMode={isDarkMode} />
+                <EditField
+                  label="Phone Number"
+                  value={draft.phone}
+                  onChange={(value) => setField("phone", value)}
+                  type="tel"
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Email Address"
+                  value={draft.parentEmail}
+                  onChange={(value) => setField("parentEmail", value)}
+                  type="email"
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Parent Gender"
+                  value={draft.parentGender}
+                  onChange={(value) => setField("parentGender", value)}
+                  options={["Male", "Female", "Other"]}
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Parent Age"
+                  value={draft.parentAge}
+                  onChange={(value) => setField("parentAge", value)}
+                  isDarkMode={isDarkMode}
+                />
               </div>
-              <EditField label="Qualification" value={draft.parentQualification} onChange={(value) => setField("parentQualification", value)} isDarkMode={isDarkMode} />
-              <EditField label="Occupation" value={draft.parentOccupation} onChange={(value) => setField("parentOccupation", value)} isDarkMode={isDarkMode} />
-              <EditField label="Parent Address" value={draft.parentAddress} onChange={(value) => setField("parentAddress", value)} isDarkMode={isDarkMode} />
+              <EditField
+                label="Qualification"
+                value={draft.parentQualification}
+                onChange={(value) => setField("parentQualification", value)}
+                isDarkMode={isDarkMode}
+              />
+              <EditField
+                label="Occupation"
+                value={draft.parentOccupation}
+                onChange={(value) => setField("parentOccupation", value)}
+                isDarkMode={isDarkMode}
+              />
+              <EditField
+                label="Parent Address"
+                value={draft.parentAddress}
+                onChange={(value) => setField("parentAddress", value)}
+                isDarkMode={isDarkMode}
+              />
             </>
           ) : null}
 
-          {tab === "academic" ? (
+          {/* {tab === "academic" ? (
             <>
               <p className="mb-4 text-sm text-slate-500">
                 Academic placement is shown for reference. Class and section changes stay in the section setup flow.
@@ -671,16 +887,20 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
               <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
               <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || getStudentRecordId(student)} isDarkMode={isDarkMode} />
             </>
-          ) : null}
+          ) : null} */}
         </div>
 
         <div
           className={cn(
             "flex items-center justify-between gap-3 border-t px-6 py-4",
-            isDarkMode ? "border-white/10 bg-[#111315]" : "border-borderWhite bg-whiteBackground"
+            isDarkMode
+              ? "border-white/10 bg-[#111315]"
+              : "border-borderWhite bg-whiteBackground",
           )}
         >
-          <span className="text-xs text-slate-500">Changes save to the student API</span>
+          <span className="text-xs text-slate-500">
+            Changes save to the student API
+          </span>
           <div className="flex gap-2">
             <button
               type="button"
@@ -689,7 +909,7 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
                 "rounded-lg border px-4 py-2 text-sm font-poppins-bold transition",
                 isDarkMode
                   ? "border-white/10 text-slate-400 hover:bg-white/[0.04]"
-                  : "border-borderWhite text-textGray hover:bg-whiteBackground2"
+                  : "border-borderWhite text-textGray hover:bg-whiteBackground2",
               )}
             >
               Cancel
@@ -728,9 +948,11 @@ export default function Studentlist() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
-  const [searchClass, setSearchClass] = useState(() => getStoredFilter("searchClass"));
+  const [searchClass, setSearchClass] = useState(() =>
+    getStoredFilter("searchClass"),
+  );
   const [searchSection, setSearchSection] = useState(() =>
-    getStoredFilter("searchSection")
+    getStoredFilter("searchSection"),
   );
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -740,23 +962,23 @@ export default function Studentlist() {
 
   const classOptions = useMemo(
     () => CLASS_OPTION_KEYS.map((key) => t(`options.${key}`)),
-    [t]
+    [t],
   );
 
   const selectedClass = useMemo(
     () => classList.find((item) => item?._id === searchClass),
-    [classList, searchClass]
+    [classList, searchClass],
   );
 
   const selectedSection = useMemo(
     () => sectionList.find((item) => item?._id === searchSection),
-    [sectionList, searchSection]
+    [sectionList, searchSection],
   );
 
   const totalPages = Math.max(1, Math.ceil(totalStudentCount / limit) || 1);
   const visiblePages = useMemo(
     () => buildVisiblePages(pageNo, totalPages),
-    [pageNo, totalPages]
+    [pageNo, totalPages],
   );
   const showingFrom = totalStudentCount === 0 ? 0 : (pageNo - 1) * limit + 1;
   const showingTo = Math.min(totalStudentCount, pageNo * limit);
@@ -797,7 +1019,7 @@ export default function Studentlist() {
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(searchTerm.trim());
-    }, 350);
+    }, 1000);
 
     return () => window.clearTimeout(timeout);
   }, [searchTerm]);
@@ -822,14 +1044,22 @@ export default function Studentlist() {
 
       try {
         const response = await axiosClient.get(
-          `${EndPoints.COMMON.CLASS_LIST}/${selectedSessionId}`
+          `${EndPoints.COMMON.CLASS_LIST}/${selectedSessionId}`,
         );
         const classes = Array.isArray(response?.result) ? response.result : [];
         const sortedClasses = classes
-          .filter((item) => Array.isArray(item?.section) && item.section.length > 0)
+          .filter(
+            (item) => Array.isArray(item?.section) && item.section.length > 0,
+          )
           .sort((firstClass, secondClass) => {
-            const firstValue = getClassSortValue(firstClass?.name, classOptions);
-            const secondValue = getClassSortValue(secondClass?.name, classOptions);
+            const firstValue = getClassSortValue(
+              firstClass?.name,
+              classOptions,
+            );
+            const secondValue = getClassSortValue(
+              secondClass?.name,
+              classOptions,
+            );
             return firstValue - secondValue;
           });
 
@@ -867,7 +1097,9 @@ export default function Studentlist() {
       return;
     }
 
-    const nextSections = Array.isArray(classData?.section) ? classData.section : [];
+    const nextSections = Array.isArray(classData?.section)
+      ? classData.section
+      : [];
     setSectionList(nextSections);
 
     if (
@@ -909,7 +1141,7 @@ export default function Studentlist() {
         setErrorMessage("");
 
         const response = await axiosClient.get(
-          `${EndPoints.ADMIN.SEARCH_STUDENT}?${query.toString()}`
+          `${EndPoints.ADMIN.SEARCH_STUDENT}?${query.toString()}`,
         );
 
         if (requestId !== requestIdRef.current) return;
@@ -925,7 +1157,7 @@ export default function Studentlist() {
 
         setStudentList(students);
         setTotalStudentCount(
-          Number.isFinite(totalStudents) ? totalStudents : students.length
+          Number.isFinite(totalStudents) ? totalStudents : students.length,
         );
       } catch (error) {
         if (requestId !== requestIdRef.current) return;
@@ -941,7 +1173,7 @@ export default function Studentlist() {
         }
       }
     },
-    [debouncedSearch, limit, pageNo, searchSection, selectedSessionId]
+    [debouncedSearch, limit, pageNo, searchSection, selectedSessionId],
   );
 
   useEffect(() => {
@@ -1013,7 +1245,7 @@ export default function Studentlist() {
     try {
       setDeleting(true);
       const response = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_SECTION_STUDENT}/${idForDelete}`
+        `${EndPoints.ADMIN.DELETE_SECTION_STUDENT}/${idForDelete}`,
       );
 
       if (response?.statusCode !== 200) {
@@ -1044,10 +1276,12 @@ export default function Studentlist() {
 
     try {
       setSavingStudent(true);
+      // console.log(draft);
+
       const payload = buildStudentUpdatePayload(draft);
       const response = await axiosClient.put(
         `${EndPoints.ADMIN.STUDENT_UPDATE}/${draft.id}`,
-        payload
+        payload,
       );
 
       if (response?.statusCode !== 200) {
@@ -1073,6 +1307,9 @@ export default function Studentlist() {
     ? "Choose an academic session to load student records."
     : errorMessage || "Try changing the class, section, or search text.";
 
+  const darkControlClass =
+    "border-white/10 bg-[#1a1d28] text-[#E3E8F3] focus:border-[#0A81D1] focus:ring-1 focus:ring-[#0A81D1]";
+
   return (
     <div className={cn("min-h-[calc(100vh-72px)] p-6", pageClass)}>
       <Toaster />
@@ -1082,7 +1319,9 @@ export default function Studentlist() {
 
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-poppins-bold text-current">Students</h1>
+            <h1 className="text-2xl font-poppins-bold text-current">
+              Students
+            </h1>
             <p className={cn("mt-1 text-sm", mutedClass)}>
               {activeFilterLabel} - {totalStudentCount} students
               {loading && studentList.length > 0 ? " - Refreshing" : ""}
@@ -1108,19 +1347,25 @@ export default function Studentlist() {
             value={searchClass}
             onChange={handleClassChange}
             className={cn(
-              "h-12 rounded-lg border px-4 text-sm font-poppins-regular outline-none transition disabled:cursor-not-allowed disabled:opacity-60",
-              controlClass
+              "h-12 rounded-lg px-4 text-sm font-poppins-regular outline-none transition",
+              "disabled:cursor-not-allowed disabled:opacity-60",
+              darkControlClass,
             )}
             disabled={!selectedSessionId || classList.length === 0}
           >
-            <option value="">All classes</option>
+            <option className="bg-[#1a1d28] text-white" value="">
+              All classes
+            </option>
             {classList.map((item) => (
-              <option key={item?._id} value={item?._id}>
+              <option
+                key={item?._id}
+                value={item?._id}
+                className="bg-[#1a1d28] text-white"
+              >
                 {getDisplayValue(item?.name)}
               </option>
             ))}
           </select>
-
           <label className="sr-only" htmlFor="student-section-filter">
             Section
           </label>
@@ -1130,25 +1375,32 @@ export default function Studentlist() {
             value={searchSection}
             onChange={handleSectionChange}
             className={cn(
-              "h-12 rounded-lg border px-4 text-sm font-poppins-regular outline-none transition disabled:cursor-not-allowed disabled:opacity-60",
-              controlClass
+              "h-12 rounded-lg px-4 text-sm font-poppins-regular outline-none transition",
+              "disabled:cursor-not-allowed disabled:opacity-60",
+              darkControlClass,
             )}
             disabled={!searchClass || sectionList.length === 0}
           >
-            <option value="">
+            <option className="bg-[#1a1d28] text-white" value="">
               {searchClass ? "All sections" : "Select class first"}
             </option>
             {sectionList.map((item) => (
-              <option key={item?._id} value={item?._id}>
+              <option
+                key={item?._id}
+                value={item?._id}
+                className="bg-[#1a1d28] text-white"
+              >
                 {getDisplayValue(item?.name)}
               </option>
             ))}
           </select>
-
           <div className="relative">
             <Search
               size={18}
-              className={cn("pointer-events-none absolute left-4 top-1/2 -translate-y-1/2", mutedClass)}
+              className={cn(
+                "pointer-events-none absolute left-4 top-1/2 -translate-y-1/2",
+                mutedClass,
+              )}
             />
             <input
               type="text"
@@ -1157,7 +1409,7 @@ export default function Studentlist() {
               placeholder="Search by name, email or phone..."
               className={cn(
                 "h-12 w-full rounded-lg border py-3 pl-12 pr-11 text-sm outline-none transition",
-                controlClass
+                controlClass,
               )}
             />
             {searchTerm ? (
@@ -1171,20 +1423,21 @@ export default function Studentlist() {
                 }}
                 className={cn(
                   "absolute right-3 top-1/2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-lg transition",
-                  isDarkMode ? "text-slate-500 hover:bg-white/10" : "text-textGray hover:bg-whiteBackground2"
+                  isDarkMode
+                    ? "text-slate-500 hover:bg-white/10"
+                    : "text-textGray hover:bg-whiteBackground2",
                 )}
               >
                 <X size={16} />
               </button>
             ) : null}
           </div>
-
           <button
             type="button"
             onClick={handleClear}
             className={cn(
               "inline-flex h-12 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-poppins-bold transition",
-              controlClass
+              controlClass,
             )}
           >
             <X size={16} />
@@ -1192,14 +1445,22 @@ export default function Studentlist() {
           </button>
         </div>
 
-        <section className={cn("overflow-hidden rounded-lg border", panelClass)}>
-          <div className={cn("flex items-center justify-between border-b px-5 py-4", headerClass)}>
+        <section
+          className={cn("overflow-hidden rounded-lg border", panelClass)}
+        >
+          <div
+            className={cn(
+              "flex items-center justify-between border-b px-5 py-4",
+              headerClass,
+            )}
+          >
             <div>
               <h2 className={cn("text-sm font-poppins-bold", bodyTextClass)}>
                 Student records
               </h2>
               <p className={cn("mt-1 text-xs", mutedClass)}>
-                Showing {showingFrom}-{showingTo} from {totalStudentCount} students
+                Showing {showingFrom}-{showingTo} from {totalStudentCount}{" "}
+                students
               </p>
             </div>
 
@@ -1219,36 +1480,53 @@ export default function Studentlist() {
             <table className="w-full min-w-[920px] border-collapse">
               <thead>
                 <tr className={cn("border-b", headerClass)}>
-                  {["Student", "Gender", "Phone", "Email", "Blood", "Action"].map(
-                    (heading) => (
-                      <th
-                        key={heading}
-                        className={cn(
-                          "px-5 py-3 text-left text-xs font-poppins-bold uppercase text-[#0A81D1]",
-                          heading === "Action" && "text-right"
-                        )}
-                      >
-                        {heading}
-                      </th>
-                    )
-                  )}
+                  {[
+                    "Student",
+                    "Gender",
+                    "Phone",
+                    "Email",
+                    "Blood",
+                    "Action",
+                  ].map((heading) => (
+                    <th
+                      key={heading}
+                      className={cn(
+                        "px-5 py-3 text-left text-xs font-poppins-bold uppercase text-[#0A81D1]",
+                        heading === "Action" && "text-right",
+                      )}
+                    >
+                      {heading}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {loading && studentList.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-5 py-14 text-center">
-                      <div className={cn("text-sm", mutedClass)}>Loading students...</div>
+                      <div className={cn("text-sm", mutedClass)}>
+                        Loading students...
+                      </div>
                     </td>
                   </tr>
                 ) : studentList.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-5 py-14 text-center">
-                      <Users size={30} className={cn("mx-auto mb-3", mutedClass)} />
-                      <p className={cn("text-sm font-poppins-bold", bodyTextClass)}>
+                      <Users
+                        size={30}
+                        className={cn("mx-auto mb-3", mutedClass)}
+                      />
+                      <p
+                        className={cn(
+                          "text-sm font-poppins-bold",
+                          bodyTextClass,
+                        )}
+                      >
                         {emptyTitle}
                       </p>
-                      <p className={cn("mt-1 text-xs", mutedClass)}>{emptyMessage}</p>
+                      <p className={cn("mt-1 text-xs", mutedClass)}>
+                        {emptyMessage}
+                      </p>
                     </td>
                   </tr>
                 ) : (
@@ -1261,8 +1539,11 @@ export default function Studentlist() {
                         key={getStudentKey(student, index)}
                         className={cn(
                           "border-b transition last:border-b-0",
-                          index % 2 === 1 && (isDarkMode ? "bg-white/[0.02]" : "bg-whiteBackground1"),
-                          rowClass
+                          index % 2 === 1 &&
+                            (isDarkMode
+                              ? "bg-white/[0.02]"
+                              : "bg-whiteBackground1"),
+                          rowClass,
                         )}
                       >
                         <td className="px-5 py-4">
@@ -1270,30 +1551,64 @@ export default function Studentlist() {
                             <div
                               className={cn(
                                 "flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-poppins-bold text-white",
-                                getAvatarClass(student, index)
+                                getAvatarClass(student, index),
                               )}
                             >
                               {getInitials(student)}
                             </div>
                             <div className="min-w-0">
-                              <p className={cn("truncate text-sm font-poppins-bold", bodyTextClass)}>
+                              <p
+                                className={cn(
+                                  "truncate text-sm font-poppins-bold",
+                                  bodyTextClass,
+                                )}
+                              >
                                 {fullName}
                               </p>
-                              <p className={cn("mt-1 truncate text-xs", mutedClass)}>
-                                Roll {getDisplayValue(student?.rollNo || student?.rollNumber || student?.studentId)}
+                              <p
+                                className={cn(
+                                  "mt-1 truncate text-xs",
+                                  mutedClass,
+                                )}
+                              >
+                                Roll{" "}
+                                {getDisplayValue(
+                                  student?.rollNo ||
+                                    student?.rollNumber ||
+                                    student?.studentId,
+                                )}
                               </p>
                             </div>
                           </div>
                         </td>
-                        <td className={cn("px-5 py-4 text-sm", secondaryTextClass)}>
+                        <td
+                          className={cn(
+                            "px-5 py-4 text-sm",
+                            secondaryTextClass,
+                          )}
+                        >
                           {getDisplayValue(student?.gender)}
                         </td>
-                        <td className={cn("px-5 py-4 text-sm", secondaryTextClass)}>
-                          {getDisplayValue(student?.parentPhone || student?.phone)}
+                        <td
+                          className={cn(
+                            "px-5 py-4 text-sm",
+                            secondaryTextClass,
+                          )}
+                        >
+                          {getDisplayValue(
+                            student?.parentPhone || student?.phone,
+                          )}
                         </td>
-                        <td className={cn("px-5 py-4 text-sm", secondaryTextClass)}>
+                        <td
+                          className={cn(
+                            "px-5 py-4 text-sm",
+                            secondaryTextClass,
+                          )}
+                        >
                           <span className="block max-w-[240px] truncate">
-                            {getDisplayValue(student?.parentEmail || student?.email)}
+                            {getDisplayValue(
+                              student?.parentEmail || student?.email,
+                            )}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-sm font-poppins-bold text-[#FE4040]">
@@ -1308,7 +1623,7 @@ export default function Studentlist() {
                               onClick={() => handleEdit(student)}
                               className={cn(
                                 "inline-flex size-8 items-center justify-center rounded-lg border transition",
-                                iconButtonClass
+                                iconButtonClass,
                               )}
                             >
                               <Edit3 size={14} />
@@ -1320,7 +1635,7 @@ export default function Studentlist() {
                               onClick={() => handleShowInfo(student)}
                               className={cn(
                                 "inline-flex size-8 items-center justify-center rounded-lg border transition",
-                                activeIconButtonClass
+                                activeIconButtonClass,
                               )}
                             >
                               <Info size={15} />
@@ -1349,13 +1664,23 @@ export default function Studentlist() {
           </div>
 
           {totalStudentCount > 0 ? (
-            <div className={cn("flex flex-wrap items-center justify-between gap-4 border-t px-5 py-4", headerClass)}>
-              <label className={cn("flex items-center gap-2 text-sm", mutedClass)}>
+            <div
+              className={cn(
+                "flex flex-wrap items-center justify-between gap-4 border-t px-5 py-4",
+                headerClass,
+              )}
+            >
+              <label
+                className={cn("flex items-center gap-2 text-sm", mutedClass)}
+              >
                 Rows
                 <select
                   value={limit}
                   onChange={handleLimitChange}
-                  className={cn("h-9 rounded-lg border px-3 text-sm outline-none", controlClass)}
+                  className={cn(
+                    "h-9 rounded-lg border px-3 text-sm outline-none",
+                    controlClass,
+                  )}
                 >
                   {PAGE_LIMIT_OPTIONS.map((item) => (
                     <option key={item} value={item}>
@@ -1368,7 +1693,9 @@ export default function Studentlist() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setPageNo((currentPage) => Math.max(1, currentPage - 1))}
+                  onClick={() =>
+                    setPageNo((currentPage) => Math.max(1, currentPage - 1))
+                  }
                   disabled={pageNo === 1 || loading}
                   aria-label="Previous page"
                   className="inline-flex size-8 items-center justify-center rounded-full border border-[#0A81D1] text-[#0A81D1] transition hover:bg-[#0A81D1]/10 disabled:cursor-not-allowed disabled:opacity-40"
@@ -1387,7 +1714,7 @@ export default function Studentlist() {
                       "inline-flex size-8 items-center justify-center rounded-full border border-[#0A81D1] text-xs font-poppins-bold transition disabled:cursor-not-allowed disabled:opacity-60",
                       page === pageNo
                         ? "bg-[#0A81D1] text-white"
-                        : "text-[#0A81D1] hover:bg-[#0A81D1]/10"
+                        : "text-[#0A81D1] hover:bg-[#0A81D1]/10",
                     )}
                   >
                     {page}
@@ -1397,7 +1724,9 @@ export default function Studentlist() {
                 <button
                   type="button"
                   onClick={() =>
-                    setPageNo((currentPage) => Math.min(totalPages, currentPage + 1))
+                    setPageNo((currentPage) =>
+                      Math.min(totalPages, currentPage + 1),
+                    )
                   }
                   disabled={pageNo === totalPages || loading}
                   aria-label="Next page"

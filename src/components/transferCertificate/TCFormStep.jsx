@@ -242,12 +242,13 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
   const [submitting, setSubmitting] = useState(false);
 
   const newItemRef = useRef(null);
+  const hasStudentIdentifiers =
+    Boolean(student?.studentId) && Boolean(student?.sessionStudentId);
   const allCleared = checklist.every((item) => item.checked);
   const feeStatusLabel = formatFeeStatus(student?.feeStatus);
 
   const canSubmit =
-    // Boolean(student?.studentId) &&
-    // Boolean(student?.sessionStudentId) &&
+    hasStudentIdentifiers &&
     Boolean(leaveReason) &&
     Boolean(reasonDescription.trim()) &&
     Boolean(lastDate) &&
@@ -257,6 +258,9 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
     checklist.every((item) => item.checked) &&
     !addingItem &&
     !submitting;
+  const submitHint = hasStudentIdentifiers
+    ? "Complete all fields and clearance items to send the request."
+    : "Student data is incomplete. Go back and reselect the student.";
 
   useEffect(() => {
     if (addingItem) {
@@ -284,6 +288,11 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
   }
 
   async function handleSubmit() {
+    if (!hasStudentIdentifiers) {
+      toast.error("Student data is incomplete. Please reselect the student.");
+      return;
+    }
+
     if (!canSubmit) {
       return;
     }
@@ -311,7 +320,11 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
       setPreviewing(false);
       onRequestSubmitted?.();
     } catch (error) {
-      toast.error(error || "Failed to submit TC request");
+      toast.error(
+        typeof error === "string"
+          ? error
+          : error?.message || "Failed to submit TC request",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -649,7 +662,7 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
                 textAlign: "center",
               }}
             >
-              <span style={{ fontSize: "12px", color: C.amber }}>Complete all fields and clearance items to send the request.</span>
+              <span style={{ fontSize: "12px", color: C.amber }}>{submitHint}</span>
             </div>
           ) : null}
         </div>

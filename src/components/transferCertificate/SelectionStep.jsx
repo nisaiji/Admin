@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronRight, Search, Users, X } from "lucide-react";
 import {
   FormControl,
@@ -42,9 +42,17 @@ const paginationSelectSx = {
   "& .MuiSvgIcon-root": { color: C.muted },
 };
 
+function getErrorMessage(error, fallbackMessage) {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return error?.message || fallbackMessage;
+}
+
 function SelectionFilters({
   search,
-  setSearch,
+  onSearchChange,
   filterClass,
   filterSec,
   classList,
@@ -81,7 +89,7 @@ function SelectionFilters({
         <Search size={14} color={C.muted} style={{ flexShrink: 0 }} />
         <input
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by name..."
           style={{
             flex: 1,
@@ -94,7 +102,7 @@ function SelectionFilters({
         />
         {search ? (
           <button
-            onClick={() => setSearch("")}
+            onClick={() => onSearchChange("")}
             style={{
               background: "transparent",
               border: "none",
@@ -128,7 +136,7 @@ function SelectionFilters({
           <MenuItem value="" sx={{ fontSize: "13px" }}>
             Class
           </MenuItem>
-          {classList.map((item) => (
+          {classList?.map((item) => (
             <MenuItem
               key={item?._id}
               value={item?._id}
@@ -385,6 +393,7 @@ function SelectionPaginationControls({
 
 export function SelectionStep({ onSelect }) {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterClass, setFilterClass] = useState("");
   const [filterSec, setFilterSec] = useState("");
   const [pageNo, setPageNo] = useState(1);
@@ -395,80 +404,18 @@ export function SelectionStep({ onSelect }) {
   const [sectionList, setSectionList] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const selectedSessionId = useSelector(
+    (state) => state.appAuth.classAndSectionData?.selectedSession?._id,
+  );
   const debounceTimeoutRef = useRef(null);
-  const selectedSessionId = classAndSectionData?.selectedSession?._id;
+  const requestIdRef = useRef(0);
 
-  useEffect(() => {
-    if (classAndSectionData?.id || selectedSessionId) {
-      getClassList();
-      fetchStudents({});
-    }
-  }, [classAndSectionData?.id, selectedSessionId]);
-
-  useEffect(() => {
-    if (filterClass && classList.length > 0) {
-      const selectedClass = classList.find((item) => item?._id === filterClass);
-      setSectionList(selectedClass?.section || []);
-      return;
-    }
-
-    setSectionList([]);
-  }, [filterClass, classList]);
-
-  useEffect(() => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    debounceTimeoutRef.current = setTimeout(() => {
-      fetchStudents({ searchName: search, searchSection: filterSec });
-    }, 1000);
-
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, [search, filterSec, pageNo, limit]);
-
-  async function fetchStudents({
-    searchName = search,
-    searchSection = filterSec,
-  }) {
+  const getClassList = useCallback(async () => {
     if (!selectedSessionId) {
+      setClassList([]);
       return;
     }
 
-    const url = EndPoints.ADMIN.SEARCH_STUDENT;
-    let query = `?page=${pageNo}&limit=${limit}&session=${selectedSessionId}`;
-
-    if (searchName) {
-      query += `&search=${searchName}`;
-    }
-
-    if (searchSection) {
-      query += `&section=${searchSection}`;
-    }
-
-    try {
-      setLoading(true);
-      const response = await axiosClient.get(`${url}${query}`);
-
-      if (response?.statusCode === 200) {
-        const { totalStudents, students } = response?.result || {};
-        setTotalStudentCount(totalStudents || 0);
-        setStudentList(students || []);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(error?.message || "Failed to fetch students");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function getClassList() {
     try {
       const response = await axiosClient.get(
         `${EndPoints.COMMON.CLASS_LIST}/${selectedSessionId}`,
@@ -485,9 +432,154 @@ export function SelectionStep({ onSelect }) {
 
       setClassList(filteredSortedClasses);
     } catch (error) {
-      console.error(error);
+      setClassList([]);
+      toast.error(getErrorMessage(error, "Failed to fetch classes"));
     }
-  }
+  }, [selectedSessionId]);
+
+  const fetchStudents = useCallback(
+    async ({
+      page = pageNo,
+      pageLimit = limit,
+      searchName = debouncedSearch,
+      searchClass = filterClass,
+      searchSection = filterSec,
+    } = {}) => {
+      if (!selectedSessionId) {
+        setStudentList([]);
+        setTotalStudentCount(0);
+        setLoading(false);
+        return;
+      }
+
+      const query = new URLSearchParams({
+        page: String(page),
+        limit: String(pageLimit),
+        session: selectedSessionId,
+      });
+
+      if (searchName) {
+        query.set("search", searchName);
+      }
+
+      if (searchClass) {
+        query.set("classId", searchClass);
+      }
+
+      if (searchSection) {
+        query.set("section", searchSection);
+      }
+
+      const requestId = requestIdRef.current + 1;
+      requestIdRef.current = requestId;
+
+      try {
+        setLoading(true);
+        const response = await axiosClient.get(
+          `${EndPoints.ADMIN.SEARCH_STUDENT}?${query.toString()}`,
+        );
+
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        if (response?.statusCode !== 200) {
+          throw new Error(response?.message || "Failed to fetch students");
+        }
+
+        const { totalStudents, students } = response?.result || {};
+        setTotalStudentCount(Number(totalStudents) || 0);
+        setStudentList(Array.isArray(students) ? students : []);
+      } catch (error) {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        setStudentList([]);
+        setTotalStudentCount(0);
+        toast.error(getErrorMessage(error, "Failed to fetch students"));
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setLoading(false);
+        }
+      }
+    },
+    [debouncedSearch, filterClass, filterSec, limit, pageNo, selectedSessionId],
+  );
+
+  useEffect(() => {
+    if (!selectedSessionId) {
+      setStudentList([]);
+      setTotalStudentCount(0);
+      setClassList([]);
+      setSectionList([]);
+      setLoading(false);
+      return;
+    }
+
+    getClassList();
+  }, [getClassList, selectedSessionId]);
+
+  useEffect(() => {
+    if (!filterClass) {
+      setSectionList([]);
+
+      if (filterSec) {
+        setFilterSec("");
+      }
+
+      return;
+    }
+
+    const selectedClass = classList.find((item) => item?._id === filterClass);
+
+    if (!selectedClass) {
+      setFilterClass("");
+      setFilterSec("");
+      setSectionList([]);
+      return;
+    }
+
+    const nextSections = Array.isArray(selectedClass?.section)
+      ? selectedClass.section
+      : [];
+    setSectionList(nextSections);
+
+    if (
+      filterSec &&
+      !nextSections.some((item) => item?._id === filterSec)
+    ) {
+      setFilterSec("");
+    }
+  }, [classList, filterClass, filterSec]);
+
+  useEffect(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 1000);
+
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [search]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(totalStudentCount / limit));
+
+    if (totalStudentCount > 0 && pageNo > totalPages) {
+      setPageNo(totalPages);
+    }
+  }, [limit, pageNo, totalStudentCount]);
 
   function handlePageChange(_event, value) {
     setPageNo(value);
@@ -495,15 +587,19 @@ export function SelectionStep({ onSelect }) {
 
   function handleClear() {
     setSearch("");
+    setDebouncedSearch("");
     setFilterClass("");
     setFilterSec("");
     setPageNo(1);
-    fetchStudents({ searchName: "", searchSection: "" });
   }
 
   function handleSelectStudent(student) {
     onSelect(mapStudentForTc(student, classList, sectionList));
   }
+
+  const emptyMessage = selectedSessionId
+    ? "No students match your filters"
+    : "Select an active session to load students";
 
   return (
     <div style={{ padding: "28px 28px 60px" }}>
@@ -533,7 +629,10 @@ export function SelectionStep({ onSelect }) {
       >
         <SelectionFilters
           search={search}
-          setSearch={setSearch}
+          onSearchChange={(value) => {
+            setSearch(value);
+            setPageNo(1);
+          }}
           filterClass={filterClass}
           filterSec={filterSec}
           classList={classList}
@@ -589,7 +688,7 @@ export function SelectionStep({ onSelect }) {
                       style={{ display: "block", margin: "0 auto 10px" }}
                     />
                     <div style={{ fontSize: "14px", color: C.muted }}>
-                      No students match your filters
+                      {emptyMessage}
                     </div>
                   </td>
                 </tr>
@@ -615,7 +714,7 @@ export function SelectionStep({ onSelect }) {
             pageNo={pageNo}
             totalStudentCount={totalStudentCount}
             onLimitChange={(value) => {
-              setLimit(value);
+              setLimit(Number(value));
               setPageNo(1);
             }}
             onPageChange={handlePageChange}

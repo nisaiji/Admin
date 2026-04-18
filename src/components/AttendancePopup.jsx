@@ -621,118 +621,127 @@ export default function AttendancePopup() {
    * Uses jsPDF and jspdf-autotable for PDF generation.
    */
   const downloadAttendance = () => {
-    if (!attendanceData?.length) {
-      toast.error("No attendance data to download");
-      return;
-    }
+    try {
+      if (loading) return;
+      if (!attendanceData?.length) {
+        toast.error("No attendance data to download");
+        return;
+      }
+      setLoading(true);
+      const doc = new jsPDF({
+        orientation: "landscape", // required for many columns
+        unit: "pt",
+        format: "a4",
+      });
 
-    const doc = new jsPDF({
-      orientation: "landscape", // required for many columns
-      unit: "pt",
-      format: "a4",
-    });
+      const monthYear = moment(currentDate).format("MMMM YYYY");
 
-    const monthYear = moment(currentDate).format("MMMM YYYY");
+      // ===== Title =====
+      doc.setFontSize(16);
+      doc.text(
+        `${role === "classTeacher" ? teacherData?.schoolName : role === "admin" ? data?.schoolName : ""}`,
+        doc.internal.pageSize.getWidth() / 2,
+        30,
+        {
+          align: "center",
+        },
+      );
+      doc.text(
+        "Monthly Attendance Sheet",
+        doc.internal.pageSize.getWidth() / 2,
+        50,
+        {
+          align: "center",
+        },
+      );
 
-    // ===== Title =====
-    doc.setFontSize(16);
-    doc.text(
-      `${role === "classTeacher" ? teacherData?.schoolName : role === "admin" ? data?.schoolName : ""}`,
-      doc.internal.pageSize.getWidth() / 2,
-      30,
-      {
-        align: "center",
-      },
-    );
-    doc.text(
-      "Monthly Attendance Sheet",
-      doc.internal.pageSize.getWidth() / 2,
-      50,
-      {
-        align: "center",
-      },
-    );
+      doc.setFontSize(11);
+      doc.text(
+        `${classAndSectionData?.className || ""} - ${
+          classAndSectionData?.sectionName || ""
+        } | ${monthYear}`,
+        doc.internal.pageSize.getWidth() / 2,
+        65,
+        { align: "center" },
+      );
 
-    doc.setFontSize(11);
-    doc.text(
-      `${classAndSectionData?.className || ""} - ${
-        classAndSectionData?.sectionName || ""
-      } | ${monthYear}`,
-      doc.internal.pageSize.getWidth() / 2,
-      65,
-      { align: "center" },
-    );
-
-    // ===== Table Head =====
-    const headRow = [
-      "S.No",
-      "Student Name",
-      ...Array.from({ length: totalDays }, (_, i) => `${i + 1}`),
-      "Total",
-    ];
-
-    // ===== Table Body =====
-    const bodyRows = attendanceData.map((student, index) => {
-      const totalPresent = student.attendances.filter(
-        (a) => a.attendance === "P",
-      ).length;
-
-      return [
-        index + 1,
-        `${student.firstname || ""} ${student.lastname || ""}`,
-        ...student.attendances.map((a) => a.attendance || ""),
-        `${totalPresent}/${totalAttendanceDays}`,
+      // ===== Table Head =====
+      const headRow = [
+        "S.No",
+        "Student Name",
+        ...Array.from({ length: totalDays }, (_, i) => `${i + 1}`),
+        "Total",
       ];
-    });
 
-    // ===== AutoTable =====
-    autoTable(doc, {
-      startY: 80,
-      head: [headRow],
-      body: bodyRows,
-      styles: {
-        fontSize: 8,
-        halign: "center",
-        valign: "middle",
-        cellPadding: 3,
-      },
-      headStyles: {
-        fillColor: [40, 40, 40],
-        textColor: 255,
-        fontStyle: "bold",
-      },
-      alternateRowStyles: {
-        fillColor: [245, 245, 245],
-      },
-      columnStyles: {
-        0: { cellWidth: 40 }, // S.No
-        1: { cellWidth: 120 }, // Name
-      },
-      didDrawPage: () => {
-        doc.setFontSize(9);
-        doc.text(
-          `Generated on: ${moment().format("DD/MM/YYYY hh:mm A")}`,
-          doc.internal.pageSize.getWidth() - 40,
-          doc.internal.pageSize.getHeight() - 20,
-          { align: "right" },
+      // ===== Table Body =====
+      const bodyRows = attendanceData.map((student, index) => {
+        const totalPresent = student.attendances.filter(
+          (a) => a.attendance === "P",
+        ).length;
+
+        return [
+          index + 1,
+          `${student.firstname || ""} ${student.lastname || ""}`,
+          ...student.attendances.map((a) => a.attendance || ""),
+          `${totalPresent}/${totalAttendanceDays}`,
+        ];
+      });
+
+      // ===== AutoTable =====
+      autoTable(doc, {
+        startY: 80,
+        head: [headRow],
+        body: bodyRows,
+        styles: {
+          fontSize: 8,
+          halign: "center",
+          valign: "middle",
+          cellPadding: 3,
+        },
+        headStyles: {
+          fillColor: [40, 40, 40],
+          textColor: 255,
+          fontStyle: "bold",
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245],
+        },
+        columnStyles: {
+          0: { cellWidth: 40 }, // S.No
+          1: { cellWidth: 120 }, // Name
+        },
+        didDrawPage: () => {
+          doc.setFontSize(9);
+          doc.text(
+            `Generated on: ${moment().format("DD/MM/YYYY hh:mm A")}`,
+            doc.internal.pageSize.getWidth() - 40,
+            doc.internal.pageSize.getHeight() - 20,
+            { align: "right" },
+          );
+        },
+      });
+
+      // ===== Save =====
+      // doc.save(`Attendance_${monthYear}.pdf`);
+      if (role === "admin") {
+        doc.save(
+          `Attendance_${classAndSectionData?.className}_${
+            classAndSectionData?.sectionName
+          }_${monthYear}.pdf`,
         );
-      },
-    });
-
-    // ===== Save =====
-    // doc.save(`Attendance_${monthYear}.pdf`);
-    if (role === "admin") {
-      doc.save(
-        `Attendance_${classAndSectionData?.className}_${
-          classAndSectionData?.sectionName
-        }_${monthYear}.pdf`,
-      );
-    } else if (role === "classTeacher") {
-      doc.save(
-        `Attendance_${teacherData?.className}_${
-          teacherData?.sectionName
-        }_${monthYear}.pdf`,
-      );
+      } else if (role === "classTeacher") {
+        doc.save(
+          `Attendance_${teacherData?.className}_${
+            teacherData?.sectionName
+          }_${monthYear}.pdf`,
+        );
+      }
+    } catch (e) {
+      toast.error("Failed to generate PDF");
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
     }
   };
 
@@ -782,6 +791,7 @@ export default function AttendancePopup() {
           <div className={`flex flex-row w-[270px] justify-end`}>
             {isEditable ? (
               <button
+                disabled={loading}
                 className={`px-4 py-2 text-base font-poppins-regular rounded-full bg-white transition-all duration-200 ease-in-out active:scale-90`}
                 onClick={handleSaveAttendance}
               >
@@ -807,10 +817,10 @@ export default function AttendancePopup() {
                   }}
                 />
                 <img
-                  onClick={downloadAttendance}
+                  onClick={!loading ? downloadAttendance : undefined}
                   src={downloadw}
                   alt=""
-                  className={`w-10 h-10 mx-4 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
+                  className={`w-10 h-10 mx-4 transition-all duration-200 ease-in-out ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-90"}`}
                 />
               </>
             )}

@@ -592,6 +592,7 @@ export default function Subjects() {
                           )
                         }
                         disabled={editingRow !== i}
+                        // disabled
                         sx={{
                           color: "white",
                           "&.Mui-disabled": {

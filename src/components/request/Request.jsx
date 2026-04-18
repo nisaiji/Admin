@@ -227,7 +227,7 @@ export default function Requests() {
                     isDarkMode ? "text-textPrimary" : "text-textBlack"
                   } font-poppins-bold mt-5`}
                 >
-                  {t("labels.noleave")}
+                  {t("labels.nopassword")}
                 </p>
               </div>
             ) : (

@@ -369,7 +369,7 @@ export default function Notice() {
             </div>
 
             {/* notices */}
-            {requests.map((req, index) => (
+            {requests?.map((req, index) => (
               <div
                 key={req._id}
                 className="relative flex space-x-4 p-4 border-b border-[#6E6F8173]"

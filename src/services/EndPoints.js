@@ -8,11 +8,6 @@ const EndPoints = {
 
     // ADMIN AUTH v2
     STATUS: "v2/admin/status",
-    PHONE_VERIFY: "v2/admin/phoneVerify",
-    RESEND_OTP: "v2/admin/phoneVerify/resend-otp",
-    PHONE_OTP_VERIFY: "v2/admin/phoneVerify",
-    EMAIL_VERIFY: "v2/admin/emailVerify",
-    EMAIL_OTP_VERIFY: "v2/admin/emailVerify",
     PASSWORD_UPDATE: "v2/admin/password",
     BASIC_INFO_UPDATE: "v2/admin/details",
     ADMIN_UPDATE_ADDRESS: "admin/address",
@@ -20,7 +15,6 @@ const EndPoints = {
     UPDATE_FCM_TOKEN: "admin/fcm-token",
     PHONE_TOKEN_VERIFY: "v2/admin/phone/verify",
     EMAIL_TOKEN_VERIFY: "v2/admin/email/verify",
-    // PHONE_AND_EMAIL_TOKEN_VERIFY: "v2/admin/reset-password-request",
 
     PASSWORD_RESET_PHONE_CHECK: "v2/admin/reset-password/phone",
     PASSWORD_RESET_PHONE_VERIFY: "v2/admin/reset-password/phone",
@@ -30,16 +24,12 @@ const EndPoints = {
 
     // ADMIN AUTH
     ADMIN_REGISTER: "admin",
-    GET_DEACTIVATE_ADMIN: "admin/deactivate",
     ADMIN_UPDATE_DETAILS: "admin/details",
-    // ADMIN_LOGIN: "admin/login",
     REQUESTS: "change-password/admin",
     MODIFY_REQUEST: "change-password/admin",
 
     // ADMIN DASHBOARD
-    GET_ALL_SESSION: "session",
     STUDENT_COUNT: "admin-dashboard/present-students",
-    // PARENT_COUNT: "admin-dashboard/parent-count",
     DASHBOARD_ATTENDANCE_STATUS: "admin-dashboard/attendance-status",
     GET_EVENTS: "holiday-event",
     GET_SUNDAY_HOLIDAY: "workdays",
@@ -61,7 +51,6 @@ const EndPoints = {
     DELETE_TEACHER: "teacher",
 
     // ADMIN STUDENT SETUP
-    GET_STUDENT_LIST: "student/admin",
     DELETE_STUDENT: "student/admin",
     STUDENT_UPDATE: "v3/student/admin",
     SEARCH_STUDENT: "v3/student/admin",
@@ -170,18 +159,9 @@ const EndPoints = {
     // LOGIN
     UPDATE_FCM_TOKEN: "teacher/fcm-token",
     // TEACHER DASHBOARD
-    DASHBOARD_CALENDER_EVENTS: "dashboard/holiday-events",
-    DASHBOARD_WEEKLY_ATTENDANCE: "dashboard/weekly-attendance",
-    DASHBOARD_MONTHLY_ATTENDANCE: "dashboard/monthly-attendance",
-
-    // ADMIN DASHBOARD
     DASHBOARD_ATTENDANCE_STATUS: "teacher-dashboard/attendance-status",
     GET_EVENTS: "holiday-event/teacher",
     GET_SUNDAY_HOLIDAY: "workdays/teacher",
-
-    // TEACHER STUDENT SETUP
-    GET_STUDENT_LIST: "student/teacher",
-    DELETE_STUDENT: "dashboard/parent-count",
 
     // TEACHER SECTION STUDENTS
     REGISTER_SECTION_STUDENT: "v3/student/teacher",

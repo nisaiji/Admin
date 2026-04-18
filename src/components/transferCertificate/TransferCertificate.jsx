@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { FileClock, FileDown, GraduationCap } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -11,11 +11,7 @@ import { SelectionStep } from "./SelectionStep";
 import { TCFormStep } from "./TCFormStep";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import {
-  getTcRequestsFromResponse,
-  isApprovedByParentTcRequest,
-  isPendingTcRequest,
-} from "./utils";
+import { getTcRequestsFromResponse } from "./utils";
 
 const TAB_ITEMS = [
   { key: "pending", label: "Pending Requests", icon: <FileClock size={14} /> },
@@ -149,7 +145,9 @@ export function TCPage() {
   );
 
   useEffect(() => {
-    async function fetchTcRequests(status, onSuccess) {
+    let isActive = true;
+
+    async function fetchTcRequests(status) {
       const response = await axiosClient.get(EndPoints.ADMIN.GET_ISSUED_TC, {
         params: {
           sessionId: selectedSessionId,
@@ -157,7 +155,16 @@ export function TCPage() {
           status,
         },
       });
-      onSuccess(response?.result?.requests || []);
+
+      return getTcRequestsFromResponse(response);
+    }
+
+    function getErrorMessage(error, fallbackMessage) {
+      if (typeof error === "string") {
+        return error;
+      }
+
+      return error?.message || fallbackMessage;
     }
 
     if (!selectedSessionId) {
@@ -169,34 +176,67 @@ export function TCPage() {
     }
 
     if (activeTab !== "pending" && activeTab !== "alumni") {
-      return;
+      return undefined;
     }
 
     if (activeTab === "pending") {
       (async () => {
         try {
           setPendingLoading(true);
-          await fetchTcRequests("submitted", setPendingRequests);
+          const requests = await fetchTcRequests("submitted");
+
+          if (isActive) {
+            setPendingRequests(requests);
+          }
         } catch (error) {
-          toast.error(error || "Failed to fetch pending TC requests");
+          if (isActive) {
+            setPendingRequests([]);
+            toast.error(
+              getErrorMessage(error, "Failed to fetch pending TC requests"),
+            );
+          }
         } finally {
-          setPendingLoading(false);
+          if (isActive) {
+            setPendingLoading(false);
+          }
         }
       })();
-      return;
+
+      return () => {
+        isActive = false;
+      };
     }
 
     (async () => {
       try {
         setAlumniLoading(true);
-        await fetchTcRequests("approvedByParent", setAlumniRequests);
+        const requests = await fetchTcRequests("approvedByParent");
+
+        if (isActive) {
+          setAlumniRequests(requests);
+        }
       } catch (error) {
-        toast.error(error || "Failed to fetch alumni TC requests");
+        if (isActive) {
+          setAlumniRequests([]);
+          toast.error(
+            getErrorMessage(error, "Failed to fetch alumni TC requests"),
+          );
+        }
       } finally {
-        setAlumniLoading(false);
+        if (isActive) {
+          setAlumniLoading(false);
+        }
       }
     })();
+
+    return () => {
+      isActive = false;
+    };
   }, [activeTab, refreshKey, selectedSessionId]);
+
+  useEffect(() => {
+    setSelectedStudent(null);
+  }, [selectedSessionId]);
 
   function handleTabChange(tab) {
     if (tab === activeTab && (tab === "pending" || tab === "alumni")) {

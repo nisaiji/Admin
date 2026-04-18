@@ -438,6 +438,7 @@ export default function Marksheet() {
                       <>
                         <button
                           type="button"
+                          disabled={loading}
                           onClick={() => handleSaveAllMarks()}
                           className="w-[100px] py-[10px] text-sm font-poppins-bold rounded-md bg-backgroundBlue text-white"
                         >
@@ -463,7 +464,7 @@ export default function Marksheet() {
                         <button
                           type="button"
                           onClick={() => setShowConfirm1(true)}
-                          disabled={isEdit}
+                          disabled={isEdit || loading}
                           className="w-[100px] py-[10px] text-sm font-poppins-bold rounded-md bg-backgroundBlue text-white"
                         >
                           Publish
@@ -480,6 +481,8 @@ export default function Marksheet() {
                       <tr className="text-center text-base font-poppins-bold text-white">
                         <th className="p-2">Student</th>
                         {selectedExam?.subjects?.map((subj, i) => {
+                          console.log(subj);
+
                           const maxTheoryMarks = subj?.components.find(
                             (c) => c.examType === "theory",
                           )?.maxMarks;

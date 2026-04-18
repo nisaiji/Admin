@@ -212,7 +212,9 @@ export default function Teacher() {
     } catch (e) {
       toast.error(e);
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
     }
   };
 
@@ -238,7 +240,7 @@ export default function Teacher() {
       );
       if (res?.statusCode === 201 || res?.statusCode === 200) {
         if (res?.result?.errors.length > 0) {
-          toast.error(res?.result?.errors[0])
+          toast.error(res?.result?.errors[0]);
         } else {
           toast.success(res?.result?.message);
         }
