@@ -108,7 +108,7 @@ export default function StudentView({ setSelectedView, classAndSectionData }) {
         toast.success(res?.result);
       }
     } catch (e) {
-      console.log("Error sending reminder:", e);
+      // console.log("Error sending reminder:", e);
       toast.error("Failed to send reminder");
     } finally {
       setLoading(false);

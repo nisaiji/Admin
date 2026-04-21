@@ -287,30 +287,32 @@ export default function SectionData({
   return (
     <>
       {/* Session status strip */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "11px 18px",
-          borderRadius: "11px",
-          background: "rgba(52,211,153,0.04)",
-          border: "1px solid rgba(52,211,153,0.12)",
-          marginBottom: "18px",
-        }}
-      >
-        <CheckCircle2 size={16} color="#34D399" style={{ flexShrink: 0 }} />
-        <span style={{ flex: 1, fontSize: "13px", color: "#94A3B8" }}>
-          Academic session <strong style={{ color: C.text }}>{selectedSessionLabel}</strong> is
-          active —{" "}
-          <span style={{ color: C.textSub }}>
-            you're ready to set up classes, staff, and students.
+      {role === "admin" && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "11px 18px",
+            borderRadius: "11px",
+            background: "rgba(52,211,153,0.04)",
+            border: "1px solid rgba(52,211,153,0.12)",
+            marginBottom: "18px",
+          }}
+        >
+          <CheckCircle2 size={16} color="#34D399" style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1, fontSize: "13px", color: "#94A3B8" }}>
+            Academic session{" "}
+            <strong style={{ color: C.text }}>{selectedSessionLabel}</strong> is
+            active —{" "}
+            <span style={{ color: C.textSub }}>
+              you're ready to set up classes, staff, and students.
+            </span>
           </span>
-        </span>
-        {/* <button
+          {/* <button
           // onClick={() => navigate("/")}
           style={{
             display: "flex",
@@ -335,30 +337,30 @@ export default function SectionData({
         >
           <RefreshCw size={11} /> Change Session
         </button> */}
-        <ChartDropdown
-          value={selectedSessionLabel}
-          options={sessionOptions}
-          onChange={(selectedLabel) => {
-            const selected = session.find(
-              (s) =>
-                `${s.academicStartYear}-${String(s.academicEndYear).slice(-2)}` ===
-                selectedLabel,
-            );
+          <ChartDropdown
+            value={selectedSessionLabel}
+            options={sessionOptions}
+            onChange={(selectedLabel) => {
+              const selected = session.find(
+                (s) =>
+                  `${s.academicStartYear}-${String(s.academicEndYear).slice(-2)}` ===
+                  selectedLabel,
+              );
 
-            if (!selected) return;
+              if (!selected) return;
 
-            localStorage.removeItem("classAndSectionData");
-            localStorage.removeItem("tempData");
+              localStorage.removeItem("classAndSectionData");
+              localStorage.removeItem("tempData");
 
-            dispatch(
-              setClassAndSectionData({
-                selectedSession: selected,
-              }),
-            );
-          }}
-        />
-      </motion.div>
-
+              dispatch(
+                setClassAndSectionData({
+                  selectedSession: selected,
+                }),
+              );
+            }}
+          />
+        </motion.div>
+      )}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

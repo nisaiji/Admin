@@ -2,7 +2,7 @@
  * StudentSection.jsx
  *
  * Purpose:
- * - Manage students for a class section: list, add, edit, delete, import (Excel), and download a demo template.
+ * - Manage students for a class section: list, add, edit, import (Excel), and download a demo template.
  * - Supports two roles: "admin" and "classTeacher". Role affects which endpoints are used and which section/class data is required.
  *
  * High-level responsibilities:
@@ -11,7 +11,6 @@
  * - Provide an inline row to add a new student (with validation and duplicate checks).
  * - Support inline editing of existing students (toggle edit per SNo).
  * - Show student details in a modal.
- * - Delete student with confirmation.
  * - Import students via .xlsx/.xls upload and download a demo template file.
  * - Provide client-side search over firstname/lastname and basic input sanitization.
  *
@@ -31,7 +30,6 @@
  * - handleInputChange(sNo, field, value): sanitize and update either newStudent (sNo === null) or an existing student by SNo.
  * - handleStudentAction(student, isUpdate): POST (register) or PUT (update) a student using the role-specific endpoint. Handles payload transformation.
  * - registerStudent(): wrapper that runs duplicate check then creates a student.
- * - handleDelete(): DELETE a student using role-specific endpoint after confirmation.
  * - uploadExcelSheet(file): upload .xlsx/.xls file (multipart/form-data) and refresh list on success.
  * - getDemoExcelSheet(): download demo Excel template as blob and trigger client download.
  *
@@ -59,23 +57,21 @@ import Searchw from "../../../assets/images/Search.png";
 import crossw from "../../../assets/images/cross.png";
 import infow from "../../../assets/images/info.png";
 import edit2w from "../../../assets/images/edit2.png";
-import delete2w from "../../../assets/images/delete2.png";
 import Search from "../../../assets/images/darkmode/Search.png";
 import cross from "../../../assets/images/darkmode/cross.png";
 import info from "../../../assets/images/darkmode/info.png";
 import edit2 from "../../../assets/images/darkmode/edit.png";
-import delete2 from "../../../assets/images/darkmode/delete.png";
 import book from "../../../assets/images/book.png";
 import importIcon from "../../../assets/images/importIcon.png";
 import downloadIcon from "../../../assets/images/downloadIcon.png";
 import StudentInfo from "./StudentInfo";
-import DeletePopup from "../../DeleteMessagePopup";
 import Spinner from "../../Spinner";
 import EndPoints from "../../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import REGEX from "../../../utils/regix";
 import AttendancePopup from "../../AttendancePopup";
 import Breadcrumbs from "../../BreadCrumbs";
+import { StudentDetailSidebar } from "../../studentSetup/Studentlist";
 
 export default function StudentSection() {
   // Importing necessary modules and hooks
@@ -99,7 +95,6 @@ export default function StudentSection() {
   const [studentInfoModelOpen, setStudentInfoModelOpen] = useState(false);
   const [editSNo, setEditSNo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showAttendance, setShowAttendance] = useState(false);
   const [toastDisplayed, setToastDisplayed] = useState(false);
@@ -392,32 +387,6 @@ export default function StudentSection() {
     setTimeout(() => {
       editStudentFirstNameRefs.current[SNo]?.focus();
     }, 0);
-  };
-
-  // delete student api
-  const handleDelete = async () => {
-    try {
-      setLoading(true);
-      // console.log({currStudent})
-      const url =
-        role === "classTeacher"
-          ? EndPoints.TEACHER.DELETE_SECTION_STUDENT
-          : role === "admin"
-            ? EndPoints.ADMIN.DELETE_SECTION_STUDENT
-            : "";
-      const res = await axiosClient.delete(`${url}/${currStudent._id}`);
-      // console.log(res)
-      if (res?.statusCode === 200) {
-        toast.success(res.result);
-        fetchStudents();
-      }
-    } catch (e) {
-      // console.log(e)
-      toast.error(e);
-    } finally {
-      setLoading(false);
-      setShowDeleteConfirmation(false);
-    }
   };
 
   // Uploads an Excel sheet containing student data
@@ -1072,18 +1041,6 @@ export default function StudentSection() {
                               className={`size-5`}
                             />
                           </button>
-                          {/* <button
-                            onClick={() => {
-                              setCurrStudent(student);
-                              setShowDeleteConfirmation(true);
-                            }}
-                          >
-                            <img
-                              src={isDarkMode ? delete2 : delete2w}
-                              alt="deleteStudent"
-                              className={`size-5`}
-                            />
-                          </button> */}
                         </div>
                       )}
                     </td>
@@ -1096,21 +1053,23 @@ export default function StudentSection() {
       </div>
 
       {/* student info model */}
-      {studentInfoModelOpen && (
+      {/* {studentInfoModelOpen && (
         <StudentInfo
           modelOpen={setStudentInfoModelOpen}
           currStudent={currStudent}
         />
-      )}
+      )} */}
 
-      {/* delete confirmation popup */}
-      {showDeleteConfirmation && (
-        <DeletePopup
-          isVisible={showDeleteConfirmation}
-          onClose={() => setShowDeleteConfirmation(false)}
-          onDelete={handleDelete}
+      {studentInfoModelOpen ? (
+        <StudentDetailSidebar
+          student={currStudent}
+          isDarkMode={isDarkMode}
+          onClose={() => {
+            setCurrStudent([]);
+            setStudentInfoModelOpen(false);
+          }}
         />
-      )}
+      ) : null}
     </div>
   );
 }

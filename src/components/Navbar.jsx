@@ -404,8 +404,8 @@ const Navbar = () => {
           <NavBtn
             label={t("titles.payments")}
             icon={<CreditCard size={14} />}
-            active={isActive("/payments")}
-            onClick={() => navigate("/payments")}
+            // active={isActive("/payments")}
+            // onClick={() => navigate("/payments")}
           />
         </>
       )}

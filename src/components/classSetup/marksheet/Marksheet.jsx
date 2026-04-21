@@ -281,28 +281,43 @@ export default function Marksheet() {
     );
   };
 
-  /**
-   * isAllFieldsFilled (derived)
-   * - Checks whether every student's required components have values filled.
-   * - Note: the original code uses .every inside .every but did not return from the outer
-   *   every; left unchanged but wrapped into a const for clarity. Keep an eye on logic if behavior seems off.
-   */
-  const isAllFieldsFilled = studentData?.every((student) => {
-    student?.studentExamResult?.every((res) => {
-      if (!res?.components || res?.components?.length === 0) return false;
+  const isAllMarksFilled = () => {
+    if (!studentData?.length || !selectedExam?.subjects?.length) return false;
 
-      const gradesValid = res?.components
-        ?.filter((c) => c?.gradingType === "grades")
-        ?.every((c) => !!c?.gradeObtained);
+    return studentData.every((student) => {
+      return selectedExam.subjects.every((subj) => {
+        const result = student?.studentExamResult?.find(
+          (r) => r?.subjectId === subj?.subject?._id,
+        );
 
-      const marksValid = res?.components
-        ?.filter((c) => c?.gradingType === "marks")
-        ?.every((c) => c?.marksObtained !== "" && c?.marksObtained !== null);
-      // console.log(gradesValid, marksValid);
+        if (!result || !result?.components?.length) return false;
 
-      return gradesValid && marksValid;
+        return subj?.components?.every((examComp) => {
+          const comp = result.components.find(
+            (c) => c?.examType === examComp?.examType,
+          );
+
+          if (!comp) return false;
+
+          // Marks validation
+          if (examComp?.gradingType === "marks") {
+            return (
+              comp?.marksObtained !== "" &&
+              comp?.marksObtained !== null &&
+              comp?.marksObtained !== undefined
+            );
+          }
+
+          // Grade validation
+          if (examComp?.gradingType === "grades") {
+            return !!comp?.gradeObtained;
+          }
+
+          return true;
+        });
+      });
     });
-  });
+  };
 
   /**
    * publishResult
@@ -463,7 +478,16 @@ export default function Marksheet() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setShowConfirm1(true)}
+                          onClick={() => {
+                            if (!isAllMarksFilled()) {
+                              toast.dismiss();
+                              toast.error(
+                                "Please fill all marks/grades before publishing",
+                              );
+                              return;
+                            }
+                            setShowConfirm1(true);
+                          }}
                           disabled={isEdit || loading}
                           className="w-[100px] py-[10px] text-sm font-poppins-bold rounded-md bg-backgroundBlue text-white"
                         >
@@ -481,7 +505,7 @@ export default function Marksheet() {
                       <tr className="text-center text-base font-poppins-bold text-white">
                         <th className="p-2">Student</th>
                         {selectedExam?.subjects?.map((subj, i) => {
-                          console.log(subj);
+                          // console.log(subj);
 
                           const maxTheoryMarks = subj?.components.find(
                             (c) => c.examType === "theory",
@@ -493,7 +517,14 @@ export default function Marksheet() {
                           return (
                             <th key={i} className="p-2">
                               <div className="flex flex-col items-center space-y-1">
-                                <span>{subj?.subject?.name}</span>
+                                <span>
+                                  {subj?.subject?.name}
+                                  <span className="text-red-500 pl-1">
+                                    {subj?.teacherSubjectSection?.isMainSubject
+                                      ? "*"
+                                      : ""}
+                                  </span>
+                                </span>
                                 <span className="text-xs font-poppins-medium text-gray-300">
                                   {subj?.subjectType === "mainSubject"
                                     ? `T/${maxTheoryMarks} P/${maxPracticalMarks}`
@@ -510,9 +541,16 @@ export default function Marksheet() {
                     <tbody>
                       {studentData?.map((student, i) => {
                         // Filter only main subjects
+                        // const mainSubjects = selectedExam?.subjects?.filter(
+                        //   (subj) => subj?.subjectType === "mainSubject",
+                        // );
+                        // console.log(selectedExam);
+
                         const mainSubjects = selectedExam?.subjects?.filter(
-                          (subj) => subj?.subjectType === "mainSubject",
+                          (subj) =>
+                            subj?.teacherSubjectSection?.isMainSubject === true,
                         );
+                        // console.log(mainSubjects);
 
                         // Calculate total marks obtained
                         const totalMarksObtained = mainSubjects?.reduce(

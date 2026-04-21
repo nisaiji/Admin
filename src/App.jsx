@@ -36,6 +36,7 @@ import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
 import Fees from "./components/payments/Fees";
 import { OnboardingScreen } from "./components/onboarding/Onboarding";
 import { TCPage } from "./components/transferCertificate/TransferCertificate";
+import NotFound from "./components/NotFound";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -105,10 +106,7 @@ function App() {
                   />
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
-                  <Route
-                    path="transfer-certificate"
-                    element={<TCPage />}
-                  />
+                  <Route path="transfer-certificate" element={<TCPage />} />
                   {/* <Route
                     path="transfer-certificate-apply"
                     element={<TransferCertificateApply />}
@@ -148,9 +146,12 @@ function App() {
                     element={<Requests />}
                   />
                   <Route path="teacher-leave-requests" element={<Leaves />} />
-                  <Route path="student-information-system/add-student" element={<AddStudentForm />} />
+                  <Route
+                    path="student-information-system/add-student"
+                    element={<AddStudentForm />}
+                  />
                   <Route path="notice" element={<Notice />} />
-                  <Route path="payments" element={<Fees />} />
+                  {/* <Route path="payments" element={<Fees />} /> */}
                 </>
               ) : role === "classTeacher" ? (
                 <>
@@ -184,6 +185,7 @@ function App() {
             <Route path="/signup" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
           </Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </I18nextProvider>
     </>

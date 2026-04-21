@@ -35,7 +35,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import DeletePopup from "../DeleteMessagePopup";
 import Breadcrumbs from "../BreadCrumbs";
 import CONSTANT from "../../utils/constants";
 import REGEX from "../../utils/regix";
@@ -89,14 +88,6 @@ function persistFilter(key, value) {
   window.localStorage.removeItem(key);
 }
 
-function getStudentRecordId(student) {
-  return student?._id || student?.id || student?.studentId || "";
-}
-
-function getStudentKey(student, index) {
-  return getStudentRecordId(student) || `student-${index}`;
-}
-
 function getDisplayValue(value) {
   if (value === null || value === undefined) return CONSTANT.NA;
 
@@ -126,7 +117,7 @@ function getInitials(student) {
 }
 
 function getAvatarClass(student, index) {
-  const source = String(getStudentRecordId(student) || index);
+  const source = String(student?.id || index);
   let hash = 0;
 
   for (let i = 0; i < source.length; i += 1) {
@@ -198,7 +189,7 @@ function getStudentRollNo(student) {
 
 function normalizeStudentDraft(student) {
   return {
-    id: getStudentRecordId(student),
+    id: student?.id,
     firstname: student?.firstname || student?.firstName || "",
     lastname: student?.lastname || student?.lastName || "",
     gender: student?.gender || "",
@@ -364,7 +355,7 @@ function SidebarTabs({ tabs, activeTab, onChange, accentClass }) {
   );
 }
 
-function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
+export function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
   const [tab, setTab] = useState("personal");
   const fullName = getFullName(student);
   const className = getStudentClassName(student);
@@ -496,25 +487,25 @@ function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
                 value={student?.gender}
                 isDarkMode={isDarkMode}
               />
-              <SectionTitle
+              {/* <SectionTitle
                 Icon={Phone}
                 title="Contact"
                 isDarkMode={isDarkMode}
-              />
-              <DetailRow
+              /> */}
+              {/* <DetailRow
                 Icon={Phone}
                 label="Phone"
                 value={student?.parentPhone || student?.phone}
                 isDarkMode={isDarkMode}
                 accentClass="text-[#0A81D1]"
-              />
-              <DetailRow
+              /> */}
+              {/* <DetailRow
                 Icon={Mail}
                 label="Email"
                 value={student?.parentEmail || student?.email}
                 isDarkMode={isDarkMode}
                 accentClass="text-[#0A81D1]"
-              />
+              /> */}
               <DetailRow
                 Icon={MapPin}
                 label="Address"
@@ -590,7 +581,7 @@ function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
               <DetailRow Icon={BookOpen} label="Class" value={className} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
               <DetailRow Icon={BookOpen} label="Section" value={sectionName} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
               <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || getStudentRecordId(student)} isDarkMode={isDarkMode} />
+              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || student?.id} isDarkMode={isDarkMode} />
             </>
           ) : null} */}
         </div>
@@ -885,7 +876,7 @@ function StudentEditSidebar({
               <DetailRow Icon={BookOpen} label="Class" value={getStudentClassName(student)} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
               <DetailRow Icon={BookOpen} label="Section" value={getStudentSectionName(student)} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
               <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || getStudentRecordId(student)} isDarkMode={isDarkMode} />
+              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || student?.id} isDarkMode={isDarkMode} />
             </>
           ) : null} */}
         </div>
@@ -942,8 +933,6 @@ export default function Studentlist() {
   const [studentList, setStudentList] = useState([]);
   const [detailStudent, setDetailStudent] = useState(null);
   const [editStudent, setEditStudent] = useState(null);
-  const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
-  const [idForDelete, setIdForDelete] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [classList, setClassList] = useState([]);
@@ -1224,50 +1213,6 @@ export default function Studentlist() {
     setDetailStudent(null);
   }
 
-  function handleDelete(student) {
-    const studentId = getStudentRecordId(student);
-
-    if (!studentId) {
-      toast.error("Student id is missing");
-      return;
-    }
-
-    setIdForDelete(studentId);
-    setDeleteConfirmModal(true);
-  }
-
-  async function handleConfirmDelete() {
-    if (!idForDelete) {
-      setDeleteConfirmModal(false);
-      return;
-    }
-
-    try {
-      setDeleting(true);
-      const response = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_SECTION_STUDENT}/${idForDelete}`,
-      );
-
-      if (response?.statusCode !== 200) {
-        throw new Error(response?.message || "Failed to delete student");
-      }
-
-      toast.success(response?.result || "Student deleted");
-
-      if (studentList.length === 1 && pageNo > 1) {
-        setPageNo((currentPage) => Math.max(1, currentPage - 1));
-      } else {
-        await fetchStudents();
-      }
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to delete student"));
-    } finally {
-      setDeleting(false);
-      setIdForDelete("");
-      setDeleteConfirmModal(false);
-    }
-  }
-
   async function handleSaveStudent(draft) {
     if (!draft?.id) {
       toast.error("Student id is missing");
@@ -1432,17 +1377,19 @@ export default function Studentlist() {
               </button>
             ) : null}
           </div>
-          <button
-            type="button"
-            onClick={handleClear}
-            className={cn(
-              "inline-flex h-12 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-poppins-bold transition",
-              controlClass,
-            )}
-          >
-            <X size={16} />
-            Clear
-          </button>
+          {searchTerm || searchClass || searchSection ? (
+            <button
+              type="button"
+              onClick={handleClear}
+              className={cn(
+                "inline-flex h-12 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-poppins-bold transition",
+                controlClass,
+              )}
+            >
+              <X size={16} />
+              Clear
+            </button>
+          ) : null}
         </div>
 
         <section
@@ -1530,13 +1477,12 @@ export default function Studentlist() {
                     </td>
                   </tr>
                 ) : (
-                  studentList.map((student, index) => {
+                  studentList?.map((student, index) => {
                     const fullName = getFullName(student);
-                    const recordId = getStudentRecordId(student);
 
                     return (
                       <tr
-                        key={getStudentKey(student, index)}
+                        key={index}
                         className={cn(
                           "border-b transition last:border-b-0",
                           index % 2 === 1 &&
@@ -1640,19 +1586,6 @@ export default function Studentlist() {
                             >
                               <Info size={15} />
                             </button>
-                            {/* <button
-                              type="button"
-                              title="Delete"
-                              aria-label={`Delete ${fullName}`}
-                              onClick={() => handleDelete(student)}
-                              className={cn(
-                                "inline-flex size-8 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-60",
-                                dangerIconButtonClass
-                              )}
-                              disabled={deleting && idForDelete === recordId}
-                            >
-                              <Trash2 size={14} />
-                            </button> */}
                           </div>
                         </td>
                       </tr>
@@ -1757,14 +1690,6 @@ export default function Studentlist() {
           onClose={() => setEditStudent(null)}
           onSave={handleSaveStudent}
           t={t}
-        />
-      ) : null}
-
-      {deleteConfirmModal ? (
-        <DeletePopup
-          isVisible={deleteConfirmModal}
-          onClose={() => setDeleteConfirmModal(false)}
-          onDelete={handleConfirmDelete}
         />
       ) : null}
     </div>
