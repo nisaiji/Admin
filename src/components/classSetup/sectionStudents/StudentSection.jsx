@@ -64,14 +64,15 @@ import edit2 from "../../../assets/images/darkmode/edit.png";
 import book from "../../../assets/images/book.png";
 import importIcon from "../../../assets/images/importIcon.png";
 import downloadIcon from "../../../assets/images/downloadIcon.png";
-import StudentInfo from "./StudentInfo";
 import Spinner from "../../Spinner";
 import EndPoints from "../../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import REGEX from "../../../utils/regix";
-import AttendancePopup from "../../AttendancePopup";
 import Breadcrumbs from "../../BreadCrumbs";
-import { StudentDetailSidebar } from "../../studentSetup/Studentlist";
+import {
+  StudentDetailSidebar,
+  loadDetailedStudent,
+} from "../../studentSetup/studentInfoSidebar";
 
 export default function StudentSection() {
   // Importing necessary modules and hooks
@@ -90,7 +91,7 @@ export default function StudentSection() {
   // State variables for managing component data and UI
   const [students, setStudents] = useState([]);
   const [originalStudents, setOriginalStudents] = useState([]);
-  const [currStudent, setCurrStudent] = useState([]);
+  const [currStudent, setCurrStudent] = useState(null);
   const [classData, setClassData] = useState([]);
   const [studentInfoModelOpen, setStudentInfoModelOpen] = useState(false);
   const [editSNo, setEditSNo] = useState(null);
@@ -106,6 +107,7 @@ export default function StudentSection() {
     parentFullName: "",
     guardianName: "",
     parentPhone: "",
+    aadharNumber: "",
     sectionId: "",
   });
   const genders = [t("options.male"), t("options.female"), t("options.other")];
@@ -163,9 +165,15 @@ export default function StudentSection() {
   };
 
   // Handles displaying student information in a modal
-  const handleShowInfo = (student) => {
-    setCurrStudent(student);
-    setStudentInfoModelOpen(true);
+  const handleShowInfo = async (student) => {
+    try {
+      const nextStudent = await loadDetailedStudent(student, role);
+
+      setCurrStudent(nextStudent);
+      setStudentInfoModelOpen(true);
+    } catch (error) {
+      toast.error(error?.message || "Failed to load student details");
+    }
   };
 
   // get student api
@@ -195,7 +203,20 @@ export default function StudentSection() {
       if (res?.statusCode === 200) {
         const studentList = res?.result?.map((student, index, array) => ({
           ...student,
+          id: student?.id || student?._id,
           SNo: index + 1,
+          className:
+            student?.className ||
+            (role === "classTeacher"
+              ? teacherData?.className
+              : classAndSectionData?.className) ||
+            "",
+          sectionName:
+            student?.sectionName ||
+            (role === "classTeacher"
+              ? teacherData?.sectionName
+              : classAndSectionData?.sectionName) ||
+            "",
           parentFullName: student?.parentFullName || "",
           guardianName: student?.guardianName || "",
           parentPhone: student?.parentPhone || "",
@@ -265,6 +286,10 @@ export default function StudentSection() {
     if (!student?.parentPhone.trim()) return t("validationError.phone");
     if (!REGEX.PHONE_LENGTH.test(student.parentPhone))
       return t("validationError.validationPhoneCount");
+    if (!student?.aadharNumber?.trim()) return "Aadhaar number is required";
+
+    if (!/^\d{12}$/.test(student.aadharNumber))
+      return "Aadhaar must be exactly 12 digits";
     return "";
   };
 
@@ -276,7 +301,7 @@ export default function StudentSection() {
   const handleInputChange = (sNo, field, value) => {
     let formattedValue = value;
 
-    if (field === "parentPhone") {
+    if (field === "parentPhone" || field === "aadharNumber") {
       formattedValue = value.replace(/\D/g, "");
     } else {
       formattedValue = value.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ");
@@ -334,6 +359,7 @@ export default function StudentSection() {
       }),
       gender: student.gender,
       phone: student.parentPhone,
+      aadharNumber: student.aadharNumber,
       ...(!isUpdate && {
         sectionId:
           role === "admin"
@@ -363,6 +389,7 @@ export default function StudentSection() {
             parentFullName: "",
             guardianName: "",
             parentPhone: "",
+            aadharNumber: "",
             sectionId:
               role === "admin"
                 ? classAndSectionData?.sectionId
@@ -672,6 +699,11 @@ export default function StudentSection() {
                     {t("labels.phone")}
                   </th>
                   <th
+                    className={` py-2 border border-borderLine2 bg-clip-padding`}
+                  >
+                    {t("labels.aadhar")}
+                  </th>
+                  <th
                     className={`w-36 py-2 border border-borderLine2 bg-clip-padding`}
                   >
                     {t("labels.action")}
@@ -825,6 +857,24 @@ export default function StudentSection() {
                         handleInputChange(null, "parentPhone", e.target.value)
                       }
                       placeholder={t("placeholders.phoneNumber")}
+                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                    />
+                  </td>
+                  <td
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
+                  >
+                    <input
+                      type="text"
+                      value={newStudent.aadharNumber}
+                      maxLength={12}
+                      onChange={(e) =>
+                        handleInputChange(null, "aadharNumber", e.target.value)
+                      }
+                      placeholder="Aadhaar Number"
                       className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
                         isDarkMode ? "text-textPrimary" : "text-textBlack"
                       } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
@@ -1010,6 +1060,28 @@ export default function StudentSection() {
                         disabled={editSNo !== student.SNo}
                       />
                     </td>
+                    <td
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
+                    >
+                      <input
+                        type="text"
+                        value={student.aadharNumber || ""}
+                        maxLength={12}
+                        onChange={(e) =>
+                          handleInputChange(
+                            student.SNo,
+                            "aadharNumber",
+                            e.target.value,
+                          )
+                        }
+                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                        disabled={editSNo !== student.SNo}
+                      />
+                    </td>
                     {/* actions buttons */}
                     <td
                       className={`${
@@ -1052,20 +1124,12 @@ export default function StudentSection() {
         </div>
       </div>
 
-      {/* student info model */}
-      {/* {studentInfoModelOpen && (
-        <StudentInfo
-          modelOpen={setStudentInfoModelOpen}
-          currStudent={currStudent}
-        />
-      )} */}
-
       {studentInfoModelOpen ? (
         <StudentDetailSidebar
           student={currStudent}
           isDarkMode={isDarkMode}
           onClose={() => {
-            setCurrStudent([]);
+            setCurrStudent(null);
             setStudentInfoModelOpen(false);
           }}
         />

@@ -98,6 +98,9 @@ const AddStudent = () => {
     if (!student.class) return t("validationError.class");
     if (!student.section) return t("validationError.section");
     if (!student.address) return t("validationError.address");
+    if (!student?.aadharNumber?.trim()) return "Aadhaar number is required";
+    if (!/^\d{12}$/.test(student?.aadharNumber))
+      return "Aadhaar must be exactly 12 digits";
     return "";
   };
 
@@ -118,6 +121,7 @@ const AddStudent = () => {
       parentName: "",
       guardianName: "",
       phone: "",
+      aadharNumber: "",
       class: "",
       section: "",
       bloodGroup: "",
@@ -148,8 +152,11 @@ const AddStudent = () => {
           lastname: capitalize(values.lastname.trim()),
           gender: values.gender,
           parentName: capitalize(values.parentName.trim()),
-          ...(values.guardianName && { guardianName: capitalize(values.guardianName.trim()) }),
+          ...(values.guardianName && {
+            guardianName: capitalize(values.guardianName.trim()),
+          }),
           phone: values.phone,
+          aadharNumber: values.aadharNumber,
           address: values.address,
           ...(values.bloodGroup && { bloodGroup: values.bloodGroup }),
           ...(values.dob && { dob: values.dob }),
@@ -167,7 +174,7 @@ const AddStudent = () => {
         };
         const res = await axiosClient.post(
           EndPoints.ADMIN.REGISTER_SECTION_STUDENT,
-          payload
+          payload,
         );
 
         if (res?.statusCode === 201) {
@@ -191,7 +198,7 @@ const AddStudent = () => {
         return;
       }
       const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`,
       );
 
       // Filter out classes without sections and then sort them.
@@ -229,6 +236,12 @@ const AddStudent = () => {
   const optionalFields = [
     { name: "guardianName", label: "Guardian Name 2" },
     { name: "address", label: "Address", optional: false },
+    {
+      name: "aadharNumber",
+      label: "Aadhaar Number",
+      type: "text",
+      optional: false,
+    },
     { name: "bloodGroup", label: "Blood Group", optional: true },
     { name: "dob", label: "Date of Birth", optional: true },
     { name: "parentGender", label: "Parent Gender", optional: true },
@@ -255,13 +268,13 @@ const AddStudent = () => {
         mode: isDarkMode ? "dark" : "light",
         ...(isDarkMode
           ? {
-            background: { default: "#121212", paper: "#1e1e1e" },
-            text: { primary: "#fff", secondary: "#aaa" },
-          }
+              background: { default: "#121212", paper: "#1e1e1e" },
+              text: { primary: "#fff", secondary: "#aaa" },
+            }
           : {
-            background: { default: "#f5f5f5", paper: "#fff" },
-            text: { primary: "#000", secondary: "#666" },
-          }),
+              background: { default: "#f5f5f5", paper: "#fff" },
+              text: { primary: "#000", secondary: "#666" },
+            }),
       },
       components: {
         MuiOutlinedInput: {
@@ -321,16 +334,19 @@ const AddStudent = () => {
         e.preventDefault();
       }
 
-      if (name === "phone" && !/[0-9]/.test(e.key)) {
-        e.preventDefault();
+      if (name === "phone" || name === "aadharNumber") {
+        if (!/[0-9]/.test(e.key)) {
+          e.preventDefault();
+        }
       }
     };
 
     return (
       <div key={name} className="flex flex-col flex-1 mt-3">
         <label
-          className={`font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+          className={`font-semibold mb-2 ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
         >
           {field.label}
           <span className="text-textRed"> *</span>
@@ -349,10 +365,13 @@ const AddStudent = () => {
                 ? 20
                 : name === "phone"
                   ? 10
-                  : ""
+                  : name === "aadharNumber"
+                    ? 12
+                    : ""
           }
-          className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+          className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
         />
         {formik.touched[name] && formik.errors[name] && (
           <div className="text-textRed text-sm mt-1">{formik.errors[name]}</div>
@@ -367,8 +386,9 @@ const AddStudent = () => {
   const renderGenderDropdown = () => (
     <div className="flex flex-col w-full mt-3">
       <label
-        className={`font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-          }`}
+        className={`font-semibold mb-2 ${
+          isDarkMode ? "text-textPrimary" : "text-textBlack"
+        }`}
       >
         Gender<span className="text-textRed"> *</span>
       </label>
@@ -437,8 +457,9 @@ const AddStudent = () => {
   const renderClassDropdown = () => (
     <div className="flex flex-col w-full mt-3">
       <label
-        className={`font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-          }`}
+        className={`font-semibold mb-2 ${
+          isDarkMode ? "text-textPrimary" : "text-textBlack"
+        }`}
       >
         Class<span className="text-textRed"> *</span>
       </label>
@@ -468,7 +489,7 @@ const AddStudent = () => {
             formik.setFieldValue("class", selectedClassId);
             formik.setFieldValue("section", "");
             const foundClass = classList.find(
-              (cls) => cls._id === selectedClassId
+              (cls) => cls._id === selectedClassId,
             );
             setSectionList(foundClass?.section || []);
           }}
@@ -515,8 +536,9 @@ const AddStudent = () => {
   const renderSectionDropdown = () => (
     <div className="flex flex-col w-full mt-3">
       <label
-        className={`font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-          }`}
+        className={`font-semibold mb-2 ${
+          isDarkMode ? "text-textPrimary" : "text-textBlack"
+        }`}
       >
         Section<span className="text-textRed"> *</span>
       </label>
@@ -589,8 +611,9 @@ const AddStudent = () => {
 
   return (
     <div
-      className={`flex w-full min-h-[calc(100vh-72px)] p-6 ${isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-        }`}
+      className={`flex w-full min-h-[calc(100vh-72px)] p-6 ${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      }`}
     >
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 bg-white z-30">
@@ -599,15 +622,17 @@ const AddStudent = () => {
       )}
       <Toaster position="top-center" />
       <div
-        className={`${isDarkMode
-          ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-          : "bg-white"
-          } rounded-2xl w-full h-full flex flex-col items-start py-5 px-10`}
+        className={`${
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-white"
+        } rounded-2xl w-full h-full flex flex-col items-start py-5 px-10`}
       >
         <Breadcrumbs />
         <h1
-          className={`text-2xl font-poppins-bold mt-3 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+          className={`text-2xl font-poppins-bold mt-3 ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
         >
           Add Student
         </h1>
@@ -636,14 +661,15 @@ const AddStudent = () => {
                 className="flex flex-col flex-1 min-w-[500px]"
               >
                 <label
-                  className={`font-semibold mb-1 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                    }`}
+                  className={`font-semibold mb-1 ${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
                 >
                   {field.label}
                   {!field.optional && <span className="text-textRed"> *</span>}
                 </label>
                 {field.name === "bloodGroup" ||
-                  field.name === "parentGender" ? (
+                field.name === "parentGender" ? (
                   <FormControl
                     fullWidth
                     variant="outlined"
@@ -722,7 +748,7 @@ const AddStudent = () => {
                           if (date) {
                             formik.setFieldValue(
                               field.name,
-                              moment(date).format("DD/MM/YYYY")
+                              moment(date).format("DD/MM/YYYY"),
                             );
                           }
                         }}
@@ -749,11 +775,26 @@ const AddStudent = () => {
                     type={field.type || "text"}
                     name={field.name}
                     placeholder={field.label}
-                    onChange={formik.handleChange}
+                    // onChange={formik.handleChange}
+                    onChange={(e) => {
+                      const value =
+                        field.name === "aadharNumber"
+                          ? e.target.value.replace(/\D/g, "").slice(0, 12)
+                          : e.target.value;
+
+                      formik.setFieldValue(field.name, value);
+                    }}
                     value={formik.values[field.name]}
-                    maxLength={field.name === "guardianName" ? 20 : undefined}
-                    className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                      }`}
+                    maxLength={
+                      field.name === "guardianName"
+                        ? 20
+                        : field.name === "aadharNumber"
+                          ? 12
+                          : undefined
+                    }
+                    className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
+                      isDarkMode ? "text-textPrimary" : "text-textBlack"
+                    }`}
                   />
                 )}
               </div>
@@ -764,10 +805,11 @@ const AddStudent = () => {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className={`border-2 px-4 py-2 rounded-xl ${isDarkMode
-                ? "text-white border-white"
-                : "text-black border-gray-400"
-                }`}
+              className={`border-2 px-4 py-2 rounded-xl ${
+                isDarkMode
+                  ? "text-white border-white"
+                  : "text-black border-gray-400"
+              }`}
             >
               Cancel
             </button>

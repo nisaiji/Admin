@@ -115,6 +115,91 @@ const mockStudents = [
   },
 ];
 
+const mockDetailedStudent = {
+  ...mockStudents[0],
+  studentId: "STU-101",
+  className: "8th",
+  sectionName: "A",
+  aadharNumber: 123412341234,
+  dob: "2008-01-15",
+  address: "42 Green Avenue",
+  isActive: true,
+  feeStatus: "pending",
+  transferCertificateIssued: false,
+  guardianName: "Sunita Sharma",
+  parentFullName: "Rajesh Sharma",
+  parentPhone: "9876500001",
+  mainParentFullName: "Nick Sharma",
+  mainParentGender: "Male",
+  mainParentQualification: "12 pass",
+  mainParentOccupation: "Doctor",
+  mainParentPhone: "9999999999",
+  mainParentEmail: "nick@example.com",
+  mainParentAddress: "Indore",
+  mainParentStatus: "verified",
+  mainParentFcmToken: "secret-token",
+  sessionStartYear: 2026,
+  sessionEndYear: 2027,
+  sessionStatus: "active",
+  attendanceSummary: {
+    currentSessionPercentage: 92,
+    presentCount: 23,
+    absentCount: 2,
+    totalMarkedDays: 25,
+    latestAttendanceStatus: "present",
+  },
+  attendancePercentage: 92,
+  subjectSummary: {
+    totalSubjects: 2,
+    subjects: [
+      {
+        subjectId: "subject-1",
+        subjectName: "Science",
+        subjectCode: "104",
+        teacherName: "Bhavya Singh",
+      },
+      {
+        subjectId: "subject-2",
+        subjectName: "English",
+        subjectCode: "102",
+        teacherName: "Aman Singh",
+      },
+    ],
+  },
+  leaveSummary: {
+    pending: 1,
+    accept: 2,
+    reject: 0,
+    complete: 3,
+    expired: 1,
+    latestRequests: [],
+  },
+  examSummary: {
+    stats: {
+      totalExams: 2,
+      scheduledCount: 1,
+      ongoingCount: 0,
+      completedCount: 1,
+      cancelledCount: 0,
+      publishedResultCount: 1,
+      attemptedResultCount: 1,
+      passedExamCount: 1,
+      failedExamCount: 0,
+    },
+    latestExams: [
+      {
+        examId: "exam-1",
+        examName: "Unit Test 1",
+        examStatus: "scheduled",
+        subjectCount: 4,
+        resultPublished: false,
+        overallStatus: "published_pending",
+      },
+    ],
+    hasMore: false,
+  },
+};
+
 const mockState = {
   appConfig: {
     isDarkMode: true,
@@ -133,9 +218,11 @@ function mockApi({
   students = mockStudents,
   totalStudents = students.length,
   studentError,
+  detailedStudent = mockDetailedStudent,
+  detailError,
   classes = mockClasses,
 } = {}) {
-  axiosClient.get.mockImplementation((url) => {
+  axiosClient.get.mockImplementation((url, config) => {
     if (url.startsWith("class/session")) {
       return Promise.resolve({
         statusCode: 200,
@@ -143,7 +230,22 @@ function mockApi({
       });
     }
 
-    if (url.startsWith("v3/student/admin")) {
+    if (url === "v3/student/admin/detail") {
+      if (detailError) return Promise.reject(detailError);
+
+      expect(config).toEqual({
+        params: {
+          id: "student-1",
+        },
+      });
+
+      return Promise.resolve({
+        statusCode: 200,
+        result: detailedStudent,
+      });
+    }
+
+    if (url.startsWith("v3/student/admin?")) {
       if (studentError) return Promise.reject(studentError);
 
       return Promise.resolve({
@@ -187,7 +289,7 @@ describe("Studentlist Component", () => {
     expect(screen.getByTestId("breadcrumbs")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /add student/i })).toHaveAttribute(
       "href",
-      "/add-student"
+      "/student-information-system/add-student"
     );
     expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
     expect(screen.getByText("Tony Dsouza")).toBeInTheDocument();
@@ -236,7 +338,7 @@ describe("Studentlist Component", () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(400);
+      jest.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -288,7 +390,7 @@ describe("Studentlist Component", () => {
     });
   });
 
-  test("opens the detail sidebar from the info action", async () => {
+  test("loads student details before opening the info sidebar", async () => {
     mockApi();
 
     renderComponent();
@@ -296,10 +398,106 @@ describe("Studentlist Component", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /info mahi sharma/i }));
 
-    const sidebar = screen.getByTestId("student-detail-sidebar");
+    await waitFor(() => {
+      expect(axiosClient.get).toHaveBeenCalledWith(
+        "v3/student/admin/detail",
+        {
+          params: {
+            id: "student-1",
+          },
+        }
+      );
+    });
+
+    const sidebar = await screen.findByTestId("student-detail-sidebar");
     expect(sidebar).toBeInTheDocument();
     expect(within(sidebar).getByText("Student Profile")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Class NA - NA")).toBeInTheDocument();
+    expect(within(sidebar).getAllByText("Class 8th - A").length).toBeGreaterThan(0);
+    expect(within(sidebar).getByText("STU-101")).toBeInTheDocument();
+    expect(within(sidebar).getByText("123412341234")).toBeInTheDocument();
+    expect(within(sidebar).getByText("15 Jan 2008")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Active")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Pending")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Not Issued")).toBeInTheDocument();
+  });
+
+  test("shows curated guardian details and hides sensitive fields", async () => {
+    mockApi();
+
+    renderComponent();
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /info mahi sharma/i }));
+    const sidebar = await screen.findByTestId("student-detail-sidebar");
+
+    fireEvent.click(within(sidebar).getByRole("button", { name: /guardian/i }));
+
+    expect(within(sidebar).getByText("Nick Sharma")).toBeInTheDocument();
+    expect(within(sidebar).getByText("9999999999")).toBeInTheDocument();
+    expect(within(sidebar).getByText("nick@example.com")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Doctor")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Rajesh Sharma")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Sunita Sharma")).toBeInTheDocument();
+    expect(within(sidebar).queryByText("secret-token")).not.toBeInTheDocument();
+  });
+
+  test("shows academic summaries from the detailed payload", async () => {
+    mockApi();
+
+    renderComponent();
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /info mahi sharma/i }));
+    const sidebar = await screen.findByTestId("student-detail-sidebar");
+
+    fireEvent.click(within(sidebar).getByRole("button", { name: /academic/i }));
+
+    expect(within(sidebar).getByText("2026 - 2027")).toBeInTheDocument();
+    expect(within(sidebar).getByText("92%")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Science")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Teacher Bhavya Singh")).toBeInTheDocument();
+  });
+
+  test("shows activity summaries from the detailed payload", async () => {
+    mockApi();
+
+    renderComponent();
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /info mahi sharma/i }));
+    const sidebar = await screen.findByTestId("student-detail-sidebar");
+
+    fireEvent.click(within(sidebar).getByRole("button", { name: /activity/i }));
+
+    expect(within(sidebar).getByText("No recent leave requests")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Unit Test 1")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Published Pending")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Subjects 4")).toBeInTheDocument();
+  });
+
+  test("renders safe fallback states when nested detailed data is missing", async () => {
+    mockApi({
+      detailedStudent: {
+        ...mockStudents[0],
+        studentId: "STU-101",
+        className: "8th",
+        sectionName: "A",
+      },
+    });
+
+    renderComponent();
+    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /info mahi sharma/i }));
+    const sidebar = await screen.findByTestId("student-detail-sidebar");
+
+    fireEvent.click(within(sidebar).getByRole("button", { name: /academic/i }));
+    expect(within(sidebar).getByText("No subjects assigned")).toBeInTheDocument();
+    expect(within(sidebar).getAllByText("NA").length).toBeGreaterThan(0);
+
+    fireEvent.click(within(sidebar).getByRole("button", { name: /activity/i }));
+    expect(within(sidebar).getByText("No recent leave requests")).toBeInTheDocument();
+    expect(within(sidebar).getByText("No recent exams available")).toBeInTheDocument();
   });
 
   test("opens the edit sidebar and saves through the update API", async () => {
@@ -333,25 +531,6 @@ describe("Studentlist Component", () => {
       );
     });
     expect(mockToast.success).toHaveBeenCalledWith("Updated");
-  });
-
-  test("deletes a selected student", async () => {
-    mockApi();
-    axiosClient.delete.mockResolvedValue({
-      statusCode: 200,
-      result: "Deleted",
-    });
-
-    renderComponent();
-    expect(await screen.findByText("Mahi Sharma")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: /delete mahi sharma/i }));
-    fireEvent.click(await screen.findByTestId("confirmdeleteTeacher"));
-
-    await waitFor(() => {
-      expect(axiosClient.delete).toHaveBeenCalledWith("v3/student/admin/student-1");
-    });
-    expect(mockToast.success).toHaveBeenCalledWith("Deleted");
   });
 
   test("does not call APIs when no active session is available", async () => {

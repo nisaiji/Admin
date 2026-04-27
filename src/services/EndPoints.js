@@ -1,5 +1,6 @@
 const EndPoints = {
   ADMIN: {
+    TEMP: "v2/admin/student",
     // ADMIN SECTION STUDENTS v3 api
     REGISTER_SECTION_STUDENT: "v3/student/admin", //v3
     GET_SECTION_STUDENTS: "v3/student/get/admin",
@@ -54,6 +55,7 @@ const EndPoints = {
     DELETE_STUDENT: "student/admin",
     STUDENT_UPDATE: "v3/student/admin",
     SEARCH_STUDENT: "v3/student/admin",
+    GET_DETAILED_STUDENT: "v3/student/admin/detail",
 
     // ADMIN CLASS AND SECTION SETUP
     REGISTER_CLASS: "class",
@@ -112,8 +114,7 @@ const EndPoints = {
     CREATE_FEES_STRUCTURE: "fee-structure/school-fee-structure",
     GET_FEES_STRUCTURE_OF_SCHOOL:
       "fee-structure/school-fee-structure/get-school-fee-structure",
-    GET_FEES_STRUCTURE:
-      "fee-structure/school-fee-structure/session",
+    GET_FEES_STRUCTURE: "fee-structure/school-fee-structure/session",
 
     CREATE_FEES: "fee-structure/section-fee-structure",
     GET_FEES: "fee-structure/section-fee-structure",
@@ -166,6 +167,7 @@ const EndPoints = {
     // TEACHER SECTION STUDENTS
     REGISTER_SECTION_STUDENT: "v3/student/teacher",
     GET_SECTION_STUDENTS: "v3/student/get/teacher",
+    GET_DETAILED_STUDENT: "v3/student/teacher/detail",
     UPDATE_SECTION_STUDENT: "v3/student/teacher",
     DELETE_SECTION_STUDENT: "v3/student/teacher",
     GET_ATTENDANCE: "attendance/teacher",

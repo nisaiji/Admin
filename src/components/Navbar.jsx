@@ -26,18 +26,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import logo from "../assets/images/deer logo.png";
-
-/* ─── Colours ────────────────────────────────────────────────── */
-const C = {
-  nav: "#0a0c12",
-  bg: "#13161f",
-  border: "rgba(255,255,255,0.07)",
-  text: "#E3E8F3",
-  sub: "rgba(227,232,243,0.85)",
-  muted: "#64748B",
-  orange: "#FF793F",
-  blue: "#0a81d1",
-};
+import { C } from "../utils/constants";
 
 /* ─── Reusable dropdown component ────────────────────────────── */
 function NavDrop({ label, items, icon, align = "left" }) {
@@ -82,7 +71,7 @@ function NavDrop({ label, items, icon, align = "left" }) {
         {label}
         <ChevronDown
           size={13}
-          color={C.muted}
+          color={C.textSub}
           style={{
             transform: open ? "rotate(180deg)" : "none",
             transition: "transform 0.2s",
@@ -163,7 +152,7 @@ function NavDrop({ label, items, icon, align = "left" }) {
                         background: item.iconColor
                           ? `${item.iconColor}18`
                           : "rgba(255,255,255,0.05)",
-                        color: item.iconColor || C.muted,
+                        color: item.iconColor || C.textSub,
                         flexShrink: 0,
                       }}
                     >
@@ -309,7 +298,11 @@ const Navbar = () => {
             SikshaOS
           </div>
           <div
-            style={{ fontSize: "9px", color: C.muted, letterSpacing: "0.05em" }}
+            style={{
+              fontSize: "9px",
+              color: C.textSub,
+              letterSpacing: "0.05em",
+            }}
           >
             SCHOOL MANAGEMENT
           </div>
@@ -361,13 +354,13 @@ const Navbar = () => {
               {
                 label: t("roles.student"),
                 icon: <GraduationCap size={13} />,
-                iconColor: C.blue,
+                iconColor: C.blueBright,
                 onClick: () => navigate("/student-information-system"),
               },
               {
                 label: "TC",
                 icon: <FileText size={13} />,
-                iconColor: C.blue,
+                iconColor: C.blueBright,
                 onClick: () => navigate("/transfer-certificate"),
               },
             ]}
@@ -421,7 +414,7 @@ const Navbar = () => {
           borderRadius: "9px",
           background: "rgba(255,255,255,0.04)",
           border: "1px solid rgba(255,255,255,0.07)",
-          color: C.muted,
+          color: C.textSub,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -485,13 +478,13 @@ const Navbar = () => {
           {
             label: t("profile"),
             icon: <User size={13} />,
-            iconColor: C.muted,
+            iconColor: C.textSub,
             onClick: () => navigate(profileRoute),
           },
           {
             label: "Support",
             icon: <HelpCircle size={13} />,
-            iconColor: C.muted,
+            iconColor: C.textSub,
             onClick: () => {},
           },
           { divider: true, label: "" },

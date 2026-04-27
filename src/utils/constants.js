@@ -44,6 +44,7 @@ export const C = {
   border: "rgba(255,255,255,0.07)",
   borderSoft: "rgba(255,255,255,0.04)",
   text: "#E3E8F3",
+  sub: "rgba(227,232,243,0.85)",
   textSub: "#64748B",
   textMuted: "#374151",
   blue: "#4F8EF7",

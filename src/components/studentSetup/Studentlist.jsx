@@ -9,25 +9,14 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import {
-  BookOpen,
-  Briefcase,
-  Calendar,
   ChevronLeft,
   ChevronRight,
-  Droplets,
   Edit3,
-  GraduationCap,
-  Heart,
   Info,
-  Mail,
-  MapPin,
-  Phone,
   Plus,
   RefreshCw,
   Save,
   Search,
-  Shield,
-  Trash2,
   User,
   Users,
   X,
@@ -36,19 +25,27 @@ import { useTranslation } from "react-i18next";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import Breadcrumbs from "../BreadCrumbs";
-import CONSTANT from "../../utils/constants";
 import REGEX from "../../utils/regix";
+import {
+  SidebarTabs,
+  StudentDetailSidebar,
+  getAvatarClass,
+  getDisplayValue,
+  getFullName,
+  getInitials,
+  getStudentParentAddress,
+  getStudentParentDob,
+  getStudentParentEmail,
+  getStudentParentGender,
+  getStudentParentName,
+  getStudentParentOccupation,
+  getStudentParentPhone,
+  getStudentParentQualification,
+  getStudentRecordId,
+  loadDetailedStudent,
+} from "./studentInfoSidebar";
 
 const PAGE_LIMIT_OPTIONS = [10, 20, 25, 50, 100];
-const AVATAR_CLASSES = [
-  "bg-[#4F8EF7]",
-  "bg-[#4cbc9a]",
-  "bg-[#94A3B8]",
-  "bg-[#FBBF24]",
-  "bg-[#FF793F]",
-  "bg-[#fe4040]",
-  "bg-[#0a81d1]",
-];
 const CLASS_OPTION_KEYS = [
   "preNursery",
   "nursery",
@@ -74,7 +71,7 @@ function cn(...classes) {
 
 function getStoredFilter(key) {
   if (typeof window === "undefined") return "";
-  return window.localStorage.getItem(key) || "";
+  return window.localStorage.getItem(key) ?? "";
 }
 
 function persistFilter(key, value) {
@@ -88,51 +85,12 @@ function persistFilter(key, value) {
   window.localStorage.removeItem(key);
 }
 
-function getDisplayValue(value) {
-  if (value === null || value === undefined) return CONSTANT.NA;
-
-  const normalized = String(value).trim();
-  return normalized || CONSTANT.NA;
-}
-
-function getFullName(student) {
-  const firstName = student?.firstname || student?.firstName || "";
-  const lastName = student?.lastname || student?.lastName || "";
-  const fullName = `${firstName} ${lastName}`.trim();
-
-  return fullName || CONSTANT.NA;
-}
-
-function getInitials(student) {
-  const fullName = getFullName(student);
-  if (fullName === CONSTANT.NA) return "NA";
-
-  return fullName
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-function getAvatarClass(student, index) {
-  const source = String(student?.id || index);
-  let hash = 0;
-
-  for (let i = 0; i < source.length; i += 1) {
-    hash += source.charCodeAt(i);
-  }
-
-  return AVATAR_CLASSES[Math.abs(hash) % AVATAR_CLASSES.length];
-}
-
 function getClassSortValue(className, classOptions) {
   const translatedIndex = classOptions.indexOf(className);
   if (translatedIndex >= 0) return translatedIndex;
 
   const numericValue = Number.parseInt(
-    String(className || "").replace(/\D/g, ""),
+    String(className ?? "").replace(/\D/g, ""),
     10,
   );
   return Number.isNaN(numericValue) ? Number.MAX_SAFE_INTEGER : numericValue;
@@ -155,7 +113,7 @@ function getApiErrorMessage(error, fallback) {
 }
 
 function capitalizeValue(value) {
-  const normalized = String(value || "").trim();
+  const normalized = String(value ?? "").trim();
   if (!normalized) return "";
   return normalized.replace(
     /\S+/g,
@@ -163,431 +121,119 @@ function capitalizeValue(value) {
   );
 }
 
-function getStudentClassName(student) {
-  return getDisplayValue(
-    student?.className ||
-      student?.class?.name ||
-      student?.class ||
-      student?.classId?.name,
-  );
-}
-
-function getStudentSectionName(student) {
-  return getDisplayValue(
-    student?.sectionName ||
-      student?.section?.name ||
-      student?.section ||
-      student?.sectionId?.name,
-  );
-}
-
-function getStudentRollNo(student) {
-  return getDisplayValue(
-    student?.rollNo || student?.rollNumber || student?.studentId,
-  );
-}
-
 function normalizeStudentDraft(student) {
   return {
-    id: student?.id,
-    firstname: student?.firstname || student?.firstName || "",
-    lastname: student?.lastname || student?.lastName || "",
-    gender: student?.gender || "",
-    bloodGroup: student?.bloodGroup || "",
-    dob: student?.dob || "",
-    address: student?.address || "",
-    parentName: student?.parentFullName || student?.parentName || "",
-    guardianName: student?.guardianName || "",
-    phone: student?.parentPhone || student?.phone || "",
-    parentGender: student?.parentGender || "",
-    parentAge: student?.parentAge || "",
-    parentEmail: student?.parentEmail || student?.email || "",
-    parentQualification: student?.parentQualification || "",
-    parentOccupation: student?.parentOccupation || "",
-    parentAddress: student?.parentAddress || "",
+    id: getStudentRecordId(student),
+    firstname: student?.firstname ?? student?.firstName ?? "",
+    lastname: student?.lastname ?? student?.lastName ?? "",
+    aadharNumber: student?.aadharNumber ?? "",
+    gender: student?.gender ?? "",
+    bloodGroup: student?.bloodGroup ?? "",
+    dob: student?.dob ?? "",
+    address: student?.address ?? "",
+    parentName: getStudentParentName(student),
+    guardianName: student?.guardianName ?? "",
+    phone: getStudentParentPhone(student),
+    parentGender: getStudentParentGender(student),
+    parentDob: student?.mainParentDob ?? "",
+    parentEmail: getStudentParentEmail(student),
+    parentQualification: getStudentParentQualification(student),
+    parentOccupation: getStudentParentOccupation(student),
+    parentAddress: getStudentParentAddress(student),
   };
 }
 
 function buildStudentUpdatePayload(draft) {
-  const cleanedValues = {
-    firstname: capitalizeValue(draft.firstname),
-    lastname: capitalizeValue(draft.lastname),
-    gender: draft.gender,
-    bloodGroup: draft.bloodGroup,
-    dob: String(draft.dob || "").trim(),
-    address: capitalizeValue(draft.address),
-    parentName: capitalizeValue(draft.parentName),
-    guardianName: capitalizeValue(draft.guardianName),
-    parentGender: draft.parentGender,
-    parentAge: String(draft.parentAge || "").trim(),
-    parentEmail: String(draft.parentEmail || "")
-      .trim()
-      .toLowerCase(),
-    phone: String(draft.phone || "").trim(),
-    parentQualification: capitalizeValue(draft.parentQualification),
-    parentOccupation: capitalizeValue(draft.parentOccupation),
-    parentAddress: capitalizeValue(draft.parentAddress),
+  const requiredValues = {
+    firstname: capitalizeValue(draft?.firstname),
+    lastname: capitalizeValue(draft?.lastname),
+    aadharNumber: String(draft?.aadharNumber ?? "").trim(),
+    gender: draft?.gender,
+    // parentName: capitalizeValue(draft?.parentName),
+    // guardianName: capitalizeValue(draft?.guardianName),
+    // phone: String(draft?.phone ?? "").trim(),
   };
 
-  return Object.fromEntries(
-    Object.entries(cleanedValues).filter(([, value]) => value !== ""),
-  );
+  const optionalValues = {
+    bloodGroup: draft?.bloodGroup,
+    dob: String(draft?.dob ?? "").trim(),
+    address: capitalizeValue(draft?.address),
+    // parentGender: draft?.parentGender,
+    // parentDob: String(draft?.parentDob ?? "").trim(),
+    // parentEmail: String(draft?.parentEmail ?? "")
+    //   .trim()
+    //   .toLowerCase(),
+    // parentQualification: capitalizeValue(draft?.parentQualification),
+    // parentOccupation: capitalizeValue(draft?.parentOccupation),
+    // parentAddress: capitalizeValue(draft?.parentAddress),
+  };
+
+  return {
+    ...requiredValues,
+    ...Object.fromEntries(
+      Object.entries(optionalValues).filter(([, value]) => value !== ""),
+    ),
+  };
 }
 
 function validateStudentDraft(draft, t) {
   if (
-    !String(draft.firstname || "").trim() ||
-    String(draft.firstname || "").trim().length < 3 ||
-    REGEX.NUMBER.test(draft.firstname)
+    !String(draft?.firstname ?? "").trim() ||
+    String(draft?.firstname ?? "").trim().length < 3 ||
+    REGEX.NUMBER.test(draft?.firstname)
   ) {
     return t("validationError.enterFirstName");
   }
 
   if (
-    !String(draft.lastname || "").trim() ||
-    String(draft.lastname || "").trim().length < 3 ||
-    REGEX.NUMBER.test(draft.lastname)
+    !String(draft?.lastname ?? "").trim() ||
+    String(draft?.lastname ?? "").trim().length < 3 ||
+    REGEX.NUMBER.test(draft?.lastname)
   ) {
     return t("validationError.enterLastName");
   }
 
-  if (!draft.gender) {
+  if (!String(draft?.aadharNumber ?? "").trim()) {
+    return "Aadhaar number is required";
+  }
+
+  if (!/^\d{12}$/.test(String(draft?.aadharNumber ?? "").trim())) {
+    return "Aadhaar must be exactly 12 digits";
+  }
+
+  if (!draft?.gender) {
     return t("validationError.gender");
   }
 
-  if (
-    !String(draft.parentName || "").trim() ||
-    String(draft.parentName || "").trim().length < 3 ||
-    REGEX.NUMBER.test(draft.parentName)
-  ) {
-    return t("validationError.parentName");
-  }
+  // if (
+  //   !String(draft?.parentName ?? "").trim() ||
+  //   String(draft?.parentName ?? "").trim().length < 3 ||
+  //   REGEX.NUMBER.test(draft?.parentName)
+  // ) {
+  //   return t("validationError.parentName");
+  // }
 
-  if (!String(draft.phone || "").trim()) {
-    return t("validationError.phone");
-  }
+  // if (
+  //   !String(draft?.guardianName ?? "").trim() ||
+  //   String(draft?.guardianName ?? "").trim().length < 3 ||
+  //   REGEX.NUMBER.test(draft?.guardianName)
+  // ) {
+  //   return "Guardian name is required";
+  // }
 
-  if (!REGEX.PHONE_LENGTH.test(String(draft.phone || "").trim())) {
-    return t("validationError.validationPhoneCount");
-  }
+  // if (!String(draft?.phone ?? "").trim()) {
+  //   return t("validationError.phone");
+  // }
 
-  if (draft.parentEmail && !REGEX.EMAIL.test(draft.parentEmail)) {
-    return t("validationError.emailAddress");
-  }
+  // if (!REGEX.PHONE_LENGTH.test(String(draft?.phone ?? "").trim())) {
+  //   return t("validationError.validationPhoneCount");
+  // }
+
+  // if (draft?.parentEmail && !REGEX.EMAIL.test(draft?.parentEmail)) {
+  //   return t("validationError.emailAddress");
+  // }
 
   return "";
-}
-
-function SectionTitle({ Icon, title, isDarkMode }) {
-  return (
-    <div
-      className={cn(
-        "mb-2 mt-5 flex items-center gap-2 border-b pb-2 text-xs font-poppins-bold uppercase text-[#0A81D1]",
-        isDarkMode ? "border-[#0A81D1]/20" : "border-borderWhite",
-      )}
-    >
-      <Icon size={14} />
-      {title}
-    </div>
-  );
-}
-
-function DetailRow({ Icon, label, value, isDarkMode, accentClass = "" }) {
-  return (
-    <div
-      className={cn(
-        "flex gap-3 border-b py-3",
-        isDarkMode ? "border-white/[0.04]" : "border-borderWhite",
-      )}
-    >
-      <div
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-lg",
-          isDarkMode
-            ? "bg-white/[0.04] text-slate-500"
-            : "bg-whiteBackground2 text-textGray",
-        )}
-      >
-        <Icon size={15} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p
-          className={cn(
-            "text-[11px] font-poppins-bold uppercase",
-            isDarkMode ? "text-slate-500" : "text-textGray",
-          )}
-        >
-          {label}
-        </p>
-        <p
-          className={cn(
-            "mt-1 break-words text-sm font-poppins-regular",
-            accentClass || (isDarkMode ? "text-[#E3E8F3]" : "text-textBlack"),
-          )}
-        >
-          {getDisplayValue(value)}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function SidebarTabs({ tabs, activeTab, onChange, accentClass }) {
-  return (
-    <div className="flex gap-1 border-b border-white/[0.06]">
-      {tabs.map(({ key, label, Icon }) => (
-        <button
-          key={key}
-          type="button"
-          onClick={() => onChange(key)}
-          className={cn(
-            "mb-[-1px] inline-flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-poppins-bold transition",
-            activeTab === key
-              ? `${accentClass} border-current`
-              : "border-transparent text-slate-500 hover:text-[#E3E8F3]",
-          )}
-        >
-          <Icon size={14} />
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-export function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
-  const [tab, setTab] = useState("personal");
-  const fullName = getFullName(student);
-  const className = getStudentClassName(student);
-  const sectionName = getStudentSectionName(student);
-  const avatarClass = getAvatarClass(student, 0);
-  const tabs = [
-    { key: "personal", label: "Personal", Icon: User },
-    { key: "guardian", label: "Guardian", Icon: Users },
-    // { key: "academic", label: "Academic", Icon: GraduationCap },
-  ];
-
-  return (
-    <div className="fixed inset-0 z-40 flex">
-      <button
-        type="button"
-        aria-label="Close student profile"
-        className="flex-1 bg-black/65"
-        onClick={onClose}
-      />
-      <aside
-        data-testid="student-detail-sidebar"
-        className={cn(
-          "flex h-screen w-full max-w-[540px] flex-col border-l shadow-2xl",
-          isDarkMode
-            ? "border-white/10 bg-[#111315] text-[#E3E8F3]"
-            : "border-borderWhite bg-whiteBackground text-textBlack",
-        )}
-      >
-        <div
-          className={cn(
-            "sticky top-0 z-10 border-b px-6 pt-5",
-            isDarkMode
-              ? "border-white/10 bg-[#111315]"
-              : "border-borderWhite bg-whiteBackground",
-          )}
-        >
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-xs font-poppins-bold uppercase text-slate-500">
-              Student Profile
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={onEdit}
-                className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#FF793F]/30 bg-[#FF793F]/10 px-3 text-xs font-poppins-bold text-[#FF793F] transition hover:bg-[#FF793F]/20"
-              >
-                <Edit3 size={14} />
-                Edit
-              </button>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={onClose}
-                className={cn(
-                  "inline-flex size-9 items-center justify-center rounded-lg border transition",
-                  isDarkMode
-                    ? "border-white/10 bg-white/[0.04] text-slate-500 hover:text-[#E3E8F3]"
-                    : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack",
-                )}
-              >
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-
-          <div className="mb-5 flex items-center gap-4">
-            <div
-              className={cn(
-                "flex size-16 shrink-0 items-center justify-center rounded-full border-4 border-white/10 text-xl font-poppins-bold text-white",
-                avatarClass,
-              )}
-            >
-              {getInitials(student)}
-            </div>
-            <div className="min-w-0">
-              <h2 className="truncate text-xl font-poppins-bold">{fullName}</h2>
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full bg-[#0A81D1]/15 px-2 py-1 font-poppins-bold text-[#0A81D1]">
-                  Class {className} - {sectionName}
-                </span>
-                <span className="text-slate-500">
-                  Roll {getStudentRollNo(student)}
-                </span>
-                <span className="rounded-full bg-white/[0.06] px-2 py-1 text-slate-400">
-                  {getDisplayValue(student?.gender)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <SidebarTabs
-            tabs={tabs}
-            activeTab={tab}
-            onChange={setTab}
-            accentClass="text-[#0A81D1]"
-          />
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-6 pb-8">
-          {tab === "personal" ? (
-            <>
-              <SectionTitle
-                Icon={User}
-                title="Basic Info"
-                isDarkMode={isDarkMode}
-              />
-              <DetailRow
-                Icon={User}
-                label="Full Name"
-                value={fullName}
-                isDarkMode={isDarkMode}
-              />
-              <DetailRow
-                Icon={Calendar}
-                label="Date of Birth"
-                value={student?.dob}
-                isDarkMode={isDarkMode}
-              />
-              <DetailRow
-                Icon={Droplets}
-                label="Blood Group"
-                value={student?.bloodGroup}
-                isDarkMode={isDarkMode}
-                accentClass="text-[#FE4040]"
-              />
-              <DetailRow
-                Icon={Shield}
-                label="Gender"
-                value={student?.gender}
-                isDarkMode={isDarkMode}
-              />
-              {/* <SectionTitle
-                Icon={Phone}
-                title="Contact"
-                isDarkMode={isDarkMode}
-              /> */}
-              {/* <DetailRow
-                Icon={Phone}
-                label="Phone"
-                value={student?.parentPhone || student?.phone}
-                isDarkMode={isDarkMode}
-                accentClass="text-[#0A81D1]"
-              /> */}
-              {/* <DetailRow
-                Icon={Mail}
-                label="Email"
-                value={student?.parentEmail || student?.email}
-                isDarkMode={isDarkMode}
-                accentClass="text-[#0A81D1]"
-              /> */}
-              <DetailRow
-                Icon={MapPin}
-                label="Address"
-                value={student?.address}
-                isDarkMode={isDarkMode}
-              />
-            </>
-          ) : null}
-
-          {tab === "guardian" ? (
-            <>
-              <SectionTitle
-                Icon={Briefcase}
-                title="Parent Details"
-                isDarkMode={isDarkMode}
-              />
-              <DetailRow
-                Icon={User}
-                label="Parent Name"
-                value={student?.parentFullName || student?.parentName}
-                isDarkMode={isDarkMode}
-              />
-              <DetailRow
-                Icon={User}
-                label="Guardian Name"
-                value={student?.guardianName}
-                isDarkMode={isDarkMode}
-              />
-              <DetailRow
-                Icon={Phone}
-                label="Phone"
-                value={student?.parentPhone || student?.phone}
-                isDarkMode={isDarkMode}
-                accentClass="text-[#0A81D1]"
-              />
-              <DetailRow
-                Icon={Mail}
-                label="Email"
-                value={student?.parentEmail || student?.email}
-                isDarkMode={isDarkMode}
-                accentClass="text-[#0A81D1]"
-              />
-              <DetailRow
-                Icon={Heart}
-                label="Gender"
-                value={student?.parentGender}
-                isDarkMode={isDarkMode}
-              />
-              <DetailRow
-                Icon={Briefcase}
-                label="Occupation"
-                value={student?.parentOccupation}
-                isDarkMode={isDarkMode}
-              />
-              <DetailRow
-                Icon={BookOpen}
-                label="Qualification"
-                value={student?.parentQualification}
-                isDarkMode={isDarkMode}
-              />
-              <DetailRow
-                Icon={MapPin}
-                label="Address"
-                value={student?.parentAddress}
-                isDarkMode={isDarkMode}
-              />
-            </>
-          ) : null}
-
-          {/* {tab === "academic" ? (
-            <>
-              <SectionTitle Icon={GraduationCap} title="Academic Identity" isDarkMode={isDarkMode} />
-              <DetailRow Icon={BookOpen} label="Class" value={className} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={BookOpen} label="Section" value={sectionName} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || student?.id} isDarkMode={isDarkMode} />
-            </>
-          ) : null} */}
-        </div>
-      </aside>
-    </div>
-  );
 }
 
 function EditField({
@@ -652,14 +298,9 @@ function StudentEditSidebar({
   const [draft, setDraft] = useState(() => normalizeStudentDraft(student));
   const [tab, setTab] = useState("personal");
   const [errorMessage, setErrorMessage] = useState("");
-  const fullName =
-    `${draft.firstname} ${draft.lastname}`.trim() || getFullName(student);
+  const fullName = `${draft?.firstname} ${draft?.lastname}`.trim();
   const avatarClass = getAvatarClass(student, 0);
-  const tabs = [
-    { key: "personal", label: "Personal", Icon: User },
-    { key: "guardian", label: "Guardian", Icon: Users },
-    // { key: "academic", label: "Academic", Icon: GraduationCap },
-  ];
+  const tabs = [{ key: "personal", label: "Personal", Icon: User }];
 
   function setField(field, value) {
     setDraft((currentDraft) => ({
@@ -760,26 +401,32 @@ function StudentEditSidebar({
               <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
                 <EditField
                   label="First Name"
-                  value={draft.firstname}
+                  value={draft?.firstname}
                   onChange={(value) => setField("firstname", value)}
                   isDarkMode={isDarkMode}
                 />
                 <EditField
                   label="Last Name"
-                  value={draft.lastname}
+                  value={draft?.lastname}
                   onChange={(value) => setField("lastname", value)}
                   isDarkMode={isDarkMode}
                 />
                 <EditField
+                  label="Aadhar Number"
+                  value={draft?.aadharNumber}
+                  onChange={(value) => setField("aadharNumber", value)}
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
                   label="Gender"
-                  value={draft.gender}
+                  value={draft?.gender}
                   onChange={(value) => setField("gender", value)}
                   options={["Male", "Female", "Other"]}
                   isDarkMode={isDarkMode}
                 />
                 <EditField
                   label="Blood Group"
-                  value={draft.bloodGroup}
+                  value={draft?.bloodGroup}
                   onChange={(value) => setField("bloodGroup", value)}
                   options={["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]}
                   isDarkMode={isDarkMode}
@@ -788,97 +435,18 @@ function StudentEditSidebar({
               <EditField
                 type="date"
                 label="Date of Birth"
-                value={draft.dob}
+                value={draft?.dob}
                 onChange={(value) => setField("dob", value)}
                 isDarkMode={isDarkMode}
               />
               <EditField
                 label="Address"
-                value={draft.address}
+                value={draft?.address}
                 onChange={(value) => setField("address", value)}
                 isDarkMode={isDarkMode}
               />
             </>
           ) : null}
-
-          {tab === "guardian" ? (
-            <>
-              <p className="mb-4 text-sm text-slate-500">
-                Update parent, guardian, and contact details.
-              </p>
-              <EditField
-                label="Parent Name"
-                value={draft.parentName}
-                onChange={(value) => setField("parentName", value)}
-                isDarkMode={isDarkMode}
-              />
-              <EditField
-                label="Guardian Name"
-                value={draft.guardianName}
-                onChange={(value) => setField("guardianName", value)}
-                isDarkMode={isDarkMode}
-              />
-              <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
-                <EditField
-                  label="Phone Number"
-                  value={draft.phone}
-                  onChange={(value) => setField("phone", value)}
-                  type="tel"
-                  isDarkMode={isDarkMode}
-                />
-                <EditField
-                  label="Email Address"
-                  value={draft.parentEmail}
-                  onChange={(value) => setField("parentEmail", value)}
-                  type="email"
-                  isDarkMode={isDarkMode}
-                />
-                <EditField
-                  label="Parent Gender"
-                  value={draft.parentGender}
-                  onChange={(value) => setField("parentGender", value)}
-                  options={["Male", "Female", "Other"]}
-                  isDarkMode={isDarkMode}
-                />
-                <EditField
-                  label="Parent Age"
-                  value={draft.parentAge}
-                  onChange={(value) => setField("parentAge", value)}
-                  isDarkMode={isDarkMode}
-                />
-              </div>
-              <EditField
-                label="Qualification"
-                value={draft.parentQualification}
-                onChange={(value) => setField("parentQualification", value)}
-                isDarkMode={isDarkMode}
-              />
-              <EditField
-                label="Occupation"
-                value={draft.parentOccupation}
-                onChange={(value) => setField("parentOccupation", value)}
-                isDarkMode={isDarkMode}
-              />
-              <EditField
-                label="Parent Address"
-                value={draft.parentAddress}
-                onChange={(value) => setField("parentAddress", value)}
-                isDarkMode={isDarkMode}
-              />
-            </>
-          ) : null}
-
-          {/* {tab === "academic" ? (
-            <>
-              <p className="mb-4 text-sm text-slate-500">
-                Academic placement is shown for reference. Class and section changes stay in the section setup flow.
-              </p>
-              <DetailRow Icon={BookOpen} label="Class" value={getStudentClassName(student)} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={BookOpen} label="Section" value={getStudentSectionName(student)} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || student?.id} isDarkMode={isDarkMode} />
-            </>
-          ) : null} */}
         </div>
 
         <div
@@ -890,7 +458,7 @@ function StudentEditSidebar({
           )}
         >
           <span className="text-xs text-slate-500">
-            Changes save to the student API
+            Save changes to the student
           </span>
           <div className="flex gap-2">
             <button
@@ -923,7 +491,7 @@ function StudentEditSidebar({
 
 export default function Studentlist() {
   const { t } = useTranslation();
-  const { classAndSectionData } = useSelector((state) => state.appAuth || {});
+  const { classAndSectionData } = useSelector((state) => state.appAuth ?? {});
   const isDarkMode = useSelector((state) => state.appConfig?.isDarkMode);
   const selectedSessionId = classAndSectionData?.selectedSession?._id;
 
@@ -944,7 +512,6 @@ export default function Studentlist() {
     getStoredFilter("searchSection"),
   );
   const [loading, setLoading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [savingStudent, setSavingStudent] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const requestIdRef = useRef(0);
@@ -964,7 +531,7 @@ export default function Studentlist() {
     [sectionList, searchSection],
   );
 
-  const totalPages = Math.max(1, Math.ceil(totalStudentCount / limit) || 1);
+  const totalPages = Math.max(1, Math.ceil(totalStudentCount / limit) ?? 1);
   const visiblePages = useMemo(
     () => buildVisiblePages(pageNo, totalPages),
     [pageNo, totalPages],
@@ -972,8 +539,8 @@ export default function Studentlist() {
   const showingFrom = totalStudentCount === 0 ? 0 : (pageNo - 1) * limit + 1;
   const showingTo = Math.min(totalStudentCount, pageNo * limit);
   const activeFilterLabel = selectedSessionId
-    ? `${selectedClass?.name || "All classes"} - ${
-        selectedSection?.name || "All sections"
+    ? `${selectedClass?.name ?? "All classes"} - ${
+        selectedSection?.name ?? "All sections"
       }`
     : "No active session";
 
@@ -1001,9 +568,6 @@ export default function Studentlist() {
   const activeIconButtonClass = isDarkMode
     ? "border-[#0A81D1]/30 bg-[#0A81D1]/15 text-[#0A81D1] hover:bg-[#0A81D1]/25"
     : "border-borderBlue bg-backgroundBlue15 text-textBlue hover:bg-backgroundLightBlue";
-  const dangerIconButtonClass = isDarkMode
-    ? "border-white/10 bg-white/[0.04] text-slate-500 hover:border-[#FE4040]/30 hover:bg-[#FE4040]/10 hover:text-[#FE4040]"
-    : "border-borderWhite bg-whiteBackground text-textGray hover:border-borderRed hover:bg-backgroundDarkRed2 hover:text-textRed";
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -1136,7 +700,7 @@ export default function Studentlist() {
         if (requestId !== requestIdRef.current) return;
 
         if (response?.statusCode !== 200) {
-          throw new Error(response?.message || "Failed to load students");
+          throw new Error(response?.message ?? "Failed to load students");
         }
 
         const students = Array.isArray(response?.result?.students)
@@ -1204,17 +768,30 @@ export default function Studentlist() {
     setPageNo(1);
   }
 
-  function handleShowInfo(student) {
-    setDetailStudent(student);
+  async function handleShowInfo(student) {
+    try {
+      const detailedStudent = await loadDetailedStudent(student, "admin");
+      setEditStudent(null);
+      setDetailStudent(detailedStudent);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to load student details"));
+    }
   }
 
-  function handleEdit(student) {
-    setEditStudent(student);
-    setDetailStudent(null);
+  async function handleEdit(student) {
+    try {
+      const detailedStudent = await loadDetailedStudent(student, "admin");
+      setEditStudent(detailedStudent);
+      setDetailStudent(null);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to load student details"));
+    }
   }
 
   async function handleSaveStudent(draft) {
-    if (!draft?.id) {
+    const studentId = draft?.id;
+
+    if (!studentId) {
       toast.error("Student id is missing");
       return;
     }
@@ -1225,15 +802,15 @@ export default function Studentlist() {
 
       const payload = buildStudentUpdatePayload(draft);
       const response = await axiosClient.put(
-        `${EndPoints.ADMIN.STUDENT_UPDATE}/${draft.id}`,
+        `${EndPoints.ADMIN.STUDENT_UPDATE}/${studentId}`,
         payload,
       );
 
       if (response?.statusCode !== 200) {
-        throw new Error(response?.message || "Failed to update student");
+        throw new Error(response?.message ?? "Failed to update student");
       }
 
-      toast.success(response?.result || "Student updated");
+      toast.success(response?.result ?? "Student updated");
       setEditStudent(null);
       await fetchStudents();
     } catch (error) {
@@ -1517,12 +1094,7 @@ export default function Studentlist() {
                                   mutedClass,
                                 )}
                               >
-                                Roll{" "}
-                                {getDisplayValue(
-                                  student?.rollNo ||
-                                    student?.rollNumber ||
-                                    student?.studentId,
-                                )}
+                                Roll {getDisplayValue(student?.studentId)}
                               </p>
                             </div>
                           </div>
@@ -1541,9 +1113,7 @@ export default function Studentlist() {
                             secondaryTextClass,
                           )}
                         >
-                          {getDisplayValue(
-                            student?.parentPhone || student?.phone,
-                          )}
+                          {getDisplayValue(getStudentParentPhone(student))}
                         </td>
                         <td
                           className={cn(
@@ -1552,9 +1122,7 @@ export default function Studentlist() {
                           )}
                         >
                           <span className="block max-w-[240px] truncate">
-                            {getDisplayValue(
-                              student?.parentEmail || student?.email,
-                            )}
+                            {getDisplayValue(getStudentParentEmail(student))}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-sm font-poppins-bold text-[#FE4040]">
