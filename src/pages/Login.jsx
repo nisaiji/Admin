@@ -14,7 +14,10 @@ import Spinner from "../components/Spinner";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
-import { setAuthData, setSessionCreated } from "../store/AppAuthSlice";
+import {
+  setAuthData,
+  setSessionCreatedStatus,
+} from "../store/AppAuthSlice";
 
 /**
  * Login Component
@@ -105,6 +108,7 @@ function Login() {
 
         if (res?.statusCode === 200) {
           const decodedToken = jwtDecode(res?.result?.accessToken);
+          const hasSession = Boolean(decodedToken?.isSessionCreated);
           // console.log(decodedToken);
           // console.log({ result });
           if (decodedToken?.role === "admin") {
@@ -113,10 +117,10 @@ function Login() {
               localStorage.setItem("refresh_token", res?.result?.refreshToken);
               localStorage.removeItem("temp_access_token");
               dispatch(setAuthData(res?.result?.accessToken));
-              dispatch(setSessionCreated());
+              dispatch(setSessionCreatedStatus(hasSession));
               toast.success(t("messages.login.success"));
               resetForm();
-              if (decodedToken?.role === "admin" && decodedToken?.isSessionCreated === false) {
+              if (!hasSession) {
                 navigate("/onboard", { replace: true });
               } else {
                 navigate("/", { replace: true });
@@ -141,6 +145,7 @@ function Login() {
             localStorage.setItem("access_token", res?.result?.accessToken);
             localStorage.setItem("refresh_token", res?.result?.refreshToken);
             dispatch(setAuthData(res?.result?.accessToken));
+            dispatch(setSessionCreatedStatus(hasSession));
             toast.success(t("messages.login.success"));
             resetForm();
             navigate("/", { replace: true });

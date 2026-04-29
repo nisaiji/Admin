@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Navigate, useNavigate } from "react-router";
-import { Info, ArrowRight, GraduationCap, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Info, ArrowRight } from "lucide-react";
 import { SessionCard } from "./SessionCard";
 import { motion, AnimatePresence } from "motion/react";
 import { ConfirmationModal } from "./ConfirmationModel";
@@ -9,8 +9,8 @@ import EndPoints from "../../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
 
 import moment from "moment";
-import { useDispatch, useSelector } from "react-redux";
-import { setSessionCreated } from "../../store/AppAuthSlice";
+import { useDispatch } from "react-redux";
+import { setSessionCreatedStatus } from "../../store/AppAuthSlice";
 
 const getRealSessions = () => {
   const today = moment();
@@ -42,15 +42,10 @@ const defaultSessions = getRealSessions();
 export function OnboardingScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { role, isSessionCreated } = useSelector((state) => state.appAuth);
   const [selectedId, setSelectedId] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const tooltipRef = useRef(null);
-
-  if (role === "admin" && isSessionCreated === true) {
-    return <Navigate to="/" />;
-  }
   // Close tooltip when clicking outside
   useEffect(() => {
     if (!showTooltip) return;
@@ -81,7 +76,7 @@ export function OnboardingScreen() {
 
       if (res?.statusCode === 200 || res?.statusCode === 201) {
         toast.success(res?.result);
-        dispatch(setSessionCreated());
+        dispatch(setSessionCreatedStatus(true));
         setShowConfirm(false);
         navigate("/", { replace: true });
       }
