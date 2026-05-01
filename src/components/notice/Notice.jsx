@@ -128,7 +128,7 @@ export default function Notice() {
       // Validate form
       const e = validateData();
       if (e) return toast.error(e);
-
+      setLoading(true);
       let targetAudience = [];
       if (formData.toTeacher) targetAudience.push("teacher");
       if (formData.toParent) targetAudience.push("parent");
@@ -151,6 +151,8 @@ export default function Notice() {
       }
     } catch (e) {
       toast.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -316,6 +318,7 @@ export default function Notice() {
                   </div>
                   <button
                     onClick={() => handleSave()}
+                    disabled={loading}
                     className={`px-5 py-2 text-sm rounded-md transition ${
                       isDarkMode
                         ? " bg-[#68686880] text-textPrimary"

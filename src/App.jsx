@@ -33,10 +33,10 @@ import Subjects from "./components/classSetup/subjects/Subjects";
 import Marksheet from "./components/classSetup/marksheet/Marksheet";
 import Tags from "./components/classSetup/tags/Tags";
 import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
-import Fees from "./components/payments/Fees";
 import { OnboardingScreen } from "./components/onboarding/Onboarding";
 import { TCPage } from "./components/transferCertificate/TransferCertificate";
 import NotFound from "./components/NotFound";
+import SettingsPage from "./components/settings/SettingsPage";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -150,6 +150,7 @@ function App() {
                     path="student-information-system/add-student"
                     element={<AddStudentForm />}
                   />
+                  <Route path="settings" element={<SettingsPage />} />
                   <Route path="notice" element={<Notice />} />
                   {/* <Route path="payments" element={<Fees />} /> */}
                 </>

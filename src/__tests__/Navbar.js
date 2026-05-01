@@ -1,167 +1,100 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import Navbar from "../components/Navbar";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { useSelector } from "react-redux";
+import Navbar from "../components/Navbar";
 
 jest.mock("react-redux", () => ({
   useSelector: jest.fn(),
 }));
 
 const mockedNavigate = jest.fn();
+
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockedNavigate,
-  Link: ({ children, to, ...rest }) => (
-    <a href={to} {...rest}>
-      {children}
-    </a>
-  ),
 }));
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key) => key }),
 }));
 
-describe("Navbar Component", () => {
+const createState = (role = "admin") => ({
+  appAuth: {
+    role,
+    data: { name: "Admin User" },
+    teacherData: { name: "Teacher User" },
+  },
+  appConfig: {},
+});
+
+const renderNavbar = (state, path = "/") => {
+  useSelector.mockImplementation((selector) => selector(state));
+
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <Navbar />
+    </MemoryRouter>,
+  );
+};
+
+describe("Navbar", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useSelector.mockReset();
   });
 
-  test("renders teacher view and navigates to /student-section on click", () => {
-    const teacherState = {
-      appAuth: { role: "teacher", section: "SectionA", class: "ClassB" },
-    };
-    const { useSelector } = require("react-redux");
-    useSelector.mockImplementation((callback) => callback(teacherState));
+  test("renders class teacher navigation and routes to classroom", () => {
+    renderNavbar(createState("classTeacher"));
 
-    render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
-    );
-
-    const teacherClassroomEl = screen.getByText("titles.classRoom");
-    expect(teacherClassroomEl).toBeInTheDocument();
-
-    fireEvent.click(teacherClassroomEl);
-    expect(mockedNavigate).toHaveBeenCalledWith("/student-section", {
-      state: { classId: "ClassB", sectionId: "SectionA" },
+    const classroomButton = screen.getByRole("button", {
+      name: "titles.classRoom",
     });
 
+    expect(classroomButton).toBeInTheDocument();
+    fireEvent.click(classroomButton);
+
+    expect(mockedNavigate).toHaveBeenCalledWith("/student-menu");
     expect(screen.queryByText("setup")).not.toBeInTheDocument();
-    expect(screen.queryByText("roles.student")).not.toBeInTheDocument();
-    expect(screen.queryByText("titles.requests")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Settings" })).not.toBeInTheDocument();
   });
 
-  test("renders admin view with setup, student, requests, and profile menus", async () => {
-    const adminState = {
-      appAuth: { role: "admin", section: "SectionA", class: "ClassB" },
-    };
-    const { useSelector } = require("react-redux");
-    useSelector.mockImplementation((callback) => callback(adminState));
-
-    render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
-    );
-
-    const setupButton = screen.getByText("setup");
-    expect(setupButton).toBeInTheDocument();
-
-    const studentLink = screen.getByText("roles.student");
-    expect(studentLink).toBeInTheDocument();
-
-    const requestsButton = screen.getByText("titles.requests");
-    expect(requestsButton).toBeInTheDocument();
-
-    fireEvent.click(setupButton);
-
-    expect(await screen.findByText("roles.teacher")).toBeInTheDocument();
-    expect(screen.getByText("titles.classRoom")).toBeInTheDocument();
-    expect(screen.getByText("event")).toBeInTheDocument();
-
-    fireEvent.click(requestsButton);
-
-    expect(await screen.findByText("Password Reset")).toBeInTheDocument();
-    expect(screen.getByText("leaves")).toBeInTheDocument();
-
-    const profileIcon = screen.getByAltText("Dropdown");
-    fireEvent.click(profileIcon);
-
-    expect(await screen.findByText("profile")).toBeInTheDocument();
-    expect(screen.getByText("logout")).toBeInTheDocument();
-
-    const logoutLink = screen.getByText("logout");
-    const localStorageClearSpy = jest.spyOn(
+  test("renders admin settings navigation and removes support from the profile menu", () => {
+    const clearStorageSpy = jest.spyOn(
       window.localStorage.__proto__,
-      "clear"
+      "clear",
     );
-    fireEvent.click(logoutLink);
-    expect(localStorageClearSpy).toHaveBeenCalled();
+
+    renderNavbar(createState(), "/settings");
+
+    const settingsButton = screen.getByRole("button", { name: "Settings" });
+    expect(settingsButton).toHaveAttribute("aria-current", "page");
+
+    fireEvent.click(settingsButton);
+    expect(mockedNavigate).toHaveBeenCalledWith("/settings");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /open profile menu/i }),
+    );
+
+    expect(screen.getByText("profile")).toBeInTheDocument();
+    expect(screen.queryByText("Support")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("logout"));
+    expect(clearStorageSpy).toHaveBeenCalled();
+    expect(mockedNavigate).toHaveBeenCalledWith("/login");
+
+    clearStorageSpy.mockRestore();
   });
 
-  test("hovering over menus toggles them appropriately", async () => {
-    const adminState = {
-      appAuth: { role: "admin", section: "SectionA", class: "ClassB" },
-    };
-    const { useSelector } = require("react-redux");
-    useSelector.mockImplementation((callback) => callback(adminState));
+  test("keeps settings highlighted for nested settings paths", () => {
+    renderNavbar(createState(), "/settings/academic-sessions");
 
-    render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
-    );
-
-    const setupContainer = screen.getByText("setup").parentElement;
-
-    fireEvent.mouseEnter(setupContainer);
-    expect(await screen.findByText("roles.teacher")).toBeInTheDocument();
-
-    fireEvent.mouseLeave(setupContainer);
-    await waitFor(() => {
-      expect(screen.queryByText("roles.teacher")).not.toBeInTheDocument();
-    });
-
-    const requestsContainer = screen.getByText("titles.requests").parentElement;
-    fireEvent.mouseEnter(requestsContainer);
-    expect(await screen.findByText("Password Reset")).toBeInTheDocument();
-    fireEvent.mouseLeave(requestsContainer);
-    await waitFor(() => {
-      expect(screen.queryByText("Password Reset")).not.toBeInTheDocument();
-    });
-
-    const profileContainer = screen.getByAltText("Dropdown").parentElement;
-    fireEvent.mouseEnter(profileContainer);
-    expect(await screen.findByText("profile")).toBeInTheDocument();
-    fireEvent.mouseLeave(profileContainer);
-    await waitFor(() => {
-      expect(screen.queryByText("profile")).not.toBeInTheDocument();
-    });
-  });
-
-  test("removes event listener on unmount", () => {
-    const adminState = {
-      appAuth: { role: "admin", section: "SectionA", class: "ClassB" },
-    };
-    const { useSelector } = require("react-redux");
-    useSelector.mockImplementation((callback) => callback(adminState));
-
-    const addSpy = jest.spyOn(document, "addEventListener");
-    const removeSpy = jest.spyOn(document, "removeEventListener");
-
-    const { unmount } = render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
-    );
-    expect(addSpy).toHaveBeenCalledWith("mousedown", expect.any(Function));
-
-    unmount();
-    expect(removeSpy).toHaveBeenCalledWith("mousedown", expect.any(Function));
-
-    addSpy.mockRestore();
-    removeSpy.mockRestore();
+    expect(
+      screen.getByRole("button", { name: "Settings" }),
+    ).toHaveAttribute("aria-current", "page");
+    expect(
+      screen.getByRole("button", { name: "titles.notice" }),
+    ).not.toHaveAttribute("aria-current");
   });
 });

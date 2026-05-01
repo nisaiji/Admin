@@ -6,16 +6,15 @@
  * Preserves role-based navigation, i18n translations, and logout functionality.
  */
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import {
   ChevronDown,
-  Bell,
   CreditCard,
+  Settings,
   User,
   LogOut,
-  HelpCircle,
   UserCog,
   BookOpen,
   Umbrella,
@@ -29,7 +28,7 @@ import logo from "../assets/images/deer logo.png";
 import { C } from "../utils/constants";
 
 /* ─── Reusable dropdown component ────────────────────────────── */
-function NavDrop({ label, items, icon, align = "left" }) {
+function NavDrop({ label, items, icon, align = "left", buttonAriaLabel }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -45,6 +44,8 @@ function NavDrop({ label, items, icon, align = "left" }) {
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
+        type="button"
+        aria-label={buttonAriaLabel || label}
         onClick={() => setOpen((o) => !o)}
         style={{
           display: "flex",
@@ -112,6 +113,7 @@ function NavDrop({ label, items, icon, align = "left" }) {
                 />
               ) : (
                 <button
+                  type="button"
                   key={i}
                   onClick={() => {
                     item.onClick?.();
@@ -174,6 +176,8 @@ function NavDrop({ label, items, icon, align = "left" }) {
 function NavBtn({ label, icon, active, onClick }) {
   return (
     <button
+      type="button"
+      aria-current={active ? "page" : undefined}
       onClick={onClick}
       style={{
         display: "flex",
@@ -211,15 +215,14 @@ function NavBtn({ label, icon, active, onClick }) {
 ═══════════════════════════════════════════════════════════════ */
 const Navbar = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const location = useLocation();
   const { t } = useTranslation();
 
   const { data, teacherData } = useSelector((state) => state.appAuth);
   const role = useSelector((state) => state.appAuth.role);
-  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
-  const isActive = (path) => location.pathname === path;
+  const isPathActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   // Logout: clear local storage
   const handleLogout = () => {
@@ -271,6 +274,7 @@ const Navbar = () => {
     >
       {/* ── Logo ─────────────────────────────────────────── */}
       <button
+        type="button"
         onClick={() => navigate("/")}
         style={{
           display: "flex",
@@ -314,7 +318,7 @@ const Navbar = () => {
         <NavBtn
           label={t("titles.classRoom")}
           icon={<BookOpen size={14} />}
-          active={isActive("/student-menu")}
+          active={isPathActive("/student-menu")}
           onClick={() => navigate("/student-menu")}
         />
       )}
@@ -389,7 +393,7 @@ const Navbar = () => {
           <NavBtn
             label={t("titles.notice")}
             icon={<Megaphone size={14} />}
-            active={isActive("/notice")}
+            active={isPathActive("/notice")}
             onClick={() => navigate("/notice")}
           />
 
@@ -442,6 +446,7 @@ const Navbar = () => {
       <NavDrop
         label=""
         align="right"
+        buttonAriaLabel="Open profile menu"
         icon={
           profilePhoto ? (
             <img
@@ -481,13 +486,18 @@ const Navbar = () => {
             iconColor: C.textSub,
             onClick: () => navigate(profileRoute),
           },
-          {
-            label: "Support",
-            icon: <HelpCircle size={13} />,
-            iconColor: C.textSub,
-            onClick: () => {},
-          },
           { divider: true, label: "" },
+          ...(role === "admin"
+            ? [
+                {
+                  label: "Settings",
+                  icon: <Settings size={13} />,
+                  iconColor: C.textSub,
+                  onClick: () => navigate("/settings"),
+                },
+                { divider: true, label: "" },
+              ]
+            : []),
           {
             label: t("logout"),
             icon: <LogOut size={13} />,

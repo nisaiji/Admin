@@ -12,6 +12,7 @@ function renderHome({
   role,
   isSessionCreated,
   includeOnboardRoute = true,
+  includeSettingsRoute = true,
 }) {
   const store = configureStore({
     reducer: {
@@ -28,6 +29,9 @@ function renderHome({
             <Route index element={<div>Dashboard</div>} />
             {includeOnboardRoute ? (
               <Route path="onboard" element={<div>Onboard</div>} />
+            ) : null}
+            {includeSettingsRoute ? (
+              <Route path="settings" element={<div>Settings</div>} />
             ) : null}
           </Route>
           <Route path="*" element={<div>Not Found</div>} />
@@ -74,6 +78,30 @@ describe("Home onboarding redirects", () => {
     expect(screen.queryByText("Onboard")).not.toBeInTheDocument();
   });
 
+  test("allows admins with a session to access settings", async () => {
+    renderHome({
+      path: "/settings",
+      role: "admin",
+      isSessionCreated: true,
+    });
+
+    expect(await screen.findByText("Settings")).toBeInTheDocument();
+    expect(screen.getByText("Navbar")).toBeInTheDocument();
+    expect(screen.queryByText("Onboard")).not.toBeInTheDocument();
+  });
+
+  test("redirects admins without a session from settings to onboarding", async () => {
+    renderHome({
+      path: "/settings",
+      role: "admin",
+      isSessionCreated: false,
+    });
+
+    expect(await screen.findByText("Onboard")).toBeInTheDocument();
+    expect(screen.queryByText("Settings")).not.toBeInTheDocument();
+    expect(screen.queryByText("Navbar")).not.toBeInTheDocument();
+  });
+
   test("does not expose onboarding to non-admin routes", async () => {
     renderHome({
       path: "/onboard",
@@ -84,5 +112,17 @@ describe("Home onboarding redirects", () => {
 
     expect(await screen.findByText("Not Found")).toBeInTheDocument();
     expect(screen.queryByText("Onboard")).not.toBeInTheDocument();
+  });
+
+  test("does not expose settings to non-admin routes", async () => {
+    renderHome({
+      path: "/settings",
+      role: "teacher",
+      isSessionCreated: true,
+      includeSettingsRoute: false,
+    });
+
+    expect(await screen.findByText("Not Found")).toBeInTheDocument();
+    expect(screen.queryByText("Settings")).not.toBeInTheDocument();
   });
 });

@@ -4,13 +4,12 @@ import { Info, ArrowRight } from "lucide-react";
 import { SessionCard } from "./SessionCard";
 import { motion, AnimatePresence } from "motion/react";
 import { ConfirmationModal } from "./ConfirmationModel";
-import { axiosClient } from "../../services/axiosClient";
-import EndPoints from "../../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
 
 import moment from "moment";
 import { useDispatch } from "react-redux";
 import { setSessionCreatedStatus } from "../../store/AppAuthSlice";
+import { createSession, getErrorMessage } from "../../services/sessionService";
 
 const getRealSessions = () => {
   const today = moment();
@@ -68,7 +67,7 @@ export function OnboardingScreen() {
   const handleConfirm = async () => {
     if (!selectedSession) return;
     try {
-      const res = await axiosClient.post(EndPoints.ADMIN.CREATE_SESSION, {
+      const res = await createSession({
         academicStartYear: selectedSession?.start,
         academicEndYear: selectedSession?.end,
         status: selectedSession?.id === "current" ? "active" : "upcoming",
@@ -80,8 +79,8 @@ export function OnboardingScreen() {
         setShowConfirm(false);
         navigate("/", { replace: true });
       }
-    } catch (e) {
-      toast.error(e?.response?.data?.message || "Error creating session.");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Error creating session."));
     }
   };
 
