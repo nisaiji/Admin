@@ -13,11 +13,13 @@ import { useSelector } from "react-redux";
 
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import { C, TH } from "./constants";
+import { getTH } from "./constants";
+import { useTCTheme } from "./ThemeContext";
 import { AvatarBadge } from "./shared";
 import { mapStudentForTc } from "./utils";
 
-const filterSelectSx = {
+const getFilterSelectSx = (C) => ({
+
   minWidth: 120,
   backgroundColor: C.cardAlt,
   borderRadius: "8px",
@@ -28,9 +30,11 @@ const filterSelectSx = {
   },
   "& .MuiInputBase-input": { color: C.text, fontSize: "13px", py: 1 },
   "& .MuiSvgIcon-root": { color: C.muted },
-};
 
-const paginationSelectSx = {
+});
+
+const getPaginationSelectSx = (C) => ({
+
   minWidth: 70,
   backgroundColor: "transparent",
   "& .MuiOutlinedInput-notchedOutline": { border: `1px solid ${C.border}` },
@@ -40,7 +44,14 @@ const paginationSelectSx = {
   },
   "& .MuiInputBase-input": { color: C.text, fontSize: "13px", py: 0.5 },
   "& .MuiSvgIcon-root": { color: C.muted },
-};
+
+});
+
+const getSelectMenuSx = (C) => ({
+  backgroundColor: C.card,
+  color: C.text,
+  border: `1px solid ${C.border}`,
+});
 
 function getErrorMessage(error, fallbackMessage) {
   if (typeof error === "string") {
@@ -62,6 +73,8 @@ function SelectionFilters({
   onFilterClassChange,
   onFilterSectionChange,
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       style={{
@@ -118,22 +131,21 @@ function SelectionFilters({
         ) : null}
       </div>
 
-      <FormControl size="small" sx={filterSelectSx}>
+      <FormControl size="small" sx={getFilterSelectSx(C)}>
         <Select
           value={filterClass}
           displayEmpty
           onChange={(event) => onFilterClassChange(event.target.value)}
           MenuProps={{
             PaperProps: {
-              sx: {
-                backgroundColor: "#111520",
-                color: C.text,
-                border: `1px solid ${C.border}`,
-              },
+              sx: getSelectMenuSx(C),
             },
           }}
         >
-          <MenuItem value="" sx={{ fontSize: "13px" }}>
+          <MenuItem
+            value=""
+            sx={{ fontSize: "13px", backgroundColor: C.card, color: C.text }}
+          >
             Class
           </MenuItem>
           {classList?.map((item) => (
@@ -142,7 +154,9 @@ function SelectionFilters({
               value={item?._id}
               sx={{
                 fontSize: "13px",
-                "&:hover": { backgroundColor: "rgba(255,255,255,0.05)" },
+                backgroundColor: C.card,
+                color: C.text,
+                "&:hover": { backgroundColor: C.rowHov },
               }}
             >
               {item?.name}
@@ -151,7 +165,7 @@ function SelectionFilters({
         </Select>
       </FormControl>
 
-      <FormControl size="small" sx={filterSelectSx}>
+      <FormControl size="small" sx={getFilterSelectSx(C)}>
         <Select
           value={filterSec}
           displayEmpty
@@ -159,15 +173,14 @@ function SelectionFilters({
           onChange={(event) => onFilterSectionChange(event.target.value)}
           MenuProps={{
             PaperProps: {
-              sx: {
-                backgroundColor: "#111520",
-                color: C.text,
-                border: `1px solid ${C.border}`,
-              },
+              sx: getSelectMenuSx(C),
             },
           }}
         >
-          <MenuItem value="" sx={{ fontSize: "13px" }}>
+          <MenuItem
+            value=""
+            sx={{ fontSize: "13px", backgroundColor: C.card, color: C.text }}
+          >
             Section
           </MenuItem>
           {sectionList.map((item) => (
@@ -176,7 +189,9 @@ function SelectionFilters({
               value={item?._id}
               sx={{
                 fontSize: "13px",
-                "&:hover": { backgroundColor: "rgba(255,255,255,0.05)" },
+                backgroundColor: C.card,
+                color: C.text,
+                "&:hover": { backgroundColor: C.rowHov },
               }}
             >
               {item?.name}
@@ -215,6 +230,8 @@ function SelectionFilters({
 }
 
 function StudentRow({ student, index, pageNo, limit, onSelectStudent }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <tr
       style={{
@@ -244,13 +261,13 @@ function StudentRow({ student, index, pageNo, limit, onSelectStudent }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <AvatarBadge
             id={student?._id || "student"}
-            label={student?.firstname || student?.name || "S"}
+            label={student?.firstName || "S"}
             size={36}
             fontSize={14}
           />
           <div>
             <div style={{ fontSize: "14px", fontWeight: 600, color: C.text }}>
-              {student?.firstname} {student?.lastname}
+              {student?.firstName} {student?.lastName}
             </div>
             <div style={{ fontSize: "11px", color: C.muted }}>
               {student?.gender || "-"}
@@ -277,10 +294,10 @@ function StudentRow({ student, index, pageNo, limit, onSelectStudent }) {
         </div>
       </td>
       <td style={{ padding: "13px 18px", fontSize: "13px", color: C.sub }}>
-        {student?.parentFullName || "-"}
+        {student?.mainParentFullName || "-"}
       </td>
       <td style={{ padding: "13px 18px", fontSize: "13px", color: C.sub }}>
-        {student?.parentPhone || student?.phone || "-"}
+        {student?.mainParentPhone || "-"}
       </td>
       <td style={{ padding: "13px 18px", textAlign: "center" }}>
         <button
@@ -323,6 +340,8 @@ function SelectionPaginationControls({
   onLimitChange,
   onPageChange,
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       style={{
@@ -335,27 +354,25 @@ function SelectionPaginationControls({
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <span style={{ fontSize: "13px", color: C.muted }}>Rows per page:</span>
-        <FormControl size="small" sx={paginationSelectSx}>
+        <FormControl size="small" sx={getPaginationSelectSx(C)}>
           <Select
             value={limit}
             onChange={(event) => onLimitChange(event.target.value)}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  backgroundColor: "#111520",
-                  color: C.text,
-                  border: `1px solid ${C.border}`,
-                },
-              },
-            }}
-          >
+          MenuProps={{
+            PaperProps: {
+              sx: getSelectMenuSx(C),
+            },
+          }}
+        >
             {[10, 20, 25, 50, 100].map((value) => (
               <MenuItem
                 key={value}
                 value={value}
                 sx={{
                   fontSize: "13px",
-                  "&:hover": { backgroundColor: "rgba(255,255,255,0.05)" },
+                  backgroundColor: C.card,
+                  color: C.text,
+                  "&:hover": { backgroundColor: C.rowHov },
                 }}
               >
                 {value}
@@ -392,6 +409,8 @@ function SelectionPaginationControls({
 }
 
 export function SelectionStep({ onSelect }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterClass, setFilterClass] = useState("");

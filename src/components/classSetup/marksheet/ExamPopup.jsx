@@ -35,7 +35,7 @@ export default function CreateExamPopup({
       if (res?.statusCode === 200) {
         const data = res?.result?.map((subj) => ({
           ...subj,
-          subjectType: "mainSubject",
+          subjectType: "MAIN_SUBJECT",
           scores: {},
         }));
         setMarksheetSubjects(data);
@@ -60,7 +60,7 @@ export default function CreateExamPopup({
   const handleScoreChange = (index, field, value) => {
     setMarksheetSubjects((prev) => {
       const updated = [...prev];
-      if (updated[index].subjectType === "mainSubject") {
+      if (updated[index].subjectType === "MAIN_SUBJECT") {
         if (/^\d*$/.test(value)) {
           updated[index].scores[field] = value;
         }
@@ -105,7 +105,7 @@ export default function CreateExamPopup({
     }
 
     for (let subj of marksheetSubjects) {
-      if (subj?.subjectType === "mainSubject") {
+      if (subj?.subjectType === "MAIN_SUBJECT") {
         const { tMax, tMin, pMax, pMin } = subj?.scores || {};
 
         // Required + mainSubject checks
@@ -138,7 +138,7 @@ export default function CreateExamPopup({
           );
           return false;
         }
-      } else if (subj?.subjectType === "gradeOnlySubject") {
+      } else if (subj?.subjectType === "GRADE_ONLY_SUBJECT") {
         const { tMax, tMin, pMax, pMin } = subj?.scores || {};
 
         // Required checks
@@ -203,11 +203,11 @@ export default function CreateExamPopup({
       const subjectsPayload = marksheetSubjects?.map((subj) => {
         let components = [];
 
-        if (subj?.subjectType === "mainSubject") {
+        if (subj?.subjectType === "MAIN_SUBJECT") {
           // numeric mapping for theory
           if (subj?.scores?.tMax || subj?.scores?.tMin) {
             components.push({
-              examType: "theory",
+              examType: "THEORY",
               maxMarks: Number(subj?.scores?.tMax || 0),
               passingMarks: Number(subj?.scores?.tMin || 0),
             });
@@ -215,16 +215,16 @@ export default function CreateExamPopup({
           // numeric mapping for practical
           if (subj?.scores?.pMax || subj?.scores?.pMin) {
             components.push({
-              examType: "practical",
+              examType: "PRACTICAL",
               maxMarks: Number(subj?.scores?.pMax || 0),
               passingMarks: Number(subj?.scores?.pMin || 0),
             });
           }
-        } else if (subj?.subjectType === "gradeOnlySubject") {
+        } else if (subj?.subjectType === "GRADE_ONLY_SUBJECT") {
           // grade mapping for theory
           if (subj?.scores?.tMax || subj?.scores?.tMin) {
             components.push({
-              examType: "theory",
+              examType: "THEORY",
               maxGrade: subj?.scores?.tMax || "",
               passingGrade: subj?.scores?.tMin || "",
             });
@@ -232,7 +232,7 @@ export default function CreateExamPopup({
           // grade mapping for practical
           if (subj?.scores?.pMax || subj?.scores?.pMin) {
             components.push({
-              examType: "practical",
+              examType: "PRACTICAL",
               maxGrade: subj?.scores?.pMax || "",
               passingGrade: subj?.scores?.pMin || "",
             });
@@ -368,13 +368,13 @@ export default function CreateExamPopup({
                         renderValue={(selected) =>
                           selected === ""
                             ? "Select Type"
-                            : selected === "mainSubject"
+                            : selected === "MAIN_SUBJECT"
                               ? "Numeric"
                               : "Grade"
                         }
                       >
-                        <MenuItem value="mainSubject">Numeric</MenuItem>
-                        <MenuItem value="gradeOnlySubject">Grade</MenuItem>
+                        <MenuItem value="MAIN_SUBJECT">Numeric</MenuItem>
+                        <MenuItem value="GRADE_ONLY_SUBJECT">Grade</MenuItem>
                       </Select>
                     </FormControl>
                   </td>
@@ -382,7 +382,7 @@ export default function CreateExamPopup({
                   {/* mainSubject fields */}
                   {["tMax", "tMin", "pMax", "pMin"].map((field) => (
                     <td className="p-2" key={field}>
-                      {subj?.subjectType === "mainSubject" ? (
+                      {subj?.subjectType === "MAIN_SUBJECT" ? (
                         <input
                           type="text"
                           placeholder="Score"

@@ -8,7 +8,9 @@ if (!global.TextDecoder) {
   global.TextDecoder = TextDecoder;
 }
 
-Object.defineProperty(window, "scrollTo", {
-  writable: true,
-  value: jest.fn(),
-});
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, "scrollTo", {
+    writable: true,
+    value: jest.fn(),
+  });
+}

@@ -23,8 +23,8 @@ export function getDisplayValue(value) {
 }
 
 export function getFullName(student) {
-  const firstName = student?.firstname ?? student?.firstName ?? "";
-  const lastName = student?.lastname ?? student?.lastName ?? "";
+  const firstName = student?.firstName ?? "";
+  const lastName = student?.lastName ?? "";
   const fullName = `${firstName} ${lastName}`.trim();
 
   return fullName || CONSTANT.NA;

@@ -41,7 +41,6 @@ It provides an overview of attendance, session management, calendar events, and 
   _id: string;
   academicStartYear: number;
   academicEndYear: number;
-  isCurrent: boolean;
 }
 ```
 

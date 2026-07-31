@@ -5,13 +5,14 @@ import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 import { AlumniStep } from "./AlumniStep";
-import { C, PAGE_TRANSITION } from "./constants";
+import { PAGE_TRANSITION } from "./constants";
 import { PendingStep } from "./PendingStep";
 import { SelectionStep } from "./SelectionStep";
 import { TCFormStep } from "./TCFormStep";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import { getTcRequestsFromResponse } from "./utils";
+import { useTCTheme, TCThemeProvider } from "./ThemeContext";
 
 const TAB_ITEMS = [
   { key: "pending", label: "Pending Requests", icon: <FileClock size={14} /> },
@@ -24,6 +25,7 @@ const TAB_ITEMS = [
 ];
 
 function PageHeader({ activeTab, isInForm, onTabChange }) {
+  const C = useTCTheme();
   return (
     <div
       style={{ borderBottom: `1px solid ${C.border}`, background: C.surface }}
@@ -131,7 +133,8 @@ function PageHeader({ activeTab, isInForm, onTabChange }) {
   );
 }
 
-export function TCPage() {
+function TCPageInner() {
+  const C = useTCTheme();
   const [activeTab, setActiveTab] = useState("pending");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -326,5 +329,13 @@ export function TCPage() {
         ) : null}
       </AnimatePresence>
     </div>
+  );
+}
+
+export function TCPage() {
+  return (
+    <TCThemeProvider>
+      <TCPageInner />
+    </TCThemeProvider>
   );
 }

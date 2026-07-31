@@ -15,7 +15,6 @@ const activeSession = {
   _id: "active-session",
   academicStartYear: 2026,
   academicEndYear: 2027,
-  isCurrent: true,
 };
 
 const upcomingSession = {

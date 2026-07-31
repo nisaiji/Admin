@@ -89,7 +89,7 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className="text-base font-normal text-textPrimary">
+                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
                   Classroom
                 </p>
               </div>
@@ -111,7 +111,7 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className="text-base font-normal text-textPrimary">
+                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
                   Attendance
                 </p>
               </div>
@@ -127,7 +127,7 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className="text-base font-normal text-textPrimary">
+                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
                   Tags
                 </p>
               </div>
@@ -149,7 +149,7 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className="text-base font-normal text-textPrimary">
+                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
                   Subjects
                 </p>
               </div>
@@ -168,7 +168,7 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className="text-base font-normal text-textPrimary">
+                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
                   Marksheet
                 </p>
               </div>

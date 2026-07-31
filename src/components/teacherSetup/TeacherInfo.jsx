@@ -17,12 +17,13 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
     };
   }, [modelOpen]);
 
+// console.log(currTeacher);
 
   const personalDetails = [
     [t("labels.id"), currTeacher?.teacherId || CONSTANT.NA],
     [
       t("labels.fullName"),
-      `${currTeacher?.firstname} ${currTeacher?.lastname}`,
+      `${currTeacher?.firstName} ${currTeacher?.lastName}`,
     ],
     [
       t("labels.class"),
@@ -51,7 +52,7 @@ export default function TeacherInfo({ currTeacher, modelOpen }) {
       }`}
     >
       <div
-        className={`relative rounded-lg shadow-xl w-full max-w-3xl max-h-full overflow-auto ${
+        className={`relative rounded-lg shadow-xl w-full max-w-3xl max-h-[550px] overflow-auto ${
           isDarkMode ? "bg-background" : "bg-whiteBackground"
         }`}
       >

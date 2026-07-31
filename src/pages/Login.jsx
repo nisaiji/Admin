@@ -108,6 +108,8 @@ function Login() {
 
         if (res?.statusCode === 200) {
           const decodedToken = jwtDecode(res?.result?.accessToken);
+          // console.log(decodedToken);
+          
           const hasSession = Boolean(decodedToken?.isSessionCreated);
           // console.log(decodedToken);
           // console.log({ result });

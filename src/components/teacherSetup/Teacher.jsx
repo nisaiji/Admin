@@ -43,8 +43,8 @@ export default function Teacher() {
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const [newTeacher, setNewTeacher] = useState({
     SNo: null,
-    firstname: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
     phone: "",
   });
   // console.log(teachers);
@@ -66,16 +66,16 @@ export default function Teacher() {
    */
   const validateData = (teacher) => {
     if (
-      !teacher.firstname.trim() ||
-      teacher.firstname.length < 3 ||
-      REGEX.NUMBER.test(teacher.firstname)
+      !teacher.firstName.trim() ||
+      teacher.firstName.length < 3 ||
+      REGEX.NUMBER.test(teacher.firstName)
     ) {
       return t("validationError.enterFirstName");
     }
     if (
-      !teacher.lastname.trim() ||
-      teacher.lastname.length < 3 ||
-      REGEX.NUMBER.test(teacher.lastname)
+      !teacher.lastName.trim() ||
+      teacher.lastName.length < 3 ||
+      REGEX.NUMBER.test(teacher.lastName)
     ) {
       return t("validationError.enterLastName");
     }
@@ -104,8 +104,8 @@ export default function Teacher() {
       const response = await axiosClient.post(
         EndPoints.ADMIN.REGISTER_TEACHER,
         {
-          firstname: capitalizeFirstLetter(newTeacher?.firstname.trim()),
-          lastname: capitalizeFirstLetter(newTeacher?.lastname.trim()),
+          firstName: capitalizeFirstLetter(newTeacher?.firstName.trim()),
+          lastName: capitalizeFirstLetter(newTeacher?.lastName.trim()),
           phone: newTeacher.phone.trim(),
         },
       );
@@ -113,7 +113,7 @@ export default function Teacher() {
       if ([200, 201].includes(response?.statusCode)) {
         toast.success(response.result);
         getTeacher(); // Refresh the teacher list
-        setNewTeacher({ SNo: null, firstname: "", lastname: "", phone: "" });
+        setNewTeacher({ SNo: null, firstName: "", lastName: "", phone: "" });
         newTeacherFirstNameRef.current?.focus(); // Focus on the first name input
       }
     } catch (e) {
@@ -300,9 +300,9 @@ export default function Teacher() {
   // Filters the teachers list based on search input
   const filteredTeachers = teachers.filter(
     (teacher) =>
-      teacher?.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      teacher?.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      teacher?.phone.includes(searchQuery),
+      teacher?.firstName?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      teacher?.lastName?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      teacher?.phone?.includes(searchQuery),
   );
 
   return (
@@ -477,9 +477,9 @@ export default function Teacher() {
                       <input
                         data-testid="firstnameInput"
                         type="text"
-                        value={newTeacher.firstname}
+                        value={newTeacher.firstName}
                         onChange={(e) =>
-                          handleInputChange(null, "firstname", e.target.value)
+                          handleInputChange(null, "firstName", e.target.value)
                         }
                         maxLength={15}
                         placeholder={t("placeholders.firstName")}
@@ -495,9 +495,9 @@ export default function Teacher() {
                       <input
                         data-testid="lastnameInput"
                         type="text"
-                        value={newTeacher.lastname}
+                        value={newTeacher.lastName}
                         onChange={(e) =>
-                          handleInputChange(null, "lastname", e.target.value)
+                          handleInputChange(null, "lastName", e.target.value)
                         }
                         maxLength={15}
                         placeholder={t("placeholders.lastName")}
@@ -561,11 +561,11 @@ export default function Teacher() {
                         <input
                           data-testid="savedFirstname"
                           type="text"
-                          value={teacher.firstname}
+                          value={teacher.firstName}
                           onChange={(e) =>
                             handleInputChange(
                               teacher.SNo,
-                              "firstname",
+                              "firstName",
                               e.target.value,
                             )
                           }
@@ -585,11 +585,11 @@ export default function Teacher() {
                         <input
                           data-testid="savedLastname"
                           type="text"
-                          value={teacher.lastname}
+                          value={teacher.lastName}
                           onChange={(e) =>
                             handleInputChange(
                               teacher.SNo,
-                              "lastname",
+                              "lastName",
                               e.target.value,
                             )
                           }

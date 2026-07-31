@@ -2,11 +2,14 @@ import React, { useMemo, useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { Calendar, Clock, Eye } from "lucide-react";
 
-import { C, TH } from "./constants";
+import { getTH } from "./constants";
+import { useTCTheme } from "./ThemeContext";
 import { AvatarBadge, DetailRows, ModalShell, TableEmptyState, Toolbar } from "./shared";
 import { getPendingStatusTone, isPendingTcRequest, mapTcRequestForDisplay } from "./utils";
 
 function PendingRequestRow({ record, index, onView }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   // console.log(record);
   
   const tone = getPendingStatusTone(record?.status);
@@ -27,7 +30,7 @@ function PendingRequestRow({ record, index, onView }) {
           <AvatarBadge id={record?.id} label={record?.name} />
           <div>
             <div style={{ fontSize: "14px", fontWeight: 600, color: C.text }}>{record?.name}</div>
-            <div style={{ fontSize: "11px", color: C.muted }}>{record?.parentFullName}</div>
+            <div style={{ fontSize: "11px", color: C.muted }}>{record?.mainParentFullName}</div>
           </div>
         </div>
       </td>
@@ -73,6 +76,8 @@ function PendingRequestRow({ record, index, onView }) {
 }
 
 function PendingRequestModal({ record, onClose }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   if (!record) {
     return null;
   }
@@ -103,7 +108,7 @@ function PendingRequestModal({ record, onClose }) {
       <DetailRows
         items={[
           ["Student Name", record?.name],
-          ["Parent's Name", record?.parentFullName],
+          ["Parent's Name", record?.mainParentFullName],
           ["Admission Number", record?.admissionNumber],
           ["Class & Section", `${record?.className} - ${record?.sectionName}`],
           ["Request Date", record?.requestDate],
@@ -122,6 +127,8 @@ function PendingRequestModal({ record, onClose }) {
 }
 
 export function PendingStep({ tcRequests = [], loading = false }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const [search, setSearch] = useState("");
   const [filterClass, setFilterClass] = useState("All");
   const [filterSec, setFilterSec] = useState("All");
@@ -141,7 +148,7 @@ export function PendingStep({ tcRequests = [], loading = false }) {
       const matchesQuery =
         !query ||
         record?.name?.toLowerCase().includes(query) ||
-        record?.parentFullName?.toLowerCase().includes(query) ||
+        record?.mainParentFullName?.toLowerCase().includes(query) ||
         record?.admissionNumber?.toLowerCase().includes(query) ||
         record?.reasonLabel?.toLowerCase().includes(query);
       const matchesClass = filterClass === "All" || record?.className === filterClass;

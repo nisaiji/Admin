@@ -101,12 +101,12 @@ export default function StudentSection() {
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const [newStudent, setNewStudent] = useState({
     SNo: null,
-    firstname: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
     gender: "",
-    parentFullName: "",
+    mainParentFullName: "",
     guardianName: "",
-    parentPhone: "",
+    mainParentPhone: "",
     aadharNumber: "",
     sectionId: "",
   });
@@ -217,9 +217,9 @@ export default function StudentSection() {
               ? teacherData?.sectionName
               : classAndSectionData?.sectionName) ||
             "",
-          parentFullName: student?.parentFullName || "",
+          mainParentFullName: student?.mainParentFullName || "",
           guardianName: student?.guardianName || "",
-          parentPhone: student?.parentPhone || "",
+          mainParentPhone: student?.mainParentPhone || "",
         }));
         // console.table(studentList)
         setStudents(studentList);
@@ -236,14 +236,14 @@ export default function StudentSection() {
   // check same entry in registration
   const checkIsStudentExistForSameParent = () => {
     const userExist = students.find(
-      (item) => item?.parentPhone === newStudent?.parentPhone,
+      (item) => item?.mainParentPhone === newStudent?.mainParentPhone,
     );
     if (userExist) {
-      const existFullName = `${userExist?.firstname.trim()} ${userExist?.lastname.trim()}`;
-      const newFullName = `${newStudent?.firstname.trim()} ${newStudent?.lastname.trim()}`;
+      const existFullName = `${userExist?.firstName?.trim()} ${userExist?.lastName?.trim()}`;
+      const newFullName = `${newStudent?.firstName?.trim()} ${newStudent?.lastName?.trim()}`;
 
       if (
-        existFullName.toLowerCase() === newFullName.toLowerCase() &&
+        existFullName?.toLowerCase() === newFullName?.toLowerCase() &&
         userExist?.gender === newStudent?.gender
       ) {
         toast.error(t("duplicate"));
@@ -262,31 +262,32 @@ export default function StudentSection() {
   // validation schema
   const validateData = (student) => {
     if (
-      !student.firstname.trim() ||
-      student.firstname.length < 3 ||
-      REGEX.NUMBER.test(student.firstname)
+      !student.firstName?.trim() ||
+      student.firstName.length < 3 ||
+      REGEX.NUMBER.test(student.firstName)
     ) {
       return t("validationError.enterFirstName");
     }
     if (
-      !student.lastname.trim() ||
-      student.lastname.length < 3 ||
-      REGEX.NUMBER.test(student.lastname)
+      !student.lastName?.trim() ||
+      student.lastName.length < 3 ||
+      REGEX.NUMBER.test(student.lastName)
     ) {
       return t("validationError.enterLastName");
     }
     if (!student.gender) return t("validationError.gender");
     if (
-      !student.parentFullName.trim() ||
-      student.parentFullName.length < 3 ||
-      REGEX.NUMBER.test(student.parentFullName)
+      !student.mainParentFullName?.trim() ||
+      student.mainParentFullName.length < 3 ||
+      REGEX.NUMBER.test(student.mainParentFullName)
     ) {
       return t("validationError.parentName");
     }
-    if (!student?.parentPhone.trim()) return t("validationError.phone");
-    if (!REGEX.PHONE_LENGTH.test(student.parentPhone))
+    if (!student?.mainParentPhone?.trim()) return t("validationError.phone");
+    if (!REGEX.PHONE_LENGTH.test(student.mainParentPhone))
       return t("validationError.validationPhoneCount");
-    if (!student?.aadharNumber?.trim()) return "Aadhaar number is required";
+    if (!String(student?.aadharNumber)?.trim())
+      return "Aadhaar number is required";
 
     if (!/^\d{12}$/.test(student.aadharNumber))
       return "Aadhaar must be exactly 12 digits";
@@ -301,7 +302,7 @@ export default function StudentSection() {
   const handleInputChange = (sNo, field, value) => {
     let formattedValue = value;
 
-    if (field === "parentPhone" || field === "aadharNumber") {
+    if (field === "mainParentPhone" || field === "aadharNumber") {
       formattedValue = value.replace(/\D/g, "");
     } else {
       formattedValue = value.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ");
@@ -321,6 +322,8 @@ export default function StudentSection() {
   // api for registering and updating student
   const handleStudentAction = async (student, isUpdate = false) => {
     const e = validateData(student);
+    // console.log({e});
+
     if (e) {
       if (!toastDisplayed) {
         setToastDisplayed(true);
@@ -351,14 +354,14 @@ export default function StudentSection() {
     }
 
     let transformedStudent = {
-      firstname: capitalize(student.firstname.trim()),
-      lastname: capitalize(student.lastname.trim()),
-      parentName: capitalize(student.parentFullName.trim()),
+      firstName: capitalize(student.firstName?.trim()),
+      lastName: capitalize(student.lastName?.trim()),
+      parentName: capitalize(student.mainParentFullName?.trim()),
       ...(student.guardianName && {
-        guardianName: capitalize(student.guardianName.trim()),
+        guardianName: capitalize(student.guardianName?.trim()),
       }),
       gender: student.gender,
-      phone: student.parentPhone,
+      phone: student.mainParentPhone,
       aadharNumber: student.aadharNumber,
       ...(!isUpdate && {
         sectionId:
@@ -377,18 +380,20 @@ export default function StudentSection() {
         `${url}${isUpdate ? `/${student?.id}` : ""}`,
         transformedStudent,
       );
+      // console.log(response);
+
       if ([200, 201].includes(response?.statusCode)) {
-        toast.success(response.result);
+        toast.success(isUpdate ? response?.result : response?.result?.message);
         fetchStudents();
         if (!isUpdate) {
           setNewStudent({
             SNo: null,
-            firstname: "",
-            lastname: "",
+            firstName: "",
+            lastName: "",
             gender: "",
-            parentFullName: "",
+            mainParentFullName: "",
             guardianName: "",
-            parentPhone: "",
+            mainParentPhone: "",
             aadharNumber: "",
             sectionId:
               role === "admin"
@@ -403,6 +408,7 @@ export default function StudentSection() {
       }
     } catch (e) {
       toast.error(e);
+      // console.log({e});
     } finally {
       setLoading(false);
     }
@@ -500,12 +506,12 @@ export default function StudentSection() {
 
   const filteredStudents = students.filter(
     (student) =>
-      student.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.parentFullName
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      student.parentPhone.includes(searchQuery),
+      student.firstName?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      student.lastName?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      student.mainParentFullName
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase()) ||
+      student.mainParentPhone.includes(searchQuery),
   );
 
   useEffect(() => {
@@ -554,8 +560,8 @@ export default function StudentSection() {
                 {role === "classTeacher"
                   ? (localStorage.getItem("firstname") ?? "")
                   : role === "admin"
-                    ? `${classData?.teacher?.firstname ?? ""} ${
-                        classData?.teacher?.lastname ?? ""
+                    ? `${classData?.teacher?.firstName ?? ""} ${
+                        classData?.teacher?.lastName ?? ""
                       }`
                     : ""}
               </div>
@@ -729,9 +735,9 @@ export default function StudentSection() {
                   >
                     <input
                       type="text"
-                      value={newStudent.firstname}
+                      value={newStudent.firstName}
                       onChange={(e) =>
-                        handleInputChange(null, "firstname", e.target.value)
+                        handleInputChange(null, "firstName", e.target.value)
                       }
                       maxLength={15}
                       placeholder={t("placeholders.firstName")}
@@ -748,9 +754,9 @@ export default function StudentSection() {
                   >
                     <input
                       type="text"
-                      value={newStudent.lastname}
+                      value={newStudent.lastName}
                       onChange={(e) =>
-                        handleInputChange(null, "lastname", e.target.value)
+                        handleInputChange(null, "lastName", e.target.value)
                       }
                       maxLength={15}
                       placeholder={t("placeholders.lastName")}
@@ -811,11 +817,11 @@ export default function StudentSection() {
                   >
                     <input
                       type="text"
-                      value={newStudent.parentFullName}
+                      value={newStudent.mainParentFullName}
                       onChange={(e) =>
                         handleInputChange(
                           null,
-                          "parentFullName",
+                          "mainParentFullName",
                           e.target.value,
                         )
                       }
@@ -851,10 +857,14 @@ export default function StudentSection() {
                   >
                     <input
                       type="text"
-                      value={newStudent.parentPhone}
+                      value={newStudent.mainParentPhone}
                       maxLength={10}
                       onChange={(e) =>
-                        handleInputChange(null, "parentPhone", e.target.value)
+                        handleInputChange(
+                          null,
+                          "mainParentPhone",
+                          e.target.value,
+                        )
                       }
                       placeholder={t("placeholders.phoneNumber")}
                       className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
@@ -913,13 +923,13 @@ export default function StudentSection() {
                       }`}
                     >
                       <input
-                        data-testid="firstname"
+                        data-testid="firstName"
                         type="text"
-                        value={student.firstname}
+                        value={student.firstName}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "firstname",
+                            "firstName",
                             e.target.value,
                           )
                         }
@@ -941,11 +951,11 @@ export default function StudentSection() {
                     >
                       <input
                         type="text"
-                        value={student.lastname}
+                        value={student.lastName}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "lastname",
+                            "lastName",
                             e.target.value,
                           )
                         }
@@ -998,11 +1008,11 @@ export default function StudentSection() {
                     >
                       <input
                         type="text"
-                        value={student.parentFullName}
+                        value={student.mainParentFullName}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "parentFullName",
+                            "mainParentFullName",
                             e.target.value,
                           )
                         }
@@ -1021,7 +1031,7 @@ export default function StudentSection() {
                     >
                       <input
                         type="text"
-                        value={student.guardianName}
+                        value={student?.guardianName}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
@@ -1044,12 +1054,12 @@ export default function StudentSection() {
                     >
                       <input
                         type="text"
-                        value={student.parentPhone}
+                        value={student.mainParentPhone}
                         maxLength={10}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "parentPhone",
+                            "mainParentPhone",
                             e.target.value,
                           )
                         }

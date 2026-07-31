@@ -178,6 +178,7 @@
     "WriteNotice": "Write notice here..."
   },
   "labels": {
+    "aadhar": "Aadhar Number",
     "id": "ID",
     "sNo": "S.No.",
     "gender": "Gender",
@@ -308,9 +309,9 @@
     "eleven": "11th",
     "twelve": "12th",
     "sections": "ABCDEFGH",
-    "male": "Male",
-    "female": "Female",
-    "other": "Other"
+    "male": "MALE",
+    "female": "FEMALE",
+    "other": "OTHER"
   },
   "confirm": {
     "leave": "Please confirm if you want to reject this leave request.",

@@ -1,546 +1,687 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
-import { axiosClient } from "../../../services/axiosClient";
-import EndPoints from "../../../services/EndPoints";
-import moment from "moment/moment";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import { Eye } from "lucide-react";
+import svgPaths from "./svg.jsx";
+import { axiosClient } from "../../../services/axiosClient.js";
+import EndPoints from "../../../services/EndPoints.js";
 import {
-  ArrowLeft,
-  Plus,
-  Search,
-  Edit2,
-  Eye,
-  Trash2,
-  X,
-  Calendar,
-  DollarSign,
-  GraduationCap,
-  Clock,
-  Settings,
-} from "lucide-react";
-import { capitalize } from "@mui/material";
+  setClassAndSectionData,
+  setTempData,
+} from "../../../store/AppAuthSlice.js";
+import moment from "moment";
+import FeeInfo from "./FeeInfo.jsx";
+import view from "../../../assets/images/fees/view.png";
+import edit from "../../../assets/images/fees/edit.png";
 
-export function FeeStructureView({ onBack, setSelected }) {
-  const { classAndSectionData } = useSelector((state) => state.appAuth);
+function IconSearch() {
+  return (
+    <svg
+      className="size-[18px] shrink-0"
+      fill="none"
+      viewBox="0 0 18.006 18.006"
+    >
+      <path d={svgPaths.p2e7aad00} fill="#6E6E6E" />
+    </svg>
+  );
+}
 
-  const [data, setData] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterClass, setFilterClass] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedStructure, setSelectedStructure] = useState(null);
+function IconChevronDown({ color = "#686868" }) {
+  return (
+    <svg className="size-[16px] shrink-0" fill="none" viewBox="0 0 24 24">
+      <path d={svgPaths.p22c96af0} fill={color} />
+    </svg>
+  );
+}
+
+function IconChevronSmall() {
+  return (
+    <svg className="size-[10px]" fill="none" viewBox="0 0 11.333 6.667">
+      <path
+        d={svgPaths.p2f39e800}
+        stroke="#0F0F0F"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function IconDashboard() {
+  return (
+    <svg className="size-[22px] shrink-0" fill="none" viewBox="0 0 24 24">
+      <path d={svgPaths.p1fff9400} fill="#0F0F0F" />
+    </svg>
+  );
+}
+
+function IconFeeSetup() {
+  return (
+    <svg className="size-[22px] shrink-0" fill="none" viewBox="0 0 24 24">
+      <path
+        d={svgPaths.p26719e70}
+        fill="#0F4189"
+        stroke="#0F4189"
+        strokeWidth="0.8"
+      />
+      <path
+        d={svgPaths.p375baa40}
+        fill="#0F4189"
+        stroke="#0F4189"
+        strokeWidth="0.8"
+      />
+      <path
+        d={svgPaths.p224ce680}
+        fill="#0F4189"
+        stroke="#0F4189"
+        strokeWidth="0.8"
+      />
+      <path
+        d={svgPaths.p224b1400}
+        fill="white"
+        stroke="#103F5F"
+        strokeWidth="0.2"
+      />
+    </svg>
+  );
+}
+
+function IconCollections() {
+  return (
+    <svg className="size-[22px] shrink-0" fill="none" viewBox="0 0 24 24">
+      <path
+        clipRule="evenodd"
+        d={svgPaths.p1c7a5700}
+        fill="#0F0F0F"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function IconLookups() {
+  return (
+    <svg className="size-[22px] shrink-0" fill="none" viewBox="0 0 24 24">
+      <path
+        clipRule="evenodd"
+        d={svgPaths.p28ec7b80}
+        fill="#0F0F0F"
+        fillRule="evenodd"
+      />
+      <path
+        clipRule="evenodd"
+        d={svgPaths.p36fed730}
+        fill="#0F0F0F"
+        fillRule="evenodd"
+      />
+      <path
+        clipRule="evenodd"
+        d={svgPaths.p355e7600}
+        fill="#0F0F0F"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function IconPlus() {
+  return (
+    <svg className="size-[18px] shrink-0" fill="none" viewBox="0 0 20 20">
+      <path d="M0 20L20 20L20 0L0 0L0 20Z" fill="white" opacity="0" />
+      <path d={svgPaths.p13533d00} fill="white" />
+    </svg>
+  );
+}
+
+function IconLoudspeaker() {
+  return (
+    <svg className="size-[20px]" fill="none" viewBox="0 0 20 20">
+      <path d={svgPaths.p138799c0} fill="#0F0F0F" />
+      <path d={svgPaths.p378b2700} fill="#0F0F0F" />
+    </svg>
+  );
+}
+
+function IconMoney() {
+  return (
+    <svg className="size-[20px]" fill="none" viewBox="0 0 20 20">
+      <path d={svgPaths.p1179daf0} fill="#FF793F" />
+      <path d={svgPaths.p1858b800} fill="#FF793F" />
+      <path d={svgPaths.p3669cf00} fill="#FF793F" />
+    </svg>
+  );
+}
+
+function IconUser() {
+  return (
+    <svg className="size-[32px]" fill="none" viewBox="0 0 32 32">
+      <path
+        clipRule="evenodd"
+        d={svgPaths.p90d5400}
+        fill="#0F0F0F"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function IconReindeer() {
+  return (
+    <svg className="h-[36px] w-[32px] shrink-0" fill="none" viewBox="0 0 35 40">
+      <path d={svgPaths.p13693400} fill="#FF793F" />
+    </svg>
+  );
+}
+
+function DropdownSelect({ label, theme }) {
+  return (
+    <div
+      className={`relative flex items-center gap-3 ${theme.inputBg} border ${theme.border} rounded-[8px] px-3 py-[9px] cursor-pointer select-none`}
+    >
+      <span
+        className={`text-[13px] font-normal font-['Inter',sans-serif] ${theme.inputText} whitespace-nowrap`}
+      >
+        {label}
+      </span>
+      <IconChevronDown />
+    </div>
+  );
+}
+
+function ActionButton({
+  icon,
+  label,
+  disabled = false,
+  onClick,
+  theme,
+  isDarkMode,
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`inline-flex h-[30px] items-center justify-center gap-2 rounded-[4px] border px-3 text-[12px] font-semibold transition-colors ${disabled ? "cursor-not-allowed " + theme.border + " " + theme.subText : "cursor-pointer " + theme.border + " " + theme.text + " " + (isDarkMode ? "hover:bg-[#1f2430]" : "hover:bg-gray-50")}`}
+    >
+      {icon}
+      {label ? <span>{label}</span> : null}
+    </button>
+  );
+}
+
+function StatusBadge({ verified }) {
+  if (verified) {
+    return (
+      <span className="inline-flex items-center justify-center h-[28px] w-[68px] rounded-[6px] bg-[rgba(40,169,135,0.10)] text-[#28a987] text-[13px] font-medium font-['Inter',sans-serif]">
+        Verified
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center justify-center h-[28px] w-[68px] rounded-[6px] bg-[rgba(255,195,67,0.10)] text-[#ffa221] text-[13px] font-medium font-['Inter',sans-serif]">
+      Draft
+    </span>
+  );
+}
+
+function formatDateTime(value) {
+  if (!value) return "--";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "--";
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+export default function FeeStructureView({ setSelected }) {
+  const isDarkMode = useSelector(
+    (state) => state.appConfig?.isDarkMode ?? false,
+  );
+  const { classAndSectionData } = useSelector((state) => state.appAuth ?? {});
+  const selectedSessionId = classAndSectionData?.selectedSession?._id;
+  const selectedSessionName = classAndSectionData?.selectedSession?.name;
+  const feeCycleData = classAndSectionData?.feeStructureData;
+  const feeHeadData = classAndSectionData?.feeHeadData;
+  const canCreateClassFeeStructure =
+    feeCycleData?.isVerified && feeHeadData?.isVerified;
+
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const [classFeeStructures, setClassFeeStructures] = useState([]);
+  const [feeInfoOpen, setFeeInfoOpen] = useState(false);
+  const [feeInfoLoading, setFeeInfoLoading] = useState(false);
+  const [feeInfoError, setFeeInfoError] = useState("");
+  const [feeInfoData, setFeeInfoData] = useState(null);
+  // const [feeStructureData, setFeeStructureData] = useState(null);
+
+  const feeHeads = Array.isArray(feeHeadData)
+    ? feeHeadData
+    : feeHeadData?.feeHeads || [];
+
+  const closeFeeInfo = () => {
+    setFeeInfoOpen(false);
+    setFeeInfoLoading(false);
+    setFeeInfoError("");
+    setFeeInfoData(null);
+  };
+
+  const openFeeSetup = async (mode) => {
+    localStorage.setItem("selectedFeeSetupMode", mode);
+    await dispatch(
+      setTempData({
+        selectedFeeSetupMode: mode,
+        selectedClassFeeStructure: null,
+        selectedClassFeeStructureId: "",
+      }),
+    );
+    setSelected("schoolFeeSetting");
+  };
+
+  const openClassFeeStructure = async (row) => {
+    if (row?.status === "ACTIVE") {
+      toast.error("Verified class fee structures cannot be updated.");
+      return;
+    }
+
+    const feeStructureId = getClassFeeStructureId(row);
+
+    if (!feeStructureId) {
+      toast.error("Fee structure details are unavailable.");
+      return;
+    }
+
+    try {
+      const response = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_SINGLE_CLASS_FEES_STRUCTURE}/${feeStructureId}`,
+      );
+
+      const record = response?.result?.feeStructure || response?.result?.feeStructureData || response?.result;
+
+      if (!record) {
+        throw new Error("Fee structure details are unavailable.");
+      }
+
+      const selectedClassFeeStructure = {
+        ...(row?.raw || row || {}),
+        ...record,
+      };
+
+      localStorage.setItem("selectedFeeSetupMode", "class");
+
+      await dispatch(
+        setTempData({
+          selectedFeeSetupMode: "class",
+          selectedClassFeeStructure,
+          selectedClassFeeStructureId: feeStructureId,
+        }),
+      );
+      setSelected("feeStructureSetup");
+    } catch (e) {
+      toast.error(
+        e?.response?.data?.message || e?.message || "Failed to load fee structure details.",
+      );
+    }
+  };
+
+  const getClassFeeStructureId = (row) => {
+    return (
+      row?._id ||
+      row?.id ||
+      row?.feeStructureId ||
+      row?.raw?._id ||
+      row?.raw?.id ||
+      row?.raw?.feeStructureId ||
+      ""
+    );
+  };
+
+  const openFeeInfo = async (row) => {
+    // console.log(row);
+
+    const feeStructureId = row?._id;
+
+    if (!feeStructureId) {
+      toast.error("Fee structure details are unavailable.");
+      return;
+    }
+
+    setFeeInfoOpen(true);
+    setFeeInfoLoading(true);
+
+    try {
+      const response = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_SINGLE_CLASS_FEES_STRUCTURE}/${feeStructureId}`,
+      );
+      // console.log(response);
+
+      const record = response?.result?.feeStructure;
+
+      setFeeInfoData(record);
+    } catch (e) {
+      toast.error(e);
+    } finally {
+      setFeeInfoLoading(false);
+    }
+  };
+
+  const theme = {
+    bg: isDarkMode ? "bg-[#0B0D14]" : "bg-[#f8fafc]",
+    surface: isDarkMode ? "bg-[#111315]" : "bg-white",
+    card: isDarkMode ? "bg-[#181b24]" : "bg-white",
+    border: isDarkMode ? "border-[#2a2d36]" : "border-[#e7e2e2]",
+    text: isDarkMode ? "text-white" : "text-[#0f0f0f]",
+    subText: isDarkMode ? "text-[#9ca3af]" : "text-[#686868]",
+    inputBg: isDarkMode ? "bg-[#1f2430]" : "bg-[#f0f6f9]",
+    inputText: isDarkMode ? "text-[#d1d5db]" : "text-[#0f0f0f]",
+    tableHead: isDarkMode ? "bg-[#1a2233]" : "bg-[#f0f6f9]",
+    primaryBtn: isDarkMode
+      ? "bg-[#0a81d1] hover:bg-[#0970b8]"
+      : "bg-[#0a81d1] hover:bg-[#0970b8]",
+    outlineBtn: isDarkMode
+      ? "border-[#38bdf8] text-[#38bdf8] hover:bg-[#0f172a]"
+      : "border-[#0a81d1] text-[#0a81d1] hover:bg-blue-50",
+  };
 
   const getSchoolFeeStructure = async () => {
+    if (!selectedSessionId) {
+      setClassFeeStructures([]);
+      return;
+    }
+
     try {
-      const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_FEES_STRUCTURE}/${classAndSectionData?.selectedSession?._id}`,
-      );
-      // console.log(res);
-      if (res?.statusCode === 200) {
-        setData(res?.result);
+      setLoading(true);
+
+      const [feeStructureRes, feeHeadRes, classFeeRes] =
+        await Promise.allSettled([
+          axiosClient.get(
+            `${EndPoints.ADMIN.GET_FEES_STRUCTURE_OF_SCHOOL}/${selectedSessionId}`,
+          ),
+          axiosClient.get(
+            `${EndPoints.ADMIN.GET_FEES_HEAD_OF_SCHOOL}/${selectedSessionId}`,
+          ),
+          axiosClient.get(
+            `${EndPoints.ADMIN.GET_CLASS_FEES_STRUCTURE}?sessionId=${selectedSessionId}`,
+          ),
+        ]);
+
+      if (feeStructureRes?.status === "fulfilled") {
+        dispatch(
+          setClassAndSectionData({
+            feeStructureData: feeStructureRes?.value?.result?.feeCycle ?? null,
+          }),
+        );
+      } else {
+        dispatch(setClassAndSectionData({ feeStructureData: null }));
+        // log("Fee Structure API failed", feeStructureRes.reason);
       }
-    } catch (e) {
-      //       console.log(e);
+
+      if (feeHeadRes?.status === "fulfilled") {
+        dispatch(
+          setClassAndSectionData({
+            feeHeadData: feeHeadRes?.value?.result?.feeHead ?? [],
+          }),
+        );
+      } else {
+        dispatch(setClassAndSectionData({ feeHeadData: [] }));
+        // log("Fee Head API failed", feeHeadRes.reason);
+      }
+
+      if (classFeeRes?.status === "fulfilled") {
+        setClassFeeStructures(classFeeRes?.value?.result?.feeStructures);
+      } else {
+        setClassFeeStructures([]);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (classAndSectionData?.selectedSession?._id) {
-      getSchoolFeeStructure();
-    }
-  }, [classAndSectionData]);
-
-  const structures = useMemo(() => {
-    const schoolFeeStructure = data?.schoolFeeStructure;
-    const classes = data?.sessionSectionsFeeStructure?.classes || [];
-
-    let rows = [];
-
-    classes?.forEach((cls) => {
-      const sections = cls?.sections || [];
-
-      sections.forEach((sec) => {
-        const sectionFeeStructure = sec?.sectionFeeStructure;
-
-        rows.push({
-          id: sectionFeeStructure?._id || sec?._id,
-
-          className: cls?.name || "-",
-          sectionName: sec?.name || "-",
-
-          // ✅ totalAmount now per section
-          totalAmount: sectionFeeStructure?.totalAmount || 0,
-
-          status: sectionFeeStructure?.isActive ? "Active" : "Inactive",
-
-          frequency: schoolFeeStructure?.installmentType || "-",
-          startDate: schoolFeeStructure?.effectiveFromDate
-            ? moment(schoolFeeStructure?.effectiveFromDate).format(
-                "DD MMM YYYY",
-              )
-            : "-",
-
-          lateFee: schoolFeeStructure?.lateFeePercent || 0,
-
-          createdAt: sectionFeeStructure?.createdAt
-            ? moment(sectionFeeStructure?.createdAt).format("DD MMM YYYY")
-            : "-",
-
-          // for modal
-          feeInstallments: sectionFeeStructure?.feeInstallments || [],
-        });
-      });
-    });
-
-    return rows;
-  }, [data]);
-
-  const filteredStructures = structures.filter((s) => {
-    const matchesSearch = s.className
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-
-    const matchesClass = filterClass === "all" || s.className === filterClass;
-
-    const matchesStatus = filterStatus === "all" || s.status === filterStatus;
-
-    return matchesSearch && matchesClass && matchesStatus;
-  });
-
-  const getStatusColor = (status) => {
-    if (status === "Active")
-      return "bg-green-500/10 text-green-400 border-green-500/20";
-    return "bg-gray-500/10 text-gray-400 border-gray-500/20";
-  };
-
-  const classes = useMemo(() => {
-    const uniqueClasses = new Set();
-
-    structures?.forEach((item) => {
-      if (item?.className && item?.className !== "-") {
-        uniqueClasses.add(item?.className);
-      }
-    });
-
-    return ["all", ...Array.from(uniqueClasses)];
-  }, [structures]);
-
-  const statuses = ["all", "Active", "Inactive"];
+    getSchoolFeeStructure();
+  }, [selectedSessionId, selectedSessionName]);
 
   return (
-    <div className="w-full mx-auto max-w-5xl my-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          {/* <button
-            onClick={onBack}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button> */}
-          <div>
-            <h1 className="text-white text-2xl">Fee Structures</h1>
-            <p className="text-gray-400 text-sm mt-1">
-              View and manage all class-based fee structures
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setSelected("schoolFeeSetting")}
-            className="p-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all"
-            title="School Settings"
-          >
-            <Settings className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => setSelected("paymentSetup")}
-            disabled={!classAndSectionData?.feeStructureData?.installmentType}
-            className="flex items-center gap-2 px-6 py-3 bg-[#0A81D1] text-white rounded-lg hover:bg-[#0A81D1]/90 transition-all"
-          >
-            <Plus className="w-5 h-5" />
-            Create New Fee Structure
-          </button>
-        </div>
-      </div>
-
-      {/* Combined Card with Filters, Search and Table */}
-      {filteredStructures.length === 0 ? (
-        <div className="bg-[#1a1d24] border border-gray-800 rounded-xl p-12 text-center">
-          <div className="text-gray-500 mb-2"> No fee structures found</div>
-          <p className="text-gray-600 text-sm mb-6">
-            Get started by creating your first fee structure
-          </p>
-        </div>
-      ) : (
-        <div className="bg-[#1a1d24] border border-gray-800 rounded-xl overflow-hidden">
-          {/* Filters and Search inside card */}
-          <div className="p-6 border-b border-gray-800">
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* Search */}
-              <div className="flex-1 relative">
-                <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search by class..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#0a0a0a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#0A81D1] transition-colors"
-                />
-              </div>
-
-              {/* Class Filter */}
-              <div className="relative min-w-[200px]">
-                <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <select
-                  value={filterClass}
-                  onChange={(e) => {
-                    setFilterClass(e.target.value);
-                  }}
-                  className="w-full pl-9 pr-4 py-2.5 bg-[#0a0a0a] border border-gray-700 rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:border-[#0A81D1] transition-colors"
-                >
-                  {classes?.map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls === "all" ? "All Classes" : cls}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status Filter */}
-              <div className="relative min-w-[180px]">
-                <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => {
-                    setFilterStatus(e.target.value);
-                  }}
-                  className="w-full pl-9 pr-4 py-2.5 bg-[#0a0a0a] border border-gray-700 rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:border-[#0A81D1] transition-colors"
-                >
-                  {statuses?.map((status) => (
-                    <option key={status} value={status}>
-                      {status === "all" ? "All Status" : status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Fee Structures Table or Empty State */}
-          {filteredStructures.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="text-gray-500 mb-2">No fee structures found</div>
-              <p className="text-gray-600 text-sm">
-                Try adjusting your search or filters
+    <div>
+      <main className={` pt-[72px] min-h-screen ${theme.bg}`}>
+        <div className="px-8 py-6">
+          {/* Page header */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1
+                className={`text-[20px] font-bold ${theme.text} leading-[1.3] mb-1`}
+              >
+                All Fee Structures
+              </h1>
+              <p className={`text-[13px] font-medium ${theme.subText}`}>
+                View and manage all fee structures.
               </p>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-800">
-                    <th className="text-left text-gray-400 text-sm px-6 py-4">
-                      Class
-                    </th>
-                    <th className="text-left text-gray-400 text-sm px-6 py-4">
-                      Sections
-                    </th>
-                    <th className="text-left text-gray-400 text-sm px-6 py-4">
-                      Total Amount
-                    </th>
-                    <th className="text-left text-gray-400 text-sm px-6 py-4">
-                      Status
-                    </th>
-                    <th className="text-left text-gray-400 text-sm px-6 py-4">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStructures?.map((structure, i) => (
-                    <tr
-                      key={i}
-                      className="border-b border-gray-800 hover:bg-[#0a0a0a]/50 transition-colors"
+            <div className="flex items-center gap-4">
+              {/* Unified Fee Setup Button */}
+              <button
+                onClick={() => openFeeSetup("all")}
+                className="flex items-center gap-[6px] h-[42px] px-4 rounded-[6px] bg-[#0a81d1] text-[14px] font-bold text-white hover:bg-[#0970b8] transition-colors cursor-pointer"
+              >
+                <IconPlus />
+                School Fee Setup
+              </button>
+              <button
+                onClick={async () => {
+                  if (!canCreateClassFeeStructure) {
+                    toast.error("Create fee cycle and fee heads first.");
+                    return;
+                  }
+
+                  localStorage.setItem("selectedFeeSetupMode", "class");
+                  await dispatch(
+                    setTempData({
+                      selectedFeeSetupMode: "class",
+                      selectedClassFeeStructure: null,
+                      selectedClassFeeStructureId: "",
+                    }),
+                  );
+                  setSelected("feeStructureSetup");
+                }}
+                disabled={!canCreateClassFeeStructure}
+                className={`flex items-center gap-[6px] h-[42px] px-4 rounded-[6px] text-[14px] font-bold text-white transition-colors ${canCreateClassFeeStructure ? "bg-[#0f4189] hover:bg-[#0c356d] cursor-pointer" : "bg-[#9ca3af] cursor-not-allowed"}`}
+                title={
+                  canCreateClassFeeStructure
+                    ? "Create or update class fee structure"
+                    : "Create fee cycle and fee heads first"
+                }
+              >
+                <IconPlus />
+                Class Fee Structure
+              </button>
+            </div>
+          </div>
+
+          {!canCreateClassFeeStructure ? (
+            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+              Create and verify fee cycle and fee heads first to add a class fee
+              structure.
+            </div>
+          ) : null}
+
+          {/* Table card */}
+          <div
+            className={`${theme.card} border ${theme.border} rounded-[14px] overflow-hidden`}
+          >
+            {/* Filter bar */}
+            <div
+              className={`flex items-center gap-4 px-5 py-4 border-b ${theme.border}`}
+            >
+              {/* Search */}
+              {/* <div
+                className={`flex items-center gap-2.5 ${theme.inputBg} border ${theme.border} rounded-[8px] px-3 py-[9px] w-[280px]`}
+              >
+                <IconSearch />
+                <span className={`text-[13px] font-normal ${theme.inputText}`}>
+                  Search by class or academic year
+                </span>
+              </div>
+              <DropdownSelect label="All Classes" theme={theme} />
+              <DropdownSelect label="All Academic Years" theme={theme} />
+              <DropdownSelect label="All Status" theme={theme} /> */}
+            </div>
+
+            {/* Table */}
+            <table className="w-full border-collapse">
+              <thead>
+                <tr
+                  className={`${theme.tableHead} border-t border-l border-r ${theme.border}`}
+                >
+                  <th
+                    className={`text-left pl-8 pr-2 py-4 text-[13px] font-semibold ${theme.text} w-[180px]`}
+                  >
+                    Class
+                  </th>
+                  <th
+                    className={`text-center px-2 py-4 text-[13px] font-semibold ${theme.text} w-[160px]`}
+                  >
+                    Academic Year
+                  </th>
+                  <th
+                    className={`text-center px-2 py-4 text-[13px] font-semibold ${theme.text} w-[140px]`}
+                  >
+                    Fee Cycle
+                  </th>
+                  <th
+                    className={`text-center px-2 py-4 text-[13px] font-semibold ${theme.text} w-[210px]`}
+                  >
+                    Created
+                  </th>
+                  <th
+                    className={`text-center px-2 py-4 text-[13px] font-semibold ${theme.text} w-[210px]`}
+                  >
+                    Last Updated
+                  </th>
+                  <th
+                    className={`text-center px-2 py-4 text-[13px] font-semibold ${theme.text} w-[150px]`}
+                  >
+                    Status
+                  </th>
+                  <th
+                    className={`text-center px-2 py-4 text-[13px] font-semibold ${theme.text} w-[140px]`}
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className={`px-6 py-10 text-center text-sm ${theme.subText}`}
                     >
-                      <td className="px-6 py-4">
-                        <span className="text-white">
-                          {structure?.className}
-                        </span>
+                      Loading class fee structures...
+                    </td>
+                  </tr>
+                ) : classFeeStructures?.length ? (
+                  classFeeStructures?.map((row, idx) => (
+                    <tr
+                      key={idx}
+                      className={`border-b ${theme.border} ${idx === classFeeStructures?.length - 1 ? "border-b-0" : ""}`}
+                    >
+                      <td
+                        className={`pl-8 pr-2 py-4 text-[13px] font-normal ${theme.text}`}
+                      >
+                        {row?.className}
                       </td>
-
-                      <td className="px-6 py-4">
-                        <span className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded">
-                          {structure?.sectionName}
-                        </span>
+                      <td
+                        className={`text-center px-2 py-4 text-[13px] font-normal ${theme.text}`}
+                      >
+                        {row?.academicYear}
                       </td>
-
-                      <td className="px-6 py-4">
-                        <span className="text-white">
-                          ₹ {structure?.totalAmount || 0}
-                        </span>
+                      <td
+                        className={`text-center px-2 py-4 text-[13px] font-normal ${theme.text}`}
+                      >
+                        {classAndSectionData?.feeStructureData?.frequency}
                       </td>
-
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs border ${getStatusColor(
-                            structure?.status,
-                          )}`}
-                        >
-                          {structure?.status}
-                        </span>
+                      <td
+                        className={`text-center px-2 py-4 text-[13px] font-normal ${theme.text}`}
+                      >
+                        {moment(row?.createdAt).format("DD MMM YYYY")}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setSelectedStructure(structure)}
-                            className="p-2 text-gray-400 hover:text-[#0A81D1] hover:bg-[#0A81D1]/10 rounded-lg transition-all"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            className="p-2 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all"
-                            title="Edit"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                      <td
+                        className={`text-center px-2 py-4 text-[13px] font-normal ${theme.text}`}
+                      >
+                        {moment(row?.updatedAt).format("DD MMM YYYY")}
+                      </td>
+                      <td className="text-center px-2 py-4">
+                        <div className="flex justify-center">
+                          <StatusBadge verified={row?.status === "ACTIVE"} />
+                        </div>
+                      </td>
+                      <td className="px-2 py-4">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <ActionButton
+                            icon={
+                              <img
+                                src={view}
+                                alt="View"
+                                className="size-[18px]"
+                              />
+                            }
+                            // label="View"
+                            onClick={() => openFeeInfo(row)}
+                            theme={theme}
+                            isDarkMode={isDarkMode}
+                          />
+                          <ActionButton
+                            icon={
+                              <img
+                                src={edit}
+                                alt="Edit"
+                                className="size-[18px]"
+                              />
+                            }
+                            // label={
+                            //   row?.status === "ACTIVE" ? "Verified" : "Update"
+                            // }
+                            disabled={row?.status === "ACTIVE"}
+                            onClick={() => openClassFeeStructure(row)}
+                            theme={theme}
+                            isDarkMode={isDarkMode}
+                          />
                         </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Detail View Modal */}
-      {selectedStructure && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1d24] border border-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="sticky top-0 bg-[#1a1d24] border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-white text-xl">Fee Structure Details</h2>
-              <button
-                onClick={() => setSelectedStructure(null)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            {/* {console.log(selectedStructure)} */}
-            {/* Modal Content */}
-            <div className="p-6 space-y-6">
-              {/* Overview Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                      <GraduationCap className="w-5 h-5 text-blue-400" />
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Class</p>
-                      <p className="text-white">
-                        {selectedStructure?.className}{" "}
-                        {selectedStructure?.sectionName}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
-                      <DollarSign className="w-5 h-5 text-green-400" />
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Total Amount</p>
-                      <p className="text-white">
-                        {selectedStructure?.totalAmount}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                      <Clock className="w-5 h-5 text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Frequency</p>
-                      <p className="text-white">
-                        {capitalize(selectedStructure?.frequency)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-orange-400" />
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Start Date</p>
-                      <p className="text-white">
-                        {selectedStructure?.startDate}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sections & Status */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
-                  {/* <h3 className="text-white mb-3">Status & Fees</h3> */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Status</span>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs border ${getStatusColor(
-                          selectedStructure?.status,
-                        )}`}
-                      >
-                        {selectedStructure?.status}
-                      </span>
-                    </div>
-                    {selectedStructure?.lateFee && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400">Late Fee Interest</span>
-                        <span className="text-white">
-                          {selectedStructure?.lateFee}%
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Period Breakdown */}
-              <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
-                <h3 className="text-white mb-4">Payment Breakdown</h3>
-                {selectedStructure?.feeInstallments?.length === 0 ? (
-                  <div className="text-gray-500 text-sm py-6 text-center">
-                    No installments available
-                  </div>
+                  ))
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {selectedStructure?.feeInstallments?.map((inst, index) => {
-                      const amount = inst?.amount || 0;
-                      const isZero = amount === 0;
-
-                      return (
-                        <div
-                          key={inst?._id || index}
-                          className="group bg-[#12141b] border border-gray-800 rounded-2xl p-4 hover:border-[#0A81D1]/40 hover:shadow-[0_0_0_1px_rgba(10,129,209,0.25)] transition-all"
-                        >
-                          {/* Top */}
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-2">
-                              <div>
-                                <p className="text-white text-sm font-medium">
-                                  Installment{" "}
-                                  {inst?.installmentNumber
-                                    ? inst.installmentNumber
-                                    : index + 1}
-                                </p>
-                                <p className="text-gray-500 text-xs">
-                                  {moment(inst?.startDate).format("MMM YYYY")}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Due pill */}
-                            <span className="px-2.5 py-1 rounded-full text-[11px] border border-orange-500/20 bg-orange-500/10 text-orange-300">
-                              Due {moment(inst?.dueDate).format("DD MMM")}
-                            </span>
-                          </div>
-
-                          {/* Amount */}
-                          <div className="mt-4">
-                            <p className="text-gray-400 text-xs mb-1">Amount</p>
-
-                            {isZero ? (
-                              <p className="text-gray-500 text-lg font-semibold">
-                                ₹ 0{" "}
-                                <span className="text-xs font-normal text-gray-600">
-                                  (Not Set)
-                                </span>
-                              </p>
-                            ) : (
-                              <p className="text-white text-2xl font-bold tracking-wide">
-                                ₹ {amount}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Dates */}
-                          {/* <div className="mt-4 grid grid-cols-2 gap-3">
-                            <div className="bg-[#0a0a0a] border border-gray-800 rounded-xl p-2.5">
-                              <p className="text-gray-500 text-[11px]">
-                                Start Date
-                              </p>
-                              <p className="text-gray-200 text-xs font-medium">
-                                {moment(inst?.startDate).format("DD MMM YYYY")}
-                              </p>
-                            </div>
-
-                            <div className="bg-[#0a0a0a] border border-gray-800 rounded-xl p-2.5">
-                              <p className="text-gray-500 text-[11px]">
-                                Due Date
-                              </p>
-                              <p className="text-gray-200 text-xs font-medium">
-                                {moment(inst?.dueDate).format("DD MMM YYYY")}
-                              </p>
-                            </div>
-                          </div> */}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className={`px-6 py-10 text-center text-sm ${theme.subText}`}
+                    >
+                      No class fee structures found for this session.
+                    </td>
+                  </tr>
                 )}
-              </div>
-
-              {/* Metadata */}
-              {/* <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-4">
-                <h3 className="text-white mb-3">Additional Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">Created Date</p>
-                    <p className="text-white">{selectedStructure?.createdAt}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Academic Year Start</p>
-                    <p className="text-white">{selectedStructure?.startDate}</p>
-                  </div>
-                </div>
-              </div> */}
-            </div>
-
-            {/* Modal Footer */}
-            {/* <div className="sticky bottom-0 bg-[#1a1d24] border-t border-gray-800 px-6 py-4 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setSelectedStructure(null)}
-                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all"
-              >
-                Close
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#0A81D1] text-white rounded-lg hover:bg-[#0A81D1]/90 transition-all">
-              <Edit2 className="w-4 h-4" />
-                Edit Structure
-            </button>
-</div> */}
+              </tbody>
+            </table>
           </div>
         </div>
-      )}
+      </main>
+
+      <FeeInfo
+        open={feeInfoOpen}
+        onClose={closeFeeInfo}
+        data={feeInfoData}
+        feeHeads={feeHeads}
+        classAndSectionData={classAndSectionData}
+        loading={feeInfoLoading}
+        error={feeInfoError}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 }

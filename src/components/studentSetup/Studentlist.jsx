@@ -124,8 +124,8 @@ function capitalizeValue(value) {
 function normalizeStudentDraft(student) {
   return {
     id: getStudentRecordId(student),
-    firstname: student?.firstname ?? student?.firstName ?? "",
-    lastname: student?.lastname ?? student?.lastName ?? "",
+    firstName: student?.firstName ?? "",
+    lastName: student?.lastName ?? "",
     aadharNumber: student?.aadharNumber ?? "",
     gender: student?.gender ?? "",
     bloodGroup: student?.bloodGroup ?? "",
@@ -145,8 +145,8 @@ function normalizeStudentDraft(student) {
 
 function buildStudentUpdatePayload(draft) {
   const requiredValues = {
-    firstname: capitalizeValue(draft?.firstname),
-    lastname: capitalizeValue(draft?.lastname),
+    firstName: capitalizeValue(draft?.firstName),
+    lastName: capitalizeValue(draft?.lastName),
     aadharNumber: String(draft?.aadharNumber ?? "").trim(),
     gender: draft?.gender,
     // parentName: capitalizeValue(draft?.parentName),
@@ -178,17 +178,17 @@ function buildStudentUpdatePayload(draft) {
 
 function validateStudentDraft(draft, t) {
   if (
-    !String(draft?.firstname ?? "").trim() ||
-    String(draft?.firstname ?? "").trim().length < 3 ||
-    REGEX.NUMBER.test(draft?.firstname)
+    !String(draft?.firstName ?? "").trim() ||
+    String(draft?.firstName ?? "").trim().length < 3 ||
+    REGEX.NUMBER.test(draft?.firstName)
   ) {
     return t("validationError.enterFirstName");
   }
 
   if (
-    !String(draft?.lastname ?? "").trim() ||
-    String(draft?.lastname ?? "").trim().length < 3 ||
-    REGEX.NUMBER.test(draft?.lastname)
+    !String(draft?.lastName ?? "").trim() ||
+    String(draft?.lastName ?? "").trim().length < 3 ||
+    REGEX.NUMBER.test(draft?.lastName)
   ) {
     return t("validationError.enterLastName");
   }
@@ -252,6 +252,9 @@ function EditField({
       : "border-borderWhite bg-whiteBackground text-textBlack focus:border-borderBlue",
     error && "border-[#FE4040] focus:border-[#FE4040]",
   );
+  const optionStyle = isDarkMode
+    ? { backgroundColor: "#1a1d28", color: "#E3E8F3" }
+    : { backgroundColor: "#ffffff", color: "#0f172a" };
 
   return (
     <label className="mb-4 block text-xs font-poppins-bold uppercase text-slate-500">
@@ -264,7 +267,7 @@ function EditField({
         >
           <option value="">Select {label}</option>
           {options.map((option) => (
-            <option key={option} value={option}>
+            <option key={option} value={option} style={optionStyle}>
               {option}
             </option>
           ))}
@@ -298,7 +301,7 @@ function StudentEditSidebar({
   const [draft, setDraft] = useState(() => normalizeStudentDraft(student));
   const [tab, setTab] = useState("personal");
   const [errorMessage, setErrorMessage] = useState("");
-  const fullName = `${draft?.firstname} ${draft?.lastname}`.trim();
+  const fullName = `${draft?.firstName} ${draft?.lastName}`.trim();
   const avatarClass = getAvatarClass(student, 0);
   const tabs = [{ key: "personal", label: "Personal", Icon: User }];
 
@@ -401,14 +404,14 @@ function StudentEditSidebar({
               <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
                 <EditField
                   label="First Name"
-                  value={draft?.firstname}
-                  onChange={(value) => setField("firstname", value)}
+                  value={draft?.firstName}
+                  onChange={(value) => setField("firstName", value)}
                   isDarkMode={isDarkMode}
                 />
                 <EditField
                   label="Last Name"
-                  value={draft?.lastname}
-                  onChange={(value) => setField("lastname", value)}
+                  value={draft?.lastName}
+                  onChange={(value) => setField("lastName", value)}
                   isDarkMode={isDarkMode}
                 />
                 <EditField
@@ -559,15 +562,19 @@ export default function Studentlist() {
   const mutedClass = isDarkMode ? "text-slate-500" : "text-textGray";
   const bodyTextClass = isDarkMode ? "text-[#E3E8F3]" : "text-textBlack";
   const secondaryTextClass = isDarkMode ? "text-[#E3E8F3]/75" : "text-textGray";
-  const controlClass = isDarkMode
-    ? "border-white/10 bg-[#6868681A] text-[#E3E8F3] placeholder:text-slate-500 focus:border-[#0A81D1]"
-    : "border-borderWhite bg-whiteBackground text-textBlack placeholder:text-textGray focus:border-borderBlue";
   const iconButtonClass = isDarkMode
     ? "border-white/10 bg-white/[0.04] text-slate-500 hover:border-[#FF793F]/30 hover:bg-[#FF793F]/10 hover:text-[#FF793F]"
     : "border-borderWhite bg-whiteBackground text-textGray hover:border-borderOrange1 hover:bg-backgroundOrange2 hover:text-textOrange";
   const activeIconButtonClass = isDarkMode
     ? "border-[#0A81D1]/30 bg-[#0A81D1]/15 text-[#0A81D1] hover:bg-[#0A81D1]/25"
     : "border-borderBlue bg-backgroundBlue15 text-textBlue hover:bg-backgroundLightBlue";
+  const controlClass = isDarkMode
+    ? "bg-background2 border border-borderColor text-textPrimary focus:border-primaryBlue"
+    : "bg-white border border-slate-200 text-slate-800 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
+  const optionStyle = {
+    backgroundColor: isDarkMode ? "#111827" : "#ffffff",
+    color: isDarkMode ? "#f8fafc" : "#1e293b",
+  };
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -871,19 +878,15 @@ export default function Studentlist() {
             className={cn(
               "h-12 rounded-lg px-4 text-sm font-poppins-regular outline-none transition",
               "disabled:cursor-not-allowed disabled:opacity-60",
-              darkControlClass,
+              controlClass,
             )}
             disabled={!selectedSessionId || classList.length === 0}
           >
-            <option className="bg-[#1a1d28] text-white" value="">
+            <option value="" style={optionStyle}>
               All classes
             </option>
             {classList.map((item) => (
-              <option
-                key={item?._id}
-                value={item?._id}
-                className="bg-[#1a1d28] text-white"
-              >
+              <option key={item?._id} value={item?._id} style={optionStyle}>
                 {getDisplayValue(item?.name)}
               </option>
             ))}
@@ -899,19 +902,15 @@ export default function Studentlist() {
             className={cn(
               "h-12 rounded-lg px-4 text-sm font-poppins-regular outline-none transition",
               "disabled:cursor-not-allowed disabled:opacity-60",
-              darkControlClass,
+              controlClass,
             )}
             disabled={!searchClass || sectionList.length === 0}
           >
-            <option className="bg-[#1a1d28] text-white" value="">
+            <option value="" style={optionStyle}>
               {searchClass ? "All sections" : "Select class first"}
             </option>
             {sectionList.map((item) => (
-              <option
-                key={item?._id}
-                value={item?._id}
-                className="bg-[#1a1d28] text-white"
-              >
+              <option key={item?._id} value={item?._id} style={optionStyle}>
                 {getDisplayValue(item?.name)}
               </option>
             ))}
@@ -1184,7 +1183,7 @@ export default function Studentlist() {
                   )}
                 >
                   {PAGE_LIMIT_OPTIONS.map((item) => (
-                    <option key={item} value={item}>
+                    <option key={item} value={item} style={optionStyle}>
                       {item}
                     </option>
                   ))}

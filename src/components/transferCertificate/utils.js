@@ -1,6 +1,14 @@
 import { C } from "./constants";
 
-const AVATAR_COLORS = ["#4F8EF7", "#4cbc9a", "#94A3B8", "#FBBF24", "#FF793F", "#fe4040", "#0a81d1"];
+const AVATAR_COLORS = [
+  "#4F8EF7",
+  "#4cbc9a",
+  "#94A3B8",
+  "#FBBF24",
+  "#FF793F",
+  "#fe4040",
+  "#0a81d1",
+];
 
 export function avatarColorForId(id) {
   let sum = 0;
@@ -50,13 +58,19 @@ export function mapStudentForTc(student, classList = [], sectionList = []) {
     classId: student?.classId || student?.class?._id,
     sectionId: student?.sectionId || student?.section?._id,
     admissionNumber: student?.studentId || student?.admissionNumber || "-",
-    name: [student?.firstname, student?.lastname].filter(Boolean).join(" ").trim() || student?.name || "-",
+    name:
+      [student?.firstName, student?.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim() ||
+      student?.name ||
+      "-",
     class: className,
     className,
     section: sectionName,
     sectionName,
-    parentFullName: student?.parentFullName || "-",
-    phone: student?.parentPhone || student?.phone || "-",
+    mainParentFullName: student?.mainParentFullName || "-",
+    phone: student?.mainParentPhone ||  "-",
     dob: student?.dob || student?.dateOfBirth || student?.birthDate || "-",
     gender: student?.gender || "-",
     feeStatus: student?.feeStatus || "due",
@@ -111,7 +125,13 @@ function entityLabel(entity, fallback = "-") {
     return entity || fallback;
   }
 
-  return entity?.name || entity?.fullname || entity?.fullName || entity?.title || fallback;
+  return (
+    entity?.name ||
+    entity?.fullname ||
+    entity?.fullName ||
+    entity?.title ||
+    fallback
+  );
 }
 
 function getYearFromDateValue(value) {
@@ -209,7 +229,12 @@ export function isIssuedTcRequest(request) {
     return status === "certificateIssued" || status === "issued";
   }
 
-  return Boolean(request?.certificateNumber || request?.tcNumber || request?.transferCertificateNumber || request?.certificate?.number);
+  return Boolean(
+    request?.certificateNumber ||
+    request?.tcNumber ||
+    request?.transferCertificateNumber ||
+    request?.certificate?.number,
+  );
 }
 
 export function isApprovedByParentTcRequest(request) {
@@ -218,14 +243,24 @@ export function isApprovedByParentTcRequest(request) {
 }
 
 export function isPendingTcRequest(request) {
-  return !isIssuedTcRequest(request) && request?.status !== "rejectedByParent" && request?.status !== "rejected";
+  return (
+    !isIssuedTcRequest(request) &&
+    request?.status !== "rejectedByParent" &&
+    request?.status !== "rejected"
+  );
 }
 
 export function mapTcRequestForDisplay(request) {
   const student = request?.student || request?.sessionStudent?.student || {};
-  const parent = request?.parent || student?.parent || request?.sessionStudent?.parent || {};
-  const classSource = request?.class || request?.sessionStudent?.class || student?.class || {};
-  const sectionSource = request?.section || request?.sessionStudent?.section || student?.section || {};
+  const parent =
+    request?.parent || student?.parent || request?.sessionStudent?.parent || {};
+  const classSource =
+    request?.class || request?.sessionStudent?.class || student?.class || {};
+  const sectionSource =
+    request?.section ||
+    request?.sessionStudent?.section ||
+    student?.section ||
+    {};
   const certificateNumber =
     request?.certificateNumber ||
     request?.tcNumber ||
@@ -244,24 +279,13 @@ export function mapTcRequestForDisplay(request) {
 
   return {
     id: request?.requestId || request?._id || certificateNumber,
-    name:
-      joinName([student?.firstname || student?.firstName, student?.lastname || student?.lastName]) ||
-      student?.fullname ||
-      student?.fullName ||
-      student?.name ||
-      request?.studentName ||
-      request?.name ||
-      "-",
-    parentFullName:
-      parent?.fullname ||
-      parent?.fullName ||
-      parent?.name ||
-      request?.parentFullName ||
-      request?.parentName ||
-      "-",
+    name: joinName([student?.firstName, student?.lastName]) || "-",
+    mainParentFullName: request?.mainParentFullName || "-",
     className: request?.className || entityLabel(classSource),
     sectionName: request?.sectionName || entityLabel(sectionSource),
-    requestDate: formatDisplayDate(request?.requestedDate || request?.requestDate || request?.createdAt),
+    requestDate: formatDisplayDate(
+      request?.requestedDate || request?.requestDate || request?.createdAt,
+    ),
     reasonLabel: formatTcReason(request?.reason),
     reason: formatTcReason(request?.reason),
     reasonDescription: request?.reasonDescription || "",
@@ -272,14 +296,31 @@ export function mapTcRequestForDisplay(request) {
     conduct: formatTcConduct(request?.conduct),
     promotionStatus: request?.promotionStatus || "-",
     promoStatus: request?.promotionStatus || "-",
-    feeStatus: formatFeeStatus(request?.feeStatus || request?.sessionStudent?.feeStatus || student?.feeStatus),
+    feeStatus: formatFeeStatus(
+      request?.feeStatus ||
+        request?.sessionStudent?.feeStatus ||
+        student?.feeStatus,
+    ),
     certificateNumber,
     tcNumber: certificateNumber,
     tcDate: formatDisplayDate(issuedDate),
     issuedYear: getYearFromDateValue(issuedDate),
-    issuedBy: entityLabel(request?.issuedBy || request?.issuer || request?.admin, "Administrator"),
-    admissionNumber: request?.admissionNumber || student?.studentId || student?.admissionNumber || "-",
-    dob: formatDisplayDate(student?.dob || student?.dateOfBirth || student?.birthDate || request?.dob || request?.dateOfBirth),
+    issuedBy: entityLabel(
+      request?.issuedBy || request?.issuer || request?.admin,
+      "Administrator",
+    ),
+    admissionNumber:
+      request?.admissionNumber ||
+      student?.studentId ||
+      student?.admissionNumber ||
+      "-",
+    dob: formatDisplayDate(
+      student?.dob ||
+        student?.dateOfBirth ||
+        student?.birthDate ||
+        request?.dob ||
+        request?.dateOfBirth,
+    ),
     gender: student?.gender || request?.gender || "-",
     raw: request,
   };
@@ -306,7 +347,12 @@ export function getConductTone(conduct) {
     return { background: C.greenDim, color: C.green };
   }
 
-  if (conduct === "Very Good" || conduct === "verygood" || conduct === "Good" || conduct === "good") {
+  if (
+    conduct === "Very Good" ||
+    conduct === "verygood" ||
+    conduct === "Good" ||
+    conduct === "good"
+  ) {
     return { background: C.blueDim, color: C.blue };
   }
 

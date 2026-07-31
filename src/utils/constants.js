@@ -59,3 +59,27 @@ export const C = {
   violet: "#CBD5E1",
   orange: "#FF793F",
 };
+
+export const C_LIGHT = {
+  bg: "#f8fafc",
+  nav: "#ffffff",
+  surface: "#ffffff",
+  card: "#ffffff",
+  border: "rgba(0,0,0,0.1)",
+  borderSoft: "rgba(0,0,0,0.05)",
+  text: "#0f172a",
+  sub: "#334155",
+  textSub: "#64748b",
+  textMuted: "#94a3b8",
+  blue: "#3b82f6",
+  blueBright: "#0284c7",
+  blueDim: "rgba(59,130,246,0.1)",
+  green: "#16a34a",
+  greenDim: "rgba(22,163,74,0.1)",
+  red: "#dc2626",
+  redDim: "rgba(220,38,38,0.1)",
+  amber: "#d97706",
+  amberDim: "rgba(217,119,6,0.1)",
+  violet: "#64748b",
+  orange: "#ea580c",
+};

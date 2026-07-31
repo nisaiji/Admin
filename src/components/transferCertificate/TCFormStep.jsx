@@ -5,7 +5,8 @@ import toast from "react-hot-toast";
 
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import { C, DEFAULT_CHECKLIST, TC_PROMOTION_OPTIONS } from "./constants";
+import { DEFAULT_CHECKLIST, TC_PROMOTION_OPTIONS } from "./constants";
+import { useTCTheme } from "./ThemeContext";
 import { CertificateSheet, DropField, InfoGrid, ModalShell, SectionCard, TextField } from "./shared";
 import { formatDisplayDate, formatFeeStatus, getClassSectionLabel } from "./utils";
 
@@ -28,6 +29,8 @@ const CONDUCT_OPTIONS = [
 ];
 
 function ChecklistRow({ item, onToggle, onRemove }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       onClick={() => onToggle(item?.id)}
@@ -122,6 +125,8 @@ function PreviewTCModal({
   canSubmit,
   submitting,
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <AnimatePresence>
       {previewing ? (
@@ -171,7 +176,7 @@ function PreviewTCModal({
           <CertificateSheet
             items={[
               ["Student Name", student?.name],
-              ["Parent's Name", student?.parentFullName],
+              ["Parent's Name", student?.mainParentFullName],
               ["Class & Section", getClassSectionLabel(student)],
               ["Admission Number", student?.admissionNumber],
               ["Date of Birth", student?.dob],
@@ -230,6 +235,8 @@ function getConductValue(label) {
 }
 
 export function TCFormStep({ student, onBack, onRequestSubmitted }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const [leaveReason, setLeaveReason] = useState(REASON_OPTIONS[0].label);
   const [reasonDescription, setReasonDescription] = useState("");
   const [lastDate, setLastDate] = useState("");
@@ -391,7 +398,7 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
             <InfoGrid
               items={[
                 ["Student Name", student?.name],
-                ["Parent's Name", student?.parentFullName],
+                ["Parent's Name", student?.mainParentFullName],
                 ["Class", student?.className],
                 ["Section", student?.section],
                 ["Admission Number", student?.admissionNumber],

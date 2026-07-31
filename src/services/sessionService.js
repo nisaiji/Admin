@@ -4,11 +4,9 @@ import EndPoints from "./EndPoints";
 
 const DATE_FORMAT = "YYYY-MM-DD";
 const SESSION_STATUS_MAP = {
-  current: "active",
   active: "active",
   upcoming: "upcoming",
-  completed: "archived",
-  archived: "archived",
+  completed: "completed",
 };
 
 const getCurrentAcademicStartYear = (referenceDate = moment()) =>
@@ -18,10 +16,9 @@ export const getAcademicYearLabel = (academicStartYear, academicEndYear) =>
   `${academicStartYear}-${String(academicEndYear).slice(-2)}`;
 
 export const getSessionDateRange = (academicStartYear, academicEndYear) => ({
-  startDate: moment(
-    `${academicStartYear}-04-01`,
+  startDate: moment(`${academicStartYear}-04-01`, DATE_FORMAT).format(
     DATE_FORMAT,
-  ).format(DATE_FORMAT),
+  ),
   endDate: moment(`${academicEndYear}-03-31`, DATE_FORMAT).format(DATE_FORMAT),
 });
 
@@ -29,12 +26,7 @@ const getNormalizedStatus = (session) => {
   if (session?.status) {
     return SESSION_STATUS_MAP[session.status] || session.status;
   }
-
-  if (session?.isCurrent) {
-    return "active";
-  }
-
-  return "archived";
+  return "";
 };
 
 export const normalizeSession = (session) => {
@@ -61,10 +53,7 @@ export const normalizeSession = (session) => {
     id: session?._id || session?.id || null,
     academicStartYear,
     academicEndYear,
-    academicYearLabel: getAcademicYearLabel(
-      academicStartYear,
-      academicEndYear,
-    ),
+    academicYearLabel: getAcademicYearLabel(academicStartYear, academicEndYear),
     startDate,
     endDate,
     status: getNormalizedStatus(session),

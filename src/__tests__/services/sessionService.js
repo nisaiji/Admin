@@ -34,7 +34,6 @@ describe("sessionService", () => {
           _id: "active-session",
           academicStartYear: 2026,
           academicEndYear: 2027,
-          isCurrent: true,
         },
       ],
     });
@@ -63,7 +62,6 @@ describe("sessionService", () => {
         {
           academicStartYear: 2026,
           academicEndYear: 2027,
-          isCurrent: true,
         },
         {
           academicStartYear: 2027,
@@ -91,7 +89,6 @@ describe("sessionService", () => {
           {
             academicStartYear: 2026,
             academicEndYear: 2027,
-            isCurrent: true,
           },
           {
             academicStartYear: 2027,
@@ -111,7 +108,6 @@ describe("sessionService", () => {
           {
             academicStartYear: 2026,
             academicEndYear: 2027,
-            isCurrent: true,
           },
         ],
         {

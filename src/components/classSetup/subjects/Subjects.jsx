@@ -55,6 +55,7 @@ import {
   FormControlLabel,
   Button,
 } from "@mui/material";
+import { C_LIGHT } from "../../../utils/constants";
 
 export default function Subjects() {
   // Theme and user role
@@ -233,7 +234,7 @@ export default function Subjects() {
 
       {/* Left side - Subject Table */}
       <div
-        className={` bg-background1 rounded-lg p-8 ${
+        className={`${isDarkMode ? "bg-background1" : "bg-whiteBackground1"} rounded-lg p-8 ${
           role === "admin" ? "flex-3 w-3/4" : "w-full"
         }`}
       >
@@ -426,7 +427,7 @@ export default function Subjects() {
                             },
                           }}
                         >
-                          {t?.firstname} {t?.lastname}
+                          {t?.firstName} {t?.lastName}
                           {t?.role === "classTeacher" &&
                             t?.sectionId === classAndSectionData?.sectionId && (
                               <span
@@ -471,7 +472,7 @@ export default function Subjects() {
               </tr>
             )}
             {/* assigned subject list */}
-            {assignedSubjects.map((sub, i) => (
+            {assignedSubjects?.map((sub, i) => (
               <tr
                 key={i}
                 onClick={() => {
@@ -483,7 +484,7 @@ export default function Subjects() {
                     );
                   }
                 }}
-                className={`${selectedRow === i ? "bg-background3" : ""} `}
+                className={`${selectedRow === i ? (isDarkMode ? "bg-background3" : "bg-backgroundGray2") : ""} `}
               >
                 {/* Subject dropdown */}
                 <td>
@@ -699,7 +700,7 @@ export default function Subjects() {
                             }}
                           >
                             <span>
-                              {t?.firstname} {t?.lastname}
+                              {t?.firstName} {t?.lastName}
                             </span>
                             {t?.role === "classTeacher" &&
                               t?.sectionId ===
@@ -753,7 +754,7 @@ export default function Subjects() {
                         </button>
                         <button
                           type="button"
-                          className="text-base font-poppins-bold rounded ml-3 h-[34px] w-[100px] text-textPrimary bg-background4"
+                          className={`text-base font-poppins-bold rounded ml-3 h-[34px] w-[100px] ${isDarkMode ? "bg-background2 text-textPrimary" : "bg-whiteBackground text-textBlack"} `}
                           onClick={() => handleCancel(i)}
                         >
                           Cancel
@@ -762,7 +763,7 @@ export default function Subjects() {
                     ) : (
                       <button
                         type="button"
-                        className="text-base font-poppins-bold rounded h-[34px] w-[100px] text-textPrimary bg-background4"
+                        className={`text-base font-poppins-bold rounded h-[34px] w-[100px] ${isDarkMode ? "bg-background2 text-textPrimary" : "bg-whiteBackground text-textBlack"} `}
                         onClick={() => handleEditRow(i)}
                       >
                         Edit
@@ -778,7 +779,13 @@ export default function Subjects() {
 
       {/* Right side - Teacher Profile */}
       {role === "admin" && (
-        <div className="flex-1 bg-background1 rounded-lg shadow-md p-6">
+        <div
+          className="rounded-lg shadow-md p-6 transition-colors duration-300"
+          style={{
+            backgroundColor: isDarkMode ? undefined : C_LIGHT.card,
+            border: isDarkMode ? undefined : `1px solid ${C_LIGHT.borderSoft}`,
+          }}
+        >
           {selectedTeacher ? (
             <div className="flex flex-col items-center">
               {/* Centered Section */}
@@ -786,41 +793,88 @@ export default function Subjects() {
                 <img
                   src={selectedTeacher?.photo || profileEmpty}
                   alt="teacher"
-                  className="size-[180px] rounded-full mx-auto mb-3 object-cover"
+                  className="size-[180px] rounded-full mx-auto mb-3 object-cover border"
+                  style={{
+                    borderColor: isDarkMode ? undefined : C_LIGHT.border,
+                  }}
                 />
-                <h3 className="text-base font-poppins-bold">
+
+                <h3
+                  className="text-base font-poppins-bold"
+                  style={{
+                    color: isDarkMode ? undefined : C_LIGHT.text,
+                  }}
+                >
                   {selectedTeacher?.teacherFirstName}{" "}
                   {selectedTeacher?.teacherLastName}
                 </h3>
+
                 {selectedTeacher?.role === "classTeacher" && (
-                  <p className="mb-2 text-textOrange bg-backgroundOrange inline-block px-3 py-1 rounded-md">
+                  <p
+                    className="mb-2 inline-block px-3 py-1 rounded-md"
+                    style={{
+                      backgroundColor: isDarkMode
+                        ? undefined
+                        : C_LIGHT.amberDim,
+                      color: isDarkMode ? undefined : C_LIGHT.amber,
+                    }}
+                  >
                     Class Teacher – {selectedTeacher?.className}{" "}
                     {selectedTeacher?.sectionName}
                   </p>
                 )}
               </div>
 
-              {/* Left-aligned Section */}
+              {/* Details Section */}
               <div className="w-full mt-6 text-left">
                 {/* phone */}
-                <div className="flex items-center gap-2 mb-2">
+                <div
+                  className="flex items-center gap-2 mb-3"
+                  style={{
+                    color: isDarkMode ? undefined : C_LIGHT.sub,
+                  }}
+                >
                   <img src={phone} alt="phone" className="size-6" />
                   <p>{selectedTeacher?.phone}</p>
                 </div>
+
                 {/* email */}
                 {selectedTeacher?.email && (
-                  <div className="flex items-center gap-2 mb-2">
+                  <div
+                    className="flex items-center gap-2 mb-3"
+                    style={{
+                      color: isDarkMode ? undefined : C_LIGHT.sub,
+                    }}
+                  >
                     <img src={email} alt="email" className="size-6" />
                     <p>{selectedTeacher?.email}</p>
                   </div>
                 )}
-                {/* other class list */}
-                <h4 className="mt-4 font-semibold">Other Classes</h4>
-                <div className="flex flex-wrap gap-2 mt-2">
+
+                {/* other classes */}
+                <h4
+                  className="mt-4 font-semibold"
+                  style={{
+                    color: isDarkMode ? undefined : C_LIGHT.text,
+                  }}
+                >
+                  Other Classes
+                </h4>
+
+                <div className="flex flex-wrap gap-2 mt-3">
                   {selectedTeacher?.sectionSubjects?.map((c, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1 rounded text-sm bg-backgroundGray15 text-textPrimary"
+                      className="px-3 py-1 rounded text-sm"
+                      style={{
+                        backgroundColor: isDarkMode
+                          ? undefined
+                          : C_LIGHT.cardAlt,
+                        color: isDarkMode ? undefined : C_LIGHT.text,
+                        border: isDarkMode
+                          ? undefined
+                          : `1px solid ${C_LIGHT.borderSoft}`,
+                      }}
                     >
                       {c?.className} {c?.sectionName} {c?.subjectName}
                     </span>
@@ -829,7 +883,12 @@ export default function Subjects() {
               </div>
             </div>
           ) : (
-            <p className="text-center mt-10">
+            <p
+              className="text-center mt-10"
+              style={{
+                color: isDarkMode ? undefined : C_LIGHT.muted,
+              }}
+            >
               Select a teacher to view details
             </p>
           )}

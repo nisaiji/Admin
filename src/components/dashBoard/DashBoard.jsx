@@ -126,7 +126,13 @@ const Dashboard = () => {
   }, [dispatch]);
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, color: C.text }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: isDarkMode ? C.bg : C.bgLight,
+        color: C.text,
+      }}
+    >
       <main style={{ padding: "24px 32px 40px" }}>
         <Toaster position="top-center" reverseOrder={false} />
 

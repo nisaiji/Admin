@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import DashBoard from "./components/dashBoard/DashBoard";
 import NotRequireUser from "./components/NotRequireUser";
 import RequireUser from "./components/RequireUser";
@@ -7,7 +7,6 @@ import Login from "./pages/Login";
 import ClassSetup from "./components/classSetup/ClassSetup";
 import TeacherPage from "./components/teacherSetup/Teacher";
 import Event from "./components/eventSetup/Event";
-// import TransferCertificate from "./components/transferCertificate/TransferCertificate";
 import Addsection from "./components/classSetup/Addsection";
 import Studentlist from "./components/studentSetup/Studentlist";
 import StudentSection from "./components/classSetup/sectionStudents/StudentSection";
@@ -24,7 +23,6 @@ import Leaves from "./components/request/Leaves";
 import TeacherProfile from "./components/admin/TeacherProfile";
 import desktop from "./assets/images/desktop.png";
 import Register from "./pages/Register";
-// import TransferCertificateApply from "./components/transferCertificate/TransferCertificateApply";
 import AddStudentForm from "./components/studentSetup/AddStudentForm";
 import Notice from "./components/notice/Notice";
 import StudentMenu from "./components/classSetup/sectionStudents/StudentMenu";
@@ -37,6 +35,7 @@ import { OnboardingScreen } from "./components/onboarding/Onboarding";
 import { TCPage } from "./components/transferCertificate/TransferCertificate";
 import NotFound from "./components/NotFound";
 import SettingsPage from "./components/settings/SettingsPage";
+import Fees from "./components/payments/Fees";
 
 /**
  * Main application component for handling routes and rendering views.
@@ -107,10 +106,6 @@ function App() {
                   <Route path="class-setup" element={<ClassSetup />} />
                   <Route path="event" element={<Event />} />
                   <Route path="transfer-certificate" element={<TCPage />} />
-                  {/* <Route
-                    path="transfer-certificate-apply"
-                    element={<TransferCertificateApply />}
-                  /> */}
                   <Route path="add-section" element={<Addsection />} />
                   <Route
                     path="class-setup/student-menu"
@@ -152,7 +147,8 @@ function App() {
                   />
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="notice" element={<Notice />} />
-                  {/* <Route path="payments" element={<Fees />} /> */}
+                  <Route path="payments" element={<Fees />} />
+
                 </>
               ) : role === "classTeacher" ? (
                 <>

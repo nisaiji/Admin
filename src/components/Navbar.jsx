@@ -7,7 +7,8 @@
  */
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { appConfigAction } from "../store/AppConfigSlice";
 import { useTranslation } from "react-i18next";
 import {
   ChevronDown,
@@ -22,13 +23,16 @@ import {
   Lock,
   Megaphone,
   GraduationCap,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import logo from "../assets/images/deer logo.png";
-import { C } from "../utils/constants";
+import { C, C_LIGHT } from "../utils/constants";
 
 /* ─── Reusable dropdown component ────────────────────────────── */
-function NavDrop({ label, items, icon, align = "left", buttonAriaLabel }) {
+function NavDrop({ label, items, icon, align = "left", buttonAriaLabel , isDarkMode}) {
+  const themeC = isDarkMode ? C : C_LIGHT;
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -55,24 +59,24 @@ function NavDrop({ label, items, icon, align = "left", buttonAriaLabel }) {
           background: open ? "rgba(255,255,255,0.08)" : "transparent",
           border: `1px solid ${open ? "rgba(255,255,255,0.11)" : "transparent"}`,
           borderRadius: "9px",
-          color: open ? C.text : C.sub,
+          color: open ? themeC.text : themeC.sub,
           fontSize: "14px",
           fontWeight: 600,
           cursor: "pointer",
           transition: "all 0.15s",
         }}
         onMouseEnter={(e) => {
-          if (!open) e.currentTarget.style.color = C.text;
+          if (!open) e.currentTarget.style.color = themeC.text;
         }}
         onMouseLeave={(e) => {
-          if (!open) e.currentTarget.style.color = C.sub;
+          if (!open) e.currentTarget.style.color = themeC.sub;
         }}
       >
         {icon && <span style={{ opacity: 0.8, display: "flex" }}>{icon}</span>}
         {label}
         <ChevronDown
           size={13}
-          color={C.textSub}
+          color={themeC.textSub}
           style={{
             transform: open ? "rotate(180deg)" : "none",
             transition: "transform 0.2s",
@@ -93,7 +97,7 @@ function NavDrop({ label, items, icon, align = "left", buttonAriaLabel }) {
               top: "calc(100% + 10px)",
               [align === "right" ? "right" : "left"]: 0,
               zIndex: 600,
-              background: "#111520",
+              background: themeC.card,
               border: "1px solid rgba(255,255,255,0.09)",
               borderRadius: "13px",
               overflow: "hidden",
@@ -127,7 +131,7 @@ function NavDrop({ label, items, icon, align = "left", buttonAriaLabel }) {
                     padding: "11px 18px",
                     background: "transparent",
                     border: "none",
-                    color: C.text,
+                    color: themeC.text,
                     fontSize: "14px",
                     fontWeight: 500,
                     cursor: "pointer",
@@ -135,8 +139,8 @@ function NavDrop({ label, items, icon, align = "left", buttonAriaLabel }) {
                     transition: "background 0.12s",
                   }}
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.background =
-                      "rgba(255,255,255,0.05)")
+                  (e.currentTarget.style.background =
+                    "rgba(255,255,255,0.05)")
                   }
                   onMouseLeave={(e) =>
                     (e.currentTarget.style.background = "transparent")
@@ -154,7 +158,7 @@ function NavDrop({ label, items, icon, align = "left", buttonAriaLabel }) {
                         background: item.iconColor
                           ? `${item.iconColor}18`
                           : "rgba(255,255,255,0.05)",
-                        color: item.iconColor || C.textSub,
+                        color: item.iconColor || themeC.textSub,
                         flexShrink: 0,
                       }}
                     >
@@ -173,7 +177,8 @@ function NavDrop({ label, items, icon, align = "left", buttonAriaLabel }) {
 }
 
 /* ─── Flat nav button ─────────────────────────────────────────── */
-function NavBtn({ label, icon, active, onClick }) {
+function NavBtn({ label, icon, active, onClick , isDarkMode}) {
+  const themeC = isDarkMode ? C : C_LIGHT;
   return (
     <button
       type="button"
@@ -187,7 +192,7 @@ function NavBtn({ label, icon, active, onClick }) {
         background: active ? "rgba(255,255,255,0.06)" : "transparent",
         border: "1px solid transparent",
         borderRadius: "9px",
-        color: active ? C.text : C.sub,
+        color: active ? themeC.text : themeC.sub,
         fontSize: "14px",
         fontWeight: 600,
         cursor: "pointer",
@@ -195,12 +200,12 @@ function NavBtn({ label, icon, active, onClick }) {
       }}
       onMouseEnter={(e) => {
         const b = e.currentTarget;
-        b.style.color = C.text;
+        b.style.color = themeC.text;
         b.style.background = "rgba(255,255,255,0.06)";
       }}
       onMouseLeave={(e) => {
         const b = e.currentTarget;
-        b.style.color = active ? C.text : C.sub;
+        b.style.color = active ? themeC.text : themeC.sub;
         b.style.background = active ? "rgba(255,255,255,0.06)" : "transparent";
       }}
     >
@@ -217,9 +222,12 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-
+  
   const { data, teacherData } = useSelector((state) => state.appAuth);
   const role = useSelector((state) => state.appAuth.role);
+  const dispatch = useDispatch();
+  const isDarkMode = useSelector((state) => state.appConfig?.isDarkMode ?? true);
+  const themeC = isDarkMode ? C : C_LIGHT;
 
   const isPathActive = (path) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -263,8 +271,8 @@ const Navbar = () => {
         top: 0,
         zIndex: 300,
         height: 60,
-        background: C.nav,
-        borderBottom: `1px solid ${C.border}`,
+        background: themeC.nav,
+        borderBottom: `1px solid ${themeC.border}`,
         display: "flex",
         alignItems: "center",
         padding: "0 28px",
@@ -295,7 +303,7 @@ const Navbar = () => {
             style={{
               fontSize: "15px",
               fontWeight: 700,
-              color: C.text,
+              color: themeC.text,
               lineHeight: 1.2,
             }}
           >
@@ -304,7 +312,7 @@ const Navbar = () => {
           <div
             style={{
               fontSize: "9px",
-              color: C.textSub,
+              color: themeC.textSub,
               letterSpacing: "0.05em",
             }}
           >
@@ -315,8 +323,7 @@ const Navbar = () => {
 
       {/* ── Class Teacher: single "Classroom" link ────────── */}
       {role === "classTeacher" && (
-        <NavBtn
-          label={t("titles.classRoom")}
+        <NavBtn isDarkMode={isDarkMode} label={t("titles.classRoom")}
           icon={<BookOpen size={14} />}
           active={isPathActive("/student-menu")}
           onClick={() => navigate("/student-menu")}
@@ -327,88 +334,112 @@ const Navbar = () => {
       {role === "admin" && (
         <>
           {/* Setup dropdown */}
-          <NavDrop
-            label={t("setup")}
+          <NavDrop isDarkMode={isDarkMode} label={t("setup")}
             items={[
               {
                 label: t("roles.teacher"),
                 icon: <UserCog size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/teacher"),
               },
               {
                 label: t("titles.classRoom"),
                 icon: <BookOpen size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/class-setup"),
               },
               {
                 label: t("event"),
                 icon: <Umbrella size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/event"),
               },
             ]}
           />
 
           {/* SIS dropdown */}
-          <NavDrop
-            label={t("roles.student")}
+          <NavDrop isDarkMode={isDarkMode} label={t("roles.student")}
             items={[
               {
                 label: t("roles.student"),
                 icon: <GraduationCap size={13} />,
-                iconColor: C.blueBright,
+                iconColor: themeC.blueBright,
                 onClick: () => navigate("/student-information-system"),
               },
               {
                 label: "TC",
                 icon: <FileText size={13} />,
-                iconColor: C.blueBright,
+                iconColor: themeC.blueBright,
                 onClick: () => navigate("/transfer-certificate"),
               },
             ]}
           />
 
           {/* Requests dropdown */}
-          <NavDrop
-            label={t("titles.requests")}
+          <NavDrop isDarkMode={isDarkMode} label={t("titles.requests")}
             items={[
               {
                 label: "Password Reset",
                 icon: <Lock size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/password-reset-requests"),
               },
               {
                 label: t("leaves"),
                 icon: <FileText size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/teacher-leave-requests"),
               },
             ]}
           />
 
           {/* Notice button */}
-          <NavBtn
-            label={t("titles.notice")}
+          <NavBtn isDarkMode={isDarkMode} label={t("titles.notice")}
             icon={<Megaphone size={14} />}
             active={isPathActive("/notice")}
             onClick={() => navigate("/notice")}
           />
 
           {/* Payments button */}
-          <NavBtn
-            label={t("titles.payments")}
+          <NavBtn isDarkMode={isDarkMode} label={t("titles.payments")}
             icon={<CreditCard size={14} />}
-            // active={isActive("/payments")}
-            // onClick={() => navigate("/payments")}
+            active={isPathActive("/payments")}
+            onClick={() => navigate("/payments")}
           />
         </>
       )}
 
       {/* ── Spacer ───────────────────────────────────────── */}
       <div style={{ flex: 1 }} />
+
+      {/* ── Theme Toggle ─────────────────────────────── */}
+      <button
+        onClick={() => dispatch(appConfigAction.toggleDarkMode())}
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: "9px",
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          color: themeC.textSub,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          marginRight: 4,
+          transition: "all 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = themeC.text;
+          e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = themeC.textSub;
+          e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+        }}
+      >
+        {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
+      </button>
 
       {/* ── Bell notification ─────────────────────────────── */}
       {/* <button
@@ -418,7 +449,7 @@ const Navbar = () => {
           borderRadius: "9px",
           background: "rgba(255,255,255,0.04)",
           border: "1px solid rgba(255,255,255,0.07)",
-          color: C.textSub,
+          color: themeC.textSub,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -436,15 +467,14 @@ const Navbar = () => {
             width: 7,
             height: 7,
             borderRadius: "50%",
-            background: C.orange,
-            border: `2px solid ${C.nav}`,
+            background: themeC.orange,
+            border: `2px solid ${themeC.nav}`,
           }}
         />
       </button> */}
 
       {/* ── User avatar / profile dropdown ────────────────── */}
-      <NavDrop
-        label=""
+      <NavDrop isDarkMode={isDarkMode} label=""
         align="right"
         buttonAriaLabel="Open profile menu"
         icon={
@@ -483,20 +513,20 @@ const Navbar = () => {
           {
             label: t("profile"),
             icon: <User size={13} />,
-            iconColor: C.textSub,
+            iconColor: themeC.textSub,
             onClick: () => navigate(profileRoute),
           },
           { divider: true, label: "" },
           ...(role === "admin"
             ? [
-                {
-                  label: "Settings",
-                  icon: <Settings size={13} />,
-                  iconColor: C.textSub,
-                  onClick: () => navigate("/settings"),
-                },
-                { divider: true, label: "" },
-              ]
+              {
+                label: "Settings",
+                icon: <Settings size={13} />,
+                iconColor: themeC.textSub,
+                onClick: () => navigate("/settings"),
+              },
+              { divider: true, label: "" },
+            ]
             : []),
           {
             label: t("logout"),

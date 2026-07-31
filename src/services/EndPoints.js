@@ -111,50 +111,65 @@ const EndPoints = {
     GET_ISSUED_TC: "transfer-certificate/admin",
 
     // FEES
-    CREATE_FEES_STRUCTURE: "fee-structure/school-fee-structure",
-    GET_FEES_STRUCTURE_OF_SCHOOL:
-      "fee-structure/school-fee-structure/get-school-fee-structure",
-    GET_FEES_STRUCTURE: "fee-structure/school-fee-structure/session",
+    CREATE_FEES_STRUCTURE: "fee-setup/fee-cycle",
+    GET_FEES_STRUCTURE_OF_SCHOOL: "fee-setup/fee-cycle",
+    UPDATE_FEES_STRUCTURE: "fee-setup/fee-cycle",
+    
+    CREATE_FEES_HEAD_OF_SCHOOL: "fee-setup/fee-head",
+    GET_FEES_HEAD_OF_SCHOOL: "fee-setup/fee-head",
+    UPDATE_FEES_HEAD_OF_SCHOOL: "fee-setup/fee-head",
+    DELETE_FEES_HEAD_OF_SCHOOL: "fee-setup/fee-head",
+    
+    CREATE_CLASS_FEES_STRUCTURE: "fee-setup/fee-structure",
+    GET_CLASS_FEES_STRUCTURE: "fee-setup/fee-structure/list",
+    GET_SINGLE_CLASS_FEES_STRUCTURE: "fee-setup/fee-structure",
+    UPDATE_CLASS_FEES_STRUCTURE: "fee-setup/fee-structure",
 
-    CREATE_FEES: "fee-structure/section-fee-structure",
-    GET_FEES: "fee-structure/section-fee-structure",
-    GET_SCHOOL_FEES: "fee-structure/school-fee-structure/session",
+    VERIFY_FEES_STRUCTURE: "fee-setup/verify",
 
-    CREATE_REFUND: "payment/refund",
+    GET_FEE_SUMMARY: "payment/fee-summary",
+    GET_TRANSITION_HISTORY: "payment/admin/history",
+    GET_STUDENT_DUES: "fee-setup/dues",
 
-    GET_FEE_SUMMARY: "payment/v2/dashboard/summary",
-    GET_TRANSITIONS: "payment/v2/dashboard/transactions",
-    GET_PAYMENT_BY_MODE: "payment/v2/dashboard/payment-modes-summary",
-    GET_DAILY_PAYMENT_SUMMARY: "payment/v2/dashboard/daywise-summary",
-    GET_CLASS_SECTIONS_REPORTS: "payment/v2/dashboard/sections-report",
-    GET_SECTIONS_REPORTS: "payment/v2/dashboard/section-students-report",
+    // CREATE_FEES: "fee-structure/section-fee-structure",
+    // GET_FEES: "fee-structure/section-fee-structure",
+    // GET_SCHOOL_FEES: "fee-structure/school-fee-structure/session",
 
-    GET_MONTHLY_PAYMENT_SUMMARY: "payment/dashboard/monthwise-paid",
-    GET_CLASS_PAYMENT_SUMMARY: "payment/dashboard/class-paid",
-    GET_PAYMENT_TRANSITIIONS: "payment/dashboard/transactions",
-    SEND_PAYMENT_REMINDER: "payment/dashboard/parent-reminder",
+    // CREATE_REFUND: "payment/refund",
 
-    GET_CLASS_WISE_SUMMARY: "payment/dashboard/reports/class-wise/summary",
-    GET_CLASS_WISE_CHART: "payment/dashboard/reports/class-wise/chart",
-    GET_CLASS_WISE_TRANSACTIONS:
-      "payment/dashboard/reports/class-wise/transactions",
+    // GET_FEE_SUMMARY: "payment/v2/dashboard/summary",
+    // GET_TRANSITIONS: "payment/v2/dashboard/transactions",
+    // GET_PAYMENT_BY_MODE: "payment/v2/dashboard/payment-modes-summary",
+    // GET_DAILY_PAYMENT_SUMMARY: "payment/v2/dashboard/daywise-summary",
+    // GET_CLASS_SECTIONS_REPORTS: "payment/v2/dashboard/sections-report",
+    // GET_SECTIONS_REPORTS: "payment/v2/dashboard/section-students-report",
 
-    GET_PERIODICALLY_SUMMARY: "payment/dashboard/reports/periodically/summary",
-    GET_PERIODICALLY_CHART: "payment/dashboard/reports/periodically/chart",
-    GET_PERIODICALLY_TRANSACTIONS:
-      "payment/dashboard/reports/periodically/transactions",
+    // GET_MONTHLY_PAYMENT_SUMMARY: "payment/dashboard/monthwise-paid",
+    // GET_CLASS_PAYMENT_SUMMARY: "payment/dashboard/class-paid",
+    // GET_PAYMENT_TRANSITIIONS: "payment/dashboard/transactions",
+    // SEND_PAYMENT_REMINDER: "payment/dashboard/parent-reminder",
 
-    GET_PAYMENT_MODE_SUMMARY: "payment/dashboard/reports/payment-mode/summary",
+    // GET_CLASS_WISE_SUMMARY: "payment/dashboard/reports/class-wise/summary",
+    // GET_CLASS_WISE_CHART: "payment/dashboard/reports/class-wise/chart",
+    // GET_CLASS_WISE_TRANSACTIONS:
+    //   "payment/dashboard/reports/class-wise/transactions",
+
+    // GET_PERIODICALLY_SUMMARY: "payment/dashboard/reports/periodically/summary",
+    // GET_PERIODICALLY_CHART: "payment/dashboard/reports/periodically/chart",
+    // GET_PERIODICALLY_TRANSACTIONS:
+    //   "payment/dashboard/reports/periodically/transactions",
+
+    // GET_PAYMENT_MODE_SUMMARY: "payment/dashboard/reports/payment-mode/summary",
     // GET_PAYMENT_MODE_TRANSACTIONS:"payment/dashboard/reports/payment-mode/transactions",
 
-    GET_REPORT_FEE_SUMMARY: "payment/dashboard/reports/fee/summary",
-    GET_REPORT_FEE_TRANSACTIONS: "payment/dashboard/reports/fee/transactions",
-    GET_REPORT_FEE_REMINDER: "payment/dashboard/parent-reminder",
+    // GET_REPORT_FEE_SUMMARY: "payment/dashboard/reports/fee/summary",
+    // GET_REPORT_FEE_TRANSACTIONS: "payment/dashboard/reports/fee/transactions",
+    // GET_REPORT_FEE_REMINDER: "payment/dashboard/parent-reminder",
 
-    GET_REFUND_AND_FAILED_SUMMARY: "payment/dashboard/reports/other/summary",
-    GET_REFUND_AND_FAILED_CHART: "payment/dashboard/reports/other/chart",
-    GET_REFUND_AND_FAILED_TRANSACTIONS:
-      "payment/dashboard/reports/other/transactions",
+    // GET_REFUND_AND_FAILED_SUMMARY: "payment/dashboard/reports/other/summary",
+    // GET_REFUND_AND_FAILED_CHART: "payment/dashboard/reports/other/chart",
+    // GET_REFUND_AND_FAILED_TRANSACTIONS:
+    //   "payment/dashboard/reports/other/transactions",
   },
   TEACHER: {
     // LOGIN

@@ -362,8 +362,8 @@ export default function AttendancePopup() {
     isFetchingRef.current = true;
 
     // Use passed data or fall back to state
-    const currentHolidays = eventData.holidayMap || holidays;
-    const currentWorkdays = eventData.workdayMap || workdays;
+    const currentHolidays = eventData?.holidayMap || holidays;
+    const currentWorkdays = eventData?.workdayMap || workdays;
 
     try {
       setLoading(true);
@@ -391,15 +391,16 @@ export default function AttendancePopup() {
       const res = await axiosClient.get(url);
 
       if (res?.statusCode === 200) {
+        
         const attendances = res?.result?.attendances || [];
 
-        const updatedAttendanceData = attendances.map((student) => {
+        const updatedAttendanceData = attendances?.map((student) => {
           // Create a map of attendance data by date
-          const attendanceByDate = student.attendances.reduce((acc, item) => {
-            acc[item.date] =
-              item.teacherAttendance === "present"
+          const attendanceByDate = student?.attendances?.reduce((acc, item) => {
+            acc[item?.date] =
+              item?.teacherAttendance === "present"
                 ? "P"
-                : item.teacherAttendance === "absent"
+                : item?.teacherAttendance === "absent"
                   ? "A"
                   : "";
             return acc;
@@ -442,10 +443,10 @@ export default function AttendancePopup() {
         });
 
         // Sort by firstname, and if equal, sort by lastname
-        updatedAttendanceData.sort((a, b) => {
-          const firstNameComparison = a.firstname.localeCompare(b.firstname);
+        updatedAttendanceData?.sort((a, b) => {
+          const firstNameComparison = a?.firstname?.localeCompare(b?.firstname);
           if (firstNameComparison === 0) {
-            return a.lastname.localeCompare(b.lastname);
+            return a?.lastname?.localeCompare(b?.lastname);
           }
           return firstNameComparison;
         });
@@ -761,7 +762,7 @@ export default function AttendancePopup() {
             <img
               src={backIcon}
               alt="Previous Month"
-              className={`w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
+              className={`${isDarkMode ? "" : "invert"} w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
               onClick={() =>
                 isEditable
                   ? toast.error(
@@ -770,14 +771,16 @@ export default function AttendancePopup() {
                   : changeMonth(-1)
               }
             />
-            <div className={`text-white text-xl mx-4`}>
+            <div
+              className={`${isDarkMode ? "text-textPrimary" : "text-textBlack"} text-xl mx-4`}
+            >
               {currentDate.toLocaleString("default", { month: "long" })}{" "}
               {currentDate.getFullYear()}
             </div>
             <img
               src={backIcon}
               alt="Next Month"
-              className={`w-10 h-10 rotate-180 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
+              className={`${isDarkMode ? "" : "invert"} w-10 h-10 rotate-180 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
               onClick={() =>
                 isEditable
                   ? toast.error(
@@ -787,7 +790,11 @@ export default function AttendancePopup() {
               }
             />
           </div>
-          <div className={`text-white text-xl`}>Monthly Attendance</div>
+          <div
+            className={`${isDarkMode ? "text-textPrimary" : "text-textBlack"} text-xl`}
+          >
+            Monthly Attendance
+          </div>
           <div className={`flex flex-row w-[270px] justify-end`}>
             {isEditable ? (
               <button
@@ -802,7 +809,7 @@ export default function AttendancePopup() {
                 <img
                   src={editw}
                   alt=""
-                  className={`w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
+                  className={`${isDarkMode ? "" : "invert"} w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
                   onClick={() => {
                     if (!canEditAttendance) {
                       toast.error(
@@ -820,7 +827,7 @@ export default function AttendancePopup() {
                   onClick={!loading ? downloadAttendance : undefined}
                   src={downloadw}
                   alt=""
-                  className={`w-10 h-10 mx-4 transition-all duration-200 ease-in-out ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-90"}`}
+                  className={`${isDarkMode ? "" : "invert"} w-10 h-10 mx-4 transition-all duration-200 ease-in-out ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-90"}`}
                 />
               </>
             )}

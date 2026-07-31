@@ -61,8 +61,8 @@ const TeacherUpdate = () => {
 
   // Validation schema using Yup
   const validationSchema = Yup.object({
-    firstname: Yup.string().trim().required(t("validationError.firstName")),
-    lastname: Yup.string().trim().required(t("validationError.lastName")),
+    firstName: Yup.string().trim().required(t("validationError.firstName")),
+    lastName: Yup.string().trim().required(t("validationError.lastName")),
     phone: Yup.string()
       .trim()
       .required(t("validationError.phone"))
@@ -73,11 +73,13 @@ const TeacherUpdate = () => {
         (value) => value && REGEX.PHONE_TEST.test(value)
       ),
   });
+  // console.log(teacher);
+  
   // Setup formik for handling form submission, validation, and field management
   const formik = useFormik({
     initialValues: {
-      firstname: teacher?.firstname || "",
-      lastname: teacher?.lastname || "",
+      firstName: teacher?.firstName ?? "",
+      lastName: teacher?.lastName ?? "",
       email: teacher?.email || "",
       address: teacher?.address || "",
       university: teacher?.university || "",
@@ -98,7 +100,7 @@ const TeacherUpdate = () => {
         const teacherData = Object.entries(values).reduce(
           (acc, [key, value]) => {
             acc[key] =
-              key === "email" ? value.toLowerCase() : capitalize(value);
+              key === "email" ? value.toLowerCase() : key === "gender" ? value.toUpperCase():capitalize(value);
             return value ? acc : acc;
           },
           {}
@@ -126,7 +128,7 @@ const TeacherUpdate = () => {
   // form fields
   const fields = [
     {
-      name: "firstname",
+      name: "firstName",
       label: t("labels.firstName"),
       placeholder: t("placeholders.firstName"),
       type: "text",
@@ -138,7 +140,7 @@ const TeacherUpdate = () => {
       options: [t("options.male"), t("options.female"), t("options.other")],
     },
     {
-      name: "lastname",
+      name: "lastName",
       label: t("labels.lastName"),
       placeholder: t("placeholders.lastName"),
       type: "text",
@@ -216,7 +218,7 @@ const TeacherUpdate = () => {
               border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
               "& fieldset": { border: "none" },
               "&:hover fieldset": { border: "none" },
-              "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
+              "&.Mui-focused fieldset": { border: "20px solid #1976d2" },
             },
             input: {
               color: isDarkMode ? "#fff" : "#000",
@@ -414,7 +416,7 @@ const TeacherUpdate = () => {
                           name={name}
                           placeholder={placeholder}
                           onChange={(e) => {
-                            if (["firstname", "lastname"].includes(name)) {
+                            if (["firstName", "lastName"].includes(name)) {
                               e.target.value = e.target.value.replace(
                                 /[^a-zA-Z]/g,
                                 ""
@@ -424,7 +426,7 @@ const TeacherUpdate = () => {
                           }}
                           onKeyDown={(e) => {
                             if (
-                              ["firstname", "lastname"]
+                              ["firstName", "lastName"]
                                 .includes(name)
                                 .trimStart() &&
                               /[^a-zA-Z\s]/.test(e.key)
@@ -436,7 +438,7 @@ const TeacherUpdate = () => {
                           maxLength={
                             name === "phone"
                               ? 10
-                              : name === "firstname" || name == "lastname"
+                              : name === "firstName" || name == "lastName"
                               ? 15
                               : ""
                           }

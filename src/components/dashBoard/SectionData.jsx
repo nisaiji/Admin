@@ -16,7 +16,7 @@ import { Box } from "@mui/system";
 import moment from "moment";
 import { getSessionPhase } from "../../utils/helper";
 import { motion, AnimatePresence } from "motion/react";
-import { C } from "../../utils/constants";
+import { C, C_LIGHT } from "../../utils/constants";
 import {
   Users,
   BookOpen,
@@ -213,7 +213,9 @@ export default function SectionData({
         if (res?.statusCode === 200) {
           // console.log(res);
 
-          const activeSession = res?.result?.find((s) => s?.isCurrent === true);
+          const activeSession = res?.result?.find(
+            (s) => s?.status === "active",
+          );
 
           const selectedExists = res?.result?.some(
             (s) => s?._id === classAndSectionData?.selectedSession?._id,
@@ -286,7 +288,6 @@ export default function SectionData({
 
   return (
     <>
-      {/* Session status strip */}
       {role === "admin" && (
         <motion.div
           initial={{ opacity: 0, y: -8 }}
@@ -298,45 +299,39 @@ export default function SectionData({
             gap: 12,
             padding: "11px 18px",
             borderRadius: "11px",
-            background: "rgba(52,211,153,0.04)",
-            border: "1px solid rgba(52,211,153,0.12)",
+            background: isDarkMode
+              ? "rgba(52,211,153,0.04)"
+              : "rgba(21,128,61,0.06)",
+            border: `1px solid ${
+              isDarkMode ? "rgba(52,211,153,0.12)" : "rgba(21,128,61,0.15)"
+            }`,
             marginBottom: "18px",
+            boxShadow: !isDarkMode ? "0 4px 16px rgba(15,23,42,0.04)" : "none",
           }}
         >
-          <CheckCircle2 size={16} color="#34D399" style={{ flexShrink: 0 }} />
-          <span style={{ flex: 1, fontSize: "13px", color: "#94A3B8" }}>
+          <CheckCircle2
+            size={16}
+            color={isDarkMode ? "#34D399" : "#15803d"}
+            style={{ flexShrink: 0 }}
+          />
+
+          <span
+            style={{
+              flex: 1,
+              fontSize: "13px",
+              color: isDarkMode ? "#94A3B8" : "#475569",
+            }}
+          >
             Academic session{" "}
-            <strong style={{ color: C.text }}>{selectedSessionLabel}</strong> is
-            active —{" "}
-            <span style={{ color: C.textSub }}>
+            <strong style={{ color: isDarkMode ? C.text : C_LIGHT.text }}>
+              {selectedSessionLabel}
+            </strong>{" "}
+            is active —{" "}
+            <span style={{ color: isDarkMode ? C.textSub : C_LIGHT.textSub }}>
               you're ready to set up classes, staff, and students.
             </span>
           </span>
-          {/* <button
-          // onClick={() => navigate("/")}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 5,
-            padding: "6px 12px",
-            borderRadius: "7px",
-            background: "transparent",
-            border: "1px solid rgba(255,255,255,0.09)",
-            color: C.textSub,
-            fontSize: "12px",
-            fontWeight: 600,
-            cursor: "pointer",
-            transition: "all 0.15s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.background = "transparent")
-          }
-        >
-          <RefreshCw size={11} /> Change Session
-        </button> */}
+
           <ChartDropdown
             value={selectedSessionLabel}
             options={sessionOptions}
@@ -361,6 +356,7 @@ export default function SectionData({
           />
         </motion.div>
       )}
+
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -368,14 +364,21 @@ export default function SectionData({
         style={{
           display: "flex",
           alignItems: "stretch",
-          background: C.card,
-          border: `1px solid ${C.border}`,
-          borderRadius: "16px",
+          background: isDarkMode ? C.card : C_LIGHT.bg,
+          border: `1px solid ${isDarkMode ? C.border : C_LIGHT.border}`,
+          borderRadius: "18px",
           overflow: "hidden",
           marginBottom: "20px",
+          boxShadow: !isDarkMode ? "0 12px 32px rgba(15,23,42,0.06)" : "none",
         }}
       >
-        <div style={{ flexShrink: 0, width: "160px", position: "relative" }}>
+        <div
+          style={{
+            flexShrink: 0,
+            width: "160px",
+            position: "relative",
+          }}
+        >
           {role === "classTeacher" || role === "teacher" ? (
             <img
               src={teacherData?.photo || school}
@@ -388,9 +391,15 @@ export default function SectionData({
               }}
             />
           ) : (
-            <div className="relative inline-block">
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                position: "relative",
+              }}
+            >
               <img
-                src={school}
+                src={data?.photo || school}
                 alt="School"
                 style={{
                   width: "100%",
@@ -399,12 +408,22 @@ export default function SectionData({
                   display: "block",
                 }}
               />
+
               <img
                 src={isDarkMode ? editPhotow : editPhoto}
                 alt="Edit"
-                className={`absolute size-8 bottom-0 right-0 cursor-pointer z-10`}
+                className="absolute size-8 bottom-2 right-2 cursor-pointer z-10"
                 onClick={() => fileInputRef?.current?.click()}
+                style={{
+                  background: isDarkMode
+                    ? "rgba(15,23,42,0.7)"
+                    : "rgba(255,255,255,0.95)",
+                  borderRadius: "999px",
+                  padding: 4,
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+                }}
               />
+
               <input
                 type="file"
                 ref={fileInputRef}
@@ -414,15 +433,18 @@ export default function SectionData({
               />
             </div>
           )}
+
           <div
             style={{
               position: "absolute",
               inset: 0,
-              background:
-                "linear-gradient(to right, transparent 50%, rgba(24,27,36,0.8))",
+              background: isDarkMode
+                ? "linear-gradient(to right, transparent 50%, rgba(24,27,36,0.8))"
+                : "linear-gradient(to right, transparent 45%, rgba(255,255,255,0.65))",
             }}
           />
         </div>
+
         <div
           style={{
             flex: 1,
@@ -435,10 +457,11 @@ export default function SectionData({
               display: "flex",
               alignItems: "center",
               gap: 7,
-              marginBottom: 4,
+              marginBottom: 6,
             }}
           >
             <School size={13} color={C.textMuted} />
+
             <span
               style={{
                 fontSize: "10px",
@@ -451,35 +474,52 @@ export default function SectionData({
               Your School
             </span>
           </div>
+
           <h2
             style={{
-              margin: "0 0 4px",
+              margin: "0 0 6px",
               fontSize: "22px",
               fontWeight: 700,
-              color: C.text,
+              color: isDarkMode ? C.text : C_LIGHT.text,
+              lineHeight: 1.3,
             }}
           >
             {localStorage.getItem("schoolName") || schoolName}
           </h2>
-          <p style={{ margin: 0, fontSize: "13px", color: C.textSub }}>
+
+          <p
+            style={{
+              margin: 0,
+              fontSize: "13px",
+              color: isDarkMode ? C.textSub : C_LIGHT.textSub,
+            }}
+          >
             Welcome to School Dashboard!
           </p>
         </div>
+
         <div
           style={{
             padding: "20px 28px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            gap: 14,
+            gap: 16,
+            background: isDarkMode ? "transparent" : "rgba(248,250,252,0.75)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
             <div
               style={{
-                width: 30,
-                height: 30,
-                borderRadius: "8px",
+                width: 32,
+                height: 32,
+                borderRadius: "10px",
                 background: C.blueDim,
                 display: "flex",
                 alignItems: "center",
@@ -488,6 +528,7 @@ export default function SectionData({
             >
               <CalendarDays size={14} color={C.blue} />
             </div>
+
             <div>
               <div
                 style={{
@@ -500,25 +541,42 @@ export default function SectionData({
               >
                 Date
               </div>
-              <div style={{ fontSize: "14px", fontWeight: 700, color: C.text }}>
+
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  color: isDarkMode ? C.text : C_LIGHT.text,
+                }}
+              >
                 {dateStr}
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
             <div
               style={{
-                width: 30,
-                height: 30,
-                borderRadius: "8px",
-                background: "rgba(255,255,255,0.06)",
+                width: 32,
+                height: 32,
+                borderRadius: "10px",
+                background: isDarkMode
+                  ? "rgba(255,255,255,0.06)"
+                  : "rgba(100,116,139,0.08)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Clock size={14} color="#94A3B8" />
+              <Clock size={14} color={isDarkMode ? "#94A3B8" : "#475569"} />
             </div>
+
             <div>
               <div
                 style={{
@@ -531,11 +589,12 @@ export default function SectionData({
               >
                 Time
               </div>
+
               <div
                 style={{
                   fontSize: "14px",
                   fontWeight: 700,
-                  color: C.text,
+                  color: isDarkMode ? C.text : C_LIGHT.text,
                   fontVariantNumeric: "tabular-nums",
                 }}
               >
@@ -545,156 +604,6 @@ export default function SectionData({
           </div>
         </div>
       </motion.div>
-      {/* 
-        <div className={`flex flex-col items-end space-y-4`}>
-          {role === "admin" && (
-            <div className="flex items-center gap-4">
-              {nextSession && (
-                <button
-                  className="font-bold text-white bg-[#4CBC9A] rounded-lg px-4 py-2 cursor-pointer mr-3  focus:outline-none"
-                  onClick={handleCreateSession}
-                >
-                  Create Session {nextSession?.start}-
-                  {String(nextSession?.end).slice(-2)}
-                </button>
-              )}
-              {classAndSectionData?.selectedSession?._id && (
-                <button
-                  className="font-bold text-white bg-[#0F4189] rounded-lg px-4 py-2 cursor-pointer mr-3 focus:outline-none"
-                  onClick={handleMarkSessionComplete}
-                >
-                  Toggle Session{" "}
-                  {classAndSectionData?.selectedSession?.academicStartYear}-
-                  {String(
-                    classAndSectionData?.selectedSession?.academicEndYear,
-                  ).slice(-2)}
-                </button>
-              )}
-              <FormControl sx={{ bgcolor: "#1e1e1e", borderRadius: 3 }}>
-                <Select
-                  value={
-                    session?.some(
-                      (s) =>
-                        s?._id === classAndSectionData?.selectedSession?._id,
-                    )
-                      ? classAndSectionData?.selectedSession?._id
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const selected = session?.find(
-                      (s) => s?._id === e?.target?.value,
-                    );
-                    localStorage.removeItem("classAndSectionData");
-                    localStorage.removeItem("tempData");
-                    dispatch(
-                      setClassAndSectionData({
-                        selectedSession: selected,
-                      }),
-                    );
-                  }}
-                  displayEmpty
-                  sx={{
-                    color: "#fff",
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    borderRadius: 14,
-                    ".MuiSelect-select": {
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      border: "none",
-                    },
-                    ".MuiSelect-icon": {
-                      color: isDarkMode ? "#fff" : "#000",
-                    },
-                    bgcolor: "#1e1e1e",
-                  }}
-                  renderValue={(selectedValue) => {
-                    const s = session?.find(
-                      (item) => item?._id === selectedValue,
-                    );
-                    if (!s) return <Typography>Select Session</Typography>;
-
-                    const phase = getSessionPhase(s, moment);
-                    const chipLabel =
-                      phase === "current"
-                        ? "Current"
-                        : phase === "upcoming"
-                          ? "Upcoming"
-                          : "Previous";
-
-                    return (
-                      <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                        gap={1}
-                        width="100%"
-                      >
-                        <Typography fontWeight="bold">
-                          {s?.academicStartYear}-
-                          {String(s?.academicEndYear).slice(-2)}
-                        </Typography>
-                        {s?._id && (
-                          <Chip
-                            label={chipLabel}
-                            size="small"
-                            sx={{
-                              bgcolor:
-                                phase === "current"
-                                  ? "#4CBC9A26"
-                                  : phase === "upcoming"
-                                    ? "#3A86FF26"
-                                    : "#9CA3AF26",
-                              color:
-                                phase === "current"
-                                  ? "#4CBC9A"
-                                  : phase === "upcoming"
-                                    ? "#3A86FF"
-                                    : "#9CA3AF",
-                              fontWeight: "bold",
-                              fontSize: 14,
-                              p: 2,
-                            }}
-                          />
-                        )}
-                      </Box>
-                    );
-                  }}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        bgcolor: "#1e1e1e",
-                        color: "#fff",
-                        borderRadius: 3,
-                        mt: 1,
-                      },
-                    },
-                  }}
-                >
-                  {session?.map((data) => (
-                    <MenuItem
-                      key={data?._id}
-                      value={data?._id} // ✅ only pass id
-                      sx={{
-                        fontWeight: "bold",
-                        "&:hover": {
-                          bgcolor: "#333",
-                        },
-                      }}
-                    >
-                      {data?.academicStartYear}-
-                      {String(data?.academicEndYear).slice(-2)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-          )}
-        </div>
-      </div> */}
     </>
   );
 }

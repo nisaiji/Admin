@@ -81,7 +81,9 @@ function Addsection({
     try {
       const [sectionsRes, teachersRes] = await Promise.all([
         axiosClient.get(`${EndPoints.ADMIN.CLASS_SECTION}/${clickedClassId}`),
-        axiosClient.get(`${EndPoints.ADMIN.UNASSIGNED_TEACHER}/${classAndSectionData?.selectedSession?._id}`),
+        axiosClient.get(
+          `${EndPoints.ADMIN.UNASSIGNED_TEACHER}/${classAndSectionData?.selectedSession?._id}`,
+        ),
       ]);
 
       if (sectionsRes?.statusCode === 200) {
@@ -377,7 +379,7 @@ function Addsection({
                           (teacher) => teacher._id === selected,
                         );
                         return teacherObj
-                          ? `${teacherObj.firstname} ${teacherObj.lastname}`
+                          ? `${teacherObj?.firstName || ""} ${teacherObj?.lastName || ""}`
                           : selected;
                       }}
                       MenuProps={{
@@ -406,7 +408,7 @@ function Addsection({
                             },
                           }}
                         >
-                          {teacher.firstname} {teacher.lastname}
+                          {teacher?.firstName || ""} {teacher?.lastName || ""}
                         </MenuItem>
                       ))}
                     </Select>
@@ -420,7 +422,8 @@ function Addsection({
                     } w-[250px]`}
                     data-tsetid="savedTeacherName"
                   >
-                    {section?.teacher?.firstname} {section?.teacher?.lastname}
+                    {section?.teacher?.firstName || ""}{" "}
+                    {section?.teacher?.lastName || ""}
                   </div>
                 )}
                 <DatePicker
@@ -543,7 +546,7 @@ function Addsection({
                         (teacher) => teacher._id === selected,
                       );
                       return teacherObj
-                        ? `${teacherObj.firstname} ${teacherObj.lastname}`
+                        ? `${teacherObj?.firstName || ""} ${teacherObj?.lastName || ""}`
                         : selected;
                     }}
                     MenuProps={{
@@ -587,7 +590,7 @@ function Addsection({
                           },
                         }}
                       >
-                        {teacher.firstname} {teacher.lastname}
+                        {teacher?.firstName || ""} {teacher?.lastName || ""}
                       </MenuItem>
                     ))}
                   </Select>

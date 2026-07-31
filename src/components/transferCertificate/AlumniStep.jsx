@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { C, TH } from "./constants";
+import { getTH } from "./constants";
+import { useTCTheme } from "./ThemeContext";
 import {
   AvatarBadge,
   CertificateSheet,
@@ -35,7 +36,7 @@ const A4_PAGE_HEIGHT = 1123;
 function getCertificateItems(record) {
   return [
     ["Student Name", record?.name],
-    ["Parent's Name", record?.parentFullName],
+    ["Parent's Name", record?.mainParentFullName],
     ["Class & Section", getClassSectionLabel(record)],
     ["Date of Birth", record?.dob],
     ["Gender", record?.gender],
@@ -75,6 +76,8 @@ async function downloadStudentTcPdf(node, fileName) {
 }
 
 function PrintableTcPage({ record, printableRef }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const certificateItems = getCertificateItems(record);
 
   return (
@@ -312,6 +315,8 @@ function PrintableTcPage({ record, printableRef }) {
 }
 
 function AlumniRecordRow({ record, index, onView }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const conductTone = getConductTone(record?.conduct);
 
   return (
@@ -463,6 +468,8 @@ function AlumniRecordRow({ record, index, onView }) {
 }
 
 function IssuedTCModal({ record, onClose }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const printableRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
   const certificateItems = useMemo(() => getCertificateItems(record), [record]);
@@ -597,6 +604,8 @@ function IssuedTCModal({ record, onClose }) {
 }
 
 export function AlumniStep({ tcRequests = [], loading = false }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const [search, setSearch] = useState("");
   const [filterClass, setFilterClass] = useState("All");
   const [filterSec, setFilterSec] = useState("All");
@@ -656,7 +665,7 @@ export function AlumniStep({ tcRequests = [], loading = false }) {
       const matchesQuery =
         !query ||
         record?.name?.toLowerCase().includes(query) ||
-        record?.parentFullName?.toLowerCase().includes(query) ||
+        record?.mainParentFullName?.toLowerCase().includes(query) ||
         record?.admissionNumber?.toLowerCase().includes(query) ||
         record?.certificateNumber?.toLowerCase().includes(query) ||
         record?.reason?.toLowerCase().includes(query);
