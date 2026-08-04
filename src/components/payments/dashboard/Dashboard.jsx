@@ -389,10 +389,10 @@ export function PaymentDashboard() {
             </div>
           </div>
         ))}
-        <StudentPaymentInfo
+        {/* <StudentPaymentInfo
           // studentId=""
           // sessionId={selectedSessionId}
-        />
+        /> */}
         {/* fee cards */}
         <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
           <StatCard
