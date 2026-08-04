@@ -76,7 +76,7 @@ export function getStudentParentName(student) {
 }
 
 export function getStudentParentPhone(student) {
-  return String(student?.mainParentPhone ?? student?.parentPhone ?? "").trim();
+  return String(student?.parentPhone ?? student?.parentPhone ?? "").trim();
 }
 
 export function getStudentParentEmail(student) {

@@ -33,7 +33,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-const TAB_ITEMS = ["pending", "approved", "rejected", "all"];
+const TAB_ITEMS = ["PENDING", "APPROVED", "REJECTED", "ALL"];
 const PAGE_SIZE_OPTIONS = [10, 20, 25, 50, 100];
 
 const getApiErrorMessage = (error, fallback) => {
@@ -63,28 +63,28 @@ const formatDate = (value) => {
 
 const getStatusQuery = (tab) => {
   switch (tab) {
-    case "pending":
-      return "pending";
-    case "approved":
-      return "accept,complete";
-    case "rejected":
-      return "reject,expired";
+    case "PENDING":
+      return "PENDING";
+    case "APPROVED":
+      return "ACCEPT,COMPLETE";
+    case "REJECTED":
+      return "REJECT,EXPIRED";
     default:
-      return "accept,reject,pending,complete,expired,notSet";
+      return "ACCEPT,REJECT,PENDING,COMPLETE,EXPIRED,NOTSET";
   }
 };
 
 const getStatusLabel = (status) => {
   switch (String(status || "").toLowerCase()) {
-    case "pending":
+    case "PENDING":
       return "Pending";
-    case "accept":
+    case "ACCEPT":
       return "Approved";
-    case "reject":
+    case "REJECT":
       return "Rejected";
-    case "complete":
+    case "COMPLETE":
       return "Completed";
-    case "expired":
+    case "EXPIRED":
       return "Expired";
     default:
       return safeText(status);
@@ -93,13 +93,13 @@ const getStatusLabel = (status) => {
 
 const getStatusTone = (status) => {
   switch (String(status || "").toLowerCase()) {
-    case "pending":
+    case "PENDING":
       return "warning";
-    case "accept":
-    case "complete":
+    case "ACCEPT":
+    case "COMPLETE":
       return "success";
-    case "reject":
-    case "expired":
+    case "REJECT":
+    case "EXPIRED":
       return "danger";
     default:
       return "neutral";
@@ -108,20 +108,20 @@ const getStatusTone = (status) => {
 
 const getReasonLabel = (reason) => {
   switch (reason) {
-    case "forgetPassword":
-      return "Forgot Password";
-    case "changeDevice":
+    case "FORGET_PASSWORD":
+      return "Forget Password";
+    case "CHANGE_DEVICE":
       return "Changed Device";
-    case "technical":
+    case "TECHNICAL":
       return "Technical";
-    case "other":
+    case "OTHER":
       return "Other";
     default:
       return safeText(reason);
   }
 };
 
-function StatusPill({ status }) {
+function StatusPill({ status, dark }) {
   const tone = getStatusTone(status);
 
   const toneClass =
@@ -138,7 +138,7 @@ function StatusPill({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-poppins-bold uppercase tracking-[0.08em] ${toneClass}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-poppins-bold uppercase tracking-[0.08em] ${toneClass} ${dark ? "text-textPrimary" : "text-textBlack"}`}
     >
       <Icon size={12} />
       {getStatusLabel(status)}
@@ -153,10 +153,14 @@ function InfoPill({ label, value, dark }) {
         dark ? "border-white/10 bg-white/5" : "border-[#E9EEF2] bg-white"
       }`}
     >
-      <p className={`text-[11px] font-poppins-bold uppercase tracking-[0.08em] ${dark ? "text-slate-400" : "text-textGray"}`}>
+      <p
+        className={`text-[11px] font-poppins-bold uppercase tracking-[0.08em] ${dark ? "text-slate-400" : "text-textGray"}`}
+      >
         {label}
       </p>
-      <p className={`mt-1 text-sm font-poppins-semibold break-words ${dark ? "text-textPrimary" : "text-textBlack"}`}>
+      <p
+        className={`mt-1 text-sm font-poppins-semibold break-words ${dark ? "text-textPrimary" : "text-textBlack"}`}
+      >
         {value}
       </p>
     </div>
@@ -166,7 +170,7 @@ function InfoPill({ label, value, dark }) {
 export default function Requests() {
   const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
-  const [selectedTab, setSelectedTab] = useState("pending");
+  const [selectedTab, setSelectedTab] = useState("PENDING");
   const [loading, setLoading] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState("");
   const [pageNo, setPageNo] = useState(1);
@@ -183,15 +187,15 @@ export default function Requests() {
     const normalizedRequests = Array.isArray(requests) ? requests : [];
 
     switch (selectedTab) {
-      case "pending":
-        return normalizedRequests.filter((req) => req?.status === "pending");
-      case "approved":
+      case "PENDING":
+        return normalizedRequests.filter((req) => req?.status === "PENDING");
+      case "APPROVED":
         return normalizedRequests.filter(
-          (req) => req?.status === "accept" || req?.status === "complete",
+          (req) => req?.status === "ACCEPT" || req?.status === "COMPLETE",
         );
-      case "rejected":
+      case "REJECTED":
         return normalizedRequests.filter(
-          (req) => req?.status === "reject" || req?.status === "expired",
+          (req) => req?.status === "REJECT" || req?.status === "EXPIRED",
         );
       default:
         return normalizedRequests;
@@ -200,7 +204,8 @@ export default function Requests() {
 
   const totalPages = Math.max(1, Math.ceil(totalRequestCount / limit || 1));
   const showingFrom = totalRequestCount === 0 ? 0 : (pageNo - 1) * limit + 1;
-  const showingTo = totalRequestCount === 0 ? 0 : Math.min(totalRequestCount, pageNo * limit);
+  const showingTo =
+    totalRequestCount === 0 ? 0 : Math.min(totalRequestCount, pageNo * limit);
 
   const getRequest = async () => {
     try {
@@ -208,11 +213,13 @@ export default function Requests() {
       setErrorMessage("");
       const statusQuery = getStatusQuery(selectedTab);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.REQUESTS}?model=teacher&page=${pageNo}&limit=${limit}&reason=forgetPassword&status=${statusQuery}`,
+        `${EndPoints.ADMIN.REQUESTS}?model=TEACHER&page=${pageNo}&limit=${limit}&reason=FORGET_PASSWORD&status=${statusQuery}`,
       );
 
       if (res?.statusCode === 200) {
-        setRequests(Array.isArray(res?.result?.requests) ? res.result.requests : []);
+        setRequests(
+          Array.isArray(res?.result?.requests) ? res.result.requests : [],
+        );
         setTotalRequestCount(Number(res?.result?.totalRequests) || 0);
       } else {
         setRequests([]);
@@ -270,7 +277,7 @@ export default function Requests() {
   const handleAction = (request, action) => {
     if (!request?._id || loading || actionLoadingId) return;
 
-    if (action === "reject") {
+    if (action === "REJECT") {
       setConfirmRequest(request);
       setConfirmOpen(true);
       return;
@@ -306,23 +313,32 @@ export default function Requests() {
 
         <div className="flex flex-col gap-4 rounded-[24px] border border-transparent bg-transparent sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className={`text-xs font-poppins-bold uppercase tracking-[0.16em] ${textMutedClass}`}>
+            <p
+              className={`text-xs font-poppins-bold uppercase tracking-[0.16em] ${textMutedClass}`}
+            >
               Requests
             </p>
-            <h1 className={`mt-2 text-2xl font-poppins-bold sm:text-3xl ${textPrimaryClass}`}>
+            <h1
+              className={`mt-2 text-2xl font-poppins-bold sm:text-3xl ${textPrimaryClass}`}
+            >
               {t("titles.passwordReset")}
             </h1>
             <p className={`mt-2 max-w-2xl text-sm leading-6 ${textMutedClass}`}>
-              Review teacher password reset requests, then approve or reject them with a clearer workflow.
+              Review teacher password reset requests, then approve or reject
+              them with a clearer workflow.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <div className={`rounded-2xl border px-4 py-3 ${controlClass}`}>
-              <p className={`text-[11px] font-poppins-bold uppercase tracking-[0.08em] ${textMutedClass}`}>
+              <p
+                className={`text-[11px] font-poppins-bold uppercase tracking-[0.08em] ${textMutedClass}`}
+              >
                 Showing
               </p>
-              <p className={`mt-1 text-sm font-poppins-semibold ${textPrimaryClass}`}>
+              <p
+                className={`mt-1 text-sm font-poppins-semibold ${textPrimaryClass}`}
+              >
                 {showingFrom}-{showingTo} of {totalRequestCount}
               </p>
             </div>
@@ -333,13 +349,19 @@ export default function Requests() {
                 minWidth: 104,
                 borderRadius: 3,
                 backgroundColor: isDarkMode ? "rgba(255,255,255,0.04)" : "#fff",
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: isDarkMode ? "rgba(255,255,255,0.12)" : "#E9EEF2" },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: isDarkMode
+                    ? "rgba(255,255,255,0.12)"
+                    : "#E9EEF2",
+                },
                 "& .MuiInputBase-input": {
                   color: isDarkMode ? "#E3E8F3" : "#111827",
                   fontSize: "0.875rem",
                   fontFamily: "Poppins, sans-serif",
                 },
-                "& .MuiSvgIcon-root": { color: isDarkMode ? "#E3E8F3" : "#111827" },
+                "& .MuiSvgIcon-root": {
+                  color: isDarkMode ? "#E3E8F3" : "#111827",
+                },
               }}
             >
               <Select
@@ -355,7 +377,9 @@ export default function Requests() {
                     sx: {
                       backgroundColor: isDarkMode ? "#111827" : "#fff",
                       color: isDarkMode ? "#E3E8F3" : "#111827",
-                      border: isDarkMode ? "1px solid rgba(255,255,255,0.08)" : "1px solid #E9EEF2",
+                      border: isDarkMode
+                        ? "1px solid rgba(255,255,255,0.08)"
+                        : "1px solid #E9EEF2",
                     },
                   },
                 }}
@@ -368,7 +392,9 @@ export default function Requests() {
                       backgroundColor: isDarkMode ? "#111827" : "#fff",
                       color: isDarkMode ? "#E3E8F3" : "#111827",
                       "&:hover": {
-                        backgroundColor: isDarkMode ? "rgba(255,255,255,0.06)" : "#F8FAFC",
+                        backgroundColor: isDarkMode
+                          ? "rgba(255,255,255,0.06)"
+                          : "#F8FAFC",
                       },
                     }}
                   >
@@ -380,7 +406,11 @@ export default function Requests() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Request status filters">
+        <div
+          className="flex flex-wrap gap-2"
+          role="tablist"
+          aria-label="Request status filters"
+        >
           {TAB_ITEMS.map((tab) => {
             const active = selectedTab === tab;
 
@@ -417,8 +447,12 @@ export default function Requests() {
             <div className="flex items-start gap-3">
               <AlertCircle size={18} className="mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-poppins-bold">Unable to load requests</p>
-                <p className="mt-1 text-sm leading-6 break-words">{errorMessage}</p>
+                <p className="text-sm font-poppins-bold">
+                  Unable to load requests
+                </p>
+                <p className="mt-1 text-sm leading-6 break-words">
+                  {errorMessage}
+                </p>
               </div>
             </div>
             <button
@@ -433,20 +467,29 @@ export default function Requests() {
           </div>
         ) : null}
 
-        <section className={`overflow-hidden rounded-[24px] shadow-[0_10px_30px_rgba(15,23,42,0.05)] ${panelClass}`}>
-          <div className={`flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 ${isDarkMode ? "border-white/10" : "border-[#E9EEF2]"}`}>
+        <section
+          className={`overflow-hidden rounded-[24px] shadow-[0_10px_30px_rgba(15,23,42,0.05)] ${panelClass}`}
+        >
+          <div
+            className={`flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 ${isDarkMode ? "border-white/10" : "border-[#E9EEF2]"}`}
+          >
             <div>
               <h2 className={`text-base font-poppins-bold ${textPrimaryClass}`}>
                 Password reset requests
               </h2>
               <p className={`mt-1 text-sm ${textMutedClass}`}>
-                {loading && requests.length > 0 ? "Refreshing the list..." : `${filteredRequests.length} request${filteredRequests.length === 1 ? "" : "s"} on this view`}
+                {loading && requests.length > 0
+                  ? "Refreshing the list..."
+                  : `${filteredRequests.length} request${filteredRequests.length === 1 ? "" : "s"} on this view`}
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               {loading ? (
-                <span className={`inline-flex items-center gap-2 text-sm ${textMutedClass}`} aria-live="polite">
+                <span
+                  className={`inline-flex items-center gap-2 text-sm ${textMutedClass}`}
+                  aria-live="polite"
+                >
                   <CircularProgress size={16} thickness={5} color="inherit" />
                   Loading
                 </span>
@@ -456,9 +499,13 @@ export default function Requests() {
 
           {loading && requests.length === 0 ? (
             <div className="flex min-h-[360px] items-center justify-center px-6 py-12">
-              <div className={`flex flex-col items-center text-center ${textMutedClass}`}>
+              <div
+                className={`flex flex-col items-center text-center ${textMutedClass}`}
+              >
                 <CircularProgress size={42} thickness={4} color="inherit" />
-                <p className="mt-4 text-sm font-poppins-semibold">Loading requests...</p>
+                <p className="mt-4 text-sm font-poppins-semibold">
+                  Loading requests...
+                </p>
               </div>
             </div>
           ) : filteredRequests.length === 0 ? (
@@ -468,23 +515,27 @@ export default function Requests() {
                 alt="No requests found"
                 className="h-44 w-44 object-contain sm:h-52 sm:w-52"
               />
-              <h3 className={`mt-4 text-xl font-poppins-bold ${textPrimaryClass}`}>
-                {selectedTab === "pending"
+              <h3
+                className={`mt-4 text-xl font-poppins-bold ${textPrimaryClass}`}
+              >
+                {selectedTab === "PENDING"
                   ? "No pending requests"
-                  : selectedTab === "approved"
+                  : selectedTab === "APPROVED"
                     ? "No approved requests"
-                    : selectedTab === "rejected"
+                    : selectedTab === "REJECTED"
                       ? "No rejected requests"
                       : "No requests found"}
               </h3>
-              <p className={`mt-2 max-w-xl text-sm leading-6 ${textMutedClass}`}>
+              <p
+                className={`mt-2 max-w-xl text-sm leading-6 ${textMutedClass}`}
+              >
                 Try a different status filter or refresh the list.
               </p>
             </div>
           ) : (
             <>
               <div className="hidden overflow-x-auto lg:block">
-                <table className="min-w-full border-separate border-spacing-0">
+                <table className="min-w-full min-h-[240px] border-separate border-spacing-0">
                   <thead className={isDarkMode ? "bg-white/5" : "bg-[#F8FAFC]"}>
                     <tr>
                       {[
@@ -507,37 +558,57 @@ export default function Requests() {
                   </thead>
                   <tbody>
                     {filteredRequests.map((req) => {
-                      const isPending = req?.status === "pending";
+                      const isPending = req?.status === "PENDING";
                       const isActionLoading = actionLoadingId === req?._id;
 
                       return (
                         <tr
-                          key={req?._id || `${req?.createdAt}-${req?.teacher?._id || "row"}`}
+                          key={
+                            req?._id ||
+                            `${req?.createdAt}-${req?.teacher?._id || "row"}`
+                          }
                           className={`${rowHoverClass} border-b ${isDarkMode ? "border-white/10" : "border-[#E9EEF2]"}`}
                         >
-                          <td className={`max-w-[220px] px-5 py-4 align-top text-sm font-medium ${textPrimaryClass}`}>
+                          <td
+                            className={`max-w-[220px] px-5 py-4 align-top text-sm font-medium ${textPrimaryClass}`}
+                          >
                             <p className="break-words">
-                              {safeText(req?.teacher?.firstName)} {safeText(req?.teacher?.lastName, "")}
+                              {safeText(req?.teacher?.firstName)}{" "}
+                              {safeText(req?.teacher?.lastName, "")}
                             </p>
                           </td>
-                          <td className={`max-w-[220px] px-5 py-4 align-top text-sm ${textPrimaryClass}`}>
-                            <p className="break-words">{getReasonLabel(req?.reason)}</p>
-                          </td>
-                          <td className={`px-5 py-4 align-top text-sm ${textPrimaryClass}`}>
+                          <td
+                            className={`max-w-[220px] px-5 py-4 align-top text-sm ${textPrimaryClass}`}
+                          >
                             <p className="break-words">
-                              {safeText(req?.teacher?.class)}-{safeText(req?.teacher?.section)}
+                              {getReasonLabel(req?.reason)}
                             </p>
                           </td>
-                          <td className={`px-5 py-4 align-top text-sm ${textPrimaryClass}`}>
+                          <td
+                            className={`px-5 py-4 align-top text-sm ${textPrimaryClass}`}
+                          >
+                            <p className="break-words">
+                              {safeText(req?.teacher?.class)}-
+                              {safeText(req?.teacher?.section)}
+                            </p>
+                          </td>
+                          <td
+                            className={`px-5 py-4 align-top text-sm ${textPrimaryClass}`}
+                          >
                             {formatDate(req?.createdAt)}
                           </td>
-                          <td className={`px-5 py-4 align-top text-center text-sm ${textPrimaryClass}`}>
+                          <td
+                            className={`px-5 py-4 align-top text-center text-sm ${textPrimaryClass}`}
+                          >
                             {safeText(req?.teacher?.forgetPasswordCount, "0")}
                           </td>
                           <td className="px-5 py-4 align-top text-center">
                             {isPending ? (
                               <div className="inline-flex items-center gap-2">
-                                <StatusPill status={req?.status} />
+                                <StatusPill
+                                  status={req?.status}
+                                  dark={isDarkMode}
+                                />
                                 <IconButton
                                   aria-label={`Open actions for ${safeText(req?.teacher?.firstName)} ${safeText(req?.teacher?.lastName, "")}`}
                                   onClick={(event) => {
@@ -547,7 +618,9 @@ export default function Requests() {
                                   disabled={loading || isActionLoading}
                                   sx={{
                                     color: isDarkMode ? "#E3E8F3" : "#0F172A",
-                                    border: isDarkMode ? "1px solid rgba(255,255,255,0.12)" : "1px solid #E9EEF2",
+                                    border: isDarkMode
+                                      ? "1px solid rgba(255,255,255,0.12)"
+                                      : "1px solid #E9EEF2",
                                     borderRadius: 2,
                                     width: 38,
                                     height: 38,
@@ -558,10 +631,15 @@ export default function Requests() {
                                 </IconButton>
                               </div>
                             ) : (
-                              <StatusPill status={req?.status} />
+                              <StatusPill
+                                status={req?.status}
+                                dark={isDarkMode}
+                              />
                             )}
                           </td>
-                          <td className={`px-5 py-4 align-top text-center text-sm ${textPrimaryClass}`}>
+                          <td
+                            className={`px-5 py-4 align-top text-center text-sm ${textPrimaryClass}`}
+                          >
                             <span className="inline-flex min-w-[84px] justify-center rounded-xl border px-3 py-2 font-poppins-semibold break-words">
                               {safeText(req?.otp, "-")}
                             </span>
@@ -575,49 +653,92 @@ export default function Requests() {
 
               <div className="grid gap-4 px-4 py-4 lg:hidden">
                 {filteredRequests.map((req) => {
-                  const isPending = req?.status === "pending";
+                  const isPending = req?.status === "PENDING";
                   const isActionLoading = actionLoadingId === req?._id;
 
                   return (
                     <article
-                      key={req?._id || `${req?.createdAt}-${req?.teacher?._id || "card"}`}
+                      key={
+                        req?._id ||
+                        `${req?.createdAt}-${req?.teacher?._id || "card"}`
+                      }
                       className={`rounded-2xl border p-4 ${isDarkMode ? "border-white/10 bg-white/5" : "border-[#E9EEF2] bg-white"}`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <h3 className={`truncate text-base font-poppins-bold ${textPrimaryClass}`}>
-                            {safeText(req?.teacher?.firstName)} {safeText(req?.teacher?.lastName, "")}
+                          <h3
+                            className={`truncate text-base font-poppins-bold ${textPrimaryClass}`}
+                          >
+                            {safeText(req?.teacher?.firstName)}{" "}
+                            {safeText(req?.teacher?.lastName, "")}
                           </h3>
-                          <p className={`mt-1 text-sm ${textMutedClass}`}>{getReasonLabel(req?.reason)}</p>
+                          <p className={`mt-1 text-sm ${textMutedClass}`}>
+                            {getReasonLabel(req?.reason)}
+                          </p>
                         </div>
-                        <StatusPill status={req?.status} />
+                        <StatusPill status={req?.status} dark={isDarkMode} />
                       </div>
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <InfoPill label="Class" value={`${safeText(req?.teacher?.class)}-${safeText(req?.teacher?.section)}`} dark={isDarkMode} />
-                        <InfoPill label="Date" value={formatDate(req?.createdAt)} dark={isDarkMode} />
-                        <InfoPill label="Count" value={safeText(req?.teacher?.forgetPasswordCount, "0")} dark={isDarkMode} />
-                        <InfoPill label="OTP" value={safeText(req?.otp, "-")} dark={isDarkMode} />
+                        <InfoPill
+                          label="Class"
+                          value={`${safeText(req?.teacher?.class)}-${safeText(req?.teacher?.section)}`}
+                          dark={isDarkMode}
+                        />
+                        <InfoPill
+                          label="Date"
+                          value={formatDate(req?.createdAt)}
+                          dark={isDarkMode}
+                        />
+                        <InfoPill
+                          label="Count"
+                          value={safeText(
+                            req?.teacher?.forgetPasswordCount,
+                            "0",
+                          )}
+                          dark={isDarkMode}
+                        />
+                        <InfoPill
+                          label="OTP"
+                          value={safeText(req?.otp, "-")}
+                          dark={isDarkMode}
+                        />
                       </div>
 
                       {isPending ? (
                         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                           <button
                             type="button"
-                            onClick={() => handleAction(req, "accept")}
+                            onClick={() => handleAction(req, "ACCEPT")}
                             disabled={loading || isActionLoading}
                             className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#4CBC9A] px-4 text-sm font-poppins-bold text-white transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4CBC9A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                           >
-                            {isActionLoading ? <CircularProgress size={16} thickness={5} color="inherit" /> : <CheckCircle2 size={16} />}
+                            {isActionLoading ? (
+                              <CircularProgress
+                                size={16}
+                                thickness={5}
+                                color="inherit"
+                              />
+                            ) : (
+                              <CheckCircle2 size={16} />
+                            )}
                             Approve
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleAction(req, "reject")}
+                            onClick={() => handleAction(req, "REJECT")}
                             disabled={loading || isActionLoading}
                             className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-[#FE4040]/30 bg-[#FE4040]/10 px-4 text-sm font-poppins-bold text-[#FE4040] transition hover:bg-[#FE4040]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FE4040] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                           >
-                            {isActionLoading ? <CircularProgress size={16} thickness={5} color="inherit" /> : <XCircle size={16} />}
+                            {isActionLoading ? (
+                              <CircularProgress
+                                size={16}
+                                thickness={5}
+                                color="inherit"
+                              />
+                            ) : (
+                              <XCircle size={16} />
+                            )}
                             Reject
                           </button>
                         </div>
@@ -630,7 +751,15 @@ export default function Requests() {
               {totalRequestCount > 0 ? (
                 <div className="flex flex-col gap-4 border-t px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div className={`text-sm ${textMutedClass}`}>
-                    {t("titles.showing")} <span className="font-poppins-bold text-[#0A81D1]">{showingFrom}-{showingTo}</span> {t("titles.from")} <span className="font-poppins-bold text-[#0A81D1]">{totalRequestCount}</span> {t("titles.data")}
+                    {t("titles.showing")}{" "}
+                    <span className="font-poppins-bold text-[#0A81D1]">
+                      {showingFrom}-{showingTo}
+                    </span>{" "}
+                    {t("titles.from")}{" "}
+                    <span className="font-poppins-bold text-[#0A81D1]">
+                      {totalRequestCount}
+                    </span>{" "}
+                    {t("titles.data")}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
@@ -649,7 +778,10 @@ export default function Requests() {
                             {...item}
                             sx={{
                               color: isDarkMode ? "#E3E8F3" : "#111827",
-                              borderColor: item.type === "previous" || item.type === "next" ? "transparent" : "#0F4189",
+                              borderColor:
+                                item.type === "previous" || item.type === "next"
+                                  ? "transparent"
+                                  : "#0F4189",
                               borderWidth: "1px",
                               borderRadius: "12px",
                               borderStyle: "solid",
@@ -682,8 +814,12 @@ export default function Requests() {
             overflow: "hidden",
             backgroundColor: isDarkMode ? "#111827" : "#fff",
             color: isDarkMode ? "#E3E8F3" : "#111827",
-            border: isDarkMode ? "1px solid rgba(255,255,255,0.08)" : "1px solid #E9EEF2",
-            boxShadow: isDarkMode ? "0 20px 40px rgba(0,0,0,0.45)" : "0 18px 30px rgba(15,23,42,0.12)",
+            border: isDarkMode
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid #E9EEF2",
+            boxShadow: isDarkMode
+              ? "0 20px 40px rgba(0,0,0,0.45)"
+              : "0 18px 30px rgba(15,23,42,0.12)",
           },
         }}
       >
@@ -715,16 +851,23 @@ export default function Requests() {
             borderRadius: 4,
             backgroundColor: isDarkMode ? "#111827" : "#fff",
             color: isDarkMode ? "#E3E8F3" : "#111827",
-            border: isDarkMode ? "1px solid rgba(255,255,255,0.08)" : "1px solid #E9EEF2",
+            border: isDarkMode
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid #E9EEF2",
           },
         }}
       >
-        <DialogTitle sx={{ fontFamily: "Poppins, sans-serif", fontWeight: 700 }}>
+        <DialogTitle
+          sx={{ fontFamily: "Poppins, sans-serif", fontWeight: 700 }}
+        >
           Reject request?
         </DialogTitle>
         <DialogContent sx={{ pt: 0 }}>
-          <p className={`text-sm leading-6 ${isDarkMode ? "text-slate-300" : "text-textGray"}`}>
-            This will reject the selected request and cannot be undone from here.
+          <p
+            className={`text-sm leading-6 ${isDarkMode ? "text-slate-300" : "text-textGray"}`}
+          >
+            This will reject the selected request and cannot be undone from
+            here.
           </p>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, gap: 1.5 }}>

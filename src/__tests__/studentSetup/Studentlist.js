@@ -133,7 +133,7 @@ const mockDetailedStudent = {
   mainParentGender: "Male",
   mainParentQualification: "12 pass",
   mainParentOccupation: "Doctor",
-  mainParentPhone: "9999999999",
+  parentPhone: "9999999999",
   mainParentEmail: "nick@example.com",
   mainParentAddress: "Indore",
   mainParentStatus: "verified",

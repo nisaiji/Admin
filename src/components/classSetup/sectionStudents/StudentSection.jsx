@@ -106,7 +106,7 @@ export default function StudentSection() {
     gender: "",
     mainParentFullName: "",
     guardianName: "",
-    mainParentPhone: "",
+    parentPhone: "",
     aadharNumber: "",
     sectionId: "",
   });
@@ -219,7 +219,7 @@ export default function StudentSection() {
             "",
           mainParentFullName: student?.mainParentFullName || "",
           guardianName: student?.guardianName || "",
-          mainParentPhone: student?.mainParentPhone || "",
+          parentPhone: student?.parentPhone || "",
         }));
         // console.table(studentList)
         setStudents(studentList);
@@ -236,7 +236,7 @@ export default function StudentSection() {
   // check same entry in registration
   const checkIsStudentExistForSameParent = () => {
     const userExist = students.find(
-      (item) => item?.mainParentPhone === newStudent?.mainParentPhone,
+      (item) => item?.parentPhone === newStudent?.parentPhone,
     );
     if (userExist) {
       const existFullName = `${userExist?.firstName?.trim()} ${userExist?.lastName?.trim()}`;
@@ -283,8 +283,8 @@ export default function StudentSection() {
     ) {
       return t("validationError.parentName");
     }
-    if (!student?.mainParentPhone?.trim()) return t("validationError.phone");
-    if (!REGEX.PHONE_LENGTH.test(student.mainParentPhone))
+    if (!student?.parentPhone?.trim()) return t("validationError.phone");
+    if (!REGEX.PHONE_LENGTH.test(student.parentPhone))
       return t("validationError.validationPhoneCount");
     if (!String(student?.aadharNumber)?.trim())
       return "Aadhaar number is required";
@@ -302,7 +302,7 @@ export default function StudentSection() {
   const handleInputChange = (sNo, field, value) => {
     let formattedValue = value;
 
-    if (field === "mainParentPhone" || field === "aadharNumber") {
+    if (field === "parentPhone" || field === "aadharNumber") {
       formattedValue = value.replace(/\D/g, "");
     } else {
       formattedValue = value.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ");
@@ -361,7 +361,7 @@ export default function StudentSection() {
         guardianName: capitalize(student.guardianName?.trim()),
       }),
       gender: student.gender,
-      phone: student.mainParentPhone,
+      phone: student.parentPhone,
       aadharNumber: student.aadharNumber,
       ...(!isUpdate && {
         sectionId:
@@ -393,7 +393,7 @@ export default function StudentSection() {
             gender: "",
             mainParentFullName: "",
             guardianName: "",
-            mainParentPhone: "",
+            parentPhone: "",
             aadharNumber: "",
             sectionId:
               role === "admin"
@@ -511,7 +511,7 @@ export default function StudentSection() {
       student.mainParentFullName
         ?.toLowerCase()
         .includes(searchQuery?.toLowerCase()) ||
-      student.mainParentPhone.includes(searchQuery),
+      student.parentPhone.includes(searchQuery),
   );
 
   useEffect(() => {
@@ -857,12 +857,12 @@ export default function StudentSection() {
                   >
                     <input
                       type="text"
-                      value={newStudent.mainParentPhone}
+                      value={newStudent.parentPhone}
                       maxLength={10}
                       onChange={(e) =>
                         handleInputChange(
                           null,
-                          "mainParentPhone",
+                          "parentPhone",
                           e.target.value,
                         )
                       }
@@ -1054,12 +1054,12 @@ export default function StudentSection() {
                     >
                       <input
                         type="text"
-                        value={student.mainParentPhone}
+                        value={student.parentPhone}
                         maxLength={10}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "mainParentPhone",
+                            "parentPhone",
                             e.target.value,
                           )
                         }

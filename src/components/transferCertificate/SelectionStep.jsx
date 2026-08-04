@@ -297,7 +297,7 @@ function StudentRow({ student, index, pageNo, limit, onSelectStudent }) {
         {student?.mainParentFullName || "-"}
       </td>
       <td style={{ padding: "13px 18px", fontSize: "13px", color: C.sub }}>
-        {student?.mainParentPhone || "-"}
+        {student?.parentPhone || "-"}
       </td>
       <td style={{ padding: "13px 18px", textAlign: "center" }}>
         <button

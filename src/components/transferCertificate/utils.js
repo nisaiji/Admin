@@ -70,7 +70,7 @@ export function mapStudentForTc(student, classList = [], sectionList = []) {
     section: sectionName,
     sectionName,
     mainParentFullName: student?.mainParentFullName || "-",
-    phone: student?.mainParentPhone ||  "-",
+    phone: student?.parentPhone ||  "-",
     dob: student?.dob || student?.dateOfBirth || student?.birthDate || "-",
     gender: student?.gender || "-",
     feeStatus: student?.feeStatus || "due",

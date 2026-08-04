@@ -117,7 +117,7 @@ export function GuardianTabContent({ student, isDarkMode }) {
       <DetailRow
         Icon={Phone}
         label="Phone"
-        value={student?.mainParentPhone}
+        value={student?.parentPhone}
         isDarkMode={isDarkMode}
         accentClass="text-[#0A81D1]"
       />

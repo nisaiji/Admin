@@ -34,7 +34,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-const TAB_ITEMS = ["pending", "approved", "rejected", "all"];
+const TAB_ITEMS = ["PENDING", "APPROVED", "REJECTED", "ALL"];
 const PAGE_SIZE_OPTIONS = [10, 20, 25, 50, 100];
 
 const getApiErrorMessage = (error, fallback) => {
@@ -64,33 +64,33 @@ const formatDate = (value) => {
 
 const getStatusQuery = (tab) => {
   switch (tab) {
-    case "pending":
-      return "pending";
-    case "approved":
-      return "accept,complete";
-    case "rejected":
-      return "reject,expired";
+    case "PENDING":
+      return "PENDING";
+    case "APPROVED":
+      return "ACCEPT,COMPLETE";
+    case "REJECTED":
+      return "REJECT,EXPIRED";
     default:
-      return "accept,reject,pending,complete,expired";
+      return "ACCEPT,REJECT,PENDING,COMPLETE,EXPIRED";
   }
 };
 
 const getStatusTone = (status) => {
   switch (String(status || "").toLowerCase()) {
-    case "pending":
+    case "PENDING":
       return "warning";
-    case "accept":
-    case "complete":
+    case "ACCEPT":
+    case "COMPLETE":
       return "success";
-    case "reject":
-    case "expired":
+    case "REJECT":
+    case "EXPIRED":
       return "danger";
     default:
       return "neutral";
   }
 };
 
-function StatusPill({ status }) {
+function StatusPill({ status, dark }) {
   const tone = getStatusTone(status);
   const toneClass =
     tone === "success"
@@ -106,7 +106,7 @@ function StatusPill({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-poppins-bold uppercase tracking-[0.08em] ${toneClass}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-poppins-bold uppercase tracking-[0.08em] ${toneClass} ${dark ? "text-textPrimary" : "text-textBlack"}`}
     >
       <Icon size={12} />
       {requestsStatus(status)}
@@ -133,15 +133,15 @@ function InfoPill({ label, value, dark }) {
 
 function requestsStatus(status) {
   switch (String(status || "").toLowerCase()) {
-    case "pending":
+    case "PENDING":
       return "Pending";
-    case "accept":
+    case "ACCEPT":
       return "Approved";
-    case "reject":
+    case "REJECT":
       return "Rejected";
-    case "complete":
+    case "COMPLETE":
       return "Completed";
-    case "expired":
+    case "EXPIRED":
       return "Expired";
     default:
       return safeText(status);
@@ -162,7 +162,7 @@ function reasonStatus(status) {
 export default function Leaves() {
   const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
-  const [selectedTab, setSelectedTab] = useState("pending");
+  const [selectedTab, setSelectedTab] = useState("PENDING");
   const [loading, setLoading] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -184,15 +184,15 @@ export default function Leaves() {
     const normalizedRequests = Array.isArray(requests) ? requests : [];
 
     switch (selectedTab) {
-      case "pending":
-        return normalizedRequests.filter((req) => req?.status === "pending");
-      case "approved":
+      case "PENDING":
+        return normalizedRequests.filter((req) => req?.status === "PENDING");
+      case "APPROVED":
         return normalizedRequests.filter(
-          (req) => req?.status === "accept" || req?.status === "complete",
+          (req) => req?.status === "ACCEPT" || req?.status === "COMPLETE",
         );
-      case "rejected":
+      case "REJECTED":
         return normalizedRequests.filter(
-          (req) => req?.status === "reject" || req?.status === "expired",
+          (req) => req?.status === "REJECT" || req?.status === "EXPIRED",
         );
       default:
         return normalizedRequests;
@@ -248,7 +248,7 @@ export default function Leaves() {
       setErrorMessage("");
       const statusQuery = getStatusQuery(selectedTab);
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_LEAVES}?model=teacher&page=${pageNo}&limit=${limit}&status=${statusQuery}`,
+        `${EndPoints.ADMIN.GET_LEAVES}?model=TEACHER&page=${pageNo}&limit=${limit}&status=${statusQuery}`,
       );
 
       if (res?.statusCode === 200) {
@@ -318,7 +318,7 @@ export default function Leaves() {
   const handleSave = async (id, status) => {
     if (!id || loading || actionLoadingId) return;
 
-    if (status === "accept") {
+    if (status === "ACCEPT") {
       const validationError = validateData();
       if (validationError) {
         toast.error(validationError);
@@ -329,7 +329,7 @@ export default function Leaves() {
     try {
       setActionLoadingId(id);
       const payload =
-        status === "reject"
+        status === "REJECT"
           ? { leaveRequestId: id, status }
           : {
               leaveRequestId: id,
@@ -664,7 +664,7 @@ export default function Leaves() {
                               {reasonStatus(req?.reason || "")}
                             </p>
                           </div>
-                          <StatusPill status={req?.status} />
+                          <StatusPill status={req?.status} dark={isDarkMode} />
                         </div>
 
                         <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -759,7 +759,7 @@ export default function Leaves() {
                       {safeText(currentReq?.teacher?.class)} {safeText(currentReq?.teacher?.section)}
                     </p>
                     <div className="mt-3">
-                      <StatusPill status={currentReq?.status} />
+                      <StatusPill status={currentReq?.status} dark={isDarkMode} />
                     </div>
                   </div>
                 </div>
@@ -804,11 +804,11 @@ export default function Leaves() {
                         Guest credentials
                       </p>
                       <p className={`mt-1 text-sm ${textMutedClass}`}>
-                        {currentReq?.status === "pending" ? "Generate credentials before approval." : "View generated guest teacher details."}
+                        {currentReq?.status === "PENDING" ? "Generate credentials before approval." : "View generated guest teacher details."}
                       </p>
                     </div>
 
-                    {currentReq?.status === "pending" ? (
+                    {currentReq?.status === "PENDING" ? (
                       <button
                         type="button"
                         onClick={() =>
@@ -834,7 +834,7 @@ export default function Leaves() {
                       <input
                         id="leave-username"
                         type="text"
-                        value={currentReq?.status === "pending" ? formData.username : safeText(currentReq?.guestTeacher?.username, "")}
+                        value={currentReq?.status === "PENDING" ? formData.username : safeText(currentReq?.guestTeacher?.username, "")}
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
@@ -842,7 +842,7 @@ export default function Leaves() {
                           }))
                         }
                         placeholder={t("placeholders.generateUsername")}
-                        readOnly={currentReq?.status !== "pending"}
+                        readOnly={currentReq?.status !== "PENDING"}
                         disabled={loading || Boolean(actionLoadingId)}
                         className={`h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#0A81D1] ${
                           isDarkMode
@@ -859,7 +859,7 @@ export default function Leaves() {
                       <input
                         id="leave-fullname"
                         type="text"
-                        value={currentReq?.status === "pending" ? formData.fullname : safeText(currentReq?.guestTeacher?.tagline, "")}
+                        value={currentReq?.status === "PENDING" ? formData.fullname : safeText(currentReq?.guestTeacher?.tagline, "")}
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
@@ -867,7 +867,7 @@ export default function Leaves() {
                           }))
                         }
                         placeholder={t("placeholders.replacementTeacherName")}
-                        readOnly={currentReq?.status !== "pending"}
+                        readOnly={currentReq?.status !== "PENDING"}
                         disabled={loading || Boolean(actionLoadingId)}
                         className={`h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#0A81D1] ${
                           isDarkMode
@@ -885,7 +885,7 @@ export default function Leaves() {
                         <input
                           id="leave-password"
                           type={isPasswordVisible ? "text" : "password"}
-                          value={currentReq?.status === "pending" ? formData.password : safeText(currentReq?.guestTeacher?.secretKey, "")}
+                          value={currentReq?.status === "PENDING" ? formData.password : safeText(currentReq?.guestTeacher?.secretKey, "")}
                           onChange={(e) =>
                             setFormData((prev) => ({
                               ...prev,
@@ -893,7 +893,7 @@ export default function Leaves() {
                             }))
                           }
                           placeholder={t("placeholders.password")}
-                          readOnly={currentReq?.status !== "pending"}
+                          readOnly={currentReq?.status !== "PENDING"}
                           disabled={loading || Boolean(actionLoadingId)}
                           className={`h-11 w-full rounded-xl border px-4 pr-11 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#0A81D1] ${
                             isDarkMode
@@ -915,7 +915,7 @@ export default function Leaves() {
                   </div>
                 </div>
 
-                {currentReq?.status === "pending" ? (
+                {currentReq?.status === "PENDING" ? (
                   <div className="grid gap-3 sm:grid-cols-2">
                     <button
                       type="button"
@@ -928,7 +928,7 @@ export default function Leaves() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleSave(currentReq?._id, "accept")}
+                      onClick={() => handleSave(currentReq?._id, "ACCEPT")}
                       disabled={loading || Boolean(actionLoadingId)}
                       className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#4CBC9A] px-4 text-sm font-poppins-bold text-white transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4CBC9A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -938,7 +938,7 @@ export default function Leaves() {
                   </div>
                 ) : (
                   <div className="flex justify-start">
-                    <StatusPill status={currentReq?.status} />
+                    <StatusPill status={currentReq?.status} dark={isDarkMode} />
                   </div>
                 )}
               </div>
@@ -991,7 +991,7 @@ export default function Leaves() {
             Cancel
           </Button>
           <Button
-            onClick={() => handleSave(rejectTargetId, "reject")}
+            onClick={() => handleSave(rejectTargetId, "REJECT")}
             disabled={!rejectTargetId || Boolean(actionLoadingId)}
             variant="contained"
             sx={{
