@@ -216,8 +216,8 @@ export default function SchoolFeeSetting({ setSelected }) {
 
   useEffect(() => {
     if (window?.initSendOTP) {
-      window.configuration.widgetId = import.meta.env.VITE_PHONE_WIDGET_ID;
-      window.configuration.tokenAuth = import.meta.env.VITE_PHONE_AUTH_TOKEN;
+      window.configuration.widgetId = import.meta.env.VITE_PHONE_AND_EMAIL_WIDGET_ID;
+      window.configuration.tokenAuth = import.meta.env.VITE_PHONE_AND_EMAIL_AUTH_TOKEN;
       window.initSendOTP(window.configuration);
     }
   }, []);

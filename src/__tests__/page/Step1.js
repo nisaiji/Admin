@@ -19,7 +19,7 @@ jest.mock("react-redux", () => ({
 }));
 
 jest.mock("../../utils/helper", () => ({
-  VITE_PHONE_WIDGET_ID: "1",
+  VITE_PHONE_AND_EMAIL_WIDGET_ID: "1",
 }));
 
 describe("Step1 component", () => {
@@ -28,15 +28,15 @@ describe("Step1 component", () => {
   beforeEach(() => {
     Object.defineProperty(import.meta, "env", {
       value: {
-        VITE_PHONE_WIDGET_ID: "mock-widget-id",
-        VITE_PHONE_AUTH_TOKEN: "mock-auth-token",
+        VITE_PHONE_AND_EMAIL_WIDGET_ID: "mock-widget-id",
+        VITE_PHONE_AND_EMAIL_AUTH_TOKEN: "mock-auth-token",
       },
       writable: true,
     });
 
     window.configuration = {
-      widgetId: import.meta.env.VITE_PHONE_WIDGET_ID,
-      tokenAuth: import.meta.env.VITE_PHONE_AUTH_TOKEN,
+      widgetId: import.meta.env.VITE_PHONE_AND_EMAIL_WIDGET_ID,
+      tokenAuth: import.meta.env.VITE_PHONE_AND_EMAIL_AUTH_TOKEN,
     };
 
     jest.useFakeTimers();

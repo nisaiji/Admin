@@ -46,8 +46,8 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
   useEffect(() => {
     if (window?.initSendOTP) {
       if (currentStep === 2) {
-        window.configuration.widgetId = import.meta.env.VITE_EMAIL_WIDGET_ID;
-        window.configuration.tokenAuth = import.meta.env.VITE_EMAIL_AUTH_TOKEN;
+        window.configuration.widgetId = import.meta.env.VITE_PHONE_AND_EMAIL_WIDGET_ID;
+        window.configuration.tokenAuth = import.meta.env.VITE_PHONE_AND_EMAIL_AUTH_TOKEN;
         window.initSendOTP(window.configuration);
       }
     }
