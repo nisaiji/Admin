@@ -129,6 +129,7 @@ const EndPoints = {
 
     GET_FEE_SUMMARY: "payment/fee-summary",
     GET_TRANSITION_HISTORY: "payment/admin/history",
+    GET_STUDENT_HISTORY: "payment/admin/history",
     GET_STUDENT_DUES: "fee-setup/dues",
     GET_COLLECTION_DATA: "payment/admin/collections",
 

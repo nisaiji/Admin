@@ -23,6 +23,7 @@ import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import toast, { Toaster } from "react-hot-toast";
 import moment from "moment/moment";
+import StudentPaymentInfo from "./dashboard/StudentPaymentInfo";
 
 const PAGE_LIMIT_OPTIONS = [10, 20, 25, 50, 100];
 
@@ -93,6 +94,7 @@ export default function CollectionScreen() {
   const [searchSection, setSearchSection] = useState("");
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -228,6 +230,47 @@ export default function CollectionScreen() {
     backgroundColor: isDarkMode ? "#111827" : "#ffffff",
     color: isDarkMode ? "#f8fafc" : "#1e293b",
   };
+
+  if (selectedStudent) {
+    return (
+      <div
+        style={{
+          padding: "28px 28px 60px",
+          minHeight: "100%",
+          background: themeC.bg,
+        }}
+      >
+        <Toaster />
+        <div style={{ maxWidth: 1384, margin: "0 auto" }}>
+          <div style={{ marginBottom: 20 }}>
+            <button
+              type="button"
+              onClick={() => setSelectedStudent(null)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-poppins-bold cursor-pointer border"
+              style={{
+                color: themeC.blue,
+                borderColor: themeC.blue,
+                background: themeC.card,
+              }}
+            >
+              <ChevronLeft size={16} /> Back to Collection
+            </button>
+          </div>
+          <StudentPaymentInfo
+            student={selectedStudent}
+            studentId={selectedStudent?.studentId ?? ""}
+            sessionStudentId={selectedStudent?.sessionStudentId ?? ""}
+            sessionId={selectedSessionId ?? ""}
+            userInfo={{
+              studentName: selectedStudent?.studentName ?? "",
+              classAndSection: `${selectedStudent?.class ?? ""} ${selectedStudent?.section ?? ""}`,
+              phone: selectedStudent?.mainParentPhone ?? "",
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -580,6 +623,8 @@ export default function CollectionScreen() {
                       </td>
                       <td style={{ padding: "13px 18px", textAlign: "center" }}>
                         <button
+                          type="button"
+                          onClick={() => setSelectedStudent(data)}
                           style={{
                             display: "inline-flex",
                             alignItems: "center",

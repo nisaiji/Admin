@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import svgPaths from "./svg";
 import payable from "../../../assets/images/payments/payable.png";
 import collected from "../../../assets/images/payments/collected.png";
@@ -13,51 +19,105 @@ import EndPoints from "../../../services/EndPoints";
 import moment from "moment";
 import { setTempData } from "../../../store/AppAuthSlice.js";
 import StudentPaymentInfo from "./StudentPaymentInfo.jsx";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  Search,
+  Users,
+  X,
+} from "lucide-react";
 
-const FINANCIAL_YEAR_MONTHS = [
-  { month: "Apr", label: "Apr", year: 2026, days: 30, amount: 124000 },
-  { month: "May", label: "May", year: 2026, days: 31, amount: 136500 },
-  { month: "Jun", label: "Jun", year: 2026, days: 30, amount: 149250 },
-  { month: "Jul", label: "Jul", year: 2026, days: 31, amount: 141000 },
-  { month: "Aug", label: "Aug", year: 2026, days: 31, amount: 158750 },
-  { month: "Sep", label: "Sep", year: 2026, days: 30, amount: 164000 },
-  { month: "Oct", label: "Oct", year: 2026, days: 31, amount: 172500 },
-  { month: "Nov", label: "Nov", year: 2026, days: 30, amount: 168250 },
-  { month: "Dec", label: "Dec", year: 2026, days: 31, amount: 176400 },
-  { month: "Jan", label: "Jan", year: 2027, days: 31, amount: 182300 },
-  { month: "Feb", label: "Feb", year: 2027, days: 28, amount: 189600 },
-  { month: "Mar", label: "Mar", year: 2027, days: 31, amount: 194900 },
-];
+const PAGE_LIMIT_OPTIONS = [10, 20, 25, 50, 100];
 
-function buildDailySeries(totalAmount, totalDays) {
-  const weights = Array.from(
-    { length: totalDays },
-    (_, index) => 1 + (index % 5) * 0.12,
-  );
-  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+function buildVisiblePages(pageNo, totalPages) {
+  if (totalPages <= 5) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
 
-  return weights.map((weight) =>
-    Math.round((totalAmount * weight) / totalWeight),
+  const pages = new Set([1, totalPages, pageNo - 1, pageNo, pageNo + 1]);
+  return Array.from(pages)
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((firstPage, secondPage) => firstPage - secondPage);
+}
+
+function getApiErrorMessage(error, fallback) {
+  if (typeof error === "string") return error;
+  return error?.message || error?.data?.message || fallback;
+}
+
+function getStudentDisplayName(student) {
+  const firstName = String(student?.firstName ?? "").trim();
+  const lastName = String(student?.lastName ?? "").trim();
+  const combinedName = `${firstName} ${lastName}`.trim();
+
+  return (
+    String(student?.studentName ?? "").trim() ||
+    combinedName ||
+    String(student?.name ?? "").trim() ||
+    "NA"
   );
 }
 
-function buildDailyChartData(monthKey) {
-  const monthMeta =
-    FINANCIAL_YEAR_MONTHS.find((item) => item.month === monthKey) ||
-    FINANCIAL_YEAR_MONTHS[FINANCIAL_YEAR_MONTHS.length - 1];
-  const series = buildDailySeries(monthMeta.amount, monthMeta.days);
+function getStudentInitials(student) {
+  const fullName = getStudentDisplayName(student);
 
-  return {
-    monthMeta,
-    xAxisData: Array.from(
-      { length: monthMeta.days },
-      (_, index) => `${index + 1} ${monthMeta.month}`,
-    ),
-    series,
-  };
+  if (fullName === "NA") return "NA";
+
+  return fullName
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
-function StatCard({ icon, label, value, color, themeC, isDarkMode }) {
+function getStudentAdmissionNumber(student) {
+  return (
+    student?.admNo ??
+    student?.admissionNo ??
+    student?.studentCode ??
+    student?.studentId ??
+    student?._id ??
+    "NA"
+  );
+}
+
+function getStudentClassLabel(student) {
+  const className = String(
+    student?.className ?? student?.class?.name ?? student?.class ?? "",
+  ).trim();
+  const sectionName = String(
+    student?.sectionName ?? student?.section?.name ?? student?.section ?? "",
+  ).trim();
+
+  return [className, sectionName].filter(Boolean).join(" ") || "NA";
+}
+
+function formatStudentDate(value) {
+  const date = moment(value);
+  return date.isValid() ? date.format("DD MMM YYYY") : "NA";
+}
+
+function getStudentPhone(student) {
+  return (
+    String(
+      student?.phone ??
+        student?.parentPhone ??
+        student?.mainParentPhone ??
+        student?.contactNo ??
+        student?.mobileNo ??
+        "",
+    ).trim() || "NA"
+  );
+}
+
+function getStudentGender(student) {
+  return String(student?.gender ?? student?.studentGender ?? "").trim() || "NA";
+}
+
+function StatCard({ icon, label, value, themeC }) {
   return (
     <div
       style={{
@@ -86,24 +146,6 @@ function StatCard({ icon, label, value, color, themeC, isDarkMode }) {
   );
 }
 
-function StatusBadge({ status }) {
-  const styles =
-    status === "Succeeded"
-      ? "bg-[rgba(34,197,94,0.1)] text-[#22c55e]"
-      : status === "Failed"
-        ? "bg-[rgba(254,64,64,0.1)] text-[#fe4040]"
-        : "bg-[rgba(251,191,36,0.1)] text-[#f59e0b]";
-  return (
-    <div
-      className={`flex items-center justify-center h-[32px] w-[78px] rounded-[6px] ${styles}`}
-    >
-      <span className="font-medium text-[12px] font-['Inter',sans-serif]">
-        {status}
-      </span>
-    </div>
-  );
-}
-
 export function PaymentDashboard() {
   const isDarkMode = useSelector(
     (state) => state.appConfig?.isDarkMode ?? false,
@@ -115,13 +157,20 @@ export function PaymentDashboard() {
   const [feeSummaryData, setFeeSummaryData] = useState({});
   const [transitionHistoryData, setTransitionHistoryData] = useState([]);
   const [searchValue, setSearchValue] = useState("");
-  const [searched, setSearched] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [studentListData, setStudentListData] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState("Mar");
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [pageNo, setPageNo] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalStudentCount, setTotalStudentCount] = useState(0);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [studentError, setStudentError] = useState("");
+  const requestIdRef = useRef(0);
 
   function pad(n) {
     return String(n).padStart(2, "0");
   }
+
   function useClock() {
     const [now, setNow] = useState(new Date());
     useEffect(() => {
@@ -138,10 +187,13 @@ export function PaymentDashboard() {
   });
   const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
-  const monthlyChartData = useMemo(
-    () => buildDailyChartData(selectedMonth),
-    [selectedMonth],
+  const totalPages = Math.max(1, Math.ceil(totalStudentCount / limit) || 1);
+  const visiblePages = useMemo(
+    () => buildVisiblePages(pageNo, totalPages),
+    [pageNo, totalPages],
   );
+  const showingFrom = totalStudentCount === 0 ? 0 : (pageNo - 1) * limit + 1;
+  const showingTo = Math.min(totalStudentCount, pageNo * limit);
 
   const getFeeSummary = async () => {
     try {
@@ -175,12 +227,160 @@ export function PaymentDashboard() {
     getTransitionHistory();
   }, []);
 
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setDebouncedSearch(searchValue.trim());
+    }, 1000);
+
+    return () => window.clearTimeout(timeout);
+  }, [searchValue]);
+
+  const fetchStudents = async () => {
+    if (!selectedSessionId) {
+      setStudentListData([]);
+      setTotalStudentCount(0);
+      setStudentError("");
+      setLoadingStudents(false);
+      return;
+    }
+
+    const query = new URLSearchParams({
+      page: String(pageNo),
+      limit: String(limit),
+      session: String(selectedSessionId),
+    });
+
+    if (debouncedSearch) {
+      query.set("search", debouncedSearch);
+    }
+
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+
+    try {
+      setLoadingStudents(true);
+      setStudentError("");
+
+      const response = await axiosClient.get(
+        `${EndPoints.ADMIN.SEARCH_STUDENT}?${query.toString()}`,
+      );
+
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
+      if (response?.statusCode === 200) {
+        const result = response?.result ?? {};
+        const students = Array.isArray(result?.students)
+          ? result.students
+          : Array.isArray(result)
+            ? result
+            : [];
+        const totalStudents = Number(
+          result?.totalStudents ?? result?.pagination?.total ?? students.length,
+        );
+
+        setStudentListData(students);
+        setTotalStudentCount(
+          Number.isFinite(totalStudents) ? totalStudents : 0,
+        );
+      }
+    } catch (e) {
+      toast.error(e);
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoadingStudents(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!debouncedSearch) {
+      setStudentListData([]);
+      setTotalStudentCount(0);
+      setStudentError("");
+      setLoadingStudents(false);
+      return;
+    }
+
+    fetchStudents();
+  }, [debouncedSearch, pageNo, limit, selectedSessionId]);
+
+  useEffect(() => {
+    if (pageNo > totalPages) {
+      setPageNo(totalPages);
+    }
+  }, [pageNo, totalPages]);
+
+  function handleSearchChange(event) {
+    setSearchValue(event.target.value);
+    setPageNo(1);
+    setSelectedStudent(null);
+  }
+
+  function handleLimitChange(event) {
+    setLimit(Number(event.target.value));
+    setPageNo(1);
+  }
+
+  function handleSelectStudent(student) {
+    setSelectedStudent(student);
+  }
+
+  function handleClearSearch() {
+    setSearchValue("");
+    setDebouncedSearch("");
+    setPageNo(1);
+    setSelectedStudent(null);
+  }
+
+  if (selectedStudent) {
+    return (
+      <div
+        style={{
+          padding: "28px 28px 60px",
+          minHeight: "100%",
+          background: themeC.bg,
+        }}
+      >
+        <Toaster />
+        <div style={{ maxWidth: 1384, margin: "0 auto" }}>
+          <div style={{ marginBottom: 20 }}>
+            <button
+              type="button"
+              onClick={() => setSelectedStudent(null)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-poppins-bold cursor-pointer border"
+              style={{
+                color: themeC.blue,
+                borderColor: themeC.blue,
+                background: themeC.card,
+              }}
+            >
+              <ChevronLeft size={16} /> Back to Dashboard
+            </button>
+          </div>
+          <StudentPaymentInfo
+            student={selectedStudent}
+            studentId={selectedStudent?.studentId ?? ""}
+            sessionStudentId={selectedStudent?._id ?? ""}
+            sessionId={selectedSessionId ?? ""}
+            userInfo={{
+              studentName: `${selectedStudent?.firstName ?? ""} ${selectedStudent?.lastName ?? ""}`,
+              classAndSection: `${selectedStudent?.className ?? ""} ${selectedStudent?.sectionName ?? ""}`,
+              phone: selectedStudent?.mainParentPhone ?? "",
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-[24px]">
       <Toaster />
       <div className="flex flex-col gap-[24px]">
         {/* ── Header bar ── */}
-        <div className="flex items-center justify-between rounded-[0]">
+        <div className="flex items-center justify-between">
           <div className="flex flex-col gap-[5px]">
             <h1 className="font-bold text-[20px] text-[#0f0f0f] font-['Inter',sans-serif] leading-[1.2]">
               Payment Dashboard
@@ -241,158 +441,237 @@ export function PaymentDashboard() {
           </div>
         </div>
 
-        {/* ── Search bar ── */}
-        <div className="flex items-center gap-[12px]">
-          <div className="flex-1 bg-white rounded-[6px] border border-[#e7e2e2] flex items-center justify-between px-[13px] py-[9px]">
-            <div className="flex items-center gap-[10px]">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 18.006 18.006"
-                fill="none"
-              >
-                <path d={svgPaths.p2e7aad00} fill="#6E6E6E" />
-              </svg>
-              <input
-                className="font-medium text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] outline-none bg-transparent w-full"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && setSearched(true)}
-                placeholder="Search student..."
-              />
-            </div>
-            {searchValue && (
+        <div className="rounded-[14px] border border-[#e7e2e2] bg-white p-5">
+          <div className="flex items-center justify-between gap-4">
+            {/* <div>
+              <p className="font-bold text-[14px] text-[#101828] font-['Inter',sans-serif]">
+                Students ({totalStudentCount})
+              </p>
+              <p className="mt-1 text-[13px] text-[#6a7282] font-['Inter',sans-serif]">
+                {selectedStudent
+                  ? `Viewing ${getStudentDisplayName(selectedStudent)}`
+                  : `Showing ${showingFrom}-${showingTo} of ${totalStudentCount} students`}
+              </p>
+            </div> */}
+
+            {selectedStudent ? (
               <button
-                onClick={() => {
-                  setSearchValue("");
-                  setSearched(false);
-                }}
+                type="button"
+                onClick={() => setSelectedStudent(null)}
+                className="inline-flex items-center gap-2 rounded-lg border border-[#2563eb] px-4 py-2 text-sm font-poppins-bold text-[#2563eb] transition hover:bg-[#2563eb]/10"
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M4 4L20 20"
-                    stroke="#686868"
-                    strokeLinecap="round"
-                    strokeMiterlimit="10"
-                    strokeWidth="2"
-                  />
-                  <path
-                    d="M4 20L20 4"
-                    stroke="#686868"
-                    strokeLinecap="round"
-                    strokeMiterlimit="10"
-                    strokeWidth="2"
-                  />
-                </svg>
+                <ChevronLeft size={16} />
+                Back to Students
               </button>
-            )}
+            ) : null}
           </div>
+
+          <>
+            {/* searchbar */}
+            <div className="flex items-center gap-[12px] flex-wrap">
+              <div className="flex-1 min-w-[280px] bg-white rounded-[6px] border border-[#e7e2e2] flex items-center justify-between px-[13px] py-[9px]">
+                <div className="flex items-center gap-[10px] flex-1">
+                  <Search size={18} className="text-[#6E6E6E]" />
+                  <input
+                    className="font-medium text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] outline-none bg-transparent w-full"
+                    value={searchValue}
+                    onChange={handleSearchChange}
+                    placeholder="Search student..."
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="flex items-center gap-1 rounded-lg border border-[#2563eb] px-4 py-2 text-sm font-poppins-bold text-[#2563eb] transition hover:bg-[#2563eb]/10"
+              >
+                Clear Search
+              </button>
+            </div>
+            {/* student list */}
+            <div className="space-y-3">
+              {studentListData.length === 0 &&
+              (loadingStudents || searchValue) ? (
+                <div className="rounded-xl border border-dashed border-[#e5e7eb] mt-2 p-4 text-center text-sm text-[#6a7282] font-['Inter',sans-serif]">
+                  {loadingStudents ? (
+                    <>
+                      <RefreshCw
+                        className="mx-auto mb-2 animate-spin"
+                        size={18}
+                      />
+                      Loading students...
+                    </>
+                  ) : (
+                    <>
+                      <Users className="mx-auto mb-2" size={18} />
+                      {studentError || "No students found"}
+                    </>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {studentListData?.map((student, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleSelectStudent(student)}
+                      className="flex w-full items-center justify-between gap-4 rounded-xl border border-[#E5E7EB] bg-white p-5 text-left transition hover:border-[#2563EB] hover:shadow-sm mt-3"
+                    >
+                      <div className="flex min-w-0 space-x-4">
+                        <div className="flex size-11 items-center justify-center rounded-full bg-[#2563EB]">
+                          <div className="font-poppins-bold text-md text-white">
+                            {getStudentInitials(student)}
+                          </div>
+                        </div>
+                        <div className="min-w-0">
+                          <div
+                            className="truncate font-poppins-bold text-sm"
+                            style={{ color: themeC.text }}
+                          >
+                            {`${student?.firstName ?? ""} ${student?.lastName ?? ""}`}
+                          </div>
+                          <div
+                            className="font-poppins-medium text-xs"
+                            style={{ color: themeC.textSub }}
+                          >
+                            {student?.studentUniqueId ?? ""}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-end gap-8">
+                        <div>
+                          <div
+                            className="font-poppins-medium text-xs uppercase"
+                            style={{ color: themeC.textSub }}
+                          >
+                            Class
+                          </div>
+                          <div
+                            className="font-poppins-bold text-sm"
+                            style={{ color: themeC.text }}
+                          >
+                            {`${student?.className ?? ""} ${student?.sectionName ?? ""}`}
+                          </div>
+                        </div>
+                        <div>
+                          <div
+                            className="font-poppins-medium text-xs uppercase"
+                            style={{ color: themeC.textSub }}
+                          >
+                            DOB
+                          </div>
+                          <div
+                            className="font-poppins-bold text-sm"
+                            style={{ color: themeC.text }}
+                          >
+                            {student?.dob ?? ""}
+                          </div>
+                        </div>
+                        <div>
+                          <div
+                            className="font-poppins-medium text-xs uppercase"
+                            style={{ color: themeC.textSub }}
+                          >
+                            Phone
+                          </div>
+                          <div
+                            className="font-poppins-bold text-sm"
+                            style={{ color: themeC.text }}
+                          >
+                            {student?.mainParentPhone ?? ""}
+                          </div>
+                        </div>
+                        <div>
+                          <div
+                            className="font-poppins-medium text-xs uppercase"
+                            style={{ color: themeC.textSub }}
+                          >
+                            Gender
+                          </div>
+                          <div
+                            className="font-poppins-bold text-sm"
+                            style={{ color: themeC.text }}
+                          >
+                            {student?.gender ?? ""}
+                          </div>
+                        </div>
+                        <img
+                          src={openArrow}
+                          alt="open"
+                          className="size-8 object-contain"
+                        />
+                      </div>
+                    </button>
+                  ))}
+                  {studentListData.length > 0 && (
+                    <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-[#e7e2e2] pt-4">
+                      <label
+                        className="flex items-center gap-2 text-sm"
+                        style={{ color: themeC.textSub }}
+                      >
+                        Rows
+                        <select
+                          value={limit}
+                          onChange={handleLimitChange}
+                          className="h-9 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm outline-none"
+                        >
+                          {PAGE_LIMIT_OPTIONS.map((item) => (
+                            <option key={item} value={item}>
+                              {item}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPageNo((currentPage) =>
+                              Math.max(1, currentPage - 1),
+                            )
+                          }
+                          disabled={pageNo === 1 || loadingStudents}
+                          className="inline-flex size-8 items-center justify-center rounded-full border border-[#2563eb] text-[#2563eb] transition hover:bg-[#2563eb]/10 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <ChevronLeft size={15} />
+                        </button>
+
+                        {visiblePages.map((page) => (
+                          <button
+                            key={page}
+                            type="button"
+                            onClick={() => setPageNo(page)}
+                            disabled={loadingStudents}
+                            className={`inline-flex size-8 items-center justify-center rounded-full border border-[#2563eb] text-xs font-poppins-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${page === pageNo ? "bg-[#2563eb] text-white" : "text-[#2563eb] hover:bg-[#2563eb]/10"}`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPageNo((currentPage) =>
+                              Math.min(totalPages, currentPage + 1),
+                            )
+                          }
+                          disabled={pageNo === totalPages || loadingStudents}
+                          className="inline-flex size-8 items-center justify-center rounded-full border border-[#2563eb] text-[#2563eb] transition hover:bg-[#2563eb]/10 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <ChevronRight size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </>
         </div>
 
-        {/* ── Search results label ── */}
-        {searched && (
-          <p className="font-semibold text-[14px] text-[#6a7282] font-['Inter',sans-serif]">
-            Search Results for{" "}
-            <span className="text-[#101828]">&ldquo;{searchValue}&rdquo;</span>
-          </p>
-        )}
-        {studentListData?.map((data, i) => (
-          <div className="flex w-full bg-white border border-[#E5E7EB] rounded-xl p-5 mt-3 justify-between items-center">
-            {/* left */}
-            <div className="flex space-x-4">
-              <div className="flex bg-[#2563EB] rounded-full size-11 justify-center items-center">
-                <div
-                  className="font-poppins-bold text-md"
-                  style={{ color: themeC.text }}
-                >
-                  SM
-                </div>
-              </div>
-              <div>
-                <div
-                  className="font-poppins-bold text-sm"
-                  style={{ color: themeC.text }}
-                >
-                  Aarav Sharma
-                </div>
-                <div
-                  className="font-poppins-medium text-xs"
-                  style={{ color: themeC.textSub }}
-                >
-                  ADM-2026-00012
-                </div>
-              </div>
-            </div>
-            {/* right */}
-            <div className="flex space-x-8">
-              <div>
-                <div
-                  className="font-poppins-medium text-xs"
-                  style={{ color: themeC.textSub }}
-                >
-                  CLASS
-                </div>
-                <div
-                  className="font-poppins-bold text-sm"
-                  style={{ color: themeC.text }}
-                >
-                  1 A
-                </div>
-              </div>
-              <div>
-                <div
-                  className="font-poppins-medium text-xs"
-                  style={{ color: themeC.textSub }}
-                >
-                  DOB
-                </div>
-                <div
-                  className="font-poppins-bold text-sm"
-                  style={{ color: themeC.text }}
-                >
-                  14 MAR 2002
-                </div>
-              </div>
-              <div>
-                <div
-                  className="font-poppins-medium text-xs"
-                  style={{ color: themeC.textSub }}
-                >
-                  PHONE
-                </div>
-                <div
-                  className="font-poppins-bold text-sm"
-                  style={{ color: themeC.text }}
-                >
-                  7778889990
-                </div>
-              </div>
-              <div>
-                <div
-                  className="font-poppins-medium text-xs"
-                  style={{ color: themeC.textSub }}
-                >
-                  GENDER
-                </div>
-                <div
-                  className="font-poppins-bold text-sm"
-                  style={{ color: themeC.text }}
-                >
-                  Male
-                </div>
-              </div>
-              <img
-                src={openArrow}
-                alt="open"
-                className="size-8 object-contain"
-              />
-            </div>
-          </div>
-        ))}
-        {/* <StudentPaymentInfo
-          // studentId=""
-          // sessionId={selectedSessionId}
-        /> */}
         {/* fee cards */}
         <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
           <StatCard
@@ -423,7 +702,7 @@ export function PaymentDashboard() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-2 sm:min-w-[180px]">
+            {/* <div className="flex flex-col gap-2 sm:min-w-[180px]">
               <label className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#6a7282] font-['Inter',sans-serif]">
                 Month
               </label>
@@ -438,7 +717,7 @@ export function PaymentDashboard() {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
           </div>
 
           <div className="mt-4">
@@ -480,63 +759,124 @@ export function PaymentDashboard() {
             </button>
           </div>
 
-          <div className="rounded-[8px] overflow-hidden border border-[#e7e2e2]">
-            <div className="bg-[#f0f6f9] border-b border-[#e7e2e2] flex items-center h-[36px] pl-[10px]">
-              {[
-                "Student Name",
-                "Class & Section",
-                "Phone",
-                "Payment Ref",
-                "Amount",
-                "Payment Mode",
-                "Date & Time",
-                "Status",
-              ]?.map((col, i) => (
-                <div
-                  key={i}
-                  className="flex-1 px-[8px] font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif] text-center first:text-left"
-                >
-                  {col}
+          <div className="overflow-x-auto">
+            <div className="w-full rounded-[8px] overflow-hidden border border-[#e7e2e2]">
+              {/* Header */}
+              <div className="bg-[#f0f6f9] border-b border-[#e7e2e2] flex items-center h-[40px] pl-[10px]">
+                <div className="w-[140px] shrink-0 px-[8px] font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                  Student Name
                 </div>
-              ))}
-            </div>
-            {transitionHistoryData?.length === 0 ? (
-              <div style={{ textAlign: "center", color: themeC.text }}>
-                No Data To Display
+
+                <div className="w-[140px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                  Class & Section
+                </div>
+
+                <div className="w-[140px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                  Phone
+                </div>
+
+                <div className="w-[200px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                  Payment Ref
+                </div>
+
+                <div className="w-[120px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                  Amount
+                </div>
+
+                <div className="w-[150px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                  Payment Mode
+                </div>
+
+                <div className="w-[180px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                  Date & Time
+                </div>
+
+                <div className="w-[100px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                  Status
+                </div>
               </div>
-            ) : (
-              transitionHistoryData?.map((payment, index) => (
+
+              {/* Body */}
+              {transitionHistoryData?.length === 0 ? (
                 <div
-                  key={index}
-                  className={`flex items-center h-[52px] pl-[10px] ${index < transitionHistoryData?.length - 1 ? "border-b border-[#d0d0d0]/25" : ""} border-l border-r border-[#e7e2e2]`}
+                  className="py-6 text-center"
+                  style={{ color: themeC.text }}
                 >
-                  <div className="flex-1 px-[8px] font-normal text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
-                    {payment?.studentName ?? ""}
-                  </div>
-                  <div className="flex-1 px-[8px] font-normal text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
-                    {`${payment?.class ?? ""} ${payment?.section ?? ""}`}
-                  </div>
-                  <div className="flex-1 px-[8px] font-normal text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
-                    {payment?.phone ?? ""}
-                  </div>
-                  <div className="flex-1 px-[8px] font-normal text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
-                    {payment?.paymentRef ?? ""}
-                  </div>
-                  <div className="flex-1 px-[8px] font-semibold text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
-                    {payment?.amount ?? ""}
-                  </div>
-                  <div className="flex-1 px-[8px] text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
-                    {payment?.paymentMode ?? ""}
-                  </div>
-                  <div className="flex-1 px-[8px] text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
-                    {moment(payment?.dateTime).format("DD MMM YYYY HH:MM A")}
-                  </div>
-                  <div className="flex-1 px-[8px] flex justify-center">
-                    <StatusBadge status={payment?.status ?? ""} />
-                  </div>
+                  No Data To Display
                 </div>
-              ))
-            )}
+              ) : (
+                transitionHistoryData?.map((payment, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center h-[56px] pl-[10px] ${
+                      index < transitionHistoryData.length - 1
+                        ? "border-b border-[#d0d0d0]/25"
+                        : ""
+                    } border-l border-r border-[#e7e2e2]`}
+                  >
+                    {/* Student Name */}
+                    <div
+                      className="w-[140px] shrink-0 px-[8px] text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] truncate"
+                      title={payment?.studentName}
+                    >
+                      {payment?.studentName ?? ""}
+                    </div>
+
+                    {/* Class & Section */}
+                    <div className="w-[140px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                      {`${payment?.class ?? ""} ${payment?.section ?? ""}`}
+                    </div>
+
+                    {/* Phone */}
+                    <div className="w-[140px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                      {payment?.phone ?? ""}
+                    </div>
+
+                    {/* Payment Ref */}
+                    <div
+                      className="w-[200px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] truncate"
+                      title={payment?.paymentRef}
+                    >
+                      {payment?.paymentRef ?? ""}
+                    </div>
+
+                    {/* Amount */}
+                    <div className="w-[120px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                      ₹{payment?.amount ?? ""}
+                    </div>
+
+                    {/* Payment Mode */}
+                    <div className="w-[150px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                      {payment?.paymentMode ?? ""}
+                    </div>
+
+                    {/* Date & Time */}
+                    <div className="w-[180px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                      {payment?.dateTime
+                        ? moment(payment.dateTime).format("DD MMM YYYY hh:mm A")
+                        : ""}
+                    </div>
+
+                    {/* Status */}
+                    <div className="w-[100px] shrink-0 flex justify-center">
+                      <div
+                        className={`flex items-center justify-center h-[32px] w-[78px] rounded-[6px] ${
+                          payment?.status === "SUCCESS"
+                            ? "bg-[rgba(34,197,94,0.1)] text-[#22c55e]"
+                            : payment?.status === "FAILED"
+                              ? "bg-[rgba(254,64,64,0.1)] text-[#fe4040]"
+                              : "bg-[rgba(251,191,36,0.1)] text-[#f59e0b]"
+                        }`}
+                      >
+                        <span className="font-poppins-bold text-[12px] font-['Inter',sans-serif]">
+                          {payment?.status ?? ""}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
