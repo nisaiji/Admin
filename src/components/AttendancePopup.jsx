@@ -444,9 +444,9 @@ export default function AttendancePopup() {
 
         // Sort by firstname, and if equal, sort by lastname
         updatedAttendanceData?.sort((a, b) => {
-          const firstNameComparison = a?.firstname?.localeCompare(b?.firstname);
+          const firstNameComparison = a?.firstName?.localeCompare(b?.firstName);
           if (firstNameComparison === 0) {
-            return a?.lastname?.localeCompare(b?.lastname);
+            return a?.lastName?.localeCompare(b?.lastName);
           }
           return firstNameComparison;
         });
@@ -682,7 +682,7 @@ export default function AttendancePopup() {
 
         return [
           index + 1,
-          `${student.firstname || ""} ${student.lastname || ""}`,
+          `${student.firstName || ""} ${student.lastName || ""}`,
           ...student.attendances.map((a) => a.attendance || ""),
           `${totalPresent}/${totalAttendanceDays}`,
         ];
@@ -917,7 +917,7 @@ export default function AttendancePopup() {
                         isDarkMode ? "text-textPrimary" : "text-textBlack"
                       }`}
                     >
-                      {data?.firstname || ""} {data?.lastname || ""}
+                      {data?.firstName || ""} {data?.lastName || ""}
                     </td>
                     {data.attendances.map((value, idx) => {
                       const attendance = value.attendance;

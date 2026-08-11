@@ -71,16 +71,16 @@ const AddStudent = () => {
    */
   const validateData = (student) => {
     if (
-      !student.firstname.trim() ||
-      student.firstname.length < 3 ||
-      REGEX.NUMBER.test(student.firstname)
+      !student.firstName.trim() ||
+      student.firstName.length < 3 ||
+      REGEX.NUMBER.test(student.firstName)
     ) {
       return t("validationError.enterFirstName");
     }
     if (
-      !student.lastname.trim() ||
-      student.lastname.length < 3 ||
-      REGEX.NUMBER.test(student.lastname)
+      !student.lastName.trim() ||
+      student.lastName.length < 3 ||
+      REGEX.NUMBER.test(student.lastName)
     ) {
       return t("validationError.enterLastName");
     }
@@ -98,8 +98,9 @@ const AddStudent = () => {
     if (!student.class) return t("validationError.class");
     if (!student.section) return t("validationError.section");
     if (!student.address) return t("validationError.address");
-    if (!student?.aadharNumber?.trim()) return "Aadhaar number is required";
-    if (!/^\d{12}$/.test(student?.aadharNumber))
+    const aadharNumber = String(student?.aadharNumber ?? "").trim();
+    // if (!student?.aadharNumber?.trim()) return "Aadhaar number is required";
+    if (aadharNumber && !/^\d{12}$/.test(student?.aadharNumber))
       return "Aadhaar must be exactly 12 digits";
     return "";
   };
@@ -115,8 +116,8 @@ const AddStudent = () => {
   // Formik setup for form state and submission
   const formik = useFormik({
     initialValues: {
-      firstname: "",
-      lastname: "",
+      firstName: "",
+      lastName: "",
       gender: "",
       parentName: "",
       guardianName: "",
@@ -147,16 +148,19 @@ const AddStudent = () => {
 
       try {
         setLoading(true);
+        const aadharNumber = String(values?.aadharNumber ?? "").trim();
         const payload = {
-          firstname: capitalize(values.firstname.trim()),
-          lastname: capitalize(values.lastname.trim()),
+          firstName: capitalize(values.firstName.trim()),
+          lastName: capitalize(values.lastName.trim()),
           gender: values.gender,
           parentName: capitalize(values.parentName.trim()),
           ...(values.guardianName && {
             guardianName: capitalize(values.guardianName.trim()),
           }),
           phone: values.phone,
-          aadharNumber: values.aadharNumber,
+          ...(aadharNumber && {
+            aadharNumber,
+          }),
           address: values.address,
           ...(values.bloodGroup && { bloodGroup: values.bloodGroup }),
           ...(values.dob && { dob: values.dob }),
@@ -178,10 +182,14 @@ const AddStudent = () => {
         );
 
         if (res?.statusCode === 201) {
-          toast.success(res?.result);
+          // console.log(res.result);
+          
+          toast.success(res?.result?.message);
           navigate(-1);
         }
       } catch (e) {
+        // console.log(e);
+        
         toast.error(e);
       } finally {
         setLoading(false);
@@ -227,8 +235,8 @@ const AddStudent = () => {
 
   // Field definitions for rendering
   const fields = [
-    { name: "firstname", label: "First Name", type: "text" },
-    { name: "lastname", label: "Last Name", type: "text" },
+    { name: "firstName", label: "First Name", type: "text" },
+    { name: "lastName", label: "Last Name", type: "text" },
     { name: "parentName", label: "Parent Name", type: "text" },
     { name: "phone", label: "Phone Number", type: "text" },
   ];
@@ -326,8 +334,8 @@ const AddStudent = () => {
 
     const preventInvalidInput = (e) => {
       if (
-        (name === "firstname" ||
-          name === "lastname" ||
+        (name === "firstName" ||
+          name === "lastName" ||
           name === "parentName") &&
         /\d/.test(e.key)
       ) {
@@ -359,7 +367,7 @@ const AddStudent = () => {
           onChange={formik.handleChange}
           value={formik.values[name]}
           maxLength={
-            name === "firstname" || name === "lastname"
+            name === "firstName" || name === "lastName"
               ? 15
               : name === "parentName"
                 ? 20
@@ -640,7 +648,7 @@ const AddStudent = () => {
         <form onSubmit={formik.handleSubmit} className="w-full mt-5">
           {/* Row 1: First Name, Last Name */}
           <div className="flex gap-4">
-            {["firstname", "lastname"].map((name) => renderField(name))}
+            {["firstName", "lastName"].map((name) => renderField(name))}
           </div>
 
           {/* Row 2: Parent Name, Phone */}

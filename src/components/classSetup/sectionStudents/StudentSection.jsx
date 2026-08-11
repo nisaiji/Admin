@@ -286,10 +286,13 @@ export default function StudentSection() {
     if (!student?.parentPhone?.trim()) return t("validationError.phone");
     if (!REGEX.PHONE_LENGTH.test(student.parentPhone))
       return t("validationError.validationPhoneCount");
-    if (!String(student?.aadharNumber)?.trim())
-      return "Aadhaar number is required";
+    // Aadhaar is optional
+    const aadharNumber = String(student?.aadharNumber ?? "").trim();
 
-    if (!/^\d{12}$/.test(student.aadharNumber))
+    // if (!String(student?.aadharNumber)?.trim())
+    //   return "Aadhaar number is required";
+
+    if (aadharNumber && !/^\d{12}$/.test(aadharNumber))
       return "Aadhaar must be exactly 12 digits";
     return "";
   };
@@ -352,7 +355,7 @@ export default function StudentSection() {
     if (role === "admin" && !isUpdate) {
       delete student.SNo;
     }
-
+    const aadharNumber = String(student?.aadharNumber ?? "").trim();
     let transformedStudent = {
       firstName: capitalize(student.firstName?.trim()),
       lastName: capitalize(student.lastName?.trim()),
@@ -362,7 +365,9 @@ export default function StudentSection() {
       }),
       gender: student.gender,
       phone: student.parentPhone,
-      aadharNumber: student.aadharNumber,
+      ...(aadharNumber && {
+        aadharNumber,
+      }),
       ...(!isUpdate && {
         sectionId:
           role === "admin"
@@ -860,11 +865,7 @@ export default function StudentSection() {
                       value={newStudent.parentPhone}
                       maxLength={10}
                       onChange={(e) =>
-                        handleInputChange(
-                          null,
-                          "parentPhone",
-                          e.target.value,
-                        )
+                        handleInputChange(null, "parentPhone", e.target.value)
                       }
                       placeholder={t("placeholders.phoneNumber")}
                       className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
