@@ -19,6 +19,14 @@ export default function StudentPaymentInfo({
   userInfo = {},
 }) {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+  const theme = {
+    card: isDarkMode ? "#111315" : "#ffffff",
+    border: isDarkMode ? "rgba(255,255,255,0.07)" : "#e7e2e2",
+    text: isDarkMode ? "#E3E8F3" : "#101828",
+    subText: isDarkMode ? "#94a3b8" : "#6a7282",
+    mutedText: isDarkMode ? "#cbd5e1" : "#444",
+    accent: isDarkMode ? "#4F8EF7" : "#0a81d1",
+  };
   const [studentDues, setstudentDues] = useState([]);
   const [studentHistory, setstudentHistory] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -132,13 +140,19 @@ export default function StudentPaymentInfo({
   }
 
   return (
-    <div>
+    <div style={{ color: theme.text }}>
       <div className="flex gap-[12px] items-start">
         {/* Student info card */}
-        <div className="bg-white rounded-[14px] border border-[#e7e2e2] p-[20.8px] w-[484px] flex flex-col gap-[24px]">
+        <div
+          className="rounded-[14px] border p-[20.8px] w-[484px] flex flex-col gap-[24px]"
+          style={{ background: theme.card, borderColor: theme.border }}
+        >
           {/* Student header */}
           <div className="flex items-start gap-[12px]">
-            <div className="bg-[#0a81d1] rounded-full size-[48px] flex items-center justify-center shrink-0">
+            <div
+              className="rounded-full size-[48px] flex items-center justify-center shrink-0"
+              style={{ background: theme.accent }}
+            >
               <span className="font-bold text-[16px] text-white font-['Inter',sans-serif]">
                 {userInfo?.studentName
                   ?.match(/\b\w/g)
@@ -148,23 +162,38 @@ export default function StudentPaymentInfo({
               </span>
             </div>
             <div className="flex flex-col gap-[5px] flex-1">
-              <p className="font-bold text-[16px] text-[#101828] font-['Inter',sans-serif]">
+              <p
+                className="font-bold text-[16px] font-['Inter',sans-serif]"
+                style={{ color: theme.text }}
+              >
                 {userInfo?.studentName}
               </p>
               <div className="flex flex-col gap-[5px]">
                 <div className="flex items-center gap-[16px]">
-                  <span className="text-[14px] text-[#444] font-['Inter',sans-serif]">
+                  <span
+                    className="text-[14px] font-['Inter',sans-serif]"
+                    style={{ color: theme.mutedText }}
+                  >
                     Class
                   </span>
-                  <span className="font-medium text-[14px] text-[#1e2939] font-['Inter',sans-serif]">
+                  <span
+                    className="font-medium text-[14px] font-['Inter',sans-serif]"
+                    style={{ color: theme.text }}
+                  >
                     {userInfo?.classAndSection}
                   </span>
                 </div>
                 <div className="flex items-center gap-[16px]">
-                  <span className="text-[14px] text-[#444] font-['Inter',sans-serif]">
+                  <span
+                    className="text-[14px] font-['Inter',sans-serif]"
+                    style={{ color: theme.mutedText }}
+                  >
                     Phone
                   </span>
-                  <span className="font-medium text-[14px] text-[#1e2939] font-['Inter',sans-serif]">
+                  <span
+                    className="font-medium text-[14px] font-['Inter',sans-serif]"
+                    style={{ color: theme.text }}
+                  >
                     {userInfo?.phone}
                   </span>
                 </div>
@@ -174,7 +203,8 @@ export default function StudentPaymentInfo({
               type="button"
               onClick={handleShowInfo}
               disabled={profileLoading}
-              className="bg-[#0a81d1] rounded-[8px] h-[30px] px-[12px] flex items-center gap-[6px] self-start transition disabled:cursor-not-allowed disabled:opacity-70"
+              className="rounded-[8px] h-[30px] px-[12px] flex items-center gap-[6px] self-start transition disabled:cursor-not-allowed disabled:opacity-70"
+              style={{ background: theme.accent }}
             >
               <span className="font-semibold text-[12px] text-white font-['Inter',sans-serif] whitespace-nowrap">
                 {profileLoading ? "Loading..." : "View Full Profile"}
@@ -198,31 +228,46 @@ export default function StudentPaymentInfo({
 
           {/* Payment summary */}
           <div className="flex flex-col gap-[12px]">
-            <p className="font-semibold text-[14px] text-[#6a7282] font-['Inter',sans-serif] capitalize">
+            <p
+              className="font-semibold text-[14px] font-['Inter',sans-serif] capitalize"
+              style={{ color: theme.subText }}
+            >
               Payment Summary
             </p>
             <div className="flex gap-[8px]">
-              <div className="bg-[#eff6ff] rounded-[10px] border border-[#dbeafe] flex flex-col gap-[5px] items-start px-[12.8px] py-[8.8px] w-[142px]">
-                <span className="text-[14px] text-[#0a81d1] font-['Inter',sans-serif]">
+              <div
+                className="rounded-[10px] border flex flex-col gap-[5px] items-start px-[12.8px] py-[8.8px] w-[142px]"
+                style={{ background: isDarkMode ? "rgba(10,129,209,0.08)" : "#eff6ff", borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "#dbeafe" }}
+              >
+                <span
+                  className="text-[14px] font-['Inter',sans-serif]"
+                  style={{ color: theme.accent }}
+                >
                   Total Payable
                 </span>
-                <span className="font-bold text-[16px] text-[#025f9d] font-['Inter',sans-serif]">
+                <span className="font-bold text-[16px] font-['Inter',sans-serif]" style={{ color: isDarkMode ? "#7cc3ff" : "#025f9d" }}>
                   ₹{totalPayable}
                 </span>
               </div>
-              <div className="bg-[#f0fdf4] rounded-[10px] border border-[#dcfce7] flex flex-col gap-[5px] items-start px-[12.8px] py-[8.8px] w-[142px]">
-                <span className="text-[14px] text-[#008236] font-['Inter',sans-serif]">
+              <div
+                className="rounded-[10px] border flex flex-col gap-[5px] items-start px-[12.8px] py-[8.8px] w-[142px]"
+                style={{ background: isDarkMode ? "rgba(34,197,94,0.08)" : "#f0fdf4", borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "#dcfce7" }}
+              >
+                <span className="text-[14px] font-['Inter',sans-serif]" style={{ color: isDarkMode ? "#4ade80" : "#008236" }}>
                   Collected
                 </span>
-                <span className="font-bold text-[16px] text-[#016630] font-['Inter',sans-serif]">
+                <span className="font-bold text-[16px] font-['Inter',sans-serif]" style={{ color: isDarkMode ? "#86efac" : "#016630" }}>
                   ₹{paidTotal}
                 </span>
               </div>
-              <div className="bg-[#fff1f1] rounded-[10px] border border-[#ffe2e2] flex flex-col gap-[5px] items-start px-[12.8px] py-[8.8px] w-[142px]">
-                <span className="text-[14px] text-[#fe4040] font-['Inter',sans-serif]">
+              <div
+                className="rounded-[10px] border flex flex-col gap-[5px] items-start px-[12.8px] py-[8.8px] w-[142px]"
+                style={{ background: isDarkMode ? "rgba(254,64,64,0.08)" : "#fff1f1", borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "#ffe2e2" }}
+              >
+                <span className="text-[14px] font-['Inter',sans-serif]" style={{ color: isDarkMode ? "#fca5a5" : "#fe4040" }}>
                   Outstanding
                 </span>
-                <span className="font-bold text-[16px] text-[#d42c2c] font-['Inter',sans-serif]">
+                <span className="font-bold text-[16px] font-['Inter',sans-serif]" style={{ color: isDarkMode ? "#fca5a5" : "#d42c2c" }}>
                   ₹{unpaidTotal}
                 </span>
               </div>
@@ -231,15 +276,27 @@ export default function StudentPaymentInfo({
         </div>
 
         {/* Recent payments table */}
-        <div className="bg-white rounded-[14px] border border-[#e7e2e2] p-[20.8px] flex-1 flex flex-col gap-[12px]">
-          <p className="font-bold text-[14px] text-[#101828] font-['Inter',sans-serif]">
+        <div
+          className="rounded-[14px] border p-[20.8px] flex-1 flex flex-col gap-[12px]"
+          style={{ background: theme.card, borderColor: theme.border }}
+        >
+          <p
+            className="font-bold text-[14px] font-['Inter',sans-serif]"
+            style={{ color: theme.text }}
+          >
             Recent Payments
           </p>
 
           {/* Table */}
-          <div className="rounded-[8px] max-h-44 overflow-scroll border border-[#e7e2e2]">
+          <div
+            className="rounded-[8px] max-h-44 overflow-scroll border"
+            style={{ borderColor: theme.border }}
+          >
             {/* Header */}
-            <div className="bg-[#f0f6f9] border-b border-[#e7e2e2] flex items-center h-[36px] pl-[10px]">
+            <div
+              className="border-b flex items-center h-[36px] pl-[10px]"
+              style={{ background: isDarkMode ? "rgba(255,255,255,0.03)" : "#f0f6f9", borderColor: theme.border }}
+            >
               {[
                 "Payment Ref",
                 "Amount",
@@ -249,7 +306,8 @@ export default function StudentPaymentInfo({
               ].map((col) => (
                 <div
                   key={col}
-                  className="flex-1 px-[8px] font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif] text-center first:text-left"
+                  className="flex-1 px-[8px] font-semibold text-[14px] font-['Inter',sans-serif] text-center first:text-left"
+                  style={{ color: theme.text }}
                 >
                   {col}
                 </div>
@@ -261,18 +319,31 @@ export default function StudentPaymentInfo({
               studentHistory?.map((p, i) => (
                 <div
                   key={i}
-                  className={`flex items-center h-[52px] pl-[10px] ${i < studentHistory?.length - 1 ? "border-b border-[#d0d0d0]/25" : ""} border-l border-r border-[#e7e2e2]`}
+                  className={`flex items-center h-[52px] pl-[10px] ${i < studentHistory?.length - 1 ? "border-b" : ""} border-l border-r`}
+                  style={{ borderColor: theme.border }}
                 >
-                  <div className="flex-1 px-[8px] font-normal text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                  <div
+                    className="flex-1 px-[8px] font-normal text-[14px] font-['Inter',sans-serif]"
+                    style={{ color: theme.text }}
+                  >
                     {p?.paymentRef ?? ""}
                   </div>
-                  <div className="flex-1 px-[8px] font-semibold text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
+                  <div
+                    className="flex-1 px-[8px] font-semibold text-[14px] font-['Inter',sans-serif] text-center"
+                    style={{ color: theme.text }}
+                  >
                     {p?.amount ?? ""}
                   </div>
-                  <div className="flex-1 px-[8px] text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
+                  <div
+                    className="flex-1 px-[8px] text-[14px] font-['Inter',sans-serif] text-center"
+                    style={{ color: theme.text }}
+                  >
                     {p?.paymentMode ?? ""}
                   </div>
-                  <div className="flex-1 px-[8px] text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
+                  <div
+                    className="flex-1 px-[8px] text-[14px] font-['Inter',sans-serif] text-center"
+                    style={{ color: theme.text }}
+                  >
                     {paymentHistoryDisplayDate(p?.dateTime)}
                   </div>
                   <div className="flex-1 px-[8px] flex justify-center">
@@ -295,17 +366,26 @@ export default function StudentPaymentInfo({
                 </div>
               ))
             ) : loading ? (
-              <div className="border-l border-r border-[#e7e2e2] px-4 py-6 text-center text-sm text-[#6a7282] font-['Inter',sans-serif]">
-                Loading recent payments...
-              </div>
-            ) : (
-              <div className="border-l border-r border-[#e7e2e2] px-4 py-6 text-center text-sm text-[#6a7282] font-['Inter',sans-serif]">
-                No payment history found.
-              </div>
-            )}
+                <div
+                  className="border-l border-r px-4 py-6 text-center text-sm font-['Inter',sans-serif]"
+                  style={{ borderColor: theme.border, color: theme.subText }}
+                >
+                  Loading recent payments...
+                </div>
+              ) : (
+                <div
+                  className="border-l border-r px-4 py-6 text-center text-sm font-['Inter',sans-serif]"
+                  style={{ borderColor: theme.border, color: theme.subText }}
+                >
+                  No payment history found.
+                </div>
+              )}
 
             {/* Last row border */}
-            <div className="h-[1px] border-l border-r border-b border-[#e7e2e2]" />
+            <div
+              className="h-[1px] border-l border-r border-b"
+              style={{ borderColor: theme.border }}
+            />
           </div>
 
           {/* Footer */}
@@ -329,16 +409,28 @@ export default function StudentPaymentInfo({
       ) : null}
 
       {/* fee cards */}
-      <div className="bg-white rounded-[14px] border border-[#e7e2e2] p-[20px] mt-3">
+      <div
+        className="rounded-[14px] border p-[20px] mt-3"
+        style={{ background: theme.card, borderColor: theme.border }}
+      >
         <div className="flex items-center justify-between mb-[16px]">
-          <p className="font-bold text-[14px] text-[#101828] font-['Inter',sans-serif]">
+          <p
+            className="font-bold text-[14px] font-['Inter',sans-serif]"
+            style={{ color: theme.text }}
+          >
             Fee Summary
           </p>
           <div className="flex items-center gap-[16px]">
-            <span className="font-semibold text-[12px] text-[#22c55e] font-['Inter',sans-serif]">
+            <span
+              className="font-semibold text-[12px] font-['Inter',sans-serif]"
+              style={{ color: isDarkMode ? "#4ade80" : "#22c55e" }}
+            >
               Paid ({paidDues?.length})
             </span>
-            <span className="font-semibold text-[12px] text-[#fe4040] font-['Inter',sans-serif]">
+            <span
+              className="font-semibold text-[12px] font-['Inter',sans-serif]"
+              style={{ color: isDarkMode ? "#fca5a5" : "#fe4040" }}
+            >
               Unpaid ({unpaidDues?.length})
             </span>
           </div>
@@ -347,9 +439,13 @@ export default function StudentPaymentInfo({
           {studentDues?.map((fee, i) => (
             <div
               key={i}
-              className="relative h-[123px] min-w-[84px] w-[84px] rounded-[8px] border border-[#e7e2e2] flex flex-col gap-[10px] items-center pt-[10.8px] pb-[12.8px] px-[12.8px] shrink-0"
+              className="relative h-[123px] min-w-[84px] w-[84px] rounded-[8px] border flex flex-col gap-[10px] items-center pt-[10.8px] pb-[12.8px] px-[12.8px] shrink-0"
+              style={{ background: theme.card, borderColor: theme.border }}
             >
-              <p className="font-medium text-[12px] text-[#686868] font-['Inter',sans-serif] text-center">
+              <p
+                className="font-medium text-[12px] font-['Inter',sans-serif] text-center"
+                style={{ color: theme.subText }}
+              >
                 {moment(fee?.dueDate).format("MMMM")}
               </p>
               {fee?.status === "PAID" ? (
@@ -362,11 +458,15 @@ export default function StudentPaymentInfo({
                 />
               )}
               <div className="flex flex-col items-center">
-                <p className="font-semibold text-[12px] text-[#0f0f0f] font-['Inter',sans-serif] text-center">
+                <p
+                  className="font-semibold text-[12px] font-['Inter',sans-serif] text-center"
+                  style={{ color: theme.text }}
+                >
                   {fee?.totalAmount}
                 </p>
                 <p
                   className={`font-semibold text-[10px] font-['Inter',sans-serif] text-center tracking-[0.4px] capitalize ${fee?.status === "PAID" ? "text-[#22c55e]" : "text-[#fe4040]"}`}
+                  style={{ color: fee?.status === "PAID" ? (isDarkMode ? "#4ade80" : "#22c55e") : (isDarkMode ? "#fca5a5" : "#fe4040") }}
                 >
                   {fee?.status === "PAID" ? "Paid" : "Unpaid"}
                 </p>
@@ -374,11 +474,17 @@ export default function StudentPaymentInfo({
             </div>
           ))}
           {loading && studentDues.length === 0 ? (
-            <div className="flex min-w-[180px] items-center justify-center rounded-[8px] border border-dashed border-[#e7e2e2] px-4 py-6 text-sm text-[#6a7282] font-['Inter',sans-serif]">
+            <div
+              className="flex min-w-[180px] items-center justify-center rounded-[8px] border border-dashed px-4 py-6 text-sm font-['Inter',sans-serif]"
+              style={{ borderColor: theme.border, color: theme.subText }}
+            >
               Loading fees...
             </div>
           ) : !loading && studentDues.length === 0 ? (
-            <div className="flex min-w-[180px] items-center justify-center rounded-[8px] border border-dashed border-[#e7e2e2] px-4 py-6 text-sm text-[#6a7282] font-['Inter',sans-serif]">
+            <div
+              className="flex min-w-[180px] items-center justify-center rounded-[8px] border border-dashed px-4 py-6 text-sm font-['Inter',sans-serif]"
+              style={{ borderColor: theme.border, color: theme.subText }}
+            >
               No dues found.
             </div>
           ) : null}

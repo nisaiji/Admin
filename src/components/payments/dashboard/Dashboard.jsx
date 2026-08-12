@@ -154,6 +154,11 @@ export function PaymentDashboard() {
   const selectedSessionId = classAndSectionData?.selectedSession?._id;
   const dispatch = useDispatch();
   const themeC = isDarkMode ? C : C_LIGHT;
+  const surfaceStyle = {
+    background: themeC.card,
+    borderColor: themeC.border,
+    color: themeC.text,
+  };
   const [feeSummaryData, setFeeSummaryData] = useState({});
   const [transitionHistoryData, setTransitionHistoryData] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -376,22 +381,31 @@ export function PaymentDashboard() {
   }
 
   return (
-    <div className="p-[24px]">
+    <div className="p-[24px]" style={{ background: themeC.bg, color: themeC.text }}>
       <Toaster />
       <div className="flex flex-col gap-[24px]">
         {/* ── Header bar ── */}
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-[5px]">
-            <h1 className="font-bold text-[20px] text-[#0f0f0f] font-['Inter',sans-serif] leading-[1.2]">
+            <h1
+              className="font-bold text-[20px] font-['Inter',sans-serif] leading-[1.2]"
+              style={{ color: themeC.text }}
+            >
               Payment Dashboard
             </h1>
-            <p className="font-medium text-[14px] text-[#686868] font-['Inter',sans-serif]">
+            <p
+              className="font-medium text-[14px] font-['Inter',sans-serif]"
+              style={{ color: themeC.textSub }}
+            >
               Fee collection overview
             </p>
           </div>
 
           {/* Date / time */}
-          <div className="bg-white rounded-[36px] flex items-center px-[14px] py-[10px] gap-[19px] h-[72px]">
+          <div
+            className="rounded-[36px] flex items-center px-[14px] py-[10px] gap-[19px] h-[72px] border"
+            style={surfaceStyle}
+          >
             <div className="bg-[rgba(10,129,209,0.26)] rounded-full size-[48px] flex items-center justify-center">
               <div className="relative size-[32px]">
                 <svg
@@ -406,10 +420,16 @@ export function PaymentDashboard() {
             </div>
             <div className="flex items-center gap-[24px]">
               <div className="flex flex-col">
-                <span className="text-[12px] text-[#686868] font-['Helvetica',sans-serif]">
+                <span
+                  className="text-[12px] font-['Helvetica',sans-serif]"
+                  style={{ color: themeC.textSub }}
+                >
                   Date
                 </span>
-                <span className="font-bold text-[16px] text-[#040320] font-['Nunito_Sans',sans-serif]">
+                <span
+                  className="font-bold text-[16px] font-['Nunito_Sans',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   {dateStr}
                 </span>
               </div>
@@ -424,10 +444,16 @@ export function PaymentDashboard() {
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-[12px] text-[#686868] font-['Helvetica',sans-serif]">
+                <span
+                  className="text-[12px] font-['Helvetica',sans-serif]"
+                  style={{ color: themeC.textSub }}
+                >
                   Time
                 </span>
-                <span className="font-bold text-[16px] text-[#040320] font-['Nunito_Sans',sans-serif]">
+                <span
+                  className="font-bold text-[16px] font-['Nunito_Sans',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   {timeStr}
                 </span>
               </div>
@@ -441,7 +467,7 @@ export function PaymentDashboard() {
           </div>
         </div>
 
-        <div className="rounded-[14px] border border-[#e7e2e2] bg-white p-5">
+        <div className="rounded-[14px] border p-5" style={surfaceStyle}>
           <div className="flex items-center justify-between gap-4">
             {/* <div>
               <p className="font-bold text-[14px] text-[#101828] font-['Inter',sans-serif]">
@@ -469,11 +495,18 @@ export function PaymentDashboard() {
           <>
             {/* searchbar */}
             <div className="flex items-center gap-[12px] flex-wrap">
-              <div className="flex-1 min-w-[280px] bg-white rounded-[6px] border border-[#e7e2e2] flex items-center justify-between px-[13px] py-[9px]">
+              <div
+                className="flex-1 min-w-[280px] rounded-[6px] border flex items-center justify-between px-[13px] py-[9px]"
+                style={surfaceStyle}
+              >
                 <div className="flex items-center gap-[10px] flex-1">
-                  <Search size={18} className="text-[#6E6E6E]" />
+                  <Search
+                    size={18}
+                    style={{ color: themeC.textSub }}
+                  />
                   <input
-                    className="font-medium text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] outline-none bg-transparent w-full"
+                    className="font-medium text-[14px] font-['Inter',sans-serif] outline-none bg-transparent w-full"
+                    style={{ color: themeC.text }}
                     value={searchValue}
                     onChange={handleSearchChange}
                     placeholder="Search student..."
@@ -516,7 +549,8 @@ export function PaymentDashboard() {
                       key={index}
                       type="button"
                       onClick={() => handleSelectStudent(student)}
-                      className="flex w-full items-center justify-between gap-4 rounded-xl border border-[#E5E7EB] bg-white p-5 text-left transition hover:border-[#2563EB] hover:shadow-sm mt-3"
+                    className="flex w-full items-center justify-between gap-4 rounded-xl border p-5 text-left transition hover:border-[#2563EB] hover:shadow-sm mt-3"
+                    style={surfaceStyle}
                     >
                       <div className="flex min-w-0 space-x-4">
                         <div className="flex size-11 items-center justify-center rounded-full bg-[#2563EB]">
@@ -606,7 +640,10 @@ export function PaymentDashboard() {
                     </button>
                   ))}
                   {studentListData.length > 0 && (
-                    <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-[#e7e2e2] pt-4">
+                    <div
+                      className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t pt-4"
+                      style={{ borderColor: themeC.border }}
+                    >
                       <label
                         className="flex items-center gap-2 text-sm"
                         style={{ color: themeC.textSub }}
@@ -615,7 +652,8 @@ export function PaymentDashboard() {
                         <select
                           value={limit}
                           onChange={handleLimitChange}
-                          className="h-9 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm outline-none"
+                          className="h-9 rounded-lg border px-3 text-sm outline-none"
+                          style={surfaceStyle}
                         >
                           {PAGE_LIMIT_OPTIONS.map((item) => (
                             <option key={item} value={item}>
@@ -691,13 +729,19 @@ export function PaymentDashboard() {
         </div>
 
         {/* bar chart */}
-        <div className="rounded-[14px] border border-[#e7e2e2] bg-white p-[20px]">
+        <div className="rounded-[14px] border p-[20px]" style={surfaceStyle}>
           <div className="flex flex-col gap-4 border-b border-[#f3f4f6] pb-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="font-bold text-[18px] text-[#101828] font-['Inter',sans-serif]">
+              <h2
+                className="font-bold text-[18px] font-['Inter',sans-serif]"
+                style={{ color: themeC.text }}
+              >
                 Fee Collection Trend
               </h2>
-              <p className="mt-1 text-[13px] text-[#6a7282] font-['Inter',sans-serif]">
+              <p
+                className="mt-1 text-[13px] font-['Inter',sans-serif]"
+                style={{ color: themeC.textSub }}
+              >
                 Monthly collection trend across the financial year
               </p>
             </div>
@@ -709,7 +753,8 @@ export function PaymentDashboard() {
               <select
                 value={selectedMonth}
                 onChange={(event) => setSelectedMonth(event.target.value)}
-                className="h-10 rounded-lg border border-[#dfe5eb] bg-white px-4 text-sm font-['Inter',sans-serif] text-[#0f172a] outline-none transition focus:border-[#0A81D1] focus:ring-2 focus:ring-blue-100"
+                className="h-10 rounded-lg border px-4 text-sm font-['Inter',sans-serif] outline-none transition focus:border-[#0A81D1] focus:ring-2 focus:ring-blue-100"
+                style={surfaceStyle}
               >
                 {FINANCIAL_YEAR_MONTHS.map((item) => (
                   <option key={item.month} value={item.month}>
@@ -731,20 +776,26 @@ export function PaymentDashboard() {
               // xAxisData={monthlyChartData.xAxisData}
               // series={monthlyChartData.series}
               barColor="#0A81D1"
-              isDarkMode={false}
+              isDarkMode={isDarkMode}
               height={300}
             />
           </div>
         </div>
 
         {/* Recent transactions */}
-        <div className="rounded-[14px] border border-[#e7e2e2] bg-white p-[20px]">
+        <div className="rounded-[14px] border p-[20px]" style={surfaceStyle}>
           <div className="flex items-start justify-between gap-4 mb-[16px]">
             <div>
-              <p className="font-bold text-[14px] text-[#101828] font-['Inter',sans-serif]">
+              <p
+                className="font-bold text-[14px] font-['Inter',sans-serif]"
+                style={{ color: themeC.text }}
+              >
                 Recent Transactions
               </p>
-              <p className="mt-1 text-[13px] text-[#6a7282] font-['Inter',sans-serif]">
+              <p
+                className="mt-1 text-[13px] font-['Inter',sans-serif]"
+                style={{ color: themeC.textSub }}
+              >
                 Latest successful fee payments
               </p>
             </div>
@@ -760,38 +811,68 @@ export function PaymentDashboard() {
           </div>
 
           <div className="overflow-x-auto">
-            <div className="w-full rounded-[8px] overflow-hidden border border-[#e7e2e2]">
+            <div
+              className="w-full rounded-[8px] overflow-hidden border"
+              style={{ borderColor: themeC.border }}
+            >
               {/* Header */}
-              <div className="bg-[#f0f6f9] border-b border-[#e7e2e2] flex items-center h-[40px] pl-[10px]">
-                <div className="w-[140px] shrink-0 px-[8px] font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+              <div
+                className="flex items-center h-[40px] pl-[10px] border-b"
+                style={{ background: isDarkMode ? "rgba(255,255,255,0.03)" : "#f0f6f9", borderColor: themeC.border }}
+              >
+                <div
+                  className="w-[140px] shrink-0 px-[8px] font-semibold text-[14px] font-['Inter',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   Student Name
                 </div>
 
-                <div className="w-[140px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                <div
+                  className="w-[140px] shrink-0 px-[8px] text-center font-semibold text-[14px] font-['Inter',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   Class & Section
                 </div>
 
-                <div className="w-[140px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                <div
+                  className="w-[140px] shrink-0 px-[8px] text-center font-semibold text-[14px] font-['Inter',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   Phone
                 </div>
 
-                <div className="w-[200px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                <div
+                  className="w-[200px] shrink-0 px-[8px] text-center font-semibold text-[14px] font-['Inter',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   Payment Ref
                 </div>
 
-                <div className="w-[120px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                <div
+                  className="w-[120px] shrink-0 px-[8px] text-center font-semibold text-[14px] font-['Inter',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   Amount
                 </div>
 
-                <div className="w-[150px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                <div
+                  className="w-[150px] shrink-0 px-[8px] text-center font-semibold text-[14px] font-['Inter',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   Payment Mode
                 </div>
 
-                <div className="w-[180px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                <div
+                  className="w-[180px] shrink-0 px-[8px] text-center font-semibold text-[14px] font-['Inter',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   Date & Time
                 </div>
 
-                <div className="w-[100px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#002861] font-['Inter',sans-serif]">
+                <div
+                  className="w-[100px] shrink-0 px-[8px] text-center font-semibold text-[14px] font-['Inter',sans-serif]"
+                  style={{ color: themeC.text }}
+                >
                   Status
                 </div>
               </div>
@@ -808,50 +889,68 @@ export function PaymentDashboard() {
                 transitionHistoryData?.map((payment, index) => (
                   <div
                     key={index}
-                    className={`flex items-center h-[56px] pl-[10px] ${
+                      className={`flex items-center h-[56px] pl-[10px] ${
                       index < transitionHistoryData.length - 1
                         ? "border-b border-[#d0d0d0]/25"
                         : ""
-                    } border-l border-r border-[#e7e2e2]`}
-                  >
+                    } border-l border-r`}
+                      style={{ borderColor: themeC.border }}
+                    >
                     {/* Student Name */}
                     <div
-                      className="w-[140px] shrink-0 px-[8px] text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] truncate"
+                      className="w-[140px] shrink-0 px-[8px] text-[14px] font-['Inter',sans-serif] truncate"
+                      style={{ color: themeC.text }}
                       title={payment?.studentName}
                     >
                       {payment?.studentName ?? ""}
                     </div>
 
                     {/* Class & Section */}
-                    <div className="w-[140px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                    <div
+                      className="w-[140px] shrink-0 px-[8px] text-center text-[14px] font-['Inter',sans-serif]"
+                      style={{ color: themeC.text }}
+                    >
                       {`${payment?.class ?? ""} ${payment?.section ?? ""}`}
                     </div>
 
                     {/* Phone */}
-                    <div className="w-[140px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                    <div
+                      className="w-[140px] shrink-0 px-[8px] text-center text-[14px] font-['Inter',sans-serif]"
+                      style={{ color: themeC.text }}
+                    >
                       {payment?.phone ?? ""}
                     </div>
 
                     {/* Payment Ref */}
                     <div
-                      className="w-[200px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif] truncate"
+                      className="w-[200px] shrink-0 px-[8px] text-center text-[14px] font-['Inter',sans-serif] truncate"
+                      style={{ color: themeC.text }}
                       title={payment?.paymentRef}
                     >
                       {payment?.paymentRef ?? ""}
                     </div>
 
                     {/* Amount */}
-                    <div className="w-[120px] shrink-0 px-[8px] text-center font-semibold text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                    <div
+                      className="w-[120px] shrink-0 px-[8px] text-center font-semibold text-[14px] font-['Inter',sans-serif]"
+                      style={{ color: themeC.text }}
+                    >
                       ₹{payment?.amount ?? ""}
                     </div>
 
                     {/* Payment Mode */}
-                    <div className="w-[150px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                    <div
+                      className="w-[150px] shrink-0 px-[8px] text-center text-[14px] font-['Inter',sans-serif]"
+                      style={{ color: themeC.text }}
+                    >
                       {payment?.paymentMode ?? ""}
                     </div>
 
                     {/* Date & Time */}
-                    <div className="w-[180px] shrink-0 px-[8px] text-center text-[14px] text-[#0f0f0f] font-['Inter',sans-serif]">
+                    <div
+                      className="w-[180px] shrink-0 px-[8px] text-center text-[14px] font-['Inter',sans-serif]"
+                      style={{ color: themeC.text }}
+                    >
                       {payment?.dateTime
                         ? moment(payment.dateTime).format("DD MMM YYYY hh:mm A")
                         : ""}
