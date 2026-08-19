@@ -5,6 +5,7 @@ import ConfirmationPopup from "../../ConfirmationPopup2";
 import accept from "../../../assets/images/darkmode/accept.png";
 import confirm1 from "../../../assets/images/darkmode/confirm1.png";
 import cross from "../../../assets/images/darkmode/cross.png";
+import crossw from "../../../assets/images/cross.png";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { FormControl, MenuItem, Select } from "@mui/material";
@@ -15,6 +16,12 @@ export default function CreateExamPopup({
   getExamList,
 }) {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+  const popupSurface = isDarkMode ? "#1E1D1D" : "#FFFFFF";
+  const popupSurfaceSoft = isDarkMode ? "#3e3e3e" : "#F8FAFC";
+  const popupText = isDarkMode ? "#E3E8F3" : "#111827";
+  const popupBorder = isDarkMode ? "#2b2e4a40" : "#D9E2EC";
+  const popupHoverBg = isDarkMode ? "#2a2a2a" : "#E9EEF2";
+  const popupTableRow = isDarkMode ? "bg-[#68686826]" : "bg-[#F4F7FB]";
   const [showConformationPopup, setshowConformationPopup] = useState(false);
   const [examName, setExamName] = useState("");
   const [marksheetSubjects, setMarksheetSubjects] = useState([]);
@@ -278,7 +285,11 @@ export default function CreateExamPopup({
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-poppins-bold">Create Test</h2>
           <div className="flex gap-5">
-            <div className="flex gap-5 items-center bg-background3 h-[50px] px-5 rounded-md">
+            <div
+              className={`flex gap-5 items-center h-[50px] px-5 rounded-md ${
+                isDarkMode ? "bg-background3" : "bg-[#F8FAFC]"
+              }`}
+            >
               <label className="text-base font-poppins-regular">
                 Exam Name:
               </label>
@@ -290,11 +301,13 @@ export default function CreateExamPopup({
                   setExamName(e.target.value)
                 }
                 placeholder="eg. Term-1"
-                className="rounded-md px-3 py-1 bg-background4 focus:outline-none"
+                className={`rounded-md px-3 py-1 focus:outline-none ${
+                  isDarkMode ? "bg-background4" : "bg-white"
+                }`}
               />
             </div>
             <button onClick={onClose} className="ml-3 text-textGray">
-              <img src={cross} alt="" className="size-4" />
+              <img src={isDarkMode ? cross : crossw} alt="" className="size-4" />
             </button>
           </div>
         </div>
@@ -303,7 +316,7 @@ export default function CreateExamPopup({
         <div className="overflow-x-auto my-9">
           <table className="w-full border-collapse text-sm text-center">
             <thead>
-              <tr>
+              <tr className={isDarkMode ? "text-white" : "text-textBlack"}>
                 <th className="p-2">List of subjects</th>
                 <th className="p-2">Main</th>
                 <th className="p-2">Score Type</th>
@@ -315,11 +328,15 @@ export default function CreateExamPopup({
             </thead>
             <tbody>
               {marksheetSubjects?.map((subj, idx) => (
-                <tr key={idx} className="bg-[#68686826]">
+                <tr key={idx} className={popupTableRow}>
                   <td className="p-2">{subj?.subjectName}</td>
                   <td className="flex p-2 justify-center">
                     {subj?.isMainSubject && (
-                      <img src={accept} alt="" className="size-6" />
+                      <img
+                        src={accept}
+                        alt=""
+                        className={`size-6 ${isDarkMode ? "" : "invert"}`}
+                      />
                     )}
                   </td>
 
@@ -331,15 +348,15 @@ export default function CreateExamPopup({
                         width: "130px",
                         fontSize: "14px",
                         borderRadius: "6px",
-                        backgroundColor: isDarkMode ? "#3e3e3e" : "white",
+                        backgroundColor: popupSurfaceSoft,
                         "& .MuiOutlinedInput-notchedOutline": {
-                          border: "1px solid #2b2e4a40",
+                          border: `1px solid ${popupBorder}`,
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: isDarkMode ? "#E3E8F3" : "#000",
+                          borderColor: popupBorder,
                         },
                         "& .MuiInputBase-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
+                          color: popupText,
                           height: 40,
                         },
                         "& .MuiSelect-select": {
@@ -348,7 +365,7 @@ export default function CreateExamPopup({
                         },
                         "& .MuiSvgIcon-root": {
                           fontSize: 18,
-                          color: isDarkMode ? "#E3E8F3" : "black",
+                          color: popupText,
                         },
                       }}
                     >
@@ -360,8 +377,8 @@ export default function CreateExamPopup({
                         MenuProps={{
                           PaperProps: {
                             sx: {
-                              backgroundColor: isDarkMode ? "#3e3e3e" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
+                              backgroundColor: popupSurfaceSoft,
+                              color: popupText,
                             },
                           },
                         }}
@@ -390,7 +407,9 @@ export default function CreateExamPopup({
                           onChange={(e) =>
                             handleScoreChange(idx, field, e.target.value)
                           }
-                          className="w-[130px] h-10 rounded px-2 py-1 bg-background4 text-center"
+                          className={`w-[130px] h-10 rounded px-2 py-1 text-center ${
+                            isDarkMode ? "bg-background4" : "bg-white"
+                          }`}
                         />
                       ) : (
                         <FormControl
@@ -399,15 +418,15 @@ export default function CreateExamPopup({
                             width: "130px",
                             fontSize: "14px",
                             borderRadius: "6px",
-                            backgroundColor: isDarkMode ? "#3e3e3e" : "white",
+                            backgroundColor: popupSurfaceSoft,
                             "& .MuiOutlinedInput-notchedOutline": {
-                              border: "1px solid #2b2e4a40",
+                              border: `1px solid ${popupBorder}`,
                             },
                             "&:hover .MuiOutlinedInput-notchedOutline": {
-                              borderColor: isDarkMode ? "#E3E8F3" : "#000",
+                              borderColor: popupBorder,
                             },
                             "& .MuiInputBase-root": {
-                              color: isDarkMode ? "#E3E8F3" : "black",
+                              color: popupText,
                               height: 40,
                             },
                             "& .MuiSelect-select": {
@@ -416,7 +435,7 @@ export default function CreateExamPopup({
                             },
                             "& .MuiSvgIcon-root": {
                               fontSize: 18,
-                              color: isDarkMode ? "#E3E8F3" : "black",
+                              color: popupText,
                             },
                           }}
                         >
@@ -428,10 +447,8 @@ export default function CreateExamPopup({
                             MenuProps={{
                               PaperProps: {
                                 sx: {
-                                  backgroundColor: isDarkMode
-                                    ? "#3e3e3e"
-                                    : "white",
-                                  color: isDarkMode ? "#E3E8F3" : "black",
+                                  backgroundColor: popupSurfaceSoft,
+                                  color: popupText,
                                 },
                               },
                             }}
@@ -460,7 +477,9 @@ export default function CreateExamPopup({
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-1 rounded border border-borderWhite text-textPrimary"
+            className={`px-4 py-1 rounded border ${
+              isDarkMode ? "border-borderWhite text-textPrimary" : "border-borderGray3 text-textBlack"
+            }`}
           >
             Cancel
           </button>
@@ -481,7 +500,7 @@ export default function CreateExamPopup({
         title="Create Exam"
         message="Are you sure you want to create this exam?"
         confirmImg={confirm1}
-        cancelImg={cross}
+        cancelImg={isDarkMode ? cross : crossw}
       />
     </div>
   );

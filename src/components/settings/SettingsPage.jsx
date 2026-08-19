@@ -316,7 +316,7 @@ export default function SettingsPage({ isDarkMode }) {
       const response = await createSession({
         academicStartYear: nextSessionDraft?.academicStartYear,
         academicEndYear: nextSessionDraft?.academicEndYear,
-        status: "upcoming",
+        status: "UPCOMING",
       });
 
       setSuccessMessage(

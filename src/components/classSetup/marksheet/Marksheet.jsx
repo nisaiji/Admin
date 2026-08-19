@@ -6,17 +6,28 @@ import toast, { Toaster } from "react-hot-toast";
 import confirm1 from "../../../assets/images/darkmode/confirm1.png";
 import confirm2 from "../../../assets/images/darkmode/confirm2.png";
 import cross from "../../../assets/images/darkmode/cross.png";
+import crossw from "../../../assets/images/cross.png";
 import addIcon from "../../../assets/images/darkmode/plus.png";
+import addIconLight from "../../../assets/images/plus.png";
 import CreateExamPopup from "./ExamPopup";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import ConfirmationPopup from "../../ConfirmationPopup2";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { FormControl, MenuItem, Select } from "@mui/material";
 import CONSTANT from "../../../utils/constants";
 
 export default function Marksheet() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const pageText = isDarkMode ? "text-textPrimary" : "text-textBlack";
+  const mutedText = isDarkMode ? "text-gray-300" : "text-textGray";
+  const tableRowBg = isDarkMode ? "bg-[#68686826]" : "bg-[#F4F7FB]";
+  const tableInputBg = isDarkMode ? "bg-background4" : "bg-white";
+  const tableInputText = isDarkMode ? "text-textPrimary" : "text-textBlack";
+  const tableSurface = isDarkMode ? "#3e3e3e" : "#FFFFFF";
+  const tableSurfaceText = isDarkMode ? "#E3E8F3" : "#111827";
+  const tableBorder = isDarkMode ? "#2b2e4a40" : "#D9E2EC";
+  const tableHoverBg = isDarkMode ? "#2a2a2a" : "#E9EEF2";
   const [loading, setLoading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [examList, setExamList] = useState([]);
@@ -345,9 +356,7 @@ export default function Marksheet() {
   return (
     <div className="select-none">
       <div
-        className={`${
-          isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-        } px-6 min-h-[calc(100vh-72px)] py-4 `}
+        className={`${isDarkMode ? "bg-background2" : "bg-whiteBackground2"} px-6 min-h-[calc(100vh-72px)] py-4 `}
       >
         <div className="py-4">
           {/* Toast notifications */}
@@ -373,7 +382,11 @@ export default function Marksheet() {
                 onClick={() => setShowPopup(true)}
                 className="flex flex-row justify-center items-center p-[10px] space-x-[10px] cursor-pointer bg-whiteBackground rounded-md transition-all duration-200 ease-in-out active:scale-90"
               >
-                <img src={addIcon} alt="+" className="size-4" />
+                <img
+                  src={isDarkMode ? addIcon : addIconLight}
+                  alt="+"
+                  className="size-4"
+                />
                 <span className="text-sm font-poppins-bold text-textBlack">
                   Create
                 </span>
@@ -391,21 +404,21 @@ export default function Marksheet() {
                       size="small"
                       sx={{
                         width: "150px",
-                        border: "1px solid #2b2e4a40",
+                        border: `1px solid ${tableBorder}`,
                         fontSize: "16px",
                         borderRadius: "6px",
-                        backgroundColor: isDarkMode ? "#3e3e3e" : "white",
+                        backgroundColor: tableSurface,
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
                         },
                         "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "white !important",
+                          borderColor: `${tableBorder} !important`,
                         },
                         "& .MuiInputBase-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
+                          color: tableSurfaceText,
                         },
                         "& .MuiSvgIcon-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
+                          color: tableSurfaceText,
                         },
                       }}
                     >
@@ -422,8 +435,8 @@ export default function Marksheet() {
                         MenuProps={{
                           PaperProps: {
                             sx: {
-                              backgroundColor: isDarkMode ? "#3e3e3e" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
+                              backgroundColor: tableSurface,
+                              color: tableSurfaceText,
                             },
                           },
                         }}
@@ -433,12 +446,10 @@ export default function Marksheet() {
                             key={i}
                             value={exam._id}
                             sx={{
-                              backgroundColor: isDarkMode ? "#3e3e3e" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
+                              backgroundColor: tableSurface,
+                              color: tableSurfaceText,
                               "&:hover": {
-                                backgroundColor: isDarkMode
-                                  ? "#2a2a2a"
-                                  : "#E9EEF2",
+                                backgroundColor: tableHoverBg,
                               },
                             }}
                           >
@@ -502,7 +513,9 @@ export default function Marksheet() {
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-sm">
                     <thead>
-                      <tr className="text-center text-base font-poppins-bold text-white">
+                      <tr
+                        className={`text-center text-base font-poppins-bold ${pageText}`}
+                      >
                         <th className="p-2">Student</th>
                         {selectedExam?.subjects?.map((subj, i) => {
                           // console.log(subj);
@@ -525,7 +538,7 @@ export default function Marksheet() {
                                       : ""}
                                   </span>
                                 </span>
-                                <span className="text-xs font-poppins-medium text-gray-300">
+                                <span className={`text-xs font-poppins-medium ${mutedText}`}>
                                   {subj?.subjectType === "MAIN_SUBJECT"
                                     ? `T/${maxTheoryMarks} P/${maxPracticalMarks}`
                                     : "T/Gr P/Gr"}
@@ -592,7 +605,7 @@ export default function Marksheet() {
                         return (
                           <tr
                             key={i}
-                            className="bg-[#68686826] text-white text-center text-base font-poppins-regular"
+                            className={`${tableRowBg} ${pageText} text-center text-base font-poppins-regular`}
                           >
                             <td className="p-2">
                               {student?.studentFirstName}{" "}
@@ -668,7 +681,11 @@ export default function Marksheet() {
                                 <td key={i} className="p-2 text-center">
                                   {subj?.subjectType === "MAIN_SUBJECT" ? (
                                     <div className="flex justify-center items-center space-x-2">
-                                      <div className="flex items-center justify-center size-10 bg-background4 rounded text-white font-semibold">
+                                      <div
+                                        className={`flex items-center justify-center size-10 rounded font-semibold ${tableInputBg} ${
+                                          isDarkMode ? "" : "border border-borderGray3"
+                                        }`}
+                                      >
                                         <input
                                           type="text"
                                           placeholder="-"
@@ -692,11 +709,15 @@ export default function Marksheet() {
                                             theoryMarks >= theoryMinMarks
                                               ? "text-textGreen"
                                               : "text-textRed"
-                                          }`}
+                                          } ${tableInputText}`}
                                         />
                                       </div>
 
-                                      <div className="flex items-center justify-center size-10 bg-background4 rounded text-white font-semibold">
+                                      <div
+                                        className={`flex items-center justify-center size-10 rounded font-semibold ${tableInputBg} ${
+                                          isDarkMode ? "" : "border border-borderGray3"
+                                        }`}
+                                      >
                                         <input
                                           type="text"
                                           placeholder="-"
@@ -720,7 +741,7 @@ export default function Marksheet() {
                                             practicalMarks >= practicalMinMarks
                                               ? "text-textGreen"
                                               : "text-textRed"
-                                          }`}
+                                          } ${tableInputText}`}
                                         />
                                       </div>
                                     </div>
@@ -731,18 +752,15 @@ export default function Marksheet() {
                                         size="small"
                                         sx={{
                                           width: "70px",
-                                          border: "1px solid #2b2e4a40",
+                                          border: `1px solid ${tableBorder}`,
                                           fontSize: "14px",
                                           borderRadius: "6px",
-                                          backgroundColor: isDarkMode
-                                            ? "#3e3e3e"
-                                            : "white",
-                                          "& .MuiOutlinedInput-notchedOutline":
-                                            { border: "none" },
+                                          backgroundColor: tableSurface,
+                                          "& .MuiOutlinedInput-notchedOutline": {
+                                            border: "none",
+                                          },
                                           "& .MuiSvgIcon-root": {
-                                            color: isDarkMode
-                                              ? "#E3E8F3"
-                                              : "black",
+                                            color: tableSurfaceText,
                                           },
                                           "& .MuiSelect-select": {
                                             display: "flex",
@@ -811,12 +829,8 @@ export default function Marksheet() {
                                           MenuProps={{
                                             PaperProps: {
                                               sx: {
-                                                backgroundColor: isDarkMode
-                                                  ? "#3e3e3e"
-                                                  : "white",
-                                                color: isDarkMode
-                                                  ? "#E3E8F3"
-                                                  : "black",
+                                                backgroundColor: tableSurface,
+                                                color: tableSurfaceText,
                                               },
                                             },
                                           }}
@@ -826,16 +840,10 @@ export default function Marksheet() {
                                               key={g}
                                               value={g}
                                               sx={{
-                                                backgroundColor: isDarkMode
-                                                  ? "#3e3e3e"
-                                                  : "white",
-                                                color: isDarkMode
-                                                  ? "#E3E8F3"
-                                                  : "black",
+                                                backgroundColor: tableSurface,
+                                                color: tableSurfaceText,
                                                 "&:hover": {
-                                                  backgroundColor: isDarkMode
-                                                    ? "#2a2a2a"
-                                                    : "#E9EEF2",
+                                                  backgroundColor: tableHoverBg,
                                                 },
                                               }}
                                             >
@@ -850,18 +858,15 @@ export default function Marksheet() {
                                         size="small"
                                         sx={{
                                           width: "70px",
-                                          border: "1px solid #2b2e4a40",
+                                          border: `1px solid ${tableBorder}`,
                                           fontSize: "14px",
                                           borderRadius: "6px",
-                                          backgroundColor: isDarkMode
-                                            ? "#3e3e3e"
-                                            : "white",
-                                          "& .MuiOutlinedInput-notchedOutline":
-                                            { border: "none" },
+                                          backgroundColor: tableSurface,
+                                          "& .MuiOutlinedInput-notchedOutline": {
+                                            border: "none",
+                                          },
                                           "& .MuiSvgIcon-root": {
-                                            color: isDarkMode
-                                              ? "#E3E8F3"
-                                              : "black",
+                                            color: tableSurfaceText,
                                           },
                                           "& .MuiSelect-select": {
                                             display: "flex",
@@ -930,12 +935,8 @@ export default function Marksheet() {
                                           MenuProps={{
                                             PaperProps: {
                                               sx: {
-                                                backgroundColor: isDarkMode
-                                                  ? "#3e3e3e"
-                                                  : "white",
-                                                color: isDarkMode
-                                                  ? "#E3E8F3"
-                                                  : "black",
+                                                backgroundColor: tableSurface,
+                                                color: tableSurfaceText,
                                               },
                                             },
                                           }}
@@ -945,16 +946,10 @@ export default function Marksheet() {
                                               key={g}
                                               value={g}
                                               sx={{
-                                                backgroundColor: isDarkMode
-                                                  ? "#3e3e3e"
-                                                  : "white",
-                                                color: isDarkMode
-                                                  ? "#E3E8F3"
-                                                  : "black",
+                                                backgroundColor: tableSurface,
+                                                color: tableSurfaceText,
                                                 "&:hover": {
-                                                  backgroundColor: isDarkMode
-                                                    ? "#2a2a2a"
-                                                    : "#E9EEF2",
+                                                  backgroundColor: tableHoverBg,
                                                 },
                                               }}
                                             >
@@ -971,7 +966,9 @@ export default function Marksheet() {
                             <td>
                               <div className="flex justify-center">
                                 <p
-                                  className={`font-poppins-regular bg-background4 text-center py-2 min-w-[80px] rounded-md ${
+                                  className={`font-poppins-regular ${tableInputBg} text-center py-2 min-w-[80px] rounded-md ${
+                                    isDarkMode ? "" : "border border-borderGray3"
+                                  } ${
                                     totalMarksObtained >= totalMarks / 2
                                       ? "text-textGreen"
                                       : "text-textRed"
@@ -1010,7 +1007,7 @@ export default function Marksheet() {
         title="Save Changes"
         message="Are you sure you want to save changes?"
         confirmImg={confirm1}
-        cancelImg={cross}
+        cancelImg={isDarkMode ? cross : crossw}
       />
 
       {/* Second confirmation popup */}
@@ -1021,7 +1018,7 @@ export default function Marksheet() {
         title="Publish Marksheet"
         message="Are you sure you want to publish this marksheet?"
         confirmImg={confirm2}
-        cancelImg={cross}
+        cancelImg={isDarkMode ? cross : crossw}
       />
     </div>
   );
