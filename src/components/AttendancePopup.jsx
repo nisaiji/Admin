@@ -14,13 +14,14 @@ import editw from "../assets/images/editw.png";
 import downloadw from "../assets/images/downloadw.png";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import moment from "moment";
 import { getSessionPermissions, getSessionWindow } from "../utils/helper";
 import Breadcrumbs from "./BreadCrumbs";
+import { showToast } from "../services/toastService";
 
 export default function AttendancePopup() {
   // Redux state selectors
@@ -37,7 +38,6 @@ export default function AttendancePopup() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [holidays, setHolidays] = useState({});
   const [workdays, setWorkdays] = useState({});
-  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [totalAttendanceDays, setTotalAttendanceDays] = useState(0);
   const isFetchingRef = useRef(false);
 
@@ -170,15 +170,11 @@ export default function AttendancePopup() {
         nextMonthMoment.isBefore(minAllowedMonth, "month") ||
         nextMonthMoment.isAfter(maxAllowedMonth, "month")
       ) {
-        if (!toastDisplayed) {
-          setToastDisplayed(true);
-          toast.error(
-            `You can only change month between ${minAllowedMonth.format(
-              "MMMM YYYY",
-            )} and ${maxAllowedMonth.format("MMMM YYYY")}.`,
-          );
-          setTimeout(() => setToastDisplayed(false), 3000);
-        }
+        showToast.error(
+          `You can only change month between ${minAllowedMonth.format(
+            "MMMM YYYY",
+          )} and ${maxAllowedMonth.format("MMMM YYYY")}.`,
+        );
         return prevDate;
       }
       return newDate;
@@ -194,15 +190,11 @@ export default function AttendancePopup() {
    */
   const handleInputChange = (studentIndex, dateIndex, value) => {
     if (!canEditAttendance) {
-      if (!toastDisplayed) {
-        setToastDisplayed(true);
-        toast.error(
-          sessionPermissions?.phase === "upcoming"
-            ? "Attendance cannot be created in upcoming session."
-            : "Previous session attendance is view only.",
-        );
-        setTimeout(() => setToastDisplayed(false), 3000);
-      }
+      showToast.error(
+        sessionPermissions?.phase === "upcoming"
+          ? "Attendance cannot be created in upcoming session."
+          : "Previous session attendance is view only.",
+      );
       return;
     }
 
@@ -219,16 +211,11 @@ export default function AttendancePopup() {
       attendanceMoment.isBefore(editableStartDate, "day") ||
       attendanceMoment.isAfter(editableEndDate, "day")
     ) {
-      if (!toastDisplayed) {
-        setToastDisplayed(true);
-
-        toast.error(
-          `You can only edit attendance between ${editableStartDate.format(
-            "DD/MM/YYYY",
-          )} and ${editableEndDate.format("DD/MM/YYYY")}.`,
-        );
-        setTimeout(() => setToastDisplayed(false), 3000);
-      }
+      showToast.error(
+        `You can only edit attendance between ${editableStartDate.format(
+          "DD/MM/YYYY",
+        )} and ${editableEndDate.format("DD/MM/YYYY")}.`,
+      );
       return;
     }
     setAttendanceData((prevData) =>
@@ -253,7 +240,7 @@ export default function AttendancePopup() {
    */
   const handleSaveAttendance = async () => {
     if (!canEditAttendance) {
-      toast.error(
+      showToast.error(
         sessionPermissions?.phase === "upcoming"
           ? "Attendance cannot be created in upcoming session."
           : "Previous session attendance is view only.",
@@ -294,15 +281,11 @@ export default function AttendancePopup() {
       });
 
       if (invalidDays.length > 0) {
-        if (!toastDisplayed) {
-          setToastDisplayed(true);
-          toast.error(
-            `Please fill all the cells to save the attendance. Incomplete attendance on: ${invalidDays.join(
-              ", ",
-            )}`,
-          );
-          setTimeout(() => setToastDisplayed(false), 3000);
-        }
+        showToast.error(
+          `Please fill all the cells to save the attendance. Incomplete attendance on: ${invalidDays.join(
+            ", ",
+          )}`,
+        );
         return;
       }
 
@@ -338,14 +321,14 @@ export default function AttendancePopup() {
       const res = await axiosClient.post(url, { studentsAttendances });
 
       if (res.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         setIsEditable(false);
         // We need to re-fetch with current state logic or pass current state if we want to be safe,
         // but typically safe here as save doesn't change holidays/workdays
         fetchMonthlyAttendance({ holidayMap: holidays, workdayMap: workdays });
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -391,7 +374,6 @@ export default function AttendancePopup() {
       const res = await axiosClient.get(url);
 
       if (res?.statusCode === 200) {
-        
         const attendances = res?.result?.attendances || [];
 
         const updatedAttendanceData = attendances?.map((student) => {
@@ -454,7 +436,7 @@ export default function AttendancePopup() {
         setAttendanceData(updatedAttendanceData);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
@@ -625,7 +607,7 @@ export default function AttendancePopup() {
     try {
       if (loading) return;
       if (!attendanceData?.length) {
-        toast.error("No attendance data to download");
+        showToast.error("No attendance data to download");
         return;
       }
       setLoading(true);
@@ -738,7 +720,7 @@ export default function AttendancePopup() {
         );
       }
     } catch (e) {
-      toast.error("Failed to generate PDF");
+      showToast.error("Failed to generate PDF");
     } finally {
       setTimeout(() => {
         setLoading(false);
@@ -765,7 +747,7 @@ export default function AttendancePopup() {
               className={`${isDarkMode ? "" : "invert"} w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
               onClick={() =>
                 isEditable
-                  ? toast.error(
+                  ? showToast.error(
                       "please save the data before changing the month",
                     )
                   : changeMonth(-1)
@@ -783,7 +765,7 @@ export default function AttendancePopup() {
               className={`${isDarkMode ? "" : "invert"} w-10 h-10 rotate-180 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
               onClick={() =>
                 isEditable
-                  ? toast.error(
+                  ? showToast.error(
                       "please save the data before changing the month",
                     )
                   : changeMonth(1)
@@ -812,7 +794,7 @@ export default function AttendancePopup() {
                   className={`${isDarkMode ? "" : "invert"} w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
                   onClick={() => {
                     if (!canEditAttendance) {
-                      toast.error(
+                      showToast.error(
                         sessionPermissions?.phase === "upcoming"
                           ? "Attendance cannot be created in upcoming session."
                           : "Previous session attendance is view only.",

@@ -6,7 +6,6 @@ import edit from "../../assets/images/darkmode/editimg.png";
 import { useDispatch, useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import toast from "react-hot-toast";
 import {
   setClassAndSectionData,
   updateAdminData,
@@ -32,6 +31,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { ChartDropdown } from "./ChartDropdown";
+import { showToast } from "../../services/toastService";
 
 export default function SectionData({
   isDarkMode,
@@ -159,11 +159,11 @@ export default function SectionData({
 
       if (res?.statusCode === 200) {
         dispatch(updateAdminData({ photo: base64Image }));
-        toast.success(res?.result);
+        showToast.success(res?.result);
       }
     } catch (error) {
       // console.error("Photo upload failed", error);
-      toast.error("Photo upload failed.");
+      showToast.error("Photo upload failed.");
     }
   };
 
@@ -208,32 +208,28 @@ export default function SectionData({
    */
   const getSession = async () => {
     try {
-      if (role === "admin") {
-        const res = await axiosClient.get(EndPoints.ADMIN.GET_SESSION);
-        if (res?.statusCode === 200) {
-          // console.log(res);
+      if (role !== "admin") return;
+      const res = await axiosClient.get(EndPoints.ADMIN.GET_SESSION);
+      if (res?.statusCode === 200) {
+        const sessions = res?.result || [];
+        const activeSession = sessions?.find((s) => s?.status === "ACTIVE");
+        const currentSessionId = classAndSectionData?.selectedSession?._id;
+        const selectedSession = sessions?.find(
+          (s) => s?._id === currentSessionId,
+        );
+        const sessionToSelect = selectedSession || activeSession;
+        setSession(
+          [...sessions].sort(
+            (a, b) => a?.academicStartYear - b?.academicStartYear,
+          ),
+        );
 
-          const activeSession = res?.result?.find(
-            (s) => s?.status === "active",
-          );
-
-          const selectedExists = res?.result?.some(
-            (s) => s?._id === classAndSectionData?.selectedSession?._id,
-          );
-
-          if (!selectedExists) {
-            dispatch(
-              setClassAndSectionData({
-                selectedSession: activeSession,
-                session: res?.result,
-              }),
-            );
-          }
-
-          setSession(
-            res?.result.sort(
-              (a, b) => a?.academicStartYear - b?.academicStartYear,
-            ),
+        if (sessionToSelect) {
+          dispatch(
+            setClassAndSectionData({
+              selectedSession: sessionToSelect,
+              session: sessions,
+            }),
           );
         }
       }
@@ -242,49 +238,9 @@ export default function SectionData({
     }
   };
 
-  // Handler to create new session
-  const handleCreateSession = async () => {
-    try {
-      // setLoading(true);
-      // console.log(nextSession);
-      const res = await axiosClient.post(EndPoints.ADMIN.CREATE_SESSION, {
-        academicStartYear: nextSession.start,
-        academicEndYear: nextSession.end,
-      });
-      // console.log(res);
-
-      if (res?.statusCode === 200) {
-        toast.success(res?.result);
-        getSession();
-      }
-    } catch (e) {
-      // toast.error("Error creating session.");
-    } finally {
-      // setLoading(false);
-    }
-  };
-
-  const handleMarkSessionComplete = async () => {
-    try {
-      if (!classAndSectionData?.selectedSession?._id) {
-        toast.error("No session selected.");
-        return;
-      }
-      const res = await axiosClient.get(
-        `${EndPoints.ADMIN.MARK_SESSION_COMPLETE}/${classAndSectionData?.selectedSession?._id}`,
-      );
-      if (res?.statusCode === 200) {
-        toast.success(res?.result);
-        getSession(); // Refresh session list
-      }
-    } catch (e) {
-      toast.error(e);
-    }
-  };
-
   useEffect(() => {
     getSession();
-  }, [date]);
+  }, []);
 
   return (
     <>

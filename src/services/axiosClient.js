@@ -1,6 +1,6 @@
 import axios from "axios";
-import toast from "react-hot-toast";
 import { sha256 } from "js-sha256";
+import { showToast } from "./toastService";
 
 // const baseURL = "http://localhost:4000/";
 // const baseURL = "https://api.sharedri.com";
@@ -97,7 +97,7 @@ axiosClient.interceptors.response.use(
     // console.log("api error", error);
 
     if (error.message === "Network Error") {
-      toast.error("Check your internet connectivity");
+      showToast.error("Check your internet connectivity");
       return;
     }
     const err = error?.response?.data;

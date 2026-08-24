@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 import { C, C_LIGHT } from "../../../utils/constants";
 import { axiosClient } from "../../../services/axiosClient";
@@ -19,6 +19,7 @@ import {
 } from "./utils";
 
 import complete from "../../../assets/images/darkmode/complete.png";
+import { showToast } from "../../../services/toastService";
 
 const INITIAL_FEE_HEADS = [];
 
@@ -236,7 +237,7 @@ export default function FeeStructureSetup({ setSelected }) {
 
   const sendOtpForCreatedStructure = async () => {
     if (!adminPhone) {
-      toast.error("Admin phone number not found.");
+      showToast.error("Admin phone number not found.");
       return;
     }
 
@@ -248,16 +249,16 @@ export default function FeeStructureSetup({ setSelected }) {
         `91${adminPhone}`,
         (res) => {
           setOtpReqId(res?.message);
-          toast.success("OTP sent successfully");
+          showToast.success("OTP sent successfully");
           setLoading(false);
         },
         (err) => {
-          toast.error(err?.message || "Failed to send OTP");
+          showToast.error(err?.message || "Failed to send OTP");
           setLoading(false);
         },
       );
     } catch (error) {
-      toast.error(error?.message || error || "Failed to send OTP");
+      showToast.error(error?.message || error || "Failed to send OTP");
       setLoading(false);
     }
   };
@@ -283,7 +284,7 @@ export default function FeeStructureSetup({ setSelected }) {
       setOtpReqId(null);
       setStep(3);
     } catch (error) {
-      toast.error(error?.message || error || "Failed to prepare OTP flow");
+      showToast.error(error?.message || error || "Failed to prepare OTP flow");
     } finally {
       setSaving(false);
     }
@@ -291,7 +292,7 @@ export default function FeeStructureSetup({ setSelected }) {
 
   const handleVerifyOtp = async (feeStructureId, token) => {
     if (!feeStructureId) {
-      toast.error("Created fee structure id not found.");
+      showToast.error("Created fee structure id not found.");
       return false;
     }
 
@@ -312,12 +313,12 @@ export default function FeeStructureSetup({ setSelected }) {
         async (verifyRes) => {
           try {
             if (!createdFeeStructureId) {
-              toast.error("Fee structure id not found.");
+              showToast.error("Fee structure id not found.");
               return;
             }
 
             await handleVerifyOtp(createdFeeStructureId, verifyRes?.message);
-            toast.success("Verification successful!");
+            showToast.success("Verification successful!");
             await dispatch(
               setTempData({
                 selectedClassFeeStructure: null,
@@ -327,7 +328,7 @@ export default function FeeStructureSetup({ setSelected }) {
             setCreatedFeeStructureId("");
             setSelected("viewSetup");
           } catch (e) {
-            toast.error(
+            showToast.error(
               e?.message || e || "Verification failed after OTP verification",
             );
           } finally {
@@ -335,13 +336,13 @@ export default function FeeStructureSetup({ setSelected }) {
           }
         },
         (err) => {
-          toast.error(err?.message || "OTP verification failed");
+          showToast.error(err?.message || "OTP verification failed");
           setSaving(false);
         },
         otpReqId,
       );
     } catch (error) {
-      toast.error(error?.message || error || "Verification failed");
+      showToast.error(error?.message || error || "Verification failed");
       setSaving(false);
     }
   };
@@ -352,39 +353,39 @@ export default function FeeStructureSetup({ setSelected }) {
         "11",
         (res) => {
           setOtpReqId(res?.message);
-          toast.success("OTP resent successfully");
+          showToast.success("OTP resent successfully");
         },
         (err) => {
-          toast.error(err?.message || "Failed to resend OTP");
+          showToast.error(err?.message || "Failed to resend OTP");
         },
         otpReqId,
       );
     } catch (error) {
-      toast.error(error?.message || error || "Failed to resend OTP");
+      showToast.error(error?.message || error || "Failed to resend OTP");
     }
   };
   // console.log(feeHeads);
 
   const handleCreateClassFeeStructure = async () => {
     if (isEditingClassFeeStructure && selectedClassFeeStructure?.isVerified) {
-      toast.error("Verified fee structures cannot be updated.");
+      showToast.error("Verified fee structures cannot be updated.");
       return "";
     }
 
     if (!selectedSessionId) {
-      toast.error("No active academic session found.");
+      showToast.error("No active academic session found.");
       return "";
     }
 
     if (!feeCycleId) {
-      toast.error(
+      showToast.error(
         "Please configure the fee cycle before creating a class fee structure.",
       );
       return "";
     }
 
     if (!activeClassConfig?.classId) {
-      toast.error("Select a class before continuing.");
+      showToast.error("Select a class before continuing.");
       return "";
     }
 
@@ -444,20 +445,19 @@ export default function FeeStructureSetup({ setSelected }) {
           "";
 
         if (!feeStructureId) {
-          toast.error("Fee structure id not found.");
+          showToast.error("Fee structure id not found.");
         }
 
         return feeStructureId;
       }
 
-      toast.error(
+      showToast.error(
         response?.result?.message || "Failed to create class fee structure.",
       );
       return "";
     } catch (error) {
-      console.log(error);
 
-      toast.error(
+      showToast.error(
         error?.message || error || "Failed to create class fee structure.",
       );
       return "";

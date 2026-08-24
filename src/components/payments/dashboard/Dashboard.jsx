@@ -13,7 +13,7 @@ import openArrow from "../../../assets/images/payments/openArrow.png";
 import { C, C_LIGHT } from "../../../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import BarChartComponent from "../BarChart";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../../services/axiosClient.js";
 import EndPoints from "../../../services/EndPoints";
 import moment from "moment";
@@ -27,6 +27,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { showToast } from "../../../services/toastService.js";
 
 const PAGE_LIMIT_OPTIONS = [10, 20, 25, 50, 100];
 
@@ -197,25 +198,41 @@ export function PaymentDashboard() {
     () => buildVisiblePages(pageNo, totalPages),
     [pageNo, totalPages],
   );
-  const showingFrom = totalStudentCount === 0 ? 0 : (pageNo - 1) * limit + 1;
-  const showingTo = Math.min(totalStudentCount, pageNo * limit);
 
   const getFeeSummary = async () => {
+    if (!selectedSessionId) {
+      showToast.error("Please select session");
+      return;
+    }
+
     try {
-      const res = await axiosClient.get(EndPoints.ADMIN.GET_FEE_SUMMARY);
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.GET_FEE_SUMMARY}?sessionId=${selectedSessionId}`,
+      );
 
       if (res?.statusCode === 200) {
         setFeeSummaryData(res?.result);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     }
   };
 
   const getTransitionHistory = async () => {
+    if (!selectedSessionId) {
+      showToast.error("Please select session");
+      return;
+    }
     try {
+      const params = {
+        page: 1,
+        limit: 5,
+        sessionId: selectedSessionId,
+      };
+
       const res = await axiosClient.get(
-        `${EndPoints.ADMIN.GET_TRANSITION_HISTORY}?page=1,limit=5`,
+        EndPoints.ADMIN.GET_TRANSITION_HISTORY,
+        { params },
       );
       // console.log(res);
 
@@ -223,7 +240,7 @@ export function PaymentDashboard() {
         setTransitionHistoryData(res?.result?.payments);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     }
   };
 
@@ -291,7 +308,7 @@ export function PaymentDashboard() {
         );
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       if (requestId === requestIdRef.current) {
         setLoadingStudents(false);
@@ -381,7 +398,10 @@ export function PaymentDashboard() {
   }
 
   return (
-    <div className="p-[24px]" style={{ background: themeC.bg, color: themeC.text }}>
+    <div
+      className="p-[24px]"
+      style={{ background: themeC.bg, color: themeC.text }}
+    >
       <Toaster />
       <div className="flex flex-col gap-[24px]">
         {/* ── Header bar ── */}
@@ -469,17 +489,6 @@ export function PaymentDashboard() {
 
         <div className="rounded-[14px] border p-5" style={surfaceStyle}>
           <div className="flex items-center justify-between gap-4">
-            {/* <div>
-              <p className="font-bold text-[14px] text-[#101828] font-['Inter',sans-serif]">
-                Students ({totalStudentCount})
-              </p>
-              <p className="mt-1 text-[13px] text-[#6a7282] font-['Inter',sans-serif]">
-                {selectedStudent
-                  ? `Viewing ${getStudentDisplayName(selectedStudent)}`
-                  : `Showing ${showingFrom}-${showingTo} of ${totalStudentCount} students`}
-              </p>
-            </div> */}
-
             {selectedStudent ? (
               <button
                 type="button"
@@ -500,10 +509,7 @@ export function PaymentDashboard() {
                 style={surfaceStyle}
               >
                 <div className="flex items-center gap-[10px] flex-1">
-                  <Search
-                    size={18}
-                    style={{ color: themeC.textSub }}
-                  />
+                  <Search size={18} style={{ color: themeC.textSub }} />
                   <input
                     className="font-medium text-[14px] font-['Inter',sans-serif] outline-none bg-transparent w-full"
                     style={{ color: themeC.text }}
@@ -549,8 +555,8 @@ export function PaymentDashboard() {
                       key={index}
                       type="button"
                       onClick={() => handleSelectStudent(student)}
-                    className="flex w-full items-center justify-between gap-4 rounded-xl border p-5 text-left transition hover:border-[#2563EB] hover:shadow-sm mt-3"
-                    style={surfaceStyle}
+                      className="flex w-full items-center justify-between gap-4 rounded-xl border p-5 text-left transition hover:border-[#2563EB] hover:shadow-sm mt-3"
+                      style={surfaceStyle}
                     >
                       <div className="flex min-w-0 space-x-4">
                         <div className="flex size-11 items-center justify-center rounded-full bg-[#2563EB]">
@@ -818,7 +824,10 @@ export function PaymentDashboard() {
               {/* Header */}
               <div
                 className="flex items-center h-[40px] pl-[10px] border-b"
-                style={{ background: isDarkMode ? "rgba(255,255,255,0.03)" : "#f0f6f9", borderColor: themeC.border }}
+                style={{
+                  background: isDarkMode ? "rgba(255,255,255,0.03)" : "#f0f6f9",
+                  borderColor: themeC.border,
+                }}
               >
                 <div
                   className="w-[140px] shrink-0 px-[8px] font-semibold text-[14px] font-['Inter',sans-serif]"
@@ -889,13 +898,13 @@ export function PaymentDashboard() {
                 transitionHistoryData?.map((payment, index) => (
                   <div
                     key={index}
-                      className={`flex items-center h-[56px] pl-[10px] ${
+                    className={`flex items-center h-[56px] pl-[10px] ${
                       index < transitionHistoryData.length - 1
                         ? "border-b border-[#d0d0d0]/25"
                         : ""
                     } border-l border-r`}
-                      style={{ borderColor: themeC.border }}
-                    >
+                    style={{ borderColor: themeC.border }}
+                  >
                     {/* Student Name */}
                     <div
                       className="w-[140px] shrink-0 px-[8px] text-[14px] font-['Inter',sans-serif] truncate"

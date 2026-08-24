@@ -12,10 +12,10 @@ import EndPoints from "../services/EndPoints";
 import { axiosClient } from "../services/axiosClient";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
-import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
 import { useNavigate } from "react-router-dom";
+import { showToast } from "../services/toastService";
 
 const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
   // Hooks and state variables
@@ -83,7 +83,7 @@ const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         }
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -98,16 +98,16 @@ const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
       await window?.verifyOtp(
         Number(otp.join("")),
         async (res) => {
-          toast.success("Phone verified successfully");
+          showToast.success("Phone verified successfully");
           await phoneVerifiedApi(res?.message);
         },
         (err) => {
-          toast.error(err?.message);
+          showToast.error(err?.message);
         },
         status?.phoneOtpReqId,
       );
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -145,18 +145,18 @@ const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
           `91${phone}`,
           (res) => {
             dispatch(setAuth({ phoneOtpReqId: res?.message }));
-            toast.success("OTP sent successfully");
+            showToast.success("OTP sent successfully");
             setOtpVisible(true);
             document.getElementById("otp-0")?.focus();
             setTimer(30);
             setIsResendDisabled(true);
           },
           (err) => {
-            toast.error(err?.message);
+            showToast.error(err?.message);
           },
         );
       } else if (data?.isActive) {
-        toast.success("Already verified");
+        showToast.success("Already verified");
         navigate("/signup");
       }
     } catch (e) {
@@ -167,14 +167,14 @@ const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
           `91${phone}`,
           (res) => {
             dispatch(setAuth({ phoneOtpReqId: res?.message }));
-            toast.success("OTP sent successfully");
+            showToast.success("OTP sent successfully");
             setOtpVisible(true);
             document.getElementById("otp-0")?.focus();
             setTimer(30);
             setIsResendDisabled(true);
           },
           (err) => {
-            toast.error(err?.message);
+            showToast.error(err?.message);
           },
         );
       }
@@ -219,19 +219,19 @@ const Step1 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         "11", // '11' = SMS
         (res) => {
           dispatch(setAuth({ phoneOtpReqId: res?.message }));
-          toast.success("OTP resent successfully");
+          showToast.success("OTP resent successfully");
           setOtp(["", "", "", "", "", ""]);
           inputRefs.current[0]?.focus();
           setTimer(30);
           setIsResendDisabled(true);
         },
         (err) => {
-          toast.error(err?.message);
+          showToast.error(err?.message);
         },
         status?.phoneOtpReqId,
       );
     } catch (e) {
-      // toast.error(e);
+      // showToast.error(e);
     } finally {
       setLoading(false);
     }

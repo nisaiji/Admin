@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Toaster, toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import ConfirmationPopup from "../../ConfirmationPopup2";
 import accept from "../../../assets/images/darkmode/accept.png";
 import confirm1 from "../../../assets/images/darkmode/confirm1.png";
@@ -9,6 +9,7 @@ import crossw from "../../../assets/images/cross.png";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { FormControl, MenuItem, Select } from "@mui/material";
+import { showToast } from "../../../services/toastService";
 
 export default function CreateExamPopup({
   onClose,
@@ -107,7 +108,7 @@ export default function CreateExamPopup({
    */
   const validateForm = () => {
     if (!examName?.trim()) {
-      toast.error("Exam Name is required");
+      showToast.error("Exam Name is required");
       return false;
     }
 
@@ -123,24 +124,24 @@ export default function CreateExamPopup({
           ["P- Min", pMin],
         ]) {
           if (val === undefined || val === "") {
-            toast.error(`${subj?.subjectName}: ${label} is required`);
+            showToast.error(`${subj?.subjectName}: ${label} is required`);
             return false;
           }
           if (isNaN(val)) {
-            toast.error(`${subj?.subjectName}: ${label} must be a number`);
+            showToast.error(`${subj?.subjectName}: ${label} must be a number`);
             return false;
           }
         }
 
         // Logical checks
         if (Number(tMax) < Number(tMin)) {
-          toast.error(
+          showToast.error(
             `${subj?.subjectName}: T- Max must be greater than T- Min`,
           );
           return false;
         }
         if (Number(pMax) < Number(pMin)) {
-          toast.error(
+          showToast.error(
             `${subj?.subjectName}: P- Max must be greater than P- Min`,
           );
           return false;
@@ -156,7 +157,7 @@ export default function CreateExamPopup({
           ["P- Min Grade", pMin],
         ]) {
           if (!val) {
-            toast.error(`${subj?.subjectName}: ${label} is required`);
+            showToast.error(`${subj?.subjectName}: ${label} is required`);
             return false;
           }
         }
@@ -173,19 +174,19 @@ export default function CreateExamPopup({
           pMaxIdx === -1 ||
           pMinIdx === -1
         ) {
-          toast.error(`${subj?.subjectName}: Invalid grade selected`);
+          showToast.error(`${subj?.subjectName}: Invalid grade selected`);
           return false;
         }
 
         if (tMaxIdx > tMinIdx) {
-          toast.error(
+          showToast.error(
             `${subj?.subjectName}: T- Max Grade must be better than or equal to T- Min Grade`,
           );
           return false;
         }
 
         if (pMaxIdx > pMinIdx) {
-          toast.error(
+          showToast.error(
             `${subj?.subjectName}: P- Max Grade must be better than or equal to P- Min Grade`,
           );
           return false;
@@ -262,13 +263,13 @@ export default function CreateExamPopup({
       });
 
       if (res?.statusCode === 201) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         setshowConformationPopup(false);
         getExamList();
         onClose();
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     }
   };
 

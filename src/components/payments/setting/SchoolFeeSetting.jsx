@@ -5,10 +5,11 @@ import { ArrowLeft, CalendarDays, ChevronDown } from "lucide-react";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { setClassAndSectionData } from "../../../store/AppAuthSlice";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import complete from "../../../assets/images/darkmode/complete.png";
 import FeeHeadSetup from "../FeeStructureSetup/Step1";
 import OTPVERIFY from "../FeeStructureSetup/OTPVERIFY";
+import { showToast } from "../../../services/toastService";
 
 const INITIAL_FEE_HEADS = [];
 
@@ -246,19 +247,19 @@ export default function SchoolFeeSetting({ setSelected }) {
 
   const validateSettings = () => {
     if (!settings.frequency) {
-      toast.error("Please select fee frequency.");
+      showToast.error("Please select fee frequency.");
       return false;
     }
 
     if (!settings.dueDate) {
-      toast.error("Please enter due date.");
+      showToast.error("Please enter due date.");
       return false;
     }
 
     const dueDate = Number(settings.dueDate);
 
     if (Number.isNaN(dueDate) || dueDate < 1 || dueDate > 28) {
-      toast.error("Due date must be between 1 and 28.");
+      showToast.error("Due date must be between 1 and 28.");
       return false;
     }
 
@@ -267,7 +268,7 @@ export default function SchoolFeeSetting({ setSelected }) {
 
   const saveFeeCycleSettings = async () => {
     if (!selectedSessionId) {
-      toast.error("No active academic session found.");
+      showToast.error("No active academic session found.");
       return false;
     }
 
@@ -299,7 +300,7 @@ export default function SchoolFeeSetting({ setSelected }) {
             res?.result?.id ||
             feeCycleId,
         );
-        toast.success(
+        showToast.success(
           res?.result?.message ||
             (shouldUpdateFeeCycle
               ? "School fee settings updated."
@@ -325,10 +326,10 @@ export default function SchoolFeeSetting({ setSelected }) {
         return true;
       }
 
-      toast.error(res?.result?.message || "Failed to save settings.");
+      showToast.error(res?.result?.message || "Failed to save settings.");
       return false;
     } catch (error) {
-      toast.error(error?.message || error || "Failed to save settings.");
+      showToast.error(error?.message || error || "Failed to save settings.");
       return false;
     } finally {
       setSaving(false);
@@ -353,12 +354,12 @@ export default function SchoolFeeSetting({ setSelected }) {
     if (allVerified) return;
 
     if (!feeHeads.length) {
-      toast.error("Please add at least one fee head.");
+      showToast.error("Please add at least one fee head.");
       return;
     }
 
     if (!adminPhone) {
-      toast.error("Admin phone number not found.");
+      showToast.error("Admin phone number not found.");
       return;
     }
 
@@ -370,16 +371,16 @@ export default function SchoolFeeSetting({ setSelected }) {
         `91${adminPhone}`,
         (res) => {
           setOtpReqId(res?.message);
-          toast.success("OTP sent successfully");
+          showToast.success("OTP sent successfully");
           setLoading(false);
         },
         (err) => {
-          toast.error(err?.message || "Failed to send OTP");
+          showToast.error(err?.message || "Failed to send OTP");
           setLoading(false);
         },
       );
     } catch (error) {
-      toast.error(error?.message || error || "Failed to send OTP");
+      showToast.error(error?.message || error || "Failed to send OTP");
       setLoading(false);
     }
   };
@@ -409,22 +410,22 @@ export default function SchoolFeeSetting({ setSelected }) {
             });
             // }
 
-            toast.success("Verification successful!");
+            showToast.success("Verification successful!");
             setSelected("viewSetup");
           } catch (e) {
-            toast.error(e?.message || e || "Backend verification failed");
+            showToast.error(e?.message || e || "Backend verification failed");
           } finally {
             setSaving(false);
           }
         },
         (err) => {
-          toast.error(err?.message || "OTP verification failed");
+          showToast.error(err?.message || "OTP verification failed");
           setSaving(false);
         },
         otpReqId,
       );
     } catch (error) {
-      toast.error(error?.message || error || "Verification failed");
+      showToast.error(error?.message || error || "Verification failed");
       setSaving(false);
     }
   };
@@ -435,15 +436,15 @@ export default function SchoolFeeSetting({ setSelected }) {
         "11",
         (res) => {
           setOtpReqId(res?.message);
-          toast.success("OTP resent successfully");
+          showToast.success("OTP resent successfully");
         },
         (err) => {
-          toast.error(err?.message || "Failed to resend OTP");
+          showToast.error(err?.message || "Failed to resend OTP");
         },
         otpReqId,
       );
     } catch (error) {
-      toast.error(error?.message || error || "Failed to resend OTP");
+      showToast.error(error?.message || error || "Failed to resend OTP");
     }
   };
 

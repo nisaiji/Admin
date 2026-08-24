@@ -10,7 +10,6 @@ import {
   Eye,
   GraduationCap,
 } from "lucide-react";
-import toast from "react-hot-toast";
 
 import { getTH } from "./constants";
 import { useTCTheme } from "./ThemeContext";
@@ -29,6 +28,7 @@ import {
   isApprovedByParentTcRequest,
   mapTcRequestForDisplay,
 } from "./utils";
+import { showToast } from "../../services/toastService";
 
 const A4_PAGE_WIDTH = 794;
 const A4_PAGE_HEIGHT = 1123;
@@ -492,7 +492,7 @@ function IssuedTCModal({ record, onClose }) {
         `${safeTcNumber}_${safeName}.pdf`,
       );
     } catch (error) {
-      toast.error(error?.message || "Failed to download TC PDF");
+      showToast.error(error?.message || "Failed to download TC PDF");
     } finally {
       setDownloading(false);
     }

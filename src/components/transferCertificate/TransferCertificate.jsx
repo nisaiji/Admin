@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { FileClock, FileDown, GraduationCap } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 import { AlumniStep } from "./AlumniStep";
@@ -13,6 +13,7 @@ import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import { getTcRequestsFromResponse } from "./utils";
 import { useTCTheme, TCThemeProvider } from "./ThemeContext";
+import { showToast } from "../../services/toastService";
 
 const TAB_ITEMS = [
   { key: "pending", label: "Pending Requests", icon: <FileClock size={14} /> },
@@ -194,7 +195,7 @@ function TCPageInner() {
         } catch (error) {
           if (isActive) {
             setPendingRequests([]);
-            toast.error(
+            showToast.error(
               getErrorMessage(error, "Failed to fetch pending TC requests"),
             );
           }
@@ -221,7 +222,7 @@ function TCPageInner() {
       } catch (error) {
         if (isActive) {
           setAlumniRequests([]);
-          toast.error(
+          showToast.error(
             getErrorMessage(error, "Failed to fetch alumni TC requests"),
           );
         }

@@ -28,7 +28,7 @@ import DownArrow from "../../assets/images/darkmode/downArrow.png";
 import close from "../../assets/images/close.png";
 import calendar from "../../assets/images/calendar.png";
 import notes from "../../assets/images/notes.png";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
 import DeletePopup from "../DeleteMessagePopup";
@@ -42,6 +42,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { TextField } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { showToast } from "../../services/toastService";
 
 // Event - Manages the logic of the calendar, events, and month navigation
 const Event = () => {
@@ -506,7 +507,7 @@ const Event = () => {
         );
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setEventLoading(false);
     }
@@ -583,10 +584,10 @@ const Event = () => {
       if (res?.statusCode === 200) {
         setShowAddEvent(false);
         fetchEvents();
-        toast.success(res?.result);
+        showToast.success(res?.result);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -766,12 +767,12 @@ const Event = () => {
           : EndPoints.ADMIN.DELETE_EVENT;
       const response = await axiosClient.delete(`${url}/${eventToDelete._id}`);
       if (response?.statusCode === 200) {
-        toast.success(response.result);
+        showToast.success(response.result);
         setShowDeleteConfirmation(false);
         fetchEvents();
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }

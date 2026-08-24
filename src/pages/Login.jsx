@@ -3,7 +3,7 @@ import React, { useState, useMemo } from "react";
 import { useFormik } from "formik";
 import { jwtDecode } from "jwt-decode";
 import { Link, useNavigate } from "react-router-dom";
-import { Toaster, toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { axiosClient } from "../services/axiosClient";
 import LoginVideo from "../assets/videos/LoginVideo.mp4";
 import hide from "../assets/images/darkmode/hide.png";
@@ -18,6 +18,7 @@ import {
   setAuthData,
   setSessionCreatedStatus,
 } from "../store/AppAuthSlice";
+import { showToast } from "../services/toastService";
 
 /**
  * Login Component
@@ -45,8 +46,6 @@ function Login() {
 
   // State for managing loading spinner visibility
   const [loading, setLoading] = useState(false);
-
-  const [toastDisplayed, setToastDisplayed] = useState(false);
 
   // Translation hook for multilingual support
   const [t] = useTranslation();
@@ -86,9 +85,6 @@ function Login() {
     validationSchema, // Validation schema for form fields
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        if (toastDisplayed) return;
-        setToastDisplayed(true);
-        setTimeout(() => setToastDisplayed(false), 3000);
         setLoading(true); // Show loading spinner
 
         // Define API endpoint and payload based on login role
@@ -120,7 +116,7 @@ function Login() {
               localStorage.removeItem("temp_access_token");
               dispatch(setAuthData(res?.result?.accessToken));
               dispatch(setSessionCreatedStatus(hasSession));
-              toast.success(t("messages.login.success"));
+              showToast.success(t("messages.login.success"));
               resetForm();
               if (!hasSession) {
                 navigate("/onboard", { replace: true });
@@ -148,14 +144,14 @@ function Login() {
             localStorage.setItem("refresh_token", res?.result?.refreshToken);
             dispatch(setAuthData(res?.result?.accessToken));
             dispatch(setSessionCreatedStatus(hasSession));
-            toast.success(t("messages.login.success"));
+            showToast.success(t("messages.login.success"));
             resetForm();
             navigate("/", { replace: true });
           }
         }
       } catch (e) {
         // console.log({e});
-        toast.error(e); // Show error message
+        showToast.error(e); // Show error message
       } finally {
         setLoading(false); // Hide loading spinner
         setSubmitting(false); // Reset form submission state

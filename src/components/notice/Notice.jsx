@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import Breadcrumbs from "../BreadCrumbs";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,7 @@ import {
   DialogActions,
   Button
 } from "@mui/material";
+import { showToast } from "../../services/toastService";
 
 export default function Notice() {
   const { t } = useTranslation();
@@ -49,8 +50,6 @@ export default function Notice() {
 
   const [editingNoticeId, setEditingNoticeId] = useState(null);
   const [updatedDescription, setUpdatedDescription] = useState("");
-
-  const [toastDisplayed, setToastDisplayed] = useState(false);
 
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
 
@@ -93,7 +92,7 @@ export default function Notice() {
         setTotalRequestCount(resAdmin?.result?.total || 0);
       }
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to fetch notices");
+      showToast.error(e?.response?.data?.message || e?.message || "Failed to fetch notices");
     } finally {
       setLoading(false);
     }
@@ -110,13 +109,11 @@ export default function Notice() {
   };
 
   const handleSave = async () => {
-    if (toastDisplayed || isSubmitting) return;
+    if (isSubmitting) return;
     const errorMsg = validateData();
-    if (errorMsg) return toast.error(errorMsg);
+    if (errorMsg) return showToast.error(errorMsg);
 
     try {
-      setToastDisplayed(true);
-      setTimeout(() => setToastDisplayed(false), 3000);
       setIsSubmitting(true);
 
       let targetAudience = [];
@@ -130,13 +127,13 @@ export default function Notice() {
       });
 
       if (res?.statusCode === 201) {
-        toast.success(res?.result || "Notice posted successfully");
+        showToast.success(res?.result || "Notice posted successfully");
         setFormData({ description: "", toTeacher: false, toParent: false });
         setPageNo(1);
         fetchNotice();
       }
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to post notice");
+      showToast.error(e?.response?.data?.message || e?.message || "Failed to post notice");
     } finally {
       setIsSubmitting(false);
     }
@@ -149,7 +146,7 @@ export default function Notice() {
   };
 
   const handleConfirmUpdate = async (notice) => {
-    if (!updatedDescription.trim()) return toast.error("Description cannot be empty");
+    if (!updatedDescription.trim()) return showToast.error("Description cannot be empty");
     if (isSubmitting) return;
 
     try {
@@ -163,12 +160,12 @@ export default function Notice() {
       );
 
       if (res?.statusCode === 200) {
-        toast.success("Notice updated successfully");
+        showToast.success("Notice updated successfully");
         setEditingNoticeId(null);
         fetchNotice();
       }
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to update notice");
+      showToast.error(e?.response?.data?.message || e?.message || "Failed to update notice");
     } finally {
       setIsSubmitting(false);
     }
@@ -192,12 +189,12 @@ export default function Notice() {
         `${EndPoints.ADMIN.DELETE_NOTICE}/${deleteDialog.id}`,
       );
       if (res?.statusCode === 200) {
-        toast.success("Notice deleted successfully");
+        showToast.success("Notice deleted successfully");
         if (requests.length === 1 && pageNo > 1) setPageNo(prev => prev - 1);
         else fetchNotice();
       }
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to delete notice");
+      showToast.error(e?.response?.data?.message || e?.message || "Failed to delete notice");
     } finally {
       setIsSubmitting(false);
       setDeleteDialog({ open: false, id: null });
@@ -217,7 +214,7 @@ export default function Notice() {
         </div>
       )}
 
-      <Toaster position="top-center" reverseOrder={false} toastOptions={{ duration: 3000 }} />
+      <Toaster position="top-center" reverseOrder={false} />
 
       <div className={`${isDarkMode ? "bg-background2" : "bg-whiteBackground2"} px-4 sm:px-6 py-[25px] select-none min-h-screen transition-colors duration-300`}>
         <div className={`${isDarkMode ? "bg-gradient-to-r from-fromColor1 to-toColor1" : "bg-whiteBackground"} min-h-[calc(100vh-110px)] rounded-2xl shadow-sm overflow-hidden transition-colors duration-300`}>

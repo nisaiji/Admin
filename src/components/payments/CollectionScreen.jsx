@@ -21,9 +21,10 @@ import outstanding from "../../assets/images/payments/outstanding.png";
 import filter from "../../assets/images/payments/filter.png";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import moment from "moment/moment";
 import StudentPaymentInfo from "./dashboard/StudentPaymentInfo";
+import { showToast } from "../../services/toastService";
 
 const PAGE_LIMIT_OPTIONS = [10, 20, 25, 50, 100];
 
@@ -160,10 +161,16 @@ export default function CollectionScreen() {
   }, [classList, searchClass, searchSection]);
 
   const getFeeSummary = async () => {
+    if(!selectedSessionId){
+      showToast.error("Please select session")
+      return;
+    }
+    
     try {
       const params = {
         page: pageNo,
         limit: limit,
+        sessionId: selectedSessionId
       };
 
       if (selectedSessionId) params.sessionId = selectedSessionId;
@@ -179,7 +186,7 @@ export default function CollectionScreen() {
         setFeeSummaryData(res?.result);
       }
     } catch (e) {
-      toast.error(e?.message || "Failed to load collection data");
+      showToast.error(e?.message || "Failed to load collection data");
     }
   };
 

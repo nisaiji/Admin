@@ -11,9 +11,9 @@ import EndPoints from "../services/EndPoints";
 import { axiosClient } from "../services/axiosClient";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
-import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
 import refresh from "../assets/images/refresh.png";
+import { showToast } from "../services/toastService";
 
 const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
   // Hooks and state variables
@@ -70,7 +70,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         setStep(3);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -85,16 +85,16 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
       await window?.verifyOtp(
         Number(otp.join("")),
         async (res) => {
-          toast.success("Email verified successfully");
+          showToast.success("Email verified successfully");
           await emailVerifiedApi(res?.message);
         },
         (err) => {
-          toast.error(err?.message);
+          showToast.error(err?.message);
         },
         status?.emailOtpReqId,
       );
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -117,7 +117,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         email,
         (res) => {
           dispatch(setAuth({ email, emailOtpReqId: res?.message }));
-          toast.success("OTP sent successfully");
+          showToast.success("OTP sent successfully");
           setOtpVisible(true);
           document.getElementById("otp-0")?.focus();
           setTimer(30);
@@ -125,7 +125,7 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         },
         (err) => {
           // console.log({ err });
-          toast.error(err?.message);
+          showToast.error(err?.message);
         },
       );
     } catch (e) {
@@ -171,19 +171,19 @@ const Step2 = ({ goback, setStep, loading, setLoading, currentStep }) => {
         "3", // '3' = EMAIL
         (res) => {
           dispatch(setAuth({ emailOtpReqId: res?.message }));
-          toast.success("OTP resent successfully");
+          showToast.success("OTP resent successfully");
           setOtp(["", "", "", "", "", ""]);
           inputRefs.current[0]?.focus();
           setTimer(30);
           setIsResendDisabled(true);
         },
         (err) => {
-          toast.error(err?.message);
+          showToast.error(err?.message);
         },
         status?.emailOtpReqId,
       );
     } catch (e) {
-      // toast.error(e);
+      // showToast.error(e);
     } finally {
       setLoading(false);
     }

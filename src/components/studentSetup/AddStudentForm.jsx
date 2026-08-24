@@ -11,7 +11,7 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
@@ -30,6 +30,7 @@ import REGEX from "../../utils/regix";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment from "moment";
+import { showToast } from "../../services/toastService";
 
 /**
  * AddStudent component renders the form and handles all logic for adding a student.
@@ -41,7 +42,6 @@ const AddStudent = () => {
   const { t } = useTranslation();
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
-  const [toastDisplayed, setToastDisplayed] = useState(false);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   // Class options for dropdown (translated)
@@ -138,11 +138,7 @@ const AddStudent = () => {
     onSubmit: async (values) => {
       const e = validateData(values);
       if (e) {
-        if (!toastDisplayed) {
-          setToastDisplayed(true);
-          toast.error(e);
-          setTimeout(() => setToastDisplayed(false), 3000);
-        }
+        showToast.error(e);
         return;
       }
 
@@ -184,13 +180,13 @@ const AddStudent = () => {
         if (res?.statusCode === 201) {
           // console.log(res.result);
           
-          toast.success(res?.result?.message);
+          showToast.success(res?.result?.message);
           navigate(-1);
         }
       } catch (e) {
         // console.log(e);
         
-        toast.error(e);
+        showToast.error(e);
       } finally {
         setLoading(false);
       }
@@ -220,7 +216,7 @@ const AddStudent = () => {
 
       setClassList(filteredSortedClasses);
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     }
   };
 

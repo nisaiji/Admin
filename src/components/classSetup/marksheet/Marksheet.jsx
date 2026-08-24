@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Breadcrumbs from "../../BreadCrumbs";
 import { useSelector } from "react-redux";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 import confirm1 from "../../../assets/images/darkmode/confirm1.png";
 import confirm2 from "../../../assets/images/darkmode/confirm2.png";
@@ -15,6 +15,7 @@ import EndPoints from "../../../services/EndPoints";
 import ConfirmationPopup from "../../ConfirmationPopup2";
 import { FormControl, MenuItem, Select } from "@mui/material";
 import CONSTANT from "../../../utils/constants";
+import { showToast } from "../../../services/toastService";
 
 export default function Marksheet() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
@@ -153,12 +154,12 @@ export default function Marksheet() {
       // console.log(res);
 
       if (res?.statusCode === 200 || res?.statusCode === 201) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         getStudentsByExam();
         setIsEdit(false);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -185,8 +186,7 @@ export default function Marksheet() {
   ) => {
     // Show toast if value exceeds max
     if (value > maxMarks) {
-      toast.dismiss(); // remove any existing toasts
-      toast.error(`Marks must be between 0 and ${maxMarks}`);
+      showToast.error(`Marks must be between 0 and ${maxMarks}`);
       return;
     }
 
@@ -248,7 +248,7 @@ export default function Marksheet() {
     if (!grade) return;
 
     if (CONSTANT.GRADES.indexOf(grade) < CONSTANT.GRADES.indexOf(maxGrade)) {
-      toast.error(`Grade cannot be higher than max grade ${maxGrade}`);
+      showToast.error(`Grade cannot be higher than max grade ${maxGrade}`);
       return;
     }
 
@@ -344,12 +344,12 @@ export default function Marksheet() {
       );
       // console.log(res)
       if (res?.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         setShowConfirm2(false);
       }
     } catch (e) {
       // console.log(e)
-      toast.error(e);
+      showToast.error(e);
     }
   };
 
@@ -491,8 +491,7 @@ export default function Marksheet() {
                           type="button"
                           onClick={() => {
                             if (!isAllMarksFilled()) {
-                              toast.dismiss();
-                              toast.error(
+                              showToast.error(
                                 "Please fill all marks/grades before publishing",
                               );
                               return;
@@ -538,7 +537,9 @@ export default function Marksheet() {
                                       : ""}
                                   </span>
                                 </span>
-                                <span className={`text-xs font-poppins-medium ${mutedText}`}>
+                                <span
+                                  className={`text-xs font-poppins-medium ${mutedText}`}
+                                >
                                   {subj?.subjectType === "MAIN_SUBJECT"
                                     ? `T/${maxTheoryMarks} P/${maxPracticalMarks}`
                                     : "T/Gr P/Gr"}
@@ -683,7 +684,9 @@ export default function Marksheet() {
                                     <div className="flex justify-center items-center space-x-2">
                                       <div
                                         className={`flex items-center justify-center size-10 rounded font-semibold ${tableInputBg} ${
-                                          isDarkMode ? "" : "border border-borderGray3"
+                                          isDarkMode
+                                            ? ""
+                                            : "border border-borderGray3"
                                         }`}
                                       >
                                         <input
@@ -715,7 +718,9 @@ export default function Marksheet() {
 
                                       <div
                                         className={`flex items-center justify-center size-10 rounded font-semibold ${tableInputBg} ${
-                                          isDarkMode ? "" : "border border-borderGray3"
+                                          isDarkMode
+                                            ? ""
+                                            : "border border-borderGray3"
                                         }`}
                                       >
                                         <input
@@ -756,9 +761,10 @@ export default function Marksheet() {
                                           fontSize: "14px",
                                           borderRadius: "6px",
                                           backgroundColor: tableSurface,
-                                          "& .MuiOutlinedInput-notchedOutline": {
-                                            border: "none",
-                                          },
+                                          "& .MuiOutlinedInput-notchedOutline":
+                                            {
+                                              border: "none",
+                                            },
                                           "& .MuiSvgIcon-root": {
                                             color: tableSurfaceText,
                                           },
@@ -862,9 +868,10 @@ export default function Marksheet() {
                                           fontSize: "14px",
                                           borderRadius: "6px",
                                           backgroundColor: tableSurface,
-                                          "& .MuiOutlinedInput-notchedOutline": {
-                                            border: "none",
-                                          },
+                                          "& .MuiOutlinedInput-notchedOutline":
+                                            {
+                                              border: "none",
+                                            },
                                           "& .MuiSvgIcon-root": {
                                             color: tableSurfaceText,
                                           },
@@ -967,7 +974,9 @@ export default function Marksheet() {
                               <div className="flex justify-center">
                                 <p
                                   className={`font-poppins-regular ${tableInputBg} text-center py-2 min-w-[80px] rounded-md ${
-                                    isDarkMode ? "" : "border border-borderGray3"
+                                    isDarkMode
+                                      ? ""
+                                      : "border border-borderGray3"
                                   } ${
                                     totalMarksObtained >= totalMarks / 2
                                       ? "text-textGreen"

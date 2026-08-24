@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { AlertCircle, ArrowLeft, Check, CheckCircle2, FileDown, Plus, Printer, X } from "lucide-react";
-import toast from "react-hot-toast";
 
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
@@ -9,6 +8,7 @@ import { DEFAULT_CHECKLIST, TC_PROMOTION_OPTIONS } from "./constants";
 import { useTCTheme } from "./ThemeContext";
 import { CertificateSheet, DropField, InfoGrid, ModalShell, SectionCard, TextField } from "./shared";
 import { formatDisplayDate, formatFeeStatus, getClassSectionLabel } from "./utils";
+import { showToast } from "../../services/toastService";
 
 const REASON_OPTIONS = [
   { label: "Parent Transfer", value: "parentTransfer" },
@@ -296,7 +296,7 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
 
   async function handleSubmit() {
     if (!hasStudentIdentifiers) {
-      toast.error("Student data is incomplete. Please reselect the student.");
+      showToast.error("Student data is incomplete. Please reselect the student.");
       return;
     }
 
@@ -323,11 +323,11 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
       const response = await axiosClient.post(EndPoints.ADMIN.APPLY_TC, payload);
       const successMessage = response?.result?.message || "TC request submitted successfully";
 
-      toast.success(successMessage);
+      showToast.success(successMessage);
       setPreviewing(false);
       onRequestSubmitted?.();
     } catch (error) {
-      toast.error(
+      showToast.error(
         typeof error === "string"
           ? error
           : error?.message || "Failed to submit TC request",

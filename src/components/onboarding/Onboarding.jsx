@@ -4,13 +4,14 @@ import { Info, ArrowRight } from "lucide-react";
 import { SessionCard } from "./SessionCard";
 import { motion, AnimatePresence } from "motion/react";
 import { ConfirmationModal } from "./ConfirmationModel";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { setSessionCreatedStatus } from "../../store/AppAuthSlice";
 import { createSession, getErrorMessage } from "../../services/sessionService";
 import { C, C_LIGHT } from "../../utils/constants";
+import { showToast } from "../../services/toastService";
 
 const getRealSessions = () => {
   const today = moment();
@@ -77,13 +78,13 @@ export function OnboardingScreen() {
       });
 
       if (res?.statusCode === 200 || res?.statusCode === 201) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         dispatch(setSessionCreatedStatus(true));
         setShowConfirm(false);
         navigate("/", { replace: true });
       }
     } catch (error) {
-      toast.error(getErrorMessage(error, "Error creating session."));
+      showToast.error(getErrorMessage(error, "Error creating session."));
     }
   };
 

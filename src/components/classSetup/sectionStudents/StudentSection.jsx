@@ -52,7 +52,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../../services/axiosClient";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Searchw from "../../../assets/images/Search.png";
 import crossw from "../../../assets/images/cross.png";
 import infow from "../../../assets/images/info.png";
@@ -73,6 +73,7 @@ import {
   StudentDetailSidebar,
   loadDetailedStudent,
 } from "../../studentSetup/studentInfoSidebar";
+import { showToast } from "../../../services/toastService";
 
 export default function StudentSection() {
   // Importing necessary modules and hooks
@@ -172,7 +173,7 @@ export default function StudentSection() {
       setCurrStudent(nextStudent);
       setStudentInfoModelOpen(true);
     } catch (error) {
-      toast.error(error?.message || "Failed to load student details");
+      showToast.error(error?.message || "Failed to load student details");
     }
   };
 
@@ -246,7 +247,7 @@ export default function StudentSection() {
         existFullName?.toLowerCase() === newFullName?.toLowerCase() &&
         userExist?.gender === newStudent?.gender
       ) {
-        toast.error(t("duplicate"));
+        showToast.error(t("duplicate"));
         return false;
       }
     }
@@ -330,7 +331,7 @@ export default function StudentSection() {
     if (e) {
       if (!toastDisplayed) {
         setToastDisplayed(true);
-        toast.error(e);
+        showToast.error(e);
         setTimeout(() => setToastDisplayed(false), 3000);
       }
       return;
@@ -388,7 +389,7 @@ export default function StudentSection() {
       // console.log(response);
 
       if ([200, 201].includes(response?.statusCode)) {
-        toast.success(isUpdate ? response?.result : response?.result?.message);
+        showToast.success(isUpdate ? response?.result : response?.result?.message);
         fetchStudents();
         if (!isUpdate) {
           setNewStudent({
@@ -412,7 +413,7 @@ export default function StudentSection() {
         setEditSNo(null);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
       // console.log({e});
     } finally {
       setLoading(false);
@@ -431,7 +432,7 @@ export default function StudentSection() {
   const uploadExcelSheet = async (file) => {
     try {
       if (!file) {
-        toast.error("Please select a valid Excel file.");
+        showToast.error("Please select a valid Excel file.");
         return;
       }
 
@@ -457,12 +458,12 @@ export default function StudentSection() {
         },
       );
       if (res?.statusCode === 201 || res?.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         fetchStudents();
       }
     } catch (e) {
       const err = JSON.parse(e);
-      toast.error(`error in student ${err?.student} of ${err?.reason}`);
+      showToast.error(`error in student ${err?.student} of ${err?.reason}`);
     } finally {
       setLoading(false);
     }
@@ -499,7 +500,7 @@ export default function StudentSection() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }

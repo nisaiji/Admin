@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
-import toast from "react-hot-toast";
 import paid from "../../../assets/images/payments/paid.png";
 import unpaid from "../../../assets/images/payments/unpaid.png";
 import moment from "moment";
@@ -10,6 +9,7 @@ import {
   StudentDetailSidebar,
   loadDetailedStudent,
 } from "../../studentSetup/studentInfoSidebar";
+import { showToast } from "../../../services/toastService";
 
 export default function StudentPaymentInfo({
   student = {},
@@ -78,7 +78,7 @@ export default function StudentPaymentInfo({
       try {
         await Promise.all([getStudentDues(), getStudentHistory()]);
       } catch (e) {
-        toast.error(e?.message || "Failed to load student payment data");
+        showToast.error(e?.message || "Failed to load student payment data");
       } finally {
         if (isActive) {
           setLoading(false);
@@ -133,7 +133,7 @@ export default function StudentPaymentInfo({
       );
       setDetailStudent(detailedStudent);
     } catch (error) {
-      toast.error(error?.message || "Failed to load student details");
+      showToast.error(error?.message || "Failed to load student details");
     } finally {
       setProfileLoading(false);
     }

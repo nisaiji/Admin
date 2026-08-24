@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import toast from "react-hot-toast";
 import { Eye } from "lucide-react";
 import svgPaths from "./svg.jsx";
 import { axiosClient } from "../../../services/axiosClient.js";
@@ -13,6 +12,7 @@ import moment from "moment";
 import FeeInfo from "./FeeInfo.jsx";
 import view from "../../../assets/images/fees/view.png";
 import edit from "../../../assets/images/fees/edit.png";
+import { showToast } from "../../../services/toastService.js";
 
 function IconSearch() {
   return (
@@ -286,14 +286,14 @@ export default function FeeStructureView({ setSelected }) {
 
   const openClassFeeStructure = async (row) => {
     if (row?.status === "ACTIVE") {
-      toast.error("Verified class fee structures cannot be updated.");
+      showToast.error("Verified class fee structures cannot be updated.");
       return;
     }
 
     const feeStructureId = getClassFeeStructureId(row);
 
     if (!feeStructureId) {
-      toast.error("Fee structure details are unavailable.");
+      showToast.error("Fee structure details are unavailable.");
       return;
     }
 
@@ -324,7 +324,7 @@ export default function FeeStructureView({ setSelected }) {
       );
       setSelected("feeStructureSetup");
     } catch (e) {
-      toast.error(
+      showToast.error(
         e?.response?.data?.message || e?.message || "Failed to load fee structure details.",
       );
     }
@@ -348,7 +348,7 @@ export default function FeeStructureView({ setSelected }) {
     const feeStructureId = row?._id;
 
     if (!feeStructureId) {
-      toast.error("Fee structure details are unavailable.");
+      showToast.error("Fee structure details are unavailable.");
       return;
     }
 
@@ -365,7 +365,7 @@ export default function FeeStructureView({ setSelected }) {
 
       setFeeInfoData(record);
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setFeeInfoLoading(false);
     }
@@ -475,7 +475,7 @@ export default function FeeStructureView({ setSelected }) {
               <button
                 onClick={async () => {
                   if (!canCreateClassFeeStructure) {
-                    toast.error("Create fee cycle and fee heads first.");
+                    showToast.error("Create fee cycle and fee heads first.");
                     return;
                   }
 

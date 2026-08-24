@@ -8,7 +8,6 @@ import {
   Select,
   Stack,
 } from "@mui/material";
-import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 import { axiosClient } from "../../services/axiosClient";
@@ -17,6 +16,7 @@ import { getTH } from "./constants";
 import { useTCTheme } from "./ThemeContext";
 import { AvatarBadge } from "./shared";
 import { mapStudentForTc } from "./utils";
+import { showToast } from "../../services/toastService";
 
 const getFilterSelectSx = (C) => ({
 
@@ -452,7 +452,7 @@ export function SelectionStep({ onSelect }) {
       setClassList(filteredSortedClasses);
     } catch (error) {
       setClassList([]);
-      toast.error(getErrorMessage(error, "Failed to fetch classes"));
+      showToast.error(getErrorMessage(error, "Failed to fetch classes"));
     }
   }, [selectedSessionId]);
 
@@ -516,7 +516,7 @@ export function SelectionStep({ onSelect }) {
 
         setStudentList([]);
         setTotalStudentCount(0);
-        toast.error(getErrorMessage(error, "Failed to fetch students"));
+        showToast.error(getErrorMessage(error, "Failed to fetch students"));
       } finally {
         if (requestId === requestIdRef.current) {
           setLoading(false);

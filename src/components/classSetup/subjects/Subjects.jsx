@@ -40,7 +40,7 @@ import React, { useState, useEffect } from "react";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { useSelector } from "react-redux";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Breadcrumbs from "../../BreadCrumbs";
 import email from "../../../assets/images/darkmode/email.png";
 import phone from "../../../assets/images/darkmode/Phone.png";
@@ -56,6 +56,7 @@ import {
   Button,
 } from "@mui/material";
 import { C_LIGHT } from "../../../utils/constants";
+import { showToast } from "../../../services/toastService";
 
 export default function Subjects() {
   // Theme and user role
@@ -170,11 +171,11 @@ export default function Subjects() {
         },
       );
       if (res?.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         getAssignedSubjects();
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -200,7 +201,7 @@ export default function Subjects() {
         },
       );
       if (res?.statusCode === 201) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         getAssignedSubjects();
         setSubjectList(
           subjectList.filter((s) => s._id !== newSubject?.subjectId),
@@ -208,7 +209,7 @@ export default function Subjects() {
         setNewSubject({ isMainSubject: false, subjectId: "", teacherId: "" });
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }

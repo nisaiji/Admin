@@ -5,12 +5,12 @@ import { Plus, X, Loader2 } from "lucide-react";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import { setClassAndSectionData } from "../../../store/AppAuthSlice";
-import toast from "react-hot-toast";
 
 import editfeeheadDark from "../../../assets/images/darkmode/editfeehead.png";
 import deletefeeheadDark from "../../../assets/images/darkmode/deletefeehead.png";
 import editfeeheadLight from "../../../assets/images/edit2.png";
 import deletefeeheadLight from "../../../assets/images/delete2.png";
+import { showToast } from "../../../services/toastService";
 
 const DEFAULT_ROW = {
   name: "",
@@ -147,10 +147,10 @@ export default function Step1({
               getRowId(row) === editingId ? normalizedRow : row,
             ),
           );
-          toast.success(response?.result?.message || "Fee head updated");
+          showToast.success(response?.result?.message || "Fee head updated");
         } else {
           syncHeads((previous) => [...previous, normalizedRow]);
-          toast.success(response?.result?.message || "Fee head created");
+          showToast.success(response?.result?.message || "Fee head created");
         }
 
         // Fetch and update redux after creation/update
@@ -172,7 +172,7 @@ export default function Step1({
         resetDraft();
       }
     } catch (error) {
-      toast.error(error?.message || error || "Failed to save fee head");
+      showToast.error(error?.message || error || "Failed to save fee head");
     } finally {
       setLoading(false);
     }
@@ -206,7 +206,7 @@ export default function Step1({
           resetDraft();
         }
 
-        toast.success(response?.result?.message || "Fee head deleted");
+        showToast.success(response?.result?.message || "Fee head deleted");
 
         // Fetch and update redux after deletion
         try {
@@ -225,7 +225,7 @@ export default function Step1({
         }
       }
     } catch (error) {
-      toast.error(error?.message || error || "Failed to delete fee head");
+      showToast.error(error?.message || error || "Failed to delete fee head");
     } finally {
       setLoading(false);
     }

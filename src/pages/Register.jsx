@@ -17,13 +17,14 @@ import { useNavigate } from "react-router-dom";
 import Tick from "../assets/images/Tick.png";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import Spinner from "../components/Spinner";
 import { setAuthData } from "../store/AppAuthSlice";
 import { useDispatch } from "react-redux";
 import { generateToken } from "../notifications/firebaseConfig";
 import logo from "../assets/images/deer logo.png";
+import { showToast } from "../services/toastService";
 
 function Register() {
   // React hooks and states for navigation, loading, and step tracking
@@ -85,14 +86,14 @@ function Register() {
                 localStorage.getItem("temp_access_token")
               );
               localStorage.removeItem("temp_access_token");
-              toast.success("Registration process completed.");
+              showToast.success("Registration process completed.");
               localStorage.removeItem("page");
               dispatch(setAuthData(localStorage.getItem("access_token")));
               setTimeout(() => {
                 navigate("/");
               }, 1500);
             } else {
-              toast.error(
+              showToast.error(
                 "Registerations already in progress - please wait for some time"
               );
             }

@@ -10,7 +10,7 @@ import youtube from "../../assets/images/youtube.png";
 import * as Yup from "yup";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 import statesAndCity from "../../assets/locale/statesAndCity/en";
@@ -26,6 +26,7 @@ import {
   Select,
 } from "@mui/material";
 import { useSelector } from "react-redux";
+import { showToast } from "../../services/toastService";
 
 export default function AdminProfile() {
   const [admin, setAdmin] = useState([]);
@@ -101,7 +102,7 @@ export default function AdminProfile() {
           setSelectedCountry("India");
           setStates(StateAndDistricts.states);
           const selectedState = StateAndDistricts.states.find(
-            (state) => state.state === res?.result?.state
+            (state) => state.state === res?.result?.state,
           );
           setDistricts(selectedState ? selectedState.districts : []);
         }
@@ -113,7 +114,7 @@ export default function AdminProfile() {
         });
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -139,13 +140,13 @@ export default function AdminProfile() {
             "city",
             "pincode",
           ].map((field) =>
-            Yup.reach(validationSchema, field).validate(values[field])
-          )
+            Yup.reach(validationSchema, field).validate(values[field]),
+          ),
         );
       } catch (e) {
         if (!toastDisplayed) {
           setToastDisplayed(true);
-          toast.error(e.message);
+          showToast.error(e.message);
           setTimeout(() => setToastDisplayed(false), 3000);
         }
         return;
@@ -171,15 +172,15 @@ export default function AdminProfile() {
 
       const res = await axiosClient.put(
         EndPoints.ADMIN.PROFILE_UPDATE,
-        requestBody
+        requestBody,
       );
       if (res?.statusCode === 200) {
         localStorage.setItem("schoolName", values.schoolName);
-        toast.success(res.result);
+        showToast.success(res.result);
         getadmin();
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -203,11 +204,11 @@ export default function AdminProfile() {
         youtube: values.youtube || undefined,
       });
       if (res?.statusCode === 200) {
-        toast.success(res.result);
+        showToast.success(res.result);
         getadmin();
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -239,7 +240,7 @@ export default function AdminProfile() {
   // Handle state selection
   const handleStateChange = (e) => {
     const selectedState = StateAndDistricts.states.find(
-      (state) => state.state === e.target.value
+      (state) => state.state === e.target.value,
     );
 
     // Reset fields when changing the state

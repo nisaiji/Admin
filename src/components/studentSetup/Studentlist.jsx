@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import {
   ChevronLeft,
   ChevronRight,
@@ -44,6 +44,7 @@ import {
   getStudentRecordId,
   loadDetailedStudent,
 } from "./studentInfoSidebar";
+import { showToast } from "../../services/toastService";
 
 const PAGE_LIMIT_OPTIONS = [10, 20, 25, 50, 100];
 const CLASS_OPTION_KEYS = [
@@ -629,7 +630,7 @@ export default function Studentlist() {
       } catch (error) {
         if (isActive) {
           setClassList([]);
-          toast.error(getApiErrorMessage(error, "Failed to load classes"));
+          showToast.error(getApiErrorMessage(error, "Failed to load classes"));
         }
       }
     }
@@ -726,7 +727,7 @@ export default function Studentlist() {
         setStudentList([]);
         setTotalStudentCount(0);
         setErrorMessage(message);
-        toast.error(message);
+        showToast.error(message);
       } finally {
         if (requestId === requestIdRef.current) {
           setLoading(false);
@@ -781,7 +782,7 @@ export default function Studentlist() {
       setEditStudent(null);
       setDetailStudent(detailedStudent);
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to load student details"));
+      showToast.error(getApiErrorMessage(error, "Failed to load student details"));
     }
   }
 
@@ -791,7 +792,7 @@ export default function Studentlist() {
       setEditStudent(detailedStudent);
       setDetailStudent(null);
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to load student details"));
+      showToast.error(getApiErrorMessage(error, "Failed to load student details"));
     }
   }
 
@@ -799,7 +800,7 @@ export default function Studentlist() {
     const studentId = draft?.id;
 
     if (!studentId) {
-      toast.error("Student id is missing");
+      showToast.error("Student id is missing");
       return;
     }
 
@@ -817,11 +818,11 @@ export default function Studentlist() {
         throw new Error(response?.message ?? "Failed to update student");
       }
 
-      toast.success(response?.result ?? "Student updated");
+      showToast.success(response?.result ?? "Student updated");
       setEditStudent(null);
       await fetchStudents();
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to update student"));
+      showToast.error(getApiErrorMessage(error, "Failed to update student"));
     } finally {
       setSavingStudent(false);
     }

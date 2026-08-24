@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { C, C_LIGHT } from "../../utils/constants";
@@ -523,8 +522,6 @@ const CalendarComponent = ({ events = [], workdays = [], updateDate }) => {
           })}
         </div>
       </div>
-
-      <Toaster />
     </div>
   );
 };

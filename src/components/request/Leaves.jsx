@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import EndPoints from "../../services/EndPoints";
 import { axiosClient } from "../../services/axiosClient";
@@ -33,6 +33,7 @@ import {
   RefreshCw,
   XCircle,
 } from "lucide-react";
+import { showToast } from "../../services/toastService";
 
 const TAB_ITEMS = ["PENDING", "APPROVED", "REJECTED", "ALL"];
 const PAGE_SIZE_OPTIONS = [10, 20, 25, 50, 100];
@@ -265,7 +266,7 @@ export default function Leaves() {
     } catch (error) {
       const message = getApiErrorMessage(error, "Failed to load leave requests");
       setErrorMessage(message);
-      toast.error(message);
+      showToast.error(message);
     } finally {
       setLoading(false);
     }
@@ -321,7 +322,7 @@ export default function Leaves() {
     if (status === "ACCEPT") {
       const validationError = validateData();
       if (validationError) {
-        toast.error(validationError);
+        showToast.error(validationError);
         return;
       }
     }
@@ -342,13 +343,13 @@ export default function Leaves() {
       const res = await axiosClient.put(EndPoints.ADMIN.UPDATE_LEAVE, payload);
 
       if (res?.statusCode === 200) {
-        toast.success(res?.result || "Leave request updated");
+        showToast.success(res?.result || "Leave request updated");
         setIsRejectDialogOpen(false);
         setRejectTargetId("");
         await fetchLeaves();
       }
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to update leave request"));
+      showToast.error(getApiErrorMessage(error, "Failed to update leave request"));
     } finally {
       setActionLoadingId("");
     }

@@ -11,11 +11,11 @@ import "chart.js/auto";
 import CONSTANT, { C, C_LIGHT } from "../../utils/constants";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import toast from "react-hot-toast";
 import { setClassAndSectionData } from "../../store/AppAuthSlice";
 import { useDispatch } from "react-redux";
 import { ChevronRight, ChevronLeft, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { showToast } from "../../services/toastService";
 
 /* ─── Chart Dropdown ─────────────────────────────────────────── */
 function ChartDropdown({ value, options, onChange, isDarkMode }) {
@@ -652,7 +652,7 @@ export default function AttendanceData({
         setTotalStudentClassSectionWise(result?.totalStudent);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -846,7 +846,7 @@ export default function AttendanceData({
         setTotalStudentClassSectionWise(result?.totalStudent);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
