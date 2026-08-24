@@ -162,7 +162,7 @@ export default function CollectionScreen() {
 
   const getFeeSummary = async () => {
     if(!selectedSessionId){
-      showToast.error("Please select session")
+      showToast.error("Please select Session")
       return;
     }
     

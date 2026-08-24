@@ -674,6 +674,7 @@ export default function Studentlist() {
   const fetchStudents = useCallback(
     async (overrides = {}) => {
       if (!selectedSessionId) {
+        showToast.error("Please select Session");
         setStudentList([]);
         setTotalStudentCount(0);
         setErrorMessage("");
@@ -782,7 +783,9 @@ export default function Studentlist() {
       setEditStudent(null);
       setDetailStudent(detailedStudent);
     } catch (error) {
-      showToast.error(getApiErrorMessage(error, "Failed to load student details"));
+      showToast.error(
+        getApiErrorMessage(error, "Failed to load student details"),
+      );
     }
   }
 
@@ -792,7 +795,9 @@ export default function Studentlist() {
       setEditStudent(detailedStudent);
       setDetailStudent(null);
     } catch (error) {
-      showToast.error(getApiErrorMessage(error, "Failed to load student details"));
+      showToast.error(
+        getApiErrorMessage(error, "Failed to load student details"),
+      );
     }
   }
 

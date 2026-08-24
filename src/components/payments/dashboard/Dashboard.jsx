@@ -201,7 +201,7 @@ export function PaymentDashboard() {
 
   const getFeeSummary = async () => {
     if (!selectedSessionId) {
-      showToast.error("Please select session");
+      showToast.error("Please select Session");
       return;
     }
 
@@ -220,7 +220,7 @@ export function PaymentDashboard() {
 
   const getTransitionHistory = async () => {
     if (!selectedSessionId) {
-      showToast.error("Please select session");
+      showToast.error("Please select Session");
       return;
     }
     try {

@@ -31,7 +31,14 @@ import logo from "../assets/images/deer logo.png";
 import { C, C_LIGHT } from "../utils/constants";
 
 /* ─── Reusable dropdown component ────────────────────────────── */
-function NavDrop({ label, items, icon, align = "left", buttonAriaLabel , isDarkMode}) {
+function NavDrop({
+  label,
+  items,
+  icon,
+  align = "left",
+  buttonAriaLabel,
+  isDarkMode,
+}) {
   const themeC = isDarkMode ? C : C_LIGHT;
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -139,8 +146,8 @@ function NavDrop({ label, items, icon, align = "left", buttonAriaLabel , isDarkM
                     transition: "background 0.12s",
                   }}
                   onMouseEnter={(e) =>
-                  (e.currentTarget.style.background =
-                    "rgba(255,255,255,0.05)")
+                    (e.currentTarget.style.background =
+                      "rgba(255,255,255,0.05)")
                   }
                   onMouseLeave={(e) =>
                     (e.currentTarget.style.background = "transparent")
@@ -177,7 +184,7 @@ function NavDrop({ label, items, icon, align = "left", buttonAriaLabel , isDarkM
 }
 
 /* ─── Flat nav button ─────────────────────────────────────────── */
-function NavBtn({ label, icon, active, onClick , isDarkMode}) {
+function NavBtn({ label, icon, active, onClick, isDarkMode }) {
   const themeC = isDarkMode ? C : C_LIGHT;
   return (
     <button
@@ -222,11 +229,13 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  
+
   const { data, teacherData } = useSelector((state) => state.appAuth);
   const role = useSelector((state) => state.appAuth.role);
   const dispatch = useDispatch();
-  const isDarkMode = useSelector((state) => state.appConfig?.isDarkMode ?? true);
+  const isDarkMode = useSelector(
+    (state) => state.appConfig?.isDarkMode ?? true,
+  );
   const themeC = isDarkMode ? C : C_LIGHT;
 
   const isPathActive = (path) =>
@@ -251,7 +260,7 @@ const Navbar = () => {
   // Determine profile photo if available
   const profilePhoto =
     role === "classTeacher" || role === "teacher"
-      ? teacherData?.photo
+      ? `data:image/jpeg;base64,${teacherData?.photo}`
       : role === "admin"
         ? data?.photo
         : null;
@@ -323,7 +332,9 @@ const Navbar = () => {
 
       {/* ── Class Teacher: single "Classroom" link ────────── */}
       {role === "classTeacher" && (
-        <NavBtn isDarkMode={isDarkMode} label={t("titles.classRoom")}
+        <NavBtn
+          isDarkMode={isDarkMode}
+          label={t("titles.classRoom")}
           icon={<BookOpen size={14} />}
           active={isPathActive("/student-menu")}
           onClick={() => navigate("/student-menu")}
@@ -334,7 +345,9 @@ const Navbar = () => {
       {role === "admin" && (
         <>
           {/* Setup dropdown */}
-          <NavDrop isDarkMode={isDarkMode} label={t("setup")}
+          <NavDrop
+            isDarkMode={isDarkMode}
+            label={t("setup")}
             items={[
               {
                 label: t("roles.teacher"),
@@ -358,7 +371,9 @@ const Navbar = () => {
           />
 
           {/* SIS dropdown */}
-          <NavDrop isDarkMode={isDarkMode} label={t("roles.student")}
+          <NavDrop
+            isDarkMode={isDarkMode}
+            label={t("roles.student")}
             items={[
               {
                 label: t("roles.student"),
@@ -376,7 +391,9 @@ const Navbar = () => {
           />
 
           {/* Requests dropdown */}
-          <NavDrop isDarkMode={isDarkMode} label={t("titles.requests")}
+          <NavDrop
+            isDarkMode={isDarkMode}
+            label={t("titles.requests")}
             items={[
               {
                 label: "Password Reset",
@@ -394,14 +411,18 @@ const Navbar = () => {
           />
 
           {/* Notice button */}
-          <NavBtn isDarkMode={isDarkMode} label={t("titles.notice")}
+          <NavBtn
+            isDarkMode={isDarkMode}
+            label={t("titles.notice")}
             icon={<Megaphone size={14} />}
             active={isPathActive("/notice")}
             onClick={() => navigate("/notice")}
           />
 
           {/* Payments button */}
-          <NavBtn isDarkMode={isDarkMode} label={t("titles.payments")}
+          <NavBtn
+            isDarkMode={isDarkMode}
+            label={t("titles.payments")}
             icon={<CreditCard size={14} />}
             active={isPathActive("/payments")}
             onClick={() => navigate("/payments")}
@@ -474,7 +495,9 @@ const Navbar = () => {
       </button> */}
 
       {/* ── User avatar / profile dropdown ────────────────── */}
-      <NavDrop isDarkMode={isDarkMode} label=""
+      <NavDrop
+        isDarkMode={isDarkMode}
+        label=""
         align="right"
         buttonAriaLabel="Open profile menu"
         icon={
@@ -519,14 +542,14 @@ const Navbar = () => {
           { divider: true, label: "" },
           ...(role === "admin"
             ? [
-              {
-                label: "Settings",
-                icon: <Settings size={13} />,
-                iconColor: themeC.textSub,
-                onClick: () => navigate("/settings"),
-              },
-              { divider: true, label: "" },
-            ]
+                {
+                  label: "Settings",
+                  icon: <Settings size={13} />,
+                  iconColor: themeC.textSub,
+                  onClick: () => navigate("/settings"),
+                },
+                { divider: true, label: "" },
+              ]
             : []),
           {
             label: t("logout"),

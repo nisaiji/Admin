@@ -13,6 +13,7 @@ import FeeInfo from "./FeeInfo.jsx";
 import view from "../../../assets/images/fees/view.png";
 import edit from "../../../assets/images/fees/edit.png";
 import { showToast } from "../../../services/toastService.js";
+import { Toaster } from "react-hot-toast";
 
 function IconSearch() {
   return (
@@ -302,7 +303,10 @@ export default function FeeStructureView({ setSelected }) {
         `${EndPoints.ADMIN.GET_SINGLE_CLASS_FEES_STRUCTURE}/${feeStructureId}`,
       );
 
-      const record = response?.result?.feeStructure || response?.result?.feeStructureData || response?.result;
+      const record =
+        response?.result?.feeStructure ||
+        response?.result?.feeStructureData ||
+        response?.result;
 
       if (!record) {
         throw new Error("Fee structure details are unavailable.");
@@ -325,7 +329,9 @@ export default function FeeStructureView({ setSelected }) {
       setSelected("feeStructureSetup");
     } catch (e) {
       showToast.error(
-        e?.response?.data?.message || e?.message || "Failed to load fee structure details.",
+        e?.response?.data?.message ||
+          e?.message ||
+          "Failed to load fee structure details.",
       );
     }
   };
@@ -391,6 +397,7 @@ export default function FeeStructureView({ setSelected }) {
 
   const getSchoolFeeStructure = async () => {
     if (!selectedSessionId) {
+      showToast.error("Please select Session");
       setClassFeeStructures([]);
       return;
     }
@@ -449,6 +456,7 @@ export default function FeeStructureView({ setSelected }) {
 
   return (
     <div>
+      <Toaster />
       <main className={` pt-[72px] min-h-screen ${theme.bg}`}>
         <div className="px-8 py-6">
           {/* Page header */}

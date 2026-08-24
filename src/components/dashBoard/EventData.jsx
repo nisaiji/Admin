@@ -11,6 +11,7 @@ import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import { motion } from "motion/react";
 import { C, C_LIGHT } from "../../utils/constants";
+import { showToast } from "../../services/toastService";
 
 export default function EventData({
   isDarkMode,
@@ -36,6 +37,7 @@ export default function EventData({
           ? !classAndSectionData?.selectedSession?._id
           : ""
     ) {
+      showToast.error("Please select Session");
       return;
     }
     const startTime = new Date(date.year, date.month, 1).getTime();
@@ -101,7 +103,7 @@ export default function EventData({
 
   useEffect(() => {
     getCalenderEvents();
-  }, [date, classAndSectionData?.selectedSession?._id]);
+  }, [classAndSectionData?.selectedSession?._id]);
 
   return (
     <motion.div

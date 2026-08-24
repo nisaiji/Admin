@@ -152,6 +152,10 @@ function TCPageInner() {
     let isActive = true;
 
     async function fetchTcRequests(status) {
+      if (!selectedSessionId) {
+        showToast.error("Please select Session");
+        return;
+      }
       const response = await axiosClient.get(EndPoints.ADMIN.GET_ISSUED_TC, {
         params: {
           sessionId: selectedSessionId,

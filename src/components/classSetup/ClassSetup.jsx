@@ -73,6 +73,10 @@ function ClassSetup() {
       if (loading) {
         return;
       }
+      if (!classAndSectionData?.selectedSession?._id) {
+        showToast.error("Please select Session");
+        return;
+      }
       setLoading(true);
       const res = await axiosClient.get(
         `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`,
@@ -124,7 +128,16 @@ function ClassSetup() {
       if (response?.statusCode === 200) {
         showToast.success(response.result);
         setModalIsOpen(false);
-        getAllClass();
+        setClasses((prev) =>
+          prev.filter((item) => item._id !== clickedClassId),
+        );
+        dispatch(
+          setClassAndSectionData({
+            classList: classAndSectionData?.classList?.filter(
+              (item) => item._id !== clickedClassId,
+            ),
+          }),
+        );
       }
     } catch (e) {
       showToast.error(e);
@@ -134,9 +147,7 @@ function ClassSetup() {
   };
 
   useEffect(() => {
-    if (classAndSectionData?.selectedSession?._id) {
-      getAllClass();
-    }
+    getAllClass();
   }, [classAndSectionData?.selectedSession?._id]);
 
   // Close dropdown when clicking outside

@@ -337,7 +337,11 @@ export default function SectionData({
         >
           {role === "classTeacher" || role === "teacher" ? (
             <img
-              src={teacherData?.photo || school}
+              src={
+                teacherData?.photo
+                  ? `data:image/jpeg;base64,${teacherData?.photo}`
+                  : school
+              }
               alt="School"
               style={{
                 width: "100%",

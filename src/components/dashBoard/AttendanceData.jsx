@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import DownIconw from "../../assets/images/dropdown.png";
-import DownIcon from "../../assets/images/darkmode/downArrow.png";
 import moment from "moment";
 import Spinner from "../Spinner";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { ArcElement, Chart, Legend, Tooltip } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
@@ -22,6 +19,7 @@ function ChartDropdown({ value, options, onChange, isDarkMode }) {
   const themeC = isDarkMode ? C : C_LIGHT;
   const [open, setOpen] = useState(false);
   const ref = React.useRef(null);
+
   useEffect(() => {
     if (!open) return;
     const h = (e) => {
@@ -30,6 +28,7 @@ function ChartDropdown({ value, options, onChange, isDarkMode }) {
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, [open]);
+
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
@@ -366,40 +365,39 @@ export default function AttendanceData({
    * within the start and end year boundaries.
    */
   useEffect(() => {
-    if (classAndSectionData?.selectedSession) {
-      const sessionStartYear =
-        classAndSectionData.selectedSession.academicStartYear;
-      const sessionEndYear =
-        classAndSectionData.selectedSession.academicEndYear;
-      if (sessionStartYear && sessionEndYear) {
-        const currentDate = new Date();
-        const minDate = new Date(sessionStartYear, 3, 1); // April 1st
-        const maxDate = new Date(sessionEndYear, 2, 31, 23, 59, 59); // March 31st
+    if (!classAndSectionData?.selectedSession?._id) return;
+    const sessionStartYear =
+      classAndSectionData?.selectedSession?.academicStartYear;
+    const sessionEndYear =
+      classAndSectionData?.selectedSession?.academicEndYear;
+    if (sessionStartYear && sessionEndYear) {
+      const currentDate = new Date();
+      const minDate = new Date(sessionStartYear, 3, 1); // April 1st
+      const maxDate = new Date(sessionEndYear, 2, 31, 23, 59, 59); // March 31st
 
-        let targetDate = currentDate;
-        if (currentDate < minDate) {
-          targetDate = minDate;
-        } else if (currentDate > maxDate) {
-          targetDate = maxDate;
-        }
-
-        setAttendanceTime({
-          day: {
-            startTime: moment(targetDate).startOf("day").valueOf(),
-            endTime: moment(targetDate).endOf("day").valueOf(),
-          },
-          week: {
-            startTime: moment(targetDate).startOf("week").valueOf(),
-            endTime: moment(targetDate).endOf("week").valueOf(),
-          },
-          month: {
-            startTime: moment(targetDate).startOf("month").valueOf(),
-            endTime: moment(targetDate).endOf("month").valueOf(),
-          },
-        });
+      let targetDate = currentDate;
+      if (currentDate < minDate) {
+        targetDate = minDate;
+      } else if (currentDate > maxDate) {
+        targetDate = maxDate;
       }
+
+      setAttendanceTime({
+        day: {
+          startTime: moment(targetDate).startOf("day").valueOf(),
+          endTime: moment(targetDate).endOf("day").valueOf(),
+        },
+        week: {
+          startTime: moment(targetDate).startOf("week").valueOf(),
+          endTime: moment(targetDate).endOf("week").valueOf(),
+        },
+        month: {
+          startTime: moment(targetDate).startOf("month").valueOf(),
+          endTime: moment(targetDate).endOf("month").valueOf(),
+        },
+      });
     }
-  }, [classAndSectionData?.selectedSession]);
+  }, [classAndSectionData?.selectedSession?._id]);
 
   // Register required chart elements
   Chart.register(ArcElement, Tooltip, Legend);
@@ -483,118 +481,13 @@ export default function AttendanceData({
     );
   };
 
-  // Empty weekly data
-  const emptyWeeklyChartView = {
-    labels: CONSTANT.WEEKDAYS,
-    datasets: [
-      {
-        label: "Present",
-        data: [],
-        backgroundColor: isDarkMode ? "#4CBC9A" : "#FF793F",
-        barThickness: 50,
-        borderRadius: 14,
-      },
-      {
-        label: "Absent",
-        data: [],
-        backgroundColor: isDarkMode ? "#FE404026" : "#D9E2E9",
-        barThickness: 50,
-        borderRadius: 14,
-      },
-    ],
-  };
-
-  // Empty monthly data
-  const emptyMonthlyChartView = {
-    labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
-    datasets: [
-      {
-        label: "Present",
-        data: [],
-        backgroundColor: isDarkMode ? "#4CBC9A" : "#FF793F",
-        barThickness: 20,
-      },
-      {
-        label: "Absent",
-        data: [],
-        backgroundColor: isDarkMode ? "#FE404026" : "#D9E2E9",
-        barThickness: 20,
-      },
-    ],
-  };
-
-  // Chart options for customizing the chart display
-  const chartOptions = {
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        stacked: true,
-        grid: { display: false },
-      },
-      y: {
-        min: 0,
-        max: totalStudentClassSectionWise,
-        ticks: { stepSize: Math.ceil(totalStudentClassSectionWise / 10) },
-        stacked: true,
-        grid: { display: false },
-      },
-    },
-    plugins: {
-      tooltip: {
-        callbacks: {
-          title: (tooltipItems) => {
-            if (!tooltipItems || tooltipItems.length === 0) return "";
-
-            const index = tooltipItems[0].dataIndex;
-
-            // Calculate the date for Weekly or Monthly view
-            if (selectedOption === "Weekly") {
-              // Assuming the week starts on the current date
-              const currentDate = moment(attendanceTime.week.startTime)
-                .startOf("day")
-                .day(index)
-                .valueOf();
-              return moment(currentDate).format("DD/MM/yyyy"); // Format: dd/mm/yyyy
-            } else if (selectedOption === "Monthly") {
-              const year = date.year; // Year from your data
-              const month = date.month; // Month from your data (0-indexed)
-              const currentDate = new Date(year, month, index + 1);
-              return currentDate.toLocaleDateString("en-GB"); // Format: dd/mm/yyyy
-            }
-            return "";
-          },
-          label: (tooltipItem) => {
-            if (!tooltipItem) return "";
-            const dataset = tooltipItem.dataset || {};
-            const value = dataset.data?.[tooltipItem.dataIndex] || 0;
-            return `${dataset.label || "Value"}: ${value}`;
-          },
-        },
-      },
-    },
-  };
-
-  // render charts of weekly and monthly
-  const renderChart = () => (
-    <Bar
-      data={
-        chartData ||
-        (selectedOption === "Weekly"
-          ? emptyWeeklyChartView
-          : emptyMonthlyChartView)
-      }
-      options={chartOptions}
-    />
-  );
-
   /**
    * Fetches and sets the list of available classes and their corresponding sections.
    */
   const getClassList = async () => {
     try {
-      if (!classAndSectionData?.selectedSession?._id) {
-        return;
-      }
+      if (role !== "admin") return;
+      if (!classAndSectionData?.selectedSession?._id) return;
       const res = await axiosClient.get(
         `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`,
       );
@@ -622,9 +515,7 @@ export default function AttendanceData({
 
   // fetch classlist when mount and session changes for admin
   useEffect(() => {
-    if (role === "admin" && classAndSectionData?.selectedSession?._id) {
-      getClassList();
-    }
+    getClassList();
   }, [classAndSectionData?.selectedSession?._id]);
 
   /**
@@ -891,34 +782,35 @@ export default function AttendanceData({
     }
   };
 
-  // fetch attendance data based on selectedOption
+  // fetch attendance data based on selectedOption for classTeacher
   useEffect(() => {
-    const fetchChartData = () => {
-      if (selectedOption === "Daily") {
-        if (role === "classTeacher" || selectedSection) {
-          getDailyAttendanceChart();
-        } else if (role === "admin") {
-          getStudentCount();
-        }
+    if (role !== "classTeacher") return;
+    if (selectedOption === "Daily") {
+      getDailyAttendanceChart();
+    } else {
+      getAttendanceChart(selectedOption);
+    }
+  }, [role, selectedOption]);
+
+  // fetch attendance data based on selectedOption for admin
+  useEffect(() => {
+    if (role !== "admin") return;
+    if (!classAndSectionData?.selectedSession?._id) return;
+    if (selectedOption === "Daily") {
+      if (selectedSection) {
+        getDailyAttendanceChart();
       } else {
-        if (selectedSection) {
-          getAttendanceChart(selectedOption);
-        } else {
-          role === "classTeacher"
-            ? getAttendanceChart(selectedOption)
-            : role === "admin"
-              ? getSchoolAttendanceChart(selectedOption)
-              : "";
-        }
+        getStudentCount();
       }
-    };
-    if (
-      role === "classTeacher" ||
-      (role === "admin" && classAndSectionData?.selectedSession?._id)
-    ) {
-      fetchChartData();
+    } else {
+      if (selectedSection) {
+        getAttendanceChart(selectedOption);
+      } else {
+        getSchoolAttendanceChart(selectedOption);
+      }
     }
   }, [
+    role,
     selectedSection,
     selectedOption,
     attendanceTime,

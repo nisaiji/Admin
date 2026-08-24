@@ -465,6 +465,7 @@ export function SelectionStep({ onSelect }) {
       searchSection = filterSec,
     } = {}) => {
       if (!selectedSessionId) {
+        showToast.error("Please select Session");
         setStudentList([]);
         setTotalStudentCount(0);
         setLoading(false);

@@ -233,8 +233,10 @@ function Addsection({
 
       if (res?.statusCode === 200) {
         setShowDeleteConfirmation(false);
-        await fetchData();
-        showToast.success(res.result);
+        setSections((prev) =>
+          prev.filter((section) => section._id !== deleteSectionId),
+        );
+        showToast.success(res?.result);
       }
     } catch (e) {
       showToast.error(e);
