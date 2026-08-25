@@ -61,21 +61,6 @@ import { generateToken } from "../../notifications/firebaseConfig.js";
 import EventData from "./EventData.jsx";
 import AttendanceData from "./AttendanceData.jsx";
 import SectionData from "./SectionData.jsx";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  Users,
-  BookOpen,
-  DollarSign,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  CalendarDays,
-  CheckCircle2,
-  UserCheck,
-  Clock,
-  School,
-  RefreshCw,
-} from "lucide-react";
 import { C } from "../../utils/constants.js";
 
 const Dashboard = () => {
