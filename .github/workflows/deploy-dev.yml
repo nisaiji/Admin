@@ -1,4 +1,4 @@
-name: Deploy Dev
+name: Deploy Frontend Dev
 
 on:
   push:
@@ -10,17 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to admin
+      - name: Deploy to server
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DEV_HOST }}
           username: ${{ secrets.DEV_USERNAME }}
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
-            cd var/www/dev/admin
+            cd /var/www/dev/admin
 
             git fetch origin
             git checkout dev
