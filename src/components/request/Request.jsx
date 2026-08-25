@@ -825,7 +825,7 @@ export default function Requests() {
         }}
       >
         <MenuItem
-          onClick={() => handleMenuAction("accept")}
+          onClick={() => handleMenuAction("ACCEPT")}
           disabled={loading || Boolean(actionLoadingId)}
           sx={{ gap: 1.25, fontFamily: "Poppins, sans-serif", fontSize: 14 }}
         >
@@ -833,7 +833,7 @@ export default function Requests() {
           Approve
         </MenuItem>
         <MenuItem
-          onClick={() => handleMenuAction("reject")}
+          onClick={() => handleMenuAction("REJECT")}
           disabled={loading || Boolean(actionLoadingId)}
           sx={{ gap: 1.25, fontFamily: "Poppins, sans-serif", fontSize: 14 }}
         >
