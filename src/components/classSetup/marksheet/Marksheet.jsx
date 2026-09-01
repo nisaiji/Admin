@@ -392,9 +392,13 @@ export default function Marksheet() {
                 </span>
               </button>
             </div>
-
             <hr className="border-[#9391A5]/25 my-6" />
-
+            {selectedExam?.resultPublished && (
+              <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                Exam results for <strong>{selectedExam?.name}</strong> have been
+                published. Students can now view their marks/grades.
+              </div>
+            )}
             {examList?.length > 0 && (
               <>
                 {/* Exam List + Buttons */}
