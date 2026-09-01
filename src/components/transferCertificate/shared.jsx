@@ -2,9 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 
-import { C, CERTIFICATE_SIGNERS, CLASSES, SECTIONS } from "./constants";
+import { C, CERTIFICATE_SIGNERS } from "./constants";
+import { useTCTheme } from "./ThemeContext";
 import { avatarColorForId } from "./utils";
 import moment from "moment/moment";
+import { useSelector } from "react-redux";
 
 const FIELD_LABEL_STYLE = {
   fontSize: "12px",
@@ -20,16 +22,17 @@ export function MiniSelect({
   options,
   onChange,
   placeholder = "Select",
+  isDarkMode,
 }) {
+  const C = useTCTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+
   const displayValue = value || placeholder;
   const isActive = Boolean(value) && value !== "All";
 
   useEffect(() => {
-    if (!open) {
-      return undefined;
-    }
+    if (!open) return;
 
     function handleClickOutside(event) {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -42,53 +45,75 @@ export function MiniSelect({
   }, [open]);
 
   return (
-    <div ref={ref} style={{ position: "relative", minWidth: 108 }}>
+    <div ref={ref} style={{ position: "relative", minWidth: 120 }}>
       <button
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => setOpen((prev) => !prev)}
         style={{
           display: "flex",
           alignItems: "center",
           gap: 6,
-          padding: "8px 12px",
+          padding: "9px 12px",
           width: "100%",
-          borderRadius: "9px",
-          background: C.cardAlt,
-          border: `1px solid ${open ? "rgba(10,129,209,0.4)" : C.border}`,
+          borderRadius: "10px",
+          background: isDarkMode ? C.cardAlt : C.surface,
+          border: `1px solid ${
+            open ? C.blue : isDarkMode ? C.border : C.borderSoft
+          }`,
           color: isActive ? C.text : C.muted,
           fontSize: "13px",
-          fontWeight: isActive ? 600 : 400,
+          fontWeight: isActive ? 600 : 500,
           cursor: "pointer",
+          transition: "all 0.2s ease",
+          boxShadow: open
+            ? isDarkMode
+              ? "0 4px 14px rgba(0,0,0,0.25)"
+              : "0 4px 14px rgba(15,23,42,0.08)"
+            : "none",
         }}
       >
-        <span style={{ flex: 1, textAlign: "left" }}>{displayValue}</span>
+        <span
+          style={{
+            flex: 1,
+            textAlign: "left",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {displayValue}
+        </span>
+
         <ChevronDown
-          size={12}
+          size={13}
           color={C.muted}
           style={{
             transform: open ? "rotate(180deg)" : "none",
-            transition: "transform 0.2s",
+            transition: "transform 0.2s ease",
             flexShrink: 0,
           }}
         />
       </button>
+
       <AnimatePresence>
-        {open ? (
+        {open && (
           <motion.div
-            initial={{ opacity: 0, y: -5 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.12 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
             style={{
               position: "absolute",
-              top: "calc(100% + 5px)",
+              top: "calc(100% + 6px)",
               left: 0,
               right: 0,
               zIndex: 300,
-              background: "#111520",
-              border: `1px solid ${C.border}`,
-              borderRadius: "10px",
+              background: C.surface,
+              border: `1px solid ${C.borderSoft}`,
+              borderRadius: "12px",
               overflow: "hidden",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+              boxShadow: isDarkMode
+                ? "0 12px 30px rgba(0,0,0,0.45)"
+                : "0 12px 30px rgba(15,23,42,0.12)",
             }}
           >
             {options.map((option) => (
@@ -103,28 +128,30 @@ export function MiniSelect({
                   alignItems: "center",
                   justifyContent: "space-between",
                   width: "100%",
-                  padding: "8px 12px",
+                  padding: "10px 12px",
                   background: "transparent",
                   border: "none",
                   color: option === value ? C.blue : C.text,
                   fontSize: "13px",
-                  fontWeight: option === value ? 700 : 400,
+                  fontWeight: option === value ? 700 : 500,
                   cursor: "pointer",
+                  transition: "background 0.15s ease",
                 }}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.background =
-                    "rgba(255,255,255,0.05)";
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = isDarkMode
+                    ? "rgba(255,255,255,0.05)"
+                    : C.blueDim;
                 }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.background = "transparent";
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
                 }}
               >
                 {option}
-                {option === value ? <Check size={11} color={C.blue} /> : null}
+                {option === value && <Check size={12} color={C.blue} />}
               </button>
             ))}
           </motion.div>
-        ) : null}
+        )}
       </AnimatePresence>
     </div>
   );
@@ -137,6 +164,9 @@ export function DropField({
   onChange,
   placeholder = "Select...",
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -168,8 +198,8 @@ export function DropField({
             justifyContent: "space-between",
             padding: "10px 14px",
             borderRadius: "9px",
-            background: C.cardAlt,
-            border: `1px solid ${open ? "rgba(10,129,209,0.4)" : C.border}`,
+            background: isDarkMode ? C.cardAlt : C.surface,
+            border: `1px solid ${open ? C.blue : isDarkMode ? C.border : C.borderSoft}`,
             color: C.text,
             fontSize: "14px",
             cursor: "pointer",
@@ -200,11 +230,13 @@ export function DropField({
                 left: 0,
                 right: 0,
                 zIndex: 400,
-                background: "#111520",
-                border: `1px solid ${C.border}`,
+                background: C.surface,
+                border: `1px solid ${isDarkMode ? C.border : C.borderSoft}`,
                 borderRadius: "10px",
                 overflow: "hidden",
-                boxShadow: "0 10px 28px rgba(0,0,0,0.5)",
+                boxShadow: isDarkMode 
+                  ? "0 10px 28px rgba(0,0,0,0.5)" 
+                  : "0 12px 30px rgba(15,23,42,0.12)",
               }}
             >
               {options.map((option) => (
@@ -228,8 +260,9 @@ export function DropField({
                     cursor: "pointer",
                   }}
                   onMouseEnter={(event) => {
-                    event.currentTarget.style.background =
-                      "rgba(255,255,255,0.05)";
+                    event.currentTarget.style.background = isDarkMode
+                      ? "rgba(255,255,255,0.05)"
+                      : C.blueDim;
                   }}
                   onMouseLeave={(event) => {
                     event.currentTarget.style.background = "transparent";
@@ -255,6 +288,8 @@ export function TextField({
   placeholder,
   type = "text",
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div>
       <div style={FIELD_LABEL_STYLE}>{label}</div>
@@ -294,6 +329,8 @@ export function TextField({
 }
 
 export function SectionCard({ title, accent = C.blue, children }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       style={{
@@ -332,6 +369,8 @@ export function SectionCard({ title, accent = C.blue, children }) {
 }
 
 export function InfoGrid({ items }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 48px" }}
@@ -375,10 +414,13 @@ export function Toolbar({
   count,
   countLabel,
   placeholder = "Search...",
-  classOptions = CLASSES,
-  sectionOptions = SECTIONS,
+  classOptions = [],
+  sectionOptions = [],
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const hasFilter = filterClass !== "All" || filterSec !== "All" || search;
+  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   return (
     <div
@@ -450,6 +492,7 @@ export function Toolbar({
           value={filterClass}
           options={classOptions}
           onChange={setFilterClass}
+          isDarkMode={isDarkMode}
         />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -467,6 +510,7 @@ export function Toolbar({
           value={filterSec}
           options={sectionOptions}
           onChange={setFilterSec}
+          isDarkMode={isDarkMode}
         />
       </div>
       {hasFilter ? (
@@ -509,6 +553,8 @@ export function Toolbar({
 }
 
 export function AvatarBadge({ id, label, size = 34, fontSize = 13 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       style={{
@@ -532,6 +578,8 @@ export function AvatarBadge({ id, label, size = 34, fontSize = 13 }) {
 }
 
 export function StatCard({ label, value, color, bg, icon }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       style={{
@@ -569,6 +617,8 @@ export function StatCard({ label, value, color, bg, icon }) {
 }
 
 export function TableEmptyState({ icon: Icon, message, colSpan }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <tr>
       <td colSpan={colSpan} style={{ padding: "56px", textAlign: "center" }}>
@@ -592,6 +642,8 @@ export function ModalShell({
   footer,
   maxWidth = 560,
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -679,6 +731,8 @@ export function ModalShell({
 }
 
 export function DetailRows({ items, labelMinWidth = 170 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return items.map(([label, value]) => (
     <div
       key={label}
@@ -705,6 +759,8 @@ export function SignatureRow({
   signers = CERTIFICATE_SIGNERS,
   lineWidth = 80,
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       style={{
@@ -737,6 +793,8 @@ export function CertificateSheet({
   banner,
   lineWidth = 80,
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <>
       {banner}

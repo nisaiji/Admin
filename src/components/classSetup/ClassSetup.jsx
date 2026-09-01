@@ -7,7 +7,7 @@ import trash from "../../assets/images/darkmode/delete2.png";
 import trashw from "../../assets/images/trash.png";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Addsection from "./Addsection";
 import { axiosClient } from "../../services/axiosClient";
 import DeletePopup from "../DeleteMessagePopup";
@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import Breadcrumbs from "../BreadCrumbs";
 import { setClassAndSectionData } from "../../store/AppAuthSlice";
 import FlipCard from "./FlipCard";
+import { showToast } from "../../services/toastService";
 
 function ClassSetup() {
   const navigate = useNavigate();
@@ -31,7 +32,6 @@ function ClassSetup() {
   const [addSectionModelOpen, setAddSectionModelOpen] = useState(false);
   const [showDropdowns, setShowDropdowns] = useState({});
   const [loading, setLoading] = useState(false);
-  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef();
 
@@ -73,9 +73,13 @@ function ClassSetup() {
       if (loading) {
         return;
       }
+      if (!classAndSectionData?.selectedSession?._id) {
+        showToast.error("Please select Session");
+        return;
+      }
       setLoading(true);
       const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`,
       );
       if (res?.statusCode === 200) {
         const sortedClasses = res?.result?.sort(compareClasses);
@@ -93,9 +97,9 @@ function ClassSetup() {
   const handleNewClassSubmit = async (name) => {
     const existingClassNames = classes.map((cls) => cls.name);
     if (existingClassNames.includes(name))
-      return toast.error(t("toasts.classExists"));
+      return showToast.error(t("toasts.classExists"));
     if (existingClassNames.length >= classOptions.length)
-      return toast.error(t("toasts.classroomFull"));
+      return showToast.error(t("toasts.classroomFull"));
 
     try {
       setLoading(true);
@@ -105,10 +109,10 @@ function ClassSetup() {
       });
       if ([200, 201].includes(res?.statusCode)) {
         getAllClass();
-        toast.success(res.result);
+        showToast.success(res.result);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -116,30 +120,34 @@ function ClassSetup() {
 
   // delete class api
   const handleDeleteClass = async () => {
-    if (toastDisplayed) return;
-    setToastDisplayed(true);
-    setTimeout(() => setToastDisplayed(false), 3000);
     try {
       setLoading(true);
       const response = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_CLASS}/${clickedClassId}`
+        `${EndPoints.ADMIN.DELETE_CLASS}/${clickedClassId}`,
       );
       if (response?.statusCode === 200) {
-        toast.success(response.result);
+        showToast.success(response.result);
         setModalIsOpen(false);
-        getAllClass();
+        setClasses((prev) =>
+          prev.filter((item) => item._id !== clickedClassId),
+        );
+        dispatch(
+          setClassAndSectionData({
+            classList: classAndSectionData?.classList?.filter(
+              (item) => item._id !== clickedClassId,
+            ),
+          }),
+        );
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (classAndSectionData?.selectedSession?._id) {
-      getAllClass();
-    }
+    getAllClass();
   }, [classAndSectionData?.selectedSession?._id]);
 
   // Close dropdown when clicking outside
@@ -156,7 +164,7 @@ function ClassSetup() {
 
   // Available class options that aren't already taken
   const availableClassOptions = classOptions.filter(
-    (option) => !classes.some((cls) => cls.name === option)
+    (option) => !classes.some((cls) => cls.name === option),
   );
 
   return (
@@ -235,15 +243,15 @@ function ClassSetup() {
                             ].includes(data.name)
                               ? studentsPto2
                               : [
-                                  "3rd",
-                                  "4th",
-                                  "5th",
-                                  "6th",
-                                  "7th",
-                                  "8th",
-                                ].includes(data.name)
-                              ? students3to8
-                              : students9to12
+                                    "3rd",
+                                    "4th",
+                                    "5th",
+                                    "6th",
+                                    "7th",
+                                    "8th",
+                                  ].includes(data.name)
+                                ? students3to8
+                                : students9to12
                           }
                           className={` object-contain h-[120px] ${
                             ["9th", "10th", "11th", "12th"].includes(data.name)
@@ -285,7 +293,7 @@ function ClassSetup() {
                                     className: data?.name,
                                     sectionName: section?.name,
                                     startTime: section?.startTime,
-                                  })
+                                  }),
                                 );
                                 setTimeout(() => {
                                   navigate("/class-setup/student-menu");
@@ -433,6 +441,7 @@ function ClassSetup() {
           isVisible={modalIsOpen}
           onClose={() => setModalIsOpen(false)}
           onDelete={handleDeleteClass}
+          loading={loading}
         />
       )}
     </>

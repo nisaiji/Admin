@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import moment from "moment";
 import CONSTANT from "../../../utils/constants";
-import toast from "react-hot-toast";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 
@@ -16,10 +15,33 @@ import menu2 from "../../../assets/images/darkmode/menu2.png";
 import calb from "../../../assets/images/darkmode/calb.png";
 import bell from "../../../assets/images/darkmode/bell.png";
 import noteacher from "../../../assets/images/noteacher.png";
+import { showToast } from "../../../services/toastService";
 
 export default function Tags() {
   const { classAndSectionData } = useSelector((state) => state.appAuth);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+  const pageBg = isDarkMode ? "bg-background2" : "bg-whiteBackground2";
+  const leftPanelBg = isDarkMode
+    ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+    : "bg-whiteBackground";
+  const rightPanelBg = isDarkMode
+    ? "bg-gradient-to-l from-fromColor1 to-toColor1"
+    : "bg-whiteBackground";
+  const panelText = isDarkMode ? "text-textPrimary" : "text-textBlack";
+  const lineBorder = isDarkMode ? "border-borderLine" : "border-borderWhite3";
+  const monthBorder = isDarkMode ? "border-borderLine" : "border-borderWhite3";
+  const weekdayText = isDarkMode ? "text-textBlue" : "text-textBlack";
+  const scheduleCardBg = isDarkMode ? "bg-[#0A81D11A]" : "bg-white";
+  const scheduleCardBorder = isDarkMode
+    ? "border-[#0A81D140]"
+    : "border-borderWhite3";
+  const scheduleAccent = isDarkMode
+    ? "border-l-[#0A81D1]"
+    : "border-l-backgroundBlue";
+  const scheduleText = isDarkMode ? "text-textPrimary" : "text-textBlack";
+  const scheduleMuted = isDarkMode ? "text-textPrimary" : "text-textGray";
+  const dateBadgeBg = isDarkMode ? "bg-[#0A81D11A]" : "bg-[#EAF3FF]";
+  const dateBadgeText = isDarkMode ? "text-textBlue" : "text-backgroundBlue";
   const [loading, setLoading] = useState(false);
   const [t] = useTranslation();
   const [events, setEvents] = useState([]);
@@ -27,7 +49,7 @@ export default function Tags() {
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState(
-    moment(today).format("YYYY-MM-DD")
+    moment(today).format("YYYY-MM-DD"),
   );
 
   /**
@@ -46,11 +68,11 @@ export default function Tags() {
 
       if (response?.statusCode === 200) {
         setEvents(
-          response?.result?.sort((a, b) => new Date(a.date) - new Date(b.date))
+          response?.result?.sort((a, b) => new Date(a.date) - new Date(b.date)),
         );
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -69,8 +91,10 @@ export default function Tags() {
    */
   useEffect(() => {
     if (classAndSectionData?.selectedSession) {
-      const sessionStartYear = classAndSectionData.selectedSession.academicStartYear;
-      const sessionEndYear = classAndSectionData.selectedSession.academicEndYear;
+      const sessionStartYear =
+        classAndSectionData.selectedSession.academicStartYear;
+      const sessionEndYear =
+        classAndSectionData.selectedSession.academicEndYear;
       if (sessionStartYear && sessionEndYear) {
         const currentDate = new Date();
         const minDate = new Date(sessionStartYear, 3, 1); // April 1st
@@ -105,7 +129,8 @@ export default function Tags() {
     const newMonth = month === 0 ? 11 : month - 1;
     const newYear = month === 0 ? year - 1 : year;
 
-    const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+    const sessionStartYear =
+      classAndSectionData?.selectedSession?.academicStartYear;
     if (sessionStartYear) {
       // April is month 3 (0-indexed)
       const minDate = new Date(sessionStartYear, 3, 1);
@@ -128,7 +153,8 @@ export default function Tags() {
     const newMonth = month === 11 ? 0 : month + 1;
     const newYear = month === 11 ? year + 1 : year;
 
-    const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+    const sessionEndYear =
+      classAndSectionData?.selectedSession?.academicEndYear;
     if (sessionEndYear) {
       // March is month 2 (0-indexed). Max date is end of March.
       // So targetDate (1st of month) cannot be greater than March 1st of end year
@@ -153,7 +179,7 @@ export default function Tags() {
 
   /** Filter events for the selected date */
   const filteredEvents = events.filter(
-    (ev) => moment(ev.date).format("YYYY-MM-DD") === selectedDate
+    (ev) => moment(ev.date).format("YYYY-MM-DD") === selectedDate,
   );
 
   /**
@@ -167,7 +193,7 @@ export default function Tags() {
 
     // Create a Set of event dates for faster lookup
     const eventDates = new Set(
-      events.map((ev) => moment(ev.date).format("YYYY-MM-DD"))
+      events.map((ev) => moment(ev.date).format("YYYY-MM-DD")),
     );
 
     // Add empty divs for the days before the 1st of the month
@@ -183,20 +209,23 @@ export default function Tags() {
 
       const renderCss = () => {
         if (isSelected) {
-          return `${isDarkMode
-            ? "bg-[#0A81D1] border-[#0A81D1] text-textPrimary"
-            : "bg-backgroundLightBlue border-borderBlue text-textBlue"
-            }`;
+          return `${
+            isDarkMode
+              ? "bg-[#0A81D1] border-[#0A81D1] text-textPrimary"
+              : "bg-backgroundLightBlue border-borderBlue text-textBlue"
+          }`;
         } else if (isSunday && !hasEvent) {
-          return `${isDarkMode
-            ? "bg-backgroundOrange border-borderHoliday"
-            : "bg-backgroundOrange2 border-borderOrange"
-            } text-textHoliday`;
+          return `${
+            isDarkMode
+              ? "bg-backgroundOrange border-borderHoliday"
+              : "bg-backgroundOrange2 border-borderOrange"
+          } text-textHoliday`;
         } else {
-          return `${isDarkMode
-            ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
-            : "text-textBlack bg-whiteBackground2 border-borderWhite3"
-            }`;
+          return `${
+            isDarkMode
+              ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
+              : "text-textBlack bg-whiteBackground2 border-borderWhite3"
+          }`;
         }
       };
 
@@ -210,27 +239,28 @@ export default function Tags() {
           {/* White rectangle indicator if there’s an event */}
           {hasEvent && (
             <div
-              className={`w-[8px] h-[30px] rounded-[4px] ${isDarkMode ? "bg-[#E3E8F3]" : "bg-backgroundBlue"
-                }`}
+              className={`w-[8px] h-[30px] rounded-[4px] ${
+                isDarkMode ? "bg-[#E3E8F3]" : "bg-backgroundBlue"
+              }`}
             />
           )}
-        </div>
+        </div>,
       );
     }
     return days;
   };
 
-  const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+  const sessionStartYear =
+    classAndSectionData?.selectedSession?.academicStartYear;
   const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
 
-  const isPrevDisabled = sessionStartYear && month === 3 && year === sessionStartYear;
-  const isNextDisabled = sessionEndYear && month === 2 && year === sessionEndYear;
+  const isPrevDisabled =
+    sessionStartYear && month === 3 && year === sessionStartYear;
+  const isNextDisabled =
+    sessionEndYear && month === 2 && year === sessionEndYear;
 
   return (
-    <div
-      className={`select-none grid grid-cols-6 gap-6 p-6 ${isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-        }`}
-    >
+    <div className={`select-none grid grid-cols-6 gap-6 p-6 ${pageBg}`}>
       {loading && (
         <div
           className={`fixed inset-0 flex items-center justify-center bg-whiteBackground bg-opacity-50 z-30`}
@@ -239,30 +269,18 @@ export default function Tags() {
         </div>
       )}
       {/* left view */}
-      <div
-        className={`col-span-4 px-10 ${isDarkMode
-          ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-          : "bg-whiteBackground"
-          } rounded-[16px] p-4`}
-      >
+      <div className={`col-span-4 px-10 ${leftPanelBg} rounded-[16px] p-4`}>
         <Breadcrumbs />
         <div className={`flex justify-between items-center mb-3`}>
-          <p
-            className={`text-2xl ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-              } font-poppins-bold`}
-          >
+          <p className={`text-2xl ${panelText} font-poppins-bold`}>
             {t("dashboard.tags")}
           </p>
         </div>
-        <hr
-          className={`mb-4 border ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
-            }`}
-        />
+        <hr className={`mb-4 border ${lineBorder}`} />
         <div className={`bg-transparent rounded-lg w-full`}>
           {/* Month Navigation */}
           <div
-            className={`month flex items-center justify-between py-[20px] px-10 mx-10 text-[16px] font-medium rounded-[14px] h-8 capitalize border-2 ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
-              }`}
+            className={`month flex items-center justify-between py-[20px] px-10 mx-10 text-[16px] font-medium rounded-[14px] h-8 capitalize border-2 ${monthBorder}`}
           >
             <img
               src={isDarkMode ? DownArrow : DownArroww}
@@ -270,10 +288,7 @@ export default function Tags() {
               className={`size-5 rotate-90 ${isPrevDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
               onClick={!isPrevDisabled ? handlePrevMonth : undefined}
             />
-            <div
-              className={`${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                }`}
-            >
+            <div className={panelText}>
               {moment({ year, month }).format("MMMM YYYY")}
             </div>
             <img
@@ -288,8 +303,7 @@ export default function Tags() {
             {CONSTANT.WEEKDAYS1.map((day) => (
               <div
                 key={day}
-                className={`text-center font-medium capitalize text-md ${isDarkMode ? "text-textBlue" : "text-textBlack"
-                  }`}
+                className={`text-center font-medium capitalize text-md ${weekdayText}`}
               >
                 {day}
               </div>
@@ -301,36 +315,37 @@ export default function Tags() {
         </div>
       </div>
       <div
-        className={`col-span-2 relative ${isDarkMode
-          ? "bg-gradient-to-l from-fromColor1 to-toColor1"
-          : "bg-whiteBackground"
-          } rounded-[16px] py-3 px-4`}
+        className={`col-span-2 relative ${rightPanelBg} rounded-[16px] py-3 px-4`}
       >
         <div>
           <div className="flex justify-between items-center">
             <div
-              className={`text-2xl text-center font-bold my-2 pb-1 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                }`}
+              className={`text-2xl text-center font-bold my-2 pb-1 ${panelText}`}
             >
               {t("dashboard.schedule")}
             </div>
-            <div className="flex items-center bg-[#0A81D11A]  px-2 py-1 rounded-md gap-2">
-              <img src={calb} alt="" className="size-6" />
-              <div className="text-textBlue font-poppins-bold text-base">
-                {selectedDate ? moment(selectedDate).format("dddd, D MMMM, YYYY") : "Select a date"}
+            <div
+              className={`flex items-center ${dateBadgeBg} px-2 py-1 rounded-md gap-2`}
+            >
+              <img
+                src={calb}
+                alt=""
+                className={`size-6 ${isDarkMode ? "" : "invert"}`}
+              />
+              <div className={`${dateBadgeText} font-poppins-bold text-base`}>
+                {selectedDate
+                  ? moment(selectedDate).format("dddd, D MMMM, YYYY")
+                  : "Select a date"}
               </div>
             </div>
           </div>
-          <hr
-            className={`mb-6 border-t ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
-              }`}
-          />
+          <hr className={`mb-6 border-t ${lineBorder}`} />
           {filteredEvents.length === 0 ? (
             <div className={`relative top-30 w-full h-full`}>
               <img
                 src={noteacher}
                 alt="noevents"
-                className={`absolute inset-0 w-auto h-auto object-cover`}
+                className={`absolute inset-0 w-auto h-auto object-cover ${isDarkMode ? "" : "invert"}`}
               />
             </div>
           ) : (
@@ -338,7 +353,7 @@ export default function Tags() {
               {filteredEvents?.map((itm, index) => (
                 <div
                   key={index}
-                  className="mb-4 rounded-xl bg-[#0A81D11A] text-white font-poppins p-4 border border-[#0A81D140] border-l-[14px] border-l-[#0A81D1]"
+                  className={`mb-4 rounded-xl ${scheduleCardBg} ${scheduleText} font-poppins p-4 border ${scheduleCardBorder} border-l-[14px] ${scheduleAccent}`}
                 >
                   {/* Teacher name */}
                   <div className="flex items-center mb-2">
@@ -351,28 +366,43 @@ export default function Tags() {
                       alt="teacher"
                       className="w-6 h-6 rounded-full mr-2"
                     />
-                    <span className="font-poppins-regular text-[16px]">
+                    <span
+                      className={`font-poppins-regular text-[16px] ${scheduleText}`}
+                    >
                       {itm?.teacherFirstName} {itm?.teacherLastName}
                     </span>
                   </div>
 
                   <hr
-                    className={`mb-3 border-t ${isDarkMode ? "border-[#68686880]" : "border-borderWhite3"
-                      }`}
+                    className={`mb-3 border-t ${
+                      isDarkMode ? "border-[#68686880]" : "border-borderWhite3"
+                    }`}
                   />
 
                   {/* Subject */}
                   <div className="flex items-center mb-2 gap-2">
-                    <img src={bell} alt="" className="size-5" />
-                    <span className="font-poppins-bold text-sm text-textPrimary">
+                    <img
+                      src={bell}
+                      alt=""
+                      className={`size-5 ${isDarkMode ? "" : "invert"}`}
+                    />
+                    <span
+                      className={`font-poppins-bold text-sm ${scheduleText}`}
+                    >
                       {itm?.title}
                     </span>
                   </div>
 
                   {/* Description */}
                   <div className="flex items-start gap-2">
-                    <img src={menu2} alt="" className="size-5" />
-                    <span className="font-poppins-regular text-xs text-textPrimary">
+                    <img
+                      src={menu2}
+                      alt=""
+                      className={`size-5 ${isDarkMode ? "" : "invert"}`}
+                    />
+                    <span
+                      className={`font-poppins-regular text-xs ${scheduleMuted}`}
+                    >
                       {itm?.description}
                     </span>
                   </div>

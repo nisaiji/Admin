@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Searchw from "../../assets/images/Search.png";
 import crossw from "../../assets/images/cross.png";
 import infow from "../../assets/images/info.png";
@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import REGEX from "../../utils/regix";
 import Breadcrumbs from "../BreadCrumbs";
 import CONSTANT from "../../utils/constants";
+import { showToast } from "../../services/toastService";
 
 export default function Teacher() {
   const navigate = useNavigate();
@@ -40,11 +41,10 @@ export default function Teacher() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [newTeacher, setNewTeacher] = useState({
     SNo: null,
-    firstname: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
     phone: "",
   });
   // console.log(teachers);
@@ -66,16 +66,16 @@ export default function Teacher() {
    */
   const validateData = (teacher) => {
     if (
-      !teacher.firstname.trim() ||
-      teacher.firstname.length < 3 ||
-      REGEX.NUMBER.test(teacher.firstname)
+      !teacher.firstName.trim() ||
+      teacher.firstName.length < 3 ||
+      REGEX.NUMBER.test(teacher.firstName)
     ) {
       return t("validationError.enterFirstName");
     }
     if (
-      !teacher.lastname.trim() ||
-      teacher.lastname.length < 3 ||
-      REGEX.NUMBER.test(teacher.lastname)
+      !teacher.lastName.trim() ||
+      teacher.lastName.length < 3 ||
+      REGEX.NUMBER.test(teacher.lastName)
     ) {
       return t("validationError.enterLastName");
     }
@@ -92,11 +92,7 @@ export default function Teacher() {
     try {
       const e = validateData(newTeacher);
       if (e) {
-        if (!toastDisplayed) {
-          setToastDisplayed(true);
-          toast.error(e);
-          setTimeout(() => setToastDisplayed(false), 3000);
-        }
+        showToast.error(e);
         return;
       }
       setLoading(true);
@@ -104,20 +100,20 @@ export default function Teacher() {
       const response = await axiosClient.post(
         EndPoints.ADMIN.REGISTER_TEACHER,
         {
-          firstname: capitalizeFirstLetter(newTeacher?.firstname.trim()),
-          lastname: capitalizeFirstLetter(newTeacher?.lastname.trim()),
+          firstName: capitalizeFirstLetter(newTeacher?.firstName.trim()),
+          lastName: capitalizeFirstLetter(newTeacher?.lastName.trim()),
           phone: newTeacher.phone.trim(),
         },
       );
 
       if ([200, 201].includes(response?.statusCode)) {
-        toast.success(response.result);
+        showToast.success(response.result);
         getTeacher(); // Refresh the teacher list
-        setNewTeacher({ SNo: null, firstname: "", lastname: "", phone: "" });
+        setNewTeacher({ SNo: null, firstName: "", lastName: "", phone: "" });
         newTeacherFirstNameRef.current?.focus(); // Focus on the first name input
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -142,7 +138,7 @@ export default function Teacher() {
         setTeachers(teachersWithSNos);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -210,9 +206,11 @@ export default function Teacher() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
     }
   };
 
@@ -220,7 +218,7 @@ export default function Teacher() {
   const uploadExcelSheet = async (file) => {
     try {
       if (!file) {
-        toast.error("Please select a valid Excel file.");
+        showToast.error("Please select a valid Excel file.");
         return;
       }
 
@@ -238,15 +236,15 @@ export default function Teacher() {
       );
       if (res?.statusCode === 201 || res?.statusCode === 200) {
         if (res?.result?.errors.length > 0) {
-          toast.error(res?.result?.errors[0])
+          showToast.error(res?.result?.errors[0]);
         } else {
-          toast.success(res?.result?.message);
+          showToast.success(res?.result?.message);
         }
         getTeacher();
       }
     } catch (e) {
       const err = JSON.parse(e);
-      toast.error(`error in student ${err?.student} of ${err?.reason}`);
+      showToast.error(`error in student ${err?.student} of ${err?.reason}`);
     } finally {
       setLoading(false);
     }
@@ -264,23 +262,27 @@ export default function Teacher() {
    * Deletes the currently selected teacher.
    */
   const handleDelete = async () => {
-    if (toastDisplayed) return;
-    setToastDisplayed(true);
-    setTimeout(() => setToastDisplayed(false), 3000);
     try {
       setLoading(true);
       const response = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_TEACHER}/${currTeacher._id ?? currTeacher?.id}`,
+        `${EndPoints.ADMIN.DELETE_TEACHER}/${currTeacher.id}`,
       );
 
       if (response?.statusCode === 200) {
-        getTeacher();
-        // console.log(response);
+        setTeachers((prevTeachers) => {
+          const filteredTeachers = prevTeachers?.filter(
+            (teacher) => teacher?.id !== currTeacher?.id,
+          );
 
-        toast.success(response.result);
+          return filteredTeachers?.map((teacher, index) => ({
+            ...teacher,
+            SNo: filteredTeachers.length - index,
+          }));
+        });
+        showToast.success(response?.result);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
       setShowDeleteConfirmation(false);
@@ -298,9 +300,9 @@ export default function Teacher() {
   // Filters the teachers list based on search input
   const filteredTeachers = teachers.filter(
     (teacher) =>
-      teacher?.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      teacher?.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      teacher?.phone.includes(searchQuery),
+      teacher?.firstName?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      teacher?.lastName?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      teacher?.phone?.includes(searchQuery),
   );
 
   return (
@@ -475,9 +477,9 @@ export default function Teacher() {
                       <input
                         data-testid="firstnameInput"
                         type="text"
-                        value={newTeacher.firstname}
+                        value={newTeacher.firstName}
                         onChange={(e) =>
-                          handleInputChange(null, "firstname", e.target.value)
+                          handleInputChange(null, "firstName", e.target.value)
                         }
                         maxLength={15}
                         placeholder={t("placeholders.firstName")}
@@ -493,9 +495,9 @@ export default function Teacher() {
                       <input
                         data-testid="lastnameInput"
                         type="text"
-                        value={newTeacher.lastname}
+                        value={newTeacher.lastName}
                         onChange={(e) =>
-                          handleInputChange(null, "lastname", e.target.value)
+                          handleInputChange(null, "lastName", e.target.value)
                         }
                         maxLength={15}
                         placeholder={t("placeholders.lastName")}
@@ -542,7 +544,7 @@ export default function Teacher() {
                       </button>
                     </td>
                   </tr>
-                  {filteredTeachers.map((teacher, i) => (
+                  {filteredTeachers?.map((teacher, i) => (
                     <tr key={i} className="bg-transparent">
                       {/* SNo */}
                       <td
@@ -550,7 +552,7 @@ export default function Teacher() {
                           isDarkMode ? "text-textPrimary" : "text-textBlack"
                         }`}
                       >
-                        {teacher.SNo}
+                        {teacher?.SNo ?? ""}
                       </td>
                       {/* First Name */}
                       <td
@@ -559,11 +561,11 @@ export default function Teacher() {
                         <input
                           data-testid="savedFirstname"
                           type="text"
-                          value={teacher.firstname}
+                          value={teacher?.firstName}
                           onChange={(e) =>
                             handleInputChange(
-                              teacher.SNo,
-                              "firstname",
+                              teacher?.SNo,
+                              "firstName",
                               e.target.value,
                             )
                           }
@@ -572,8 +574,8 @@ export default function Teacher() {
                           className={`w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none bg-transparent ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } focus:border-borderBlue`}
-                          disabled={editSNo !== teacher.SNo}
-                          autoFocus={editSNo === newTeacher.SNo}
+                          disabled={editSNo !== teacher?.SNo}
+                          autoFocus={editSNo === newTeacher?.SNo}
                         />
                       </td>
                       {/* Last Name */}
@@ -583,11 +585,11 @@ export default function Teacher() {
                         <input
                           data-testid="savedLastname"
                           type="text"
-                          value={teacher.lastname}
+                          value={teacher?.lastName}
                           onChange={(e) =>
                             handleInputChange(
-                              teacher.SNo,
-                              "lastname",
+                              teacher?.SNo,
+                              "lastName",
                               e.target.value,
                             )
                           }
@@ -596,7 +598,7 @@ export default function Teacher() {
                           className={`w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none bg-transparent ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } focus:border-borderBlue`}
-                          disabled={editSNo !== teacher.SNo}
+                          disabled={editSNo !== teacher?.SNo}
                         />
                       </td>
                       {/* Phone */}
@@ -606,11 +608,11 @@ export default function Teacher() {
                         <input
                           data-testid="savedPhone"
                           type="text"
-                          value={teacher.phone}
+                          value={teacher?.phone}
                           maxLength={10}
                           onChange={(e) =>
                             handleInputChange(
-                              teacher.SNo,
+                              teacher?.SNo,
                               "phone",
                               e.target.value,
                             )
@@ -619,7 +621,7 @@ export default function Teacher() {
                           className={`w-full h-full px-2 py-1 font-medium text-center border-none focus:outline-none bg-transparent ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
                           } focus:border-borderBlue`}
-                          disabled={editSNo !== teacher.SNo}
+                          disabled={editSNo !== teacher?.SNo}
                         />
                       </td>
                       {/* class */}
@@ -706,6 +708,7 @@ export default function Teacher() {
           isVisible={showDeleteConfirmation}
           onClose={() => setShowDeleteConfirmation(false)}
           onDelete={handleDelete}
+          loading={loading}
         />
       )}
     </>

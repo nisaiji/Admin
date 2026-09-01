@@ -170,8 +170,6 @@ Expected Vite env names seen in `.env` and source:
 - `VITE_PHONE_AUTH_TOKEN`
 - `VITE_EMAIL_WIDGET_ID`
 - `VITE_EMAIL_AUTH_TOKEN`
-- `VITE_PHONE_AND_EMAIL_WIDGET_ID`
-- `VITE_PHONE_AND_EMAIL_AUTH_TOKEN`
 - `VITE_SECOND_SECURITY_KEY`
 
 Do not commit or expose env values.

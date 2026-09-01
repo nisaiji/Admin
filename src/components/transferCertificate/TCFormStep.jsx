@@ -1,33 +1,37 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { AlertCircle, ArrowLeft, Check, CheckCircle2, FileDown, Plus, Printer, X } from "lucide-react";
-import toast from "react-hot-toast";
 
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import { C, DEFAULT_CHECKLIST, TC_PROMOTION_OPTIONS } from "./constants";
+import { DEFAULT_CHECKLIST, TC_PROMOTION_OPTIONS } from "./constants";
+import { useTCTheme } from "./ThemeContext";
 import { CertificateSheet, DropField, InfoGrid, ModalShell, SectionCard, TextField } from "./shared";
 import { formatDisplayDate, formatFeeStatus, getClassSectionLabel } from "./utils";
+import { showToast } from "../../services/toastService";
 
 const REASON_OPTIONS = [
-  { label: "Parent Transfer", value: "parentTransfer" },
-  { label: "Job Transfer", value: "familyRelocation" },
-  { label: "Admission Elsewhere", value: "betterOpportunity" },
-  { label: "Financial Issues", value: "financial" },
-  { label: "Academic Reasons", value: "academic" },
-  { label: "Health Issues", value: "medical" },
-  { label: "Disciplinary", value: "disciplinary" },
-  { label: "Other", value: "other" },
+  { label: "Parent Transfer", value: "PARENT_TRANSFER" },
+  { label: "Job Transfer", value: "FAMILY_RELOCATION" },
+  { label: "Admission Elsewhere", value: "BETTER_OPPORTUNITY" },
+  { label: "Financial Issues", value: "FINANCIAL" },
+  { label: "Academic Reasons", value: "ACADEMIC" },
+  { label: "Health Issues", value: "MEDICAL" },
+  { label: "Disciplinary", value: "DISCIPLINARY" },
+  { label: "Other", value: "OTHER" },
 ];
 
 const CONDUCT_OPTIONS = [
-  { label: "Excellent", value: "excellent" },
-  { label: "Good", value: "good" },
-  { label: "Satisfactory", value: "satisfactory" },
-  { label: "Poor", value: "needsImprovement" },
+  { label: "Excellent", value: "EXCELLENT" },
+  { label: "Very Good", value: "VERY_GOOD" },
+  { label: "Good", value: "GOOD" },
+  { label: "Satisfactory", value: "SATISFACTORY" },
+  { label: "Poor", value: "NEEDS_IMPROVEMENT" },
 ];
 
 function ChecklistRow({ item, onToggle, onRemove }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       onClick={() => onToggle(item?.id)}
@@ -122,6 +126,8 @@ function PreviewTCModal({
   canSubmit,
   submitting,
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <AnimatePresence>
       {previewing ? (
@@ -171,7 +177,7 @@ function PreviewTCModal({
           <CertificateSheet
             items={[
               ["Student Name", student?.name],
-              ["Parent's Name", student?.parentFullName],
+              ["Parent's Name", student?.mainParentFullName],
               ["Class & Section", getClassSectionLabel(student)],
               ["Admission Number", student?.admissionNumber],
               ["Date of Birth", student?.dob],
@@ -222,14 +228,16 @@ function PreviewTCModal({
 }
 
 function getRequestReasonValue(label) {
-  return REASON_OPTIONS?.find((option) => option.label === label)?.value || "other";
+  return REASON_OPTIONS?.find((option) => option.label === label)?.value || "OTHER";
 }
 
 function getConductValue(label) {
-  return CONDUCT_OPTIONS?.find((option) => option.label === label)?.value || "good";
+  return CONDUCT_OPTIONS?.find((option) => option.label === label)?.value || "GOOD";
 }
 
 export function TCFormStep({ student, onBack, onRequestSubmitted }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const [leaveReason, setLeaveReason] = useState(REASON_OPTIONS[0].label);
   const [reasonDescription, setReasonDescription] = useState("");
   const [lastDate, setLastDate] = useState("");
@@ -242,12 +250,13 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
   const [submitting, setSubmitting] = useState(false);
 
   const newItemRef = useRef(null);
+  const hasStudentIdentifiers =
+    Boolean(student?.studentId) && Boolean(student?.sessionStudentId);
   const allCleared = checklist.every((item) => item.checked);
   const feeStatusLabel = formatFeeStatus(student?.feeStatus);
 
   const canSubmit =
-    // Boolean(student?.studentId) &&
-    // Boolean(student?.sessionStudentId) &&
+    hasStudentIdentifiers &&
     Boolean(leaveReason) &&
     Boolean(reasonDescription.trim()) &&
     Boolean(lastDate) &&
@@ -257,6 +266,9 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
     checklist.every((item) => item.checked) &&
     !addingItem &&
     !submitting;
+  const submitHint = hasStudentIdentifiers
+    ? "Complete all fields and clearance items to send the request."
+    : "Student data is incomplete. Go back and reselect the student.";
 
   useEffect(() => {
     if (addingItem) {
@@ -284,10 +296,14 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
   }
 
   async function handleSubmit() {
-    if (!canSubmit) {
+    if (!hasStudentIdentifiers) {
+      showToast.error("Student data is incomplete. Please reselect the student.");
       return;
     }
 
+    if (!canSubmit) {
+      return;
+    }
     const payload = {
       studentId: student?.studentId,
       sessionStudentId: student?.sessionStudentId,
@@ -307,11 +323,15 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
       const response = await axiosClient.post(EndPoints.ADMIN.APPLY_TC, payload);
       const successMessage = response?.result?.message || "TC request submitted successfully";
 
-      toast.success(successMessage);
+      showToast.success(successMessage);
       setPreviewing(false);
       onRequestSubmitted?.();
     } catch (error) {
-      toast.error(error || "Failed to submit TC request");
+      showToast.error(
+        typeof error === "string"
+          ? error
+          : error?.message || "Failed to submit TC request",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -378,7 +398,7 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
             <InfoGrid
               items={[
                 ["Student Name", student?.name],
-                ["Parent's Name", student?.parentFullName],
+                ["Parent's Name", student?.mainParentFullName],
                 ["Class", student?.className],
                 ["Section", student?.section],
                 ["Admission Number", student?.admissionNumber],
@@ -649,7 +669,7 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
                 textAlign: "center",
               }}
             >
-              <span style={{ fontSize: "12px", color: C.amber }}>Complete all fields and clearance items to send the request.</span>
+              <span style={{ fontSize: "12px", color: C.amber }}>{submitHint}</span>
             </div>
           ) : null}
         </div>

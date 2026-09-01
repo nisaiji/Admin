@@ -10,7 +10,8 @@ import Spinner from "../Spinner";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
 import { motion } from "motion/react";
-import { C } from "../../utils/constants";
+import { C, C_LIGHT } from "../../utils/constants";
+import { showToast } from "../../services/toastService";
 
 export default function EventData({
   isDarkMode,
@@ -29,13 +30,8 @@ export default function EventData({
    * Fetches calendar events based on the selected month.
    */
   const getCalenderEvents = async () => {
-    if (
-      role === "classTeacher" || role === "teacher"
-        ? !teacherData?.sessionId
-        : role === "admin"
-          ? !classAndSectionData?.selectedSession?._id
-          : ""
-    ) {
+    if (role === "admin" && !classAndSectionData?.selectedSession?._id) {
+      showToast.error("Please select Session");
       return;
     }
     const startTime = new Date(date.year, date.month, 1).getTime();
@@ -101,14 +97,18 @@ export default function EventData({
 
   useEffect(() => {
     getCalenderEvents();
-  }, [date, classAndSectionData?.selectedSession?._id]);
+  }, [classAndSectionData?.selectedSession?._id]);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.36, duration: 0.4 }}
-      style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px" }}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "18px",
+      }}
     >
       {/* Calendar */}
       <CalendarComponent
@@ -116,21 +116,25 @@ export default function EventData({
         workdays={workdays}
         updateDate={(newDate) => setDate(newDate)}
       />
+
       {/* HOLIDAYS */}
       <div
         style={{
-          background: C.card,
-          border: `1px solid ${C.border}`,
+          background: isDarkMode ? C.card : C_LIGHT.card,
+          border: `1px solid ${isDarkMode ? C.border : C_LIGHT.border}`,
           borderRadius: "16px",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
+          boxShadow: !isDarkMode ? "0 10px 28px rgba(15,23,42,0.06)" : "none",
         }}
       >
         <div
           style={{
             padding: "16px 20px 12px",
-            borderBottom: `1px solid ${C.borderSoft}`,
+            borderBottom: `1px solid ${
+              isDarkMode ? C.borderSoft : C_LIGHT.borderSoft
+            }`,
           }}
         >
           <div
@@ -141,19 +145,32 @@ export default function EventData({
               marginBottom: 10,
             }}
           >
-            <span style={{ fontSize: "16px", fontWeight: 700, color: C.text }}>
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 700,
+                color: isDarkMode ? C.text : C_LIGHT.text,
+              }}
+            >
               Upcoming Holidays
             </span>
           </div>
         </div>
+
         {/* List */}
-        <div style={{ padding: "12px 16px", flex: 1, overflowY: "auto" }}>
+        <div
+          style={{
+            padding: "12px 16px",
+            flex: 1,
+            overflowY: "auto",
+          }}
+        >
           {calenderEvents.length === 0 && workdays.length === 0 ? (
             <div
               style={{
                 padding: "20px 0",
                 textAlign: "center",
-                color: C.textMuted,
+                color: isDarkMode ? C.textMuted : C_LIGHT.textMuted,
                 fontSize: "13px",
               }}
             >
@@ -173,9 +190,16 @@ export default function EventData({
                     gap: 0,
                     marginBottom: 10,
                     borderRadius: "11px",
-                    background: "rgba(255,255,255,0.02)",
-                    border: `1px solid ${C.border}`,
+                    background: isDarkMode
+                      ? "rgba(255,255,255,0.02)"
+                      : C_LIGHT.surface,
+                    border: `1px solid ${
+                      isDarkMode ? C.border : C_LIGHT.border
+                    }`,
                     overflow: "hidden",
+                    boxShadow: !isDarkMode
+                      ? "0 4px 14px rgba(15,23,42,0.04)"
+                      : "none",
                   }}
                 >
                   {/* Left accent */}
@@ -183,10 +207,11 @@ export default function EventData({
                     style={{
                       width: 5,
                       flexShrink: 0,
-                      background: C.blue,
+                      background: isDarkMode ? C.red : C_LIGHT.red,
                       borderRadius: "11px 0 0 11px",
                     }}
                   />
+
                   {/* Date block */}
                   <div
                     style={{
@@ -197,21 +222,26 @@ export default function EventData({
                       alignItems: "center",
                       justifyContent: "center",
                       padding: "10px 6px",
-                      background: "rgba(255,255,255,0.02)",
-                      borderRight: `1px solid ${C.border}`,
+                      background: isDarkMode
+                        ? "rgba(255,255,255,0.02)"
+                        : C_LIGHT.bg,
+                      borderRight: `1px solid ${
+                        isDarkMode ? C.border : C_LIGHT.border
+                      }`,
                     }}
                   >
                     <span
                       style={{
                         fontSize: "20px",
                         fontWeight: 800,
-                        color: C.red,
+                        color: isDarkMode ? C.red : C_LIGHT.red,
                         lineHeight: 1,
                       }}
                     >
                       {e?.day}
                     </span>
                   </div>
+
                   {/* Content */}
                   <div style={{ flex: 1, padding: "10px 12px" }}>
                     <div
@@ -225,23 +255,29 @@ export default function EventData({
                         style={{
                           fontSize: "14px",
                           fontWeight: 700,
-                          color: C.text,
+                          color: isDarkMode ? C.text : C_LIGHT.text,
                         }}
                       >
                         {e?.title}
                       </span>
+
                       <span
                         style={{
-                          fontSize: "14px",
-                          fontWeight: 700,
-                          color: C.text,
+                          fontSize: "13px",
+                          fontWeight: 500,
+                          color: isDarkMode ? C.sub : C_LIGHT.sub,
                         }}
                       >
                         {e?.description}
                       </span>
                     </div>
+
                     <div
-                      style={{ display: "flex", alignItems: "center", gap: 6 }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
                     >
                       <span
                         style={{
@@ -249,19 +285,26 @@ export default function EventData({
                           padding: "2px 7px",
                           borderRadius: "999px",
                           fontWeight: 700,
-                          background: C?.redDim,
-                          color: C?.red,
+                          background: isDarkMode ? C.redDim : C_LIGHT.redDim,
+                          color: isDarkMode ? C.red : C_LIGHT.red,
                         }}
                       >
                         Holiday
                       </span>
-                      <span style={{ fontSize: "11px", color: C.textSub }}>
+
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: isDarkMode ? C.textSub : C_LIGHT.textSub,
+                        }}
+                      >
                         {moment(e?.date).format("DD MMM YYYY")}
                       </span>
                     </div>
                   </div>
                 </motion.div>
               ))}
+
               {workdays?.map((e, i) => (
                 <motion.div
                   key={i}
@@ -274,9 +317,16 @@ export default function EventData({
                     gap: 0,
                     marginBottom: 10,
                     borderRadius: "11px",
-                    background: "rgba(255,255,255,0.02)",
-                    border: `1px solid ${C.border}`,
+                    background: isDarkMode
+                      ? "rgba(255,255,255,0.02)"
+                      : C_LIGHT.surface,
+                    border: `1px solid ${
+                      isDarkMode ? C.border : C_LIGHT.border
+                    }`,
                     overflow: "hidden",
+                    boxShadow: !isDarkMode
+                      ? "0 4px 14px rgba(15,23,42,0.04)"
+                      : "none",
                   }}
                 >
                   {/* Left accent */}
@@ -284,10 +334,11 @@ export default function EventData({
                     style={{
                       width: 5,
                       flexShrink: 0,
-                      background: C.blue,
+                      background: isDarkMode ? C.green : C_LIGHT.green,
                       borderRadius: "11px 0 0 11px",
                     }}
                   />
+
                   {/* Date block */}
                   <div
                     style={{
@@ -298,21 +349,26 @@ export default function EventData({
                       alignItems: "center",
                       justifyContent: "center",
                       padding: "10px 6px",
-                      background: "rgba(255,255,255,0.02)",
-                      borderRight: `1px solid ${C.border}`,
+                      background: isDarkMode
+                        ? "rgba(255,255,255,0.02)"
+                        : C_LIGHT.bg,
+                      borderRight: `1px solid ${
+                        isDarkMode ? C.border : C_LIGHT.border
+                      }`,
                     }}
                   >
                     <span
                       style={{
                         fontSize: "20px",
                         fontWeight: 800,
-                        color: C.red,
+                        color: isDarkMode ? C.green : C_LIGHT.green,
                         lineHeight: 1,
                       }}
                     >
                       {e?.day}
                     </span>
                   </div>
+
                   {/* Content */}
                   <div style={{ flex: 1, padding: "10px 12px" }}>
                     <div
@@ -326,23 +382,29 @@ export default function EventData({
                         style={{
                           fontSize: "14px",
                           fontWeight: 700,
-                          color: C.text,
+                          color: isDarkMode ? C.text : C_LIGHT.text,
                         }}
                       >
                         {e?.title}
                       </span>
+
                       <span
                         style={{
-                          fontSize: "14px",
-                          fontWeight: 700,
-                          color: C.text,
+                          fontSize: "13px",
+                          fontWeight: 500,
+                          color: isDarkMode ? C.sub : C_LIGHT.sub,
                         }}
                       >
                         {e?.description}
                       </span>
                     </div>
+
                     <div
-                      style={{ display: "flex", alignItems: "center", gap: 6 }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
                     >
                       <span
                         style={{
@@ -350,13 +412,21 @@ export default function EventData({
                           padding: "2px 7px",
                           borderRadius: "999px",
                           fontWeight: 700,
-                          background: C?.redDim,
-                          color: C?.red,
+                          background: isDarkMode
+                            ? C.greenDim
+                            : C_LIGHT.greenDim,
+                          color: isDarkMode ? C.green : C_LIGHT.green,
                         }}
                       >
                         Workday
                       </span>
-                      <span style={{ fontSize: "11px", color: C.textSub }}>
+
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: isDarkMode ? C.textSub : C_LIGHT.textSub,
+                        }}
+                      >
                         {moment(e?.date).format("DD MMM YYYY")}
                       </span>
                     </div>
@@ -366,17 +436,6 @@ export default function EventData({
             </div>
           )}
         </div>
-
-        {/* <div style={{ padding:"10px 16px 14px",borderTop:`1px solid ${C.borderSoft}` }}>
-        <button style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:6,width:"100%",
-          padding:"9px",borderRadius:"10px",background:"rgba(255,255,255,0.03)",
-          border:`1px solid ${C.border}`,color:C.blueBright,fontSize:"13px",fontWeight:700,cursor:"pointer",
-          transition:"all 0.15s" }}
-          onMouseEnter={e=>(e.currentTarget).style.background="rgba(10,129,209,0.1)"}
-          onMouseLeave={e=>(e.currentTarget).style.background="rgba(255,255,255,0.03)"}>
-          View Full Holiday Calendar <ChevronRight size={13} />
-        </button>
-      </div> */}
       </div>
     </motion.div>
   );

@@ -3,6 +3,30 @@ import { jwtDecode } from "jwt-decode";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
 
+export function getInitialSessionCreatedState() {
+  const storedValue = localStorage.getItem("isSessionCreated");
+
+  if (storedValue === "true") {
+    return true;
+  }
+
+  if (storedValue === "false") {
+    return false;
+  }
+
+  const accessToken = localStorage.getItem("access_token");
+
+  if (!accessToken) {
+    return false;
+  }
+
+  try {
+    return Boolean(jwtDecode(accessToken)?.isSessionCreated);
+  } catch (error) {
+    return false;
+  }
+}
+
 export const setAuth = createAsyncThunk("auth/setAuth", async (data) => {
   const existing = localStorage.getItem("status");
   const parsed = existing ? JSON.parse(existing) : {};
@@ -11,11 +35,12 @@ export const setAuth = createAsyncThunk("auth/setAuth", async (data) => {
   return mergedData;
 });
 
-export const setSessionCreated = createAsyncThunk(
-  "auth/setSessionCreated",
-  async (data) => {
-    localStorage.setItem("isSessionCreated", true);
-    return true;
+export const setSessionCreatedStatus = createAsyncThunk(
+  "auth/setSessionCreatedStatus",
+  async (isSessionCreated) => {
+    const normalizedValue = Boolean(isSessionCreated);
+    localStorage.setItem("isSessionCreated", String(normalizedValue));
+    return normalizedValue;
   },
 );
 
@@ -99,7 +124,7 @@ const initialState = {
     JSON.parse(localStorage.getItem("classAndSectionData")) || {},
   tempData: JSON.parse(localStorage.getItem("tempData")) || {},
   status: JSON.parse(localStorage.getItem("status")) || {},
-  isSessionCreated: localStorage.getItem("isSessionCreated") === "true",
+  isSessionCreated: getInitialSessionCreatedState(),
 };
 
 /**
@@ -152,8 +177,8 @@ const appAuthSlice = createSlice({
       .addCase(setAuth.fulfilled, (state, action) => {
         state.status = action.payload;
       })
-      .addCase(setSessionCreated.fulfilled, (state, action) => {
-        state.isSessionCreated = true;
+      .addCase(setSessionCreatedStatus.fulfilled, (state, action) => {
+        state.isSessionCreated = action.payload;
       })
       .addCase(setClassAndSectionData.fulfilled, (state, action) => {
         state.classAndSectionData = action.payload;

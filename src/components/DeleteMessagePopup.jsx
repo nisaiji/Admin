@@ -3,7 +3,7 @@ import deleteIcon from "../assets/images/deleteIcon.png";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 
-export default function DeletePopup({ isVisible, onClose, onDelete }) {
+export default function DeletePopup({ isVisible, onClose, onDelete, loading }) {
   const { t } = useTranslation();
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
@@ -63,6 +63,7 @@ export default function DeletePopup({ isVisible, onClose, onDelete }) {
             className="border border-borderDarkRed bg-backgroundDarkRed text-white shadow-sm rounded-lg px-4 py-2 text-base font-poppins-regular transition-all duration-200 ease-in-out active:scale-90"
             onClick={onDelete}
             data-testid="confirmdeleteTeacher"
+            disabled={loading}
           >
             {t("buttons.delete")}
           </button>

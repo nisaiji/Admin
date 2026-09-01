@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useLocation, useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
@@ -24,6 +24,7 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useSelector } from "react-redux";
+import { showToast } from "../../services/toastService";
 
 /**
  * Capitalizes the first letter of a string and converts the rest to lowercase.
@@ -136,11 +137,11 @@ export default function StudentUpdate() {
         );
 
         if (response?.statusCode === 200) {
-          toast.success(response.result);
+          showToast.success(response.result);
           navigate(-1);
         }
       } catch (e) {
-        toast.error(e);
+        showToast.error(e);
       } finally {
         setLoading(false);
       }

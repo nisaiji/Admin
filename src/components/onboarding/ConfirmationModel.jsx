@@ -1,8 +1,12 @@
 import React from "react";
 import { AlertTriangle, CheckCircle2, X } from "lucide-react";
 import { motion } from "motion/react";
+import { useSelector } from "react-redux";
+import { C, C_LIGHT } from "../../utils/constants";
 
 export function ConfirmationModal({ session, onConfirm, onBack }) {
+  const isDarkMode = useSelector((state) => state.appConfig?.isDarkMode ?? true);
+  const themeC = isDarkMode ? C : C_LIGHT;
   return (
     <div
       style={{
@@ -24,7 +28,7 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(0,0,0,0.75)",
+          background: isDarkMode ? "rgba(0,0,0,0.75)" : "rgba(15,23,42,0.35)",
           backdropFilter: "blur(6px)",
         }}
       />
@@ -38,13 +42,15 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
         style={{
           position: "relative",
           zIndex: 1,
-          background: "#161B2E",
-          border: "1px solid rgba(255,255,255,0.1)",
+          background: themeC.card,
+          border: `1px solid ${themeC.border}`,
           borderRadius: "20px",
           padding: "0",
           width: "100%",
           maxWidth: "500px",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
+          boxShadow: isDarkMode
+            ? "0 24px 60px rgba(0,0,0,0.5)"
+            : "0 24px 60px rgba(15,23,42,0.18)",
           overflow: "hidden",
         }}
       >
@@ -52,7 +58,7 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
         <div
           style={{
             height: "3px",
-            background: "#4F8EF7",
+            background: themeC.blue,
           }}
         />
 
@@ -68,9 +74,9 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
               width: "36px",
               height: "36px",
               borderRadius: "8px",
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "#9CA3AF",
+              background: themeC.borderSoft,
+              border: `1px solid ${themeC.border}`,
+              color: themeC.textSub,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -87,15 +93,15 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
               width: "60px",
               height: "60px",
               borderRadius: "16px",
-              background: "rgba(79,142,247,0.12)",
-              border: "1px solid rgba(79,142,247,0.25)",
+              background: themeC.blueDim,
+              border: `1px solid ${themeC.blueDim}`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginBottom: "24px",
             }}
           >
-            <AlertTriangle size={26} color="#4F8EF7" />
+            <AlertTriangle size={26} color={themeC.blue} />
           </div>
 
           {/* Title */}
@@ -103,7 +109,7 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
             style={{
               fontSize: "22px",
               fontWeight: 700,
-              color: "#F1F5F9",
+              color: themeC.text,
               marginBottom: "16px",
               lineHeight: 1.3,
             }}
@@ -114,8 +120,8 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
           {/* Body message */}
           <div
             style={{
-              background: "rgba(79,142,247,0.07)",
-              border: "1px solid rgba(79,142,247,0.18)",
+              background: themeC.blueDim,
+              border: `1px solid ${themeC.blueDim}`,
               borderRadius: "12px",
               padding: "20px",
               marginBottom: "24px",
@@ -124,13 +130,13 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
             <p
               style={{
                 fontSize: "16px",
-                color: "#CBD5E1",
+                color: themeC.sub,
                 lineHeight: 1.7,
                 margin: 0,
               }}
             >
               You are setting up your school for the{" "}
-              <span style={{ color: "#7EB3FF", fontWeight: 700 }}>
+              <span style={{ color: themeC.blue, fontWeight: 700 }}>
                 {session.year}
               </span>{" "}
               session. All data — including classes, sections, students,
@@ -145,14 +151,14 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
               gap: "10px",
               alignItems: "flex-start",
               padding: "14px 16px",
-              background: "rgba(251,191,36,0.06)",
-              border: "1px solid rgba(251,191,36,0.18)",
+              background: themeC.amberDim,
+              border: `1px solid ${themeC.amberDim}`,
               borderRadius: "10px",
               marginBottom: "28px",
             }}
           >
-            <AlertTriangle size={16} color="#FBBF24" style={{ flexShrink: 0, marginTop: "2px" }} />
-            <p style={{ margin: 0, fontSize: "14px", color: "#D1B454", lineHeight: 1.6 }}>
+            <AlertTriangle size={16} color={themeC.amber} style={{ flexShrink: 0, marginTop: "2px" }} />
+            <p style={{ margin: 0, fontSize: "14px", color: themeC.amber, lineHeight: 1.6 }}>
               <strong>Please double-check</strong> your selection. Changing the active session later may require re-setting up your school data.
             </p>
           </div>
@@ -166,21 +172,21 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
                 flex: 1,
                 padding: "14px 20px",
                 borderRadius: "12px",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#94A3B8",
+                background: themeC.borderSoft,
+                border: `1px solid ${themeC.border}`,
+                color: themeC.textMuted,
                 fontSize: "15px",
                 fontWeight: 600,
                 cursor: "pointer",
                 transition: "all 0.2s",
               }}
               onMouseEnter={e => {
-                (e.currentTarget).style.background = "rgba(255,255,255,0.1)";
-                (e.currentTarget).style.color = "#CBD5E1";
+                (e.currentTarget).style.background = isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(15,23,42,0.06)";
+                (e.currentTarget).style.color = themeC.sub;
               }}
               onMouseLeave={e => {
-                (e.currentTarget).style.background = "rgba(255,255,255,0.06)";
-                (e.currentTarget).style.color = "#94A3B8";
+                (e.currentTarget).style.background = themeC.borderSoft;
+                (e.currentTarget).style.color = themeC.textMuted;
               }}
             >
               Go Back
@@ -193,7 +199,7 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
                 flex: 2,
                 padding: "14px 20px",
                 borderRadius: "12px",
-                background: "#4F8EF7",
+                background: themeC.blue,
                 border: "none",
                 color: "#fff",
                 fontSize: "15px",
@@ -206,10 +212,10 @@ export function ConfirmationModal({ session, onConfirm, onBack }) {
                 transition: "all 0.2s",
               }}
               onMouseEnter={e => {
-                (e.currentTarget).style.background = "#3B7DE8";
+                (e.currentTarget).style.background = isDarkMode ? "#3B7DE8" : "#2563eb";
               }}
               onMouseLeave={e => {
-                (e.currentTarget).style.background = "#4F8EF7";
+                (e.currentTarget).style.background = themeC.blue;
               }}
             >
               <CheckCircle2 size={18} />

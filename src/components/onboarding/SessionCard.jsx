@@ -6,6 +6,7 @@ import {
   CalendarX,
   Ban,
 } from "lucide-react";
+import { C } from "../../utils/constants";
 
 const statusConfig = {
   Current: {
@@ -22,7 +23,7 @@ const statusConfig = {
   },
 };
 
-export function SessionCard({ session, isSelected, onSelect }) {
+export function SessionCard({ session, isSelected, onSelect, themeC = C }) {
   const config = statusConfig[session.status];
 
   const handleClick = () => {
@@ -35,11 +36,9 @@ export function SessionCard({ session, isSelected, onSelect }) {
       aria-pressed={isSelected}
       aria-label={`Select session ${session.year}`}
       style={{
-        background: isSelected ? "rgba(79,142,247,0.08)" : "#141825",
-        border: `2px solid ${
-          isSelected ? "#4F8EF7" : "rgba(255,255,255,0.08)"
-        }`,
-        boxShadow: isSelected ? "0 0 0 3px rgba(79,142,247,0.12)" : "none",
+        background: isSelected ? themeC.blueDim : themeC.card,
+        border: `2px solid ${isSelected ? themeC.blue : themeC.border}`,
+        boxShadow: isSelected ? `0 0 0 3px ${themeC.blueDim}` : "none",
         borderRadius: "14px",
         padding: "24px 20px",
         cursor: "pointer",
@@ -95,9 +94,9 @@ export function SessionCard({ session, isSelected, onSelect }) {
                 gap: "4px",
                 padding: "3px 8px",
                 borderRadius: "6px",
-                background: "rgba(79,142,247,0.12)",
-                border: "1px solid rgba(79,142,247,0.3)",
-                color: "#7EB3FF",
+                background: themeC.blueDim,
+                border: `1px solid ${themeC.blueDim}`,
+                color: themeC.blue,
                 fontSize: "11px",
                 fontWeight: 600,
                 width: "fit-content",
@@ -117,8 +116,8 @@ export function SessionCard({ session, isSelected, onSelect }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: isSelected ? "#4F8EF7" : "rgba(255,255,255,0.05)",
-            border: `2px solid ${isSelected ? "#4F8EF7" : "rgba(255,255,255,0.1)"}`,
+            background: isSelected ? themeC.blue : themeC.borderSoft,
+            border: `2px solid ${isSelected ? themeC.blue : themeC.border}`,
             transition: "all 0.2s ease",
             flexShrink: 0,
           }}
@@ -130,11 +129,11 @@ export function SessionCard({ session, isSelected, onSelect }) {
       </div>
 
       {/* Session year */}
-      <div
-        style={{
-          fontSize: "28px",
-          fontWeight: 700,
-          color: isSelected ? "#F0F4FF" : "#CBD5E1",
+        <div
+          style={{
+            fontSize: "28px",
+            fontWeight: 700,
+            color: isSelected ? themeC.text : themeC.sub,
           letterSpacing: "-0.02em",
           lineHeight: 1.1,
           marginBottom: "10px",
@@ -147,13 +146,13 @@ export function SessionCard({ session, isSelected, onSelect }) {
       </div>
 
       {/* Description */}
-      <div
-        style={{
-          fontSize: "13px",
-          color: isSelected ? "#94A3B8" : "#6B7280",
-          transition: "color 0.2s ease",
-        }}
-      >
+        <div
+          style={{
+            fontSize: "13px",
+            color: isSelected ? themeC.sub : themeC.textMuted,
+            transition: "color 0.2s ease",
+          }}
+        >
         {session.description}
       </div>
 
@@ -166,7 +165,7 @@ export function SessionCard({ session, isSelected, onSelect }) {
             left: 0,
             right: 0,
             height: "3px",
-            background: "#4F8EF7",
+            background: themeC.blue,
             borderRadius: "0 0 12px 12px",
           }}
         />

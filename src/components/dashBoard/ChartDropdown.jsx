@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { C } from "../../utils/constants";
+import { useSelector } from "react-redux";
+import { C, C_LIGHT } from "../../utils/constants";
 
 import {
   Users,
@@ -19,6 +20,8 @@ import { motion, AnimatePresence } from "motion/react";
 
 /* ─── Chart Dropdown ─────────────────────────────────────────── */
 export function ChartDropdown({ value, options, onChange }) {
+  const isDarkMode = useSelector((state) => state.appConfig?.isDarkMode ?? true);
+  const themeC = isDarkMode ? C : C_LIGHT;
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -43,7 +46,7 @@ export function ChartDropdown({ value, options, onChange }) {
           borderRadius: "8px",
           background: open ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.05)",
           border: `1px solid ${open ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.1)"}`,
-          color: C.text,
+          color: themeC.text,
           fontSize: "13px",
           fontWeight: 600,
           cursor: "pointer",
@@ -53,7 +56,7 @@ export function ChartDropdown({ value, options, onChange }) {
         {value}
         <ChevronDown
           size={13}
-          color={C.textSub}
+          color={themeC.textSub}
           style={{
             transform: open ? "rotate(180deg)" : "none",
             transition: "transform 0.2s",
@@ -72,7 +75,7 @@ export function ChartDropdown({ value, options, onChange }) {
               top: "calc(100% + 6px)",
               left: 0,
               zIndex: 200,
-              background: "#1a1d28",
+              background: themeC.card,
               border: "1px solid rgba(255,255,255,0.12)",
               borderRadius: "10px",
               overflow: "hidden",
@@ -92,9 +95,9 @@ export function ChartDropdown({ value, options, onChange }) {
                   width: "100%",
                   textAlign: "left",
                   padding: "9px 14px",
-                  background: opt === value ? C.blueDim : "transparent",
+                  background: opt === value ? themeC.blueDim : "transparent",
                   border: "none",
-                  color: opt === value ? "#7EB3FF" : C.text,
+                  color: opt === value ? themeC.blue : themeC.text,
                   fontSize: "13px",
                   fontWeight: opt === value ? 600 : 400,
                   cursor: "pointer",

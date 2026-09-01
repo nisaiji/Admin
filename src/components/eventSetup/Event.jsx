@@ -28,7 +28,7 @@ import DownArrow from "../../assets/images/darkmode/downArrow.png";
 import close from "../../assets/images/close.png";
 import calendar from "../../assets/images/calendar.png";
 import notes from "../../assets/images/notes.png";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
 import DeletePopup from "../DeleteMessagePopup";
@@ -42,6 +42,379 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { TextField } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { showToast } from "../../services/toastService";
+
+const EventForm = ({
+  isOpen,
+  isClose,
+  isSubmit,
+  prevData,
+  isDarkMode,
+  loading,
+  t,
+}) => {
+  const isEditMode = Boolean(prevData?.editData?.id);
+  const isWorkday = moment(prevData?.date).day() === 0;
+
+  const getInitialFormState = () => ({
+    title: prevData?.editData?.title || "",
+    description: prevData?.editData?.description || "",
+    holiday: prevData?.editData?.holiday || false,
+    workday: isWorkday,
+    date: prevData?.date ? moment(prevData.date).format("DD/MM/YYYY") : "",
+    startDate: prevData?.date ? moment(prevData.date).format("DD/MM/YYYY") : "",
+    endDate: prevData?.date ? moment(prevData.date).format("DD/MM/YYYY") : "",
+  });
+
+  const [newEventForm, setNewEventForm] = useState(getInitialFormState);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setNewEventForm(getInitialFormState());
+    setErrors({});
+  }, [isOpen, prevData]);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewEventForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!newEventForm?.title?.trim()) {
+      newErrors.title = t("toasts.titleRequired");
+    }
+    if (newEventForm?.workday && !newEventForm?.description?.trim()) {
+      newErrors.description = t("toasts.descRequired");
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  if (!isOpen) return null;
+
+  const datePickerSx = (isDarkMode) => ({
+    width: "100%",
+    "& .MuiOutlinedInput-root": {
+      fontSize: "14px",
+      minHeight: "40px",
+      borderRadius: "8px",
+      backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
+      border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
+      "& fieldset": { border: "none" },
+      "&:hover fieldset": { border: "none" },
+      "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
+    },
+    "& .MuiOutlinedInput-input, & .MuiInputBase-input": {
+      color: isDarkMode ? "#fff" : "#000",
+      fontSize: "14px",
+      padding: "10px 12px",
+    },
+    "& .MuiInputBase-inputAdornedEnd": {
+      color: isDarkMode ? "#fff" : "#000",
+    },
+    "& .MuiInputLabel-root": {
+      color: isDarkMode ? "#aaa" : "#666",
+    },
+    "& .MuiSvgIcon-root": {
+      color: isDarkMode ? "#fff" : "#000",
+    },
+  });
+
+  const theme = (isDarkMode) =>
+    createTheme({
+      palette: {
+        mode: isDarkMode ? "dark" : "light",
+        ...(isDarkMode
+          ? {
+              background: { default: "#121212", paper: "#1e1e1e" },
+              text: { primary: "#fff", secondary: "#aaa" },
+            }
+          : {
+              background: { default: "#f5f5f5", paper: "#fff" },
+              text: { primary: "#000", secondary: "#666" },
+            }),
+      },
+      components: {
+        MuiOutlinedInput: {
+          styleOverrides: {
+            root: {
+              borderRadius: 8,
+              minHeight: 40,
+              fontSize: "14px",
+              backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
+              border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
+              "& fieldset": { border: "none" },
+              "&:hover fieldset": { border: "none" },
+              "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
+            },
+            input: {
+              color: isDarkMode ? "#fff" : "#000",
+              fontSize: "14px",
+              padding: "10px 12px",
+            },
+            inputAdornedEnd: {
+              color: isDarkMode ? "#fff" : "#000",
+            },
+          },
+        },
+        MuiInputLabel: {
+          styleOverrides: {
+            root: {
+              color: isDarkMode ? "#aaa" : "#666",
+            },
+          },
+        },
+        MuiSvgIcon: {
+          styleOverrides: {
+            root: {
+              color: isDarkMode ? "#E3E8F3" : "black",
+            },
+          },
+        },
+        MuiInputBase: {
+          styleOverrides: {
+            root: {
+              "&.Mui-disabled": {
+                color: isDarkMode ? "#E3E8F3 !important" : "#000",
+                WebkitTextFillColor: isDarkMode ? "#E3E8F3" : "#000",
+              },
+            },
+          },
+        },
+      },
+    });
+
+  return (
+    <div
+      className={`fixed inset-0 flex items-center justify-center bg-opacity-50 ${
+        isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
+      }`}
+    >
+      <div
+        className={`rounded-2xl px-[30px] py-[20px] w-[450px] h-[430px] shadow-lg ${
+          isDarkMode ? "bg-background1" : "bg-whiteBackground"
+        }`}
+      >
+        <div className={`flex justify-end`}>
+          <img
+            src={close}
+            onClick={() => {
+              isClose(false);
+              setErrors({});
+            }}
+            alt="close"
+            className={`size-5 cursor-pointer`}
+          />
+        </div>
+        <input
+          className={`w-full text-lg font-medium border-b py-3 outline-none bg-transparent ${
+            isDarkMode
+              ? "text-textPrimary border-borderLine"
+              : "text-textBlack border-borderGray2"
+          }`}
+          type="text"
+          name="title"
+          value={newEventForm.title}
+          onChange={handleChange}
+          onBlur={validateForm}
+          placeholder={
+            isEditMode
+              ? isWorkday
+                ? t("eventForm.title.updateWorkday")
+                : t("eventForm.title.edit")
+              : isWorkday
+                ? t("eventForm.title.addWorkday")
+                : t("eventForm.title.add")
+          }
+        />
+        {errors.title && <p className={`text-textRed text-sm`}>{errors.title}</p>}
+        <div className={`mt-5`}>
+          <label className={`flex items-center space-x-5 rounded-lg`}>
+            <img src={calendar} alt="close" className={`size-5`} />
+            <ThemeProvider theme={theme(isDarkMode)}>
+              <LocalizationProvider dateAdapter={AdapterMoment}>
+                {isWorkday || isEditMode ? (
+                  <DatePicker
+                    views={["day", "month", "year"]}
+                    value={moment(prevData?.date, "DD/MM/YYYY")}
+                    format="DD/MM/YYYY"
+                    disabled
+                    className={`w-full`}
+                    textField={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder={t("placeholders.date")}
+                        variant="outlined"
+                      />
+                    )}
+                    sx={{
+                      border: `1px solid ${isDarkMode ? "#2b2e4a80" : "gray"}`,
+                      borderRadius: "8px",
+                      backgroundColor: isDarkMode ? "" : "white",
+                      color: isDarkMode ? "#E3E8F3" : "black",
+                      "& .MuiOutlinedInput-root": {
+                        padding: 1,
+                        fontSize: "16px",
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                      },
+                      "& .Mui-disabled": {
+                        color: isDarkMode ? "#E3E8F3 !important" : "black",
+                        WebkitTextFillColor: isDarkMode ? "#E3E8F3" : "black",
+                      },
+                      "& .MuiInputBase-input": {
+                        fontSize: "14px",
+                        padding: 1,
+                        color: isDarkMode ? "#E3E8F3" : "black",
+                      },
+                      "& .MuiSvgIcon-root": {
+                        color: "#FFFFFF",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "none",
+                      },
+                    }}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        sx: {
+                          "& .MuiInputBase-input": {
+                            color: "#FFFFFF",
+                          },
+                          "& .MuiInputLabel-root": {
+                            color: "#FFFFFF",
+                          },
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#FFFFFF",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                ) : (
+                  <>
+                    <DatePicker
+                      label="Start Date"
+                      views={["day", "month", "year"]}
+                      format="DD/MM/YYYY"
+                      minDate={moment().startOf("day")}
+                      value={moment(newEventForm.startDate, "DD/MM/YYYY")}
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedDate = date.startOf("day").format("DD/MM/YYYY");
+                          setNewEventForm((prev) => ({
+                            ...prev,
+                            startDate: formattedDate,
+                            endDate:
+                              prev.endDate &&
+                              moment(prev.endDate, "DD/MM/YYYY").isBefore(date)
+                                ? formattedDate
+                                : prev.endDate,
+                          }));
+                        }
+                      }}
+                      slotProps={{
+                        textField: {
+                          id: "start-date",
+                          size: "small",
+                          placeholder: t("placeholders.date"),
+                          sx: datePickerSx(isDarkMode),
+                        },
+                      }}
+                    />
+
+                    <DatePicker
+                      label="End Date"
+                      views={["day", "month", "year"]}
+                      format="DD/MM/YYYY"
+                      minDate={
+                        newEventForm.startDate
+                          ? moment(newEventForm.startDate, "DD/MM/YYYY")
+                          : moment().startOf("day")
+                      }
+                      value={
+                        newEventForm.endDate
+                          ? moment(newEventForm.endDate, "DD/MM/YYYY")
+                          : moment(newEventForm.startDate, "DD/MM/YYYY")
+                      }
+                      onChange={(date) => {
+                        if (date) {
+                          setNewEventForm((prev) => ({
+                            ...prev,
+                            endDate: date.endOf("day").format("DD/MM/YYYY"),
+                          }));
+                        }
+                      }}
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          placeholder: t("placeholders.date"),
+                          sx: datePickerSx(isDarkMode),
+                        },
+                      }}
+                    />
+                  </>
+                )}
+              </LocalizationProvider>
+            </ThemeProvider>
+          </label>
+        </div>
+
+        <div className={`mt-5`}>
+          <label className={`flex items-center space-x-5 rounded-lg`}>
+            <img src={notes} alt="close" className={`size-5`} />
+            <textarea
+              type="text"
+              name="description"
+              placeholder="Add Description"
+              value={newEventForm.description}
+              onChange={handleChange}
+              onBlur={validateForm}
+              className={`w-full bg-transparent border ${
+                isDarkMode
+                  ? "text-textPrimary border-borderLine"
+                  : "text-textBlack border-borderGray2"
+              } p-3 outline-none rounded-lg max-h-32 h-32`}
+            />
+          </label>
+          {errors.description && (
+            <p className={`text-textRed text-sm`}>{errors.description}</p>
+          )}
+        </div>
+
+        <div className={`mt-5 text-right`}>
+          <button
+            className={`bg-backgroundBlue text-white px-6 py-2 rounded-[10px] text-sm`}
+            disabled={loading}
+            onClick={() => {
+              if (validateForm()) {
+                isSubmit(newEventForm, prevData?.editData?.id);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || validateForm()) {
+                isSubmit(newEventForm, prevData?.editData?.id);
+              }
+            }}
+          >
+            {prevData?.editData?.id ? t("buttons.update") : t("buttons.done")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Event - Manages the logic of the calendar, events, and month navigation
 const Event = () => {
@@ -79,8 +452,10 @@ const Event = () => {
    */
   useEffect(() => {
     if (classAndSectionData?.selectedSession) {
-      const sessionStartYear = classAndSectionData.selectedSession.academicStartYear;
-      const sessionEndYear = classAndSectionData.selectedSession.academicEndYear;
+      const sessionStartYear =
+        classAndSectionData.selectedSession.academicStartYear;
+      const sessionEndYear =
+        classAndSectionData.selectedSession.academicEndYear;
       if (sessionStartYear && sessionEndYear) {
         const currentDate = new Date();
         const minDate = new Date(sessionStartYear, 3, 1); // April 1st
@@ -102,381 +477,13 @@ const Event = () => {
   }, [classAndSectionData?.selectedSession]);
 
   /**
-   * EventForm - Renders the form for adding or editing an event.
-   * Handles form state, validation, and submission.
-   * @param {object} props - isOpen, isClose, isSubmit, prevData
-   */
-  const EventForm = ({ isOpen, isClose, isSubmit, prevData }) => {
-    const isEditMode = Boolean(prevData?.editData?.id);
-    const isWorkday = moment(prevData?.date).day() === 0;
-
-    const [newEventForm, setNewEventForm] = useState({
-      title: prevData?.editData?.title || "",
-      description: prevData?.editData?.description || "",
-      holiday: prevData?.editData?.holiday || false,
-      workday: isWorkday,
-      date: prevData?.date ? moment(prevData.date).format("DD/MM/YYYY") : "",
-      startDate: moment(prevData?.date).format("DD/MM/YYYY"),
-      endDate: moment(prevData?.date).format("DD/MM/YYYY"),
-    });
-    // console.log(newEventForm.startDate, newEventForm.endDate);
-
-    const [errors, setErrors] = useState({});
-
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setNewEventForm((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    };
-
-    const validateForm = () => {
-      let newErrors = {};
-      if (!newEventForm?.title?.trim())
-        newErrors.title = t("toasts.titleRequired");
-      if (newEventForm?.workday && !newEventForm?.description?.trim()) {
-        newErrors.description = t("toasts.descRequired");
-      }
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
-    };
-
-    if (!isOpen) return null;
-
-    useEffect(() => {
-      document.body.style.overflow = isOpen ? "hidden" : "auto";
-      return () => {
-        document.body.style.overflow = "auto";
-      };
-    }, [isOpen]);
-
-    const datePickerSx = (isDarkMode) => ({
-      width: "100%",
-      "& .MuiOutlinedInput-root": {
-        fontSize: "14px",
-        minHeight: "40px",
-        borderRadius: "8px",
-        backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
-        border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
-        "& fieldset": { border: "none" },
-        "&:hover fieldset": { border: "none" },
-        "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
-      },
-
-      // 🔑 Text color inside input
-      "& .MuiOutlinedInput-input, & .MuiInputBase-input": {
-        color: isDarkMode ? "#fff" : "#000",
-        fontSize: "14px",
-        padding: "10px 12px",
-      },
-
-      // also cover the case with end adornment (calendar icon)
-      "& .MuiInputBase-inputAdornedEnd": {
-        color: isDarkMode ? "#fff" : "#000",
-      },
-
-      "& .MuiInputLabel-root": {
-        color: isDarkMode ? "#aaa" : "#666",
-      },
-
-      "& .MuiSvgIcon-root": {
-        color: isDarkMode ? "#fff" : "#000",
-      },
-    });
-
-    const theme = (isDarkMode) =>
-      createTheme({
-        palette: {
-          mode: isDarkMode ? "dark" : "light",
-          ...(isDarkMode
-            ? {
-              background: { default: "#121212", paper: "#1e1e1e" },
-              text: { primary: "#fff", secondary: "#aaa" },
-            }
-            : {
-              background: { default: "#f5f5f5", paper: "#fff" },
-              text: { primary: "#000", secondary: "#666" },
-            }),
-        },
-        components: {
-          MuiOutlinedInput: {
-            styleOverrides: {
-              root: {
-                borderRadius: 8,
-                minHeight: 40,
-                fontSize: "14px",
-                backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
-                border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
-                "& fieldset": { border: "none" },
-                "&:hover fieldset": { border: "none" },
-                "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
-              },
-              input: {
-                color: isDarkMode ? "#fff" : "#000",
-                fontSize: "14px",
-                padding: "10px 12px",
-              },
-              inputAdornedEnd: {
-                color: isDarkMode ? "#fff" : "#000",
-              },
-            },
-          },
-          MuiInputLabel: {
-            styleOverrides: {
-              root: {
-                color: isDarkMode ? "#aaa" : "#666",
-              },
-            },
-          },
-          MuiSvgIcon: {
-            styleOverrides: {
-              root: {
-                color: isDarkMode ? "#E3E8F3" : "black",
-              },
-            },
-          },
-          MuiInputBase: {
-            styleOverrides: {
-              root: {
-                "&.Mui-disabled": {
-                  color: isDarkMode ? "#E3E8F3 !important" : "#000",
-                  WebkitTextFillColor: isDarkMode ? "#E3E8F3" : "#000", // critical fix
-                },
-              },
-            },
-          },
-        },
-      });
-
-    return (
-      <div
-        className={`fixed inset-0 flex items-center justify-center bg-opacity-50 ${isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
-          }`}
-      >
-        <div
-          className={`rounded-2xl px-[30px] py-[20px] w-[450px] h-[430px] shadow-lg ${isDarkMode ? "bg-background1" : "bg-whiteBackground"
-            }`}
-        >
-          <div className={`flex justify-end`}>
-            <img
-              src={close}
-              onClick={() => {
-                isClose(false);
-                setErrors({});
-              }}
-              alt="close"
-              className={`size-5 cursor-pointer`}
-            />
-          </div>
-          <input
-            className={`w-full text-lg font-medium border-b py-3 outline-none bg-transparent ${isDarkMode
-              ? "text-textPrimary border-borderLine"
-              : "text-textBlack border-borderGray2"
-              }`}
-            type="text"
-            name="title"
-            value={newEventForm.title}
-            onChange={handleChange}
-            onBlur={validateForm}
-            placeholder={
-              isEditMode
-                ? isWorkday
-                  ? t("eventForm.title.updateWorkday")
-                  : t("eventForm.title.edit")
-                : isWorkday
-                  ? t("eventForm.title.addWorkday")
-                  : t("eventForm.title.add")
-            }
-          />
-          {errors.title && (
-            <p className={`text-textRed text-sm`}>{errors.title}</p>
-          )}
-          <div className={`mt-5`}>
-            <label className={`flex items-center space-x-5 rounded-lg`}>
-              <img src={calendar} alt="close" className={`size-5`} />
-              <ThemeProvider theme={theme}>
-                <LocalizationProvider dateAdapter={AdapterMoment}>
-                  {isWorkday || isEditMode ? (
-                    <DatePicker
-                      views={["day", "month", "year"]}
-                      value={moment(prevData.date, "DD/MM/YYYY")}
-                      format="DD/MM/YYYY"
-                      disabled
-                      className={`w-full`}
-                      textField={(params) => (
-                        <TextField
-                          {...params}
-                          placeholder={t("placeholders.date")}
-                          variant="outlined"
-                        />
-                      )}
-                      sx={{
-                        border: `1px solid ${isDarkMode ? "#2b2e4a80" : "gray"
-                          }`,
-                        borderRadius: "8px",
-                        backgroundColor: isDarkMode ? "" : "white",
-                        color: isDarkMode ? "#E3E8F3" : "black",
-                        "& .MuiOutlinedInput-root": {
-                          padding: 1,
-                          fontSize: "16px",
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .Mui-disabled": {
-                          color: isDarkMode ? "#E3E8F3 !important" : "black",
-                          WebkitTextFillColor: isDarkMode ? "#E3E8F3" : "black", // Critical for disabled input text
-                        },
-                        "& .MuiInputBase-input": {
-                          fontSize: "14px",
-                          padding: 1,
-                          color: isDarkMode ? "#E3E8F3" : "black",
-                        },
-                        "& .MuiSvgIcon-root": {
-                          color: "#FFFFFF", // <- calendar icon white
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
-                        },
-                      }}
-                      slotProps={{
-                        textField: {
-                          size: "small",
-                          sx: {
-                            "& .MuiInputBase-input": {
-                              color: "#FFFFFF", // Text color
-                            },
-                            "& .MuiInputLabel-root": {
-                              color: "#FFFFFF", // Label color
-                            },
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#FFFFFF", // Outline border
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  ) : (
-                    <>
-                      <DatePicker
-                        label="Start Date"
-                        views={["day", "month", "year"]}
-                        format="DD/MM/YYYY"
-                        minDate={moment().startOf("day")}
-                        value={moment(newEventForm.startDate, "DD/MM/YYYY")}
-                        onChange={(date) => {
-                          if (date) {
-                            const formattedDate = date
-                              .startOf("day")
-                              .format("DD/MM/YYYY");
-                            setNewEventForm((prev) => ({
-                              ...prev,
-                              startDate: formattedDate,
-                              endDate:
-                                prev.endDate &&
-                                  moment(prev.endDate, "DD/MM/YYYY").isBefore(
-                                    date,
-                                  )
-                                  ? formattedDate
-                                  : prev.endDate,
-                            }));
-                          }
-                        }}
-                        slotProps={{
-                          textField: {
-                            id: "start-date",
-                            size: "small",
-                            placeholder: t("placeholders.date"),
-                            sx: datePickerSx(isDarkMode),
-                          },
-                        }}
-                      />
-
-                      <DatePicker
-                        label="End Date"
-                        views={["day", "month", "year"]}
-                        format="DD/MM/YYYY"
-                        minDate={
-                          newEventForm.startDate
-                            ? moment(newEventForm.startDate, "DD/MM/YYYY")
-                            : moment().startOf("day")
-                        }
-                        value={
-                          newEventForm.endDate
-                            ? moment(newEventForm.endDate, "DD/MM/YYYY")
-                            : moment(newEventForm.startDate, "DD/MM/YYYY")
-                        }
-                        onChange={(date) => {
-                          if (date) {
-                            setNewEventForm((prev) => ({
-                              ...prev,
-                              endDate: date.endOf("day").format("DD/MM/YYYY"),
-                            }));
-                          }
-                        }}
-                        slotProps={{
-                          textField: {
-                            size: "small",
-                            placeholder: t("placeholders.date"),
-                            sx: datePickerSx(isDarkMode),
-                          },
-                        }}
-                      />
-                    </>
-                  )}
-                </LocalizationProvider>
-              </ThemeProvider>
-            </label>
-          </div>
-
-          <div className={`mt-5`}>
-            <label className={`flex items-center space-x-5 rounded-lg`}>
-              <img src={notes} alt="close" className={`size-5`} />
-              <textarea
-                type="text"
-                name="description"
-                placeholder="Add Description"
-                value={newEventForm.description}
-                onChange={handleChange}
-                onBlur={validateForm}
-                className={`w-full bg-transparent border ${isDarkMode
-                  ? "text-textPrimary border-borderLine"
-                  : "text-textBlack border-borderGray2"
-                  } p-3 outline-none rounded-lg max-h-32 h-32`}
-              />
-            </label>
-            {errors.description && (
-              <p className={`text-textRed text-sm`}>{errors.description}</p>
-            )}
-          </div>
-
-          <div className={`mt-5 text-right`}>
-            <button
-              className={`bg-backgroundBlue text-white px-6 py-2 rounded-[10px] text-sm`}
-              disabled={loading}
-              onClick={() => {
-                if (validateForm()) {
-                  isSubmit(newEventForm, prevData?.editData?.id);
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || validateForm()) {
-                  isSubmit(newEventForm, prevData?.editData?.id);
-                }
-              }}
-            >
-              {prevData?.editData?.id ? t("buttons.update") : t("buttons.done")}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  /**
    * Fetch events and workdays for the selected month.
    */
   const fetchEvents = async () => {
-    if (!classAndSectionData?.selectedSession?._id) return;
+    if (!classAndSectionData?.selectedSession?._id) {
+      showToast.error("Please select Session");
+      return;
+    }
     setEventLoading(true);
     try {
       const response = await axiosClient.post(EndPoints.ADMIN.GET_EVENTS, {
@@ -506,20 +513,9 @@ const Event = () => {
         );
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setEventLoading(false);
-    }
-  };
-
-  /**
-   * Handle navigation to a specific month/year from input.
-   * @param {object} e - Input event
-   */
-  const handleGotoDate = (e) => {
-    const [yyyy, mm] = e.target.value.split("/");
-    if (mm && yyyy && mm > 0 && mm < 13 && yyyy.length === 4) {
-      updateCalendar(mm - 1, parseInt(yyyy));
     }
   };
 
@@ -583,10 +579,10 @@ const Event = () => {
       if (res?.statusCode === 200) {
         setShowAddEvent(false);
         fetchEvents();
-        toast.success(res?.result);
+        showToast.success(res?.result);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -610,7 +606,8 @@ const Event = () => {
     const newMonth = month === 0 ? 11 : month - 1;
     const newYear = month === 0 ? year - 1 : year;
 
-    const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+    const sessionStartYear =
+      classAndSectionData?.selectedSession?.academicStartYear;
     if (sessionStartYear) {
       // April is month 3
       const minDate = new Date(sessionStartYear, 3, 1);
@@ -630,7 +627,8 @@ const Event = () => {
     const newMonth = month === 11 ? 0 : month + 1;
     const newYear = month === 11 ? year + 1 : year;
 
-    const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
+    const sessionEndYear =
+      classAndSectionData?.selectedSession?.academicEndYear;
     if (sessionEndYear) {
       // March is month 2. Max date is end of March.
       const maxDate = new Date(sessionEndYear, 2, 1);
@@ -705,7 +703,7 @@ const Event = () => {
       // Find event or workday data
       const findEventByDate = (key) =>
         events.find((item) => moment(item.date).isSame(targetDate, "day"))?.[
-        key
+          key
         ];
 
       const title = findEventByDate("title");
@@ -766,22 +764,33 @@ const Event = () => {
           : EndPoints.ADMIN.DELETE_EVENT;
       const response = await axiosClient.delete(`${url}/${eventToDelete._id}`);
       if (response?.statusCode === 200) {
-        toast.success(response.result);
+        showToast.success(response.result);
         setShowDeleteConfirmation(false);
-        fetchEvents();
+        if (eventToDelete.day === "Sunday") {
+          setWorkdays((prev) =>
+            prev.filter((item) => item._id !== eventToDelete._id),
+          );
+        } else {
+          setEvents((prev) =>
+            prev.filter((item) => item._id !== eventToDelete._id),
+          );
+        }
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
   };
 
-  const sessionStartYear = classAndSectionData?.selectedSession?.academicStartYear;
+  const sessionStartYear =
+    classAndSectionData?.selectedSession?.academicStartYear;
   const sessionEndYear = classAndSectionData?.selectedSession?.academicEndYear;
 
-  const isPrevDisabled = sessionStartYear && month === 3 && year === sessionStartYear;
-  const isNextDisabled = sessionEndYear && month === 2 && year === sessionEndYear;
+  const isPrevDisabled =
+    sessionStartYear && month === 3 && year === sessionStartYear;
+  const isNextDisabled =
+    sessionEndYear && month === 2 && year === sessionEndYear;
 
   // Calendar Component - Displays a calendar with month navigation and event handling
   const Calendar = ({ month, year, onPrevMonth, onNextMonth }) => {
@@ -789,8 +798,9 @@ const Event = () => {
       <div className={`bg-transparent rounded-lg w-full`}>
         {/* Month Navigation */}
         <div
-          className={`month flex items-center justify-between py-4 px-10 mx-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
-            }`}
+          className={`month flex items-center justify-between py-4 px-10 mx-10 text-[16px] font-medium rounded-[8px] h-8 capitalize border-2 ${
+            isDarkMode ? "border-borderLine" : "border-borderWhite3"
+          }`}
         >
           <img
             src={isDarkMode ? DownArrow : DownArroww}
@@ -815,8 +825,9 @@ const Event = () => {
           {CONSTANT.WEEKDAYS1.map((day) => (
             <div
               key={day}
-              className={`text-center font-medium capitalize text-md ${isDarkMode ? "text-textBlue" : "text-textBlack"
-                }`}
+              className={`text-center font-medium capitalize text-md ${
+                isDarkMode ? "text-textBlue" : "text-textBlack"
+              }`}
             >
               {day}
             </div>
@@ -832,20 +843,23 @@ const Event = () => {
       if (isHoliday) {
         return `text-textPrimary bg-backgroundRed border-borderRed`;
       } else if (isSunday) {
-        return `${isDarkMode
-          ? "bg-backgroundOrange border-borderHoliday"
-          : "bg-backgroundOrange2 border-borderOrange"
-          } text-textHoliday`;
+        return `${
+          isDarkMode
+            ? "bg-backgroundOrange border-borderHoliday"
+            : "bg-backgroundOrange2 border-borderOrange"
+        } text-textHoliday`;
       } else if (isToday) {
-        return `${isDarkMode
-          ? "text-textBlue bg-backgroundGrayDays border-borderBlue"
-          : "text-textDarkBlue bg-whiteBackground2 border-borderDarkBlue"
-          }`;
+        return `${
+          isDarkMode
+            ? "text-textBlue bg-backgroundGrayDays border-borderBlue"
+            : "text-textDarkBlue bg-whiteBackground2 border-borderDarkBlue"
+        }`;
       } else {
-        return `${isDarkMode
-          ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
-          : "text-textBlack bg-whiteBackground2 border-borderWhite3"
-          }`;
+        return `${
+          isDarkMode
+            ? "text-textPrimary bg-backgroundGrayDays border-borderGray3"
+            : "text-textBlack bg-whiteBackground2 border-borderWhite3"
+        }`;
       }
     };
 
@@ -870,8 +884,9 @@ const Event = () => {
 
   return (
     <div
-      className={`grid grid-cols-6 gap-6 p-6 min-h-[calc(100vh-72px)] ${isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-        }`}
+      className={`grid grid-cols-6 gap-6 p-6 min-h-[calc(100vh-72px)] ${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      }`}
     >
       {loading && (
         <div
@@ -882,56 +897,27 @@ const Event = () => {
       )}
       {/* left view */}
       <div
-        className={`col-span-4 px-10 ${isDarkMode
-          ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-          : "bg-whiteBackground"
-          } rounded-[16px] p-4`}
+        className={`col-span-4 px-10 ${
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
+        } rounded-[16px] p-4`}
       >
         <Breadcrumbs />
         <div className={`flex justify-between items-center mb-3`}>
           <p
-            className={`text-2xl ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-              } font-poppins-bold`}
+            className={`text-2xl ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            } font-poppins-bold`}
           >
             {t("dashboard.calendar")}
           </p>
-          {/* search input */}
-          {/* <div
-            className={`flex justify-around w-32 h-[36px] bg-transparent border-2 border-borderGray rounded-[8px] overflow-hidden`}
-          >
-            <button className={`py-1`}>
-              <img
-                src={isDarkMode ? Search : Searchw}
-                alt=""
-                className={`h-[18px] w-[18px]`}
-              />
-            </button>
-            <input
-              type="text"
-              placeholder={t("calendar.gotoDatePlaceholder")}
-              className={`date-input outline-none text-[14px] w-20 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                } bg-transparent`}
-              onBlur={handleGotoDate}
-              maxLength={7}
-              onChange={(e) => {
-                let value = e.target.value.replace(/\D/g, "");
-                if (value.length > 4) {
-                  value = value.slice(0, 4) + "/" + value.slice(4, 6);
-                }
-                let [year, month] = value.split("/");
-                e.target.value = [year, month].filter(Boolean).join("/");
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleGotoDate(e);
-                }
-              }}
-            />
-          </div> */}
+          
         </div>
         <hr
-          className={`mb-4 border ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
-            }`}
+          className={`mb-4 border ${
+            isDarkMode ? "border-borderLine" : "border-borderWhite3"
+          }`}
         />
         <Calendar
           className={`px-10`}
@@ -945,10 +931,11 @@ const Event = () => {
       </div>
       {/* right view */}
       <div
-        className={`col-span-2 relative ${isDarkMode
-          ? "bg-gradient-to-l from-fromColor1 to-toColor1"
-          : "bg-whiteBackground"
-          } rounded-[16px] py-3 px-4`}
+        className={`col-span-2 relative ${
+          isDarkMode
+            ? "bg-gradient-to-l from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
+        } rounded-[16px] py-3 px-4`}
       >
         {eventLoading && (
           <div
@@ -959,14 +946,16 @@ const Event = () => {
         )}
         <div>
           <div
-            className={`text-2xl text-center font-bold my-2 pb-1 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-              }`}
+            className={`text-2xl text-center font-bold my-2 pb-1 ${
+              isDarkMode ? "text-textPrimary" : "text-textBlack"
+            }`}
           >
             {t("events.title")}
           </div>
           <hr
-            className={`mb-6 border-t ${isDarkMode ? "border-borderLine" : "border-borderWhite3"
-              }`}
+            className={`mb-6 border-t ${
+              isDarkMode ? "border-borderLine" : "border-borderWhite3"
+            }`}
           />
           {events.length === 0 && workdays.length === 0 ? (
             <div className={`relative top-40 w-full h-full`}>
@@ -1011,18 +1000,20 @@ const Event = () => {
                   <div className={`bg-transparent mt-2`}>
                     <div className={`flex py-1 justify-between items-center`}>
                       <div
-                        className={`py-0 px-1 ml-4 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } text-xs font-bold`}
+                        className={`py-0 px-1 ml-4 ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } text-xs font-bold`}
                       >
-                        {itm.title}
+                        {itm?.title??''}
                       </div>
                     </div>
                     <div className={`flex pb-2 justify-between items-center`}>
                       <div
-                        className={`py-0 px-1 ml-4 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } text-xs font-poppins-regular`}
+                        className={`py-0 px-1 ml-4 ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } text-xs font-poppins-regular`}
                       >
-                        {itm.description}
+                        {itm?.description??''}
                       </div>
                       <div className={`flex`}>
                         <div
@@ -1065,18 +1056,20 @@ const Event = () => {
                   <div className={`bg-transparent mt-2`}>
                     <div className={`flex py-1 justify-between items-center`}>
                       <div
-                        className={`py-0 px-1 ml-4 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } text-xs font-bold`}
+                        className={`py-0 px-1 ml-4 ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } text-xs font-bold`}
                       >
-                        {itm.title}
+                        {itm?.title??''}
                       </div>
                     </div>
                     <div className={`flex pb-2 justify-between items-center`}>
                       <div
-                        className={`py-0 px-1 ml-4 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } text-xs font-poppins-regular`}
+                        className={`py-0 px-1 ml-4 ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } text-xs font-poppins-regular`}
                       >
-                        {itm.description}
+                        {itm?.description??''}
                       </div>
                       <div className={`flex`}>
                         <div
@@ -1099,6 +1092,9 @@ const Event = () => {
         isClose={setShowAddEvent}
         isSubmit={handleAddEvent}
         prevData={newEvent}
+        loading={loading}
+        isDarkMode={isDarkMode}
+        t={t}
       />
 
       {/* delete popup */}

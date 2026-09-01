@@ -13,7 +13,7 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useLocation, useNavigate } from "react-router-dom";
 import { format, parse } from "date-fns";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
@@ -36,6 +36,7 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useSelector } from "react-redux";
+import { showToast } from "../../services/toastService";
 /**
  * Capitalizes the first letter of a string and converts the rest to lowercase.
  * @param {string} string - Input string to capitalize.
@@ -61,8 +62,8 @@ const TeacherUpdate = () => {
 
   // Validation schema using Yup
   const validationSchema = Yup.object({
-    firstname: Yup.string().trim().required(t("validationError.firstName")),
-    lastname: Yup.string().trim().required(t("validationError.lastName")),
+    firstName: Yup.string().trim().required(t("validationError.firstName")),
+    lastName: Yup.string().trim().required(t("validationError.lastName")),
     phone: Yup.string()
       .trim()
       .required(t("validationError.phone"))
@@ -70,14 +71,16 @@ const TeacherUpdate = () => {
       .test(
         "starts-with-1-to-5",
         t("validationError.phoneStart"),
-        (value) => value && REGEX.PHONE_TEST.test(value)
+        (value) => value && REGEX.PHONE_TEST.test(value),
       ),
   });
+  // console.log(teacher);
+
   // Setup formik for handling form submission, validation, and field management
   const formik = useFormik({
     initialValues: {
-      firstname: teacher?.firstname || "",
-      lastname: teacher?.lastname || "",
+      firstName: teacher?.firstName ?? "",
+      lastName: teacher?.lastName ?? "",
       email: teacher?.email || "",
       address: teacher?.address || "",
       university: teacher?.university || "",
@@ -98,35 +101,39 @@ const TeacherUpdate = () => {
         const teacherData = Object.entries(values).reduce(
           (acc, [key, value]) => {
             acc[key] =
-              key === "email" ? value.toLowerCase() : capitalize(value);
+              key === "email"
+                ? value.toLowerCase()
+                : key === "gender"
+                  ? value.toUpperCase()
+                  : capitalize(value);
             return value ? acc : acc;
           },
-          {}
+          {},
         );
         const filteredTeacherData = filterEmptyValues(teacherData);
 
         // Make API request to update teacher details
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher.id}`,
-          filteredTeacherData
+          filteredTeacherData,
         );
 
         if (response?.statusCode === 200) {
-          toast.success(response.result);
+          showToast.success(response?.result);
           navigate(-1);
         }
       } catch (e) {
-        toast.error(e);
+        showToast.error(e);
       } finally {
         setLoading(false);
       }
     },
   });
-  
+
   // form fields
   const fields = [
     {
-      name: "firstname",
+      name: "firstName",
       label: t("labels.firstName"),
       placeholder: t("placeholders.firstName"),
       type: "text",
@@ -138,7 +145,7 @@ const TeacherUpdate = () => {
       options: [t("options.male"), t("options.female"), t("options.other")],
     },
     {
-      name: "lastname",
+      name: "lastName",
       label: t("labels.lastName"),
       placeholder: t("placeholders.lastName"),
       type: "text",
@@ -216,7 +223,7 @@ const TeacherUpdate = () => {
               border: `1px solid ${isDarkMode ? "#2b2e4a80" : "#ccc"}`,
               "& fieldset": { border: "none" },
               "&:hover fieldset": { border: "none" },
-              "&.Mui-focused fieldset": { border: "2px solid #1976d2" },
+              "&.Mui-focused fieldset": { border: "20px solid #1976d2" },
             },
             input: {
               color: isDarkMode ? "#fff" : "#000",
@@ -336,8 +343,8 @@ const TeacherUpdate = () => {
                                 formik.values[name] === ""
                                   ? "gray"
                                   : isDarkMode
-                                  ? "#E3E8F3"
-                                  : "black",
+                                    ? "#E3E8F3"
+                                    : "black",
                               "& .MuiOutlinedInput-notchedOutline": {
                                 border: "none",
                               },
@@ -379,7 +386,7 @@ const TeacherUpdate = () => {
                         </FormControl>
                       ) : type === "date" ? (
                         // <DatePicker
-                        <ThemeProvider theme={theme}>
+                        <ThemeProvider theme={theme(isDarkMode)}>
                           <LocalizationProvider dateAdapter={AdapterMoment}>
                             <DatePicker
                               views={["day", "month", "year"]}
@@ -394,7 +401,7 @@ const TeacherUpdate = () => {
                                 if (date) {
                                   formik.setFieldValue(
                                     "dob",
-                                    moment(date).format("DD/MM/YYYY")
+                                    moment(date).format("DD/MM/YYYY"),
                                   );
                                 }
                               }}
@@ -403,6 +410,7 @@ const TeacherUpdate = () => {
                                   fullWidth: true,
                                   size: "small",
                                   placeholder: t("placeholders.date"),
+                                 
                                 },
                               }}
                             />
@@ -414,17 +422,17 @@ const TeacherUpdate = () => {
                           name={name}
                           placeholder={placeholder}
                           onChange={(e) => {
-                            if (["firstname", "lastname"].includes(name)) {
+                            if (["firstName", "lastName"].includes(name)) {
                               e.target.value = e.target.value.replace(
                                 /[^a-zA-Z]/g,
-                                ""
+                                "",
                               );
                             }
                             formik.handleChange(e);
                           }}
                           onKeyDown={(e) => {
                             if (
-                              ["firstname", "lastname"]
+                              ["firstName", "lastName"]
                                 .includes(name)
                                 .trimStart() &&
                               /[^a-zA-Z\s]/.test(e.key)
@@ -436,9 +444,9 @@ const TeacherUpdate = () => {
                           maxLength={
                             name === "phone"
                               ? 10
-                              : name === "firstname" || name == "lastname"
-                              ? 15
-                              : ""
+                              : name === "firstName" || name == "lastName"
+                                ? 15
+                                : ""
                           }
                           className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
@@ -460,7 +468,7 @@ const TeacherUpdate = () => {
                       )}
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
             {/* submit and cancel buttons */}

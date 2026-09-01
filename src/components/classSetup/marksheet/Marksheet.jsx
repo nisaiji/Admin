@@ -1,22 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
 import Breadcrumbs from "../../BreadCrumbs";
 import { useSelector } from "react-redux";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 import confirm1 from "../../../assets/images/darkmode/confirm1.png";
 import confirm2 from "../../../assets/images/darkmode/confirm2.png";
 import cross from "../../../assets/images/darkmode/cross.png";
+import crossw from "../../../assets/images/cross.png";
 import addIcon from "../../../assets/images/darkmode/plus.png";
+import addIconLight from "../../../assets/images/plus.png";
 import CreateExamPopup from "./ExamPopup";
 import { axiosClient } from "../../../services/axiosClient";
 import EndPoints from "../../../services/EndPoints";
 import ConfirmationPopup from "../../ConfirmationPopup2";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { FormControl, MenuItem, Select } from "@mui/material";
 import CONSTANT from "../../../utils/constants";
+import { showToast } from "../../../services/toastService";
 
 export default function Marksheet() {
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const pageText = isDarkMode ? "text-textPrimary" : "text-textBlack";
+  const mutedText = isDarkMode ? "text-gray-300" : "text-textGray";
+  const tableRowBg = isDarkMode ? "bg-[#68686826]" : "bg-[#F4F7FB]";
+  const tableInputBg = isDarkMode ? "bg-background4" : "bg-white";
+  const tableInputText = isDarkMode ? "text-textPrimary" : "text-textBlack";
+  const tableSurface = isDarkMode ? "#3e3e3e" : "#FFFFFF";
+  const tableSurfaceText = isDarkMode ? "#E3E8F3" : "#111827";
+  const tableBorder = isDarkMode ? "#2b2e4a40" : "#D9E2EC";
+  const tableHoverBg = isDarkMode ? "#2a2a2a" : "#E9EEF2";
   const [loading, setLoading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [examList, setExamList] = useState([]);
@@ -112,11 +124,11 @@ export default function Marksheet() {
             components: res?.components?.map((c) => ({
               examType: c?.examType,
               marksObtained:
-                c?.gradingType === "marks"
+                c?.gradingType === "MARKS"
                   ? (c?.marksObtained ?? undefined)
                   : undefined,
               gradeObtained:
-                c?.gradingType === "grades"
+                c?.gradingType === "GRADES"
                   ? (c?.gradeObtained ?? undefined)
                   : undefined,
               maxMarks: c?.maxMarks ?? undefined,
@@ -142,12 +154,12 @@ export default function Marksheet() {
       // console.log(res);
 
       if (res?.statusCode === 200 || res?.statusCode === 201) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         getStudentsByExam();
         setIsEdit(false);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -174,8 +186,7 @@ export default function Marksheet() {
   ) => {
     // Show toast if value exceeds max
     if (value > maxMarks) {
-      toast.dismiss(); // remove any existing toasts
-      toast.error(`Marks must be between 0 and ${maxMarks}`);
+      showToast.error(`Marks must be between 0 and ${maxMarks}`);
       return;
     }
 
@@ -210,7 +221,7 @@ export default function Marksheet() {
           examResult?.components?.push({
             examType,
             marksObtained: value,
-            gradingType: "marks",
+            gradingType: "MARKS",
           });
         }
 
@@ -237,7 +248,7 @@ export default function Marksheet() {
     if (!grade) return;
 
     if (CONSTANT.GRADES.indexOf(grade) < CONSTANT.GRADES.indexOf(maxGrade)) {
-      toast.error(`Grade cannot be higher than max grade ${maxGrade}`);
+      showToast.error(`Grade cannot be higher than max grade ${maxGrade}`);
       return;
     }
 
@@ -272,7 +283,7 @@ export default function Marksheet() {
           examResult?.components?.push({
             examType,
             gradeObtained: grade,
-            gradingType: "grades",
+            gradingType: "GRADES",
           });
         }
 
@@ -281,28 +292,43 @@ export default function Marksheet() {
     );
   };
 
-  /**
-   * isAllFieldsFilled (derived)
-   * - Checks whether every student's required components have values filled.
-   * - Note: the original code uses .every inside .every but did not return from the outer
-   *   every; left unchanged but wrapped into a const for clarity. Keep an eye on logic if behavior seems off.
-   */
-  const isAllFieldsFilled = studentData?.every((student) => {
-    student?.studentExamResult?.every((res) => {
-      if (!res?.components || res?.components?.length === 0) return false;
+  const isAllMarksFilled = () => {
+    if (!studentData?.length || !selectedExam?.subjects?.length) return false;
 
-      const gradesValid = res?.components
-        ?.filter((c) => c?.gradingType === "grades")
-        ?.every((c) => !!c?.gradeObtained);
+    return studentData.every((student) => {
+      return selectedExam.subjects.every((subj) => {
+        const result = student?.studentExamResult?.find(
+          (r) => r?.subjectId === subj?.subject?._id,
+        );
 
-      const marksValid = res?.components
-        ?.filter((c) => c?.gradingType === "marks")
-        ?.every((c) => c?.marksObtained !== "" && c?.marksObtained !== null);
-      // console.log(gradesValid, marksValid);
+        if (!result || !result?.components?.length) return false;
 
-      return gradesValid && marksValid;
+        return subj?.components?.every((examComp) => {
+          const comp = result.components.find(
+            (c) => c?.examType === examComp?.examType,
+          );
+
+          if (!comp) return false;
+
+          // Marks validation
+          if (examComp?.gradingType === "MARKS") {
+            return (
+              comp?.marksObtained !== "" &&
+              comp?.marksObtained !== null &&
+              comp?.marksObtained !== undefined
+            );
+          }
+
+          // Grade validation
+          if (examComp?.gradingType === "GRADES") {
+            return !!comp?.gradeObtained;
+          }
+
+          return true;
+        });
+      });
     });
-  });
+  };
 
   /**
    * publishResult
@@ -318,21 +344,19 @@ export default function Marksheet() {
       );
       // console.log(res)
       if (res?.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         setShowConfirm2(false);
       }
     } catch (e) {
       // console.log(e)
-      toast.error(e);
+      showToast.error(e);
     }
   };
 
   return (
     <div className="select-none">
       <div
-        className={`${
-          isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-        } px-6 min-h-[calc(100vh-72px)] py-4 `}
+        className={`${isDarkMode ? "bg-background2" : "bg-whiteBackground2"} px-6 min-h-[calc(100vh-72px)] py-4 `}
       >
         <div className="py-4">
           {/* Toast notifications */}
@@ -358,15 +382,23 @@ export default function Marksheet() {
                 onClick={() => setShowPopup(true)}
                 className="flex flex-row justify-center items-center p-[10px] space-x-[10px] cursor-pointer bg-whiteBackground rounded-md transition-all duration-200 ease-in-out active:scale-90"
               >
-                <img src={addIcon} alt="+" className="size-4" />
+                <img
+                  src={isDarkMode ? addIcon : addIconLight}
+                  alt="+"
+                  className="size-4"
+                />
                 <span className="text-sm font-poppins-bold text-textBlack">
                   Create
                 </span>
               </button>
             </div>
-
             <hr className="border-[#9391A5]/25 my-6" />
-
+            {selectedExam?.resultPublished && (
+              <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                Exam results for <strong>{selectedExam?.name}</strong> have been
+                published. Students can now view their marks/grades.
+              </div>
+            )}
             {examList?.length > 0 && (
               <>
                 {/* Exam List + Buttons */}
@@ -376,21 +408,21 @@ export default function Marksheet() {
                       size="small"
                       sx={{
                         width: "150px",
-                        border: "1px solid #2b2e4a40",
+                        border: `1px solid ${tableBorder}`,
                         fontSize: "16px",
                         borderRadius: "6px",
-                        backgroundColor: isDarkMode ? "#3e3e3e" : "white",
+                        backgroundColor: tableSurface,
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "none",
                         },
                         "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "white !important",
+                          borderColor: `${tableBorder} !important`,
                         },
                         "& .MuiInputBase-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
+                          color: tableSurfaceText,
                         },
                         "& .MuiSvgIcon-root": {
-                          color: isDarkMode ? "#E3E8F3" : "black",
+                          color: tableSurfaceText,
                         },
                       }}
                     >
@@ -407,8 +439,8 @@ export default function Marksheet() {
                         MenuProps={{
                           PaperProps: {
                             sx: {
-                              backgroundColor: isDarkMode ? "#3e3e3e" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
+                              backgroundColor: tableSurface,
+                              color: tableSurfaceText,
                             },
                           },
                         }}
@@ -418,12 +450,10 @@ export default function Marksheet() {
                             key={i}
                             value={exam._id}
                             sx={{
-                              backgroundColor: isDarkMode ? "#3e3e3e" : "white",
-                              color: isDarkMode ? "#E3E8F3" : "black",
+                              backgroundColor: tableSurface,
+                              color: tableSurfaceText,
                               "&:hover": {
-                                backgroundColor: isDarkMode
-                                  ? "#2a2a2a"
-                                  : "#E9EEF2",
+                                backgroundColor: tableHoverBg,
                               },
                             }}
                           >
@@ -438,6 +468,7 @@ export default function Marksheet() {
                       <>
                         <button
                           type="button"
+                          disabled={loading}
                           onClick={() => handleSaveAllMarks()}
                           className="w-[100px] py-[10px] text-sm font-poppins-bold rounded-md bg-backgroundBlue text-white"
                         >
@@ -462,8 +493,16 @@ export default function Marksheet() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setShowConfirm1(true)}
-                          disabled={isEdit}
+                          onClick={() => {
+                            if (!isAllMarksFilled()) {
+                              showToast.error(
+                                "Please fill all marks/grades before publishing",
+                              );
+                              return;
+                            }
+                            setShowConfirm1(true);
+                          }}
+                          disabled={isEdit || loading}
                           className="w-[100px] py-[10px] text-sm font-poppins-bold rounded-md bg-backgroundBlue text-white"
                         >
                           Publish
@@ -477,22 +516,35 @@ export default function Marksheet() {
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-sm">
                     <thead>
-                      <tr className="text-center text-base font-poppins-bold text-white">
+                      <tr
+                        className={`text-center text-base font-poppins-bold ${pageText}`}
+                      >
                         <th className="p-2">Student</th>
                         {selectedExam?.subjects?.map((subj, i) => {
+                          // console.log(subj);
+
                           const maxTheoryMarks = subj?.components.find(
-                            (c) => c.examType === "theory",
+                            (c) => c.examType === "THEORY",
                           )?.maxMarks;
                           const maxPracticalMarks = subj?.components.find(
-                            (c) => c.examType === "practical",
+                            (c) => c.examType === "PRACTICAL",
                           )?.maxMarks;
 
                           return (
                             <th key={i} className="p-2">
                               <div className="flex flex-col items-center space-y-1">
-                                <span>{subj?.subject?.name}</span>
-                                <span className="text-xs font-poppins-medium text-gray-300">
-                                  {subj?.subjectType === "mainSubject"
+                                <span>
+                                  {subj?.subject?.name}
+                                  <span className="text-red-500 pl-1">
+                                    {subj?.teacherSubjectSection?.isMainSubject
+                                      ? "*"
+                                      : ""}
+                                  </span>
+                                </span>
+                                <span
+                                  className={`text-xs font-poppins-medium ${mutedText}`}
+                                >
+                                  {subj?.subjectType === "MAIN_SUBJECT"
                                     ? `T/${maxTheoryMarks} P/${maxPracticalMarks}`
                                     : "T/Gr P/Gr"}
                                 </span>
@@ -507,9 +559,16 @@ export default function Marksheet() {
                     <tbody>
                       {studentData?.map((student, i) => {
                         // Filter only main subjects
+                        // const mainSubjects = selectedExam?.subjects?.filter(
+                        //   (subj) => subj?.subjectType === "mainSubject",
+                        // );
+                        // console.log(selectedExam);
+
                         const mainSubjects = selectedExam?.subjects?.filter(
-                          (subj) => subj?.subjectType === "mainSubject",
+                          (subj) =>
+                            subj?.teacherSubjectSection?.isMainSubject === true,
                         );
+                        // console.log(mainSubjects);
 
                         // Calculate total marks obtained
                         const totalMarksObtained = mainSubjects?.reduce(
@@ -520,12 +579,12 @@ export default function Marksheet() {
 
                             const theoryMarks = Number(
                               result?.components.find(
-                                (c) => c.examType === "theory",
+                                (c) => c.examType === "THEORY",
                               )?.marksObtained ?? 0,
                             );
                             const practicalMarks = Number(
                               result?.components.find(
-                                (c) => c.examType === "practical",
+                                (c) => c.examType === "PRACTICAL",
                               )?.marksObtained ?? 0,
                             );
 
@@ -538,11 +597,11 @@ export default function Marksheet() {
                         const totalMarks = mainSubjects?.reduce((sum, subj) => {
                           const maxTheoryMarks =
                             subj?.components.find(
-                              (c) => c.examType === "theory",
+                              (c) => c.examType === "THEORY",
                             )?.maxMarks ?? 0;
                           const maxPracticalMarks =
                             subj?.components.find(
-                              (c) => c.examType === "practical",
+                              (c) => c.examType === "PRACTICAL",
                             )?.maxMarks ?? 0;
 
                           return sum + maxTheoryMarks + maxPracticalMarks;
@@ -551,7 +610,7 @@ export default function Marksheet() {
                         return (
                           <tr
                             key={i}
-                            className="bg-[#68686826] text-white text-center text-base font-poppins-regular"
+                            className={`${tableRowBg} ${pageText} text-center text-base font-poppins-regular`}
                           >
                             <td className="p-2">
                               {student?.studentFirstName}{" "}
@@ -565,54 +624,54 @@ export default function Marksheet() {
 
                               const theoryMarks =
                                 result?.components.find(
-                                  (c) => c.examType === "theory",
+                                  (c) => c.examType === "THEORY",
                                 )?.marksObtained ?? "";
                               const practicalMarks =
                                 result?.components.find(
-                                  (c) => c.examType === "practical",
+                                  (c) => c.examType === "PRACTICAL",
                                 )?.marksObtained ?? "";
 
                               const theoryMinMarks =
                                 subj?.components.find(
-                                  (c) => c.examType === "theory",
+                                  (c) => c.examType === "THEORY",
                                 )?.passingMarks ?? "";
                               const practicalMinMarks =
                                 subj?.components.find(
-                                  (c) => c.examType === "practical",
+                                  (c) => c.examType === "PRACTICAL",
                                 )?.passingMarks ?? "";
 
                               const maxTheoryMarks = subj?.components.find(
-                                (c) => c.examType === "theory",
+                                (c) => c.examType === "THEORY",
                               )?.maxMarks;
                               const maxPracticalMarks = subj?.components.find(
-                                (c) => c.examType === "practical",
+                                (c) => c.examType === "PRACTICAL",
                               )?.maxMarks;
 
                               const theoryGrade =
                                 result?.components.find(
-                                  (c) => c.examType === "theory",
+                                  (c) => c.examType === "THEORY",
                                 )?.gradeObtained ?? "";
                               const practicalGrade =
                                 result?.components.find(
-                                  (c) => c.examType === "practical",
+                                  (c) => c.examType === "PRACTICAL",
                                 )?.gradeObtained ?? "";
 
                               const minTheoryGrade =
                                 subj?.components.find(
-                                  (c) => c.examType === "theory",
+                                  (c) => c.examType === "THEORY",
                                 )?.passingGrade ?? "";
                               const minPracticleGrade =
                                 subj?.components.find(
-                                  (c) => c.examType === "practical",
+                                  (c) => c.examType === "PRACTICAL",
                                 )?.passingGrade ?? "";
 
                               const maxTheoryGrade =
                                 subj?.components.find(
-                                  (c) => c.examType === "theory",
+                                  (c) => c.examType === "THEORY",
                                 )?.maxGrade ?? "";
                               const maxPracticleGrade =
                                 subj?.components.find(
-                                  (c) => c.examType === "practical",
+                                  (c) => c.examType === "PRACTICAL",
                                 )?.maxGrade ?? "";
 
                               const getGradeColor = (grade, passingGrade) => {
@@ -625,9 +684,15 @@ export default function Marksheet() {
 
                               return (
                                 <td key={i} className="p-2 text-center">
-                                  {subj?.subjectType === "mainSubject" ? (
+                                  {subj?.subjectType === "MAIN_SUBJECT" ? (
                                     <div className="flex justify-center items-center space-x-2">
-                                      <div className="flex items-center justify-center size-10 bg-background4 rounded text-white font-semibold">
+                                      <div
+                                        className={`flex items-center justify-center size-10 rounded font-semibold ${tableInputBg} ${
+                                          isDarkMode
+                                            ? ""
+                                            : "border border-borderGray3"
+                                        }`}
+                                      >
                                         <input
                                           type="text"
                                           placeholder="-"
@@ -642,7 +707,7 @@ export default function Marksheet() {
                                             handleMarksChange(
                                               student._id,
                                               subj?.subject?._id,
-                                              "theory",
+                                              "THEORY",
                                               value,
                                               maxTheoryMarks,
                                             );
@@ -651,11 +716,17 @@ export default function Marksheet() {
                                             theoryMarks >= theoryMinMarks
                                               ? "text-textGreen"
                                               : "text-textRed"
-                                          }`}
+                                          } ${tableInputText}`}
                                         />
                                       </div>
 
-                                      <div className="flex items-center justify-center size-10 bg-background4 rounded text-white font-semibold">
+                                      <div
+                                        className={`flex items-center justify-center size-10 rounded font-semibold ${tableInputBg} ${
+                                          isDarkMode
+                                            ? ""
+                                            : "border border-borderGray3"
+                                        }`}
+                                      >
                                         <input
                                           type="text"
                                           placeholder="-"
@@ -670,7 +741,7 @@ export default function Marksheet() {
                                             handleMarksChange(
                                               student._id,
                                               subj?.subject?._id,
-                                              "practical",
+                                              "PRACTICAL",
                                               value,
                                               maxPracticalMarks,
                                             );
@@ -679,7 +750,7 @@ export default function Marksheet() {
                                             practicalMarks >= practicalMinMarks
                                               ? "text-textGreen"
                                               : "text-textRed"
-                                          }`}
+                                          } ${tableInputText}`}
                                         />
                                       </div>
                                     </div>
@@ -690,18 +761,16 @@ export default function Marksheet() {
                                         size="small"
                                         sx={{
                                           width: "70px",
-                                          border: "1px solid #2b2e4a40",
+                                          border: `1px solid ${tableBorder}`,
                                           fontSize: "14px",
                                           borderRadius: "6px",
-                                          backgroundColor: isDarkMode
-                                            ? "#3e3e3e"
-                                            : "white",
+                                          backgroundColor: tableSurface,
                                           "& .MuiOutlinedInput-notchedOutline":
-                                            { border: "none" },
+                                            {
+                                              border: "none",
+                                            },
                                           "& .MuiSvgIcon-root": {
-                                            color: isDarkMode
-                                              ? "#E3E8F3"
-                                              : "black",
+                                            color: tableSurfaceText,
                                           },
                                           "& .MuiSelect-select": {
                                             display: "flex",
@@ -722,7 +791,7 @@ export default function Marksheet() {
                                             handleGradeChange(
                                               student._id,
                                               subj?.subject?._id,
-                                              "theory",
+                                              "THEORY",
                                               e.target.value,
                                               maxTheoryGrade,
                                             )
@@ -770,12 +839,8 @@ export default function Marksheet() {
                                           MenuProps={{
                                             PaperProps: {
                                               sx: {
-                                                backgroundColor: isDarkMode
-                                                  ? "#3e3e3e"
-                                                  : "white",
-                                                color: isDarkMode
-                                                  ? "#E3E8F3"
-                                                  : "black",
+                                                backgroundColor: tableSurface,
+                                                color: tableSurfaceText,
                                               },
                                             },
                                           }}
@@ -785,16 +850,10 @@ export default function Marksheet() {
                                               key={g}
                                               value={g}
                                               sx={{
-                                                backgroundColor: isDarkMode
-                                                  ? "#3e3e3e"
-                                                  : "white",
-                                                color: isDarkMode
-                                                  ? "#E3E8F3"
-                                                  : "black",
+                                                backgroundColor: tableSurface,
+                                                color: tableSurfaceText,
                                                 "&:hover": {
-                                                  backgroundColor: isDarkMode
-                                                    ? "#2a2a2a"
-                                                    : "#E9EEF2",
+                                                  backgroundColor: tableHoverBg,
                                                 },
                                               }}
                                             >
@@ -809,18 +868,16 @@ export default function Marksheet() {
                                         size="small"
                                         sx={{
                                           width: "70px",
-                                          border: "1px solid #2b2e4a40",
+                                          border: `1px solid ${tableBorder}`,
                                           fontSize: "14px",
                                           borderRadius: "6px",
-                                          backgroundColor: isDarkMode
-                                            ? "#3e3e3e"
-                                            : "white",
+                                          backgroundColor: tableSurface,
                                           "& .MuiOutlinedInput-notchedOutline":
-                                            { border: "none" },
+                                            {
+                                              border: "none",
+                                            },
                                           "& .MuiSvgIcon-root": {
-                                            color: isDarkMode
-                                              ? "#E3E8F3"
-                                              : "black",
+                                            color: tableSurfaceText,
                                           },
                                           "& .MuiSelect-select": {
                                             display: "flex",
@@ -841,7 +898,7 @@ export default function Marksheet() {
                                             handleGradeChange(
                                               student._id,
                                               subj?.subject?._id,
-                                              "practical",
+                                              "PRACTICAL",
                                               e.target.value,
                                               maxPracticleGrade,
                                             )
@@ -889,12 +946,8 @@ export default function Marksheet() {
                                           MenuProps={{
                                             PaperProps: {
                                               sx: {
-                                                backgroundColor: isDarkMode
-                                                  ? "#3e3e3e"
-                                                  : "white",
-                                                color: isDarkMode
-                                                  ? "#E3E8F3"
-                                                  : "black",
+                                                backgroundColor: tableSurface,
+                                                color: tableSurfaceText,
                                               },
                                             },
                                           }}
@@ -904,16 +957,10 @@ export default function Marksheet() {
                                               key={g}
                                               value={g}
                                               sx={{
-                                                backgroundColor: isDarkMode
-                                                  ? "#3e3e3e"
-                                                  : "white",
-                                                color: isDarkMode
-                                                  ? "#E3E8F3"
-                                                  : "black",
+                                                backgroundColor: tableSurface,
+                                                color: tableSurfaceText,
                                                 "&:hover": {
-                                                  backgroundColor: isDarkMode
-                                                    ? "#2a2a2a"
-                                                    : "#E9EEF2",
+                                                  backgroundColor: tableHoverBg,
                                                 },
                                               }}
                                             >
@@ -930,7 +977,11 @@ export default function Marksheet() {
                             <td>
                               <div className="flex justify-center">
                                 <p
-                                  className={`font-poppins-regular bg-background4 text-center py-2 min-w-[80px] rounded-md ${
+                                  className={`font-poppins-regular ${tableInputBg} text-center py-2 min-w-[80px] rounded-md ${
+                                    isDarkMode
+                                      ? ""
+                                      : "border border-borderGray3"
+                                  } ${
                                     totalMarksObtained >= totalMarks / 2
                                       ? "text-textGreen"
                                       : "text-textRed"
@@ -969,7 +1020,7 @@ export default function Marksheet() {
         title="Save Changes"
         message="Are you sure you want to save changes?"
         confirmImg={confirm1}
-        cancelImg={cross}
+        cancelImg={isDarkMode ? cross : crossw}
       />
 
       {/* Second confirmation popup */}
@@ -980,7 +1031,7 @@ export default function Marksheet() {
         title="Publish Marksheet"
         message="Are you sure you want to publish this marksheet?"
         confirmImg={confirm2}
-        cancelImg={cross}
+        cancelImg={isDarkMode ? cross : crossw}
       />
     </div>
   );

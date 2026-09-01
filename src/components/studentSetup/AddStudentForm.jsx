@@ -11,7 +11,7 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { axiosClient } from "../../services/axiosClient";
 import Spinner from "../Spinner";
 import EndPoints from "../../services/EndPoints";
@@ -30,6 +30,7 @@ import REGEX from "../../utils/regix";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment from "moment";
+import { showToast } from "../../services/toastService";
 
 /**
  * AddStudent component renders the form and handles all logic for adding a student.
@@ -41,7 +42,6 @@ const AddStudent = () => {
   const { t } = useTranslation();
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
-  const [toastDisplayed, setToastDisplayed] = useState(false);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
   // Class options for dropdown (translated)
@@ -71,16 +71,16 @@ const AddStudent = () => {
    */
   const validateData = (student) => {
     if (
-      !student.firstname.trim() ||
-      student.firstname.length < 3 ||
-      REGEX.NUMBER.test(student.firstname)
+      !student.firstName.trim() ||
+      student.firstName.length < 3 ||
+      REGEX.NUMBER.test(student.firstName)
     ) {
       return t("validationError.enterFirstName");
     }
     if (
-      !student.lastname.trim() ||
-      student.lastname.length < 3 ||
-      REGEX.NUMBER.test(student.lastname)
+      !student.lastName.trim() ||
+      student.lastName.length < 3 ||
+      REGEX.NUMBER.test(student.lastName)
     ) {
       return t("validationError.enterLastName");
     }
@@ -98,6 +98,10 @@ const AddStudent = () => {
     if (!student.class) return t("validationError.class");
     if (!student.section) return t("validationError.section");
     if (!student.address) return t("validationError.address");
+    const aadharNumber = String(student?.aadharNumber ?? "").trim();
+    // if (!student?.aadharNumber?.trim()) return "Aadhaar number is required";
+    if (aadharNumber && !/^\d{12}$/.test(student?.aadharNumber))
+      return "Aadhaar must be exactly 12 digits";
     return "";
   };
 
@@ -112,12 +116,13 @@ const AddStudent = () => {
   // Formik setup for form state and submission
   const formik = useFormik({
     initialValues: {
-      firstname: "",
-      lastname: "",
+      firstName: "",
+      lastName: "",
       gender: "",
       parentName: "",
       guardianName: "",
       phone: "",
+      aadharNumber: "",
       class: "",
       section: "",
       bloodGroup: "",
@@ -133,23 +138,25 @@ const AddStudent = () => {
     onSubmit: async (values) => {
       const e = validateData(values);
       if (e) {
-        if (!toastDisplayed) {
-          setToastDisplayed(true);
-          toast.error(e);
-          setTimeout(() => setToastDisplayed(false), 3000);
-        }
+        showToast.error(e);
         return;
       }
 
       try {
         setLoading(true);
+        const aadharNumber = String(values?.aadharNumber ?? "").trim();
         const payload = {
-          firstname: capitalize(values.firstname.trim()),
-          lastname: capitalize(values.lastname.trim()),
+          firstName: capitalize(values.firstName.trim()),
+          lastName: capitalize(values.lastName.trim()),
           gender: values.gender,
           parentName: capitalize(values.parentName.trim()),
-          ...(values.guardianName && { guardianName: capitalize(values.guardianName.trim()) }),
+          ...(values.guardianName && {
+            guardianName: capitalize(values.guardianName.trim()),
+          }),
           phone: values.phone,
+          ...(aadharNumber && {
+            aadharNumber,
+          }),
           address: values.address,
           ...(values.bloodGroup && { bloodGroup: values.bloodGroup }),
           ...(values.dob && { dob: values.dob }),
@@ -167,15 +174,19 @@ const AddStudent = () => {
         };
         const res = await axiosClient.post(
           EndPoints.ADMIN.REGISTER_SECTION_STUDENT,
-          payload
+          payload,
         );
 
         if (res?.statusCode === 201) {
-          toast.success(res?.result);
+          // console.log(res.result);
+          
+          showToast.success(res?.result?.message);
           navigate(-1);
         }
       } catch (e) {
-        toast.error(e);
+        // console.log(e);
+        
+        showToast.error(e);
       } finally {
         setLoading(false);
       }
@@ -191,7 +202,7 @@ const AddStudent = () => {
         return;
       }
       const res = await axiosClient.get(
-        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`
+        `${EndPoints.COMMON.CLASS_LIST}/${classAndSectionData?.selectedSession?._id}`,
       );
 
       // Filter out classes without sections and then sort them.
@@ -205,7 +216,7 @@ const AddStudent = () => {
 
       setClassList(filteredSortedClasses);
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     }
   };
 
@@ -220,8 +231,8 @@ const AddStudent = () => {
 
   // Field definitions for rendering
   const fields = [
-    { name: "firstname", label: "First Name", type: "text" },
-    { name: "lastname", label: "Last Name", type: "text" },
+    { name: "firstName", label: "First Name", type: "text" },
+    { name: "lastName", label: "Last Name", type: "text" },
     { name: "parentName", label: "Parent Name", type: "text" },
     { name: "phone", label: "Phone Number", type: "text" },
   ];
@@ -229,6 +240,12 @@ const AddStudent = () => {
   const optionalFields = [
     { name: "guardianName", label: "Guardian Name 2" },
     { name: "address", label: "Address", optional: false },
+    {
+      name: "aadharNumber",
+      label: "Aadhaar Number",
+      type: "text",
+      optional: false,
+    },
     { name: "bloodGroup", label: "Blood Group", optional: true },
     { name: "dob", label: "Date of Birth", optional: true },
     { name: "parentGender", label: "Parent Gender", optional: true },
@@ -255,13 +272,13 @@ const AddStudent = () => {
         mode: isDarkMode ? "dark" : "light",
         ...(isDarkMode
           ? {
-            background: { default: "#121212", paper: "#1e1e1e" },
-            text: { primary: "#fff", secondary: "#aaa" },
-          }
+              background: { default: "#121212", paper: "#1e1e1e" },
+              text: { primary: "#fff", secondary: "#aaa" },
+            }
           : {
-            background: { default: "#f5f5f5", paper: "#fff" },
-            text: { primary: "#000", secondary: "#666" },
-          }),
+              background: { default: "#f5f5f5", paper: "#fff" },
+              text: { primary: "#000", secondary: "#666" },
+            }),
       },
       components: {
         MuiOutlinedInput: {
@@ -313,24 +330,27 @@ const AddStudent = () => {
 
     const preventInvalidInput = (e) => {
       if (
-        (name === "firstname" ||
-          name === "lastname" ||
+        (name === "firstName" ||
+          name === "lastName" ||
           name === "parentName") &&
         /\d/.test(e.key)
       ) {
         e.preventDefault();
       }
 
-      if (name === "phone" && !/[0-9]/.test(e.key)) {
-        e.preventDefault();
+      if (name === "phone" || name === "aadharNumber") {
+        if (!/[0-9]/.test(e.key)) {
+          e.preventDefault();
+        }
       }
     };
 
     return (
       <div key={name} className="flex flex-col flex-1 mt-3">
         <label
-          className={`font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+          className={`font-semibold mb-2 ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
         >
           {field.label}
           <span className="text-textRed"> *</span>
@@ -343,16 +363,19 @@ const AddStudent = () => {
           onChange={formik.handleChange}
           value={formik.values[name]}
           maxLength={
-            name === "firstname" || name === "lastname"
+            name === "firstName" || name === "lastName"
               ? 15
               : name === "parentName"
                 ? 20
                 : name === "phone"
                   ? 10
-                  : ""
+                  : name === "aadharNumber"
+                    ? 12
+                    : ""
           }
-          className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+          className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
         />
         {formik.touched[name] && formik.errors[name] && (
           <div className="text-textRed text-sm mt-1">{formik.errors[name]}</div>
@@ -367,8 +390,9 @@ const AddStudent = () => {
   const renderGenderDropdown = () => (
     <div className="flex flex-col w-full mt-3">
       <label
-        className={`font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-          }`}
+        className={`font-semibold mb-2 ${
+          isDarkMode ? "text-textPrimary" : "text-textBlack"
+        }`}
       >
         Gender<span className="text-textRed"> *</span>
       </label>
@@ -437,8 +461,9 @@ const AddStudent = () => {
   const renderClassDropdown = () => (
     <div className="flex flex-col w-full mt-3">
       <label
-        className={`font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-          }`}
+        className={`font-semibold mb-2 ${
+          isDarkMode ? "text-textPrimary" : "text-textBlack"
+        }`}
       >
         Class<span className="text-textRed"> *</span>
       </label>
@@ -468,7 +493,7 @@ const AddStudent = () => {
             formik.setFieldValue("class", selectedClassId);
             formik.setFieldValue("section", "");
             const foundClass = classList.find(
-              (cls) => cls._id === selectedClassId
+              (cls) => cls._id === selectedClassId,
             );
             setSectionList(foundClass?.section || []);
           }}
@@ -515,8 +540,9 @@ const AddStudent = () => {
   const renderSectionDropdown = () => (
     <div className="flex flex-col w-full mt-3">
       <label
-        className={`font-semibold mb-2 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-          }`}
+        className={`font-semibold mb-2 ${
+          isDarkMode ? "text-textPrimary" : "text-textBlack"
+        }`}
       >
         Section<span className="text-textRed"> *</span>
       </label>
@@ -589,8 +615,9 @@ const AddStudent = () => {
 
   return (
     <div
-      className={`flex w-full min-h-[calc(100vh-72px)] p-6 ${isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-        }`}
+      className={`flex w-full min-h-[calc(100vh-72px)] p-6 ${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      }`}
     >
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 bg-white z-30">
@@ -599,15 +626,17 @@ const AddStudent = () => {
       )}
       <Toaster position="top-center" />
       <div
-        className={`${isDarkMode
-          ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-          : "bg-white"
-          } rounded-2xl w-full h-full flex flex-col items-start py-5 px-10`}
+        className={`${
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-white"
+        } rounded-2xl w-full h-full flex flex-col items-start py-5 px-10`}
       >
         <Breadcrumbs />
         <h1
-          className={`text-2xl font-poppins-bold mt-3 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-            }`}
+          className={`text-2xl font-poppins-bold mt-3 ${
+            isDarkMode ? "text-textPrimary" : "text-textBlack"
+          }`}
         >
           Add Student
         </h1>
@@ -615,7 +644,7 @@ const AddStudent = () => {
         <form onSubmit={formik.handleSubmit} className="w-full mt-5">
           {/* Row 1: First Name, Last Name */}
           <div className="flex gap-4">
-            {["firstname", "lastname"].map((name) => renderField(name))}
+            {["firstName", "lastName"].map((name) => renderField(name))}
           </div>
 
           {/* Row 2: Parent Name, Phone */}
@@ -636,14 +665,15 @@ const AddStudent = () => {
                 className="flex flex-col flex-1 min-w-[500px]"
               >
                 <label
-                  className={`font-semibold mb-1 ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                    }`}
+                  className={`font-semibold mb-1 ${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
                 >
                   {field.label}
                   {!field.optional && <span className="text-textRed"> *</span>}
                 </label>
                 {field.name === "bloodGroup" ||
-                  field.name === "parentGender" ? (
+                field.name === "parentGender" ? (
                   <FormControl
                     fullWidth
                     variant="outlined"
@@ -722,7 +752,7 @@ const AddStudent = () => {
                           if (date) {
                             formik.setFieldValue(
                               field.name,
-                              moment(date).format("DD/MM/YYYY")
+                              moment(date).format("DD/MM/YYYY"),
                             );
                           }
                         }}
@@ -749,11 +779,26 @@ const AddStudent = () => {
                     type={field.type || "text"}
                     name={field.name}
                     placeholder={field.label}
-                    onChange={formik.handleChange}
+                    // onChange={formik.handleChange}
+                    onChange={(e) => {
+                      const value =
+                        field.name === "aadharNumber"
+                          ? e.target.value.replace(/\D/g, "").slice(0, 12)
+                          : e.target.value;
+
+                      formik.setFieldValue(field.name, value);
+                    }}
                     value={formik.values[field.name]}
-                    maxLength={field.name === "guardianName" ? 20 : undefined}
-                    className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                      }`}
+                    maxLength={
+                      field.name === "guardianName"
+                        ? 20
+                        : field.name === "aadharNumber"
+                          ? 12
+                          : undefined
+                    }
+                    className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
+                      isDarkMode ? "text-textPrimary" : "text-textBlack"
+                    }`}
                   />
                 )}
               </div>
@@ -764,10 +809,11 @@ const AddStudent = () => {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className={`border-2 px-4 py-2 rounded-xl ${isDarkMode
-                ? "text-white border-white"
-                : "text-black border-gray-400"
-                }`}
+              className={`border-2 px-4 py-2 rounded-xl ${
+                isDarkMode
+                  ? "text-white border-white"
+                  : "text-black border-gray-400"
+              }`}
             >
               Cancel
             </button>

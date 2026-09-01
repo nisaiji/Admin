@@ -13,5 +13,5 @@ export default {
     "\\.(mp4|mp3|wav|ogg|avi|mov|webm)$": "<rootDir>/__mocks__/fileMock.js",
     "\\.(jpg|jpeg|png|gif|webp|svg)$": "<rootDir>/__mocks__/fileMock.js",
   },
-  setupFilesAfterEnv: ["@testing-library/jest-dom"],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js", "@testing-library/jest-dom"],
 };

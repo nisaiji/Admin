@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Spinner from "../Spinner";
 import { useTranslation } from "react-i18next";
 import moment from "moment";
@@ -11,6 +11,7 @@ import DatePicker from "react-datepicker";
 import Breadcrumbs from "../BreadCrumbs";
 import { useSelector } from "react-redux";
 import { FormControl, MenuItem, Select } from "@mui/material";
+import { showToast } from "../../services/toastService";
 
 export default function TeacherProfile() {
   const [teacher, setTeacher] = useState([]);
@@ -51,11 +52,11 @@ export default function TeacherProfile() {
           values
         );
         if (res?.statusCode === 200) {
-          toast.success(res.result);
+          showToast.success(res.result);
           getTeacher();
         }
       } catch (e) {
-        toast.error(e);
+        showToast.error(e);
       } finally {
         setLoading(false);
       }
@@ -82,7 +83,7 @@ export default function TeacherProfile() {
         });
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }

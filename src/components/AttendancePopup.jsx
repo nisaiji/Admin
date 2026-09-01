@@ -14,13 +14,14 @@ import editw from "../assets/images/editw.png";
 import downloadw from "../assets/images/downloadw.png";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import moment from "moment";
 import { getSessionPermissions, getSessionWindow } from "../utils/helper";
 import Breadcrumbs from "./BreadCrumbs";
+import { showToast } from "../services/toastService";
 
 export default function AttendancePopup() {
   // Redux state selectors
@@ -37,7 +38,6 @@ export default function AttendancePopup() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [holidays, setHolidays] = useState({});
   const [workdays, setWorkdays] = useState({});
-  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [totalAttendanceDays, setTotalAttendanceDays] = useState(0);
   const isFetchingRef = useRef(false);
 
@@ -170,15 +170,11 @@ export default function AttendancePopup() {
         nextMonthMoment.isBefore(minAllowedMonth, "month") ||
         nextMonthMoment.isAfter(maxAllowedMonth, "month")
       ) {
-        if (!toastDisplayed) {
-          setToastDisplayed(true);
-          toast.error(
-            `You can only change month between ${minAllowedMonth.format(
-              "MMMM YYYY",
-            )} and ${maxAllowedMonth.format("MMMM YYYY")}.`,
-          );
-          setTimeout(() => setToastDisplayed(false), 3000);
-        }
+        showToast.error(
+          `You can only change month between ${minAllowedMonth.format(
+            "MMMM YYYY",
+          )} and ${maxAllowedMonth.format("MMMM YYYY")}.`,
+        );
         return prevDate;
       }
       return newDate;
@@ -194,15 +190,11 @@ export default function AttendancePopup() {
    */
   const handleInputChange = (studentIndex, dateIndex, value) => {
     if (!canEditAttendance) {
-      if (!toastDisplayed) {
-        setToastDisplayed(true);
-        toast.error(
-          sessionPermissions?.phase === "upcoming"
-            ? "Attendance cannot be created in upcoming session."
-            : "Previous session attendance is view only.",
-        );
-        setTimeout(() => setToastDisplayed(false), 3000);
-      }
+      showToast.error(
+        sessionPermissions?.phase === "upcoming"
+          ? "Attendance cannot be created in upcoming session."
+          : "Previous session attendance is view only.",
+      );
       return;
     }
 
@@ -219,16 +211,11 @@ export default function AttendancePopup() {
       attendanceMoment.isBefore(editableStartDate, "day") ||
       attendanceMoment.isAfter(editableEndDate, "day")
     ) {
-      if (!toastDisplayed) {
-        setToastDisplayed(true);
-
-        toast.error(
-          `You can only edit attendance between ${editableStartDate.format(
-            "DD/MM/YYYY",
-          )} and ${editableEndDate.format("DD/MM/YYYY")}.`,
-        );
-        setTimeout(() => setToastDisplayed(false), 3000);
-      }
+      showToast.error(
+        `You can only edit attendance between ${editableStartDate.format(
+          "DD/MM/YYYY",
+        )} and ${editableEndDate.format("DD/MM/YYYY")}.`,
+      );
       return;
     }
     setAttendanceData((prevData) =>
@@ -253,7 +240,7 @@ export default function AttendancePopup() {
    */
   const handleSaveAttendance = async () => {
     if (!canEditAttendance) {
-      toast.error(
+      showToast.error(
         sessionPermissions?.phase === "upcoming"
           ? "Attendance cannot be created in upcoming session."
           : "Previous session attendance is view only.",
@@ -294,15 +281,11 @@ export default function AttendancePopup() {
       });
 
       if (invalidDays.length > 0) {
-        if (!toastDisplayed) {
-          setToastDisplayed(true);
-          toast.error(
-            `Please fill all the cells to save the attendance. Incomplete attendance on: ${invalidDays.join(
-              ", ",
-            )}`,
-          );
-          setTimeout(() => setToastDisplayed(false), 3000);
-        }
+        showToast.error(
+          `Please fill all the cells to save the attendance. Incomplete attendance on: ${invalidDays.join(
+            ", ",
+          )}`,
+        );
         return;
       }
 
@@ -338,14 +321,14 @@ export default function AttendancePopup() {
       const res = await axiosClient.post(url, { studentsAttendances });
 
       if (res.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         setIsEditable(false);
         // We need to re-fetch with current state logic or pass current state if we want to be safe,
         // but typically safe here as save doesn't change holidays/workdays
         fetchMonthlyAttendance({ holidayMap: holidays, workdayMap: workdays });
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -362,8 +345,8 @@ export default function AttendancePopup() {
     isFetchingRef.current = true;
 
     // Use passed data or fall back to state
-    const currentHolidays = eventData.holidayMap || holidays;
-    const currentWorkdays = eventData.workdayMap || workdays;
+    const currentHolidays = eventData?.holidayMap || holidays;
+    const currentWorkdays = eventData?.workdayMap || workdays;
 
     try {
       setLoading(true);
@@ -393,13 +376,13 @@ export default function AttendancePopup() {
       if (res?.statusCode === 200) {
         const attendances = res?.result?.attendances || [];
 
-        const updatedAttendanceData = attendances.map((student) => {
+        const updatedAttendanceData = attendances?.map((student) => {
           // Create a map of attendance data by date
-          const attendanceByDate = student.attendances.reduce((acc, item) => {
-            acc[item.date] =
-              item.teacherAttendance === "present"
+          const attendanceByDate = student?.attendances?.reduce((acc, item) => {
+            acc[item?.date] =
+              item?.teacherAttendance === "present"
                 ? "P"
-                : item.teacherAttendance === "absent"
+                : item?.teacherAttendance === "absent"
                   ? "A"
                   : "";
             return acc;
@@ -442,10 +425,10 @@ export default function AttendancePopup() {
         });
 
         // Sort by firstname, and if equal, sort by lastname
-        updatedAttendanceData.sort((a, b) => {
-          const firstNameComparison = a.firstname.localeCompare(b.firstname);
+        updatedAttendanceData?.sort((a, b) => {
+          const firstNameComparison = a?.firstName?.localeCompare(b?.firstName);
           if (firstNameComparison === 0) {
-            return a.lastname.localeCompare(b.lastname);
+            return a?.lastName?.localeCompare(b?.lastName);
           }
           return firstNameComparison;
         });
@@ -453,7 +436,7 @@ export default function AttendancePopup() {
         setAttendanceData(updatedAttendanceData);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
@@ -621,118 +604,127 @@ export default function AttendancePopup() {
    * Uses jsPDF and jspdf-autotable for PDF generation.
    */
   const downloadAttendance = () => {
-    if (!attendanceData?.length) {
-      toast.error("No attendance data to download");
-      return;
-    }
+    try {
+      if (loading) return;
+      if (!attendanceData?.length) {
+        showToast.error("No attendance data to download");
+        return;
+      }
+      setLoading(true);
+      const doc = new jsPDF({
+        orientation: "landscape", // required for many columns
+        unit: "pt",
+        format: "a4",
+      });
 
-    const doc = new jsPDF({
-      orientation: "landscape", // required for many columns
-      unit: "pt",
-      format: "a4",
-    });
+      const monthYear = moment(currentDate).format("MMMM YYYY");
 
-    const monthYear = moment(currentDate).format("MMMM YYYY");
+      // ===== Title =====
+      doc.setFontSize(16);
+      doc.text(
+        `${role === "classTeacher" ? teacherData?.schoolName : role === "admin" ? data?.schoolName : ""}`,
+        doc.internal.pageSize.getWidth() / 2,
+        30,
+        {
+          align: "center",
+        },
+      );
+      doc.text(
+        "Monthly Attendance Sheet",
+        doc.internal.pageSize.getWidth() / 2,
+        50,
+        {
+          align: "center",
+        },
+      );
 
-    // ===== Title =====
-    doc.setFontSize(16);
-    doc.text(
-      `${role === "classTeacher" ? teacherData?.schoolName : role === "admin" ? data?.schoolName : ""}`,
-      doc.internal.pageSize.getWidth() / 2,
-      30,
-      {
-        align: "center",
-      },
-    );
-    doc.text(
-      "Monthly Attendance Sheet",
-      doc.internal.pageSize.getWidth() / 2,
-      50,
-      {
-        align: "center",
-      },
-    );
+      doc.setFontSize(11);
+      doc.text(
+        `${classAndSectionData?.className || ""} - ${
+          classAndSectionData?.sectionName || ""
+        } | ${monthYear}`,
+        doc.internal.pageSize.getWidth() / 2,
+        65,
+        { align: "center" },
+      );
 
-    doc.setFontSize(11);
-    doc.text(
-      `${classAndSectionData?.className || ""} - ${
-        classAndSectionData?.sectionName || ""
-      } | ${monthYear}`,
-      doc.internal.pageSize.getWidth() / 2,
-      65,
-      { align: "center" },
-    );
-
-    // ===== Table Head =====
-    const headRow = [
-      "S.No",
-      "Student Name",
-      ...Array.from({ length: totalDays }, (_, i) => `${i + 1}`),
-      "Total",
-    ];
-
-    // ===== Table Body =====
-    const bodyRows = attendanceData.map((student, index) => {
-      const totalPresent = student.attendances.filter(
-        (a) => a.attendance === "P",
-      ).length;
-
-      return [
-        index + 1,
-        `${student.firstname || ""} ${student.lastname || ""}`,
-        ...student.attendances.map((a) => a.attendance || ""),
-        `${totalPresent}/${totalAttendanceDays}`,
+      // ===== Table Head =====
+      const headRow = [
+        "S.No",
+        "Student Name",
+        ...Array.from({ length: totalDays }, (_, i) => `${i + 1}`),
+        "Total",
       ];
-    });
 
-    // ===== AutoTable =====
-    autoTable(doc, {
-      startY: 80,
-      head: [headRow],
-      body: bodyRows,
-      styles: {
-        fontSize: 8,
-        halign: "center",
-        valign: "middle",
-        cellPadding: 3,
-      },
-      headStyles: {
-        fillColor: [40, 40, 40],
-        textColor: 255,
-        fontStyle: "bold",
-      },
-      alternateRowStyles: {
-        fillColor: [245, 245, 245],
-      },
-      columnStyles: {
-        0: { cellWidth: 40 }, // S.No
-        1: { cellWidth: 120 }, // Name
-      },
-      didDrawPage: () => {
-        doc.setFontSize(9);
-        doc.text(
-          `Generated on: ${moment().format("DD/MM/YYYY hh:mm A")}`,
-          doc.internal.pageSize.getWidth() - 40,
-          doc.internal.pageSize.getHeight() - 20,
-          { align: "right" },
+      // ===== Table Body =====
+      const bodyRows = attendanceData.map((student, index) => {
+        const totalPresent = student.attendances.filter(
+          (a) => a.attendance === "P",
+        ).length;
+
+        return [
+          index + 1,
+          `${student.firstName || ""} ${student.lastName || ""}`,
+          ...student.attendances.map((a) => a.attendance || ""),
+          `${totalPresent}/${totalAttendanceDays}`,
+        ];
+      });
+
+      // ===== AutoTable =====
+      autoTable(doc, {
+        startY: 80,
+        head: [headRow],
+        body: bodyRows,
+        styles: {
+          fontSize: 8,
+          halign: "center",
+          valign: "middle",
+          cellPadding: 3,
+        },
+        headStyles: {
+          fillColor: [40, 40, 40],
+          textColor: 255,
+          fontStyle: "bold",
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245],
+        },
+        columnStyles: {
+          0: { cellWidth: 40 }, // S.No
+          1: { cellWidth: 120 }, // Name
+        },
+        didDrawPage: () => {
+          doc.setFontSize(9);
+          doc.text(
+            `Generated on: ${moment().format("DD/MM/YYYY hh:mm A")}`,
+            doc.internal.pageSize.getWidth() - 40,
+            doc.internal.pageSize.getHeight() - 20,
+            { align: "right" },
+          );
+        },
+      });
+
+      // ===== Save =====
+      // doc.save(`Attendance_${monthYear}.pdf`);
+      if (role === "admin") {
+        doc.save(
+          `Attendance_${classAndSectionData?.className}_${
+            classAndSectionData?.sectionName
+          }_${monthYear}.pdf`,
         );
-      },
-    });
-
-    // ===== Save =====
-    // doc.save(`Attendance_${monthYear}.pdf`);
-    if (role === "admin") {
-      doc.save(
-        `Attendance_${classAndSectionData?.className}_${
-          classAndSectionData?.sectionName
-        }_${monthYear}.pdf`,
-      );
-    } else if (role === "classTeacher") {
-      doc.save(
-        `Attendance_${teacherData?.className}_${
-          teacherData?.sectionName
-        }_${monthYear}.pdf`,
-      );
+      } else if (role === "classTeacher") {
+        doc.save(
+          `Attendance_${teacherData?.className}_${
+            teacherData?.sectionName
+          }_${monthYear}.pdf`,
+        );
+      }
+    } catch (e) {
+      showToast.error("Failed to generate PDF");
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
     }
   };
 
@@ -752,36 +744,43 @@ export default function AttendancePopup() {
             <img
               src={backIcon}
               alt="Previous Month"
-              className={`w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
+              className={`${isDarkMode ? "" : "invert"} w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
               onClick={() =>
                 isEditable
-                  ? toast.error(
+                  ? showToast.error(
                       "please save the data before changing the month",
                     )
                   : changeMonth(-1)
               }
             />
-            <div className={`text-white text-xl mx-4`}>
+            <div
+              className={`${isDarkMode ? "text-textPrimary" : "text-textBlack"} text-xl mx-4`}
+            >
               {currentDate.toLocaleString("default", { month: "long" })}{" "}
               {currentDate.getFullYear()}
             </div>
             <img
               src={backIcon}
               alt="Next Month"
-              className={`w-10 h-10 rotate-180 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
+              className={`${isDarkMode ? "" : "invert"} w-10 h-10 rotate-180 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
               onClick={() =>
                 isEditable
-                  ? toast.error(
+                  ? showToast.error(
                       "please save the data before changing the month",
                     )
                   : changeMonth(1)
               }
             />
           </div>
-          <div className={`text-white text-xl`}>Monthly Attendance</div>
+          <div
+            className={`${isDarkMode ? "text-textPrimary" : "text-textBlack"} text-xl`}
+          >
+            Monthly Attendance
+          </div>
           <div className={`flex flex-row w-[270px] justify-end`}>
             {isEditable ? (
               <button
+                disabled={loading}
                 className={`px-4 py-2 text-base font-poppins-regular rounded-full bg-white transition-all duration-200 ease-in-out active:scale-90`}
                 onClick={handleSaveAttendance}
               >
@@ -792,10 +791,10 @@ export default function AttendancePopup() {
                 <img
                   src={editw}
                   alt=""
-                  className={`w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
+                  className={`${isDarkMode ? "" : "invert"} w-10 h-10 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
                   onClick={() => {
                     if (!canEditAttendance) {
-                      toast.error(
+                      showToast.error(
                         sessionPermissions?.phase === "upcoming"
                           ? "Attendance cannot be created in upcoming session."
                           : "Previous session attendance is view only.",
@@ -807,10 +806,10 @@ export default function AttendancePopup() {
                   }}
                 />
                 <img
-                  onClick={downloadAttendance}
+                  onClick={!loading ? downloadAttendance : undefined}
                   src={downloadw}
                   alt=""
-                  className={`w-10 h-10 mx-4 cursor-pointer transition-all duration-200 ease-in-out active:scale-90`}
+                  className={`${isDarkMode ? "" : "invert"} w-10 h-10 mx-4 transition-all duration-200 ease-in-out ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-90"}`}
                 />
               </>
             )}
@@ -900,7 +899,7 @@ export default function AttendancePopup() {
                         isDarkMode ? "text-textPrimary" : "text-textBlack"
                       }`}
                     >
-                      {data?.firstname || ""} {data?.lastname || ""}
+                      {data?.firstName || ""} {data?.lastName || ""}
                     </td>
                     {data.attendances.map((value, idx) => {
                       const attendance = value.attendance;

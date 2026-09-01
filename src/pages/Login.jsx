@@ -3,7 +3,7 @@ import React, { useState, useMemo } from "react";
 import { useFormik } from "formik";
 import { jwtDecode } from "jwt-decode";
 import { Link, useNavigate } from "react-router-dom";
-import { Toaster, toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { axiosClient } from "../services/axiosClient";
 import LoginVideo from "../assets/videos/LoginVideo.mp4";
 import hide from "../assets/images/darkmode/hide.png";
@@ -14,7 +14,11 @@ import Spinner from "../components/Spinner";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
-import { setAuthData, setSessionCreated } from "../store/AppAuthSlice";
+import {
+  setAuthData,
+  setSessionCreatedStatus,
+} from "../store/AppAuthSlice";
+import { showToast } from "../services/toastService";
 
 /**
  * Login Component
@@ -42,8 +46,6 @@ function Login() {
 
   // State for managing loading spinner visibility
   const [loading, setLoading] = useState(false);
-
-  const [toastDisplayed, setToastDisplayed] = useState(false);
 
   // Translation hook for multilingual support
   const [t] = useTranslation();
@@ -83,9 +85,6 @@ function Login() {
     validationSchema, // Validation schema for form fields
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        if (toastDisplayed) return;
-        setToastDisplayed(true);
-        setTimeout(() => setToastDisplayed(false), 3000);
         setLoading(true); // Show loading spinner
 
         // Define API endpoint and payload based on login role
@@ -106,6 +105,9 @@ function Login() {
         if (res?.statusCode === 200) {
           const decodedToken = jwtDecode(res?.result?.accessToken);
           // console.log(decodedToken);
+          
+          const hasSession = Boolean(decodedToken?.isSessionCreated);
+          // console.log(decodedToken);
           // console.log({ result });
           if (decodedToken?.role === "admin") {
             if (decodedToken?.active) {
@@ -113,10 +115,10 @@ function Login() {
               localStorage.setItem("refresh_token", res?.result?.refreshToken);
               localStorage.removeItem("temp_access_token");
               dispatch(setAuthData(res?.result?.accessToken));
-              dispatch(setSessionCreated());
-              toast.success(t("messages.login.success"));
+              dispatch(setSessionCreatedStatus(hasSession));
+              showToast.success(t("messages.login.success"));
               resetForm();
-              if (decodedToken?.role === "admin" && decodedToken?.isSessionCreated === false) {
+              if (!hasSession) {
                 navigate("/onboard", { replace: true });
               } else {
                 navigate("/", { replace: true });
@@ -141,14 +143,15 @@ function Login() {
             localStorage.setItem("access_token", res?.result?.accessToken);
             localStorage.setItem("refresh_token", res?.result?.refreshToken);
             dispatch(setAuthData(res?.result?.accessToken));
-            toast.success(t("messages.login.success"));
+            dispatch(setSessionCreatedStatus(hasSession));
+            showToast.success(t("messages.login.success"));
             resetForm();
             navigate("/", { replace: true });
           }
         }
       } catch (e) {
         // console.log({e});
-        toast.error(e); // Show error message
+        showToast.error(e); // Show error message
       } finally {
         setLoading(false); // Hide loading spinner
         setSubmitting(false); // Reset form submission state

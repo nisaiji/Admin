@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../services/axiosClient";
 import delete2 from "../../assets/images/darkmode/delete.png";
@@ -17,6 +16,7 @@ import crossw from "../../assets/images/cross.png";
 import ConformationPopup from "../ConformationPopup";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import moment from "moment";
+import { showToast } from "../../services/toastService";
 
 function Addsection({
   isVisible,
@@ -58,7 +58,6 @@ function Addsection({
   const [deleteSectionId, setDeleteSectionId] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [toastDisplayed, setToastDisplayed] = useState(false);
   const selectRef = useRef(null);
 
   /**
@@ -81,7 +80,9 @@ function Addsection({
     try {
       const [sectionsRes, teachersRes] = await Promise.all([
         axiosClient.get(`${EndPoints.ADMIN.CLASS_SECTION}/${clickedClassId}`),
-        axiosClient.get(`${EndPoints.ADMIN.UNASSIGNED_TEACHER}/${classAndSectionData?.selectedSession?._id}`),
+        axiosClient.get(
+          `${EndPoints.ADMIN.UNASSIGNED_TEACHER}/${classAndSectionData?.selectedSession?._id}`,
+        ),
       ]);
 
       if (sectionsRes?.statusCode === 200) {
@@ -91,7 +92,7 @@ function Addsection({
         setTeachers(teachersRes?.result);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -104,19 +105,11 @@ function Addsection({
   // check validation for section assignment
   const checkValidation = () => {
     if (sections.length >= 8) {
-      if (!toastDisplayed) {
-        setToastDisplayed(true);
-        toast.error(t("toasts.sectionLimit"));
-        setTimeout(() => setToastDisplayed(false), 3000);
-      }
+      showToast.error(t("toasts.sectionLimit"));
       return;
     }
     if (!newSection.teacherId) {
-      if (!toastDisplayed) {
-        setToastDisplayed(true);
-        toast.error(t("toasts.selectTeacher"));
-        setTimeout(() => setToastDisplayed(false), 3000);
-      }
+      showToast.error(t("toasts.selectTeacher"));
       return;
     }
     setshowConformationPopup(true);
@@ -143,10 +136,10 @@ function Addsection({
       );
       if ([200, 201].includes(res?.statusCode)) {
         fetchData();
-        toast.success(res.result);
+        showToast.success(res.result);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
       // Reset new section form state
@@ -174,7 +167,7 @@ function Addsection({
       return;
     }
     if (!selectedSection.teacherId) {
-      return toast.error(t("toasts.selectTeacher"));
+      return showToast.error(t("toasts.selectTeacher"));
     }
 
     try {
@@ -186,12 +179,12 @@ function Addsection({
 
       if (res?.statusCode === 200) {
         fetchData();
-        toast.success(res.result);
+        showToast.success(res.result);
         // setNewSection({ name: section.name, teacherId: newSection.teacherId });
         setSelectedSection(null);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -232,9 +225,6 @@ function Addsection({
    * This function deletes a section based on the section ID and updates the UI accordingly.
    */
   const handleSectionDelete = async () => {
-    if (toastDisplayed) return;
-    setToastDisplayed(true);
-    setTimeout(() => setToastDisplayed(false), 3000);
     try {
       setLoading(true);
       const res = await axiosClient.delete(
@@ -243,11 +233,13 @@ function Addsection({
 
       if (res?.statusCode === 200) {
         setShowDeleteConfirmation(false);
-        await fetchData();
-        toast.success(res.result);
+        setSections((prev) =>
+          prev.filter((section) => section._id !== deleteSectionId),
+        );
+        showToast.success(res?.result);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -377,7 +369,7 @@ function Addsection({
                           (teacher) => teacher._id === selected,
                         );
                         return teacherObj
-                          ? `${teacherObj.firstname} ${teacherObj.lastname}`
+                          ? `${teacherObj?.firstName || ""} ${teacherObj?.lastName || ""}`
                           : selected;
                       }}
                       MenuProps={{
@@ -406,7 +398,7 @@ function Addsection({
                             },
                           }}
                         >
-                          {teacher.firstname} {teacher.lastname}
+                          {teacher?.firstName || ""} {teacher?.lastName || ""}
                         </MenuItem>
                       ))}
                     </Select>
@@ -420,7 +412,8 @@ function Addsection({
                     } w-[250px]`}
                     data-tsetid="savedTeacherName"
                   >
-                    {section?.teacher?.firstname} {section?.teacher?.lastname}
+                    {section?.teacher?.firstName || ""}{" "}
+                    {section?.teacher?.lastName || ""}
                   </div>
                 )}
                 <DatePicker
@@ -543,7 +536,7 @@ function Addsection({
                         (teacher) => teacher._id === selected,
                       );
                       return teacherObj
-                        ? `${teacherObj.firstname} ${teacherObj.lastname}`
+                        ? `${teacherObj?.firstName || ""} ${teacherObj?.lastName || ""}`
                         : selected;
                     }}
                     MenuProps={{
@@ -587,7 +580,7 @@ function Addsection({
                           },
                         }}
                       >
-                        {teacher.firstname} {teacher.lastname}
+                        {teacher?.firstName || ""} {teacher?.lastName || ""}
                       </MenuItem>
                     ))}
                   </Select>
@@ -651,6 +644,7 @@ function Addsection({
             isVisible={showDeleteConfirmation}
             onClose={() => setShowDeleteConfirmation(false)}
             onDelete={handleSectionDelete}
+            loading={loading}
           />
         )}
       </div>

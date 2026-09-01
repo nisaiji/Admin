@@ -6,16 +6,16 @@
  * Preserves role-based navigation, i18n translations, and logout functionality.
  */
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { appConfigAction } from "../store/AppConfigSlice";
 import { useTranslation } from "react-i18next";
 import {
   ChevronDown,
-  Bell,
   CreditCard,
+  Settings,
   User,
   LogOut,
-  HelpCircle,
   UserCog,
   BookOpen,
   Umbrella,
@@ -23,24 +23,23 @@ import {
   Lock,
   Megaphone,
   GraduationCap,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import logo from "../assets/images/deer logo.png";
-
-/* ─── Colours ────────────────────────────────────────────────── */
-const C = {
-  nav: "#0a0c12",
-  bg: "#13161f",
-  border: "rgba(255,255,255,0.07)",
-  text: "#E3E8F3",
-  sub: "rgba(227,232,243,0.85)",
-  muted: "#64748B",
-  orange: "#FF793F",
-  blue: "#0a81d1",
-};
+import { C, C_LIGHT } from "../utils/constants";
 
 /* ─── Reusable dropdown component ────────────────────────────── */
-function NavDrop({ label, items, icon, align = "left" }) {
+function NavDrop({
+  label,
+  items,
+  icon,
+  align = "left",
+  buttonAriaLabel,
+  isDarkMode,
+}) {
+  const themeC = isDarkMode ? C : C_LIGHT;
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -56,6 +55,8 @@ function NavDrop({ label, items, icon, align = "left" }) {
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
+        type="button"
+        aria-label={buttonAriaLabel || label}
         onClick={() => setOpen((o) => !o)}
         style={{
           display: "flex",
@@ -65,24 +66,24 @@ function NavDrop({ label, items, icon, align = "left" }) {
           background: open ? "rgba(255,255,255,0.08)" : "transparent",
           border: `1px solid ${open ? "rgba(255,255,255,0.11)" : "transparent"}`,
           borderRadius: "9px",
-          color: open ? C.text : C.sub,
+          color: open ? themeC.text : themeC.sub,
           fontSize: "14px",
           fontWeight: 600,
           cursor: "pointer",
           transition: "all 0.15s",
         }}
         onMouseEnter={(e) => {
-          if (!open) e.currentTarget.style.color = C.text;
+          if (!open) e.currentTarget.style.color = themeC.text;
         }}
         onMouseLeave={(e) => {
-          if (!open) e.currentTarget.style.color = C.sub;
+          if (!open) e.currentTarget.style.color = themeC.sub;
         }}
       >
         {icon && <span style={{ opacity: 0.8, display: "flex" }}>{icon}</span>}
         {label}
         <ChevronDown
           size={13}
-          color={C.muted}
+          color={themeC.textSub}
           style={{
             transform: open ? "rotate(180deg)" : "none",
             transition: "transform 0.2s",
@@ -103,7 +104,7 @@ function NavDrop({ label, items, icon, align = "left" }) {
               top: "calc(100% + 10px)",
               [align === "right" ? "right" : "left"]: 0,
               zIndex: 600,
-              background: "#111520",
+              background: themeC.card,
               border: "1px solid rgba(255,255,255,0.09)",
               borderRadius: "13px",
               overflow: "hidden",
@@ -123,6 +124,7 @@ function NavDrop({ label, items, icon, align = "left" }) {
                 />
               ) : (
                 <button
+                  type="button"
                   key={i}
                   onClick={() => {
                     item.onClick?.();
@@ -136,7 +138,7 @@ function NavDrop({ label, items, icon, align = "left" }) {
                     padding: "11px 18px",
                     background: "transparent",
                     border: "none",
-                    color: C.text,
+                    color: themeC.text,
                     fontSize: "14px",
                     fontWeight: 500,
                     cursor: "pointer",
@@ -163,7 +165,7 @@ function NavDrop({ label, items, icon, align = "left" }) {
                         background: item.iconColor
                           ? `${item.iconColor}18`
                           : "rgba(255,255,255,0.05)",
-                        color: item.iconColor || C.muted,
+                        color: item.iconColor || themeC.textSub,
                         flexShrink: 0,
                       }}
                     >
@@ -182,9 +184,12 @@ function NavDrop({ label, items, icon, align = "left" }) {
 }
 
 /* ─── Flat nav button ─────────────────────────────────────────── */
-function NavBtn({ label, icon, active, onClick }) {
+function NavBtn({ label, icon, active, onClick, isDarkMode }) {
+  const themeC = isDarkMode ? C : C_LIGHT;
   return (
     <button
+      type="button"
+      aria-current={active ? "page" : undefined}
       onClick={onClick}
       style={{
         display: "flex",
@@ -194,7 +199,7 @@ function NavBtn({ label, icon, active, onClick }) {
         background: active ? "rgba(255,255,255,0.06)" : "transparent",
         border: "1px solid transparent",
         borderRadius: "9px",
-        color: active ? C.text : C.sub,
+        color: active ? themeC.text : themeC.sub,
         fontSize: "14px",
         fontWeight: 600,
         cursor: "pointer",
@@ -202,12 +207,12 @@ function NavBtn({ label, icon, active, onClick }) {
       }}
       onMouseEnter={(e) => {
         const b = e.currentTarget;
-        b.style.color = C.text;
+        b.style.color = themeC.text;
         b.style.background = "rgba(255,255,255,0.06)";
       }}
       onMouseLeave={(e) => {
         const b = e.currentTarget;
-        b.style.color = active ? C.text : C.sub;
+        b.style.color = active ? themeC.text : themeC.sub;
         b.style.background = active ? "rgba(255,255,255,0.06)" : "transparent";
       }}
     >
@@ -222,15 +227,19 @@ function NavBtn({ label, icon, active, onClick }) {
 ═══════════════════════════════════════════════════════════════ */
 const Navbar = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const location = useLocation();
   const { t } = useTranslation();
 
   const { data, teacherData } = useSelector((state) => state.appAuth);
   const role = useSelector((state) => state.appAuth.role);
-  const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
+  const dispatch = useDispatch();
+  const isDarkMode = useSelector(
+    (state) => state.appConfig?.isDarkMode ?? true,
+  );
+  const themeC = isDarkMode ? C : C_LIGHT;
 
-  const isActive = (path) => location.pathname === path;
+  const isPathActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   // Logout: clear local storage
   const handleLogout = () => {
@@ -251,7 +260,7 @@ const Navbar = () => {
   // Determine profile photo if available
   const profilePhoto =
     role === "classTeacher" || role === "teacher"
-      ? teacherData?.photo
+      ? `data:image/jpeg;base64,${teacherData?.photo}`
       : role === "admin"
         ? data?.photo
         : null;
@@ -271,8 +280,8 @@ const Navbar = () => {
         top: 0,
         zIndex: 300,
         height: 60,
-        background: C.nav,
-        borderBottom: `1px solid ${C.border}`,
+        background: themeC.nav,
+        borderBottom: `1px solid ${themeC.border}`,
         display: "flex",
         alignItems: "center",
         padding: "0 28px",
@@ -282,6 +291,7 @@ const Navbar = () => {
     >
       {/* ── Logo ─────────────────────────────────────────── */}
       <button
+        type="button"
         onClick={() => navigate("/")}
         style={{
           display: "flex",
@@ -302,14 +312,18 @@ const Navbar = () => {
             style={{
               fontSize: "15px",
               fontWeight: 700,
-              color: C.text,
+              color: themeC.text,
               lineHeight: 1.2,
             }}
           >
             SikshaOS
           </div>
           <div
-            style={{ fontSize: "9px", color: C.muted, letterSpacing: "0.05em" }}
+            style={{
+              fontSize: "9px",
+              color: themeC.textSub,
+              letterSpacing: "0.05em",
+            }}
           >
             SCHOOL MANAGEMENT
           </div>
@@ -319,9 +333,10 @@ const Navbar = () => {
       {/* ── Class Teacher: single "Classroom" link ────────── */}
       {role === "classTeacher" && (
         <NavBtn
+          isDarkMode={isDarkMode}
           label={t("titles.classRoom")}
           icon={<BookOpen size={14} />}
-          active={isActive("/student-menu")}
+          active={isPathActive("/student-menu")}
           onClick={() => navigate("/student-menu")}
         />
       )}
@@ -331,24 +346,25 @@ const Navbar = () => {
         <>
           {/* Setup dropdown */}
           <NavDrop
+            isDarkMode={isDarkMode}
             label={t("setup")}
             items={[
               {
                 label: t("roles.teacher"),
                 icon: <UserCog size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/teacher"),
               },
               {
                 label: t("titles.classRoom"),
                 icon: <BookOpen size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/class-setup"),
               },
               {
                 label: t("event"),
                 icon: <Umbrella size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/event"),
               },
             ]}
@@ -356,18 +372,19 @@ const Navbar = () => {
 
           {/* SIS dropdown */}
           <NavDrop
+            isDarkMode={isDarkMode}
             label={t("roles.student")}
             items={[
               {
                 label: t("roles.student"),
                 icon: <GraduationCap size={13} />,
-                iconColor: C.blue,
+                iconColor: themeC.blueBright,
                 onClick: () => navigate("/student-information-system"),
               },
               {
                 label: "TC",
                 icon: <FileText size={13} />,
-                iconColor: C.blue,
+                iconColor: themeC.blueBright,
                 onClick: () => navigate("/transfer-certificate"),
               },
             ]}
@@ -375,18 +392,19 @@ const Navbar = () => {
 
           {/* Requests dropdown */}
           <NavDrop
+            isDarkMode={isDarkMode}
             label={t("titles.requests")}
             items={[
               {
                 label: "Password Reset",
                 icon: <Lock size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/password-reset-requests"),
               },
               {
                 label: t("leaves"),
                 icon: <FileText size={13} />,
-                iconColor: C.orange,
+                iconColor: themeC.orange,
                 onClick: () => navigate("/teacher-leave-requests"),
               },
             ]}
@@ -394,17 +412,19 @@ const Navbar = () => {
 
           {/* Notice button */}
           <NavBtn
+            isDarkMode={isDarkMode}
             label={t("titles.notice")}
             icon={<Megaphone size={14} />}
-            active={isActive("/notice")}
+            active={isPathActive("/notice")}
             onClick={() => navigate("/notice")}
           />
 
           {/* Payments button */}
           <NavBtn
+            isDarkMode={isDarkMode}
             label={t("titles.payments")}
             icon={<CreditCard size={14} />}
-            active={isActive("/payments")}
+            active={isPathActive("/payments")}
             onClick={() => navigate("/payments")}
           />
         </>
@@ -412,6 +432,35 @@ const Navbar = () => {
 
       {/* ── Spacer ───────────────────────────────────────── */}
       <div style={{ flex: 1 }} />
+
+      {/* ── Theme Toggle ─────────────────────────────── */}
+      <button
+        onClick={() => dispatch(appConfigAction.toggleDarkMode())}
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: "9px",
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          color: themeC.textSub,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          marginRight: 4,
+          transition: "all 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = themeC.text;
+          e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = themeC.textSub;
+          e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+        }}
+      >
+        {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
+      </button>
 
       {/* ── Bell notification ─────────────────────────────── */}
       {/* <button
@@ -421,7 +470,7 @@ const Navbar = () => {
           borderRadius: "9px",
           background: "rgba(255,255,255,0.04)",
           border: "1px solid rgba(255,255,255,0.07)",
-          color: C.muted,
+          color: themeC.textSub,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -439,16 +488,18 @@ const Navbar = () => {
             width: 7,
             height: 7,
             borderRadius: "50%",
-            background: C.orange,
-            border: `2px solid ${C.nav}`,
+            background: themeC.orange,
+            border: `2px solid ${themeC.nav}`,
           }}
         />
       </button> */}
 
       {/* ── User avatar / profile dropdown ────────────────── */}
       <NavDrop
+        isDarkMode={isDarkMode}
         label=""
         align="right"
+        buttonAriaLabel="Open profile menu"
         icon={
           profilePhoto ? (
             <img
@@ -485,16 +536,21 @@ const Navbar = () => {
           {
             label: t("profile"),
             icon: <User size={13} />,
-            iconColor: C.muted,
+            iconColor: themeC.textSub,
             onClick: () => navigate(profileRoute),
           },
-          {
-            label: "Support",
-            icon: <HelpCircle size={13} />,
-            iconColor: C.muted,
-            onClick: () => {},
-          },
           { divider: true, label: "" },
+          ...(role === "admin"
+            ? [
+                {
+                  label: "Settings",
+                  icon: <Settings size={13} />,
+                  iconColor: themeC.textSub,
+                  onClick: () => navigate("/settings"),
+                },
+                { divider: true, label: "" },
+              ]
+            : []),
           {
             label: t("logout"),
             icon: <LogOut size={13} />,

@@ -12,9 +12,9 @@ import show from "../../assets/images/darkmode/show.png";
 import { useTranslation } from "react-i18next";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { showToast } from "../../services/toastService";
 
 const Step3 = ({ goback, loading, setLoading }) => {
   const navigate = useNavigate();
@@ -71,12 +71,12 @@ const Step3 = ({ goback, loading, setLoading }) => {
         resetPasswordToken: status?.resetPasswordToken,
       });
       if (res?.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         localStorage.clear();
         navigate("/login");
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronRight, Search, Users, X } from "lucide-react";
 import {
   FormControl,
@@ -8,16 +8,18 @@ import {
   Select,
   Stack,
 } from "@mui/material";
-import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import { C, TH } from "./constants";
+import { getTH } from "./constants";
+import { useTCTheme } from "./ThemeContext";
 import { AvatarBadge } from "./shared";
 import { mapStudentForTc } from "./utils";
+import { showToast } from "../../services/toastService";
 
-const filterSelectSx = {
+const getFilterSelectSx = (C) => ({
+
   minWidth: 120,
   backgroundColor: C.cardAlt,
   borderRadius: "8px",
@@ -28,9 +30,11 @@ const filterSelectSx = {
   },
   "& .MuiInputBase-input": { color: C.text, fontSize: "13px", py: 1 },
   "& .MuiSvgIcon-root": { color: C.muted },
-};
 
-const paginationSelectSx = {
+});
+
+const getPaginationSelectSx = (C) => ({
+
   minWidth: 70,
   backgroundColor: "transparent",
   "& .MuiOutlinedInput-notchedOutline": { border: `1px solid ${C.border}` },
@@ -40,11 +44,26 @@ const paginationSelectSx = {
   },
   "& .MuiInputBase-input": { color: C.text, fontSize: "13px", py: 0.5 },
   "& .MuiSvgIcon-root": { color: C.muted },
-};
+
+});
+
+const getSelectMenuSx = (C) => ({
+  backgroundColor: C.card,
+  color: C.text,
+  border: `1px solid ${C.border}`,
+});
+
+function getErrorMessage(error, fallbackMessage) {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return error?.message || fallbackMessage;
+}
 
 function SelectionFilters({
   search,
-  setSearch,
+  onSearchChange,
   filterClass,
   filterSec,
   classList,
@@ -54,6 +73,8 @@ function SelectionFilters({
   onFilterClassChange,
   onFilterSectionChange,
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       style={{
@@ -81,7 +102,7 @@ function SelectionFilters({
         <Search size={14} color={C.muted} style={{ flexShrink: 0 }} />
         <input
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by name..."
           style={{
             flex: 1,
@@ -94,7 +115,7 @@ function SelectionFilters({
         />
         {search ? (
           <button
-            onClick={() => setSearch("")}
+            onClick={() => onSearchChange("")}
             style={{
               background: "transparent",
               border: "none",
@@ -110,31 +131,32 @@ function SelectionFilters({
         ) : null}
       </div>
 
-      <FormControl size="small" sx={filterSelectSx}>
+      <FormControl size="small" sx={getFilterSelectSx(C)}>
         <Select
           value={filterClass}
           displayEmpty
           onChange={(event) => onFilterClassChange(event.target.value)}
           MenuProps={{
             PaperProps: {
-              sx: {
-                backgroundColor: "#111520",
-                color: C.text,
-                border: `1px solid ${C.border}`,
-              },
+              sx: getSelectMenuSx(C),
             },
           }}
         >
-          <MenuItem value="" sx={{ fontSize: "13px" }}>
+          <MenuItem
+            value=""
+            sx={{ fontSize: "13px", backgroundColor: C.card, color: C.text }}
+          >
             Class
           </MenuItem>
-          {classList.map((item) => (
+          {classList?.map((item) => (
             <MenuItem
               key={item?._id}
               value={item?._id}
               sx={{
                 fontSize: "13px",
-                "&:hover": { backgroundColor: "rgba(255,255,255,0.05)" },
+                backgroundColor: C.card,
+                color: C.text,
+                "&:hover": { backgroundColor: C.rowHov },
               }}
             >
               {item?.name}
@@ -143,7 +165,7 @@ function SelectionFilters({
         </Select>
       </FormControl>
 
-      <FormControl size="small" sx={filterSelectSx}>
+      <FormControl size="small" sx={getFilterSelectSx(C)}>
         <Select
           value={filterSec}
           displayEmpty
@@ -151,15 +173,14 @@ function SelectionFilters({
           onChange={(event) => onFilterSectionChange(event.target.value)}
           MenuProps={{
             PaperProps: {
-              sx: {
-                backgroundColor: "#111520",
-                color: C.text,
-                border: `1px solid ${C.border}`,
-              },
+              sx: getSelectMenuSx(C),
             },
           }}
         >
-          <MenuItem value="" sx={{ fontSize: "13px" }}>
+          <MenuItem
+            value=""
+            sx={{ fontSize: "13px", backgroundColor: C.card, color: C.text }}
+          >
             Section
           </MenuItem>
           {sectionList.map((item) => (
@@ -168,7 +189,9 @@ function SelectionFilters({
               value={item?._id}
               sx={{
                 fontSize: "13px",
-                "&:hover": { backgroundColor: "rgba(255,255,255,0.05)" },
+                backgroundColor: C.card,
+                color: C.text,
+                "&:hover": { backgroundColor: C.rowHov },
               }}
             >
               {item?.name}
@@ -207,6 +230,8 @@ function SelectionFilters({
 }
 
 function StudentRow({ student, index, pageNo, limit, onSelectStudent }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <tr
       style={{
@@ -236,13 +261,13 @@ function StudentRow({ student, index, pageNo, limit, onSelectStudent }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <AvatarBadge
             id={student?._id || "student"}
-            label={student?.firstname || student?.name || "S"}
+            label={student?.firstName || "S"}
             size={36}
             fontSize={14}
           />
           <div>
             <div style={{ fontSize: "14px", fontWeight: 600, color: C.text }}>
-              {student?.firstname} {student?.lastname}
+              {student?.firstName} {student?.lastName}
             </div>
             <div style={{ fontSize: "11px", color: C.muted }}>
               {student?.gender || "-"}
@@ -269,10 +294,10 @@ function StudentRow({ student, index, pageNo, limit, onSelectStudent }) {
         </div>
       </td>
       <td style={{ padding: "13px 18px", fontSize: "13px", color: C.sub }}>
-        {student?.parentFullName || "-"}
+        {student?.mainParentFullName || "-"}
       </td>
       <td style={{ padding: "13px 18px", fontSize: "13px", color: C.sub }}>
-        {student?.parentPhone || student?.phone || "-"}
+        {student?.parentPhone || "-"}
       </td>
       <td style={{ padding: "13px 18px", textAlign: "center" }}>
         <button
@@ -315,6 +340,8 @@ function SelectionPaginationControls({
   onLimitChange,
   onPageChange,
 }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   return (
     <div
       style={{
@@ -327,27 +354,25 @@ function SelectionPaginationControls({
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <span style={{ fontSize: "13px", color: C.muted }}>Rows per page:</span>
-        <FormControl size="small" sx={paginationSelectSx}>
+        <FormControl size="small" sx={getPaginationSelectSx(C)}>
           <Select
             value={limit}
             onChange={(event) => onLimitChange(event.target.value)}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  backgroundColor: "#111520",
-                  color: C.text,
-                  border: `1px solid ${C.border}`,
-                },
-              },
-            }}
-          >
+          MenuProps={{
+            PaperProps: {
+              sx: getSelectMenuSx(C),
+            },
+          }}
+        >
             {[10, 20, 25, 50, 100].map((value) => (
               <MenuItem
                 key={value}
                 value={value}
                 sx={{
                   fontSize: "13px",
-                  "&:hover": { backgroundColor: "rgba(255,255,255,0.05)" },
+                  backgroundColor: C.card,
+                  color: C.text,
+                  "&:hover": { backgroundColor: C.rowHov },
                 }}
               >
                 {value}
@@ -384,7 +409,10 @@ function SelectionPaginationControls({
 }
 
 export function SelectionStep({ onSelect }) {
+  const C = useTCTheme();
+  const TH = typeof getTH !== "undefined" ? getTH(C) : {};
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterClass, setFilterClass] = useState("");
   const [filterSec, setFilterSec] = useState("");
   const [pageNo, setPageNo] = useState(1);
@@ -395,80 +423,18 @@ export function SelectionStep({ onSelect }) {
   const [sectionList, setSectionList] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const { classAndSectionData } = useSelector((state) => state.appAuth);
+  const selectedSessionId = useSelector(
+    (state) => state.appAuth.classAndSectionData?.selectedSession?._id,
+  );
   const debounceTimeoutRef = useRef(null);
-  const selectedSessionId = classAndSectionData?.selectedSession?._id;
+  const requestIdRef = useRef(0);
 
-  useEffect(() => {
-    if (classAndSectionData?.id || selectedSessionId) {
-      getClassList();
-      fetchStudents({});
-    }
-  }, [classAndSectionData?.id, selectedSessionId]);
-
-  useEffect(() => {
-    if (filterClass && classList.length > 0) {
-      const selectedClass = classList.find((item) => item?._id === filterClass);
-      setSectionList(selectedClass?.section || []);
-      return;
-    }
-
-    setSectionList([]);
-  }, [filterClass, classList]);
-
-  useEffect(() => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    debounceTimeoutRef.current = setTimeout(() => {
-      fetchStudents({ searchName: search, searchSection: filterSec });
-    }, 1000);
-
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, [search, filterSec, pageNo, limit]);
-
-  async function fetchStudents({
-    searchName = search,
-    searchSection = filterSec,
-  }) {
+  const getClassList = useCallback(async () => {
     if (!selectedSessionId) {
+      setClassList([]);
       return;
     }
 
-    const url = EndPoints.ADMIN.SEARCH_STUDENT;
-    let query = `?page=${pageNo}&limit=${limit}&session=${selectedSessionId}`;
-
-    if (searchName) {
-      query += `&search=${searchName}`;
-    }
-
-    if (searchSection) {
-      query += `&section=${searchSection}`;
-    }
-
-    try {
-      setLoading(true);
-      const response = await axiosClient.get(`${url}${query}`);
-
-      if (response?.statusCode === 200) {
-        const { totalStudents, students } = response?.result || {};
-        setTotalStudentCount(totalStudents || 0);
-        setStudentList(students || []);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(error?.message || "Failed to fetch students");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function getClassList() {
     try {
       const response = await axiosClient.get(
         `${EndPoints.COMMON.CLASS_LIST}/${selectedSessionId}`,
@@ -485,9 +451,155 @@ export function SelectionStep({ onSelect }) {
 
       setClassList(filteredSortedClasses);
     } catch (error) {
-      console.error(error);
+      setClassList([]);
+      showToast.error(getErrorMessage(error, "Failed to fetch classes"));
     }
-  }
+  }, [selectedSessionId]);
+
+  const fetchStudents = useCallback(
+    async ({
+      page = pageNo,
+      pageLimit = limit,
+      searchName = debouncedSearch,
+      searchClass = filterClass,
+      searchSection = filterSec,
+    } = {}) => {
+      if (!selectedSessionId) {
+        showToast.error("Please select Session");
+        setStudentList([]);
+        setTotalStudentCount(0);
+        setLoading(false);
+        return;
+      }
+
+      const query = new URLSearchParams({
+        page: String(page),
+        limit: String(pageLimit),
+        session: selectedSessionId,
+      });
+
+      if (searchName) {
+        query.set("search", searchName);
+      }
+
+      if (searchClass) {
+        query.set("classId", searchClass);
+      }
+
+      if (searchSection) {
+        query.set("section", searchSection);
+      }
+
+      const requestId = requestIdRef.current + 1;
+      requestIdRef.current = requestId;
+
+      try {
+        setLoading(true);
+        const response = await axiosClient.get(
+          `${EndPoints.ADMIN.SEARCH_STUDENT}?${query.toString()}`,
+        );
+
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        if (response?.statusCode !== 200) {
+          throw new Error(response?.message || "Failed to fetch students");
+        }
+
+        const { totalStudents, students } = response?.result || {};
+        setTotalStudentCount(Number(totalStudents) || 0);
+        setStudentList(Array.isArray(students) ? students : []);
+      } catch (error) {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        setStudentList([]);
+        setTotalStudentCount(0);
+        showToast.error(getErrorMessage(error, "Failed to fetch students"));
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setLoading(false);
+        }
+      }
+    },
+    [debouncedSearch, filterClass, filterSec, limit, pageNo, selectedSessionId],
+  );
+
+  useEffect(() => {
+    if (!selectedSessionId) {
+      setStudentList([]);
+      setTotalStudentCount(0);
+      setClassList([]);
+      setSectionList([]);
+      setLoading(false);
+      return;
+    }
+
+    getClassList();
+  }, [getClassList, selectedSessionId]);
+
+  useEffect(() => {
+    if (!filterClass) {
+      setSectionList([]);
+
+      if (filterSec) {
+        setFilterSec("");
+      }
+
+      return;
+    }
+
+    const selectedClass = classList.find((item) => item?._id === filterClass);
+
+    if (!selectedClass) {
+      setFilterClass("");
+      setFilterSec("");
+      setSectionList([]);
+      return;
+    }
+
+    const nextSections = Array.isArray(selectedClass?.section)
+      ? selectedClass.section
+      : [];
+    setSectionList(nextSections);
+
+    if (
+      filterSec &&
+      !nextSections.some((item) => item?._id === filterSec)
+    ) {
+      setFilterSec("");
+    }
+  }, [classList, filterClass, filterSec]);
+
+  useEffect(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 1000);
+
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [search]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(totalStudentCount / limit));
+
+    if (totalStudentCount > 0 && pageNo > totalPages) {
+      setPageNo(totalPages);
+    }
+  }, [limit, pageNo, totalStudentCount]);
 
   function handlePageChange(_event, value) {
     setPageNo(value);
@@ -495,15 +607,19 @@ export function SelectionStep({ onSelect }) {
 
   function handleClear() {
     setSearch("");
+    setDebouncedSearch("");
     setFilterClass("");
     setFilterSec("");
     setPageNo(1);
-    fetchStudents({ searchName: "", searchSection: "" });
   }
 
   function handleSelectStudent(student) {
     onSelect(mapStudentForTc(student, classList, sectionList));
   }
+
+  const emptyMessage = selectedSessionId
+    ? "No students match your filters"
+    : "Select an active session to load students";
 
   return (
     <div style={{ padding: "28px 28px 60px" }}>
@@ -533,7 +649,10 @@ export function SelectionStep({ onSelect }) {
       >
         <SelectionFilters
           search={search}
-          setSearch={setSearch}
+          onSearchChange={(value) => {
+            setSearch(value);
+            setPageNo(1);
+          }}
           filterClass={filterClass}
           filterSec={filterSec}
           classList={classList}
@@ -589,7 +708,7 @@ export function SelectionStep({ onSelect }) {
                       style={{ display: "block", margin: "0 auto 10px" }}
                     />
                     <div style={{ fontSize: "14px", color: C.muted }}>
-                      No students match your filters
+                      {emptyMessage}
                     </div>
                   </td>
                 </tr>
@@ -615,7 +734,7 @@ export function SelectionStep({ onSelect }) {
             pageNo={pageNo}
             totalStudentCount={totalStudentCount}
             onLimitChange={(value) => {
-              setLimit(value);
+              setLimit(Number(value));
               setPageNo(1);
             }}
             onPageChange={handlePageChange}

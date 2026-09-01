@@ -178,6 +178,7 @@
     "WriteNotice": "Write notice here..."
   },
   "labels": {
+    "aadhar": "Aadhar Number",
     "id": "ID",
     "sNo": "S.No.",
     "gender": "Gender",
@@ -207,6 +208,7 @@
     "classTeacher": "Class Teacher",
     "reasonToReset": "Reason to Reset",
     "class": "Class",
+    "nopassword": "No Reset Password request at ths time",
     "noleave": "No Leave request at ths time",
     "noNotice": "No Notice at ths time",
     "reasonForLeave": "Reason for leave",
@@ -220,6 +222,10 @@
     "all": "All",
     "approved": "Approved",
     "rejected": "Rejected",
+    "PENDING": "Pending",
+    "ALL": "All",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected",
     "title": "Title",
     "notice": "Notice",
     "to": "To",
@@ -290,6 +296,8 @@
     "oneCheckbox": "Please select at least one checkbox (Holiday) "
   },
   "options": {
+    "allClass": "All Class",
+    "allSections": "All Sections",
     "preNursery": "Pre-Nursery",
     "nursery": "Nursery",
     "LKG": "LKG",
@@ -307,9 +315,9 @@
     "eleven": "11th",
     "twelve": "12th",
     "sections": "ABCDEFGH",
-    "male": "Male",
-    "female": "Female",
-    "other": "Other"
+    "male": "MALE",
+    "female": "FEMALE",
+    "other": "OTHER"
   },
   "confirm": {
     "leave": "Please confirm if you want to reject this leave request.",

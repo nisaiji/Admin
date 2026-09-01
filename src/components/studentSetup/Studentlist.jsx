@@ -1,27 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import {
-  BookOpen,
-  Briefcase,
-  Calendar,
   ChevronLeft,
   ChevronRight,
-  Droplets,
   Edit3,
-  GraduationCap,
-  Heart,
   Info,
-  Mail,
-  MapPin,
-  Phone,
   Plus,
   RefreshCw,
   Save,
   Search,
-  Shield,
-  Trash2,
   User,
   Users,
   X,
@@ -29,21 +24,19 @@ import {
 import { useTranslation } from "react-i18next";
 import { axiosClient } from "../../services/axiosClient";
 import EndPoints from "../../services/EndPoints";
-import DeletePopup from "../DeleteMessagePopup";
 import Breadcrumbs from "../BreadCrumbs";
-import CONSTANT from "../../utils/constants";
 import REGEX from "../../utils/regix";
+import {
+  SidebarTabs,
+  StudentDetailSidebar,
+  getAvatarClass,
+  getInitials,
+  loadDetailedStudent,
+} from "./studentInfoSidebar";
+import { showToast } from "../../services/toastService";
+import CONSTANT from "../../utils/constants";
 
 const PAGE_LIMIT_OPTIONS = [10, 20, 25, 50, 100];
-const AVATAR_CLASSES = [
-  "bg-[#4F8EF7]",
-  "bg-[#4cbc9a]",
-  "bg-[#94A3B8]",
-  "bg-[#FBBF24]",
-  "bg-[#FF793F]",
-  "bg-[#fe4040]",
-  "bg-[#0a81d1]",
-];
 const CLASS_OPTION_KEYS = [
   "preNursery",
   "nursery",
@@ -69,7 +62,7 @@ function cn(...classes) {
 
 function getStoredFilter(key) {
   if (typeof window === "undefined") return "";
-  return window.localStorage.getItem(key) || "";
+  return window.localStorage.getItem(key) ?? "";
 }
 
 function persistFilter(key, value) {
@@ -83,58 +76,14 @@ function persistFilter(key, value) {
   window.localStorage.removeItem(key);
 }
 
-function getStudentRecordId(student) {
-  return student?._id || student?.id || student?.studentId || "";
-}
-
-function getStudentKey(student, index) {
-  return getStudentRecordId(student) || `student-${index}`;
-}
-
-function getDisplayValue(value) {
-  if (value === null || value === undefined) return CONSTANT.NA;
-
-  const normalized = String(value).trim();
-  return normalized || CONSTANT.NA;
-}
-
-function getFullName(student) {
-  const firstName = student?.firstname || student?.firstName || "";
-  const lastName = student?.lastname || student?.lastName || "";
-  const fullName = `${firstName} ${lastName}`.trim();
-
-  return fullName || CONSTANT.NA;
-}
-
-function getInitials(student) {
-  const fullName = getFullName(student);
-  if (fullName === CONSTANT.NA) return "NA";
-
-  return fullName
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-function getAvatarClass(student, index) {
-  const source = String(getStudentRecordId(student) || index);
-  let hash = 0;
-
-  for (let i = 0; i < source.length; i += 1) {
-    hash += source.charCodeAt(i);
-  }
-
-  return AVATAR_CLASSES[Math.abs(hash) % AVATAR_CLASSES.length];
-}
-
 function getClassSortValue(className, classOptions) {
   const translatedIndex = classOptions.indexOf(className);
   if (translatedIndex >= 0) return translatedIndex;
 
-  const numericValue = Number.parseInt(String(className || "").replace(/\D/g, ""), 10);
+  const numericValue = Number.parseInt(
+    String(className ?? "").replace(/\D/g, ""),
+    10,
+  );
   return Number.isNaN(numericValue) ? Number.MAX_SAFE_INTEGER : numericValue;
 }
 
@@ -155,329 +104,127 @@ function getApiErrorMessage(error, fallback) {
 }
 
 function capitalizeValue(value) {
-  const normalized = String(value || "").trim();
+  const normalized = String(value ?? "").trim();
   if (!normalized) return "";
   return normalized.replace(
     /\S+/g,
-    (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
   );
-}
-
-function getStudentClassName(student) {
-  return getDisplayValue(
-    student?.className || student?.class?.name || student?.class || student?.classId?.name
-  );
-}
-
-function getStudentSectionName(student) {
-  return getDisplayValue(
-    student?.sectionName ||
-      student?.section?.name ||
-      student?.section ||
-      student?.sectionId?.name
-  );
-}
-
-function getStudentRollNo(student) {
-  return getDisplayValue(student?.rollNo || student?.rollNumber || student?.studentId);
 }
 
 function normalizeStudentDraft(student) {
   return {
-    id: getStudentRecordId(student),
-    firstname: student?.firstname || student?.firstName || "",
-    lastname: student?.lastname || student?.lastName || "",
-    gender: student?.gender || "",
-    bloodGroup: student?.bloodGroup || "",
-    dob: student?.dob || "",
-    address: student?.address || "",
-    parentName: student?.parentFullName || student?.parentName || "",
-    guardianName: student?.guardianName || "",
-    phone: student?.parentPhone || student?.phone || "",
-    parentGender: student?.parentGender || "",
-    parentAge: student?.parentAge || "",
-    parentEmail: student?.parentEmail || student?.email || "",
-    parentQualification: student?.parentQualification || "",
-    parentOccupation: student?.parentOccupation || "",
-    parentAddress: student?.parentAddress || "",
+    id: student?._id ?? "",
+    firstName: student?.firstName ?? "",
+    lastName: student?.lastName ?? "",
+    aadharNumber: student?.aadharNumber ?? "",
+    gender: student?.gender ?? "",
+    bloodGroup: student?.bloodGroup ?? "",
+    dob: student?.dob ?? "",
+    address: student?.address ?? "",
+    parentName: student?.mainParentFullName ?? "",
+    guardianName: student?.guardianName ?? "",
+    phone: student?.mainParentPhone ?? "",
+    parentGender: student?.mainParentGender ?? "",
+    parentDob: student?.mainParentDob ?? "",
+    parentEmail: student?.mainParentEmail ?? "",
+    parentQualification: student?.mainParentQualification ?? "",
+    parentOccupation: student?.mainParentOccupation ?? "",
+    parentAddress: student?.mainParentAddress ?? "",
   };
 }
 
 function buildStudentUpdatePayload(draft) {
-  const cleanedValues = {
-    firstname: capitalizeValue(draft.firstname),
-    lastname: capitalizeValue(draft.lastname),
-    gender: draft.gender,
-    bloodGroup: draft.bloodGroup,
-    dob: String(draft.dob || "").trim(),
-    address: capitalizeValue(draft.address),
-    parentName: capitalizeValue(draft.parentName),
-    guardianName: capitalizeValue(draft.guardianName),
-    parentGender: draft.parentGender,
-    parentAge: String(draft.parentAge || "").trim(),
-    parentEmail: String(draft.parentEmail || "").trim().toLowerCase(),
-    phone: String(draft.phone || "").trim(),
-    parentQualification: capitalizeValue(draft.parentQualification),
-    parentOccupation: capitalizeValue(draft.parentOccupation),
-    parentAddress: capitalizeValue(draft.parentAddress),
+  const requiredValues = {
+    firstName: capitalizeValue(draft?.firstName),
+    lastName: capitalizeValue(draft?.lastName),
+    aadharNumber: String(draft?.aadharNumber ?? "").trim(),
+    gender: draft?.gender,
+    // parentName: capitalizeValue(draft?.parentName),
+    // guardianName: capitalizeValue(draft?.guardianName),
+    // phone: String(draft?.phone ?? "").trim(),
   };
 
-  return Object.fromEntries(
-    Object.entries(cleanedValues).filter(([, value]) => value !== "")
-  );
+  const optionalValues = {
+    bloodGroup: draft?.bloodGroup,
+    dob: String(draft?.dob ?? "").trim(),
+    address: capitalizeValue(draft?.address),
+    // parentGender: draft?.parentGender,
+    // parentDob: String(draft?.parentDob ?? "").trim(),
+    // parentEmail: String(draft?.parentEmail ?? "")
+    //   .trim()
+    //   .toLowerCase(),
+    // parentQualification: capitalizeValue(draft?.parentQualification),
+    // parentOccupation: capitalizeValue(draft?.parentOccupation),
+    // parentAddress: capitalizeValue(draft?.parentAddress),
+  };
+
+  return {
+    ...requiredValues,
+    ...Object.fromEntries(
+      Object.entries(optionalValues).filter(([, value]) => value !== ""),
+    ),
+  };
 }
 
 function validateStudentDraft(draft, t) {
   if (
-    !String(draft.firstname || "").trim() ||
-    String(draft.firstname || "").trim().length < 3 ||
-    REGEX.NUMBER.test(draft.firstname)
+    !String(draft?.firstName ?? "").trim() ||
+    String(draft?.firstName ?? "").trim().length < 3 ||
+    REGEX.NUMBER.test(draft?.firstName)
   ) {
     return t("validationError.enterFirstName");
   }
 
   if (
-    !String(draft.lastname || "").trim() ||
-    String(draft.lastname || "").trim().length < 3 ||
-    REGEX.NUMBER.test(draft.lastname)
+    !String(draft?.lastName ?? "").trim() ||
+    String(draft?.lastName ?? "").trim().length < 3 ||
+    REGEX.NUMBER.test(draft?.lastName)
   ) {
     return t("validationError.enterLastName");
   }
 
-  if (!draft.gender) {
+  if (!String(draft?.aadharNumber ?? "").trim()) {
+    return "Aadhaar number is required";
+  }
+
+  if (!/^\d{12}$/.test(String(draft?.aadharNumber ?? "").trim())) {
+    return "Aadhaar must be exactly 12 digits";
+  }
+
+  if (!draft?.gender) {
     return t("validationError.gender");
   }
 
-  if (
-    !String(draft.parentName || "").trim() ||
-    String(draft.parentName || "").trim().length < 3 ||
-    REGEX.NUMBER.test(draft.parentName)
-  ) {
-    return t("validationError.parentName");
-  }
+  // if (
+  //   !String(draft?.parentName ?? "").trim() ||
+  //   String(draft?.parentName ?? "").trim().length < 3 ||
+  //   REGEX.NUMBER.test(draft?.parentName)
+  // ) {
+  //   return t("validationError.parentName");
+  // }
 
-  if (!String(draft.phone || "").trim()) {
-    return t("validationError.phone");
-  }
+  // if (
+  //   !String(draft?.guardianName ?? "").trim() ||
+  //   String(draft?.guardianName ?? "").trim().length < 3 ||
+  //   REGEX.NUMBER.test(draft?.guardianName)
+  // ) {
+  //   return "Guardian name is required";
+  // }
 
-  if (!REGEX.PHONE_LENGTH.test(String(draft.phone || "").trim())) {
-    return t("validationError.validationPhoneCount");
-  }
+  // if (!String(draft?.phone ?? "").trim()) {
+  //   return t("validationError.phone");
+  // }
 
-  if (draft.parentEmail && !REGEX.EMAIL.test(draft.parentEmail)) {
-    return t("validationError.emailAddress");
-  }
+  // if (!REGEX.PHONE_LENGTH.test(String(draft?.phone ?? "").trim())) {
+  //   return t("validationError.validationPhoneCount");
+  // }
+
+  // if (draft?.parentEmail && !REGEX.EMAIL.test(draft?.parentEmail)) {
+  //   return t("validationError.emailAddress");
+  // }
 
   return "";
-}
-
-function SectionTitle({ Icon, title, isDarkMode }) {
-  return (
-    <div
-      className={cn(
-        "mb-2 mt-5 flex items-center gap-2 border-b pb-2 text-xs font-poppins-bold uppercase text-[#0A81D1]",
-        isDarkMode ? "border-[#0A81D1]/20" : "border-borderWhite"
-      )}
-    >
-      <Icon size={14} />
-      {title}
-    </div>
-  );
-}
-
-function DetailRow({ Icon, label, value, isDarkMode, accentClass = "" }) {
-  return (
-    <div
-      className={cn(
-        "flex gap-3 border-b py-3",
-        isDarkMode ? "border-white/[0.04]" : "border-borderWhite"
-      )}
-    >
-      <div
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-lg",
-          isDarkMode ? "bg-white/[0.04] text-slate-500" : "bg-whiteBackground2 text-textGray"
-        )}
-      >
-        <Icon size={15} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className={cn("text-[11px] font-poppins-bold uppercase", isDarkMode ? "text-slate-500" : "text-textGray")}>
-          {label}
-        </p>
-        <p
-          className={cn(
-            "mt-1 break-words text-sm font-poppins-regular",
-            accentClass || (isDarkMode ? "text-[#E3E8F3]" : "text-textBlack")
-          )}
-        >
-          {getDisplayValue(value)}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function SidebarTabs({ tabs, activeTab, onChange, accentClass }) {
-  return (
-    <div className="flex gap-1 border-b border-white/[0.06]">
-      {tabs.map(({ key, label, Icon }) => (
-        <button
-          key={key}
-          type="button"
-          onClick={() => onChange(key)}
-          className={cn(
-            "mb-[-1px] inline-flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-poppins-bold transition",
-            activeTab === key
-              ? `${accentClass} border-current`
-              : "border-transparent text-slate-500 hover:text-[#E3E8F3]"
-          )}
-        >
-          <Icon size={14} />
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function StudentDetailSidebar({ student, isDarkMode, onClose, onEdit }) {
-  const [tab, setTab] = useState("personal");
-  const fullName = getFullName(student);
-  const className = getStudentClassName(student);
-  const sectionName = getStudentSectionName(student);
-  const avatarClass = getAvatarClass(student, 0);
-  const tabs = [
-    { key: "personal", label: "Personal", Icon: User },
-    { key: "guardian", label: "Guardian", Icon: Users },
-    { key: "academic", label: "Academic", Icon: GraduationCap },
-  ];
-
-  return (
-    <div className="fixed inset-0 z-40 flex">
-      <button
-        type="button"
-        aria-label="Close student profile"
-        className="flex-1 bg-black/65"
-        onClick={onClose}
-      />
-      <aside
-        data-testid="student-detail-sidebar"
-        className={cn(
-          "flex h-screen w-full max-w-[540px] flex-col border-l shadow-2xl",
-          isDarkMode
-            ? "border-white/10 bg-[#111315] text-[#E3E8F3]"
-            : "border-borderWhite bg-whiteBackground text-textBlack"
-        )}
-      >
-        <div
-          className={cn(
-            "sticky top-0 z-10 border-b px-6 pt-5",
-            isDarkMode ? "border-white/10 bg-[#111315]" : "border-borderWhite bg-whiteBackground"
-          )}
-        >
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-xs font-poppins-bold uppercase text-slate-500">
-              Student Profile
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={onEdit}
-                className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#FF793F]/30 bg-[#FF793F]/10 px-3 text-xs font-poppins-bold text-[#FF793F] transition hover:bg-[#FF793F]/20"
-              >
-                <Edit3 size={14} />
-                Edit
-              </button>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={onClose}
-                className={cn(
-                  "inline-flex size-9 items-center justify-center rounded-lg border transition",
-                  isDarkMode
-                    ? "border-white/10 bg-white/[0.04] text-slate-500 hover:text-[#E3E8F3]"
-                    : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack"
-                )}
-              >
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-
-          <div className="mb-5 flex items-center gap-4">
-            <div
-              className={cn(
-                "flex size-16 shrink-0 items-center justify-center rounded-full border-4 border-white/10 text-xl font-poppins-bold text-white",
-                avatarClass
-              )}
-            >
-              {getInitials(student)}
-            </div>
-            <div className="min-w-0">
-              <h2 className="truncate text-xl font-poppins-bold">{fullName}</h2>
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full bg-[#0A81D1]/15 px-2 py-1 font-poppins-bold text-[#0A81D1]">
-                  Class {className} - {sectionName}
-                </span>
-                <span className="text-slate-500">Roll {getStudentRollNo(student)}</span>
-                <span className="rounded-full bg-white/[0.06] px-2 py-1 text-slate-400">
-                  {getDisplayValue(student?.gender)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <SidebarTabs
-            tabs={tabs}
-            activeTab={tab}
-            onChange={setTab}
-            accentClass="text-[#0A81D1]"
-          />
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-6 pb-8">
-          {tab === "personal" ? (
-            <>
-              <SectionTitle Icon={User} title="Basic Info" isDarkMode={isDarkMode} />
-              <DetailRow Icon={User} label="Full Name" value={fullName} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Calendar} label="Date of Birth" value={student?.dob} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Droplets} label="Blood Group" value={student?.bloodGroup} isDarkMode={isDarkMode} accentClass="text-[#FE4040]" />
-              <DetailRow Icon={Shield} label="Gender" value={student?.gender} isDarkMode={isDarkMode} />
-              <SectionTitle Icon={Phone} title="Contact" isDarkMode={isDarkMode} />
-              <DetailRow Icon={Phone} label="Phone" value={student?.parentPhone || student?.phone} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={Mail} label="Email" value={student?.parentEmail || student?.email} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={MapPin} label="Address" value={student?.address} isDarkMode={isDarkMode} />
-            </>
-          ) : null}
-
-          {tab === "guardian" ? (
-            <>
-              <SectionTitle Icon={Briefcase} title="Parent Details" isDarkMode={isDarkMode} />
-              <DetailRow Icon={User} label="Parent Name" value={student?.parentFullName || student?.parentName} isDarkMode={isDarkMode} />
-              <DetailRow Icon={User} label="Guardian Name" value={student?.guardianName} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Phone} label="Phone" value={student?.parentPhone || student?.phone} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={Mail} label="Email" value={student?.parentEmail || student?.email} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={Heart} label="Gender" value={student?.parentGender} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Briefcase} label="Occupation" value={student?.parentOccupation} isDarkMode={isDarkMode} />
-              <DetailRow Icon={BookOpen} label="Qualification" value={student?.parentQualification} isDarkMode={isDarkMode} />
-              <DetailRow Icon={MapPin} label="Address" value={student?.parentAddress} isDarkMode={isDarkMode} />
-            </>
-          ) : null}
-
-          {tab === "academic" ? (
-            <>
-              <SectionTitle Icon={GraduationCap} title="Academic Identity" isDarkMode={isDarkMode} />
-              <DetailRow Icon={BookOpen} label="Class" value={className} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={BookOpen} label="Section" value={sectionName} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || getStudentRecordId(student)} isDarkMode={isDarkMode} />
-            </>
-          ) : null}
-        </div>
-      </aside>
-    </div>
-  );
 }
 
 function EditField({
@@ -494,8 +241,11 @@ function EditField({
     isDarkMode
       ? "border-white/10 bg-[#1a1d28] text-[#E3E8F3] focus:border-[#0A81D1]"
       : "border-borderWhite bg-whiteBackground text-textBlack focus:border-borderBlue",
-    error && "border-[#FE4040] focus:border-[#FE4040]"
+    error && "border-[#FE4040] focus:border-[#FE4040]",
   );
+  const optionStyle = isDarkMode
+    ? { backgroundColor: "#1a1d28", color: "#E3E8F3" }
+    : { backgroundColor: "#ffffff", color: "#0f172a" };
 
   return (
     <label className="mb-4 block text-xs font-poppins-bold uppercase text-slate-500">
@@ -508,7 +258,7 @@ function EditField({
         >
           <option value="">Select {label}</option>
           {options.map((option) => (
-            <option key={option} value={option}>
+            <option key={option} value={option} style={optionStyle}>
               {option}
             </option>
           ))}
@@ -517,27 +267,34 @@ function EditField({
         <input
           type={type}
           value={value}
-          max={type === "date" ? new Date().toISOString().split("T")[0] : undefined}
+          max={
+            type === "date" ? new Date().toISOString().split("T")[0] : undefined
+          }
           onChange={(event) => onChange(event.target.value)}
           className={inputClass}
         />
       )}
-      {error ? <span className="mt-1 block text-xs text-[#FE4040]">{error}</span> : null}
+      {error ? (
+        <span className="mt-1 block text-xs text-[#FE4040]">{error}</span>
+      ) : null}
     </label>
   );
 }
 
-function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t }) {
+function StudentEditSidebar({
+  student,
+  isDarkMode,
+  saving,
+  onClose,
+  onSave,
+  t,
+}) {
   const [draft, setDraft] = useState(() => normalizeStudentDraft(student));
   const [tab, setTab] = useState("personal");
   const [errorMessage, setErrorMessage] = useState("");
-  const fullName = `${draft.firstname} ${draft.lastname}`.trim() || getFullName(student);
+  const fullName = `${draft?.firstName} ${draft?.lastName}`.trim();
   const avatarClass = getAvatarClass(student, 0);
-  const tabs = [
-    { key: "personal", label: "Personal", Icon: User },
-    { key: "guardian", label: "Guardian", Icon: Users },
-    { key: "academic", label: "Academic", Icon: GraduationCap },
-  ];
+  const tabs = [{ key: "personal", label: "Personal", Icon: User }];
 
   function setField(field, value) {
     setDraft((currentDraft) => ({
@@ -572,13 +329,15 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
           "flex h-screen w-full max-w-[560px] flex-col border-l shadow-2xl",
           isDarkMode
             ? "border-white/10 bg-[#111315] text-[#E3E8F3]"
-            : "border-borderWhite bg-whiteBackground text-textBlack"
+            : "border-borderWhite bg-whiteBackground text-textBlack",
         )}
       >
         <div
           className={cn(
             "sticky top-0 z-10 border-b px-6 pt-5",
-            isDarkMode ? "border-white/10 bg-[#111315]" : "border-borderWhite bg-whiteBackground"
+            isDarkMode
+              ? "border-white/10 bg-[#111315]"
+              : "border-borderWhite bg-whiteBackground",
           )}
         >
           <div className="mb-4 flex items-center justify-between gap-3">
@@ -586,13 +345,15 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
               <div
                 className={cn(
                   "flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-poppins-bold text-white",
-                  avatarClass
+                  avatarClass,
                 )}
               >
                 {getInitials(draft)}
               </div>
               <div className="min-w-0">
-                <h2 className="truncate text-base font-poppins-bold">{fullName}</h2>
+                <h2 className="truncate text-base font-poppins-bold">
+                  {fullName}
+                </h2>
                 <p className="text-xs text-slate-500">Editing student record</p>
               </div>
             </div>
@@ -604,7 +365,7 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
                 "inline-flex size-9 items-center justify-center rounded-lg border transition",
                 isDarkMode
                   ? "border-white/10 bg-white/[0.04] text-slate-500 hover:text-[#E3E8F3]"
-                  : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack"
+                  : "border-borderWhite bg-whiteBackground2 text-textGray hover:text-textBlack",
               )}
             >
               <X size={16} />
@@ -632,44 +393,52 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
                 Update personal and contact information.
               </p>
               <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
-                <EditField label="First Name" value={draft.firstname} onChange={(value) => setField("firstname", value)} isDarkMode={isDarkMode} />
-                <EditField label="Last Name" value={draft.lastname} onChange={(value) => setField("lastname", value)} isDarkMode={isDarkMode} />
-                <EditField label="Gender" value={draft.gender} onChange={(value) => setField("gender", value)} options={["Male", "Female", "Other"]} isDarkMode={isDarkMode} />
-                <EditField label="Blood Group" value={draft.bloodGroup} onChange={(value) => setField("bloodGroup", value)} options={["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]} isDarkMode={isDarkMode} />
+                <EditField
+                  label="First Name"
+                  value={draft?.firstName}
+                  onChange={(value) => setField("firstName", value)}
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Last Name"
+                  value={draft?.lastName}
+                  onChange={(value) => setField("lastName", value)}
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Aadhar Number"
+                  value={draft?.aadharNumber}
+                  onChange={(value) => setField("aadharNumber", value)}
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Gender"
+                  value={draft?.gender}
+                  onChange={(value) => setField("gender", value)}
+                  options={["MALE", "FEMALE", "OTHER"]}
+                  isDarkMode={isDarkMode}
+                />
+                <EditField
+                  label="Blood Group"
+                  value={draft?.bloodGroup}
+                  onChange={(value) => setField("bloodGroup", value)}
+                  options={["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]}
+                  isDarkMode={isDarkMode}
+                />
               </div>
-              <EditField type='date' label="Date of Birth" value={draft.dob} onChange={(value) => setField("dob", value)} isDarkMode={isDarkMode} />
-              <EditField label="Address" value={draft.address} onChange={(value) => setField("address", value)} isDarkMode={isDarkMode} />
-            </>
-          ) : null}
-
-          {tab === "guardian" ? (
-            <>
-              <p className="mb-4 text-sm text-slate-500">
-                Update parent, guardian, and contact details.
-              </p>
-              <EditField label="Parent Name" value={draft.parentName} onChange={(value) => setField("parentName", value)} isDarkMode={isDarkMode} />
-              <EditField label="Guardian Name" value={draft.guardianName} onChange={(value) => setField("guardianName", value)} isDarkMode={isDarkMode} />
-              <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
-                <EditField label="Phone Number" value={draft.phone} onChange={(value) => setField("phone", value)} type="tel" isDarkMode={isDarkMode} />
-                <EditField label="Email Address" value={draft.parentEmail} onChange={(value) => setField("parentEmail", value)} type="email" isDarkMode={isDarkMode} />
-                <EditField label="Parent Gender" value={draft.parentGender} onChange={(value) => setField("parentGender", value)} options={["Male", "Female", "Other"]} isDarkMode={isDarkMode} />
-                <EditField label="Parent Age" value={draft.parentAge} onChange={(value) => setField("parentAge", value)} isDarkMode={isDarkMode} />
-              </div>
-              <EditField label="Qualification" value={draft.parentQualification} onChange={(value) => setField("parentQualification", value)} isDarkMode={isDarkMode} />
-              <EditField label="Occupation" value={draft.parentOccupation} onChange={(value) => setField("parentOccupation", value)} isDarkMode={isDarkMode} />
-              <EditField label="Parent Address" value={draft.parentAddress} onChange={(value) => setField("parentAddress", value)} isDarkMode={isDarkMode} />
-            </>
-          ) : null}
-
-          {tab === "academic" ? (
-            <>
-              <p className="mb-4 text-sm text-slate-500">
-                Academic placement is shown for reference. Class and section changes stay in the section setup flow.
-              </p>
-              <DetailRow Icon={BookOpen} label="Class" value={getStudentClassName(student)} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={BookOpen} label="Section" value={getStudentSectionName(student)} isDarkMode={isDarkMode} accentClass="text-[#0A81D1]" />
-              <DetailRow Icon={GraduationCap} label="Roll Number" value={getStudentRollNo(student)} isDarkMode={isDarkMode} />
-              <DetailRow Icon={Shield} label="Student ID" value={student?.studentId || getStudentRecordId(student)} isDarkMode={isDarkMode} />
+              <EditField
+                type="date"
+                label="Date of Birth"
+                value={draft?.dob}
+                onChange={(value) => setField("dob", value)}
+                isDarkMode={isDarkMode}
+              />
+              <EditField
+                label="Address"
+                value={draft?.address}
+                onChange={(value) => setField("address", value)}
+                isDarkMode={isDarkMode}
+              />
             </>
           ) : null}
         </div>
@@ -677,10 +446,14 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
         <div
           className={cn(
             "flex items-center justify-between gap-3 border-t px-6 py-4",
-            isDarkMode ? "border-white/10 bg-[#111315]" : "border-borderWhite bg-whiteBackground"
+            isDarkMode
+              ? "border-white/10 bg-[#111315]"
+              : "border-borderWhite bg-whiteBackground",
           )}
         >
-          <span className="text-xs text-slate-500">Changes save to the student API</span>
+          <span className="text-xs text-slate-500">
+            Save changes to the student
+          </span>
           <div className="flex gap-2">
             <button
               type="button"
@@ -689,7 +462,7 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
                 "rounded-lg border px-4 py-2 text-sm font-poppins-bold transition",
                 isDarkMode
                   ? "border-white/10 text-slate-400 hover:bg-white/[0.04]"
-                  : "border-borderWhite text-textGray hover:bg-whiteBackground2"
+                  : "border-borderWhite text-textGray hover:bg-whiteBackground2",
               )}
             >
               Cancel
@@ -712,7 +485,7 @@ function StudentEditSidebar({ student, isDarkMode, saving, onClose, onSave, t })
 
 export default function Studentlist() {
   const { t } = useTranslation();
-  const { classAndSectionData } = useSelector((state) => state.appAuth || {});
+  const { classAndSectionData } = useSelector((state) => state.appAuth ?? {});
   const isDarkMode = useSelector((state) => state.appConfig?.isDarkMode);
   const selectedSessionId = classAndSectionData?.selectedSession?._id;
 
@@ -722,47 +495,46 @@ export default function Studentlist() {
   const [studentList, setStudentList] = useState([]);
   const [detailStudent, setDetailStudent] = useState(null);
   const [editStudent, setEditStudent] = useState(null);
-  const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
-  const [idForDelete, setIdForDelete] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
-  const [searchClass, setSearchClass] = useState(() => getStoredFilter("searchClass"));
+  const [searchClass, setSearchClass] = useState(() =>
+    getStoredFilter("searchClass"),
+  );
   const [searchSection, setSearchSection] = useState(() =>
-    getStoredFilter("searchSection")
+    getStoredFilter("searchSection"),
   );
   const [loading, setLoading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [savingStudent, setSavingStudent] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const requestIdRef = useRef(0);
 
   const classOptions = useMemo(
     () => CLASS_OPTION_KEYS.map((key) => t(`options.${key}`)),
-    [t]
+    [t],
   );
 
   const selectedClass = useMemo(
     () => classList.find((item) => item?._id === searchClass),
-    [classList, searchClass]
+    [classList, searchClass],
   );
 
   const selectedSection = useMemo(
     () => sectionList.find((item) => item?._id === searchSection),
-    [sectionList, searchSection]
+    [sectionList, searchSection],
   );
 
-  const totalPages = Math.max(1, Math.ceil(totalStudentCount / limit) || 1);
+  const totalPages = Math.max(1, Math.ceil(totalStudentCount / limit) ?? 1);
   const visiblePages = useMemo(
     () => buildVisiblePages(pageNo, totalPages),
-    [pageNo, totalPages]
+    [pageNo, totalPages],
   );
   const showingFrom = totalStudentCount === 0 ? 0 : (pageNo - 1) * limit + 1;
   const showingTo = Math.min(totalStudentCount, pageNo * limit);
   const activeFilterLabel = selectedSessionId
-    ? `${selectedClass?.name || "All classes"} - ${
-        selectedSection?.name || "All sections"
+    ? `${selectedClass?.name ?? "All classes"} - ${
+        selectedSection?.name ?? "All sections"
       }`
     : "No active session";
 
@@ -781,23 +553,24 @@ export default function Studentlist() {
   const mutedClass = isDarkMode ? "text-slate-500" : "text-textGray";
   const bodyTextClass = isDarkMode ? "text-[#E3E8F3]" : "text-textBlack";
   const secondaryTextClass = isDarkMode ? "text-[#E3E8F3]/75" : "text-textGray";
-  const controlClass = isDarkMode
-    ? "border-white/10 bg-[#6868681A] text-[#E3E8F3] placeholder:text-slate-500 focus:border-[#0A81D1]"
-    : "border-borderWhite bg-whiteBackground text-textBlack placeholder:text-textGray focus:border-borderBlue";
   const iconButtonClass = isDarkMode
     ? "border-white/10 bg-white/[0.04] text-slate-500 hover:border-[#FF793F]/30 hover:bg-[#FF793F]/10 hover:text-[#FF793F]"
     : "border-borderWhite bg-whiteBackground text-textGray hover:border-borderOrange1 hover:bg-backgroundOrange2 hover:text-textOrange";
   const activeIconButtonClass = isDarkMode
     ? "border-[#0A81D1]/30 bg-[#0A81D1]/15 text-[#0A81D1] hover:bg-[#0A81D1]/25"
     : "border-borderBlue bg-backgroundBlue15 text-textBlue hover:bg-backgroundLightBlue";
-  const dangerIconButtonClass = isDarkMode
-    ? "border-white/10 bg-white/[0.04] text-slate-500 hover:border-[#FE4040]/30 hover:bg-[#FE4040]/10 hover:text-[#FE4040]"
-    : "border-borderWhite bg-whiteBackground text-textGray hover:border-borderRed hover:bg-backgroundDarkRed2 hover:text-textRed";
+  const controlClass = isDarkMode
+    ? "bg-background2 border border-borderColor text-textPrimary focus:border-primaryBlue"
+    : "bg-white border border-slate-200 text-slate-800 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
+  const optionStyle = {
+    backgroundColor: isDarkMode ? "#111827" : "#ffffff",
+    color: isDarkMode ? "#f8fafc" : "#1e293b",
+  };
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(searchTerm.trim());
-    }, 350);
+    }, 1000);
 
     return () => window.clearTimeout(timeout);
   }, [searchTerm]);
@@ -822,14 +595,22 @@ export default function Studentlist() {
 
       try {
         const response = await axiosClient.get(
-          `${EndPoints.COMMON.CLASS_LIST}/${selectedSessionId}`
+          `${EndPoints.COMMON.CLASS_LIST}/${selectedSessionId}`,
         );
         const classes = Array.isArray(response?.result) ? response.result : [];
         const sortedClasses = classes
-          .filter((item) => Array.isArray(item?.section) && item.section.length > 0)
+          .filter(
+            (item) => Array.isArray(item?.section) && item.section.length > 0,
+          )
           .sort((firstClass, secondClass) => {
-            const firstValue = getClassSortValue(firstClass?.name, classOptions);
-            const secondValue = getClassSortValue(secondClass?.name, classOptions);
+            const firstValue = getClassSortValue(
+              firstClass?.name,
+              classOptions,
+            );
+            const secondValue = getClassSortValue(
+              secondClass?.name,
+              classOptions,
+            );
             return firstValue - secondValue;
           });
 
@@ -839,7 +620,7 @@ export default function Studentlist() {
       } catch (error) {
         if (isActive) {
           setClassList([]);
-          toast.error(getApiErrorMessage(error, "Failed to load classes"));
+          showToast.error(getApiErrorMessage(error, "Failed to load classes"));
         }
       }
     }
@@ -867,7 +648,9 @@ export default function Studentlist() {
       return;
     }
 
-    const nextSections = Array.isArray(classData?.section) ? classData.section : [];
+    const nextSections = Array.isArray(classData?.section)
+      ? classData.section
+      : [];
     setSectionList(nextSections);
 
     if (
@@ -881,6 +664,7 @@ export default function Studentlist() {
   const fetchStudents = useCallback(
     async (overrides = {}) => {
       if (!selectedSessionId) {
+        showToast.error("Please select Session");
         setStudentList([]);
         setTotalStudentCount(0);
         setErrorMessage("");
@@ -909,13 +693,13 @@ export default function Studentlist() {
         setErrorMessage("");
 
         const response = await axiosClient.get(
-          `${EndPoints.ADMIN.SEARCH_STUDENT}?${query.toString()}`
+          `${EndPoints.ADMIN.SEARCH_STUDENT}?${query.toString()}`,
         );
 
         if (requestId !== requestIdRef.current) return;
 
         if (response?.statusCode !== 200) {
-          throw new Error(response?.message || "Failed to load students");
+          throw new Error(response?.message ?? "Failed to load students");
         }
 
         const students = Array.isArray(response?.result?.students)
@@ -925,7 +709,7 @@ export default function Studentlist() {
 
         setStudentList(students);
         setTotalStudentCount(
-          Number.isFinite(totalStudents) ? totalStudents : students.length
+          Number.isFinite(totalStudents) ? totalStudents : students.length,
         );
       } catch (error) {
         if (requestId !== requestIdRef.current) return;
@@ -934,14 +718,14 @@ export default function Studentlist() {
         setStudentList([]);
         setTotalStudentCount(0);
         setErrorMessage(message);
-        toast.error(message);
+        showToast.error(message);
       } finally {
         if (requestId === requestIdRef.current) {
           setLoading(false);
         }
       }
     },
-    [debouncedSearch, limit, pageNo, searchSection, selectedSessionId]
+    [debouncedSearch, limit, pageNo, searchSection, selectedSessionId],
   );
 
   useEffect(() => {
@@ -983,82 +767,57 @@ export default function Studentlist() {
     setPageNo(1);
   }
 
-  function handleShowInfo(student) {
-    setDetailStudent(student);
-  }
-
-  function handleEdit(student) {
-    setEditStudent(student);
-    setDetailStudent(null);
-  }
-
-  function handleDelete(student) {
-    const studentId = getStudentRecordId(student);
-
-    if (!studentId) {
-      toast.error("Student id is missing");
-      return;
-    }
-
-    setIdForDelete(studentId);
-    setDeleteConfirmModal(true);
-  }
-
-  async function handleConfirmDelete() {
-    if (!idForDelete) {
-      setDeleteConfirmModal(false);
-      return;
-    }
-
+  async function handleShowInfo(student) {
     try {
-      setDeleting(true);
-      const response = await axiosClient.delete(
-        `${EndPoints.ADMIN.DELETE_SECTION_STUDENT}/${idForDelete}`
-      );
-
-      if (response?.statusCode !== 200) {
-        throw new Error(response?.message || "Failed to delete student");
-      }
-
-      toast.success(response?.result || "Student deleted");
-
-      if (studentList.length === 1 && pageNo > 1) {
-        setPageNo((currentPage) => Math.max(1, currentPage - 1));
-      } else {
-        await fetchStudents();
-      }
+      const detailedStudent = await loadDetailedStudent(student, "admin");
+      setEditStudent(null);
+      setDetailStudent(detailedStudent);
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to delete student"));
-    } finally {
-      setDeleting(false);
-      setIdForDelete("");
-      setDeleteConfirmModal(false);
+      showToast.error(
+        getApiErrorMessage(error, "Failed to load student details"),
+      );
+    }
+  }
+
+  async function handleEdit(student) {
+    try {
+      const detailedStudent = await loadDetailedStudent(student, "admin");
+      setEditStudent(detailedStudent);
+      setDetailStudent(null);
+    } catch (error) {
+      showToast.error(
+        getApiErrorMessage(error, "Failed to load student details"),
+      );
     }
   }
 
   async function handleSaveStudent(draft) {
-    if (!draft?.id) {
-      toast.error("Student id is missing");
+    const studentId = draft?.id;
+
+    if (!studentId) {
+      showToast.error("Student id is missing");
       return;
     }
 
     try {
       setSavingStudent(true);
+      // console.log(draft);
+
       const payload = buildStudentUpdatePayload(draft);
       const response = await axiosClient.put(
-        `${EndPoints.ADMIN.STUDENT_UPDATE}/${draft.id}`,
-        payload
+        `${EndPoints.ADMIN.STUDENT_UPDATE}/${studentId}`,
+        payload,
       );
 
       if (response?.statusCode !== 200) {
-        throw new Error(response?.message || "Failed to update student");
+        throw new Error(response?.message ?? "Failed to update student");
       }
 
-      toast.success(response?.result || "Student updated");
+      showToast.success(response?.result ?? "Student updated");
       setEditStudent(null);
       await fetchStudents();
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to update student"));
+      showToast.error(getApiErrorMessage(error, "Failed to update student"));
     } finally {
       setSavingStudent(false);
     }
@@ -1073,6 +832,9 @@ export default function Studentlist() {
     ? "Choose an academic session to load student records."
     : errorMessage || "Try changing the class, section, or search text.";
 
+  const darkControlClass =
+    "border-white/10 bg-[#1a1d28] text-[#E3E8F3] focus:border-[#0A81D1] focus:ring-1 focus:ring-[#0A81D1]";
+
   return (
     <div className={cn("min-h-[calc(100vh-72px)] p-6", pageClass)}>
       <Toaster />
@@ -1082,7 +844,9 @@ export default function Studentlist() {
 
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-poppins-bold text-current">Students</h1>
+            <h1 className="text-2xl font-poppins-bold text-current">
+              Students
+            </h1>
             <p className={cn("mt-1 text-sm", mutedClass)}>
               {activeFilterLabel} - {totalStudentCount} students
               {loading && studentList.length > 0 ? " - Refreshing" : ""}
@@ -1094,7 +858,7 @@ export default function Studentlist() {
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#FF793F] px-4 text-sm font-poppins-bold text-white transition hover:bg-[#ff6b2b] active:scale-95"
           >
             <Plus size={16} />
-            Add Student
+            New Admission
           </Link>
         </div>
 
@@ -1108,19 +872,21 @@ export default function Studentlist() {
             value={searchClass}
             onChange={handleClassChange}
             className={cn(
-              "h-12 rounded-lg border px-4 text-sm font-poppins-regular outline-none transition disabled:cursor-not-allowed disabled:opacity-60",
-              controlClass
+              "h-12 rounded-lg px-4 text-sm font-poppins-regular outline-none transition",
+              "disabled:cursor-not-allowed disabled:opacity-60",
+              controlClass,
             )}
             disabled={!selectedSessionId || classList.length === 0}
           >
-            <option value="">All classes</option>
+            <option value="" style={optionStyle}>
+              All classes
+            </option>
             {classList.map((item) => (
-              <option key={item?._id} value={item?._id}>
-                {getDisplayValue(item?.name)}
+              <option key={item?._id} value={item?._id} style={optionStyle}>
+                {item?.name ?? CONSTANT.NA}
               </option>
             ))}
           </select>
-
           <label className="sr-only" htmlFor="student-section-filter">
             Section
           </label>
@@ -1130,25 +896,28 @@ export default function Studentlist() {
             value={searchSection}
             onChange={handleSectionChange}
             className={cn(
-              "h-12 rounded-lg border px-4 text-sm font-poppins-regular outline-none transition disabled:cursor-not-allowed disabled:opacity-60",
-              controlClass
+              "h-12 rounded-lg px-4 text-sm font-poppins-regular outline-none transition",
+              "disabled:cursor-not-allowed disabled:opacity-60",
+              controlClass,
             )}
             disabled={!searchClass || sectionList.length === 0}
           >
-            <option value="">
+            <option value="" style={optionStyle}>
               {searchClass ? "All sections" : "Select class first"}
             </option>
             {sectionList.map((item) => (
-              <option key={item?._id} value={item?._id}>
-                {getDisplayValue(item?.name)}
+              <option key={item?._id} value={item?._id} style={optionStyle}>
+                {item?.name ?? CONSTANT.NA}
               </option>
             ))}
           </select>
-
           <div className="relative">
             <Search
               size={18}
-              className={cn("pointer-events-none absolute left-4 top-1/2 -translate-y-1/2", mutedClass)}
+              className={cn(
+                "pointer-events-none absolute left-4 top-1/2 -translate-y-1/2",
+                mutedClass,
+              )}
             />
             <input
               type="text"
@@ -1157,7 +926,7 @@ export default function Studentlist() {
               placeholder="Search by name, email or phone..."
               className={cn(
                 "h-12 w-full rounded-lg border py-3 pl-12 pr-11 text-sm outline-none transition",
-                controlClass
+                controlClass,
               )}
             />
             {searchTerm ? (
@@ -1171,35 +940,46 @@ export default function Studentlist() {
                 }}
                 className={cn(
                   "absolute right-3 top-1/2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-lg transition",
-                  isDarkMode ? "text-slate-500 hover:bg-white/10" : "text-textGray hover:bg-whiteBackground2"
+                  isDarkMode
+                    ? "text-slate-500 hover:bg-white/10"
+                    : "text-textGray hover:bg-whiteBackground2",
                 )}
               >
                 <X size={16} />
               </button>
             ) : null}
           </div>
-
-          <button
-            type="button"
-            onClick={handleClear}
-            className={cn(
-              "inline-flex h-12 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-poppins-bold transition",
-              controlClass
-            )}
-          >
-            <X size={16} />
-            Clear
-          </button>
+          {searchTerm || searchClass || searchSection ? (
+            <button
+              type="button"
+              onClick={handleClear}
+              className={cn(
+                "inline-flex h-12 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-poppins-bold transition",
+                controlClass,
+              )}
+            >
+              <X size={16} />
+              Clear
+            </button>
+          ) : null}
         </div>
 
-        <section className={cn("overflow-hidden rounded-lg border", panelClass)}>
-          <div className={cn("flex items-center justify-between border-b px-5 py-4", headerClass)}>
+        <section
+          className={cn("overflow-hidden rounded-lg border", panelClass)}
+        >
+          <div
+            className={cn(
+              "flex items-center justify-between border-b px-5 py-4",
+              headerClass,
+            )}
+          >
             <div>
               <h2 className={cn("text-sm font-poppins-bold", bodyTextClass)}>
                 Student records
               </h2>
               <p className={cn("mt-1 text-xs", mutedClass)}>
-                Showing {showingFrom}-{showingTo} from {totalStudentCount} students
+                Showing {showingFrom}-{showingTo} from {totalStudentCount}{" "}
+                students
               </p>
             </div>
 
@@ -1219,50 +999,69 @@ export default function Studentlist() {
             <table className="w-full min-w-[920px] border-collapse">
               <thead>
                 <tr className={cn("border-b", headerClass)}>
-                  {["Student", "Gender", "Phone", "Email", "Blood", "Action"].map(
-                    (heading) => (
-                      <th
-                        key={heading}
-                        className={cn(
-                          "px-5 py-3 text-left text-xs font-poppins-bold uppercase text-[#0A81D1]",
-                          heading === "Action" && "text-right"
-                        )}
-                      >
-                        {heading}
-                      </th>
-                    )
-                  )}
+                  {[
+                    "Student",
+                    "Gender",
+                    "Phone",
+                    "Email",
+                    "Blood",
+                    "Action",
+                  ].map((heading) => (
+                    <th
+                      key={heading}
+                      className={cn(
+                        "px-5 py-3 text-left text-xs font-poppins-bold uppercase text-[#0A81D1]",
+                        heading === "Action" && "text-right",
+                      )}
+                    >
+                      {heading}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {loading && studentList.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-5 py-14 text-center">
-                      <div className={cn("text-sm", mutedClass)}>Loading students...</div>
+                      <div className={cn("text-sm", mutedClass)}>
+                        Loading students...
+                      </div>
                     </td>
                   </tr>
                 ) : studentList.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-5 py-14 text-center">
-                      <Users size={30} className={cn("mx-auto mb-3", mutedClass)} />
-                      <p className={cn("text-sm font-poppins-bold", bodyTextClass)}>
+                      <Users
+                        size={30}
+                        className={cn("mx-auto mb-3", mutedClass)}
+                      />
+                      <p
+                        className={cn(
+                          "text-sm font-poppins-bold",
+                          bodyTextClass,
+                        )}
+                      >
                         {emptyTitle}
                       </p>
-                      <p className={cn("mt-1 text-xs", mutedClass)}>{emptyMessage}</p>
+                      <p className={cn("mt-1 text-xs", mutedClass)}>
+                        {emptyMessage}
+                      </p>
                     </td>
                   </tr>
                 ) : (
-                  studentList.map((student, index) => {
-                    const fullName = getFullName(student);
-                    const recordId = getStudentRecordId(student);
+                  studentList?.map((student, index) => {
+                    const fullName = `${student.firstName} ${student.lastName}`;
 
                     return (
                       <tr
-                        key={getStudentKey(student, index)}
+                        key={index}
                         className={cn(
                           "border-b transition last:border-b-0",
-                          index % 2 === 1 && (isDarkMode ? "bg-white/[0.02]" : "bg-whiteBackground1"),
-                          rowClass
+                          index % 2 === 1 &&
+                            (isDarkMode
+                              ? "bg-white/[0.02]"
+                              : "bg-whiteBackground1"),
+                          rowClass,
                         )}
                       >
                         <td className="px-5 py-4">
@@ -1270,34 +1069,59 @@ export default function Studentlist() {
                             <div
                               className={cn(
                                 "flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-poppins-bold text-white",
-                                getAvatarClass(student, index)
+                                getAvatarClass(student, index),
                               )}
                             >
                               {getInitials(student)}
                             </div>
                             <div className="min-w-0">
-                              <p className={cn("truncate text-sm font-poppins-bold", bodyTextClass)}>
+                              <p
+                                className={cn(
+                                  "truncate text-sm font-poppins-bold",
+                                  bodyTextClass,
+                                )}
+                              >
                                 {fullName}
                               </p>
-                              <p className={cn("mt-1 truncate text-xs", mutedClass)}>
-                                Roll {getDisplayValue(student?.rollNo || student?.rollNumber || student?.studentId)}
+                              <p
+                                className={cn(
+                                  "mt-1 truncate text-xs",
+                                  mutedClass,
+                                )}
+                              >
+                                Roll {student?.studentUniqueId ?? CONSTANT.NA}
                               </p>
                             </div>
                           </div>
                         </td>
-                        <td className={cn("px-5 py-4 text-sm", secondaryTextClass)}>
-                          {getDisplayValue(student?.gender)}
+                        <td
+                          className={cn(
+                            "px-5 py-4 text-sm",
+                            secondaryTextClass,
+                          )}
+                        >
+                          {student?.gender ?? CONSTANT.NA}
                         </td>
-                        <td className={cn("px-5 py-4 text-sm", secondaryTextClass)}>
-                          {getDisplayValue(student?.parentPhone || student?.phone)}
+                        <td
+                          className={cn(
+                            "px-5 py-4 text-sm",
+                            secondaryTextClass,
+                          )}
+                        >
+                          {student?.mainParentPhone ?? CONSTANT.NA}
                         </td>
-                        <td className={cn("px-5 py-4 text-sm", secondaryTextClass)}>
+                        <td
+                          className={cn(
+                            "px-5 py-4 text-sm",
+                            secondaryTextClass,
+                          )}
+                        >
                           <span className="block max-w-[240px] truncate">
-                            {getDisplayValue(student?.parentEmail || student?.email)}
+                            {student?.mainParentEmail ?? CONSTANT.NA}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-sm font-poppins-bold text-[#FE4040]">
-                          {getDisplayValue(student?.bloodGroup)}
+                          {student?.bloodGroup ?? CONSTANT.NA}
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-end gap-2">
@@ -1308,7 +1132,7 @@ export default function Studentlist() {
                               onClick={() => handleEdit(student)}
                               className={cn(
                                 "inline-flex size-8 items-center justify-center rounded-lg border transition",
-                                iconButtonClass
+                                iconButtonClass,
                               )}
                             >
                               <Edit3 size={14} />
@@ -1320,24 +1144,11 @@ export default function Studentlist() {
                               onClick={() => handleShowInfo(student)}
                               className={cn(
                                 "inline-flex size-8 items-center justify-center rounded-lg border transition",
-                                activeIconButtonClass
+                                activeIconButtonClass,
                               )}
                             >
                               <Info size={15} />
                             </button>
-                            {/* <button
-                              type="button"
-                              title="Delete"
-                              aria-label={`Delete ${fullName}`}
-                              onClick={() => handleDelete(student)}
-                              className={cn(
-                                "inline-flex size-8 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-60",
-                                dangerIconButtonClass
-                              )}
-                              disabled={deleting && idForDelete === recordId}
-                            >
-                              <Trash2 size={14} />
-                            </button> */}
                           </div>
                         </td>
                       </tr>
@@ -1349,16 +1160,26 @@ export default function Studentlist() {
           </div>
 
           {totalStudentCount > 0 ? (
-            <div className={cn("flex flex-wrap items-center justify-between gap-4 border-t px-5 py-4", headerClass)}>
-              <label className={cn("flex items-center gap-2 text-sm", mutedClass)}>
+            <div
+              className={cn(
+                "flex flex-wrap items-center justify-between gap-4 border-t px-5 py-4",
+                headerClass,
+              )}
+            >
+              <label
+                className={cn("flex items-center gap-2 text-sm", mutedClass)}
+              >
                 Rows
                 <select
                   value={limit}
                   onChange={handleLimitChange}
-                  className={cn("h-9 rounded-lg border px-3 text-sm outline-none", controlClass)}
+                  className={cn(
+                    "h-9 rounded-lg border px-3 text-sm outline-none",
+                    controlClass,
+                  )}
                 >
                   {PAGE_LIMIT_OPTIONS.map((item) => (
-                    <option key={item} value={item}>
+                    <option key={item} value={item} style={optionStyle}>
                       {item}
                     </option>
                   ))}
@@ -1368,7 +1189,9 @@ export default function Studentlist() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setPageNo((currentPage) => Math.max(1, currentPage - 1))}
+                  onClick={() =>
+                    setPageNo((currentPage) => Math.max(1, currentPage - 1))
+                  }
                   disabled={pageNo === 1 || loading}
                   aria-label="Previous page"
                   className="inline-flex size-8 items-center justify-center rounded-full border border-[#0A81D1] text-[#0A81D1] transition hover:bg-[#0A81D1]/10 disabled:cursor-not-allowed disabled:opacity-40"
@@ -1387,7 +1210,7 @@ export default function Studentlist() {
                       "inline-flex size-8 items-center justify-center rounded-full border border-[#0A81D1] text-xs font-poppins-bold transition disabled:cursor-not-allowed disabled:opacity-60",
                       page === pageNo
                         ? "bg-[#0A81D1] text-white"
-                        : "text-[#0A81D1] hover:bg-[#0A81D1]/10"
+                        : "text-[#0A81D1] hover:bg-[#0A81D1]/10",
                     )}
                   >
                     {page}
@@ -1397,7 +1220,9 @@ export default function Studentlist() {
                 <button
                   type="button"
                   onClick={() =>
-                    setPageNo((currentPage) => Math.min(totalPages, currentPage + 1))
+                    setPageNo((currentPage) =>
+                      Math.min(totalPages, currentPage + 1),
+                    )
                   }
                   disabled={pageNo === totalPages || loading}
                   aria-label="Next page"
@@ -1428,14 +1253,6 @@ export default function Studentlist() {
           onClose={() => setEditStudent(null)}
           onSave={handleSaveStudent}
           t={t}
-        />
-      ) : null}
-
-      {deleteConfirmModal ? (
-        <DeletePopup
-          isVisible={deleteConfirmModal}
-          onClose={() => setDeleteConfirmModal(false)}
-          onDelete={handleConfirmDelete}
         />
       ) : null}
     </div>

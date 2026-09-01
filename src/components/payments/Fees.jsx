@@ -1,36 +1,46 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 import dashboard from "../../assets/images/fees/dashboard.png";
-import report from "../../assets/images/fees/report.png";
+import collected from "../../assets/images/fees/collected.png";
+import receipt from "../../assets/images/fees/receipt.png";
 import settings from "../../assets/images/fees/settings.png";
 
 import Sidebar from "./Sidebar";
-import Dashboard from "./Dashboard";
-import Disputes from "./Disputes";
-import Reports from "./reports/Reports";
+import { PaymentDashboard } from "./dashboard/Dashboard";
+import CollectionScreen from "./CollectionScreen";
+import Lookup from "./lookup/Lookup";
 import SettingSetup from "./setting/SettingSetup";
+
+const ALLOWED_TABS = ["Dashboard", "Collection", "Lookup", "Settings"];
 
 export default function Fees() {
   const tempData = useSelector((state) => state.appAuth.tempData);
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [selected, setSelected] = useState(
-    tempData?.selectedTab || "Dashboard",
+    ALLOWED_TABS.includes(tempData?.selectedTab) ? tempData.selectedTab : "Dashboard",
   );
+
+  useEffect(() => {
+    if (ALLOWED_TABS.includes(tempData?.selectedTab)) {
+      setSelected(tempData.selectedTab);
+    }
+  }, [tempData?.selectedTab]);
 
   const menuItems = useMemo(
     () => [
       { src: dashboard, label: "Dashboard" },
-      { src: report, label: "Reports" },
+      { src: collected, label: "Collection" },
+      // { src: receipt, label: "Lookup" },
       { src: settings, label: "Settings" },
     ],
     [],
   );
 
   const screens = {
-    Dashboard: Dashboard,
-    Reports: Reports,
-    Disputes: Disputes,
+    Dashboard: PaymentDashboard,
+    Collection: CollectionScreen,
+    Lookup,
     Settings: SettingSetup,
   };
 

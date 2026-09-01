@@ -12,10 +12,10 @@ import { FormControl, MenuItem, Select } from "@mui/material";
 import StateAndDistricts from "../utils/StatesAndDistricts.json";
 import EndPoints from "../services/EndPoints";
 import { axiosClient } from "../services/axiosClient";
-import toast from "react-hot-toast";
 import REGEX from "../utils/regix";
 import { setAuth } from "../store/AppAuthSlice";
 import { useDispatch } from "react-redux";
+import { showToast } from "../services/toastService";
 
 const Step5 = ({ goback, setStep, loading, setLoading }) => {
   const dispatch = useDispatch();
@@ -122,12 +122,12 @@ const Step5 = ({ goback, setStep, loading, setLoading }) => {
         formData
       );
       if (res?.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         dispatch(setAuth({ addressUpdated: true }));
         setStep(6);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }

@@ -61,21 +61,6 @@ import { generateToken } from "../../notifications/firebaseConfig.js";
 import EventData from "./EventData.jsx";
 import AttendanceData from "./AttendanceData.jsx";
 import SectionData from "./SectionData.jsx";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  Users,
-  BookOpen,
-  DollarSign,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  CalendarDays,
-  CheckCircle2,
-  UserCheck,
-  Clock,
-  School,
-  RefreshCw,
-} from "lucide-react";
 import { C } from "../../utils/constants.js";
 
 const Dashboard = () => {
@@ -126,7 +111,13 @@ const Dashboard = () => {
   }, [dispatch]);
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, color: C.text }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: isDarkMode ? C.bg : C.bgLight,
+        color: C.text,
+      }}
+    >
       <main style={{ padding: "24px 32px 40px" }}>
         <Toaster position="top-center" reverseOrder={false} />
 

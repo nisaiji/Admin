@@ -2,7 +2,7 @@
  * StudentSection.jsx
  *
  * Purpose:
- * - Manage students for a class section: list, add, edit, delete, import (Excel), and download a demo template.
+ * - Manage students for a class section: list, add, edit, import (Excel), and download a demo template.
  * - Supports two roles: "admin" and "classTeacher". Role affects which endpoints are used and which section/class data is required.
  *
  * High-level responsibilities:
@@ -11,7 +11,6 @@
  * - Provide an inline row to add a new student (with validation and duplicate checks).
  * - Support inline editing of existing students (toggle edit per SNo).
  * - Show student details in a modal.
- * - Delete student with confirmation.
  * - Import students via .xlsx/.xls upload and download a demo template file.
  * - Provide client-side search over firstname/lastname and basic input sanitization.
  *
@@ -22,7 +21,6 @@
  * - useRef: focus management for newly created and editing inputs; hidden file input for Excel import.
  *
  * Important functions:
- * - getSectionInfo(): GET section metadata (admin endpoint).
  * - fetchStudents(): GET students for section (role-specific endpoints).
  * - handleShowInfo(student): open StudentInfo modal.
  * - checkIsStudentExistForSameParent(): prevent duplicate student for same parent phone + same name + gender.
@@ -31,7 +29,6 @@
  * - handleInputChange(sNo, field, value): sanitize and update either newStudent (sNo === null) or an existing student by SNo.
  * - handleStudentAction(student, isUpdate): POST (register) or PUT (update) a student using the role-specific endpoint. Handles payload transformation.
  * - registerStudent(): wrapper that runs duplicate check then creates a student.
- * - handleDelete(): DELETE a student using role-specific endpoint after confirmation.
  * - uploadExcelSheet(file): upload .xlsx/.xls file (multipart/form-data) and refresh list on success.
  * - getDemoExcelSheet(): download demo Excel template as blob and trigger client download.
  *
@@ -54,34 +51,35 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { axiosClient } from "../../../services/axiosClient";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Searchw from "../../../assets/images/Search.png";
 import crossw from "../../../assets/images/cross.png";
 import infow from "../../../assets/images/info.png";
 import edit2w from "../../../assets/images/edit2.png";
-import delete2w from "../../../assets/images/delete2.png";
 import Search from "../../../assets/images/darkmode/Search.png";
 import cross from "../../../assets/images/darkmode/cross.png";
 import info from "../../../assets/images/darkmode/info.png";
 import edit2 from "../../../assets/images/darkmode/edit.png";
-import delete2 from "../../../assets/images/darkmode/delete.png";
 import book from "../../../assets/images/book.png";
 import importIcon from "../../../assets/images/importIcon.png";
 import downloadIcon from "../../../assets/images/downloadIcon.png";
-import StudentInfo from "./StudentInfo";
-import DeletePopup from "../../DeleteMessagePopup";
 import Spinner from "../../Spinner";
 import EndPoints from "../../../services/EndPoints";
 import { useTranslation } from "react-i18next";
 import REGEX from "../../../utils/regix";
-import AttendancePopup from "../../AttendancePopup";
 import Breadcrumbs from "../../BreadCrumbs";
+import {
+  StudentDetailSidebar,
+  loadDetailedStudent,
+} from "../../studentSetup/studentInfoSidebar";
+import { showToast } from "../../../services/toastService";
+import { useLocation } from "react-router-dom";
 
 export default function StudentSection() {
   // Importing necessary modules and hooks
   const [t] = useTranslation();
   const { classAndSectionData, teacherData } = useSelector(
-    (state) => state.appAuth
+    (state) => state.appAuth,
   );
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
 
@@ -94,23 +92,24 @@ export default function StudentSection() {
   // State variables for managing component data and UI
   const [students, setStudents] = useState([]);
   const [originalStudents, setOriginalStudents] = useState([]);
-  const [currStudent, setCurrStudent] = useState([]);
-  const [classData, setClassData] = useState([]);
+  const [currStudent, setCurrStudent] = useState(null);
+  const location = useLocation();
+  const classData = location.state?.classData;
   const [studentInfoModelOpen, setStudentInfoModelOpen] = useState(false);
   const [editSNo, setEditSNo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showAttendance, setShowAttendance] = useState(false);
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const [newStudent, setNewStudent] = useState({
     SNo: null,
-    firstname: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
     gender: "",
-    parentFullName: "",
+    mainParentFullName: "",
     guardianName: "",
     parentPhone: "",
+    aadharNumber: "",
     sectionId: "",
   });
   const genders = [t("options.male"), t("options.female"), t("options.other")];
@@ -118,59 +117,37 @@ export default function StudentSection() {
   // User role and section details from Redux state
   const role = useSelector((state) => state.appAuth.role);
   // console.log(teacherData);
-
   useEffect(() => {
-    let shouldFetchStudents = false;
     if (
-      role === "admin" &&
-      classAndSectionData?.selectedSession?.school &&
-      classAndSectionData?.sectionId &&
-      classAndSectionData?.selectedSession?._id
+      (role === "admin" &&
+        classAndSectionData?.selectedSession?.school &&
+        classAndSectionData?.sectionId &&
+        classAndSectionData?.selectedSession?._id) ||
+      (role === "classTeacher" &&
+        teacherData?.sectionId &&
+        teacherData?.sessionId)
     ) {
-      shouldFetchStudents = true;
-    } else if (
-      role === "classTeacher" &&
-      teacherData?.sectionId &&
-      teacherData?.sessionId
-    ) {
-      shouldFetchStudents = true;
+      fetchStudents();
     }
-    const fetchData = async () => {
-      if (classAndSectionData?.id && classAndSectionData?.sectionId) {
-        await getSectionInfo();
-      }
-      if (shouldFetchStudents) {
-        await fetchStudents();
-      }
-    };
-
-    fetchData();
   }, [
     role,
-    classAndSectionData?.id,
+    classAndSectionData?.selectedSession?.school,
     classAndSectionData?.sectionId,
     classAndSectionData?.selectedSession?._id,
     teacherData?.sectionId,
     teacherData?.sessionId,
   ]);
-  // console.log(classAndSectionData);
-  // get class teacher info api
-  const getSectionInfo = async () => {
-    try {
-      const res = await axiosClient.get(
-        `${EndPoints.ADMIN.SECTION_INFO}/${classAndSectionData?.sectionId}`
-      );
-
-      if (res?.statusCode === 200) setClassData(res?.result);
-    } catch (e) {
-      // toast.error(e);
-    }
-  };
 
   // Handles displaying student information in a modal
-  const handleShowInfo = (student) => {
-    setCurrStudent(student);
-    setStudentInfoModelOpen(true);
+  const handleShowInfo = async (student) => {
+    try {
+      const nextStudent = await loadDetailedStudent(student, role);
+
+      setCurrStudent(nextStudent);
+      setStudentInfoModelOpen(true);
+    } catch (error) {
+      showToast.error(error?.message || "Failed to load student details");
+    }
   };
 
   // get student api
@@ -200,8 +177,21 @@ export default function StudentSection() {
       if (res?.statusCode === 200) {
         const studentList = res?.result?.map((student, index, array) => ({
           ...student,
+          id: student?.id || student?._id,
           SNo: index + 1,
-          parentFullName: student?.parentFullName || "",
+          className:
+            student?.className ||
+            (role === "classTeacher"
+              ? teacherData?.className
+              : classAndSectionData?.className) ||
+            "",
+          sectionName:
+            student?.sectionName ||
+            (role === "classTeacher"
+              ? teacherData?.sectionName
+              : classAndSectionData?.sectionName) ||
+            "",
+          mainParentFullName: student?.mainParentFullName || "",
           guardianName: student?.guardianName || "",
           parentPhone: student?.parentPhone || "",
         }));
@@ -220,17 +210,17 @@ export default function StudentSection() {
   // check same entry in registration
   const checkIsStudentExistForSameParent = () => {
     const userExist = students.find(
-      (item) => item?.parentPhone === newStudent?.parentPhone
+      (item) => item?.parentPhone === newStudent?.parentPhone,
     );
     if (userExist) {
-      const existFullName = `${userExist?.firstname.trim()} ${userExist?.lastname.trim()}`;
-      const newFullName = `${newStudent?.firstname.trim()} ${newStudent?.lastname.trim()}`;
+      const existFullName = `${userExist?.firstName?.trim()} ${userExist?.lastName?.trim()}`;
+      const newFullName = `${newStudent?.firstName?.trim()} ${newStudent?.lastName?.trim()}`;
 
       if (
-        existFullName.toLowerCase() === newFullName.toLowerCase() &&
+        existFullName?.toLowerCase() === newFullName?.toLowerCase() &&
         userExist?.gender === newStudent?.gender
       ) {
-        toast.error(t("duplicate"));
+        showToast.error(t("duplicate"));
         return false;
       }
     }
@@ -246,30 +236,38 @@ export default function StudentSection() {
   // validation schema
   const validateData = (student) => {
     if (
-      !student.firstname.trim() ||
-      student.firstname.length < 3 ||
-      REGEX.NUMBER.test(student.firstname)
+      !student.firstName?.trim() ||
+      student.firstName.length < 3 ||
+      REGEX.NUMBER.test(student.firstName)
     ) {
       return t("validationError.enterFirstName");
     }
     if (
-      !student.lastname.trim() ||
-      student.lastname.length < 3 ||
-      REGEX.NUMBER.test(student.lastname)
+      !student.lastName?.trim() ||
+      student.lastName.length < 3 ||
+      REGEX.NUMBER.test(student.lastName)
     ) {
       return t("validationError.enterLastName");
     }
     if (!student.gender) return t("validationError.gender");
     if (
-      !student.parentFullName.trim() ||
-      student.parentFullName.length < 3 ||
-      REGEX.NUMBER.test(student.parentFullName)
+      !student.mainParentFullName?.trim() ||
+      student.mainParentFullName.length < 3 ||
+      REGEX.NUMBER.test(student.mainParentFullName)
     ) {
       return t("validationError.parentName");
     }
-    if (!student?.parentPhone.trim()) return t("validationError.phone");
+    if (!student?.parentPhone?.trim()) return t("validationError.phone");
     if (!REGEX.PHONE_LENGTH.test(student.parentPhone))
       return t("validationError.validationPhoneCount");
+    // Aadhaar is optional
+    const aadharNumber = String(student?.aadharNumber ?? "").trim();
+
+    // if (!String(student?.aadharNumber)?.trim())
+    //   return "Aadhaar number is required";
+
+    if (aadharNumber && !/^\d{12}$/.test(aadharNumber))
+      return "Aadhaar must be exactly 12 digits";
     return "";
   };
 
@@ -281,7 +279,7 @@ export default function StudentSection() {
   const handleInputChange = (sNo, field, value) => {
     let formattedValue = value;
 
-    if (field === "parentPhone") {
+    if (field === "parentPhone" || field === "aadharNumber") {
       formattedValue = value.replace(/\D/g, "");
     } else {
       formattedValue = value.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ");
@@ -292,8 +290,8 @@ export default function StudentSection() {
     } else {
       setStudents((prev) =>
         prev.map((student, idx) =>
-          idx === sNo - 1 ? { ...student, [field]: formattedValue } : student
-        )
+          idx === sNo - 1 ? { ...student, [field]: formattedValue } : student,
+        ),
       );
     }
   };
@@ -301,10 +299,12 @@ export default function StudentSection() {
   // api for registering and updating student
   const handleStudentAction = async (student, isUpdate = false) => {
     const e = validateData(student);
+    // console.log({e});
+
     if (e) {
       if (!toastDisplayed) {
         setToastDisplayed(true);
-        toast.error(e);
+        showToast.error(e);
         setTimeout(() => setToastDisplayed(false), 3000);
       }
       return;
@@ -329,14 +329,19 @@ export default function StudentSection() {
     if (role === "admin" && !isUpdate) {
       delete student.SNo;
     }
-
+    const aadharNumber = String(student?.aadharNumber ?? "").trim();
     let transformedStudent = {
-      firstname: capitalize(student.firstname.trim()),
-      lastname: capitalize(student.lastname.trim()),
-      parentName: capitalize(student.parentFullName.trim()),
-      ...(student.guardianName && { guardianName: capitalize(student.guardianName.trim()) }),
+      firstName: capitalize(student.firstName?.trim()),
+      lastName: capitalize(student.lastName?.trim()),
+      parentName: capitalize(student.mainParentFullName?.trim()),
+      ...(student.guardianName && {
+        guardianName: capitalize(student.guardianName?.trim()),
+      }),
       gender: student.gender,
       phone: student.parentPhone,
+      ...(aadharNumber && {
+        aadharNumber,
+      }),
       ...(!isUpdate && {
         sectionId:
           role === "admin"
@@ -352,20 +357,25 @@ export default function StudentSection() {
       // respone based on registered or updated request
       const response = await axiosClient[isUpdate ? "put" : "post"](
         `${url}${isUpdate ? `/${student?.id}` : ""}`,
-        transformedStudent
+        transformedStudent,
       );
+      // console.log(response);
+
       if ([200, 201].includes(response?.statusCode)) {
-        toast.success(response.result);
+        showToast.success(
+          isUpdate ? response?.result : response?.result?.message,
+        );
         fetchStudents();
         if (!isUpdate) {
           setNewStudent({
             SNo: null,
-            firstname: "",
-            lastname: "",
+            firstName: "",
+            lastName: "",
             gender: "",
-            parentFullName: "",
+            mainParentFullName: "",
             guardianName: "",
             parentPhone: "",
+            aadharNumber: "",
             sectionId:
               role === "admin"
                 ? classAndSectionData?.sectionId
@@ -378,7 +388,8 @@ export default function StudentSection() {
         setEditSNo(null);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
+      // console.log({e});
     } finally {
       setLoading(false);
     }
@@ -392,37 +403,11 @@ export default function StudentSection() {
     }, 0);
   };
 
-  // delete student api
-  const handleDelete = async () => {
-    try {
-      setLoading(true);
-      // console.log({currStudent})
-      const url =
-        role === "classTeacher"
-          ? EndPoints.TEACHER.DELETE_SECTION_STUDENT
-          : role === "admin"
-            ? EndPoints.ADMIN.DELETE_SECTION_STUDENT
-            : "";
-      const res = await axiosClient.delete(`${url}/${currStudent._id}`);
-      // console.log(res)
-      if (res?.statusCode === 200) {
-        toast.success(res.result);
-        fetchStudents();
-      }
-    } catch (e) {
-      // console.log(e)
-      toast.error(e);
-    } finally {
-      setLoading(false);
-      setShowDeleteConfirmation(false);
-    }
-  };
-
   // Uploads an Excel sheet containing student data
   const uploadExcelSheet = async (file) => {
     try {
       if (!file) {
-        toast.error("Please select a valid Excel file.");
+        showToast.error("Please select a valid Excel file.");
         return;
       }
 
@@ -445,15 +430,15 @@ export default function StudentSection() {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
       if (res?.statusCode === 201 || res?.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         fetchStudents();
       }
     } catch (e) {
       const err = JSON.parse(e);
-      toast.error(`error in student ${err?.student} of ${err?.reason}`);
+      showToast.error(`error in student ${err?.student} of ${err?.reason}`);
     } finally {
       setLoading(false);
     }
@@ -490,7 +475,7 @@ export default function StudentSection() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
@@ -502,10 +487,12 @@ export default function StudentSection() {
 
   const filteredStudents = students.filter(
     (student) =>
-      student.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.parentFullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.parentPhone.includes(searchQuery)
+      student.firstName?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      student.lastName?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      student.mainParentFullName
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase()) ||
+      student.parentPhone.includes(searchQuery),
   );
 
   useEffect(() => {
@@ -516,8 +503,9 @@ export default function StudentSection() {
 
   return (
     <div
-      className={`${isDarkMode ? "bg-background2" : "bg-whiteBackground2"
-        } px-6 py-6 min-h-[calc(100vh-72px)]`}
+      className={`${
+        isDarkMode ? "bg-background2" : "bg-whiteBackground2"
+      } px-6 py-6 min-h-[calc(100vh-72px)]`}
     >
       {loading && (
         <div
@@ -527,44 +515,49 @@ export default function StudentSection() {
         </div>
       )}
       <div
-        className={`${isDarkMode
-          ? "bg-gradient-to-r from-fromColor1 to-toColor1"
-          : "bg-whiteBackground"
-          } p-4 rounded-[16px]`}
+        className={`${
+          isDarkMode
+            ? "bg-gradient-to-r from-fromColor1 to-toColor1"
+            : "bg-whiteBackground"
+        } p-4 rounded-[16px]`}
       >
         <Toaster position="top-center" reverseOrder={false} />
         <div className={`px-6`}>
           <Breadcrumbs />
           <div className={`flex justify-between`}>
             <div
-              className={`text-2xl ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                } font-semibold px-2 py-3`}
+              className={`text-2xl ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } font-semibold px-2 py-3`}
             >
               {t("titles.students")}
             </div>
             <div className={`text-right py-3`}>
               <div
-                className={`text-[20px] font-bold ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                  }`}
+                className={`text-[20px] font-bold ${
+                  isDarkMode ? "text-textPrimary" : "text-textBlack"
+                }`}
               >
                 {role === "classTeacher"
-                  ? localStorage.getItem("firstname")
+                  ? `${teacherData?.firstName} ${teacherData?.lastName}`
                   : role === "admin"
-                    ? `${classData?.teacher?.firstname || ""} ${classData?.teacher?.lastname || ""
-                    }`
+                    ? `${classData?.teacher?.firstName ?? ""} ${
+                        classData?.teacher?.lastName ?? ""
+                      }`
                     : ""}
               </div>
               <div
                 className={`flex flex-row justify-end items-center space-x-2`}
               >
                 <div
-                  className={`text-[14px] py-1 font-poppins-regular ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                    }`}
+                  className={`text-[14px] py-1 font-poppins-regular ${
+                    isDarkMode ? "text-textPrimary" : "text-textBlack"
+                  }`}
                 >
                   {role === "classTeacher"
-                    ? `${teacherData?.className} ${teacherData?.sectionName}`
+                    ? `${teacherData?.className ?? ""} ${teacherData?.sectionName ?? ""}`
                     : role === "admin"
-                      ? `${classAndSectionData?.className}-${classAndSectionData?.sectionName}`
+                      ? `${classAndSectionData?.className ?? ""} ${classAndSectionData?.sectionName ?? ""}`
                       : ""}
                 </div>
               </div>
@@ -589,10 +582,11 @@ export default function StudentSection() {
                   value={searchQuery}
                   onChange={handleSearchInputChange}
                   ref={searchInputRef}
-                  className={`bg-transparent ${isDarkMode
-                    ? "text-textPrimary border-borderLine"
-                    : "text-textBlack border-borderWhite2"
-                    } border
+                  className={`bg-transparent ${
+                    isDarkMode
+                      ? "text-textPrimary border-borderLine"
+                      : "text-textBlack border-borderWhite2"
+                  } border
                     px-14 py-2 rounded-xl focus:outline-[#05022B]/10 w-full`}
                   onFocus={() => searchInputRef.current.focus()}
                 />
@@ -645,12 +639,14 @@ export default function StudentSection() {
             className={`overflow-x-auto relative mt-6 min-h-[250px] max-h-[400px]`}
           >
             <table
-              className={`${isDarkMode ? "" : "bg-whiteBackground"
-                } min-w-full border-separate border-spacing-0`}
+              className={`${
+                isDarkMode ? "" : "bg-whiteBackground"
+              } min-w-full border-separate border-spacing-0`}
             >
               <thead
-                className={`${isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
-                  } text-textBlue text-base font-medium sticky top-0 z-10`}
+                className={`${
+                  isDarkMode ? "bg-backgroundTableCell" : "bg-whiteBackground"
+                } text-textBlue text-base font-medium sticky top-0 z-10`}
               >
                 {/* table headings */}
                 <tr>
@@ -690,6 +686,11 @@ export default function StudentSection() {
                     {t("labels.phone")}
                   </th>
                   <th
+                    className={` py-2 border border-borderLine2 bg-clip-padding`}
+                  >
+                    {t("labels.aadhar")}
+                  </th>
+                  <th
                     className={`w-36 py-2 border border-borderLine2 bg-clip-padding`}
                   >
                     {t("labels.action")}
@@ -700,49 +701,55 @@ export default function StudentSection() {
                 {/* input fields */}
                 <tr>
                   <td
-                    className={`px-2 py-0 text-center ${isDarkMode
-                      ? "text-textPrimary border-borderLine"
-                      : "text-textBlack border-borderGray2"
-                      } font-poppins font-medium border`}
+                    className={`px-2 py-0 text-center ${
+                      isDarkMode
+                        ? "text-textPrimary border-borderLine"
+                        : "text-textBlack border-borderGray2"
+                    } font-poppins font-medium border`}
                   >
                     -
                   </td>
                   <td
-                    className={`py-1 px-2 border ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                      }`}
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
                   >
                     <input
                       type="text"
-                      value={newStudent.firstname}
+                      value={newStudent.firstName}
                       onChange={(e) =>
-                        handleInputChange(null, "firstname", e.target.value)
+                        handleInputChange(null, "firstName", e.target.value)
                       }
                       maxLength={15}
                       placeholder={t("placeholders.firstName")}
-                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                       ref={newStudentFirstNameRef}
                     />
                   </td>
                   <td
-                    className={`py-1 px-2 border ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                      }`}
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
                   >
                     <input
                       type="text"
-                      value={newStudent.lastname}
+                      value={newStudent.lastName}
                       onChange={(e) =>
-                        handleInputChange(null, "lastname", e.target.value)
+                        handleInputChange(null, "lastName", e.target.value)
                       }
                       maxLength={15}
                       placeholder={t("placeholders.lastName")}
-                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                     />
                   </td>
                   <td
-                    className={`py-1 px-1 border ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                      }`}
+                    className={`py-1 px-1 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
                   >
                     <select
                       data-testid="gender"
@@ -750,19 +757,22 @@ export default function StudentSection() {
                       onChange={(e) =>
                         handleInputChange(null, "gender", e.target.value)
                       }
-                      className={`w-full h-full px-2 py-3 border-none bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } font-poppins font-medium text-center focus:outline-offset-[4px] focus:outline-borderBlue  ${newStudent.gender === ""
+                      className={`w-full h-full px-2 py-3 border-none bg-transparent ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      } font-poppins font-medium text-center focus:outline-offset-[4px] focus:outline-borderBlue  ${
+                        newStudent.gender === ""
                           ? "text-gray-400"
                           : "text-black"
-                        }`}
+                      }`}
                     >
                       <option
                         value=""
                         disabled
-                        className={`${isDarkMode
-                          ? "text-textPrimary bg-background2 "
-                          : "text-textBlack bg-whiteBackground"
-                          }`}
+                        className={`${
+                          isDarkMode
+                            ? "text-textPrimary bg-background2 "
+                            : "text-textBlack bg-whiteBackground"
+                        }`}
                       >
                         {t("placeholders.selectGender")}
                       </option>
@@ -770,10 +780,11 @@ export default function StudentSection() {
                         <option
                           key={index}
                           value={gender}
-                          className={`${isDarkMode
-                            ? "text-textPrimary bg-background2 "
-                            : "text-textBlack bg-whiteBackground"
-                            }`}
+                          className={`${
+                            isDarkMode
+                              ? "text-textPrimary bg-background2 "
+                              : "text-textBlack bg-whiteBackground"
+                          }`}
                         >
                           {gender}
                         </option>
@@ -781,48 +792,49 @@ export default function StudentSection() {
                     </select>
                   </td>
                   <td
-                    className={`py-1 px-2 border ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                      }`}
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
                   >
                     <input
                       type="text"
-                      value={newStudent.parentFullName}
+                      value={newStudent.mainParentFullName}
                       onChange={(e) =>
                         handleInputChange(
                           null,
-                          "parentFullName",
-                          e.target.value
+                          "mainParentFullName",
+                          e.target.value,
                         )
                       }
                       maxLength={20}
                       placeholder={t("placeholders.parentName")}
-                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                     />
                   </td>
                   <td
-                    className={`py-1 px-2 border ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                      }`}
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
                   >
                     <input
                       type="text"
                       value={newStudent.guardianName}
                       onChange={(e) =>
-                        handleInputChange(
-                          null,
-                          "guardianName",
-                          e.target.value
-                        )
+                        handleInputChange(null, "guardianName", e.target.value)
                       }
                       maxLength={20}
                       placeholder={t("placeholders.guardianName")}
-                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                     />
                   </td>
                   <td
-                    className={`py-1 px-2 border ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                      }`}
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
                   >
                     <input
                       type="text"
@@ -832,14 +844,34 @@ export default function StudentSection() {
                         handleInputChange(null, "parentPhone", e.target.value)
                       }
                       placeholder={t("placeholders.phoneNumber")}
-                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                    />
+                  </td>
+                  <td
+                    className={`py-1 px-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
+                  >
+                    <input
+                      type="text"
+                      value={newStudent.aadharNumber}
+                      maxLength={12}
+                      onChange={(e) =>
+                        handleInputChange(null, "aadharNumber", e.target.value)
+                      }
+                      placeholder="Aadhaar Number"
+                      className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                        isDarkMode ? "text-textPrimary" : "text-textBlack"
+                      } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                     />
                   </td>
                   {/* add student button */}
                   <td
-                    className={`px-2 py-2 border ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                      }`}
+                    className={`px-2 py-2 border ${
+                      isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                    }`}
                   >
                     <button
                       disabled={loading}
@@ -854,32 +886,35 @@ export default function StudentSection() {
                 {filteredStudents.map((student) => (
                   <tr key={student.SNo}>
                     <td
-                      className={`px-2 py-2 font-medium text-center border text-sm ${isDarkMode
-                        ? "text-textPrimary border-borderLine2"
-                        : "text-textBlack border-borderGray2"
-                        }`}
+                      className={`px-2 py-2 font-medium text-center border text-sm ${
+                        isDarkMode
+                          ? "text-textPrimary border-borderLine2"
+                          : "text-textBlack border-borderGray2"
+                      }`}
                     >
                       {student.SNo}
                     </td>
                     <td
-                      className={`px-2 py-1 border text-sm ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                        }`}
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
                     >
                       <input
-                        data-testid="firstname"
+                        data-testid="firstName"
                         type="text"
-                        value={student.firstname}
+                        value={student.firstName}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "firstname",
-                            e.target.value
+                            "firstName",
+                            e.target.value,
                           )
                         }
                         maxLength={15}
                         placeholder={t("placeholders.firstName")}
-                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                         disabled={editSNo !== student.SNo}
                         ref={(el) =>
                           (editStudentFirstNameRefs.current[student.SNo] = el)
@@ -887,29 +922,32 @@ export default function StudentSection() {
                       />
                     </td>
                     <td
-                      className={`px-2 py-1 border text-sm ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                        }`}
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
                     >
                       <input
                         type="text"
-                        value={student.lastname}
+                        value={student.lastName}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "lastname",
-                            e.target.value
+                            "lastName",
+                            e.target.value,
                           )
                         }
                         maxLength={15}
                         placeholder={t("placeholders.lastName")}
-                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                         disabled={editSNo !== student.SNo}
                       />
                     </td>
                     <td
-                      className={`px-2 py-1 border text-sm ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                        }`}
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
                     >
                       <select
                         value={student.gender}
@@ -917,21 +955,23 @@ export default function StudentSection() {
                           handleInputChange(
                             student.SNo,
                             "gender",
-                            e.target.value
+                            e.target.value,
                           )
                         }
-                        className={`w-full h-full px-2 py-3 border-none bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } font-poppins font-medium text-center focus:outline-offset-[4px] focus:outline-borderBlue`}
+                        className={`w-full h-full px-2 py-3 border-none bg-transparent ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } font-poppins font-medium text-center focus:outline-offset-[4px] focus:outline-borderBlue`}
                         disabled={editSNo !== student.SNo}
                       >
                         {genders.map((gender, index) => (
                           <option
                             key={index}
                             value={gender}
-                            className={`${isDarkMode
-                              ? "text-textPrimary bg-background2 "
-                              : "text-textBlack bg-whiteBackground"
-                              }`}
+                            className={`${
+                              isDarkMode
+                                ? "text-textPrimary bg-background2 "
+                                : "text-textBlack bg-whiteBackground"
+                            }`}
                           >
                             {gender}
                           </option>
@@ -939,50 +979,55 @@ export default function StudentSection() {
                       </select>
                     </td>
                     <td
-                      className={`px-2 py-1 border text-sm ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                        }`}
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
                     >
                       <input
                         type="text"
-                        value={student.parentFullName}
+                        value={student.mainParentFullName}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
-                            "parentFullName",
-                            e.target.value
+                            "mainParentFullName",
+                            e.target.value,
                           )
                         }
                         maxLength={20}
                         placeholder={t("placeholders.parentName")}
-                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                         disabled={editSNo !== student.SNo}
                       />
                     </td>
                     <td
-                      className={`px-2 py-1 border text-sm ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                        }`}
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
                     >
                       <input
                         type="text"
-                        value={student.guardianName}
+                        value={student?.guardianName}
                         onChange={(e) =>
                           handleInputChange(
                             student.SNo,
                             "guardianName",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         maxLength={20}
                         placeholder="guardian2"
-                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                         disabled={editSNo !== student.SNo}
                       />
                     </td>
                     <td
-                      className={`px-2 py-1 border text-sm ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                        }`}
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
                     >
                       <input
                         type="text"
@@ -992,20 +1037,45 @@ export default function StudentSection() {
                           handleInputChange(
                             student.SNo,
                             "parentPhone",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         placeholder={t("placeholders.phoneNumber")}
-                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${isDarkMode ? "text-textPrimary" : "text-textBlack"
-                          } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
+                        disabled={editSNo !== student.SNo}
+                      />
+                    </td>
+                    <td
+                      className={`px-2 py-1 border text-sm ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
+                    >
+                      <input
+                        type="text"
+                        value={student.aadharNumber || ""}
+                        maxLength={12}
+                        onChange={(e) =>
+                          handleInputChange(
+                            student.SNo,
+                            "aadharNumber",
+                            e.target.value,
+                          )
+                        }
+                        className={`w-full h-full p-2 border-none focus:outline-none focus:ring-0 bg-transparent ${
+                          isDarkMode ? "text-textPrimary" : "text-textBlack"
+                        } font-poppins font-medium text-center focus:outline-offset-[8px] focus:outline-borderBlue`}
                         disabled={editSNo !== student.SNo}
                       />
                     </td>
                     {/* actions buttons */}
                     <td
-                      className={`${isDarkMode ? "text-white" : ""
-                        } pl-3 pr-5 py-2 border ${isDarkMode ? "border-borderLine2" : "border-borderGray2"
-                        }`}
+                      className={`${
+                        isDarkMode ? "text-white" : ""
+                      } pl-3 pr-5 py-2 border ${
+                        isDarkMode ? "border-borderLine2" : "border-borderGray2"
+                      }`}
                     >
                       {editSNo === student.SNo ? (
                         <button
@@ -1030,18 +1100,6 @@ export default function StudentSection() {
                               className={`size-5`}
                             />
                           </button>
-                          {/* <button
-                            onClick={() => {
-                              setCurrStudent(student);
-                              setShowDeleteConfirmation(true);
-                            }}
-                          >
-                            <img
-                              src={isDarkMode ? delete2 : delete2w}
-                              alt="deleteStudent"
-                              className={`size-5`}
-                            />
-                          </button> */}
                         </div>
                       )}
                     </td>
@@ -1053,22 +1111,16 @@ export default function StudentSection() {
         </div>
       </div>
 
-      {/* student info model */}
-      {studentInfoModelOpen && (
-        <StudentInfo
-          modelOpen={setStudentInfoModelOpen}
-          currStudent={currStudent}
+      {studentInfoModelOpen ? (
+        <StudentDetailSidebar
+          student={currStudent}
+          isDarkMode={isDarkMode}
+          onClose={() => {
+            setCurrStudent(null);
+            setStudentInfoModelOpen(false);
+          }}
         />
-      )}
-
-      {/* delete confirmation popup */}
-      {showDeleteConfirmation && (
-        <DeletePopup
-          isVisible={showDeleteConfirmation}
-          onClose={() => setShowDeleteConfirmation(false)}
-          onDelete={handleDelete}
-        />
-      )}
+      ) : null}
     </div>
   );
 }

@@ -12,9 +12,9 @@ import show from "../assets/images/darkmode/show.png";
 import { useTranslation } from "react-i18next";
 import { axiosClient } from "../services/axiosClient";
 import EndPoints from "../services/EndPoints";
-import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setAuth } from "../store/AppAuthSlice";
+import { showToast } from "../services/toastService";
 
 const Step3 = ({ goback, setStep, loading, setLoading }) => {
   const dispatch = useDispatch();
@@ -69,12 +69,12 @@ const Step3 = ({ goback, setStep, loading, setLoading }) => {
         password,
       });
       if (res.statusCode === 200) {
-        toast.success(res?.result);
+        showToast.success(res?.result);
         dispatch(setAuth({ passwordUpdated: true }));
         setStep(4);
       }
     } catch (e) {
-      toast.error(e);
+      showToast.error(e);
     } finally {
       setLoading(false);
     }
