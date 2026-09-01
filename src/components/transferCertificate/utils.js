@@ -52,8 +52,8 @@ export function mapStudentForTc(student, classList = [], sectionList = []) {
 
   return {
     id: student?._id,
-    studentId: student?.id || student?.student?._id || student?._id,
-    sessionStudentId: student?._id || student?.sessionStudentId,
+    studentId: student?.studentId,
+    sessionStudentId: student?._id,
     sessionId: student?.sessionId || student?.session?._id,
     classId: student?.classId || student?.class?._id,
     sectionId: student?.sectionId || student?.section?._id,
@@ -70,7 +70,7 @@ export function mapStudentForTc(student, classList = [], sectionList = []) {
     section: sectionName,
     sectionName,
     mainParentFullName: student?.mainParentFullName || "-",
-    phone: student?.parentPhone ||  "-",
+    phone: student?.parentPhone || "-",
     dob: student?.dob || student?.dateOfBirth || student?.birthDate || "-",
     gender: student?.gender || "-",
     feeStatus: student?.feeStatus || "due",

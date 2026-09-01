@@ -774,10 +774,10 @@ export function PaymentDashboard() {
           <div className="mt-4">
             <BarChartComponent
               xAxisData={feeSummaryData?.feeCollectionTrend?.map(
-                (item) => item.day,
+                (item) => item?.day,
               )}
               series={feeSummaryData?.feeCollectionTrend?.map(
-                (item) => item.amount,
+                (item) => item?.amount ?? 0,
               )}
               // xAxisData={monthlyChartData.xAxisData}
               // series={monthlyChartData.series}

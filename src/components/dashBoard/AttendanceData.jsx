@@ -14,6 +14,9 @@ import { ChevronRight, ChevronLeft, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { showToast } from "../../services/toastService";
 
+const ALL_CLASS_VALUE = "__ALL_CLASS__";
+const ALL_SECTIONS_VALUE = "__ALL_SECTIONS__";
+
 /* ─── Chart Dropdown ─────────────────────────────────────────── */
 function ChartDropdown({ value, options, onChange, isDarkMode }) {
   const themeC = isDarkMode ? C : C_LIGHT;
@@ -218,17 +221,19 @@ export default function AttendanceData({
   const themeC = isDarkMode ? C : C_LIGHT;
   const [t] = useTranslation();
   const dispatch = useDispatch();
+  const allClassLabel = t("options.allClass");
+  const allSectionsLabel = t("options.allSections");
   const [selectedOption, setSelectedOption] = useState("Monthly");
   const [loading, setLoading] = useState(false);
-  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedClass, setSelectedClass] = useState(ALL_CLASS_VALUE);
   const [classList, setClassList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
-  const [selectedSection, setSelectedSection] = useState("");
+  const [selectedSection, setSelectedSection] = useState(ALL_SECTIONS_VALUE);
   const [startTime, setStartTime] = useState("");
   const [studentPresentCountData, setStudentPresentCountData] = useState(null);
   const [studentAbsentCountData, setStudentAbsentCountData] = useState(null);
   const [totalStudentClassSectionWise, setTotalStudentClassSectionWise] =
-    useState(1);
+    useState(0);
   const [chartData, setChartData] = useState(null);
   const [hovered, setHovered] = useState(null);
 
@@ -505,8 +510,10 @@ export default function AttendanceData({
         setClassList(filteredSortedClasses);
         // console.log(filteredSortedClasses);
         dispatch(setClassAndSectionData({ classList: filteredSortedClasses }));
-        const [firstClass] = filteredSortedClasses;
-        setSectionList(firstClass?.section || []);
+        setSectionList(filteredSortedClasses.flatMap((cls) => cls.section || []));
+        setSelectedClass(ALL_CLASS_VALUE);
+        setSelectedSection(ALL_SECTIONS_VALUE);
+        setStartTime("");
       }
     } catch (e) {
       // toast.error(e);
@@ -540,7 +547,7 @@ export default function AttendanceData({
         setStudentPresentCountData(
           result?.sectionAttendance?.[0]?.presentCount || 0,
         );
-        setTotalStudentClassSectionWise(result?.totalStudent);
+        setTotalStudentClassSectionWise(result?.totalStudent??0);
       }
     } catch (e) {
       showToast.error(e);
@@ -572,9 +579,9 @@ export default function AttendanceData({
               : "",
       });
       if (res?.statusCode === 200) {
-        setStudentAbsentCountData(res?.result?.absentCount || 0);
-        setStudentPresentCountData(res?.result?.presentCount || 0);
-        setTotalStudentClassSectionWise(res?.result?.totalCount || 0);
+        setStudentAbsentCountData(res?.result?.absentCount ?? 0);
+        setStudentPresentCountData(res?.result?.presentCount ?? 0);
+        setTotalStudentClassSectionWise(res?.result?.totalCount ?? 0);
       }
     } catch (e) {
       // console.log(e);
@@ -734,7 +741,7 @@ export default function AttendanceData({
         if (type === "Weekly")
           weeklyData(result?.sectionAttendance, result?.totalStudent);
         else monthlyData(result?.sectionAttendance, result?.totalStudent);
-        setTotalStudentClassSectionWise(result?.totalStudent);
+        setTotalStudentClassSectionWise(result?.totalStudent??0);
       }
     } catch (e) {
       showToast.error(e);
@@ -773,7 +780,7 @@ export default function AttendanceData({
         } else {
           monthlyData(res?.result?.attendances, res?.result?.totalStudent);
         }
-        setTotalStudentClassSectionWise(res?.result?.totalStudents);
+        setTotalStudentClassSectionWise(res?.result?.totalStudents??0);
       }
     } catch (e) {
       // console.log(e);
@@ -797,13 +804,13 @@ export default function AttendanceData({
     if (role !== "admin") return;
     if (!classAndSectionData?.selectedSession?._id) return;
     if (selectedOption === "Daily") {
-      if (selectedSection) {
+      if (selectedSection && selectedSection !== ALL_SECTIONS_VALUE) {
         getDailyAttendanceChart();
       } else {
         getStudentCount();
       }
     } else {
-      if (selectedSection) {
+      if (selectedSection && selectedSection !== ALL_SECTIONS_VALUE) {
         getAttendanceChart(selectedOption);
       } else {
         getSchoolAttendanceChart(selectedOption);
@@ -848,10 +855,10 @@ export default function AttendanceData({
       if (chartData && chartData.labels && chartData.datasets.length >= 3) {
         raw = chartData.labels.map((lbl, idx) => ({
           day: lbl,
-          present: chartData.datasets[0].data[idx] || 0,
-          absent: chartData.datasets[1].data[idx] || 0,
-          na: chartData.datasets[2].data[idx] || 0,
-          total: totalStudentClassSectionWise || 1,
+          present: chartData.datasets[0].data[idx] ?? 0,
+          absent: chartData.datasets[1].data[idx] ?? 0,
+          na: chartData.datasets[2].data[idx] ?? 0,
+          total: totalStudentClassSectionWise ??0,
         }));
       } else {
         const labels =
@@ -872,22 +879,37 @@ export default function AttendanceData({
 
   const customChartData = getCustomChartData();
   const MAX_H = 220;
-  const rawMax = totalStudentClassSectionWise || 1;
+  const rawMax = totalStudentClassSectionWise ??0;
   const step = Math.ceil(rawMax / 5) || 1;
   const MAX_AXIS = step * 5;
 
   let yLabels = [];
   for (let i = 5; i >= 0; i--) yLabels.push(i * step);
 
-  const classOptionsNames = classList.map((c) => c.name);
+  const classOptionsNames = [allClassLabel, ...classList.map((c) => c.name)];
   const selectedClassName =
-    classList.find((c) => c._id === selectedClass)?.name || "Select Class";
-  const sectionOptionsNames = sectionList?.map((s) => s.name) || [];
+    selectedClass === ALL_CLASS_VALUE
+      ? allClassLabel
+      : classList.find((c) => c._id === selectedClass)?.name || allClassLabel;
+  const sectionOptionsNames = [
+    allSectionsLabel,
+    ...(sectionList?.map((s) => s.name) || []),
+  ];
   const selectedSectionName =
-    sectionList?.find((s) => s._id === selectedSection)?.name ||
-    "Select Section";
+    selectedSection === ALL_SECTIONS_VALUE
+      ? allSectionsLabel
+      : sectionList?.find((s) => s._id === selectedSection)?.name ||
+        allSectionsLabel;
 
   const handleClassDropdown = (v) => {
+    if (v === allClassLabel) {
+      setSelectedClass(ALL_CLASS_VALUE);
+      setSectionList(classList.flatMap((cls) => cls.section || []));
+      setSelectedSection(ALL_SECTIONS_VALUE);
+      setStartTime("");
+      return;
+    }
+
     const selectedObj = classList.find((c) => c.name === v);
     if (selectedObj) {
       setSelectedClass(selectedObj._id);
@@ -896,13 +918,18 @@ export default function AttendanceData({
         setSelectedSection(selectedObj.section[0]._id);
         setStartTime(selectedObj.section[0].startTime || "");
       } else {
-        setSelectedSection("");
+        setSelectedSection(ALL_SECTIONS_VALUE);
         setStartTime("");
       }
     }
   };
 
   const handleSectionDropdown = (v) => {
+    if (v === allSectionsLabel) {
+      setSelectedSection(ALL_SECTIONS_VALUE);
+      return;
+    }
+
     const selectedObj = sectionList.find((c) => c.name === v);
     if (selectedObj) setSelectedSection(selectedObj._id);
   };

@@ -30,13 +30,7 @@ export default function EventData({
    * Fetches calendar events based on the selected month.
    */
   const getCalenderEvents = async () => {
-    if (
-      role === "classTeacher" || role === "teacher"
-        ? !teacherData?.sessionId
-        : role === "admin"
-          ? !classAndSectionData?.selectedSession?._id
-          : ""
-    ) {
+    if (role === "admin" && !classAndSectionData?.selectedSession?._id) {
       showToast.error("Please select Session");
       return;
     }

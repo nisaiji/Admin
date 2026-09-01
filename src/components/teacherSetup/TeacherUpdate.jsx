@@ -71,11 +71,11 @@ const TeacherUpdate = () => {
       .test(
         "starts-with-1-to-5",
         t("validationError.phoneStart"),
-        (value) => value && REGEX.PHONE_TEST.test(value)
+        (value) => value && REGEX.PHONE_TEST.test(value),
       ),
   });
   // console.log(teacher);
-  
+
   // Setup formik for handling form submission, validation, and field management
   const formik = useFormik({
     initialValues: {
@@ -101,17 +101,21 @@ const TeacherUpdate = () => {
         const teacherData = Object.entries(values).reduce(
           (acc, [key, value]) => {
             acc[key] =
-              key === "email" ? value.toLowerCase() : key === "gender" ? value.toUpperCase():capitalize(value);
+              key === "email"
+                ? value.toLowerCase()
+                : key === "gender"
+                  ? value.toUpperCase()
+                  : capitalize(value);
             return value ? acc : acc;
           },
-          {}
+          {},
         );
         const filteredTeacherData = filterEmptyValues(teacherData);
 
         // Make API request to update teacher details
         const response = await axiosClient.put(
           `${EndPoints.ADMIN.UPDATE_TEACHER}/${teacher.id}`,
-          filteredTeacherData
+          filteredTeacherData,
         );
 
         if (response?.statusCode === 200) {
@@ -125,7 +129,7 @@ const TeacherUpdate = () => {
       }
     },
   });
-  
+
   // form fields
   const fields = [
     {
@@ -339,8 +343,8 @@ const TeacherUpdate = () => {
                                 formik.values[name] === ""
                                   ? "gray"
                                   : isDarkMode
-                                  ? "#E3E8F3"
-                                  : "black",
+                                    ? "#E3E8F3"
+                                    : "black",
                               "& .MuiOutlinedInput-notchedOutline": {
                                 border: "none",
                               },
@@ -382,7 +386,7 @@ const TeacherUpdate = () => {
                         </FormControl>
                       ) : type === "date" ? (
                         // <DatePicker
-                        <ThemeProvider theme={theme}>
+                        <ThemeProvider theme={theme(isDarkMode)}>
                           <LocalizationProvider dateAdapter={AdapterMoment}>
                             <DatePicker
                               views={["day", "month", "year"]}
@@ -397,7 +401,7 @@ const TeacherUpdate = () => {
                                 if (date) {
                                   formik.setFieldValue(
                                     "dob",
-                                    moment(date).format("DD/MM/YYYY")
+                                    moment(date).format("DD/MM/YYYY"),
                                   );
                                 }
                               }}
@@ -406,6 +410,7 @@ const TeacherUpdate = () => {
                                   fullWidth: true,
                                   size: "small",
                                   placeholder: t("placeholders.date"),
+                                 
                                 },
                               }}
                             />
@@ -420,7 +425,7 @@ const TeacherUpdate = () => {
                             if (["firstName", "lastName"].includes(name)) {
                               e.target.value = e.target.value.replace(
                                 /[^a-zA-Z]/g,
-                                ""
+                                "",
                               );
                             }
                             formik.handleChange(e);
@@ -440,8 +445,8 @@ const TeacherUpdate = () => {
                             name === "phone"
                               ? 10
                               : name === "firstName" || name == "lastName"
-                              ? 15
-                              : ""
+                                ? 15
+                                : ""
                           }
                           className={`border-2 border-borderLine bg-transparent rounded-lg pl-2 pr-10 py-1.5 w-full ${
                             isDarkMode ? "text-textPrimary" : "text-textBlack"
@@ -463,7 +468,7 @@ const TeacherUpdate = () => {
                       )}
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
             {/* submit and cancel buttons */}

@@ -21,7 +21,6 @@
  * - useRef: focus management for newly created and editing inputs; hidden file input for Excel import.
  *
  * Important functions:
- * - getSectionInfo(): GET section metadata (admin endpoint).
  * - fetchStudents(): GET students for section (role-specific endpoints).
  * - handleShowInfo(student): open StudentInfo modal.
  * - checkIsStudentExistForSameParent(): prevent duplicate student for same parent phone + same name + gender.
@@ -74,6 +73,7 @@ import {
   loadDetailedStudent,
 } from "../../studentSetup/studentInfoSidebar";
 import { showToast } from "../../../services/toastService";
+import { useLocation } from "react-router-dom";
 
 export default function StudentSection() {
   // Importing necessary modules and hooks
@@ -93,7 +93,8 @@ export default function StudentSection() {
   const [students, setStudents] = useState([]);
   const [originalStudents, setOriginalStudents] = useState([]);
   const [currStudent, setCurrStudent] = useState(null);
-  const [classData, setClassData] = useState([]);
+  const location = useLocation();
+  const classData = location.state?.classData;
   const [studentInfoModelOpen, setStudentInfoModelOpen] = useState(false);
   const [editSNo, setEditSNo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -116,54 +117,26 @@ export default function StudentSection() {
   // User role and section details from Redux state
   const role = useSelector((state) => state.appAuth.role);
   // console.log(teacherData);
-
   useEffect(() => {
-    let shouldFetchStudents = false;
     if (
-      role === "admin" &&
-      classAndSectionData?.selectedSession?.school &&
-      classAndSectionData?.sectionId &&
-      classAndSectionData?.selectedSession?._id
+      (role === "admin" &&
+        classAndSectionData?.selectedSession?.school &&
+        classAndSectionData?.sectionId &&
+        classAndSectionData?.selectedSession?._id) ||
+      (role === "classTeacher" &&
+        teacherData?.sectionId &&
+        teacherData?.sessionId)
     ) {
-      shouldFetchStudents = true;
-    } else if (
-      role === "classTeacher" &&
-      teacherData?.sectionId &&
-      teacherData?.sessionId
-    ) {
-      shouldFetchStudents = true;
+      fetchStudents();
     }
-    const fetchData = async () => {
-      if (classAndSectionData?.id && classAndSectionData?.sectionId) {
-        await getSectionInfo();
-      }
-      if (shouldFetchStudents) {
-        await fetchStudents();
-      }
-    };
-
-    fetchData();
   }, [
     role,
-    classAndSectionData?.id,
+    classAndSectionData?.selectedSession?.school,
     classAndSectionData?.sectionId,
     classAndSectionData?.selectedSession?._id,
     teacherData?.sectionId,
     teacherData?.sessionId,
   ]);
-  // console.log(classAndSectionData);
-  // get class teacher info api
-  const getSectionInfo = async () => {
-    try {
-      const res = await axiosClient.get(
-        `${EndPoints.ADMIN.SECTION_INFO}/${classAndSectionData?.sectionId}`,
-      );
-
-      if (res?.statusCode === 200) setClassData(res?.result);
-    } catch (e) {
-      // toast.error(e);
-    }
-  };
 
   // Handles displaying student information in a modal
   const handleShowInfo = async (student) => {
@@ -389,7 +362,9 @@ export default function StudentSection() {
       // console.log(response);
 
       if ([200, 201].includes(response?.statusCode)) {
-        showToast.success(isUpdate ? response?.result : response?.result?.message);
+        showToast.success(
+          isUpdate ? response?.result : response?.result?.message,
+        );
         fetchStudents();
         if (!isUpdate) {
           setNewStudent({
@@ -564,7 +539,7 @@ export default function StudentSection() {
                 }`}
               >
                 {role === "classTeacher"
-                  ? (localStorage.getItem("firstname") ?? "")
+                  ? `${teacherData?.firstName} ${teacherData?.lastName}`
                   : role === "admin"
                     ? `${classData?.teacher?.firstName ?? ""} ${
                         classData?.teacher?.lastName ?? ""

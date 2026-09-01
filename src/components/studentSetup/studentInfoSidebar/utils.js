@@ -31,7 +31,7 @@ export function getFullName(student) {
 }
 
 export function getInitials(student) {
-  const fullName = getFullName(student);
+  const fullName = `${student?.firstName} ${student?.lastName}`;
   if (fullName === CONSTANT.NA) return "NA";
 
   return fullName
@@ -44,7 +44,7 @@ export function getInitials(student) {
 }
 
 export function getAvatarClass(student, index) {
-  const source = String(getStudentRecordId(student) || index);
+  const source = student?._id || index;
   let hash = 0;
 
   for (let i = 0; i < source.length; i += 1) {
@@ -76,7 +76,7 @@ export function getStudentParentName(student) {
 }
 
 export function getStudentParentPhone(student) {
-  return String(student?.parentPhone ?? student?.parentPhone ?? "").trim();
+  return String(student?.mainParentPhone ?? student?.parentPhone ?? "").trim();
 }
 
 export function getStudentParentEmail(student) {
@@ -312,7 +312,7 @@ export function buildLeaveRequestMeta(request) {
 }
 
 export async function loadDetailedStudent(student, role) {
-  const studentId = student?._id ?? getStudentRecordId(student);
+  const studentId = student?._id;
 
   if (!studentId) {
     throw new Error("Student id is missing");

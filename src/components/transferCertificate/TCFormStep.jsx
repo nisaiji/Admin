@@ -11,21 +11,22 @@ import { formatDisplayDate, formatFeeStatus, getClassSectionLabel } from "./util
 import { showToast } from "../../services/toastService";
 
 const REASON_OPTIONS = [
-  { label: "Parent Transfer", value: "parentTransfer" },
-  { label: "Job Transfer", value: "familyRelocation" },
-  { label: "Admission Elsewhere", value: "betterOpportunity" },
-  { label: "Financial Issues", value: "financial" },
-  { label: "Academic Reasons", value: "academic" },
-  { label: "Health Issues", value: "medical" },
-  { label: "Disciplinary", value: "disciplinary" },
-  { label: "Other", value: "other" },
+  { label: "Parent Transfer", value: "PARENT_TRANSFER" },
+  { label: "Job Transfer", value: "FAMILY_RELOCATION" },
+  { label: "Admission Elsewhere", value: "BETTER_OPPORTUNITY" },
+  { label: "Financial Issues", value: "FINANCIAL" },
+  { label: "Academic Reasons", value: "ACADEMIC" },
+  { label: "Health Issues", value: "MEDICAL" },
+  { label: "Disciplinary", value: "DISCIPLINARY" },
+  { label: "Other", value: "OTHER" },
 ];
 
 const CONDUCT_OPTIONS = [
-  { label: "Excellent", value: "excellent" },
-  { label: "Good", value: "good" },
-  { label: "Satisfactory", value: "satisfactory" },
-  { label: "Poor", value: "needsImprovement" },
+  { label: "Excellent", value: "EXCELLENT" },
+  { label: "Very Good", value: "VERY_GOOD" },
+  { label: "Good", value: "GOOD" },
+  { label: "Satisfactory", value: "SATISFACTORY" },
+  { label: "Poor", value: "NEEDS_IMPROVEMENT" },
 ];
 
 function ChecklistRow({ item, onToggle, onRemove }) {
@@ -227,11 +228,11 @@ function PreviewTCModal({
 }
 
 function getRequestReasonValue(label) {
-  return REASON_OPTIONS?.find((option) => option.label === label)?.value || "other";
+  return REASON_OPTIONS?.find((option) => option.label === label)?.value || "OTHER";
 }
 
 function getConductValue(label) {
-  return CONDUCT_OPTIONS?.find((option) => option.label === label)?.value || "good";
+  return CONDUCT_OPTIONS?.find((option) => option.label === label)?.value || "GOOD";
 }
 
 export function TCFormStep({ student, onBack, onRequestSubmitted }) {
@@ -303,7 +304,6 @@ export function TCFormStep({ student, onBack, onRequestSubmitted }) {
     if (!canSubmit) {
       return;
     }
-
     const payload = {
       studentId: student?.studentId,
       sessionStudentId: student?.sessionStudentId,

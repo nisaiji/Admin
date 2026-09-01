@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Spinner from "../../Spinner";
 import { useSelector } from "react-redux";
 import Breadcrumbs from "../../BreadCrumbs";
@@ -9,6 +9,8 @@ import attendance from "../../../assets/images/darkmode/attendance.png";
 import calendar from "../../../assets/images/darkmode/calendarimg.png";
 import subject from "../../../assets/images/darkmode/subject.png";
 import marksheet from "../../../assets/images/darkmode/marksheet.png";
+import { axiosClient } from "../../../services/axiosClient";
+import EndPoints from "../../../services/EndPoints";
 
 /**
  * StudentMenu
@@ -29,10 +31,29 @@ export default function StudentMenu() {
   const navigate = useNavigate();
   const role = useSelector((state) => state.appAuth.role);
   const { classAndSectionData, teacherData } = useSelector(
-    (state) => state.appAuth
+    (state) => state.appAuth,
   );
   const isDarkMode = useSelector((state) => state.appConfig.isDarkMode);
   const [loading, setLoading] = useState(false);
+  const [classData, setClassData] = useState([]);
+
+  // get class teacher info api
+  const getSectionInfo = async () => {
+    try {
+      if (role !== "admin") return;
+      if (!classAndSectionData?.sectionId) return;
+      const res = await axiosClient.get(
+        `${EndPoints.ADMIN.SECTION_INFO}/${classAndSectionData?.sectionId}`,
+      );
+      if (res?.statusCode === 200) setClassData(res?.result);
+    } catch (e) {
+      // toast.error(e);
+    }
+  };
+
+  useEffect(() => {
+    getSectionInfo();
+  }, [role, classAndSectionData?.sectionId]);
 
   return (
     <div
@@ -67,8 +88,21 @@ export default function StudentMenu() {
               {role === "classTeacher"
                 ? `${teacherData?.className} ${teacherData?.sectionName}`
                 : role === "admin"
-                ? `${classAndSectionData?.className} ${classAndSectionData?.sectionName}`
-                : ""}
+                  ? `${classAndSectionData?.className} ${classAndSectionData?.sectionName}`
+                  : ""}
+            </div>
+            <div
+              className={`text-2xl ${
+                isDarkMode ? "text-textPrimary" : "text-textBlack"
+              } font-semibold px-2 py-3`}
+            >
+              {role === "classTeacher"
+                ? `${teacherData?.firstName} ${teacherData?.lastName}`
+                : role === "admin"
+                  ? `${classData?.teacher?.firstName ?? ""} ${
+                      classData?.teacher?.lastName ?? ""
+                    }`
+                  : ""}
             </div>
           </div>
           <div className="flex mt-5 ">
@@ -79,8 +113,12 @@ export default function StudentMenu() {
                   role === "classTeacher"
                     ? navigate("/student-menu/student-section")
                     : role === "admin"
-                    ? navigate("/class-setup/student-menu/student-section")
-                    : "";
+                      ? navigate("/class-setup/student-menu/student-section", {
+                          state: {
+                            classData,
+                          },
+                        })
+                      : "";
                 }}
                 className="size-[162px] cursor-pointer bg-[#0A81D11A] rounded-[14px] flex flex-col justify-around items-center "
               >
@@ -89,7 +127,9 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
+                <p
+                  className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}
+                >
                   Classroom
                 </p>
               </div>
@@ -101,8 +141,8 @@ export default function StudentMenu() {
                   role === "classTeacher"
                     ? navigate("/student-menu/attendance")
                     : role === "admin"
-                    ? navigate("/class-setup/student-menu/attendance")
-                    : "";
+                      ? navigate("/class-setup/student-menu/attendance")
+                      : "";
                 }}
                 className="size-[162px] cursor-pointer bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center  "
               >
@@ -111,7 +151,9 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
+                <p
+                  className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}
+                >
                   Attendance
                 </p>
               </div>
@@ -127,7 +169,9 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
+                <p
+                  className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}
+                >
                   Tags
                 </p>
               </div>
@@ -139,8 +183,8 @@ export default function StudentMenu() {
                   role === "classTeacher"
                     ? navigate("/student-menu/subjects")
                     : role === "admin"
-                    ? navigate("/class-setup/student-menu/subjects")
-                    : "";
+                      ? navigate("/class-setup/student-menu/subjects")
+                      : "";
                 }}
                 className="size-[162px] cursor-pointer bg-[#0A81D11A] ml-5 rounded-[14px] flex flex-col justify-around items-center  "
               >
@@ -149,7 +193,9 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
+                <p
+                  className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}
+                >
                   Subjects
                 </p>
               </div>
@@ -168,7 +214,9 @@ export default function StudentMenu() {
                   alt="classroom"
                   className="size-16 object-contain"
                 />
-                <p className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}>
+                <p
+                  className={`text-base font-normal ${isDarkMode ? "text-textPrimary" : "text-textBlack"}`}
+                >
                   Marksheet
                 </p>
               </div>

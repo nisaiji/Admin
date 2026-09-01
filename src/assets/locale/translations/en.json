@@ -296,6 +296,8 @@
     "oneCheckbox": "Please select at least one checkbox (Holiday) "
   },
   "options": {
+    "allClass": "All Class",
+    "allSections": "All Sections",
     "preNursery": "Pre-Nursery",
     "nursery": "Nursery",
     "LKG": "LKG",

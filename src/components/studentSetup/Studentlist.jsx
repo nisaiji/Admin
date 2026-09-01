@@ -30,21 +30,11 @@ import {
   SidebarTabs,
   StudentDetailSidebar,
   getAvatarClass,
-  getDisplayValue,
-  getFullName,
   getInitials,
-  getStudentParentAddress,
-  getStudentParentDob,
-  getStudentParentEmail,
-  getStudentParentGender,
-  getStudentParentName,
-  getStudentParentOccupation,
-  getStudentParentPhone,
-  getStudentParentQualification,
-  getStudentRecordId,
   loadDetailedStudent,
 } from "./studentInfoSidebar";
 import { showToast } from "../../services/toastService";
+import CONSTANT from "../../utils/constants";
 
 const PAGE_LIMIT_OPTIONS = [10, 20, 25, 50, 100];
 const CLASS_OPTION_KEYS = [
@@ -124,7 +114,7 @@ function capitalizeValue(value) {
 
 function normalizeStudentDraft(student) {
   return {
-    id: getStudentRecordId(student),
+    id: student?._id ?? "",
     firstName: student?.firstName ?? "",
     lastName: student?.lastName ?? "",
     aadharNumber: student?.aadharNumber ?? "",
@@ -132,15 +122,15 @@ function normalizeStudentDraft(student) {
     bloodGroup: student?.bloodGroup ?? "",
     dob: student?.dob ?? "",
     address: student?.address ?? "",
-    parentName: getStudentParentName(student),
+    parentName: student?.mainParentFullName ?? "",
     guardianName: student?.guardianName ?? "",
-    phone: getStudentParentPhone(student),
-    parentGender: getStudentParentGender(student),
+    phone: student?.mainParentPhone ?? "",
+    parentGender: student?.mainParentGender ?? "",
     parentDob: student?.mainParentDob ?? "",
-    parentEmail: getStudentParentEmail(student),
-    parentQualification: getStudentParentQualification(student),
-    parentOccupation: getStudentParentOccupation(student),
-    parentAddress: getStudentParentAddress(student),
+    parentEmail: student?.mainParentEmail ?? "",
+    parentQualification: student?.mainParentQualification ?? "",
+    parentOccupation: student?.mainParentOccupation ?? "",
+    parentAddress: student?.mainParentAddress ?? "",
   };
 }
 
@@ -425,7 +415,7 @@ function StudentEditSidebar({
                   label="Gender"
                   value={draft?.gender}
                   onChange={(value) => setField("gender", value)}
-                  options={["Male", "Female", "Other"]}
+                  options={["MALE", "FEMALE", "OTHER"]}
                   isDarkMode={isDarkMode}
                 />
                 <EditField
@@ -868,7 +858,7 @@ export default function Studentlist() {
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#FF793F] px-4 text-sm font-poppins-bold text-white transition hover:bg-[#ff6b2b] active:scale-95"
           >
             <Plus size={16} />
-            Add Student
+            New Admission
           </Link>
         </div>
 
@@ -893,7 +883,7 @@ export default function Studentlist() {
             </option>
             {classList.map((item) => (
               <option key={item?._id} value={item?._id} style={optionStyle}>
-                {getDisplayValue(item?.name)}
+                {item?.name ?? CONSTANT.NA}
               </option>
             ))}
           </select>
@@ -917,7 +907,7 @@ export default function Studentlist() {
             </option>
             {sectionList.map((item) => (
               <option key={item?._id} value={item?._id} style={optionStyle}>
-                {getDisplayValue(item?.name)}
+                {item?.name ?? CONSTANT.NA}
               </option>
             ))}
           </select>
@@ -1060,7 +1050,7 @@ export default function Studentlist() {
                   </tr>
                 ) : (
                   studentList?.map((student, index) => {
-                    const fullName = getFullName(student);
+                    const fullName = `${student.firstName} ${student.lastName}`;
 
                     return (
                       <tr
@@ -1099,7 +1089,7 @@ export default function Studentlist() {
                                   mutedClass,
                                 )}
                               >
-                                Roll {getDisplayValue(student?.studentId)}
+                                Roll {student?.studentUniqueId ?? CONSTANT.NA}
                               </p>
                             </div>
                           </div>
@@ -1110,7 +1100,7 @@ export default function Studentlist() {
                             secondaryTextClass,
                           )}
                         >
-                          {getDisplayValue(student?.gender)}
+                          {student?.gender ?? CONSTANT.NA}
                         </td>
                         <td
                           className={cn(
@@ -1118,7 +1108,7 @@ export default function Studentlist() {
                             secondaryTextClass,
                           )}
                         >
-                          {getDisplayValue(getStudentParentPhone(student))}
+                          {student?.mainParentPhone ?? CONSTANT.NA}
                         </td>
                         <td
                           className={cn(
@@ -1127,11 +1117,11 @@ export default function Studentlist() {
                           )}
                         >
                           <span className="block max-w-[240px] truncate">
-                            {getDisplayValue(getStudentParentEmail(student))}
+                            {student?.mainParentEmail ?? CONSTANT.NA}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-sm font-poppins-bold text-[#FE4040]">
-                          {getDisplayValue(student?.bloodGroup)}
+                          {student?.bloodGroup ?? CONSTANT.NA}
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-end gap-2">

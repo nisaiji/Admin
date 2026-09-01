@@ -64,7 +64,7 @@ export const TC_REASON_OPTIONS = [
   "Others",
 ];
 
-export const TC_CONDUCT_OPTIONS = ["Excellent", "Good", "Satisfactory", "Poor"];
+export const TC_CONDUCT_OPTIONS = ["EXCELLENT", "VERY_GOOD","GOOD", "SATISFACTORY", "NEEDS_IMPROVEMENT"];
 
 export const TC_PROMOTION_OPTIONS = ["Promoted", "Not Promoted", "Detained", "Passed Out"];
 
